@@ -1,2 +1,2 @@
 // Solo enlaces públicos. Nunca guardar claves privadas de Stripe o Make aquí.
-window.PODCAST_CONFIG={stripePaymentLinks:{noVoyTarde:"",empezarDeNuevo:""},freeGuideUrl:"",podcastUrl:""};
+window.PODCAST_CONFIG={stripePaymentLinks:{noVoyTarde:"",empezarDeNuevo:""},freeGuideUrl:"",podcastUrl:"",productPhotos:[{file:"assets/productos/diario-01.webp",alt:"Fotografía del diario No voy tarde"},{file:"assets/productos/diario-02.webp",alt:"Interior del diario guiado No voy tarde"},{file:"assets/productos/guia-gratis.webp",alt:"Guía de cinco preguntas en PDF"},{file:"assets/productos/empezar-01.webp",alt:"Fotografía del workbook Empezar de nuevo"},{file:"assets/productos/empezar-02.webp",alt:"Interior del cuaderno Empezar de nuevo"}]};
