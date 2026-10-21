@@ -1,22 +1,45 @@
-# Todavía estoy a tiempo — Landing
+# Todavía estoy a tiempo
 
-Landing independiente del podcast de Dailin. Sitio estático responsive con identidad de papel texturizado, recortes editoriales y animaciones discretas inspiradas en los efectos del repositorio web existente (sin dependencias comerciales).
+Landing independiente del podcast de Dailin y su primera colección digital en español.
 
-## Productos
-- No voy tarde — Diario guiado para volver a mí: $4.99.
-- Empezar de nuevo — Cuaderno práctico: $7.99.
-- 5 preguntas para cuando sientes que vas tarde: gratuito.
+## Dirección editorial
 
-## Antes de publicar
-1. Subir retrato original a `assets/dailin.webp` sin retocar el rostro.
-2. Subir fotografías de los productos a `assets/productos/` y reemplazar los mockups temporales por sus imágenes reales (no usar fotos de otras marcas).
-3. Revisar archivos PDF finales y texto legal de datos, contacto y políticas.
-4. Conectar enlaces públicos de pago de Stripe en `site-config.js`, tras probar el webhook de pago completado y la entrega automática en Make.
-5. Colocar URL pública real del podcast y guía digital.
-6. Probar manualmente en móvil, tablet y desktop.
+Azul noche `#101D34`, ivory `#F6F3EB`, azul suave `#B8CADC` y líneas doradas discretas `#AC9870`. Las portadas incorporan siluetas femeninas, fotografías en azul monocromático y bordes de papel. El retrato existente de Dailin se conserva sin editar sus píxeles ni su identidad.
 
-## Seguridad
-No se almacenan claves secretas de Stripe ni tokens de Make en GitHub. Botones comerciales deliberadamente en modo espera mientras no haya enlace de pago real.
+- `index.html`: landing principal.
+- `styles-redesign.css`: sistema visual y responsive compartido.
+- `app-redesign.js`: navegación móvil, reveals, estados de disponibilidad y configuración de enlaces.
+- `productos/`: páginas de los dos cuadernos de pago.
+- `assets/productos/editorial/`: las tres portadas vigentes, en WebP.
+- `assets/fonts/`: tipografías WOFF2 locales y licencias; no se depende de Google Fonts.
+- `redesign.html`: alias a la página principal para evitar una vista previa antigua.
 
-## Movimiento
-La implementación usa reveal con IntersectionObserver, relieve suave de tarjetas, sello flotante y textura scratch-paper realizada con SVG + CSS. Respeta `prefers-reduced-motion`.
+## Colección
+
+| Producto | Precio previsto |
+| --- | --- |
+| 5 preguntas para cuando sientes que vas tarde | Gratis |
+| No voy tarde — Un diario para volver a mí | $4.99 USD |
+| Empezar de nuevo — Sin tener todo resuelto | $7.99 USD |
+
+## Vista local
+
+Ejecutar `python3 -m http.server 8015` y abrir `http://localhost:8015`.
+
+## Enlaces y ventas
+
+La tienda permanece en preparación. `site-config.js` contiene únicamente configuración pública.
+
+- `commerceEnabled: false` mantiene los botones de compra desactivados, incluso si hay un enlace de pago.
+- Antes de activar ventas: terminar los PDF y verificar el pago, la confirmación y la entrega de archivos de extremo a extremo.
+- Después de esa prueba: añadir los enlaces públicos de Stripe y activar `commerceEnabled` explícitamente.
+- `freeGuideUrl` y `podcastUrl` quedan vacíos hasta disponer de sus enlaces oficiales; la interfaz muestra ese estado sin simular descargas o reproducciones.
+- No guardar claves secretas, tokens ni datos personales en este repositorio.
+
+## Accesibilidad y movimiento
+
+Navegación con teclado, cierre del menú con Escape, FAQ nativo, avisos con `aria-live`, imágenes con dimensiones y texto alternativo. Reveals con IntersectionObserver y transiciones suaves; `prefers-reduced-motion` deja todo el contenido visible sin animaciones. La colección utiliza scroll horizontal nativo y snap en móvil, sin dependencias ni autoplay.
+
+## Publicación
+
+El flujo existente de GitHub Pages publica la rama `main`.
