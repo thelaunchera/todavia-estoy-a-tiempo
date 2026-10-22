@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup } from './local-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -178,6 +178,7 @@ function StatePill({ status }: { status?: string }) {
 }
 function App() {
   const [passphrase, setPassphrase] = useState('');
+  const [mailSent, setMailSent] = useState(false);
   const [confirmPhrase, setConfirmPhrase] = useState('');
   const [vaultPresent, setVaultPresent] = useState(hasLocalVault());
   const [account, setAccount] = useState<{
@@ -229,7 +230,8 @@ function App() {
           setAccount(u);
           await refresh();
         }
-      } catch {
+      } catch (e) {
+        if (alive) setError((e as {code?:string})?.code === 'unauthorized' ? 'Esta cuenta no tiene permiso para entrar al estudio.' : 'No pude comprobar tu acceso. Inténtalo nuevamente.');
       } finally {
         if (alive) setChecking(false);
       }
@@ -242,11 +244,12 @@ function App() {
     setSigning(true);
     setError('');
     try {
-      if (!vaultPresent && passphrase !== confirmPhrase) {
+      if (!SUPABASE_ENABLED && !vaultPresent && passphrase !== confirmPhrase) {
         setError('Las frases no coinciden. Escríbelas igual para crear tu estudio.');
         return;
       }
       const r = await auth.signIn(passphrase);
+      if ('sent' in r && r.sent) { setMailSent(true); setPassphrase(''); return; }
       setAccount(r.user);
       setPassphrase('');
       setConfirmPhrase('');
@@ -257,6 +260,7 @@ function App() {
       setError(
         code === 'bad_passphrase' ? 'La frase no coincide. Inténtalo de nuevo.' :
         code === 'short_password' ? 'Usa al menos 10 caracteres para proteger tu estudio.' :
+        SUPABASE_ENABLED ? 'No se pudo enviar el enlace. Comprueba tu correo e inténtalo nuevamente.' :
         'No se pudo abrir la bóveda. Comprueba el almacenamiento de tu navegador.'
       );
     } finally {
@@ -496,7 +500,7 @@ function App() {
             Las ideas también <em>necesitan un lugar</em> donde quedarse.
           </h1>
           <p>
-            Un estudio que funciona desde el repositorio del podcast. Tus notas se guardan cifradas en este dispositivo.
+            Un estudio que funciona desde GitHub. {SUPABASE_ENABLED ? 'Tus registros se sincronizan con la base de datos privada del podcast.' : 'Tus notas se guardan cifradas en este dispositivo.'}
           </p>
           {denied && (
             <div className="login-warning">
@@ -505,18 +509,19 @@ function App() {
           )}
           {!!error && <div className="login-warning" role="alert">{error}</div>}
           <form className="vault-form" onSubmit={event => { event.preventDefault(); void login(); }}>
-            <label htmlFor="studio-passphrase">{vaultPresent ? 'Tu frase de acceso' : 'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
-            <input id="studio-passphrase" type="password" required minLength={10} autoComplete={vaultPresent ? 'current-password' : 'new-password'} value={passphrase} onChange={event => setPassphrase(event.target.value)} placeholder="Tu frase secreta" />
-            {!vaultPresent && <>
+            <label htmlFor="studio-passphrase">{SUPABASE_ENABLED ? 'Tu correo de administración' : vaultPresent ? 'Tu frase de acceso' : 'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
+            <input id="studio-passphrase" type={SUPABASE_ENABLED ? 'email' : 'password'} required minLength={SUPABASE_ENABLED ? undefined : 10} autoComplete={SUPABASE_ENABLED ? 'email' : vaultPresent ? 'current-password' : 'new-password'} value={passphrase} onChange={event => setPassphrase(event.target.value)} placeholder={SUPABASE_ENABLED ? 'tu@correo.com' : 'Tu frase secreta'} />
+            {!SUPABASE_ENABLED && !vaultPresent && <>
               <label htmlFor="studio-passphrase-confirm">Repite la frase</label>
               <input id="studio-passphrase-confirm" type="password" required minLength={10} autoComplete="new-password" value={confirmPhrase} onChange={event => setConfirmPhrase(event.target.value)} placeholder="Confirma tu frase" />
             </>}
             <button type="submit" disabled={signing} className="login-cta">
-              {signing ? 'Abriendo estudio…' : vaultPresent ? 'Abrir mi estudio' : 'Crear mi estudio'}
+              {signing ? 'Comprobando…' : SUPABASE_ENABLED ? 'Enviarme enlace de acceso' : vaultPresent ? 'Abrir mi estudio' : 'Crear mi estudio'}
               <ArrowUpRight size={19} />
             </button>
           </form>
-          <small><ShieldCheck size={15} /> Cifrado en este dispositivo. Conserva tu frase y exporta un respaldo.</small>
+          {mailSent && <div className="login-warning" role="status">Revisa tu correo. Te envié un enlace para entrar al Estudio.</div>}
+          <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Cifrado en este dispositivo. Conserva tu frase y exporta un respaldo.'}</small>
         </section>
         <aside className="login-art">
           <div className="login-circle" />
@@ -1179,7 +1184,7 @@ function App() {
                 <section>
                   <span>ARCHIVO DEL ESTUDIO</span>
                   <h3>Protección local</h3>
-                  <p>{recording ? 'Detalles ocultos mientras grabas' : 'Bóveda cifrada en este navegador'}</p>
+                  <p>{recording ? 'Detalles ocultos mientras grabas' : SUPABASE_ENABLED ? 'Conexión Supabase protegida' : 'Bóveda cifrada en este navegador'}</p>
                 </section>
                 <ShieldCheck size={23} />
               </div>
@@ -1204,13 +1209,12 @@ function App() {
                 <div>
                   <b>Frase de acceso</b>
                   <p>
-                    Las notas y los capítulos se cifran con tu frase antes de guardarse en este dispositivo.
-                    No hay sincronización entre móviles o computadoras.
+                    {SUPABASE_ENABLED ? 'Inicias sesión desde tu correo autorizado. Tus datos viven en Supabase con reglas de seguridad privadas.' : 'Las notas y los capítulos se cifran con tu frase antes de guardarse en este dispositivo. No hay sincronización entre móviles o computadoras.'}
                   </p>
                 </div>
                 <StatePill status="disponible" />
               </div>
-              <div className="setting vault-backups">
+              {!SUPABASE_ENABLED && <div className="setting vault-backups">
                 <div>
                   <b>Respaldo de tu estudio</b>
                   <p>Guarda una copia cifrada para recuperar tu trabajo en otro dispositivo. Necesitarás la misma frase de acceso.</p>
@@ -1232,7 +1236,7 @@ function App() {
                     }} />
                   </label>
                 </div>
-              </div>
+              </div>}
               <button className="logout" onClick={logout}>
                 <LogOut size={17} /> Cerrar sesión
               </button>

@@ -38,6 +38,9 @@ jobs:
         with:
           node-version: '22'
       - name: Compilar el estudio desde el repositorio
+        env:
+          VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
+          VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           cd estudio-control
           npm install --no-audit --no-fund
