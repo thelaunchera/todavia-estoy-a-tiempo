@@ -44,3 +44,13 @@ Solo una función o endpoint confiable, con validación de firmas y secretos alm
 - RLS solo lectura para datos sensibles de operaciones.
 - `anon` sin permisos en tablas privadas.
 - El modo grabación **es visual**, no reemplaza la seguridad de RLS.
+
+## 7. Migración del estudio local
+Después de configurar el nuevo proyecto y habilitar el primer administrador, entra en el estudio con el correo autorizado.
+En **Configuración** aparecerá «Recuperar mis capítulos y tareas anteriores» si este navegador guarda una bóveda cifrada.
+La importación utiliza la frase local, añade los episodios, tareas, productos e ideas a Supabase y conserva la copia cifrada. Si la repites, las claves `external_id` evitan duplicados.
+No importa ventas ni direcciones de compradores porque estas no se pueden validar mediante los datos del navegador.
+
+## 8. Control de calidad del repositorio
+El despliegue de GitHub Pages ahora verifica `tests/check-schema.mjs` antes de compilar.
+La primera lectura real de Supabase, sus políticas RLS y el acceso por correo deben probarse tras crear el nuevo proyecto. No declarar «conectado» hasta que esa verificación sea satisfactoria.

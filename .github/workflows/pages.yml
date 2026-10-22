@@ -37,6 +37,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validar esquema y permisos del podcast
+        run: node estudio-control/tests/check-schema.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
