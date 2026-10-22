@@ -4,6 +4,21 @@
   const menu = document.querySelector('.menu-toggle');
   const toast = document.querySelector('#toast');
   let timeout;
+
+  // A tiny sentinel detects when the transparent nav becomes frosted glass.
+  // The header itself does not use a scroll listener when IntersectionObserver is available.
+  const glassHeader = document.querySelector('.header');
+  const glassSentinel = document.querySelector('.scroll-sentinel');
+  const setGlass = on => glassHeader?.setAttribute('data-scrolled', on ? 'true' : 'false');
+  setGlass(window.scrollY > 8);
+  if (glassHeader && glassSentinel && 'IntersectionObserver' in window) {
+    const glassObserver = new IntersectionObserver(([entry]) => {
+      setGlass(!entry.isIntersecting);
+    }, { threshold: 0 });
+    glassObserver.observe(glassSentinel);
+  } else if (glassHeader) {
+    window.addEventListener('scroll', () => setGlass(window.scrollY > 8), { passive: true });
+  }
   const publicUrl = value => {
     try {
       const url = new URL(value);
@@ -60,7 +75,7 @@
     });
   });
 
-  // An image pill expands from its measured hero-relative bounds to fill the hero.
+  // Image pills unveil a contained editorial photo panel without distorting book-cover text.
   // No dependency or layout shift: only a clip-path on the full-size overlay animates.
   const hero = document.querySelector('.hero');
   const imageOverlay = document.querySelector('#hero-image-overlay');
