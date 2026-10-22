@@ -62,7 +62,7 @@ export const auth={
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Introduce un correo válido.');
     const redirect=window.location.origin+window.location.pathname;
     const {error}=await client.auth.signInWithOtp({
-      email, options:{emailRedirectTo:redirect,shouldCreateUser:true}
+      email, options:{emailRedirectTo:redirect,shouldCreateUser:false}
     });
     if(error){
       const detail = error as {status?:number;code?:string;message?:string};
@@ -196,6 +196,18 @@ export async function importLocalRecords(passphrase: string) {
       .upsert(chunk,{onConflict:'user_id,kind,external_id',ignoreDuplicates:true}).select('id');
     if(error) throw new Error('No se pudieron importar todos los registros. Puedes reintentar sin generar duplicados.');
     imported+=(data||[]).length;
+    // Read back each batch before claiming that the local records were preserved in Supabase.
+    const keys = chunk.map(row => String(row.external_id));
+    const {data:verified,error:verificationError} = await client.from('podcast_studio_entries')
+      .select('external_id,kind').eq('user_id',user.id).in('external_id',keys);
+    if(verificationError || !verified || verified.length !== chunk.length) {
+      throw new Error('La importación necesita verificación. Tus datos cifrados locales se conservaron; puedes volver a intentarlo.');
+    }
+    const expected = new Set(chunk.map(row => String(row.kind)+'|'+String(row.external_id)));
+    const received = new Set(verified.map(row => String(row.kind)+'|'+String(row.external_id)));
+    if(expected.size !== received.size || [...expected].some(item => !received.has(item))) {
+      throw new Error('Faltan registros por verificar. La copia original del navegador está intacta.');
+    }
   }
-  return { total:rows.length, imported, existing:rows.length-imported };
+  return { total:rows.length, imported, existing:rows.length-imported, verified:rows.length };
 }
