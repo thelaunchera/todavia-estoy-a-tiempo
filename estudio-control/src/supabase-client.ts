@@ -17,6 +17,50 @@ const client: SupabaseClient | null = SUPABASE_ENABLED
     })
   : null;
 
+// Five-day remembered login; password is never saved in the browser.
+// Supabase securely stores and refreshes the browser session. This local marker
+// enforces an absolute 120-hour maximum for access to this studio.
+const SESSION_KEY = 'podcast_studio_password_login_deadline_v1';
+const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+let recoveringPassword = /(?:^|[&#?])type=recovery(?:&|$)/.test(window.location.hash + '&' + window.location.search);
+function rememberPasswordLogin(userId: string) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ userId, expiresAt: Date.now() + FIVE_DAYS }));
+  } catch {
+    throw new Error('Safari no permite guardar la sesión. Abre una pestaña normal, fuera del modo privado.');
+  }
+}
+function clearPasswordLogin() {
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* storage unavailable */ }
+}
+function passwordLoginActive(userId: string): boolean {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return false;
+    const info = JSON.parse(raw) as {userId?: string; expiresAt?: number};
+    return info.userId === userId &&
+      typeof info.expiresAt === 'number' &&
+      Number.isFinite(info.expiresAt) &&
+      info.expiresAt > Date.now() &&
+      info.expiresAt <= Date.now() + FIVE_DAYS;
+  } catch { return false; }
+}
+async function enforcePasswordSession() {
+  if (!client || recoveringPassword) return;
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) return;
+  if (!passwordLoginActive(user.id)) {
+    // The old magic-link login is no longer sufficient to open the studio.
+    // Keep it on the login screen until email/password is established.
+    const raw = (() => { try { return localStorage.getItem(SESSION_KEY); } catch { return null; } })();
+    if (raw) {
+      clearPasswordLogin();
+      await client.auth.signOut({scope:'local'});
+    }
+    throw Object.assign(new Error('Entra con tu correo y contraseña.'), { code:'session_expired' });
+  }
+}
+
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 const kinds: Kind[] = ['episodios','tareas','productos','ideas'];
 type Entry = { id: string; title: string; [key: string]: unknown };
@@ -41,6 +85,7 @@ function payload(input: unknown): {title:string;payload:Record<string,unknown>} 
 }
 async function owner():Promise<{id:string;email:string}> {
   if(!client)throw new Error('Supabase no está configurado.');
+  await enforcePasswordSession();
   const {data:{user},error}=await client.auth.getUser();
   if(error||!user)throw new Error('Inicia sesión para continuar.');
   const {data:admin,error:roleError}=await client.from('podcast_studio_admins')
@@ -49,83 +94,79 @@ async function owner():Promise<{id:string;email:string}> {
   return {id:user.id,email:user.email||''};
 }
 export const auth={
-  // Restore the private studio after returning to Safari from the email app.
-  // Do not query Supabase inside onAuthStateChange: delegate to the UI on the next tick.
+  isRecovering: () => recoveringPassword,
   onSessionEvent(callback: (event: string) => void): () => void {
     if (!client) return () => {};
     const { data: { subscription } } = client.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') callback(event);
+      if (event === 'PASSWORD_RECOVERY') recoveringPassword = true;
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') callback(event);
     });
     return () => subscription.unsubscribe();
   },
-  // A six-digit code works only if the configured Supabase email template contains {{ .Token }}.
-  async verifyEmailCode(emailValue: string, code: string) {
-    if (!client) throw new Error('La verificación por correo solo está disponible con Supabase.');
-    const email = emailValue.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code)) {
-      throw new Error('Introduce el correo autorizado y los seis dígitos del código.');
-    }
-    const { error } = await client.auth.verifyOtp({ email, token: code, type: 'email' });
-    if (error) throw new Error('El código no es válido o ha caducado. Comprueba el correo más reciente.');
-    const authorized = await owner();
-    return { email: authorized.email, name: 'Administración del podcast' };
-  },
-  // Gmail and the ChatGPT in-app browser can use separate storage from Safari.
-  // Let the owner redeem the ORIGINAL unvisited link in this browser without
-  // saving or transmitting it anywhere besides the authorized Supabase origin.
-  openEmailLink(raw: string): void {
-    if (!client) throw new Error('El acceso por correo no está habilitado.');
-    let link: URL;
-    try { link = new URL(raw.trim()); }
-    catch { throw new Error('Pega el enlace completo de acceso que recibiste por correo.'); }
-    const allowedProject = new URL(url).origin;
-    const allowedSite = window.location.origin;
-    const verifyLink = link.protocol === 'https:' && link.origin === allowedProject
-      && link.pathname === '/auth/v1/verify'
-      && (link.searchParams.has('token') || link.searchParams.has('token_hash'));
-    const returnLink = link.protocol === 'https:' && link.origin === allowedSite
-      && link.pathname.replace(/\/+$/, '') === '/estudio'
-      && (link.searchParams.has('code') || /(?:^|[&#])access_token=/.test(link.hash));
-    if (!verifyLink && !returnLink) {
-      throw new Error('Este no es un enlace de acceso válido del podcast. Copia el enlace original del correo.');
-    }
-    window.location.assign(link.toString());
-  },
   async getUser(){
     if(!client) return localAuth.getUser();
+    if(recoveringPassword) return null;
+    try { await enforcePasswordSession(); }
+    catch { return null; }
     const {data:{user},error}=await client.auth.getUser();
     if(error||!user)return null;
     const admin=await owner();
     return {email:admin.email,name:'Administración del podcast'};
   },
-  async signIn(value:string){
-    if(!client)return localAuth.signIn(value);
-    const email=value.trim().toLowerCase();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Introduce un correo válido.');
-    const redirect=window.location.origin+window.location.pathname;
-    const {error}=await client.auth.signInWithOtp({
-      email, options:{emailRedirectTo:redirect,shouldCreateUser:false}
-    });
-    if(error){
-      const detail = error as {status?:number;code?:string;message?:string};
-      const code = (detail.code || '').toLowerCase();
-      const msg = (detail.message || '').toLowerCase();
-      if(detail.status === 429 || code.includes('rate_limit') || /rate limit|too many|try again after/.test(msg)){
-        throw Object.assign(new Error('Supabase alcanzó el límite temporal de correos. No necesitas corregir tu dirección.'), {code:'email_rate_limited'});
-      }
-      if(code.includes('email_not_authorized') || /not authorized|address not authorized/.test(msg)){
-        throw Object.assign(new Error('El servidor de correo todavía no autoriza este destinatario.'), {code:'email_not_authorized'});
-      }
-      if(code.includes('redirect') || msg.includes('redirect')){
-        throw Object.assign(new Error('La URL de regreso no está permitida en Supabase Auth.'), {code:'redirect_not_allowed'});
-      }
-      throw Object.assign(new Error('Supabase no pudo enviar el enlace de acceso.'), {code:'email_delivery_error'});
+  async signIn(emailValue:string, password?:string){
+    if(!client)return localAuth.signIn(emailValue);
+    const email=emailValue.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !password)
+      throw new Error('Escribe tu correo y contraseña.');
+    const {data,error}=await client.auth.signInWithPassword({email,password});
+    if(error || !data.user) {
+      const code=(error?.code||'').toLowerCase();
+      if(error?.status===429 || code.includes('rate_limit')) throw new Error('Demasiados intentos. Inténtalo más tarde.');
+      throw new Error('El correo o la contraseña no coinciden. Puedes restablecer la contraseña.');
     }
-    return {user:null,sent:true} as const;
+    try {
+      rememberPasswordLogin(data.user.id);
+      const admin=await owner();
+      recoveringPassword=false;
+      return {user:{email:admin.email,name:'Administración del podcast'}};
+    } catch(e) {
+      clearPasswordLogin();
+      await client.auth.signOut({scope:'local'});
+      throw e;
+    }
+  },
+  async requestPasswordReset(emailValue:string){
+    if(!client)throw new Error('Supabase no está conectado.');
+    const email=emailValue.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      throw new Error('Introduce tu correo de administración.');
+    const redirectTo=window.location.origin+window.location.pathname;
+    const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error) {
+      const code=(error.code||'').toLowerCase();
+      if(error.status===429 || code.includes('rate_limit'))throw new Error('Espera antes de solicitar otro correo de recuperación.');
+      throw new Error('No se pudo solicitar el cambio de contraseña. Inténtalo más tarde.');
+    }
+  },
+  async setPassword(newPassword:string){
+    if(!client || !recoveringPassword)throw new Error('Abre primero el enlace de recuperación enviado a tu correo.');
+    if(newPassword.length<10)throw new Error('Usa al menos 10 caracteres para tu contraseña.');
+    // Verify this is the existing authorized studio owner before changing credentials.
+    const {data:{user},error}=await client.auth.getUser();
+    if(error||!user)throw new Error('Este enlace caducó. Solicita uno nuevo.');
+    const {data:admin,error:adminError}=await client.from('podcast_studio_admins')
+      .select('user_id').eq('user_id',user.id).maybeSingle();
+    if(adminError || !admin)throw new Error('Esta cuenta no tiene permiso de administración del podcast.');
+    const {error:updateError}=await client.auth.updateUser({password:newPassword});
+    if(updateError)throw new Error('No se pudo guardar la contraseña. Revisa que cumpla los requisitos e inténtalo.');
+    recoveringPassword=false;
+    clearPasswordLogin();
+    await client.auth.signOut({scope:'local'});
   },
   async signOut(){
     if(!client)return localAuth.signOut();
-    const {error}=await client.auth.signOut();
+    clearPasswordLogin();
+    const {error}=await client.auth.signOut({scope:'local'});
     if(error)throw error;
   }
 };
