@@ -177,7 +177,7 @@ export const api={
     await owner();
     const [entries,sales,subscribers,messages,deliveries,runs,integrations]=await Promise.all([
       client.from('podcast_studio_entries').select('id,kind,title,payload,user_id').order('created_at',{ascending:true}).limit(500),
-      client.from('podcast_sales').select('id',{count:'exact',head:true}),
+      client.from('podcast_sales').select('id',{count:'exact',head:true}).eq('status','paid'),
       client.from('podcast_subscribers').select('id',{count:'exact',head:true}).is('unsubscribed_at',null),
       client.from('podcast_support_messages').select('id',{count:'exact',head:true}),
       client.from('podcast_delivery_events').select('id',{count:'exact',head:true}),
@@ -194,8 +194,9 @@ export const api={
     const active=(provider:string)=>!integrations.error && (integrations.data||[]).some(x=>x.provider===provider && x.status==='active');
     return {data:{
       records,
+      finance:{ confirmedPaidCount: sales.error ? null : (sales.count ?? null) },
       sources:{
-        sales:active('stripe')?'Pagos registrados en Supabase: '+fmt(sales.count,sales.error)+'. Solo eventos verificados cuentan.':'Pendiente: conectar eventos firmados de Stripe; ninguna cifra de ventas se presenta como confirmada.',
+        sales: sales.error ? 'No se puede consultar el registro de pagos en este momento.' : 'Compras con estado pagado registradas en Supabase: '+fmt(sales.count,null)+'. Stripe y Make tienen un escenario activo, pero su flujo completo sigue pendiente de verificar con una compra real.',
         subscribers:active('make')?'Suscripciones vigentes registradas: '+fmt(subscribers.count,subscribers.error)+'.':'Pendiente: conectar de forma segura la lista de consentimientos de Make.',
         support:active('resend')?'Mensajes registrados: '+fmt(messages.count,messages.error)+'.':'Pendiente: integrar la bandeja privada de ayuda y sus respuestas.',
         seo:'Sitemap publicado. Indexación en Search Console aún pendiente de comprobar.',

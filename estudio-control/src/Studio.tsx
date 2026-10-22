@@ -72,6 +72,7 @@ type Row = {
 };
 type Data = {
   records: Record<Kind, Row[]>;
+  finance?: { confirmedPaidCount: number | null };
   sources: {
     lastVerified: string;
     sales: string;
@@ -1118,19 +1119,22 @@ function App() {
             <>
               {head(
                 'Ingresos, sin números inventados',
-                'Un espacio para confirmar compras, entregas y reembolsos cuando se sincronice Stripe con Make.'
+                'Stripe y Make tienen preparado el flujo de cobro y entrega. Falta validar una compra real de principio a fin.'
               )}
               <div className="finance">
                 <span>INGRESOS VERIFICADOS</span>
-                <h3>Sin sincronizar</h3>
+                <h3>{typeof data?.finance?.confirmedPaidCount === 'number' && data.finance.confirmedPaidCount > 0
+                  ? data.finance.confirmedPaidCount + ' compras registradas'
+                  : 'Verificación pendiente'}</h3>
                 <p>
-                  Aún no hay datos de ventas conectados a este estudio. No
-                  mostramos $0 porque no significa que no hayas vendido.
+                  {typeof data?.finance?.confirmedPaidCount === 'number' && data.finance.confirmedPaidCount > 0
+                    ? 'El Estudio ya registra compras con pago confirmado. Puedes actualizar para consultar los datos recientes.'
+                    : 'El flujo Stripe → Make está preparado, pero todavía no hay compras verificadas registradas en este panel. Esto no significa que no haya ventas en Stripe.'}
                 </p>
                 <div className="finance-mark" aria-hidden="true"><ReceiptText size={78} strokeWidth={1.15} /></div>
               </div>
               {statusPanel(
-                'Conectar compras verificadas',
+                'Estado de compras y entregas',
                 data?.sources.sales ||
                   'Se requiere una conexión segura con los eventos de pago y entrega.'
               )}
