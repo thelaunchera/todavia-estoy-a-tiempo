@@ -89,12 +89,14 @@
   let openingClip = '';
   const fullClip = 'inset(0px 0px 0px 0px round 0px)';
   const pillClip = pill => {
-    const parent = hero.getBoundingClientRect();
+    // The expanded overlay fills the mobile viewport, so animation coordinates
+    // must be relative to the viewport rather than the taller page hero.
     const p = pill.getBoundingClientRect();
-    const top = Math.max(0, p.top - parent.top);
-    const right = Math.max(0, parent.right - p.right);
-    const bottom = Math.max(0, parent.bottom - p.bottom);
-    const left = Math.max(0, p.left - parent.left);
+    const width = window.innerWidth, height = window.innerHeight;
+    const top = Math.max(0, Math.min(height, p.top));
+    const right = Math.max(0, Math.min(width, width - p.right));
+    const bottom = Math.max(0, Math.min(height, height - p.bottom));
+    const left = Math.max(0, Math.min(width, p.left));
     return `inset(${top.toFixed(1)}px ${right.toFixed(1)}px ${bottom.toFixed(1)}px ${left.toFixed(1)}px round ${(p.height/2).toFixed(1)}px)`;
   };
   const resetOverlay = (restoreFocus = true) => {
