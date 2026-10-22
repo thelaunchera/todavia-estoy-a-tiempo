@@ -1584,3 +1584,61 @@ html{scroll-padding-top:96px}
 @media(max-width:850px){
   .footer-curtain .footer-credits{align-items:flex-start;padding-right:0}
 }
+
+
+/* Episodio destacado: fotografía real de estudio con branding editorial. */
+.featured-episode .episode-cover--studio{
+  display:block;max-width:440px;text-decoration:none;color:#f8f4e9;
+  transition:transform .3s ease,box-shadow .3s ease;
+}
+.featured-episode .episode-cover--studio:hover{
+  transform:translateY(-3px);
+  box-shadow:0 26px 60px rgba(27,44,60,.19);
+}
+.featured-episode .episode-cover--studio .episode-art{
+  position:relative;display:block;aspect-ratio:1;overflow:hidden;
+  border-radius:15px;box-shadow:0 12px 28px rgba(19,38,57,.13);
+  background:#153a66;isolation:isolate;
+}
+.featured-episode .episode-cover--studio .episode-art img{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
+  aspect-ratio:1;object-fit:cover;object-position:center center;
+  border-radius:0;box-shadow:none;
+}
+.episode-art::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(4,21,42,.36) 0%,transparent 56%),
+             linear-gradient(0deg,rgba(7,25,43,.16),transparent 45%);
+}
+.episode-art-brand{
+  position:absolute;z-index:1;top:7%;left:7%;display:block;
+  font:400 clamp(1.55rem,3.1vw,2.25rem)/.91 var(--serif);
+  letter-spacing:-.035em;color:#f8f4e9;text-shadow:0 2px 12px #091e3855;
+}
+.episode-art-brand em{font-weight:400;font-style:italic;}
+.episode-art-brand small{
+  display:block;margin-top:14px;font:500 .58rem/1 var(--sans);
+  letter-spacing:.25em;color:#f8f4e9;
+}
+.episode-art-spotify{
+  position:absolute;z-index:2;inset:auto 0 0;min-height:22%;
+  display:flex;align-items:center;gap:18px;padding:15px 8%;
+  background:#294763;color:#f8f4e9;
+}
+.episode-art-spotify-mark{width:clamp(37px,4vw,52px);height:auto;flex:none}
+.episode-art-bars{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:3px;height:50px}
+.episode-art-bars i{
+  display:block;flex:1;max-width:5px;height:var(--bar);
+  border-radius:99px;background:#f8f4e9;opacity:.96;
+}
+@media(max-width:600px){
+  .featured-episode .episode-cover--studio .episode-art{border-radius:13px}
+  .episode-art-brand{font-size:clamp(1.45rem,6.6vw,2.1rem)}
+  .episode-art-brand small{font-size:.47rem;margin-top:11px}
+  .episode-art-spotify{padding:10px 8%;gap:13px}
+  .episode-art-spotify-mark{width:36px}
+  .episode-art-bars{height:40px;gap:2px}
+}
+@media(prefers-reduced-motion:reduce){
+  .featured-episode .episode-cover--studio{transition:none}
+}
