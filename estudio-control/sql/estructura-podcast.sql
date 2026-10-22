@@ -70,7 +70,68 @@ create table if not exists public.podcast_sales (
 );
 create table if not exists public.podcast_subscribers (
   id uuid primary key default gen_random_uuid(),
-  email text not null check(email ~* '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$'),
+  email text not null check(email ~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+
+  source text not null,
+  consent_at timestamptz not null,
+  consent_version text not null default 'episodios-v1',
+  unsubscribed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create unique index if not exists podcast_subscribers_email_unique on public.podcast_subscribers(lower(email));
+create table if not exists public.podcast_support_messages (
+  id uuid primary key default gen_random_uuid(),
+  external_message_id text unique,
+  sender_name text,
+  sender_email text not null,
+  subject text,
+  body text not null,
+  status text not null default 'abierto' check(status in ('abierto','en curso','resuelto')),
+  created_at timestamptz not null default now()
+);
+create table if not exists public.podcast_delivery_events (
+  id uuid primary key default gen_random_uuid(),
+  provider_event_id text unique not null,
+  delivery_type text not null,
+  recipient_email text,
+  status text not null,
+  occurred_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create table if not exists public.podcast_automation_runs (
+  id uuid primary key default gen_random_uuid(),
+  provider_run_id text unique,
+  flow_key text not null,
+  outcome text not null,
+  message text,
+  created_at timestamptz not null default now()
+);
+
+-- Acceso read-only y RLS en cada tabla, nunca escritura desde frontend.
+do $$
+declare tab text;
+begin
+  foreach tab in array array[
+    'podcast_sales','podcast_subscribers','podcast_support_messages',
+    'podcast_delivery_events','podcast_automation_runs'
+  ] loop
+    execute format('alter table public.%I enable row level security',tab);
+    execute format('revoke all on public.%I from anon,authenticated',tab);
+    execute format('grant select on public.%I to authenticated',tab);
+    execute format('drop policy if exists podcast_operator_read on public.%I',tab);
+    execute format('create policy podcast_operator_read on public.%I for select to authenticated using (exists (select 1 from public.podcast_studio_admins a where a.user_id=(select auth.uid())))',tab);
+  end loop;
+end $$;
+commit;
+
+-- El administrador se asigna DESPUÉS de tener cuenta en Auth:
+-- insert into public.podcast_studio_admins(user_id,role)
+-- values ('UUID_COPIADO_DESDE_AUTH_USERS','owner');
+-- No insertar un correo en GitHub ni convertir este INSERT en acción pública.
+
+-- Verificaciones posteriores al despliegue:
+-- select tablename, rowsecurity from pg_tables where schemaname='public' and tablename like 'podcast_%';
+-- select tablename, policyname, roles, cmd from pg_policies where schemaname='public' and tablename like 'podcast_%';
+),
   source text not null,
   consent_at timestamptz not null,
   consent_version text not null default 'episodios-v1',
