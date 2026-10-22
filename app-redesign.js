@@ -389,7 +389,7 @@
     link.addEventListener('click', event => {
       event.preventDefault();
       closeMenu();
-      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
       window.scrollTo({ top: 0, left: 0, behavior });
       const scroller = document.scrollingElement;
       if (scroller && scroller !== document.documentElement) scroller.scrollTo({ top: 0, behavior });
