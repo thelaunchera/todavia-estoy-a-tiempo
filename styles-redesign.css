@@ -414,7 +414,7 @@ html{scroll-padding-top:96px}
 .help-card-eyebrow{font-weight:600;letter-spacing:.14em;font-size:.61rem;color:var(--accent);margin-bottom:29px}
 .podcast-form{max-width:100%}
 .podcast-form label{display:block;font:.78rem/1.45 var(--sans);font-weight:600;color:var(--ink);margin-bottom:10px}
-.podcast-form input:not([type="hidden"]),.podcast-form select,.podcast-form textarea{
+.podcast-form input:not([type="hidden"]):not([type="checkbox"]),.podcast-form select,.podcast-form textarea{
   width:100%;font:400 1rem/1.5 var(--sans);color:var(--ink);
   background:#fffefa;border:1px solid #b9c2c7;
   padding:14px 15px;border-radius:11px;min-height:52px;
@@ -423,7 +423,7 @@ html{scroll-padding-top:96px}
 .podcast-form input::placeholder,.podcast-form textarea::placeholder{color:#677786}
 .podcast-form textarea{resize:vertical;min-height:127px}
 .podcast-form select{cursor:pointer}
-.podcast-form input:not([type="hidden"]):focus-visible,.podcast-form textarea:focus-visible,.podcast-form select:focus-visible{
+.podcast-form input:not([type="hidden"]):not([type="checkbox"]):focus-visible,.podcast-form textarea:focus-visible,.podcast-form select:focus-visible{
   border-color:#506b81;box-shadow:0 0 0 4px rgba(67,105,129,.15)
 }
 .podcast-form .form-field{margin-bottom:20px;min-width:0}
@@ -491,7 +491,7 @@ html{scroll-padding-top:96px}
   .help-intro>p:not(.eyebrow){font-size:.97rem}
   .help-card{padding:24px 20px;border-radius:20px}
   .podcast-form .form-grid{grid-template-columns:1fr;gap:0}
-  .podcast-form input:not([type="hidden"]),.podcast-form select,.podcast-form textarea{font-size:1rem}
+  .podcast-form input:not([type="hidden"]):not([type="checkbox"]),.podcast-form select,.podcast-form textarea{font-size:1rem}
   .podcast-form .form-submit{width:100%;justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){
@@ -1442,3 +1442,117 @@ html{scroll-padding-top:96px}
 .podcast-newsletter-optin strong{font-weight:700;display:inline}
 .podcast-newsletter-optin:hover{border-color:#91abbc}
 .podcast-newsletter-optin:focus-within{outline:2px solid #345776;outline-offset:3px}
+
+
+/* Mobile form QA repair: compact consent and permanently hidden spam fields. */
+.honeypot,
+.podcast-form .honeypot,
+.newsletter-form .honeypot{
+  position:absolute!important;
+  width:1px!important;height:1px!important;min-width:0!important;min-height:0!important;
+  padding:0!important;margin:-1px!important;border:0!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;
+  clip-path:inset(50%)!important;white-space:nowrap!important;pointer-events:none!important;
+}
+.honeypot[hidden],
+.podcast-form .honeypot[hidden],
+.newsletter-form .honeypot[hidden]{display:none!important}
+/* Optional consent is ONE quiet checkbox, not another full-sized form field. */
+.podcast-form label.podcast-newsletter-optin{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin:7px 0 11px!important;
+  padding:7px 0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#405569!important;
+  text-align:left!important;
+  font:400 .79rem/1.4 var(--sans)!important;
+}
+.podcast-form label.podcast-newsletter-optin input[type="checkbox"]{
+  display:block!important;
+  appearance:auto!important;
+  -webkit-appearance:checkbox!important;
+  flex:0 0 17px!important;
+  width:17px!important;
+  min-width:17px!important;
+  max-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
+  max-height:17px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:3px!important;
+  box-shadow:none!important;
+  accent-color:#345776;
+  cursor:pointer;
+}
+.podcast-form label.podcast-newsletter-optin>span{
+  flex:1 1 auto;min-width:0;
+}
+.podcast-form label.podcast-newsletter-optin small{
+  display:inline!important;
+  margin:0!important;
+  font:inherit!important;
+  color:#566b7d!important;
+}
+.free-mini-section.paper{padding-block:39px}
+.free-mini-grid{gap:clamp(18px,3vw,38px)}
+.free-mini-form .guide-form label:not(.podcast-newsletter-optin){margin-bottom:7px}
+.free-mini-form .guide-form input[type="email"]{min-height:47px;padding-block:10px}
+.free-mini-form .guide-form .form-submit{min-height:47px;padding:11px 19px}
+.free-mini-form .guide-form .field-feedback{min-height:22px;margin:4px 0 0}
+.free-mini-form .guide-form .form-status{margin-top:9px}
+.free-mini-form .guide-form .form-small-note{
+  font-size:.68rem;line-height:1.5;margin-top:7px;
+}
+.footer-curtain .footer-newsletter{
+  margin-bottom:34px;
+  padding-top:8px;
+  gap:clamp(20px,4vw,42px);
+}
+.footer-curtain .footer-newsletter-intro h3{
+  font-size:clamp(1.8rem,2.5vw,2.5rem);
+  line-height:1.14;
+  margin-bottom:8px;
+}
+.footer-curtain .footer-newsletter-intro>p:last-child{
+  font-size:.82rem;line-height:1.5;
+}
+.footer-curtain .footer-newsletter-eyebrow{margin-bottom:9px}
+.newsletter-label{margin-bottom:7px}
+.newsletter-feedback{min-height:1.4em;margin-top:6px}
+.newsletter-note{font-size:.68rem;line-height:1.4;margin-top:2px}
+@media(max-width:600px){
+  .free-mini-section.paper{padding:34px 0 32px}
+  .free-mini-grid{gap:15px}
+  .free-mini-content h2{font-size:clamp(1.85rem,7.2vw,2.22rem)}
+  .free-mini-content>p:last-child{font-size:.86rem;margin-top:6px}
+  .podcast-form label.podcast-newsletter-optin{
+    gap:9px!important;
+    margin:4px 0 10px!important;
+    padding:5px 0!important;
+    font-size:.76rem!important;
+  }
+  .footer-curtain .footer-newsletter{
+    gap:13px;
+    margin:0 0 26px;
+    padding-top:0;
+  }
+  .footer-curtain .footer-newsletter-intro h3{
+    font-size:1.85rem;
+    margin-bottom:5px;
+  }
+  .footer-curtain .footer-newsletter-intro>p:last-child{
+    font-size:.81rem;
+    max-width:360px;
+  }
+  .newsletter-label{font-size:.72rem;margin-bottom:6px}
+  .newsletter-note{font-size:.67rem}
+  .footer-curtain .footer-separator{margin-bottom:19px}
+}
