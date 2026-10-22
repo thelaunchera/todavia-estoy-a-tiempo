@@ -624,7 +624,7 @@ function App() {
       ))}
         </section>
       ))}
-      {visible(episodes).length===0&&empty}
+      {!visible(episodes).some(x=>seriesTab==='all'||(seriesTab==='first'?Number(x.number||0)<=8:Number(x.number||0)>=9))&&empty}
     </div>
   );
   const taskRows = (
