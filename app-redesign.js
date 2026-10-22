@@ -306,6 +306,15 @@
     const status = form.querySelector('.form-status');
     const submit = form.querySelector('button[type="submit"]');
     const buttonText = submit?.textContent;
+    const revealGuide = () => {
+      if (form.dataset.podcastForm !== 'guide') return;
+      const box = document.getElementById('guide-direct-access');
+      const link = document.getElementById('guide-direct-link');
+      const url = publicUrl(config.freeGuideUrl);
+      if (!box || !link || !url) return;
+      link.href = url;
+      box.hidden = false;
+    };
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!field || !submit || !status) return;
@@ -329,6 +338,7 @@
       if (!url) {
         status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
         status.classList.add('is-error');
+        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Escribir por correo';
@@ -345,15 +355,19 @@
         const data = await response.json();
         if (data?.ok !== true) throw new Error('Envío no confirmado');
         status.textContent = kind === 'guide'
-          ? '¡Listo! Revisa tu correo para encontrar la guía. Mira también spam.'
-          : '¡Recibimos tu consulta! Te responderemos al correo que nos compartiste.';
+          ? 'Tu solicitud se procesó. Revisa tu correo y spam; también puedes abrir la guía aquí mismo.'
+          : '¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.';
         status.classList.add('is-success');
+        revealGuide();
         form.reset();
         field.clear();
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
       } catch (error) {
-        status.textContent = 'No pudimos confirmar el envío. Inténtalo de nuevo o escríbenos directamente.';
+        status.textContent = kind === 'guide'
+          ? 'No pudimos confirmar el correo, pero puedes abrir la guía gratis aquí mismo.'
+          : 'No pudimos confirmar la consulta. Inténtalo de nuevo o escríbenos directamente.';
         status.classList.add('is-error');
+        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Abrir correo';
@@ -367,6 +381,31 @@
       input.addEventListener('input', () => input.classList.remove('has-form-error'));
       input.addEventListener('change', () => input.classList.remove('has-form-error'));
     });
+  }
+
+  // The native anchor stays as a no-JavaScript fallback. On iOS, use
+  // explicit scrolling to guarantee that the control works inside in-app browsers.
+  document.querySelectorAll('[data-back-top]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      closeMenu();
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
+      window.scrollTo({ top: 0, left: 0, behavior });
+      const scroller = document.scrollingElement;
+      if (scroller && scroller !== document.documentElement) scroller.scrollTo({ top: 0, behavior });
+    });
+  });
+  const editorialFooter = document.querySelector('.footer-curtain');
+  if (editorialFooter && 'IntersectionObserver' in window &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const footerObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting) {
+        editorialFooter.classList.add('is-visible');
+        footerObserver.disconnect();
+      }
+    }, { threshold: 0.08 });
+    editorialFooter.classList.add('footer-animate');
+    footerObserver.observe(editorialFooter);
   }
 
   const progress = document.querySelector('.scroll-progress');
