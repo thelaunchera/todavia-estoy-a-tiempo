@@ -1906,3 +1906,21 @@ a:focus-visible {
   html,body,#root {min-height:100dvh}
   .login-install-tip{display:none}
 }
+
+
+/* Acceso desde Safari: recuperación sin volver a solicitar correos */
+.login-success{width:min(100%,440px);padding:13px 16px;border-radius:12px;background:#eaf2ef;border:1px solid #b8d4c8;color:#275b4b;font-size:13px;line-height:1.6;margin:12px 0}
+.mobile-access-help{width:min(100%,440px);border:1px solid #d7e1e8;background:#f5f8f9;border-radius:18px;margin:20px 0 4px;padding:16px 18px;color:#27425b}
+.mobile-access-help>strong{font:700 14px 'DM Sans',Arial,sans-serif;color:#173149}
+.mobile-access-help p{font:13px/1.7 'DM Sans',Arial,sans-serif;color:#526c7f;margin:8px 0}
+.mobile-access-help b{color:#23435b;font-weight:700;overflow-wrap:anywhere}
+.email-link-rescue{padding-top:10px;border-top:1px solid #dce6eb;margin-top:13px}
+.email-link-rescue summary{font:700 12px/1.5 'DM Sans',Arial,sans-serif;color:#2d5878;cursor:pointer;padding:7px 0}
+.email-link-rescue form{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.email-link-rescue form+form{border-top:1px solid #dce6eb;padding-top:14px;margin-top:15px}
+.email-link-rescue label{font:700 12px 'DM Sans',Arial,sans-serif;color:#355670}
+.email-link-rescue input{width:100%;min-height:46px;border-radius:12px;border:1px solid #b1c5d0;background:white;color:#183149;padding:10px 13px;font:14px 'DM Sans',Arial,sans-serif}
+.email-link-rescue input:focus-visible{outline:3px solid #9fbdd0;outline-offset:2px}
+.email-link-rescue button{background:#1b3656;border:0;border-radius:999px;padding:12px 16px;min-height:44px;color:#fff;font:700 12px 'DM Sans',Arial,sans-serif;cursor:pointer}
+.email-link-rescue button:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:540px){.mobile-access-help{padding:14px}.mobile-access-help p{font-size:12px}}
