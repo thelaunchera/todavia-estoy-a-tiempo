@@ -1933,3 +1933,102 @@ a:focus-visible {
 .login-text-action:hover,.login-text-action:focus-visible{color:#142a42}
 .login .vault-form input{font-size:16px}
 .login .vault-form .login-cta{width:100%;max-width:390px;min-height:54px;justify-content:center;gap:12px}
+
+
+/* Editorial refinements: readable portrait art, controlled scale, no colored emoji. */
+.top-star{
+  display:inline-grid;place-items:center;flex:0 0 26px;
+  height:26px;width:26px;margin-right:9px;font-size:inherit;
+  color:#557991;background:#eaf1f4;border:1px solid #afc4d033;border-radius:50%;
+}
+.top-star svg{display:block}
+.hero-kicker{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hero-kicker svg{flex:none;opacity:.88}
+@media (min-width:721px){
+  .hero{
+    display:grid;grid-template-columns:minmax(0,1.25fr) minmax(195px,.7fr);
+    gap:clamp(16px,3vw,44px);align-items:center;
+    min-height:clamp(350px,31vw,435px);
+    padding:clamp(27px,3.4vw,48px);
+  }
+  .hero>div:first-child{max-width:750px;min-width:0}
+  .hero h2{font-size:clamp(39px,4vw,59px);line-height:1.1}
+  .hero-cover{
+    flex:none;width:100%;min-width:0;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    padding:15px 5px 0;
+  }
+  .hero-cover img{
+    display:block;width:min(100%,305px);max-height:355px;
+    height:auto;object-fit:contain;
+    border:6px solid #fffaf1;border-radius:13px;
+    transform:rotate(4deg);
+    box-shadow:0 25px 48px rgba(5,13,28,.34),0 6px 14px rgba(5,13,28,.18);
+  }
+  .hero-cover span{
+    position:static;font-size:10px;letter-spacing:1.2px;
+    white-space:nowrap;text-align:center;
+  }
+  .login{grid-template-columns:minmax(0,1.06fr) minmax(320px,.94fr);min-height:100dvh}
+  .login-content{min-width:0;padding:clamp(35px,4.5vw,86px)}
+  .login-content>img{max-width:min(75%,245px);margin-bottom:clamp(34px,5vh,65px)}
+  .login h1{font-size:clamp(43px,5vw,82px);line-height:1.08;letter-spacing:-1.6px}
+  .login-art{
+    min-width:0;min-height:100dvh;
+    padding:clamp(35px,4vw,65px) 22px;
+  }
+  .login-circle{width:min(72vw,680px);height:auto;aspect-ratio:1}
+  .login-art-inner{
+    width:min(100%,440px);max-width:100%;
+    display:flex;flex-direction:column;align-items:center;
+    gap:clamp(15px,3vh,25px);transform:none;
+  }
+  .login-art-inner>span{letter-spacing:1.5px;line-height:1.5}
+  .login-art-inner>img{
+    display:block;width:min(85%,350px);max-width:100%;
+    height:auto;max-height:min(55dvh,505px);
+    object-fit:contain;border:7px solid #fffdf5;border-radius:15px;
+    margin:0;transform:rotate(-3deg);
+    box-shadow:0 28px 64px rgba(4,13,30,.4);
+  }
+  .login-art-inner>p{font-size:clamp(24px,2.6vw,32px);line-height:1.14}
+}
+@media (min-width:721px) and (max-width:1050px){
+  .hero{grid-template-columns:minmax(0,1.4fr) minmax(185px,.8fr);gap:18px;padding:28px 31px}
+  .hero h2{font-size:clamp(37px,4.6vw,49px)}
+  .hero-cover img{width:min(100%,265px);max-height:315px}
+  .login{grid-template-columns:minmax(0,1.08fr) minmax(290px,.92fr)}
+  .login h1{font-size:clamp(41px,5.2vw,56px)}
+  .login-content{padding:clamp(30px,4vw,54px)}
+  .login-art-inner>img{width:min(82%,280px);max-height:51dvh}
+}
+.finance{
+  isolation:isolate;min-height:255px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  padding:clamp(29px,3.5vw,46px);
+  background:radial-gradient(ellipse at 95% 10%,rgba(170,205,222,.19),transparent 42%),linear-gradient(115deg,#172f48,#355c79);
+}
+.finance>span,.finance>h3,.finance>p{position:relative;z-index:2}
+.finance>p{max-width:min(72%,530px);line-height:1.75}
+.finance>div.finance-mark{
+  position:absolute;top:50%;right:clamp(26px,5vw,70px);
+  width:clamp(115px,15vw,175px);height:clamp(115px,15vw,175px);
+  transform:translateY(-50%) rotate(7deg);
+  display:grid;place-items:center;
+  border:1px solid rgba(237,247,250,.19);border-radius:28px;
+  background:linear-gradient(145deg,rgba(239,249,252,.13),rgba(189,221,235,.035));
+  color:rgba(235,245,250,.56);box-shadow:0 14px 40px rgba(5,20,36,.14);
+  pointer-events:none;z-index:1;font-size:initial;
+}
+.finance-mark svg{max-width:64%;height:auto;opacity:.85}
+@media(max-width:720px){
+  .top-star{margin-left:8px;margin-right:6px}
+  .hero-kicker svg{width:14px;height:14px}
+  .finance{min-height:235px}
+  .finance>p{max-width:100%}
+  .finance>div.finance-mark{
+    width:90px;height:90px;top:35px;right:22px;
+    opacity:.28;transform:rotate(8deg);
+  }
+  .finance>h3{font-size:clamp(33px,8vw,46px)}
+}
