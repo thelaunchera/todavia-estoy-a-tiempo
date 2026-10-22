@@ -1,4 +1,5 @@
 // Estudio del podcast - bóveda cifrada exclusiva de este navegador.
+import { FIVE_DAYS_MS, sessionIsActive, rememberFiveDayKey, restoreFiveDayKey, clearFiveDayKey } from './five-day-session';
 // No procesa compras ni correos; los estados de integraciones son informativos.
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Row = { id: string; title: string; [key: string]: unknown };
@@ -9,6 +10,7 @@ const STORAGE_KEY = 'podcast_studio_vault_v1';
 const ITERATIONS = 230000;
 let key: CryptoKey | null = null;
 let memory: Vault | null = null;
+let sessionExpiresAt = 0;
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 const kinds: Kind[] = ['episodios', 'tareas', 'productos', 'ideas'];
@@ -83,7 +85,30 @@ export function hasLocalVault(): boolean {
 }
 export const auth = {
   async getUser() {
-    return key && memory ? { name: 'Mi estudio local', email: 'Protegido en este dispositivo' } : null;
+    const user = { name: 'Mi estudio local', email: 'Protegido en este dispositivo' };
+    if (key && memory && sessionIsActive(sessionExpiresAt)) return user;
+    key = null; memory = null; sessionExpiresAt = 0;
+    const existing = readEnvelope();
+    if (!existing) { await clearFiveDayKey(); return null; }
+    const session = await restoreFiveDayKey(existing.salt);
+    if (!session) return null;
+    try {
+      const plain = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: unbase64(existing.iv) },
+        session.key,
+        unbase64(existing.ciphertext)
+      );
+      const vault = JSON.parse(dec.decode(plain)) as Vault;
+      if (vault.version !== 1 || !vault.records || !kinds.every(k => Array.isArray(vault.records[k])))
+        throw new Error('Invalid encrypted vault');
+      key = session.key;
+      memory = vault;
+      sessionExpiresAt = session.expiresAt;
+      return user;
+    } catch {
+      await clearFiveDayKey();
+      return null;
+    }
   },
   async signIn(passphrase: string) {
     if (!passphrase || passphrase.length < 10) fail('Usa una frase de acceso de al menos 10 caracteres.', 'short_password');
@@ -107,15 +132,27 @@ export const auth = {
       await lockAndStore(initial(), derived, salt);
       key = derived;
     }
+    const current = readEnvelope();
+    // Remember ONLY the non-extractable encryption key, never the phrase.
+    const rememberedUntil = current && key ? await rememberFiveDayKey(key, current.salt) : null;
+    sessionExpiresAt = rememberedUntil || Date.now() + FIVE_DAYS_MS;
     return { user: { name: 'Mi estudio local', email: 'Protegido en este dispositivo' } };
   },
-  async signOut() { key = null; memory = null; }
+  async signOut() {
+    key = null; memory = null; sessionExpiresAt = 0;
+    await clearFiveDayKey();
+  }
 };
 function ensure(): Vault {
+  if (!sessionIsActive(sessionExpiresAt)) {
+    key = null; memory = null; sessionExpiresAt = 0;
+    fail('Han pasado cinco días. Introduce tu frase para abrir el estudio.', 'session_expired');
+  }
   if (!key || !memory) fail('Abre la bóveda antes de continuar.', 'locked');
   return memory;
 }
 async function persist(update: Vault): Promise<void> {
+  ensure();
   if (!key) fail('Estudio bloqueado.', 'locked');
   const e = readEnvelope();
   if (!e) fail('No se encontró tu estudio cifrado.', 'missing_vault');
@@ -211,5 +248,6 @@ export async function importEncryptedBackup(raw: string): Promise<void> {
     fail('El archivo no es un respaldo compatible.', 'invalid_backup');
   unbase64(parsed.salt); unbase64(parsed.iv); unbase64(parsed.ciphertext);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-  key = null; memory = null;
+  key = null; memory = null; sessionExpiresAt = 0;
+  await clearFiveDayKey();
 }
