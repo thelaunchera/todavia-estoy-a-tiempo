@@ -55,140 +55,91 @@ create policy "podcast_studio_owner_delete" on public.podcast_studio_entries
 
 -- Los siguientes registros reciben escrituras SOLAMENTE desde servicios verificados;
 -- el navegador NO puede crearlos ni editar importes, suscripciones ni mensajes.
+alter table public.podcast_studio_entries
+  add column if not exists external_id text;
+create unique index if not exists podcast_entries_local_import_uniq
+  on public.podcast_studio_entries(user_id,kind,external_id);
+
+-- Operaciones: ninguna escritura desde un navegador, solamente desde backend verificado.
 create table if not exists public.podcast_sales (
-  id uuid primary key default gen_random_uuid(),
-  provider text not null,
-  provider_payment_id text not null,
-  product_code text,
-  customer_email text,
-  currency text not null default 'usd',
-  amount_cents integer not null check(amount_cents >= 0),
-  status text not null check(status in ('paid','refunded','partial_refund','pending','failed')),
-  purchased_at timestamptz not null,
-  recorded_at timestamptz not null default now(),
-  unique(provider,provider_payment_id)
+ id uuid primary key default gen_random_uuid(),
+ provider text not null,
+ provider_payment_id text not null,
+ product_code text,
+ customer_email text,
+ currency text not null default 'usd',
+ amount_cents integer not null check(amount_cents >= 0),
+ status text not null check(status in ('paid','refunded','partial_refund','pending','failed')),
+ purchased_at timestamptz not null,
+ recorded_at timestamptz not null default now(),
+ unique(provider,provider_payment_id)
 );
 create table if not exists public.podcast_subscribers (
-  id uuid primary key default gen_random_uuid(),
-  email text not null check(email ~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+
-  source text not null,
-  consent_at timestamptz not null,
-  consent_version text not null default 'episodios-v1',
-  unsubscribed_at timestamptz,
-  created_at timestamptz not null default now()
+ id uuid primary key default gen_random_uuid(),
+ email text not null check(position('@' in email) > 1),
+ source text not null,
+ consent_at timestamptz not null,
+ consent_version text not null default 'episodios-v1',
+ unsubscribed_at timestamptz,
+ created_at timestamptz not null default now()
 );
 create unique index if not exists podcast_subscribers_email_unique on public.podcast_subscribers(lower(email));
 create table if not exists public.podcast_support_messages (
-  id uuid primary key default gen_random_uuid(),
-  external_message_id text unique,
-  sender_name text,
-  sender_email text not null,
-  subject text,
-  body text not null,
-  status text not null default 'abierto' check(status in ('abierto','en curso','resuelto')),
-  created_at timestamptz not null default now()
+ id uuid primary key default gen_random_uuid(),
+ external_message_id text unique,
+ sender_name text,
+ sender_email text not null,
+ subject text,
+ body text not null,
+ status text not null default 'abierto' check(status in ('abierto','en curso','resuelto')),
+ created_at timestamptz not null default now()
 );
 create table if not exists public.podcast_delivery_events (
-  id uuid primary key default gen_random_uuid(),
-  provider_event_id text unique not null,
-  delivery_type text not null,
-  recipient_email text,
-  status text not null,
-  occurred_at timestamptz not null,
-  created_at timestamptz not null default now()
+ id uuid primary key default gen_random_uuid(),
+ provider_event_id text unique not null,
+ delivery_type text not null,
+ recipient_email text,
+ status text not null,
+ occurred_at timestamptz not null,
+ created_at timestamptz not null default now()
 );
 create table if not exists public.podcast_automation_runs (
-  id uuid primary key default gen_random_uuid(),
-  provider_run_id text unique,
-  flow_key text not null,
-  outcome text not null,
-  message text,
-  created_at timestamptz not null default now()
+ id uuid primary key default gen_random_uuid(),
+ provider_run_id text unique,
+ flow_key text not null,
+ outcome text not null,
+ message text,
+ created_at timestamptz not null default now()
 );
-
--- Acceso read-only y RLS en cada tabla, nunca escritura desde frontend.
+create table if not exists public.podcast_integrations (
+ provider text primary key check(provider in ('stripe','make','resend','gsc')),
+ status text not null default 'pending' check(status in ('pending','active','error','paused')),
+ last_sync_at timestamptz,
+ updated_at timestamptz not null default now()
+);
+-- Las políticas de lectura de registros personales requieren rol OWNER verificado.
 do $$
-declare tab text;
+declare t text;
 begin
-  foreach tab in array array[
-    'podcast_sales','podcast_subscribers','podcast_support_messages',
-    'podcast_delivery_events','podcast_automation_runs'
-  ] loop
-    execute format('alter table public.%I enable row level security',tab);
-    execute format('revoke all on public.%I from anon,authenticated',tab);
-    execute format('grant select on public.%I to authenticated',tab);
-    execute format('drop policy if exists podcast_operator_read on public.%I',tab);
-    execute format('create policy podcast_operator_read on public.%I for select to authenticated using (exists (select 1 from public.podcast_studio_admins a where a.user_id=(select auth.uid())))',tab);
-  end loop;
+ foreach t in array array[
+  'podcast_sales','podcast_subscribers','podcast_support_messages',
+  'podcast_delivery_events','podcast_automation_runs','podcast_integrations'
+ ] loop
+   execute format('alter table public.%I enable row level security',t);
+   execute format('revoke all on public.%I from PUBLIC,anon,authenticated',t);
+   execute format('grant select on public.%I to authenticated',t);
+   execute format('drop policy if exists podcast_operator_read on public.%I',t);
+   execute format('drop policy if exists podcast_sensitive_owner_read on public.%I',t);
+   execute format('create policy podcast_sensitive_owner_read on public.%I for select to authenticated using (exists (select 1 from public.podcast_studio_admins a where a.user_id=(select auth.uid()) and a.role=''owner''))',t);
+ end loop;
 end $$;
 commit;
 
--- El administrador se asigna DESPUÉS de tener cuenta en Auth:
+-- ADMIN: invitar primero a la cuenta en Supabase Auth, copiar su UUID:
 -- insert into public.podcast_studio_admins(user_id,role)
--- values ('UUID_COPIADO_DESDE_AUTH_USERS','owner');
--- No insertar un correo en GitHub ni convertir este INSERT en acción pública.
+-- values ('UUID_DE_CUENTA_AUTORIZADA','owner')
+-- on conflict (user_id) do update set role='owner';
 
--- Verificaciones posteriores al despliegue:
--- select tablename, rowsecurity from pg_tables where schemaname='public' and tablename like 'podcast_%';
--- select tablename, policyname, roles, cmd from pg_policies where schemaname='public' and tablename like 'podcast_%';
-),
-  source text not null,
-  consent_at timestamptz not null,
-  consent_version text not null default 'episodios-v1',
-  unsubscribed_at timestamptz,
-  created_at timestamptz not null default now()
-);
-create unique index if not exists podcast_subscribers_email_unique on public.podcast_subscribers(lower(email));
-create table if not exists public.podcast_support_messages (
-  id uuid primary key default gen_random_uuid(),
-  external_message_id text unique,
-  sender_name text,
-  sender_email text not null,
-  subject text,
-  body text not null,
-  status text not null default 'abierto' check(status in ('abierto','en curso','resuelto')),
-  created_at timestamptz not null default now()
-);
-create table if not exists public.podcast_delivery_events (
-  id uuid primary key default gen_random_uuid(),
-  provider_event_id text unique not null,
-  delivery_type text not null,
-  recipient_email text,
-  status text not null,
-  occurred_at timestamptz not null,
-  created_at timestamptz not null default now()
-);
-create table if not exists public.podcast_automation_runs (
-  id uuid primary key default gen_random_uuid(),
-  provider_run_id text unique,
-  flow_key text not null,
-  outcome text not null,
-  message text,
-  created_at timestamptz not null default now()
-);
-
--- Acceso read-only y RLS en cada tabla, nunca escritura desde frontend.
-do $$
-declare tab text;
-begin
-  foreach tab in array array[
-    'podcast_sales','podcast_subscribers','podcast_support_messages',
-    'podcast_delivery_events','podcast_automation_runs'
-  ] loop
-    execute format('alter table public.%I enable row level security',tab);
-    execute format('revoke all on public.%I from anon,authenticated',tab);
-    execute format('grant select on public.%I to authenticated',tab);
-    execute format('drop policy if exists podcast_operator_read on public.%I',tab);
-    execute format('create policy podcast_operator_read on public.%I for select to authenticated using (exists (select 1 from public.podcast_studio_admins a where a.user_id=(select auth.uid())))',tab);
-  end loop;
-end $$;
-commit;
-
--- El administrador se asigna DESPUÉS de tener cuenta en Auth:
--- insert into public.podcast_studio_admins(user_id,role)
--- values ('UUID_COPIADO_DESDE_AUTH_USERS','owner');
--- No insertar un correo en GitHub ni convertir este INSERT en acción pública.
-
--- Verificaciones posteriores al despliegue:
--- select tablename, rowsecurity from pg_tables where schemaname='public' and tablename like 'podcast_%';
--- select tablename, policyname, roles, cmd from pg_policies where schemaname='public' and tablename like 'podcast_%';
+-- Verificaciones: todas las tablas podcast_* deben tener rowsecurity=true.
+-- select tablename,rowsecurity from pg_tables where schemaname='public' and tablename like 'podcast_%';
+-- select tablename,policyname,cmd from pg_policies where schemaname='public' and tablename like 'podcast_%';
