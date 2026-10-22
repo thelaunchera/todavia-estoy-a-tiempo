@@ -1556,3 +1556,30 @@ html{scroll-padding-top:96px}
   .newsletter-note{font-size:.67rem}
   .footer-curtain .footer-separator{margin-bottom:19px}
 }
+
+/* Discreet website credit, readable on desktop and mobile. */
+.footer-curtain .footer-credits{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:7px;
+}
+.footer-curtain .footer-powered-by{
+  display:inline-block;
+  padding:3px 0;
+  border:0;
+  color:#b6c7d6;
+  font:400 .75rem/1.5 var(--sans);
+  letter-spacing:.01em;
+  text-decoration:none;
+  text-underline-offset:4px;
+}
+.footer-curtain .footer-powered-by span{font-weight:500}
+.footer-curtain .footer-powered-by:hover,
+.footer-curtain .footer-powered-by:focus-visible{
+  color:#f6f3eb;
+  text-decoration:underline;
+}
+@media(max-width:850px){
+  .footer-curtain .footer-credits{align-items:flex-start}
+}
