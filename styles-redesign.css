@@ -1174,3 +1174,154 @@ html{scroll-padding-top:96px}
   .floating-back-top,.floating-back-top.is-shown,.footer-cta-button{animation:none!important;transition:none!important}
   .floating-back-top.is-traveling .floating-back-top-icon svg{animation:none!important}
 }
+
+
+/* Double editorial brand marquee — monochrome, mathematically seamless.
+   Each set contains identical items with margin-right on every brand (including last).
+   No fabricated "Trusted by" partners: all wording belongs to this podcast and Spotify. */
+.podcast-marquee--double{
+  display:block;
+  padding:16px 0;
+  min-height:0;
+  border-top:1px solid rgba(37,57,75,.15);
+  border-bottom:1px solid rgba(37,57,75,.15);
+  background:linear-gradient(110deg,#f7f4ed,#e5e8e8 52%,#f5f1e9);
+  color:#344b60;
+  overflow:hidden;
+  text-decoration:none;
+  outline-offset:5px;
+}
+.podcast-marquee--double .podcast-marquee-reader{
+  display:block;width:100%;
+}
+.podcast-marquee--double .podcast-marquee-sr{
+  position:absolute;
+  width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+.podcast-marquee--double .podcast-marquee-row{
+  display:block;
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);
+}
+.podcast-marquee--double .podcast-marquee-row+.podcast-marquee-row{
+  margin-top:6px;
+}
+.podcast-marquee--double .podcast-marquee-track{
+  display:flex;
+  align-items:center;
+  width:max-content;
+  gap:0;
+  white-space:nowrap;
+  animation:podcast-marquee-roll 20s linear infinite;
+  will-change:transform;
+}
+.podcast-marquee--double .podcast-marquee-row--reverse .podcast-marquee-track{
+  animation-direction:reverse;
+  animation-duration:26s;
+}
+.podcast-marquee--double .podcast-marquee-set{
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  width:max-content;
+  gap:0;
+}
+.podcast-marquee--double .podcast-marquee-brand{
+  display:inline-flex;
+  flex:0 0 auto;
+  align-items:center;
+  white-space:nowrap;
+  height:39px;
+  margin-right:clamp(42px,6vw,84px);
+  color:#344b60;
+  opacity:.76;
+  text-transform:none;
+}
+.podcast-marquee--double .podcast-marquee-brand--logo img{
+  display:block;
+  width:auto;
+  height:37px;
+  max-width:177px;
+  object-fit:contain;
+  filter:grayscale(1);
+  opacity:.82;
+}
+.podcast-marquee--double .podcast-marquee-brand--caps{
+  font:600 .69rem/1.4 var(--sans);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.podcast-marquee--double .podcast-marquee-brand--serif{
+  font:italic 1.15rem/1.25 var(--serif);
+  letter-spacing:-.025em;
+}
+.podcast-marquee--double .podcast-marquee-brand--spotify{
+  gap:9px;
+  font:700 .76rem/1.25 var(--sans);
+  letter-spacing:.15em;
+}
+.podcast-marquee--double .podcast-marquee-brand--spotify svg{
+  flex:0 0 auto;
+  color:inherit;
+}
+.podcast-marquee--double:hover .podcast-marquee-track,
+.podcast-marquee--double:focus-visible .podcast-marquee-track{
+  animation-play-state:paused;
+}
+.podcast-marquee--double:focus-visible{
+  outline:3px solid #375b76;
+  outline-offset:3px;
+}
+.feature-list li{
+  gap:14px;
+}
+.feature-list li .feature-mark{
+  display:block;
+  flex:0 0 13px;
+  width:13px;
+  height:2px;
+  margin-top:15px;
+  border-radius:2px;
+  background:#60778a;
+}
+@media(max-width:600px){
+  .podcast-marquee--double{
+    padding:12px 0;
+    min-height:0;
+  }
+  .podcast-marquee--double .podcast-marquee-row+.podcast-marquee-row{
+    margin-top:5px;
+  }
+  .podcast-marquee--double .podcast-marquee-brand{
+    height:31px;
+    margin-right:38px;
+  }
+  .podcast-marquee--double .podcast-marquee-brand--logo img{
+    height:29px;
+    max-width:132px;
+  }
+  .podcast-marquee--double .podcast-marquee-brand--caps{
+    font-size:.61rem;
+  }
+  .podcast-marquee--double .podcast-marquee-brand--serif{
+    font-size:1rem;
+  }
+  .podcast-marquee--double .podcast-marquee-brand--spotify{
+    font-size:.64rem;
+  }
+  .podcast-marquee--double .podcast-marquee-brand--spotify svg{
+    width:19px;
+    height:19px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .podcast-marquee--double .podcast-marquee-track{
+    animation:none!important;
+    transform:translateX(0)!important;
+    will-change:auto;
+  }
+}
