@@ -1852,3 +1852,17 @@ a:focus-visible {
     transition: none !important;
   }
 }
+
+/* Login y respaldo cifrado, edición GitHub Pages. */
+.login .vault-form{width:min(100%,390px);display:flex;flex-direction:column;align-items:flex-start;gap:11px;margin-top:4px}
+.vault-form label{font-size:12px;font-weight:700;color:#41617a}
+.vault-form input{width:100%;height:50px;border-radius:12px;border:1px solid #afc2cd;background:#fff;padding:0 16px;color:#183149;font-size:15px}
+.vault-form input:focus-visible{outline:3px solid #9fbdd0;outline-offset:2px}
+.vault-form .login-cta{margin-top:12px}
+.vault-backups{flex-wrap:wrap;align-items:center}
+.vault-backup-actions{display:flex;gap:10px;flex-wrap:wrap}
+.vault-backup-actions button,.vault-import{font:700 12px 'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;min-height:42px;border-radius:99px;border:1px solid #55788f;background:#f8fafb;color:#31566f;padding:11px 15px;cursor:pointer}
+.vault-import{position:relative}
+.vault-import input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.vault-import:focus-within{outline:3px solid #9fbdd0;outline-offset:3px}
+@media(max-width:600px){.vault-backups{align-items:flex-start}.vault-backup-actions{width:100%}}

@@ -33,12 +33,22 @@ jobs:
           cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-social-dark.png", output_width=1600)
           cairosvg.svg2png(bytestring=source.replace(b'#131925', b'#f7f3eb'), write_to="assets/logo-podcast-04-social-light.png", output_width=1600)
           PY
-      - name: Separar el sitio público del código privado
+      - name: Preparar Node para el Estudio de Control
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compilar el estudio desde el repositorio
         run: |
-          mkdir -p _podcast_pages
-          cp -R assets productos estudio _podcast_pages/
+          cd estudio-control
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Empaquetar el podcast y su estudio
+        run: |
+          mkdir -p _podcast_pages/estudio
+          cp -R assets productos _podcast_pages/
           cp -- *.html *.css *.js *.xml _podcast_pages/
           cp .nojekyll _podcast_pages/
+          cp -R estudio-control/dist/. _podcast_pages/estudio/
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
         with:

@@ -1,30 +1,29 @@
-# Estudio de Control · Todavía estoy a tiempo
+# Estudio de Control — Todavía estoy a tiempo
 
-Código fuente del centro privado del podcast. Proyecto **independiente** del Command Center de The Launch Era.
+Este es el **código fuente y publicación real** del estudio del podcast; no requiere AppDeploy.
 
-## Accesos
-- Panel en funcionamiento: https://estudio-de-control-todavia-estoy-a-tiempo-c09dcu.v2.appdeploy.ai/
-- Enlace desde GitHub Pages: https://thelaunchera.github.io/todavia-estoy-a-tiempo/estudio/
-- El sitio público del podcast permanece en https://thelaunchera.github.io/todavia-estoy-a-tiempo/
+## Abrir el estudio
+**https://podcast.thelaunchera.com/estudio/**
+
+En cada cambio a `main`, GitHub Actions compila esta aplicación React desde `estudio-control/` y publica los archivos resultantes en GitHub Pages bajo `/estudio/`. El landing sigue en la raíz.
+
+## Cómo funciona esta primera versión
+- Organiza **episodios, calendario, tareas, productos e ideas**, con crear, editar, completar y borrar.
+- **Modo grabación** oculta controles delicados para mostrar el estudio en videos.
+- Tus registros se guardan **en el navegador**, cifrados con AES-GCM a partir de una frase que eliges al entrar por primera vez.
+- Cada vez que abras o actualices el estudio, tendrás que desbloquearlo con la frase.
+- Para usarlo en otro dispositivo, utiliza **Guardar copia** y **Restaurar copia** desde Configuración. Las copias mantienen el cifrado y requieren la misma frase.
+- Si borras los datos del navegador o olvidas la frase sin tener un respaldo, no será posible recuperar los registros.
+- GitHub Pages no proporciona backend ni autenticación de usuarios; la frase protege los datos locales, **no crea una cuenta de servidor**.
+- Los registros anteriores de otro proveedor **no se transfieren** automáticamente.
+- **Ventas, compradores, suscriptores y bandeja de mensajes** todavía no están sincronizados. No mostrar datos reales hasta implementar un servicio con acceso autorizado y una base de datos exclusiva del podcast.
 
 ## Arquitectura
-- React + TypeScript, interfaz 100 % español, responsive
-- Autenticación de AppDeploy; rutas privadas que validan al administrador
-- Backend AppDeploy SDK (API y base de datos) para episodios, tareas, productos e ideas
-- Modo grabación oculta controles y no muestra datos de compradores
-- Indicadores de ventas, audiencia y soporte **no sincronizados** hasta configurar las conexiones reales
+`src/Studio.tsx` contiene la interfaz, `src/local-client.ts` el almacenamiento cifrado local y `src/studio.css` el diseño.
 
-## Importante sobre la publicación
-GitHub Pages sirve **solo contenido estático**. El código de `backend/index.ts` necesita un entorno servidor con el SDK de AppDeploy; **no puede ejecutarse directamente en GitHub Pages**.
-La página `/estudio/` de este repositorio abre el panel seguro existente. Los cambios realizados en este directorio GitHub **no actualizan automáticamente** el despliegue AppDeploy hasta configurar un flujo de deploy compatible.
+Para desarrollar: `cd estudio-control && npm install && npm run dev`.
 
-## Seguridad
-No guardar claves, credenciales ni información de compradores en el repositorio. Este repositorio es público; el workflow de Pages excluye `estudio-control/` de los archivos publicados. Los archivos del repositorio sí son visibles como código fuente en GitHub. Se ha sustituido el correo administrativo explícito por `STUDIO_ADMIN_EMAILS` en el **código exportado**; debes configurar este valor como secreto de servidor al hacer una futura implementación. El panel AppDeploy que ya está activo mantiene su configuración original. Evita exponer secretos en variables VITE_ o archivos frontend.
+El directorio antiguo `backend/` fue retirado de este repositorio porque dependía de AppDeploy. **No coloques claves privadas, correos de compradores ni secretos de pago en los archivos publicados.**
 
-## Desarrollo
-```sh
-cd estudio-control
-npm install
-npm run dev
-```
-Para ejecutar las rutas `/api` necesitas el entorno AppDeploy, con dependencias `@appdeploy/sdk` y `@appdeploy/client` inyectadas por esa plataforma, o adaptar el backend a otro proveedor. No confundir la vista local sin API con una versión de producción.
+## Próxima fase
+Un backend externo al sitio estático, controlado desde este mismo repositorio, con base de datos separada, autenticación verificada y eventos firmados de pago para sincronizar compras, entregas, audiencia y soporte. No usar la base de datos comercial de The Launch Era como si fuera la del podcast.

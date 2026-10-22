@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api } from '@appdeploy/client';
+import { auth, api, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup } from './local-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -78,7 +78,7 @@ type Data = {
     seo: string;
   };
 };
-const SITE = 'https://thelaunchera.github.io/todavia-estoy-a-tiempo/';
+const SITE = 'https://podcast.thelaunchera.com/';
 const LOGO = SITE + 'assets/logo-podcast-04.svg';
 const COVER = SITE + 'assets/podcast-episodio-01-azul-v3.webp';
 const NAV = [
@@ -177,6 +177,9 @@ function StatePill({ status }: { status?: string }) {
   );
 }
 function App() {
+  const [passphrase, setPassphrase] = useState('');
+  const [confirmPhrase, setConfirmPhrase] = useState('');
+  const [vaultPresent, setVaultPresent] = useState(hasLocalVault());
   const [account, setAccount] = useState<{
     email?: string;
     name?: string;
@@ -239,17 +242,23 @@ function App() {
     setSigning(true);
     setError('');
     try {
-      const r = await auth.signIn();
+      if (!vaultPresent && passphrase !== confirmPhrase) {
+        setError('Las frases no coinciden. Escríbelas igual para crear tu estudio.');
+        return;
+      }
+      const r = await auth.signIn(passphrase);
       setAccount(r.user);
+      setPassphrase('');
+      setConfirmPhrase('');
+      setVaultPresent(true);
       await refresh();
     } catch (e) {
       const code = (e as { code?: string })?.code;
-      if (code !== 'popup_closed')
-        setError(
-          code === 'popup_blocked'
-            ? 'Permite ventanas emergentes para entrar.'
-            : 'No se pudo completar el acceso.'
-        );
+      setError(
+        code === 'bad_passphrase' ? 'La frase no coincide. Inténtalo de nuevo.' :
+        code === 'short_password' ? 'Usa al menos 10 caracteres para proteger tu estudio.' :
+        'No se pudo abrir la bóveda. Comprueba el almacenamiento de tu navegador.'
+      );
     } finally {
       setSigning(false);
     }
@@ -487,32 +496,27 @@ function App() {
             Las ideas también <em>necesitan un lugar</em> donde quedarse.
           </h1>
           <p>
-            Tu estudio privado para cuidar cada capítulo, organizar lo que viene
-            y construir a tu propio ritmo.
+            Un estudio que funciona desde el repositorio del podcast. Tus notas se guardan cifradas en este dispositivo.
           </p>
           {denied && (
             <div className="login-warning">
-              <LockKeyhole size={17} /> Esta cuenta no está autorizada para ver
-              el estudio.
+              <LockKeyhole size={17} /> No pude abrir la bóveda local. Vuelve a intentarlo.
             </div>
           )}
-          {!!error && <div className="login-warning">{error}</div>}
-          <button
-            disabled={signing}
-            onClick={denied ? logout : login}
-            className="login-cta"
-          >
-            {denied
-              ? 'Cambiar de cuenta'
-              : signing
-                ? 'Abriendo acceso…'
-                : 'Entrar a mi estudio'}
-            <ArrowUpRight size={19} />
-          </button>
-          <small>
-            <ShieldCheck size={15} /> Solo tu cuenta administradora puede ver
-            los datos.
-          </small>
+          {!!error && <div className="login-warning" role="alert">{error}</div>}
+          <form className="vault-form" onSubmit={event => { event.preventDefault(); void login(); }}>
+            <label htmlFor="studio-passphrase">{vaultPresent ? 'Tu frase de acceso' : 'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
+            <input id="studio-passphrase" type="password" required minLength={10} autoComplete={vaultPresent ? 'current-password' : 'new-password'} value={passphrase} onChange={event => setPassphrase(event.target.value)} placeholder="Tu frase secreta" />
+            {!vaultPresent && <>
+              <label htmlFor="studio-passphrase-confirm">Repite la frase</label>
+              <input id="studio-passphrase-confirm" type="password" required minLength={10} autoComplete="new-password" value={confirmPhrase} onChange={event => setConfirmPhrase(event.target.value)} placeholder="Confirma tu frase" />
+            </>}
+            <button type="submit" disabled={signing} className="login-cta">
+              {signing ? 'Abriendo estudio…' : vaultPresent ? 'Abrir mi estudio' : 'Crear mi estudio'}
+              <ArrowUpRight size={19} />
+            </button>
+          </form>
+          <small><ShieldCheck size={15} /> Cifrado en este dispositivo. Conserva tu frase y exporta un respaldo.</small>
         </section>
         <aside className="login-art">
           <div className="login-circle" />
@@ -1173,13 +1177,9 @@ function App() {
               <div className="account-card">
                 <div>D</div>
                 <section>
-                  <span>CUENTA ADMINISTRADORA</span>
-                  <h3>Acceso privado</h3>
-                  <p>
-                    {recording
-                      ? 'Correo oculto durante la grabación'
-                      : account.email}
-                  </p>
+                  <span>ARCHIVO DEL ESTUDIO</span>
+                  <h3>Protección local</h3>
+                  <p>{recording ? 'Detalles ocultos mientras grabas' : 'Bóveda cifrada en este navegador'}</p>
                 </section>
                 <ShieldCheck size={23} />
               </div>
@@ -1202,13 +1202,36 @@ function App() {
               </div>
               <div className="setting">
                 <div>
-                  <b>Acceso protegido</b>
+                  <b>Frase de acceso</b>
                   <p>
-                    Solo tu cuenta administradora puede entrar. Cada dato se
-                    guarda detrás de autenticación.
+                    Las notas y los capítulos se cifran con tu frase antes de guardarse en este dispositivo.
+                    No hay sincronización entre móviles o computadoras.
                   </p>
                 </div>
                 <StatePill status="disponible" />
+              </div>
+              <div className="setting vault-backups">
+                <div>
+                  <b>Respaldo de tu estudio</b>
+                  <p>Guarda una copia cifrada para recuperar tu trabajo en otro dispositivo. Necesitarás la misma frase de acceso.</p>
+                </div>
+                <div className="vault-backup-actions">
+                  <button type="button" onClick={() => { try { downloadEncryptedBackup(); } catch { setError('No se pudo descargar el respaldo.'); } }}>Guardar copia</button>
+                  <label className="vault-import">Restaurar copia
+                    <input type="file" accept=".json,application/json" onChange={async event => {
+                      const file = event.currentTarget.files?.[0];
+                      if (!file) return;
+                      try {
+                        const source = await file.text();
+                        if (!window.confirm('¿Reemplazar los datos de este dispositivo por los del respaldo cifrado? Esta acción no se puede deshacer.')) return;
+                        await importEncryptedBackup(source);
+                        await logout();
+                        setVaultPresent(true);
+                      } catch { setError('No se pudo restaurar ese archivo. Verifica que sea un respaldo cifrado del estudio.'); }
+                      finally { event.currentTarget.value = ''; }
+                    }} />
+                  </label>
+                </div>
               </div>
               <button className="logout" onClick={logout}>
                 <LogOut size={17} /> Cerrar sesión
