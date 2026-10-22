@@ -2111,3 +2111,21 @@ a:focus-visible {
   .episode-editorial .episode-progress { margin:4px 0; }
   .episode-editorial .episode-actions { margin-top:0; }
 }
+
+/* Tablet and desktop reading keep their own scale and use the card width. */
+@media (min-width:651px) {
+  .episode-editorial { display:grid; grid-template-columns:48px minmax(0,1fr); column-gap:16px; row-gap:12px; }
+  .episode-editorial > .epi-no { grid-column:1; grid-row:1; }
+  .episode-editorial > .epi-info { display:contents; }
+  .episode-editorial > .epi-info > * { grid-column:1 / -1; min-width:0; }
+  .episode-editorial > .epi-info > .epi-line { grid-column:2; grid-row:1; min-height:48px; padding-right:80px; align-content:center; }
+  .episode-editorial > .edit-buttons { grid-column:2; grid-row:1; justify-self:end; align-self:start; margin:0; }
+  .episode-editorial .episode-script { width:100%; margin:4px 0 12px; }
+  .episode-editorial .episode-script-body { padding:24px; }
+  .episode-editorial .episode-script-text { max-height:none; overflow:visible; padding-right:0; font-size:17px; line-height:1.8; }
+  .episode-editorial .episode-progress { margin:4px 0; }
+}
+@media (min-width:1100px) {
+  .episode-editorial .episode-script-body { padding:32px max(32px, calc((100% - 76ch) / 2)); }
+  .episode-editorial .episode-script-text { font-size:18px; }
+}
