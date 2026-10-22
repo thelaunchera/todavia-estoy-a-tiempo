@@ -11,7 +11,10 @@ En cada cambio a `main`, GitHub Actions compila esta aplicación React desde `es
 - Organiza **episodios, calendario, tareas, productos e ideas**, con crear, editar, completar y borrar.
 - **Modo grabación** oculta controles delicados para mostrar el estudio en videos.
 - Tus registros se guardan **en el navegador**, cifrados con AES-GCM a partir de una frase que eliges al entrar por primera vez.
-- Cada vez que abras o actualices el estudio, tendrás que desbloquearlo con la frase.
+- En la **bóveda local**, tras desbloquearla correctamente, ese **mismo navegador** recordará el acceso durante **5 días (120 horas)**. Recargar o cerrar y abrir la pestaña no debe volver a pedirte la frase en ese periodo.
+- La frase **nunca se guarda**; el navegador recuerda temporalmente una llave WebCrypto AES-GCM no exportable, asociada al archivo cifrado, en IndexedDB. La sesión expira a los cinco días contados desde el último desbloqueo con frase; las visitas no reinician el plazo.
+- **Cerrar sesión**, importar un respaldo distinto o caducar el plazo borra o invalida el acceso recordado. Si el navegador bloquea IndexedDB, usa navegación privada o borra los datos, hará falta volver a introducir la frase.
+- **No actives esta comodidad en un dispositivo compartido**: cualquiera con acceso al navegador abierto podrá entrar durante esos cinco días. La modalidad Supabase, cuando está configurada, tiene autenticación de servidor y sesiones independientes.
 - Para usarlo en otro dispositivo, utiliza **Guardar copia** y **Restaurar copia** desde Configuración. Las copias mantienen el cifrado y requieren la misma frase.
 - Si borras los datos del navegador o olvidas la frase sin tener un respaldo, no será posible recuperar los registros.
 - GitHub Pages no proporciona backend ni autenticación de usuarios; la frase protege los datos locales, **no crea una cuenta de servidor**.
@@ -19,7 +22,7 @@ En cada cambio a `main`, GitHub Actions compila esta aplicación React desde `es
 - **Ventas, compradores, suscriptores y bandeja de mensajes** todavía no están sincronizados. No mostrar datos reales hasta implementar un servicio con acceso autorizado y una base de datos exclusiva del podcast.
 
 ## Arquitectura
-`src/Studio.tsx` contiene la interfaz, `src/local-client.ts` el almacenamiento cifrado local y `src/studio.css` el diseño.
+`src/Studio.tsx` contiene la interfaz; `src/local-client.ts` el almacenamiento cifrado local; `src/five-day-session.ts` el recuerdo temporal de acceso; `src/supabase-client.ts` la conexión opcional a Supabase y `src/studio.css` el diseño.
 
 Para desarrollar: `cd estudio-control && npm install && npm run dev`.
 
