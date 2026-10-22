@@ -1309,13 +1309,17 @@ function App() {
               {SUPABASE_ENABLED && hasLocalVault() && !recording && <div className="setting vault-backups">
                 <div>
                   <b>Recuperar mis capítulos y tareas anteriores</b>
-                  <p>Importa tus registros guardados en este navegador a Supabase. No borra tu copia cifrada y no duplica datos si lo intentas de nuevo.</p>
+                  <p>Antes de importar, guarda un respaldo cifrado en este dispositivo. Luego importa tus capítulos, tareas, productos e ideas; se verifican contra Supabase sin borrar la copia original. Necesitas la frase de acceso anterior.</p>
                   <label className="migration-label" htmlFor="import-vault-passphrase">Frase de acceso anterior</label>
                   <input id="import-vault-passphrase" className="migration-input" type="password" autoComplete="off"
                     value={importSecret} onChange={event=>setImportSecret(event.target.value)} placeholder="Tu frase de la bóveda local" />
                   {importMessage && <p role="status" className="migration-status">{importMessage}</p>}
                 </div>
                 <div className="vault-backup-actions">
+                  <button type="button" onClick={() => {
+                    try { downloadEncryptedBackup(); }
+                    catch { setImportMessage('No pude guardar la copia cifrada. Revisa los permisos de descarga de tu navegador.'); }
+                  }}>Guardar respaldo cifrado primero</button>
                   <button type="button" disabled={importing || importSecret.length<10} onClick={async()=>{
                     if(!window.confirm('¿Importar al estudio de Supabase los episodios, tareas, productos e ideas guardados en este dispositivo? Los archivos locales no se eliminarán.'))return;
                     setImporting(true);setImportMessage('');
