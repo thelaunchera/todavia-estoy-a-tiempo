@@ -21,6 +21,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Preparar GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Preparar logo oficial en PNG para correos
+        run: |
+          python -m pip install --quiet cairosvg
+          python - <<'PY'
+          from pathlib import Path
+          import cairosvg
+          source = Path("assets/logo-podcast-04.svg").read_bytes()
+          cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-email.png", output_width=900)
+          cairosvg.svg2png(bytestring=source.replace(b'#131925', b'#f7f3eb'), write_to="assets/logo-podcast-04-light.png", output_width=900)
+          PY
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
         with:
