@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Podcast en español con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-newsletter-v1">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-compact-forms-v3">
   <script defer src="site-config.js?v=20261022-newsletter-footer2"></script>
   <script defer src="app-redesign.js?v=20261022-newsletter-v1"></script>
 <link rel="canonical" href="https://thelaunchera.github.io/todavia-estoy-a-tiempo/"><meta property="og:url" content="https://thelaunchera.github.io/todavia-estoy-a-tiempo/"><meta property="og:locale" content="es_ES"><meta property="og:site_name" content="Todavía estoy a tiempo"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Todavía estoy a tiempo | Podcast en español con Dailin"><meta name="twitter:description" content="Un podcast en español sobre sentir que vas tarde, las expectativas, las comparaciones y volver a empezar. Nuevos episodios los martes con Dailin."><meta name="twitter:image" content="https://thelaunchera.github.io/todavia-estoy-a-tiempo/assets/podcast-episodio-01-azul-v3.webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"PodcastSeries","@id":"https://thelaunchera.github.io/todavia-estoy-a-tiempo/#podcast","name":"Todavía estoy a tiempo","description":"Conversaciones sobre las expectativas, las comparaciones y los nuevos comienzos, con Dailin.","url":"https://thelaunchera.github.io/todavia-estoy-a-tiempo/","inLanguage":"es","image":"https://thelaunchera.github.io/todavia-estoy-a-tiempo/assets/podcast-episodio-01-azul-v3.webp","author":{"@type":"Person","name":"Dailin"},"sameAs":["https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh"],"episode":[{"@type":"PodcastEpisode","name":"Tengo 30 y pensé que mi vida sería diferente.","episodeNumber":1,"description":"Sobre las expectativas, las comparaciones y esa pregunta que a veces pesa: ¿Ya debería estar en otro lugar?","partOfSeries":{"@id":"https://thelaunchera.github.io/todavia-estoy-a-tiempo/#podcast"},"inLanguage":"es"}]}</script></head>
@@ -125,10 +125,10 @@
             <input type="hidden" name="resource" value="cinco_preguntas">
             <label class="podcast-newsletter-optin" for="guide-newsletter">
               <input id="guide-newsletter" name="newsletter" type="checkbox" value="yes">
-              <span><strong>¿Nos seguimos escuchando?</strong> Si te apetece, te escribo cuando haya un nuevo episodio. Sin compromiso.</span>
+              <span>Quiero recibir avisos de nuevos episodios <small>(opcional)</small>.</span>
             </label>
             <input type="hidden" name="source" value="podcast_website">
-            <div class="honeypot" aria-hidden="true"><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="honeypot" aria-hidden="true" hidden><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
             <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
             <p class="guide-direct-access" id="guide-direct-access" hidden>Mientras llega el correo, ya puedes <a id="guide-direct-link" href="https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">abrir las 5 preguntas aquí <span aria-hidden="true">↗</span></a>.</p>
@@ -179,7 +179,7 @@
             </div>
             <input type="hidden" name="resource" value="podcast_help">
             <input type="hidden" name="source" value="podcast_website">
-            <div class="honeypot" aria-hidden="true"><label for="help-website">Deja este campo vacío</label><input id="help-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="honeypot" aria-hidden="true" hidden><label for="help-website">Deja este campo vacío</label><input id="help-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviar mi consulta</button>
             <p class="form-status" id="help-form-status" role="status" aria-live="polite"></p>
             <small class="form-small-note">Te responderé a este mismo correo.</small>
@@ -230,7 +230,7 @@
         <div class="footer-newsletter-intro">
           <p class="footer-newsletter-eyebrow">UNA NOTA DE VEZ EN CUANDO</p>
           <h3 id="footer-newsletter-title">Nos seguimos <em>escuchando.</em></h3>
-          <p>Nuevos episodios y alguna reflexión para acompañarte, sin llenar tu bandeja de entrada.</p>
+          <p>Un correo cuando haya un nuevo episodio. Sin mensajes de más.</p>
         </div>
         <form class="newsletter-form" id="newsletter-form" data-newsletter-form novalidate>
           <label class="newsletter-label" for="newsletter-email">Tu correo electrónico</label>
@@ -246,7 +246,7 @@
           <p id="newsletter-note" class="newsletter-note">Solo avisos de nuevos episodios. <a href="baja.html">Dejar de recibirlos</a> cuando quieras.</p>
           <input type="hidden" name="consent" value="yes">
           <input type="hidden" name="source" value="podcast_newsletter">
-          <div class="honeypot" aria-hidden="true"><label for="newsletter-website">Deja este campo vacío</label><input type="text" name="website" id="newsletter-website" tabindex="-1" autocomplete="off"></div>
+          <div class="honeypot" aria-hidden="true" hidden><label for="newsletter-website">Deja este campo vacío</label><input type="text" name="website" id="newsletter-website" tabindex="-1" autocomplete="off"></div>
         </form>
       </div>
       <div class="footer-separator" aria-hidden="true"><span></span><span>·</span><span></span></div>
