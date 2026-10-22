@@ -234,7 +234,7 @@ function App() {
           await refresh();
         }
       } catch (e) {
-        if (alive) setError((e as {code?:string})?.code === 'unauthorized' ? 'Esta cuenta no tiene permiso para entrar al estudio.' : 'No pude comprobar tu acceso. Inténtalo nuevamente.');
+        if (alive) setError((e as {code?:string})?.code === 'unauthorized' ? 'Tu correo ya está reconocido, pero falta habilitar el acceso de administradora. Avísame cuando confirmes el enlace.' : 'No pude comprobar tu acceso. Inténtalo nuevamente.');
       } finally {
         if (alive) setChecking(false);
       }
