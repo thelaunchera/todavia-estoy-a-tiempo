@@ -336,6 +336,7 @@
         return;
       }
       const kind = form.dataset.podcastForm;
+      const wantsEpisodeNotes = kind === 'guide' && form.querySelector('input[name="newsletter"]')?.checked === true;
       const url = publicUrl(kind === 'guide' ? config.freeGuideEndpoint : config.helpEndpoint);
       if (!url) {
         status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
@@ -361,6 +362,30 @@
           : '¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.';
         status.classList.add('is-success');
         revealGuide();
+        // The freebie never depends on subscribing. Save permission only when
+        // the person explicitly checked the optional box.
+        if (wantsEpisodeNotes) {
+          const subscribeUrl = publicUrl(config.newsletterEndpoint);
+          try {
+            if (!subscribeUrl) throw new Error('Servicio no disponible');
+            const consentBody = new URLSearchParams({
+              email: field.input.value.trim().toLowerCase(),
+              resource: 'podcast_newsletter',
+              newsletter: 'yes',
+              source: 'freebie',
+              website: ''
+            });
+            const consentRes = await fetch(subscribeUrl, {
+              method: 'POST', mode: 'cors',
+              headers: { Accept: 'application/json' },
+              body: consentBody
+            });
+            if (!consentRes.ok || (await consentRes.json())?.ok !== true) throw new Error('No guardado');
+            status.textContent += ' También te avisaré cuando salga un nuevo episodio.';
+          } catch {
+            status.textContent += ' No pude activar los avisos; puedes intentarlo desde el formulario al final de la página.';
+          }
+        }
         form.reset();
         field.clear();
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
@@ -382,6 +407,71 @@
     form.querySelectorAll('input[required]:not([type="email"]),textarea[required],select[required]').forEach(input => {
       input.addEventListener('input', () => input.classList.remove('has-form-error'));
       input.addEventListener('change', () => input.classList.remove('has-form-error'));
+    });
+  }
+
+  // The newsletter field itself becomes its confirmation after real success.
+  // No automatic subscription from a freebie, purchase or help request.
+  const newsletterForm = document.querySelector('[data-newsletter-form]');
+  if (newsletterForm) {
+    const input = newsletterForm.querySelector('input[type="email"]');
+    const button = newsletterForm.querySelector('button[type="submit"]');
+    const pill = newsletterForm.querySelector('[data-newsletter-pill]');
+    const confirmation = newsletterForm.querySelector('.newsletter-pill-confirmation');
+    const error = newsletterForm.querySelector('.newsletter-error');
+    newsletterForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!input || !button || !pill || pill.classList.contains('done')) return;
+      pill.classList.add('is-pressing');
+      window.setTimeout(() => pill.classList.remove('is-pressing'), 90);
+      const email = input.value.trim().toLowerCase();
+      error.textContent = '';
+      input.setAttribute('aria-invalid', 'false');
+      if (!validEmail(email)) {
+        input.setAttribute('aria-invalid', 'true');
+        error.textContent = 'Revisa tu correo para que pueda enviarte los episodios.';
+        input.focus();
+        return;
+      }
+      const endpoint = publicUrl(config.newsletterEndpoint);
+      if (!endpoint) {
+        error.textContent = 'Ahora mismo no puedo guardar tu correo. Prueba de nuevo más tarde.';
+        return;
+      }
+      input.disabled = true;
+      button.disabled = true;
+      pill.classList.add('is-sending');
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { Accept: 'application/json' },
+          body: new URLSearchParams({
+            email, resource: 'podcast_newsletter', newsletter: 'yes',
+            source: 'footer', website: ''
+          })
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const result = await response.json();
+        if (result?.ok !== true) throw new Error('No se pudo guardar el consentimiento');
+        pill.classList.remove('is-sending');
+        pill.classList.add('done');
+        confirmation?.setAttribute('aria-hidden', 'false');
+        error.textContent = '';
+        input.disabled = true;
+        button.disabled = true;
+      } catch {
+        pill.classList.remove('is-sending');
+        input.disabled = false;
+        button.disabled = false;
+        input.setAttribute('aria-invalid', 'true');
+        error.textContent = 'No pude guardar tu suscripción. Inténtalo nuevamente.';
+      }
+    });
+    input?.addEventListener('input', () => {
+      input.setAttribute('aria-invalid', 'false');
+      const error = newsletterForm.querySelector('.newsletter-error');
+      if (error) error.textContent = '';
     });
   }
 
