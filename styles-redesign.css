@@ -1563,6 +1563,7 @@ html{scroll-padding-top:96px}
   flex-direction:column;
   align-items:flex-end;
   gap:7px;
+  padding-right:24px;
 }
 .footer-curtain .footer-powered-by{
   display:inline-block;
@@ -1581,5 +1582,5 @@ html{scroll-padding-top:96px}
   text-decoration:underline;
 }
 @media(max-width:850px){
-  .footer-curtain .footer-credits{align-items:flex-start}
+  .footer-curtain .footer-credits{align-items:flex-start;padding-right:0}
 }
