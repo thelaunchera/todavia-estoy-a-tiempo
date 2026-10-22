@@ -21,6 +21,7 @@
     sessionStorage.setItem('podcast_audio_session_v1', sessionId);
   } catch { sessionId = crypto.randomUUID(); }
   let playbackId = '';
+  let playedBeforeThisStart = 0;
   const milestones = new Set();
 
   const playedSeconds = () => {
@@ -32,7 +33,7 @@
   function emit(name) {
     if (!analyticsOk || !playbackId || milestones.has(name)) return;
     milestones.add(name);
-    const seconds = Math.floor(Math.min(7200, Math.max(0, playedSeconds())));
+    const seconds = Math.floor(Math.min(7200, Math.max(0, playedSeconds() - playedBeforeThisStart)));
     fetch(endpoint, {
       method: 'POST', mode: 'cors', keepalive: true,
       headers: {
@@ -52,20 +53,21 @@
   audio.addEventListener('play', () => {
     if (!playbackId) {
       playbackId = crypto.randomUUID();
+      playedBeforeThisStart = playedSeconds();
       milestones.clear();
     }
     emit('play');
   });
   audio.addEventListener('timeupdate', () => {
     if (!playbackId || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
-    const percent = playedSeconds() / audio.duration;
+    const percent = Math.max(0, playedSeconds() - playedBeforeThisStart) / audio.duration;
     if (percent >= .25) emit('quarter');
     if (percent >= .50) emit('half');
     if (percent >= .75) emit('three_quarters');
     if (percent >= .95) emit('completed');
   });
   audio.addEventListener('ended', () => {
-    if (Number.isFinite(audio.duration) && audio.duration > 0 && playedSeconds() / audio.duration >= .95) emit('completed');
+    if (Number.isFinite(audio.duration) && audio.duration > 0 && (playedSeconds() - playedBeforeThisStart) / audio.duration >= .95) emit('completed');
     playbackId = '';
   });
 })();
