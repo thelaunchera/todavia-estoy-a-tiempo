@@ -86,6 +86,7 @@
     if (!expandedPill || !imageOverlay) return;
     const last = expandedPill;
     expandedPill = null;
+    hero.style.zIndex = '';
     imageOverlay.classList.remove('is-active');
     imageOverlay.style.clipPath = '';
     imageOverlay.setAttribute('aria-hidden', 'true');
@@ -118,6 +119,7 @@
     const smallImage = pill.querySelector('img');
     if (!smallImage) return;
     expandedPill = pill;
+    hero.style.zIndex = '120'; // Image and dismiss button stay above the header during expansion.
     openingClip = pillClip(pill);
     overlayImage.src = smallImage.currentSrc || smallImage.src;
     overlayImage.alt = pill.dataset.expandedAlt || 'Imagen ampliada del podcast';
