@@ -1065,3 +1065,19 @@ html{scroll-padding-top:96px}
 @media(prefers-reduced-motion:reduce){
   .podcast-closing-photo,.podcast-hero-v2 .podcast-host-portrait{transition:none!important}
 }
+
+
+/* Approved Podcast Logo 4 — one coherent lockup across all site footers */
+.footer .footer-official-logo{
+  display:block;width:clamp(170px,20vw,245px);height:auto;max-width:100%;
+  object-fit:contain;object-position:left center;
+  filter:brightness(0) invert(1);opacity:.95;
+}
+.footer .footer-product-logo{width:clamp(205px,24vw,300px)}
+.footer-curtain .footer-brand .footer-official-logo{width:210px;max-width:100%}
+.footer-curtain .footer-brand small{letter-spacing:.02em}
+@media(max-width:600px){
+  .footer .footer-official-logo{width:190px}
+  .footer .footer-product-logo{width:208px}
+  .footer-curtain .footer-brand .footer-official-logo{width:184px}
+}
