@@ -45,6 +45,38 @@
     }
     button.addEventListener('click', () => url ? window.location.assign(url) : info('Estamos preparando las cinco preguntas. La descarga gratuita aparecerá aquí cuando esté lista.'));
   });
+  const freeForm = document.querySelector('#free-guide-form');
+  if (freeForm) {
+    const endpoint = publicUrl(config.freeGuideFormEndpoint);
+    const submit = freeForm.querySelector('button[type="submit"]');
+    const note = document.querySelector('#guide-state');
+    const enabled = config.freeFormEnabled === true && Boolean(endpoint);
+    if (enabled) {
+      freeForm.action = endpoint;
+      if (submit) submit.disabled = false;
+      if (note) note.textContent = 'Te la enviaremos al correo que nos compartas. No hay ningún pago.';
+    }
+    freeForm.addEventListener('submit', event => {
+      if (!enabled) {
+        event.preventDefault();
+        info('El envío de la guía todavía no está habilitado.');
+        return;
+      }
+      if (freeForm.querySelector('input[name="website"]')?.value) {
+        event.preventDefault();
+        return;
+      }
+      freeForm.removeAttribute('novalidate');
+      if (!freeForm.reportValidity()) {
+        event.preventDefault();
+        return;
+      }
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = 'Enviando tu solicitud…';
+      }
+    });
+  };
   document.querySelectorAll('[data-podcast]').forEach(button => {
     const url = publicUrl(config.podcastUrl);
     if (url) document.querySelector('#podcast-state')?.remove();
