@@ -1,8 +1,12 @@
-// Public configuration only. Never add API keys, Stripe secrets or Make tokens.
-// Keep commerce disabled until payment confirmation and delivery pass end-to-end QA.
+// Public configuration only. Never add API keys or Stripe secrets here.
+// Paid sales remain disabled until checkout-to-delivery QA is complete.
 window.PODCAST_CONFIG = {
   commerceEnabled: false,
-  stripePaymentLinks: { noVoyTarde: '', empezarDeNuevo: '' },
+  stripePaymentLinks: {
+    noVoyTarde: 'https://buy.stripe.com/dRm3cu32Le5Pc4x5Z293y0V',
+    empezarDeNuevo: 'https://buy.stripe.com/28E3cu7j16Dn7Oh87a93y0W'
+  },
+  freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
   freeGuideUrl: '',
   podcastUrl: '',
   productPhotos: [

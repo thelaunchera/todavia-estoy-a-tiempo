@@ -37,13 +37,36 @@
   document.addEventListener('click', event => {
     if (nav?.classList.contains('open') && !nav.contains(event.target) && !menu?.contains(event.target)) closeMenu();
   });
-  document.querySelectorAll('[data-guide]').forEach(button => {
-    const url = publicUrl(config.freeGuideUrl);
-    if (url) {
-      const note = document.querySelector('#guide-state');
-      if (note) note.textContent = 'Recurso gratuito en PDF. Sin compra.';
+  const guideForm = document.querySelector('#guide-form');
+  guideForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!guideForm.reportValidity()) return;
+    const note = document.querySelector('#guide-state');
+    const button = guideForm.querySelector('button[type="submit"]');
+    const endpoint = publicUrl(config.freeGuideEndpoint);
+    if (!endpoint) { note.textContent = 'La entrega estará disponible pronto.'; return; }
+    button.disabled = true;
+    note.textContent = 'Estamos enviando tu guía…';
+    const fields = new FormData(guideForm);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const payload = new URLSearchParams({
+        email: String(fields.get('email') || '').trim(),
+        name: '', resource: 'cinco_preguntas', newsletter: 'no',
+        website: String(fields.get('website') || ''), source: 'podcast_website'
+      });
+      const response = await fetch(endpoint, { method: 'POST', body: payload, signal: controller.signal });
+      const result = await response.json();
+      if (!response.ok || result.ok !== true) throw new Error('Delivery not confirmed');
+      note.textContent = 'Listo. Revisa tu correo y la carpeta de spam. Si ya la pediste hoy, usa el mismo mensaje.';
+      guideForm.reset();
+    } catch {
+      note.textContent = 'No pudimos confirmar el envío. Inténtalo de nuevo o escribe a hello@thelaunchera.com.';
+    } finally {
+      clearTimeout(timer);
+      button.disabled = false;
     }
-    button.addEventListener('click', () => url ? window.location.assign(url) : info('Estamos preparando las cinco preguntas. La descarga gratuita aparecerá aquí cuando esté lista.'));
   });
   document.querySelectorAll('[data-podcast]').forEach(button => {
     const url = publicUrl(config.podcastUrl);

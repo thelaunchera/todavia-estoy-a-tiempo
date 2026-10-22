@@ -101,8 +101,14 @@
           <p class="free-product-name">5 preguntas para cuando sientes que vas tarde</p>
           <p>Yo también conozco ese ruido entre lo que imaginabas para ti y lo que otras personas esperan. Hice esta guía para sentarnos un momento con cinco preguntas, sin prisa y sin respuestas perfectas.</p>
           <div class="resource-meta"><span>PDF DIGITAL</span><span>EN ESPAÑOL</span><strong>GRATIS</strong></div>
-          <button type="button" class="button button-navy" data-guide aria-describedby="guide-state">Quiero las 5 preguntas <span aria-hidden="true">↗</span></button>
-          <small id="guide-state">La guía está en preparación. La descarga se habilitará aquí cuando esté lista.</small>
+          <form id="guide-form" aria-describedby="guide-state" style="display:grid;gap:12px;max-width:480px">
+            <label for="guide-email">Tu correo electrónico</label>
+            <input id="guide-email" name="email" type="email" autocomplete="email" required maxlength="254" style="width:100%;box-sizing:border-box;padding:15px;font:inherit;font-size:18px;border:1px solid #42536a;border-radius:8px">
+            <div aria-hidden="true" style="position:absolute;left:-10000px"><label>Sitio web <input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+            <button type="submit" class="button button-navy">Enviarme las 5 preguntas <span aria-hidden="true">↗</span></button>
+            <small>Usaremos tu correo para enviarte la guía. No te suscribes a publicidad. <a href="privacidad.html">Privacidad</a>.</small>
+            <small id="guide-state" role="status" aria-live="polite">Gratis. PDF rellenable para tu teléfono.</small>
+          </form>
         </div>
       </div>
     </section>
@@ -120,7 +126,7 @@
         <details><summary>¿Son libros físicos o digitales?</summary><p>Son recursos digitales en formato PDF. No enviamos un libro físico. Los archivos finales están en preparación y los cuadernos de pago estarán disponibles próximamente.</p></details>
         <details><summary>¿Necesito escuchar el podcast para usarlos?</summary><p>No. Nacen de las conversaciones del podcast, pero puedes leerlos y hacer sus ejercicios por separado, a tu propio ritmo.</p></details>
         <details><summary>¿Puedo leerlos desde el teléfono?</summary><p>Sí, son archivos PDF para leer desde el teléfono, la tablet o la computadora. También podrás imprimir las páginas si prefieres escribir a mano.</p></details>
-        <details><summary>¿Las cinco preguntas son gratis?</summary><p>Sí. La guía «5 preguntas para cuando sientes que vas tarde» será gratuita. Encontrarás la descarga en esta página cuando esté lista.</p></details>
+        <details><summary>¿Las cinco preguntas son gratis?</summary><p>Sí. La guía «5 preguntas para cuando sientes que vas tarde» es gratuita. Puedes solicitarla por correo en esta página.</p></details>
         <details><summary>¿Cuándo podré conseguir los cuadernos?</summary><p>Estamos terminando la colección. Los precios previstos son $4.99 USD para «No voy tarde» y $7.99 USD para «Empezar de nuevo». La compra se abrirá cuando los archivos y su entrega estén listos.</p></details>
       </div></div>
     </section>
