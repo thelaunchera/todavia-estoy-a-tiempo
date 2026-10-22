@@ -120,7 +120,7 @@
     expandedPill = pill;
     openingClip = pillClip(pill);
     overlayImage.src = smallImage.currentSrc || smallImage.src;
-    overlayImage.alt = pill.getAttribute('aria-label') || 'Imagen ampliada del podcast';
+    overlayImage.alt = pill.dataset.expandedAlt || 'Imagen ampliada del podcast';
     if (overlayQuote) overlayQuote.textContent =
       pill.classList.contains('hero-pill-second')
         ? 'Volver a ti también es una forma de empezar.'
