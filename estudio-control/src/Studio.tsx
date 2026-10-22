@@ -590,6 +590,7 @@ function App() {
             </button>
           </form>
           {mailSent && <div className="login-warning" role="status">Revisa tu correo. Te envié un enlace para entrar al Estudio.</div>}
+          {SUPABASE_ENABLED && <p className="login-device-hint">¿Quieres entrar en tu computadora? Abre el correo y pulsa «Sign in» <strong>en esa misma computadora</strong>. Para entrar en el iPhone, abre el enlace en Safari del iPhone. Cada dispositivo inicia su propia sesión.</p>}
           <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
         <aside className="login-art">

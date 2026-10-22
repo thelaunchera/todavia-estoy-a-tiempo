@@ -1882,3 +1882,7 @@ a:focus-visible {
 }
 .access-recheck:focus-visible {outline:3px solid #7398b1;outline-offset:3px}
 .access-recheck:disabled {opacity:.66}
+
+/* Instrucción para completar un magic link en el dispositivo deseado */
+.login-device-hint{font-size:12px!important;line-height:1.6!important;color:#637c8f!important;margin:14px 0 10px!important;max-width:440px!important}
+.login-device-hint strong{color:#254961;font-weight:700}
