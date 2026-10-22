@@ -1,7 +1,8 @@
 // Public configuration only. Never add API keys, Stripe secrets or Make tokens.
-// Keep commerce disabled until payment confirmation and delivery pass end-to-end QA.
+// Stripe Payment Links and Make's paid-only PDF delivery workflow are configured.
+// The first real purchase should be monitored to confirm inbox delivery.
 window.PODCAST_CONFIG = {
-  commerceEnabled: false,
+  commerceEnabled: true,
   stripePaymentLinks: {
     noVoyTarde: 'https://buy.stripe.com/dRm3cu32Le5Pc4x5Z293y0V',
     empezarDeNuevo: 'https://buy.stripe.com/28E3cu7j16Dn7Oh87a93y0W'
