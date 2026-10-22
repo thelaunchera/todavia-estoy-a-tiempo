@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, type FormEvent } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords } from './supabase-client';
 import {
   LayoutDashboard,
@@ -376,7 +376,7 @@ function App() {
       setSigning(false);
     }
   }
-  async function verifyEmailCode(event: React.FormEvent<HTMLFormElement>) {
+  async function verifyEmailCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCheckingCode(true);
     setError('');
@@ -393,7 +393,7 @@ function App() {
       setCheckingCode(false);
     }
   }
-  function redeemAccessLink(event: React.FormEvent<HTMLFormElement>) {
+  function redeemAccessLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     try {
