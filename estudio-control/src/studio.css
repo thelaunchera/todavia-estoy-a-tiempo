@@ -2093,3 +2093,21 @@ a:focus-visible {
 .research-dossier { max-width:100%; }
 .idea:has(.research-dossier) { grid-column:1/-1; }
 .episode-production,.episode-promotion { margin-top:10px; }
+
+/* Mobile episode reading uses the entire card, below its compact controls. */
+@media (max-width:650px) {
+  .main:has(.episode-library) { padding-inline:12px; }
+  .episode-library { padding:4px 8px; }
+  .episode-editorial { display:grid; grid-template-columns:39px minmax(0,1fr); column-gap:10px; row-gap:10px; padding:18px 0; }
+  .episode-editorial > .epi-no { grid-column:1; grid-row:1; width:39px; height:39px; min-width:0; }
+  .episode-editorial > .epi-info { display:contents; }
+  .episode-editorial > .epi-info > * { grid-column:1 / -1; min-width:0; }
+  .episode-editorial > .epi-info > .epi-line { grid-column:2; grid-row:1; min-height:39px; padding-right:70px; align-content:center; }
+  .episode-editorial > .edit-buttons { grid-column:2; grid-row:1; justify-self:end; align-self:start; margin:0; }
+  .episode-editorial .epi-line b { font-size:15px; }
+  .episode-editorial .episode-script { width:100%; margin:4px 0 10px; }
+  .episode-editorial .episode-script-body { padding:16px 12px; }
+  .episode-editorial .episode-script-text { max-height:none; overflow:visible; padding-right:0; font-size:16px; line-height:1.75; }
+  .episode-editorial .episode-progress { margin:4px 0; }
+  .episode-editorial .episode-actions { margin-top:0; }
+}
