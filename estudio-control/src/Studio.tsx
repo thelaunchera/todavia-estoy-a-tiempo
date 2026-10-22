@@ -178,11 +178,13 @@ function StatePill({ status }: { status?: string }) {
 }
 function App() {
   const [passphrase, setPassphrase] = useState('');
-  const [mailSent, setMailSent] = useState(false);
-  const [accessEmail, setAccessEmail] = useState('');
-  const [oneTimeCode, setOneTimeCode] = useState('');
-  const [emailLink, setEmailLink] = useState('');
-  const [checkingCode, setCheckingCode] = useState(false);
+  const [loginPassword, setLoginPassword] = useState('');
+  const [authView, setAuthView] = useState<'login'|'request'|'set'>(auth.isRecovering() ? 'set' : 'login');
+  const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
+  const [resetMessage, setResetMessage] = useState('');
+  const [resetting, setResetting] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(false);
   const [accessPending, setAccessPending] = useState(false);
   const [importSecret,setImportSecret] = useState('');
@@ -285,7 +287,7 @@ function App() {
     let active = true;
     let pending = false;
     const revalidate = async () => {
-      if (!active || pending || document.visibilityState === 'hidden') return;
+      if (!active || pending || auth.isRecovering() || document.visibilityState === 'hidden') return;
       pending = true;
       try {
         const user = await auth.getUser();
@@ -303,10 +305,11 @@ function App() {
       }
     };
     const release = auth.onSessionEvent(event => {
-      if (event === 'SIGNED_OUT') {
-        setAccount(null);
-        setData(null);
-      } else {
+      if (event === 'PASSWORD_RECOVERY') {
+        setAuthView('set'); setAccount(null); setError(''); setChecking(false);
+      } else if (event === 'SIGNED_OUT') {
+        setAccount(null); setData(null);
+      } else if (event === 'TOKEN_REFRESHED') {
         window.setTimeout(() => { void revalidate(); }, 0);
       }
     });
@@ -351,56 +354,46 @@ function App() {
         setError('Las frases no coinciden. Escríbelas igual para crear tu estudio.');
         return;
       }
-      const r = await auth.signIn(passphrase);
-      if ('sent' in r && r.sent) { setAccessEmail(passphrase.trim().toLowerCase()); setMailSent(true); setPassphrase(''); return; }
+      const r = await auth.signIn(passphrase, SUPABASE_ENABLED ? loginPassword : undefined);
       setAccount(r.user);
       setPassphrase('');
+      setLoginPassword('');
       setConfirmPhrase('');
       setVaultPresent(true);
       await refresh();
     } catch (e) {
-      const code = (e as { code?: string })?.code;
+      const code = (e as {code?:string})?.code;
       setError(
-        code === 'bad_passphrase' ? 'La frase no coincide. Inténtalo de nuevo.' :
-        code === 'short_password' ? 'Usa al menos 10 caracteres para proteger tu estudio.' :
-        code === 'email_rate_limited'
-          ? 'Supabase ha alcanzado su límite temporal de envíos (error 429). Tu correo está bien escrito. Revisa si ya tienes un enlace reciente y evita pedir varios seguidos; vuelve a probar cuando Supabase restablezca el envío.' :
-        code === 'email_not_authorized'
-          ? 'El servicio de correo de Supabase no autoriza esta dirección. Hay que habilitarla o configurar SMTP propio en Supabase.' :
-        code === 'redirect_not_allowed'
-          ? 'Falta autorizar la dirección del estudio en Authentication → URL Configuration de Supabase.' :
-        SUPABASE_ENABLED ? 'Supabase no ha podido enviar el correo. Revisa Authentication → Logs para ver el motivo.' :
-        'No se pudo abrir la bóveda. Comprueba el almacenamiento de tu navegador.'
+        !SUPABASE_ENABLED && code==='bad_passphrase' ? 'La frase no coincide. Inténtalo de nuevo.' :
+        !SUPABASE_ENABLED && code==='short_password' ? 'Usa al menos 10 caracteres para proteger el estudio.' :
+        e instanceof Error ? e.message : 'No pudimos iniciar sesión.'
       );
     } finally {
       setSigning(false);
     }
   }
-  async function verifyEmailCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setCheckingCode(true);
-    setError('');
+  async function requestPasswordReset() {
+    setResetting(true); setError(''); setResetMessage('');
     try {
-      const user = await auth.verifyEmailCode(accessEmail, oneTimeCode.trim());
-      setOneTimeCode('');
-      setMailSent(false);
-      setAccount(user);
-      setDenied(false);
-      await refresh();
-    } catch(e) {
-      setError(e instanceof Error ? e.message : 'No se pudo comprobar el código.');
-    } finally {
-      setCheckingCode(false);
-    }
+      await auth.requestPasswordReset(resetEmail);
+      setResetMessage('Si este correo es el de tu cuenta, recibirás un enlace para crear o cambiar tu contraseña. Es el único correo que necesitas para configurarla.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No pudimos solicitar la recuperación.');
+    } finally { setResetting(false); }
   }
-  function redeemAccessLink(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError('');
+  async function saveNewPassword() {
+    setResetting(true); setError(''); setResetMessage('');
     try {
-      auth.openEmailLink(emailLink);
+      if(newPassword !== repeatPassword)throw new Error('Las contraseñas no coinciden.');
+      await auth.setPassword(newPassword);
+      setNewPassword(''); setRepeatPassword('');
+      setAuthView('login');
+      setPassphrase('');
+      setLoginPassword('');
+      setResetMessage('Contraseña creada. Ya puedes entrar con tu correo y contraseña; después recordaré tu acceso cinco días.');
     } catch(e) {
-      setError(e instanceof Error ? e.message : 'El enlace no se pudo abrir.');
-    }
+      setError(e instanceof Error ? e.message : 'No se pudo guardar la nueva contraseña.');
+    } finally { setResetting(false); }
   }
   async function logout() {
     await auth.signOut();
@@ -623,7 +616,7 @@ function App() {
         <p>Abriendo el estudio…</p>
       </div>
     );
-  if (!account || denied)
+  if (!account || denied || (SUPABASE_ENABLED && authView === 'set'))
     return (
       <div className="login">
         <section className="login-content">
@@ -649,40 +642,50 @@ function App() {
               {checkingAccess ? 'Comprobando permiso…' : 'Comprobar mi acceso sin otro correo'}
             </button>
           )}
-          <form className="vault-form" onSubmit={event => { event.preventDefault(); void login(); }}>
-            <label htmlFor="studio-passphrase">{SUPABASE_ENABLED ? 'Tu correo de administración' : vaultPresent ? 'Tu frase de acceso' : 'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
-            <input id="studio-passphrase" type={SUPABASE_ENABLED ? 'email' : 'password'} required minLength={SUPABASE_ENABLED ? undefined : 10} autoComplete={SUPABASE_ENABLED ? 'email' : vaultPresent ? 'current-password' : 'new-password'} value={passphrase} onChange={event => setPassphrase(event.target.value)} placeholder={SUPABASE_ENABLED ? 'tu@correo.com' : 'Tu frase secreta'} />
-            {!SUPABASE_ENABLED && !vaultPresent && <>
-              <label htmlFor="studio-passphrase-confirm">Repite la frase</label>
-              <input id="studio-passphrase-confirm" type="password" required minLength={10} autoComplete="new-password" value={confirmPhrase} onChange={event => setConfirmPhrase(event.target.value)} placeholder="Confirma tu frase" />
-            </>}
-            <button type="submit" disabled={signing} className="login-cta">
-              {signing ? 'Comprobando…' : SUPABASE_ENABLED ? 'Enviarme enlace de acceso' : vaultPresent ? 'Abrir mi estudio' : 'Crear mi estudio'}
-              <ArrowUpRight size={19} />
-            </button>
-          </form>
-          {mailSent && <div className="login-success" role="status">Correo solicitado. Abre el enlace en <strong>Safari del mismo iPhone</strong>, no dentro de Gmail ni ChatGPT. No necesitas pedir otro correo si ya tienes uno reciente.</div>}
-          {SUPABASE_ENABLED && <section className="mobile-access-help" aria-label="Ayuda para entrar en iPhone">
-            <strong>¿No te deja entrar desde el iPhone?</strong>
-            <p>Abre <b>podcast.thelaunchera.com/estudio/</b> directamente en Safari. En Gmail, mantén pulsado el enlace «Sign in», elige <b>Copiar enlace</b> y pégalo en la barra de Safari. Así el acceso queda en el mismo navegador. No uses la ventana interna de ChatGPT.</p>
-            <details className="email-link-rescue">
-              <summary>Entrar sin salir de esta pestaña</summary>
-              <p>Si tu correo abre el enlace en otra aplicación, copia el enlace <b>original, sin abrirlo primero</b> y pégalo aquí. Solo aceptamos enlaces de Supabase del podcast.</p>
-              <form onSubmit={redeemAccessLink}>
-                <label htmlFor="paste-studio-email-link">Enlace completo del correo</label>
-                <input id="paste-studio-email-link" type="url" value={emailLink} onChange={e => setEmailLink(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="https://…supabase.co/auth/v1/verify?…" required/>
-                <button type="submit">Abrir mi estudio con este enlace</button>
+          {SUPABASE_ENABLED ? (
+            authView === 'set' ? (
+              <form className="vault-form" onSubmit={event=>{ event.preventDefault(); void saveNewPassword(); }}>
+                <h2 className="login-mode-title">Crea tu contraseña</h2>
+                <p>Es la única vez que necesitas el enlace del correo. Después entrarás normalmente y tu sesión permanecerá abierta durante cinco días.</p>
+                <label htmlFor="studio-new-password">Nueva contraseña</label>
+                <input id="studio-new-password" type="password" autoComplete="new-password" minLength={10} required value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Mínimo 10 caracteres"/>
+                <label htmlFor="studio-new-repeat">Repite la contraseña</label>
+                <input id="studio-new-repeat" type="password" autoComplete="new-password" minLength={10} required value={repeatPassword} onChange={e=>setRepeatPassword(e.target.value)} placeholder="Repite tu contraseña"/>
+                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Guardando…':'Guardar mi contraseña'} <ArrowUpRight size={19}/></button>
               </form>
-              {mailSent && <form onSubmit={verifyEmailCode}>
-                <p>Solo si el correo recibido contiene un <b>código de seis dígitos</b>, puedes escribirlo aquí.</p>
-                <label htmlFor="studio-email-code">Código recibido</label>
-                <input id="studio-email-code" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" value={oneTimeCode} onChange={e => setOneTimeCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" required />
-                <button type="submit" disabled={checkingCode || oneTimeCode.length !== 6}>{checkingCode ? 'Verificando…' : 'Verificar código'}</button>
-              </form>}
-            </details>
-          </section>}
-          <p className="login-install-tip">📱 Para usarlo como app en iPhone, primero entra desde Safari. Después toca Compartir → Añadir a pantalla de inicio.</p>
-          <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
+            ) : authView === 'request' ? (
+              <form className="vault-form" onSubmit={event=>{ event.preventDefault(); void requestPasswordReset(); }}>
+                <h2 className="login-mode-title">Crear o recuperar contraseña</h2>
+                <p>Para configurar tu contraseña por primera vez, te enviaremos un único enlace seguro. Luego iniciarás sesión normalmente.</p>
+                <label htmlFor="studio-reset-email">Correo de administración</label>
+                <input id="studio-reset-email" type="email" autoComplete="email" required value={resetEmail} onChange={e=>setResetEmail(e.target.value)} placeholder="tu@correo.com"/>
+                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Solicitando…':'Enviarme enlace para crear contraseña'} <ArrowUpRight size={19}/></button>
+                <button type="button" className="login-text-action" onClick={()=>{setAuthView('login');setError('');}}>Volver a entrar</button>
+              </form>
+            ) : (
+              <form className="vault-form" onSubmit={event=>{ event.preventDefault(); void login(); }}>
+                <label htmlFor="studio-passphrase">Tu correo</label>
+                <input id="studio-passphrase" type="email" autoComplete="username" required value={passphrase} onChange={e=>setPassphrase(e.target.value)} placeholder="tu@correo.com"/>
+                <label htmlFor="studio-account-password">Tu contraseña</label>
+                <input id="studio-account-password" type="password" autoComplete="current-password" required value={loginPassword} onChange={e=>setLoginPassword(e.target.value)} placeholder="Tu contraseña"/>
+                <button type="submit" disabled={signing} className="login-cta">{signing?'Entrando…':'Abrir mi estudio'} <ArrowUpRight size={19}/></button>
+                <button type="button" className="login-text-action" onClick={()=>{setResetEmail(passphrase);setAuthView('request');setError('');setResetMessage('');}}>Crear contraseña por primera vez / ¿La olvidaste?</button>
+              </form>
+            )
+          ) : (
+            <form className="vault-form" onSubmit={event=>{event.preventDefault();void login();}}>
+              <label htmlFor="studio-passphrase">{vaultPresent?'Tu frase de acceso':'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
+              <input id="studio-passphrase" type="password" required minLength={10} autoComplete={vaultPresent?'current-password':'new-password'} value={passphrase} onChange={event=>setPassphrase(event.target.value)} placeholder="Tu frase secreta"/>
+              {!vaultPresent && <>
+                <label htmlFor="studio-passphrase-confirm">Repite la frase</label>
+                <input id="studio-passphrase-confirm" type="password" required minLength={10} autoComplete="new-password" value={confirmPhrase} onChange={event=>setConfirmPhrase(event.target.value)} placeholder="Confirma tu frase"/>
+              </>}
+              <button type="submit" disabled={signing} className="login-cta">{signing?'Comprobando…':vaultPresent?'Abrir mi estudio':'Crear mi estudio'} <ArrowUpRight size={19}/></button>
+            </form>
+          )}
+          {resetMessage && <p className="login-success" role="status">{resetMessage}</p>}
+          <p className="login-install-tip">📱 En iPhone, abre el Centro de Comando en Safari. Si quieres, añádelo a la pantalla de inicio como una app.</p>
+          <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Tu acceso se recordará cinco días en este dispositivo. Tu contraseña no se guarda en la página.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
         <aside className="login-art">
           <div className="login-circle" />
