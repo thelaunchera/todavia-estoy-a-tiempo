@@ -1321,7 +1321,7 @@ function App() {
                     setImporting(true);setImportMessage('');
                     try{
                       const result=await importLocalRecords(importSecret);
-                      setImportMessage('Importación terminada: '+result.imported+' nuevos registros y '+result.existing+' que ya estaban guardados.');
+                      setImportMessage('Importación verificada: '+result.imported+' nuevos registros y '+result.existing+' que ya estaban guardados.');
                       await refresh();
                     }catch(e){
                       setImportMessage(e instanceof Error?e.message:'No pude importar tus datos. Puedes volver a intentarlo.');
