@@ -179,6 +179,8 @@ function StatePill({ status }: { status?: string }) {
 function App() {
   const [passphrase, setPassphrase] = useState('');
   const [mailSent, setMailSent] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(false);
+  const [accessPending, setAccessPending] = useState(false);
   const [importSecret,setImportSecret] = useState('');
   const [importing,setImporting] = useState(false);
   const [importMessage,setImportMessage] = useState('');
@@ -234,7 +236,13 @@ function App() {
           await refresh();
         }
       } catch (e) {
-        if (alive) setError((e as {code?:string})?.code === 'unauthorized' ? 'Tu correo ya está reconocido, pero falta habilitar el acceso de administradora. Avísame cuando confirmes el enlace.' : 'No pude comprobar tu acceso. Inténtalo nuevamente.');
+        if (alive) {
+          const pending = (e as {code?:string})?.code === 'unauthorized';
+          setAccessPending(pending);
+          setError(pending
+            ? 'Tu sesión está abierta, pero todavía no tiene autorización de administradora. Puedes comprobar el permiso sin solicitar otro correo.'
+            : 'No pude comprobar la sesión. Si abriste el enlace desde Gmail, inténtalo en el mismo navegador donde lo solicitaste.');
+        }
       } finally {
         if (alive) setChecking(false);
       }
@@ -266,6 +274,29 @@ function App() {
       window.removeEventListener('pageshow', checkLocalSession);
     };
   }, []);
+  async function recheckAccess() {
+    setCheckingAccess(true);
+    setError('');
+    try {
+      const existing = await auth.getUser();
+      if(!existing){
+        setAccessPending(false);
+        setError('No hay una sesión abierta en este navegador. Cuando se restablezca el límite de correos, solicita un nuevo enlace.');
+        return;
+      }
+      setAccount(existing);
+      setAccessPending(false);
+      setDenied(false);
+      await refresh();
+    } catch(e) {
+      setAccessPending((e as {code?:string})?.code === 'unauthorized');
+      setError((e as {code?:string})?.code === 'unauthorized'
+        ? 'La sesión sigue activa, pero aún falta autorización en Supabase. No es necesario pedir otro enlace.'
+        : 'No se pudo comprobar la sesión. Revisa que estés usando el navegador correcto.');
+    } finally {
+      setCheckingAccess(false);
+    }
+  }
   async function login() {
     setSigning(true);
     setError('');
@@ -286,7 +317,13 @@ function App() {
       setError(
         code === 'bad_passphrase' ? 'La frase no coincide. Inténtalo de nuevo.' :
         code === 'short_password' ? 'Usa al menos 10 caracteres para proteger tu estudio.' :
-        SUPABASE_ENABLED ? 'No se pudo enviar el enlace. Comprueba tu correo e inténtalo nuevamente.' :
+        code === 'email_rate_limited'
+          ? 'Supabase ha alcanzado su límite temporal de envíos (error 429). Tu correo está bien escrito. Revisa si ya tienes un enlace reciente y evita pedir varios seguidos; vuelve a probar cuando Supabase restablezca el envío.' :
+        code === 'email_not_authorized'
+          ? 'El servicio de correo de Supabase no autoriza esta dirección. Hay que habilitarla o configurar SMTP propio en Supabase.' :
+        code === 'redirect_not_allowed'
+          ? 'Falta autorizar la dirección del estudio en Authentication → URL Configuration de Supabase.' :
+        SUPABASE_ENABLED ? 'Supabase no ha podido enviar el correo. Revisa Authentication → Logs para ver el motivo.' :
         'No se pudo abrir la bóveda. Comprueba el almacenamiento de tu navegador.'
       );
     } finally {
@@ -530,10 +567,16 @@ function App() {
           </p>
           {denied && (
             <div className="login-warning">
-              <LockKeyhole size={17} /> No pude abrir la bóveda local. Vuelve a intentarlo.
+              <LockKeyhole size={17} /> {SUPABASE_ENABLED ? 'El acceso de Supabase aún no está verificado.' : 'No pude abrir la bóveda local. Vuelve a intentarlo.'}
             </div>
           )}
           {!!error && <div className="login-warning" role="alert">{error}</div>}
+          {SUPABASE_ENABLED && accessPending && (
+            <button type="button" className="access-recheck" onClick={() => void recheckAccess()} disabled={checkingAccess}>
+              <RotateCcw size={17} />
+              {checkingAccess ? 'Comprobando permiso…' : 'Comprobar mi acceso sin otro correo'}
+            </button>
+          )}
           <form className="vault-form" onSubmit={event => { event.preventDefault(); void login(); }}>
             <label htmlFor="studio-passphrase">{SUPABASE_ENABLED ? 'Tu correo de administración' : vaultPresent ? 'Tu frase de acceso' : 'Crea una frase de acceso (mínimo 10 caracteres)'}</label>
             <input id="studio-passphrase" type={SUPABASE_ENABLED ? 'email' : 'password'} required minLength={SUPABASE_ENABLED ? undefined : 10} autoComplete={SUPABASE_ENABLED ? 'email' : vaultPresent ? 'current-password' : 'new-password'} value={passphrase} onChange={event => setPassphrase(event.target.value)} placeholder={SUPABASE_ENABLED ? 'tu@correo.com' : 'Tu frase secreta'} />

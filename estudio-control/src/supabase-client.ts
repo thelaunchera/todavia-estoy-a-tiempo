@@ -45,7 +45,7 @@ async function owner():Promise<{id:string;email:string}> {
   if(error||!user)throw new Error('Inicia sesión para continuar.');
   const {data:admin,error:roleError}=await client.from('podcast_studio_admins')
     .select('user_id').eq('user_id',user.id).maybeSingle();
-  if(roleError || !admin){ await client.auth.signOut(); throw Object.assign(new Error('Esta cuenta no tiene acceso al estudio.'),{code:'unauthorized'}); }
+  if(roleError || !admin){ throw Object.assign(new Error('La sesión existe, pero el acceso de administradora todavía no está autorizado.'),{code:'unauthorized'}); }
   return {id:user.id,email:user.email||''};
 }
 export const auth={
@@ -64,7 +64,21 @@ export const auth={
     const {error}=await client.auth.signInWithOtp({
       email, options:{emailRedirectTo:redirect,shouldCreateUser:true}
     });
-    if(error)throw new Error('No pude enviar el enlace de acceso. Comprueba el correo configurado.');
+    if(error){
+      const detail = error as {status?:number;code?:string;message?:string};
+      const code = (detail.code || '').toLowerCase();
+      const msg = (detail.message || '').toLowerCase();
+      if(detail.status === 429 || code.includes('rate_limit') || /rate limit|too many|try again after/.test(msg)){
+        throw Object.assign(new Error('Supabase alcanzó el límite temporal de correos. No necesitas corregir tu dirección.'), {code:'email_rate_limited'});
+      }
+      if(code.includes('email_not_authorized') || /not authorized|address not authorized/.test(msg)){
+        throw Object.assign(new Error('El servidor de correo todavía no autoriza este destinatario.'), {code:'email_not_authorized'});
+      }
+      if(code.includes('redirect') || msg.includes('redirect')){
+        throw Object.assign(new Error('La URL de regreso no está permitida en Supabase Auth.'), {code:'redirect_not_allowed'});
+      }
+      throw Object.assign(new Error('Supabase no pudo enviar el enlace de acceso.'), {code:'email_delivery_error'});
+    }
     return {user:null,sent:true} as const;
   },
   async signOut(){
