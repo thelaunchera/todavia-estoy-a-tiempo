@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Un podcast con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-note2">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-footer3">
   <script defer src="site-config.js?v=20261022-spotify3"></script>
-  <script defer src="app-redesign.js?v=20261022-note2"></script>
+  <script defer src="app-redesign.js?v=20261022-footer3"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
@@ -120,6 +120,7 @@
             <div class="honeypot" aria-hidden="true"><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
             <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
+            <p class="guide-direct-access" id="guide-direct-access" hidden>Mientras llega el correo, ya puedes <a id="guide-direct-link" href="https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">abrir las 5 preguntas aquí <span aria-hidden="true">↗</span></a>.</p>
             <small id="guide-privacy">Te enviamos solo esta guía, sin suscribirte a publicidad. <a href="privacidad.html">Privacidad</a>.</small>
           </form>
         </div>
@@ -194,7 +195,28 @@
       </div></div>
     </section>
   </main>
-  <footer class="footer"><div class="shell"><div class="footer-top"><p>Una conversación.<br><em>Tu propio tiempo.</em></p><a href="#top" class="back-top" aria-label="Volver al inicio de la página">Volver arriba</a></div><div class="footer-bottom"><span>TODAVÍA ESTOY A TIEMPO · CON DAILIN</span><a href="privacidad.html">Privacidad y condiciones</a><span>HECHO CON CALMA / 2026</span></div></div></footer>
+  <footer class="footer footer-curtain" id="footer" aria-labelledby="footer-title">
+    <div class="footer-halo footer-halo-one" aria-hidden="true"></div>
+    <div class="footer-halo footer-halo-two" aria-hidden="true"></div>
+    <div class="shell footer-inner">
+      <div class="footer-prelude"><span class="footer-prelude-mark" aria-hidden="true">✳</span><span>ESTE ESPACIO TAMBIÉN ES TUYO</span><span class="footer-prelude-rule" aria-hidden="true"></span><span>CON CALMA · CON DAILIN</span></div>
+      <div class="footer-top">
+        <div class="footer-statement">
+          <h2 id="footer-title">Una conversación.<br><em>Tu propio tiempo.</em></h2>
+          <p>Hay cosas que toman tiempo. Aquí podemos hablar de ellas sin prisa.</p>
+        </div>
+        <a href="#top" class="back-top" data-back-top aria-label="Volver al principio de la página">
+          <span class="back-top-icon" aria-hidden="true">↑</span><span class="back-top-text">Volver arriba</span>
+        </a>
+      </div>
+      <div class="footer-separator" aria-hidden="true"><span></span><span>✳</span><span></span></div>
+      <div class="footer-bottom">
+        <div class="footer-brand"><span>TODAVÍA ESTOY A TIEMPO</span><small>Un podcast con Dailin</small></div>
+        <nav class="footer-links" aria-label="Enlaces del pie de página"><a href="#coleccion">La colección</a><a href="#regalo">Guía gratuita</a><a href="#ayuda">Pedir ayuda</a><a href="privacidad.html">Privacidad</a></nav>
+        <span class="footer-copyright">© 2026 · HECHO CON CALMA</span>
+      </div>
+    </div>
+  </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
