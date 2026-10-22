@@ -10,7 +10,7 @@ window.PODCAST_CONFIG = {
   freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: '',
-  podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvlh',
+  podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
   productPhotos: [
     { file: 'assets/productos/editorial/guia.webp', alt: '5 preguntas para cuando sientes que vas tarde' },
     { file: 'assets/productos/editorial/diario.webp', alt: 'No voy tarde: un diario para volver a mí' },
