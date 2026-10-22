@@ -385,18 +385,76 @@
     });
   }
 
-  // The native anchor stays as a no-JavaScript fallback. On iOS, use
-  // explicit scrolling to guarantee that the control works inside in-app browsers.
-  document.querySelectorAll('[data-back-top]').forEach(link => {
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      closeMenu();
-      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-      window.scrollTo({ top: 0, left: 0, behavior });
-      const scroller = document.scrollingElement;
-      if (scroller && scroller !== document.documentElement) scroller.scrollTo({ top: 0, behavior });
-    });
+  // A single threshold one viewport down controls the floating back-to-top.
+  // No scroll listener is used to toggle its visibility.
+  const backTop = document.querySelector('.floating-back-top[data-back-top]');
+  const backSentinel = document.querySelector('.return-top-sentinel');
+  const backMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const showBackTop = visible => {
+    if (!backTop) return;
+    backTop.classList.toggle('is-shown', visible);
+    backTop.setAttribute('aria-hidden', String(!visible));
+    backTop.tabIndex = visible ? 0 : -1;
+  };
+  if (backTop && backSentinel && 'IntersectionObserver' in window) {
+    showBackTop(window.scrollY > window.innerHeight);
+    const observer = new IntersectionObserver(([entry]) => {
+      showBackTop(entry.boundingClientRect.top < 0 && !entry.isIntersecting);
+    }, { threshold: 0 });
+    observer.observe(backSentinel);
+  } else if (backTop) {
+    showBackTop(true);
+  }
+  backTop?.addEventListener('click', () => {
+    closeMenu();
+    const destination = document.getElementById('top') || document.getElementById('principal');
+    const restoreFocus = () => {
+      if (!destination) return;
+      destination.setAttribute('tabindex', '-1');
+      try { destination.focus({ preventScroll: true }); }
+      catch { destination.focus(); }
+    };
+    backTop.classList.add('is-traveling');
+    backTop.classList.add('is-pressing');
+    window.setTimeout(() => backTop.classList.remove('is-pressing'), 90);
+    if (backMotion.matches) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      backTop.classList.remove('is-traveling');
+      restoreFocus();
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const begun = performance.now();
+    const awaitArrival = () => {
+      if (window.scrollY <= 3 || performance.now() - begun > 2400) {
+        backTop.classList.remove('is-traveling');
+        restoreFocus();
+      } else {
+        requestAnimationFrame(awaitArrival);
+      }
+    };
+    requestAnimationFrame(awaitArrival);
   });
+
+  // Editorial CTA card overlaps the footer and grows gently with its visible area.
+  const footerCta = document.querySelector('[data-footer-cta]');
+  if (footerCta && !backMotion.matches && 'IntersectionObserver' in window) {
+    footerCta.classList.add('is-motion-ready');
+    const thresholds = Array.from({ length: 21 }, (_, i) => i / 20);
+    const ctaObserver = new IntersectionObserver(([entry]) => {
+      const ratio = Math.max(0, Math.min(1, entry.intersectionRatio));
+      const ease = 1 - Math.pow(1 - ratio, 3);
+      footerCta.style.opacity = String(.25 + .75 * ease);
+      footerCta.style.transform = `translateY(${(34 * (1 - ease)).toFixed(2)}px) scale(${(.9 + .1 * ease).toFixed(4)})`;
+      if (ratio >= .999) {
+        footerCta.style.opacity = '1';
+        footerCta.style.transform = 'none';
+        ctaObserver.disconnect();
+      }
+    }, { threshold: thresholds });
+    ctaObserver.observe(footerCta);
+  }
+
   const editorialFooter = document.querySelector('.footer-curtain');
   if (editorialFooter && 'IntersectionObserver' in window &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
