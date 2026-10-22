@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, type FormEvent } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords } from './supabase-client';
 import {
   LayoutDashboard,
@@ -179,6 +179,10 @@ function StatePill({ status }: { status?: string }) {
 function App() {
   const [passphrase, setPassphrase] = useState('');
   const [mailSent, setMailSent] = useState(false);
+  const [accessEmail, setAccessEmail] = useState('');
+  const [oneTimeCode, setOneTimeCode] = useState('');
+  const [emailLink, setEmailLink] = useState('');
+  const [checkingCode, setCheckingCode] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(false);
   const [accessPending, setAccessPending] = useState(false);
   const [importSecret,setImportSecret] = useState('');
@@ -274,6 +278,48 @@ function App() {
       window.removeEventListener('pageshow', checkLocalSession);
     };
   }, []);
+  // When an email link is opened from Safari, Supabase persists the session in this
+  // browser. Re-check on return from Gmail and on token refresh without sending mail.
+  useEffect(() => {
+    if (!SUPABASE_ENABLED) return;
+    let active = true;
+    let pending = false;
+    const revalidate = async () => {
+      if (!active || pending || document.visibilityState === 'hidden') return;
+      pending = true;
+      try {
+        const user = await auth.getUser();
+        if (active && user) {
+          setAccount(user);
+          setDenied(false);
+          setAccessPending(false);
+          setMailSent(false);
+          await refresh();
+        }
+      } catch(e) {
+        if (active && (e as {code?:string})?.code === 'unauthorized') setAccessPending(true);
+      } finally {
+        pending = false;
+      }
+    };
+    const release = auth.onSessionEvent(event => {
+      if (event === 'SIGNED_OUT') {
+        setAccount(null);
+        setData(null);
+      } else {
+        window.setTimeout(() => { void revalidate(); }, 0);
+      }
+    });
+    const onResume = () => { void revalidate(); };
+    document.addEventListener('visibilitychange', onResume);
+    window.addEventListener('pageshow', onResume);
+    return () => {
+      active = false;
+      release();
+      document.removeEventListener('visibilitychange', onResume);
+      window.removeEventListener('pageshow', onResume);
+    };
+  }, [refresh]);
   async function recheckAccess() {
     setCheckingAccess(true);
     setError('');
@@ -306,7 +352,7 @@ function App() {
         return;
       }
       const r = await auth.signIn(passphrase);
-      if ('sent' in r && r.sent) { setMailSent(true); setPassphrase(''); return; }
+      if ('sent' in r && r.sent) { setAccessEmail(passphrase.trim().toLowerCase()); setMailSent(true); setPassphrase(''); return; }
       setAccount(r.user);
       setPassphrase('');
       setConfirmPhrase('');
@@ -328,6 +374,32 @@ function App() {
       );
     } finally {
       setSigning(false);
+    }
+  }
+  async function verifyEmailCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCheckingCode(true);
+    setError('');
+    try {
+      const user = await auth.verifyEmailCode(accessEmail, oneTimeCode.trim());
+      setOneTimeCode('');
+      setMailSent(false);
+      setAccount(user);
+      setDenied(false);
+      await refresh();
+    } catch(e) {
+      setError(e instanceof Error ? e.message : 'No se pudo comprobar el código.');
+    } finally {
+      setCheckingCode(false);
+    }
+  }
+  function redeemAccessLink(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    try {
+      auth.openEmailLink(emailLink);
+    } catch(e) {
+      setError(e instanceof Error ? e.message : 'El enlace no se pudo abrir.');
     }
   }
   async function logout() {
@@ -589,9 +661,27 @@ function App() {
               <ArrowUpRight size={19} />
             </button>
           </form>
-          {mailSent && <div className="login-warning" role="status">Revisa tu correo. Te envié un enlace para entrar al Estudio.</div>}
-          <p className="login-install-tip">📱 ¿Quieres usarlo como app en iPhone? Abre este sitio en Safari, toca Compartir → Añadir a pantalla de inicio y activa «Abrir como app web».</p>
-          {SUPABASE_ENABLED && <p className="login-device-hint">¿Quieres entrar en tu computadora? Abre el correo y pulsa «Sign in» <strong>en esa misma computadora</strong>. Para entrar en el iPhone, abre el enlace en Safari del iPhone. Cada dispositivo inicia su propia sesión.</p>}
+          {mailSent && <div className="login-success" role="status">Correo solicitado. Abre el enlace en <strong>Safari del mismo iPhone</strong>, no dentro de Gmail ni ChatGPT. No necesitas pedir otro correo si ya tienes uno reciente.</div>}
+          {SUPABASE_ENABLED && <section className="mobile-access-help" aria-label="Ayuda para entrar en iPhone">
+            <strong>¿No te deja entrar desde el iPhone?</strong>
+            <p>Abre <b>podcast.thelaunchera.com/estudio/</b> directamente en Safari. En Gmail, mantén pulsado el enlace «Sign in», elige <b>Copiar enlace</b> y pégalo en la barra de Safari. Así el acceso queda en el mismo navegador. No uses la ventana interna de ChatGPT.</p>
+            <details className="email-link-rescue">
+              <summary>Entrar sin salir de esta pestaña</summary>
+              <p>Si tu correo abre el enlace en otra aplicación, copia el enlace <b>original, sin abrirlo primero</b> y pégalo aquí. Solo aceptamos enlaces de Supabase del podcast.</p>
+              <form onSubmit={redeemAccessLink}>
+                <label htmlFor="paste-studio-email-link">Enlace completo del correo</label>
+                <input id="paste-studio-email-link" type="url" value={emailLink} onChange={e => setEmailLink(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="https://…supabase.co/auth/v1/verify?…" required/>
+                <button type="submit">Abrir mi estudio con este enlace</button>
+              </form>
+              {mailSent && <form onSubmit={verifyEmailCode}>
+                <p>Solo si el correo recibido contiene un <b>código de seis dígitos</b>, puedes escribirlo aquí.</p>
+                <label htmlFor="studio-email-code">Código recibido</label>
+                <input id="studio-email-code" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" value={oneTimeCode} onChange={e => setOneTimeCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" required />
+                <button type="submit" disabled={checkingCode || oneTimeCode.length !== 6}>{checkingCode ? 'Verificando…' : 'Verificar código'}</button>
+              </form>}
+            </details>
+          </section>}
+          <p className="login-install-tip">📱 Para usarlo como app en iPhone, primero entra desde Safari. Después toca Compartir → Añadir a pantalla de inicio.</p>
           <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
         <aside className="login-art">

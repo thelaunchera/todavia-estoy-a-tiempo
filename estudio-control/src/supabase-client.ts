@@ -49,6 +49,48 @@ async function owner():Promise<{id:string;email:string}> {
   return {id:user.id,email:user.email||''};
 }
 export const auth={
+  // Restore the private studio after returning to Safari from the email app.
+  // Do not query Supabase inside onAuthStateChange: delegate to the UI on the next tick.
+  onSessionEvent(callback: (event: string) => void): () => void {
+    if (!client) return () => {};
+    const { data: { subscription } } = client.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') callback(event);
+    });
+    return () => subscription.unsubscribe();
+  },
+  // A six-digit code works only if the configured Supabase email template contains {{ .Token }}.
+  async verifyEmailCode(emailValue: string, code: string) {
+    if (!client) throw new Error('La verificación por correo solo está disponible con Supabase.');
+    const email = emailValue.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code)) {
+      throw new Error('Introduce el correo autorizado y los seis dígitos del código.');
+    }
+    const { error } = await client.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error) throw new Error('El código no es válido o ha caducado. Comprueba el correo más reciente.');
+    const authorized = await owner();
+    return { email: authorized.email, name: 'Administración del podcast' };
+  },
+  // Gmail and the ChatGPT in-app browser can use separate storage from Safari.
+  // Let the owner redeem the ORIGINAL unvisited link in this browser without
+  // saving or transmitting it anywhere besides the authorized Supabase origin.
+  openEmailLink(raw: string): void {
+    if (!client) throw new Error('El acceso por correo no está habilitado.');
+    let link: URL;
+    try { link = new URL(raw.trim()); }
+    catch { throw new Error('Pega el enlace completo de acceso que recibiste por correo.'); }
+    const allowedProject = new URL(url).origin;
+    const allowedSite = window.location.origin;
+    const verifyLink = link.protocol === 'https:' && link.origin === allowedProject
+      && link.pathname === '/auth/v1/verify'
+      && (link.searchParams.has('token') || link.searchParams.has('token_hash'));
+    const returnLink = link.protocol === 'https:' && link.origin === allowedSite
+      && link.pathname.replace(/\/+$/, '') === '/estudio'
+      && (link.searchParams.has('code') || /(?:^|[&#])access_token=/.test(link.hash));
+    if (!verifyLink && !returnLink) {
+      throw new Error('Este no es un enlace de acceso válido del podcast. Copia el enlace original del correo.');
+    }
+    window.location.assign(link.toString());
+  },
   async getUser(){
     if(!client) return localAuth.getUser();
     const {data:{user},error}=await client.auth.getUser();
