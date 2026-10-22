@@ -9,6 +9,7 @@ window.PODCAST_CONFIG = {
   },
   freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
   newsletterEndpoint: 'https://hook.us2.make.com/7yyoehld3g2sh2afq1l6bcw24ct65niw',
+  unsubscribeEndpoint: 'https://hook.us2.make.com/5sgoykwaxvn52xmv817h8dgro7yxtm2h',
   newsletterEndpoint: 'https://hook.us2.make.com/96ko7rg8xtnl9oeuxrj81mib5u4kgla7',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk',
