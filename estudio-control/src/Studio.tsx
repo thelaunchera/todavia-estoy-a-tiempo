@@ -8,6 +8,8 @@ import {
   ListChecks,
   Lightbulb,
   CreditCard,
+  ReceiptText,
+  AudioLines,
   Users,
   Mail,
   Workflow,
@@ -789,7 +791,7 @@ function App() {
           <button className="menu" onClick={() => setMobileNav(true)}>
             <Menu size={23} />
           </button>
-          <span className="top-star">✳</span>
+          <span className="top-star" aria-hidden="true"><Mic2 size={18} strokeWidth={1.6} /></span>
           <span className="top-label">
             EL ESTUDIO <i>/</i> {LABELS[page]}
           </span>
@@ -844,7 +846,7 @@ function App() {
               <section className="hero">
                 <div>
                   <span className="hero-kicker">
-                    ✳ UNA CONVERSACIÓN A LA VEZ
+                    <AudioLines size={16} strokeWidth={1.6} aria-hidden="true" /> UNA CONVERSACIÓN A LA VEZ
                   </span>
                   <h2>
                     Todo lo que estás creando, <em>en un mismo lugar.</em>
@@ -1151,7 +1153,7 @@ function App() {
                   Aún no hay datos de ventas conectados a este estudio. No
                   mostramos $0 porque no significa que no hayas vendido.
                 </p>
-                <div>✳</div>
+                <div className="finance-mark" aria-hidden="true"><ReceiptText size={78} strokeWidth={1.15} /></div>
               </div>
               {statusPanel(
                 'Conectar compras verificadas',
