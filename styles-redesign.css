@@ -33,3 +33,30 @@
 
 @media(max-width:600px){.hero-footnote,.hero-cta .fine-link{display:none}.hero-layout{gap:35px}.hero-cta{margin-top:24px}}
 @media(max-width:360px){.footer-top{gap:15px}.footer-top>p{font-size:2.2rem}.back-top{flex-shrink:0;width:44px;height:44px}}
+
+
+/* Editorial free-guide opt-in — activation remains gated by site-config.js */
+.free-optin{margin-top:29px;padding:24px 24px 22px;background:linear-gradient(145deg,#f9f7f2 0%,#e9edf2 100%);border:1px solid rgba(16,29,52,.16);box-shadow:0 18px 38px rgba(16,29,52,.065);position:relative}
+.free-optin:before{content:"";position:absolute;top:-1px;left:24px;width:68px;height:3px;background:#a2bacd}
+.free-optin-intro{margin-bottom:22px}
+.free-optin-intro>span{font:600 10px/1.4 Arial,sans-serif;letter-spacing:.21em;color:#4d6278}
+.free-optin-intro>p{font:400 17px/1.55 Georgia,serif;color:#152b46;margin:10px 0 0;max-width:39ch}
+.free-optin-fields{display:grid;grid-template-columns:1fr 1.25fr;gap:12px}
+.free-optin-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.free-optin-field label{font:600 11px/1.5 Arial,sans-serif;letter-spacing:.02em;color:#182941}
+.free-optin-field label span{font-weight:400;color:#657384}
+.free-optin-field input{width:100%;min-height:48px;padding:11px 12px;border:1px solid #b9c4cc;background:#fffefa;border-radius:2px;color:#101d34;font:14px/1.4 Arial,sans-serif;outline:none;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+.free-optin-field input::placeholder{color:#7a8690}
+.free-optin-field input:focus{border-color:#315371;box-shadow:0 0 0 3px rgba(91,137,166,.14)}
+.free-optin-field input:user-invalid{border-color:#a45159}
+.free-optin-consent{display:flex;gap:10px;align-items:flex-start;margin:19px 0 19px;font:12px/1.6 Arial,sans-serif;color:#35455b;cursor:pointer}
+.free-optin-consent input{flex:0 0 auto;accent-color:#18314d;width:16px;height:16px;margin-top:2px}
+.free-optin-consent small{display:block;font:11px/1.5 Arial,sans-serif;color:#657182;margin-top:3px}
+.free-optin-submit{width:100%;justify-content:center;text-align:center;min-height:52px}
+.free-optin-submit:disabled{opacity:.6;cursor:not-allowed;filter:grayscale(.18)}
+#guide-state{display:block;margin:12px 0 0;font:12px/1.5 Arial,sans-serif;color:#53667a}
+.free-optin-privacy{margin:14px 0 0;font:11px/1.65 Arial,sans-serif;color:#53667a}
+.free-optin-privacy a{color:#183c5b;text-underline-offset:3px;text-decoration-thickness:1px}
+.free-optin-trap{position:absolute;top:auto;left:-10000px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+@media(max-width:620px){.free-optin{padding:25px 19px 22px;margin-top:25px}.free-optin-fields{grid-template-columns:1fr;gap:15px}.free-optin-intro>p{font-size:16px}.free-optin-field input{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.free-optin-field input{transition:none}}
