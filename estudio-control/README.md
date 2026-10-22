@@ -30,3 +30,9 @@ El directorio antiguo `backend/` fue retirado de este repositorio porque depend�
 
 ## Próxima fase
 Un backend externo al sitio estático, controlado desde este mismo repositorio, con base de datos separada, autenticación verificada y eventos firmados de pago para sincronizar compras, entregas, audiencia y soporte. No usar la base de datos comercial de The Launch Era como si fuera la del podcast.
+
+## Instalación en iPhone y Android
+
+El Estudio está preparado como web app instalable (PWA): su manifiesto, servicio y los iconos PNG se generan al compilar `estudio-control/`. Abre `https://podcast.thelaunchera.com/estudio/` en Safari (iPhone) y elige Compartir → Añadir a pantalla de inicio → Abrir como app web. En Android usa Instalar app en el menú del navegador. Necesita Internet para sincronizar registros con Supabase.
+
+**Publicación**: en GitHub > Settings > Pages, la fuente debe ser **GitHub Actions**, no **Deploy from a branch**. El workflow `.github/workflows/pages.yml` compila y publica tanto el podcast como `/estudio/`; el proceso automático de rama no publica la app y puede reemplazarla con un 404. El workflow intenta configurar automáticamente la fuente adecuada si GitHub permite la operación.
