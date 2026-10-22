@@ -8,6 +8,7 @@ window.PODCAST_CONFIG = {
     empezarDeNuevo: 'https://buy.stripe.com/28E3cu7j16Dn7Oh87a93y0W'
   },
   freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
+  newsletterEndpoint: 'https://hook.us2.make.com/96ko7rg8xtnl9oeuxrj81mib5u4kgla7',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk',
   podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
