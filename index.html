@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Un podcast con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-newsletter-footer2">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-newsletter-v1">
   <script defer src="site-config.js?v=20261022-newsletter-footer2"></script>
-  <script defer src="app-redesign.js?v=20261022-newsletter-footer2"></script>
+  <script defer src="app-redesign.js?v=20261022-newsletter-v1"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
@@ -118,18 +118,21 @@
         <div class="free-mini-form reveal">          <form id="guide-form" class="podcast-form guide-form" data-podcast-form="guide" novalidate>
             <label for="guide-email">¿A qué correo te envío la guía?</label>
             <div class="email-field" data-email-field>
-              <input id="guide-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="guide-email-feedback guide-privacy">
+              <input id="guide-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="guide-email-feedback">
               <span class="email-check" aria-hidden="true">✓</span>
             </div>
             <p class="field-feedback" id="guide-email-feedback" aria-live="polite"></p>
             <input type="hidden" name="resource" value="cinco_preguntas">
-            <input type="hidden" name="newsletter" value="no">
+            <label class="podcast-newsletter-optin" for="guide-newsletter">
+              <input id="guide-newsletter" name="newsletter" type="checkbox" value="yes">
+              <span><strong>¿Nos seguimos escuchando?</strong> Si te apetece, te escribo cuando haya un nuevo episodio. Sin compromiso.</span>
+            </label>
             <input type="hidden" name="source" value="podcast_website">
             <div class="honeypot" aria-hidden="true"><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
             <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
             <p class="guide-direct-access" id="guide-direct-access" hidden>Mientras llega el correo, ya puedes <a id="guide-direct-link" href="https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">abrir las 5 preguntas aquí <span aria-hidden="true">↗</span></a>.</p>
-            <small id="guide-privacy">Te enviamos solo esta guía, sin suscribirte a publicidad. <a href="privacidad.html">Privacidad</a>.</small>
+            <small class="form-small-note">La guía es tuya. Los avisos de episodios son opcionales.</small>
           </form>
         </div>
       </div>
@@ -164,7 +167,7 @@
             <div class="form-field">
               <label for="help-email">Tu correo electrónico</label>
               <div class="email-field" data-email-field>
-                <input id="help-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="help-email-feedback help-privacy">
+                <input id="help-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="help-email-feedback">
                 <span class="email-check" aria-hidden="true">✓</span>
               </div>
               <p class="field-feedback" id="help-email-feedback" aria-live="polite"></p>
@@ -179,7 +182,7 @@
             <div class="honeypot" aria-hidden="true"><label for="help-website">Deja este campo vacío</label><input id="help-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviar mi consulta</button>
             <p class="form-status" id="help-form-status" role="status" aria-live="polite"></p>
-            <small id="help-privacy">Usaremos tu correo solo para responderte. Sin publicidad. Consulta la <a href="privacidad.html">privacidad</a>.</small>
+            <small class="form-small-note">Te responderé a este mismo correo.</small>
           </form>
         </div>
       </div>
@@ -246,6 +249,26 @@
           <div class="honeypot" aria-hidden="true"><label for="newsletter-website">Deja este campo vacío</label><input type="text" name="website" id="newsletter-website" tabindex="-1" autocomplete="off"></div>
         </form>
       </div>
+      <section class="footer-newsletter" aria-labelledby="footer-newsletter-title">
+        <div class="footer-newsletter-heading">
+          <p class="footer-newsletter-kicker">NOS SEGUIMOS ESCUCHANDO</p>
+          <h3 id="footer-newsletter-title">¿Te aviso del <em>próximo episodio?</em></h3>
+          <p>Un correo corto cada vez que salga una nueva conversación. Sin prisa y sin ruido.</p>
+        </div>
+        <form class="podcast-newsletter-form" id="newsletter-form" data-newsletter-form novalidate>
+          <label for="newsletter-email" class="sr-only">Tu correo para nuevos episodios</label>
+          <div class="newsletter-pill" data-newsletter-pill>
+            <input id="newsletter-email" name="email" type="email" placeholder="Tu correo electrónico" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="newsletter-error">
+            <button type="submit" class="newsletter-subscribe-button">Avisarme</button>
+            <div class="newsletter-pill-confirmation" aria-live="polite" aria-atomic="true" role="status" aria-hidden="true">
+              <svg class="newsletter-checkmark" viewBox="0 0 28 28" width="24" height="24" focusable="false" aria-hidden="true"><path d="m5 14 6 6 12-13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24"/></svg>
+              <span>¡Ya estás dentro! Nos escuchamos pronto.</span>
+            </div>
+          </div>
+          <p id="newsletter-error" class="newsletter-error" role="status" aria-live="polite"></p>
+          <p class="newsletter-fine-print">Solo nuevos episodios. Puedes dejar de recibirlos cuando quieras.</p>
+        </form>
+      </section>
       <div class="footer-separator" aria-hidden="true"><span></span><span>·</span><span></span></div>
       <div class="footer-bottom">
         <div class="footer-brand"><img class="footer-official-logo" src="assets/logo-podcast-04.svg" alt="Todavía estoy a tiempo" width="726" height="250" loading="lazy"><small>Un podcast con Dailin</small></div>
