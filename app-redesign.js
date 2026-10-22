@@ -534,8 +534,9 @@
       try {
         const payload = new URLSearchParams();
         payload.set('email', value);
-        payload.set('source', 'podcast_newsletter');
-        payload.set('consent', 'yes');
+        payload.set('resource', 'podcast_newsletter');
+        payload.set('newsletter', 'yes');
+        payload.set('source', 'footer');
         payload.set('website', '');
         const response = await fetch(endpoint, {
           method: 'POST', mode: 'cors',
