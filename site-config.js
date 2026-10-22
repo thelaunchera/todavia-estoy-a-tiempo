@@ -4,6 +4,9 @@ window.PODCAST_CONFIG = {
   commerceEnabled: false,
   stripePaymentLinks: { noVoyTarde: '', empezarDeNuevo: '' },
   freeGuideUrl: '',
+  // Form POSTs only after Make verifies a working sender and real delivery.
+  freeFormEnabled: false,
+  freeGuideFormEndpoint: '',
   podcastUrl: '',
   productPhotos: [
     { file: 'assets/productos/editorial/guia.webp', alt: '5 preguntas para cuando sientes que vas tarde' },
