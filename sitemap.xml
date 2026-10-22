@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://podcast.thelaunchera.com/</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://podcast.thelaunchera.com/productos/no-voy-tarde.html</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://podcast.thelaunchera.com/productos/empezar-de-nuevo.html</loc><changefreq>monthly</changefreq></url>
+  <url>
+    <loc>https://podcast.thelaunchera.com/</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+  <url>
+    <loc>https://podcast.thelaunchera.com/productos/no-voy-tarde.html</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+  <url>
+    <loc>https://podcast.thelaunchera.com/productos/empezar-de-nuevo.html</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+  <url>
+    <loc>https://podcast.thelaunchera.com/privacidad.html</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
 </urlset>
