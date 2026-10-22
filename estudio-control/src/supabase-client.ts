@@ -13,7 +13,7 @@ export const SUPABASE_ENABLED = /^https:\/\/[^/]+\.supabase\.co\/?$/.test(url)
   && (key.startsWith('sb_publishable_') || key.startsWith('eyJ'));
 const client: SupabaseClient | null = SUPABASE_ENABLED
   ? createClient(url, key, {
-      auth: { persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce' }
+      auth: { persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit' }
     })
   : null;
 
