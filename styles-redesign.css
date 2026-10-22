@@ -1325,3 +1325,102 @@ html{scroll-padding-top:96px}
     will-change:auto;
   }
 }
+
+
+/* Podcast newsletter: transforming email pill with consent and server-verified success */
+.footer-curtain .footer-newsletter{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,460px);gap:clamp(34px,6vw,96px);
+  align-items:center;margin:0 0 clamp(54px,7vw,86px);
+  padding:clamp(18px,2.8vw,34px) 0 0;
+}
+.footer-curtain .footer-newsletter-intro{min-width:0}
+.footer-curtain .footer-newsletter-eyebrow{
+  font-size:.65rem;letter-spacing:.16em;color:#b8cadc;font-weight:700;margin-bottom:15px;
+}
+.footer-curtain .footer-newsletter-intro h3{
+  font:400 clamp(2rem,3.3vw,3.1rem)/1.07 var(--serif);
+  letter-spacing:-.025em;color:#f6f3eb;margin:0 0 13px;
+}
+.footer-curtain .footer-newsletter-intro h3 em{color:#b8cadc}
+.footer-curtain .footer-newsletter-intro>p:last-child{
+  max-width:440px;font-size:.89rem;color:#c9d6e0;line-height:1.7;
+}
+.newsletter-form{width:100%;min-width:0;position:relative}
+.newsletter-label{display:block;font-size:.74rem;letter-spacing:.035em;color:#eff5f9;margin-bottom:11px}
+.newsletter-pill{
+  position:relative;display:flex;align-items:center;width:100%;
+  height:42px;min-height:42px;overflow:hidden;border-radius:999px;
+  border:1px solid rgba(213,229,240,.5);background:rgba(232,240,248,.12);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  transition:border-color .2s,box-shadow .2s;
+}
+.newsletter-pill:focus-within{
+  border-color:#d9eaf8;
+  box-shadow:0 0 0 3px rgba(184,202,220,.38),inset 0 0 0 1px rgba(255,255,255,.12);
+}
+.newsletter-pill.has-error{
+  border-color:#f9b2b6;box-shadow:0 0 0 2px rgba(248,131,143,.23);
+}
+.newsletter-pill input[type=email]{
+  flex:1 1 auto;min-width:0;width:100%;height:100%;padding:0 12px 0 18px;
+  outline:0;border:0;background:transparent;color:#fffdf7;
+  font:400 14px var(--sans);box-shadow:none;
+}
+.newsletter-pill input::placeholder{color:#d6e1eb;opacity:.86}
+.newsletter-pill input:disabled{opacity:.75;-webkit-text-fill-color:#fffdf7}
+.newsletter-submit{
+  flex:0 0 auto;display:grid;place-items:center;min-height:38px;
+  height:38px;margin:1px;padding:0 17px;border:0;border-radius:999px;
+  background:#e8f1f7;color:#162d48;
+  font:700 .75rem var(--sans);
+  white-space:nowrap;
+  transition:transform 90ms ease,background .2s ease;
+}
+.newsletter-submit:hover{background:#fffdf7}
+.newsletter-submit:active,.newsletter-submit.is-pressing{transform:scale(.94)}
+.newsletter-submit:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.newsletter-submit:disabled{cursor:progress}
+.newsletter-confirmation{
+  position:absolute;inset:0;z-index:3;display:flex;gap:9px;justify-content:center;align-items:center;
+  border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,#5684ad 0%,#345f89 55%,#244c76 100%);
+  color:#fff;font:600 .88rem var(--sans);
+  clip-path:circle(0% at 88% 50%);
+  -webkit-clip-path:circle(0% at 88% 50%);
+}
+.newsletter-form.is-done .newsletter-confirmation{
+  clip-path:circle(150% at 88% 50%);
+  -webkit-clip-path:circle(150% at 88% 50%);
+  transition:clip-path 640ms cubic-bezier(.32,.72,0,1),-webkit-clip-path 640ms cubic-bezier(.32,.72,0,1);
+}
+.newsletter-tick path{stroke-dasharray:24;stroke-dashoffset:24}
+.newsletter-form.is-done .newsletter-tick path{
+  animation:newsletter-tick-draw 420ms cubic-bezier(.2,.7,.2,1) 320ms both;
+}
+@keyframes newsletter-tick-draw{to{stroke-dashoffset:0}}
+.newsletter-feedback{
+  font:500 .76rem/1.45 var(--sans);color:#ffd5d7;
+  min-height:1.45em;margin:9px 0 0;
+}
+.newsletter-form.is-done .newsletter-feedback{color:#d6e8f4}
+.newsletter-note{margin:5px 0 0;font-size:.69rem;line-height:1.5;color:#b7c8d6}
+@media(max-width:900px){
+  .footer-curtain .footer-newsletter{grid-template-columns:1fr;gap:25px}
+  .newsletter-form{max-width:530px}
+}
+@media(max-width:600px){
+  .footer-curtain .footer-newsletter{margin:0 0 57px;padding-top:0;gap:24px}
+  .footer-curtain .footer-newsletter-intro h3{font-size:2.35rem}
+  .footer-curtain .footer-newsletter-eyebrow{font-size:.6rem}
+  .newsletter-pill input[type=email]{padding-left:15px;font-size:13px}
+  .newsletter-submit{padding-inline:13px;font-size:.72rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .newsletter-form.is-done .newsletter-confirmation{
+    clip-path:none!important;-webkit-clip-path:none!important;
+    transition:opacity 200ms ease!important;opacity:1!important;
+  }
+  .newsletter-confirmation{opacity:0}
+  .newsletter-form.is-done .newsletter-tick path{animation:none;stroke-dashoffset:0}
+  .newsletter-submit{transition:none}
+}
