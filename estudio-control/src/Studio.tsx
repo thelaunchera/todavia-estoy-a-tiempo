@@ -240,7 +240,13 @@ function App() {
     finally { setAudioStatsLoading(false); }
   },[]);
   useEffect(() => {
-    if(page==='cancion' && account) { void refreshAudioStats(); }
+    if(page!=='cancion' || !account) return;
+    void refreshAudioStats();
+    // Mientras el estudio está abierto, refresca cada minuto sin pedirlo manualmente.
+    const interval = window.setInterval(() => {
+      if(document.visibilityState === 'visible') void refreshAudioStats();
+    }, 60000);
+    return () => window.clearInterval(interval);
   },[page,account,refreshAudioStats]);
   const [edit, setEdit] = useState<{
       kind: Kind;
@@ -1433,7 +1439,7 @@ function App() {
                 ) : <p className="audio-stats-empty">{audioStatsLoading?'Cargando escuchas…':'Todavía no hay escuchas registradas desde la landing.'}</p>}
                 {audioStats?.last_play_at && <p className="audio-stats-foot">Último inicio registrado: {new Date(audioStats.last_play_at).toLocaleString('es-US',{dateStyle:'medium',timeStyle:'short'})}</p>}
               </section>
-              <div className="hint"><ShieldCheck size={17}/> No almacenamos nombres ni correos de quien escucha. Las cifras son aproximadas y pueden incluir reproducciones repetidas. Spotify mantiene sus propias estadísticas.</div>
+              <div className="hint"><ShieldCheck size={17}/> Las cifras se actualizan automáticamente cada minuto mientras esta página está abierta. No guardamos nombres ni correos. Son cifras aproximadas; Spotify mantiene estadísticas aparte.</div>
             </>
           )}
           {page === 'seo' && (
