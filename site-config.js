@@ -2,7 +2,10 @@
 // Keep commerce disabled until payment confirmation and delivery pass end-to-end QA.
 window.PODCAST_CONFIG = {
   commerceEnabled: false,
-  stripePaymentLinks: { noVoyTarde: '', empezarDeNuevo: '' },
+  stripePaymentLinks: {
+    noVoyTarde: 'https://buy.stripe.com/dRm3cu32Le5Pc4x5Z293y0V',
+    empezarDeNuevo: 'https://buy.stripe.com/28E3cu7j16Dn7Oh87a93y0W'
+  },
   freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: '',
