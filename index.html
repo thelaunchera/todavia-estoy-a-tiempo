@@ -11,12 +11,13 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Un podcast con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-logo-final4">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-footer-cta-v1">
   <script defer src="site-config.js?v=20261022-spotify3"></script>
-  <script defer src="app-redesign.js?v=20261022-photos-v3"></script>
+  <script defer src="app-redesign.js?v=20261022-footer-cta-v1"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
+  <span class="return-top-sentinel" aria-hidden="true"></span>
   <a class="skip" href="#principal">Saltar al contenido</a>
   <div class="scroll-progress" aria-hidden="true"></div>
   <header class="header" id="top">
@@ -193,6 +194,18 @@
       </div>
     </section>
   </main>
+  <aside class="footer-cta-overlap" aria-labelledby="footer-cta-title">
+    <div class="shell">
+      <div class="footer-cta-card" data-footer-cta>
+        <div class="footer-cta-copy">
+          <p class="footer-cta-kicker">UN REGALO PARA LLEVAR CONTIGO</p>
+          <h2 id="footer-cta-title">No tienes que resolverlo <em>todo hoy.</em></h2>
+          <p>Cinco preguntas para escucharte con calma, a tu propio ritmo. Gratis y en tu correo.</p>
+        </div>
+        <a class="footer-cta-button" href="#regalo">Quiero las 5 preguntas <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </aside>
   <footer class="footer footer-curtain" id="footer" aria-labelledby="footer-title">
     <div class="footer-halo footer-halo-one" aria-hidden="true"></div>
     <div class="footer-halo footer-halo-two" aria-hidden="true"></div>
@@ -203,9 +216,7 @@
           <h2 id="footer-title">Una conversación.<br><em>Tu propio tiempo.</em></h2>
           <p>Hay cosas que toman tiempo. Aquí podemos hablar de ellas sin prisa.</p>
         </div>
-        <a href="#top" class="back-top" data-back-top aria-label="Volver al principio de la página">
-          <span class="back-top-icon" aria-hidden="true">↑</span><span class="back-top-text">Volver arriba</span>
-        </a>
+
       </div>
       <div class="footer-separator" aria-hidden="true"><span></span><span>✳</span><span></span></div>
       <div class="footer-bottom">
@@ -215,6 +226,9 @@
       </div>
     </div>
   </footer>
+  <button class="floating-back-top" type="button" data-back-top aria-label="Volver al inicio de la página" aria-hidden="true" tabindex="-1">
+    <span class="floating-back-top-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" focusable="false"><path d="m12 19 0-14m-6 6 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  </button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
