@@ -479,7 +479,7 @@
     const confirmation = newsletterForm.querySelector('.newsletter-confirmation');
     const confirmationText = newsletterForm.querySelector('.newsletter-confirmation-text');
     const validNewsletterEmail = value =>
-      value.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(value);
+      value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
     newsletterForm.addEventListener('submit', async event => {
       event.preventDefault();
       if (newsletterForm.classList.contains('is-done') || button.disabled) return;
