@@ -3,6 +3,8 @@
 window.PODCAST_CONFIG = {
   commerceEnabled: false,
   stripePaymentLinks: { noVoyTarde: '', empezarDeNuevo: '' },
+  freeGuideEndpoint: 'https://hook.us2.make.com/3ljucvj2nbpdff279rxmo5ys70f1ppf3',
+  helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: '',
   podcastUrl: '',
   productPhotos: [
