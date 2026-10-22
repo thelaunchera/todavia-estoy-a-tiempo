@@ -240,6 +240,29 @@ function App() {
       alive = false;
     };
   }, [refresh]);
+  // Safari can resume an already-open tab after the five-day deadline.
+  // Re-check local access when the tab becomes visible; do not query Supabase here.
+  useEffect(() => {
+    if (SUPABASE_ENABLED) return;
+    let mounted = true;
+    const checkLocalSession = async () => {
+      if (document.visibilityState === 'hidden') return;
+      const current = await auth.getUser();
+      if (mounted && !current) {
+        setAccount(null);
+        setData(null);
+        setDenied(false);
+        setPage('inicio');
+      }
+    };
+    document.addEventListener('visibilitychange', checkLocalSession);
+    window.addEventListener('pageshow', checkLocalSession);
+    return () => {
+      mounted = false;
+      document.removeEventListener('visibilitychange', checkLocalSession);
+      window.removeEventListener('pageshow', checkLocalSession);
+    };
+  }, []);
   async function login() {
     setSigning(true);
     setError('');
@@ -521,7 +544,7 @@ function App() {
             </button>
           </form>
           {mailSent && <div className="login-warning" role="status">Revisa tu correo. Te envié un enlace para entrar al Estudio.</div>}
-          <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Cifrado en este dispositivo. Conserva tu frase y exporta un respaldo.'}</small>
+          <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
         <aside className="login-art">
           <div className="login-circle" />
@@ -1184,7 +1207,7 @@ function App() {
                 <section>
                   <span>ARCHIVO DEL ESTUDIO</span>
                   <h3>Protección local</h3>
-                  <p>{recording ? 'Detalles ocultos mientras grabas' : SUPABASE_ENABLED ? 'Conexión Supabase protegida' : 'Bóveda cifrada en este navegador'}</p>
+                  <p>{recording ? 'Detalles ocultos mientras grabas' : SUPABASE_ENABLED ? 'Conexión Supabase protegida' : 'Bóveda cifrada · acceso recordado durante 5 días en este navegador'}</p>
                 </section>
                 <ShieldCheck size={23} />
               </div>
