@@ -295,8 +295,10 @@ function App() {
           setAccount(user);
           setDenied(false);
           setAccessPending(false);
-          setMailSent(false);
           await refresh();
+        } else if (active && !user) {
+          setAccount(null);
+          setData(null);
         }
       } catch(e) {
         if (active && (e as {code?:string})?.code === 'unauthorized') setAccessPending(true);
