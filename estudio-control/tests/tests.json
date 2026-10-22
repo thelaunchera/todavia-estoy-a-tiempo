@@ -1,0 +1,102 @@
+[
+  {
+    "name": "El estudio no expone datos al visitante",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "login gate",
+      "access control",
+      "denegación anónima",
+      "secciones privadas"
+    ],
+    "description": "Comprueba que los módulos no se exponen sin una sesión de administración.",
+    "steps": [
+      "Abrir el estudio sin iniciar sesión.",
+      "Comprobar que solo aparece la portada de acceso y el botón para entrar.",
+      "Iniciar sesión con la cuenta de administración y abrir Episodios."
+    ],
+    "expected": "Sin sesión no aparecen datos; la administración puede entrar y navegar."
+  },
+  {
+    "name": "Gestionar un episodio durable",
+    "viewport": "desktop",
+    "covers": [
+      "crear episodio",
+      "editar estado",
+      "backend create/update/read",
+      "persistencia tras recarga"
+    ],
+    "description": "Crear y actualizar un episodio realmente guardado en la base de datos.",
+    "steps": [
+      "Entrar como administradora y abrir Episodios.",
+      "Añadir episodio de prueba con título Prueba editorial.",
+      "Editar el estado a En producción y guardar.",
+      "Actualizar la página."
+    ],
+    "expected": "El episodio de prueba sigue visible con el nuevo estado."
+  },
+  {
+    "name": "Completar y borrar una tarea",
+    "viewport": "mobile",
+    "covers": [
+      "validación de formularios",
+      "gestión de tareas",
+      "marcar completada",
+      "borrado confirmado",
+      "backend delete"
+    ],
+    "description": "Comprueba que las tareas tienen estados durables y que borrar exige confirmación.",
+    "steps": [
+      "Abrir Tareas en móvil e intentar guardar sin título.",
+      "Introducir Revisar portada y guardar.",
+      "Marcar como completada y recargar.",
+      "Pulsar eliminar, cancelar y luego confirmar."
+    ],
+    "expected": "El título vacío se rechaza, el estado persiste y borrar solo ocurre tras confirmación."
+  },
+  {
+    "name": "Modo grabación sin datos privados",
+    "viewport": "desktop",
+    "covers": [
+      "modo presentación",
+      "bloqueo de edición",
+      "ventas sin datos inventados",
+      "estado real de fuentes",
+      "SEO"
+    ],
+    "description": "Muestra el panel de forma segura para videos sin afirmar que hay ingresos sincronizados.",
+    "steps": [
+      "Entrar como administradora y activar Modo grabación.",
+      "Visitar Ventas e ingresos y ver el mensaje Sin sincronizar.",
+      "Abrir SEO y comprobar el estado de indexación pendiente.",
+      "Desactivar Modo grabación."
+    ],
+    "expected": "Los controles privados se ocultan y se mantienen visibles los estados reales de las conexiones."
+  },
+  {
+    "name": "Error al crear idea",
+    "viewport": "mobile",
+    "covers": [
+      "manejo de error del backend",
+      "reintento visible",
+      "backend POST"
+    ],
+    "description": "No afirma éxito si la API de guardado falla.",
+    "qa_faults": [
+      {
+        "method": "POST",
+        "path": "/api/items/ideas",
+        "status": 503,
+        "body_json": {
+          "error": "temporary_failure"
+        }
+      }
+    ],
+    "steps": [
+      "Iniciar sesión y abrir Banco de ideas.",
+      "Añadir una idea con título Idea de prueba.",
+      "Intentar guardar y observar el resultado."
+    ],
+    "expected": "Aparece un error y el formulario sigue abierto para poder reintentar."
+  }
+]

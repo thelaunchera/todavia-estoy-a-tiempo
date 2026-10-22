@@ -33,10 +33,16 @@ jobs:
           cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-social-dark.png", output_width=1600)
           cairosvg.svg2png(bytestring=source.replace(b'#131925', b'#f7f3eb'), write_to="assets/logo-podcast-04-social-light.png", output_width=1600)
           PY
+      - name: Separar el sitio público del código privado
+        run: |
+          mkdir -p _podcast_pages
+          cp -R assets productos estudio _podcast_pages/
+          cp -- *.html *.css *.js *.xml _podcast_pages/
+          cp .nojekyll _podcast_pages/
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: _podcast_pages
       - name: Publicar página
         id: deployment
         uses: actions/deploy-pages@v4
