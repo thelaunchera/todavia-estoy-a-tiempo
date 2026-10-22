@@ -180,13 +180,17 @@ p {
 }
 .login-art-inner > img {
   display: block;
-  width: 80%;
-  height: 410px;
-  object-fit: cover;
-  margin: 24px auto;
-  border: 9px solid #fffdf5;
-  box-shadow: 0 30px 75px #05111c8f;
-  border-radius: 13px;
+  width: min(100%, 325px);
+  height: auto;
+  max-height: 470px;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  object-position: center;
+  margin: 22px auto;
+  background: linear-gradient(155deg, #cddce5, #203c5d 70%);
+  border: 6px solid rgba(255,255,255,.86);
+  box-shadow: 0 25px 56px #05111c73;
+  border-radius: 17px;
 }
 .login-art-inner > p {
   font:
@@ -1934,6 +1938,30 @@ a:focus-visible {
 .login .vault-form input{font-size:16px}
 .login .vault-form .login-cta{width:100%;max-width:390px;min-height:54px;justify-content:center;gap:12px}
 
+/* Biblioteca privada de guiones · Serie 01 */
+.episode-editorial{align-items:flex-start}
+.episode-editorial .epi-info{min-width:0;width:100%}
+.episode-editorial .epi-info>p{color:#6d8190;margin:8px 0}
+.episode-progress{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:15px 0}
+.progress-step{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#7791a2;border:1px solid #d7e1e7;border-radius:99px;padding:5px 9px}
+.progress-step.current{color:#244662;background:#e8f1f5;border-color:#9ebacb;font-weight:800}
+.episode-script{margin:12px 0 16px;border:1px solid #d8e2e9;border-radius:14px;overflow:hidden;background:#fbfaf6}
+.episode-script>summary{display:flex;align-items:center;gap:9px;cursor:pointer;padding:13px 15px;font-weight:700;font-size:13px;color:#254a68;list-style:none}
+.episode-script>summary::-webkit-details-marker{display:none}
+.episode-script[open]>summary{border-bottom:1px solid #d8e2e9}
+.episode-script-body{padding:20px clamp(14px,3vw,28px)}
+.episode-script-body h3{font:normal clamp(21px,3vw,30px)/1.22 'DM Serif Display',Georgia,serif;color:#162e47;margin:10px 0 18px}
+.episode-script-text{white-space:pre-wrap;font:15px/1.8 Georgia,serif;color:#314559;max-height:580px;overflow-y:auto;overflow-wrap:break-word;padding-right:7px}
+.episode-script-body button,.episode-actions button,.episode-actions a{display:inline-flex;gap:7px;align-items:center;justify-content:center;border-radius:99px;border:1px solid #adc3d1;background:#eaf2f5;color:#315772;font:700 11px 'DM Sans',sans-serif;padding:10px 13px;cursor:pointer;text-decoration:none}
+.episode-script-body button{margin-top:20px}
+.episode-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:13px}
+.episode-actions button:hover{background:#dcecf3}
+.episode-actions button:disabled{opacity:.55}
+.episode-announcement{font:700 11px 'DM Sans',sans-serif;color:#53768e}
+.full-script-label{grid-column:1/-1}
+.full-script-label textarea{min-height:310px;line-height:1.65;white-space:pre-wrap;font-family:Georgia,serif}
+.modal-helper{grid-column:1/-1;font-size:12px;line-height:1.6;color:#658198;margin:2px 0 10px}
+@media(max-width:650px){.episode-editorial{padding:18px 13px;gap:9px}.episode-editorial .epi-no{font-size:14px;min-width:27px}.episode-script-text{max-height:62dvh}.episode-actions{gap:7px}}
 
 /* Editorial refinements: readable portrait art, controlled scale, no colored emoji. */
 .top-star{
