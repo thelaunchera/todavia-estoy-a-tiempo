@@ -67,6 +67,11 @@ type Row = {
   priority?: string;
   audio?: string;
   art?: string;
+  script?: string;
+  announcement_state?: string;
+  audio_ready?: boolean;
+  number?: number;
+  series?: string;
 };
 type Data = {
   records: Record<Kind, Row[]>;
@@ -120,15 +125,7 @@ const LABELS: Record<Page, string> = {
   ajustes: 'Configuración',
 };
 const STATES: Record<Kind, string[]> = {
-  episodios: [
-    'idea',
-    'planificado',
-    'guion listo',
-    'audio listo',
-    'en producción',
-    'programado',
-    'publicado',
-  ],
+  episodios: ['guion listo','en producción','hecho','publicado'],
   tareas: ['pendiente', 'en curso', 'completado'],
   productos: ['borrador', 'en preparación', 'disponible', 'publicado'],
   ideas: ['en exploración', 'seleccionada', 'en desarrollo', 'archivada'],
@@ -456,11 +453,32 @@ function App() {
     setFormError('');
     setEdit({ kind, item: { ...item }, newItem: false });
   };
+  const validSpotifyEpisode=(value?:string)=>/^https:\/\/open\.spotify\.com\/episode\/[A-Za-z0-9]+(?:\?.*)?$/.test((value||'').trim());
+  async function advanceEpisode(item:Row,nextStatus:'en producción'|'hecho'|'publicado') {
+    if(recording||saving)return;
+    if(nextStatus==='publicado') {
+      if(item.status!=='hecho') {setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Primero marca el episodio como hecho.');return;}
+      if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Añade el enlace directo del episodio de Spotify, no el del programa.');return;}
+      if(!window.confirm('¿Confirmas que ya publicaste este capítulo en Spotify? Enviaremos un aviso a los oyentes suscritos.'))return;
+    }
+    setSaving(true);
+    try {
+      await api.put('/api/items/episodios/'+item.id,{title:item.title,status:nextStatus,...(nextStatus==='publicado'?{announcement_state:'pending',link:item.link}: {})});
+      await refresh();
+    }catch(e){setError(e instanceof Error?e.message:'No se pudo cambiar el capítulo.');}finally{setSaving(false);}
+  }
   async function save() {
     if (!edit) return;
     if (!String(edit.item.title || '').trim()) {
       setFormError('Escribe un título para continuar.');
       return;
+    }
+    const original=edit.kind==='episodios'&&!edit.newItem?episodes.find(x=>x.id===edit.item.id):null;
+    if(edit.kind==='episodios'&&edit.item.status==='publicado'&&original?.status!=='publicado'){
+      if(original?.status!=='hecho'){setFormError('Primero marca el episodio como hecho.');return;}
+      if(!validSpotifyEpisode(edit.item.link)){setFormError('Añade el enlace directo: open.spotify.com/episode/…, no la página del programa.');return;}
+      if(!window.confirm('¿Este capítulo ya está publicado en Spotify? Confirmar enviará el aviso a los oyentes suscritos.'))return;
+      edit.item.announcement_state='pending';
     }
     setSaving(true);
     setFormError('');
@@ -549,28 +567,36 @@ function App() {
       <p>No hay resultados. Puedes crear uno nuevo.</p>
     </div>
   );
-  const episodeRows = (
-    <div className="episode-list">
-      {visible(episodes).map((x, i) => (
-        <div className="episode" key={x.id}>
-          <div className="epi-no">{String(i + 1).padStart(2, '0')}</div>
+  const episodeRows=(
+    <div className="episode-list episode-library">
+      {visible(episodes).map((x,i)=>(
+        <article className="episode episode-editorial" key={x.id}>
+          <div className="epi-no">{String(x.number||i+1).padStart(2,'0')}</div>
           <div className="epi-info">
-            <div className="epi-line">
-              <b>{x.title}</b>
-              <StatePill status={x.status} />
+            <div className="epi-line"><b>{x.title}</b><StatePill status={x.status}/></div>
+            <p>{x.series||'Primera serie · Pensé que a esta edad…'}</p>
+            <small><CalendarDays size={14}/>{formatDate(x.date)} <span>·</span> {x.audio_ready||x.audio?'Audio creado':'Audio pendiente'} <span>·</span> {x.script?'Guion completo':'Sin guion'}</small>
+            <div className="episode-progress" aria-label="Progreso editorial">{(['en producción','hecho','publicado'] as const).map(stage=><span key={stage} className={'progress-step '+(stage===x.status?'current':'')}>{stage}</span>)}</div>
+            {x.script&&<details className="episode-script">
+              <summary><BookOpen size={17}/> Leer guion completo</summary>
+              <div className="episode-script-body">
+                <span className="eyebrow">PRIMERA SERIE · GUION DE NARRACIÓN</span><h3>{x.title}</h3>
+                <div className="episode-script-text">{x.script}</div>
+                <button onClick={()=>editRow('episodios',x)}><Pencil size={15}/> Editar guion</button>
+              </div>
+            </details>}
+            <div className="episode-actions">
+              {x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
+              {x.status==='en producción'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'hecho')}>Marcar hecho <CheckCircle2 size={15}/></button>}
+              {x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar <ArrowUpRight size={15}/></button>}
+              {x.status==='publicado'&&<span className="episode-announcement">{x.announcement_state==='disabled'?'Publicado · sin aviso retroactivo':x.announcement_state==='sent'?'Aviso enviado':x.announcement_state==='pending'?'Aviso en cola':'Publicado'}</span>}
+              {validSpotifyEpisode(x.link)&&<a href={x.link} target="_blank" rel="noreferrer">Escuchar en Spotify <ArrowUpRight size={14}/></a>}
             </div>
-            <p>{x.summary || 'Parte de la primera serie del podcast.'}</p>
-            <small>
-              <CalendarDays size={14} />
-              {formatDate(x.date)} <span>·</span>
-              {x.audio ? 'Audio enlazado' : 'Audio pendiente'} <span>·</span>
-              {x.art ? 'Portada enlazada' : 'Portada pendiente'}
-            </small>
           </div>
-          {buttons('episodios', x)}
-        </div>
+          {buttons('episodios',x)}
+        </article>
       ))}
-      {visible(episodes).length === 0 && empty}
+      {visible(episodes).length===0&&empty}
     </div>
   );
   const taskRows = (
@@ -974,7 +1000,7 @@ function App() {
             <>
               {head(
                 'Primera serie',
-                'De la primera idea a la publicación. Cada paso tiene su espacio.',
+                'Tus ocho guiones completos. En producción → Hecho → Publicado: solo al publicar se avisa a los oyentes.',
                 'episodios'
               )}
               <div className="search">
@@ -992,7 +1018,7 @@ function App() {
             <>
               {head(
                 'Un capítulo cada martes',
-                'Fechas editoriales. Cambiar el estado aquí no publica en plataformas.',
+                'Primero publica el audio en Spotify. Después marca «Publicado» en el estudio para enviar el aviso a oyentes.',
                 'episodios'
               )}
               <div className="calendar">
@@ -1548,6 +1574,10 @@ function App() {
               )}
               {edit.kind === 'episodios' && (
                 <>
+                  <label className="full-script-label">Guion completo (editable)
+                    <textarea rows={14} maxLength={20000} value={edit.item.script||''} onChange={e=>setEdit({...edit,item:{...edit.item,script:e.target.value}})} placeholder="Texto para narrar…"/>
+                  </label>
+                  <p className="modal-helper">Después de «Hecho», marca «Publicado» solamente con el enlace directo del capítulo de Spotify. Esa acción avisará a los oyentes.</p>
                   <label>
                     Resumen
                     <input
@@ -1588,7 +1618,7 @@ function App() {
               )}
               {(edit.kind === 'productos' || edit.kind === 'episodios') && (
                 <label>
-                  Enlace principal
+                  {edit.kind === 'episodios' ? 'Enlace directo del episodio en Spotify' : 'Enlace principal'}
                   <input
                     value={edit.item.link || ''}
                     onChange={e =>
