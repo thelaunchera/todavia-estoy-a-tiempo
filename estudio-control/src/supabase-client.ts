@@ -76,8 +76,9 @@ function payload(input: unknown): {title:string;payload:Record<string,unknown>} 
   const value = input && typeof input==='object'?input as Record<string,unknown>:{};
   const title = String(value.title || '').trim().slice(0,180);
   const content:Record<string,unknown>={};
-  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','script','announcement_state']) {
+  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','script','announcement_state','script_reviewed']) {
     const v=value[k];
+    if(k==='script_reviewed' && typeof v==='boolean') content[k]=v;
     if(k==='price' && typeof v==='number' && Number.isFinite(v) && v>=0) content[k]=Math.round(v*100)/100;
     else if(typeof v==='string')content[k]=v.trim().slice(0,k==='script'?20000:k==='notes'?3000:500);
   }
