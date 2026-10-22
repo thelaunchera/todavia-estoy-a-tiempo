@@ -590,6 +590,7 @@ function App() {
             </button>
           </form>
           {mailSent && <div className="login-warning" role="status">Revisa tu correo. Te envié un enlace para entrar al Estudio.</div>}
+          <p className="login-install-tip">📱 ¿Quieres usarlo como app en iPhone? Abre este sitio en Safari, toca Compartir → Añadir a pantalla de inicio y activa «Abrir como app web».</p>
           {SUPABASE_ENABLED && <p className="login-device-hint">¿Quieres entrar en tu computadora? Abre el correo y pulsa «Sign in» <strong>en esa misma computadora</strong>. Para entrar en el iPhone, abre el enlace en Safari del iPhone. Cada dispositivo inicia su propia sesión.</p>}
           <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Acceso por correo y datos protegidos en Supabase.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
@@ -1334,6 +1335,10 @@ function App() {
                   }}>{importing?'Importando…':'Importar al estudio'}</button>
                 </div>
               </div>}
+              <div className="app-install-settings">
+                <strong>📱 Mi estudio, como app en el teléfono</strong>
+                <p>En iPhone: abre /estudio/ en Safari, toca Compartir → Añadir a pantalla de inicio y marca «Abrir como app web». En Android: usa el menú del navegador y busca «Instalar app» o «Añadir a pantalla principal».</p>
+              </div>
               <button className="logout" onClick={logout}>
                 <LogOut size={17} /> Cerrar sesión
               </button>

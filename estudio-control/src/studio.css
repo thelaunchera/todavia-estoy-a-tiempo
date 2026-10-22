@@ -1886,3 +1886,23 @@ a:focus-visible {
 /* Instrucción para completar un magic link en el dispositivo deseado */
 .login-device-hint{font-size:12px!important;line-height:1.6!important;color:#637c8f!important;margin:14px 0 10px!important;max-width:440px!important}
 .login-device-hint strong{color:#254961;font-weight:700}
+
+/* Experiencia web app instalada en iPhone y Android */
+@media (max-width: 950px) {
+  .topbar {position:sticky;top:0;z-index:9;height:calc(69px + env(safe-area-inset-top, 0px));padding-top:env(safe-area-inset-top, 0px)}
+  .sidebar {height:100dvh;padding-bottom:env(safe-area-inset-bottom, 0px)}
+  .main {padding-bottom:calc(26px + env(safe-area-inset-bottom, 0px))}
+  .modal-backdrop {padding-top:calc(15px + env(safe-area-inset-top, 0px));padding-bottom:calc(15px + env(safe-area-inset-bottom, 0px))}
+}
+@media(max-width:720px) {
+  .login-content {min-height:100dvh;padding-top:calc(39px + env(safe-area-inset-top, 0px));padding-bottom:calc(39px + env(safe-area-inset-bottom, 0px))}
+}
+.login-install-tip{font-size:12px;color:#617b8e;line-height:1.55;margin-top:14px;max-width:400px}
+@media(min-width:951px){.login-install-tip{display:none}}
+.app-install-settings{margin-top:15px;padding:20px 24px;border-radius:14px;border:1px solid #d6e3e9;background:#eff4f6}
+.app-install-settings strong{font-size:15px;color:#254961;display:block;margin-bottom:8px}
+.app-install-settings p{font-size:12px;color:#6f8697;line-height:1.65}
+@media(display-mode:standalone) {
+  html,body,#root {min-height:100dvh}
+  .login-install-tip{display:none}
+}

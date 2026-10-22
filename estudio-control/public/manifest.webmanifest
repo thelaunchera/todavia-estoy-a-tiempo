@@ -1,0 +1,29 @@
+{
+  "id": "./",
+  "name": "Todavía estoy a tiempo · Estudio",
+  "short_name": "Mi estudio",
+  "description": "Estudio privado de creación y organización del podcast Todavía estoy a tiempo.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f3eb",
+  "theme_color": "#172940",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": [
+    "productivity"
+  ]
+}
