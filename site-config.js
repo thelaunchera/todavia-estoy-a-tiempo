@@ -13,6 +13,14 @@ window.PODCAST_CONFIG = {
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk',
   podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
+  // Esta URL queda vacía hasta subir el MP3 completo y comprobar su reproducción.
+  themeSongUrl: '',
+  // Clave pública (no secreta) del proyecto dedicado exclusivamente al podcast.
+  themeSongAnalytics: {
+    endpoint: 'https://fhrvuhikrybobidxpvnh.supabase.co/rest/v1/podcast_audio_events',
+    publishableKey: 'sb_publishable_Uj2dcLjktTPVb-IcAD5RSA_6J0AAfM-'
+  },
+
   productPhotos: [
     { file: 'assets/productos/editorial/guia.webp', alt: '5 preguntas para cuando sientes que vas tarde' },
     { file: 'assets/productos/editorial/diario.webp', alt: 'No voy tarde: un diario para volver a mí' },

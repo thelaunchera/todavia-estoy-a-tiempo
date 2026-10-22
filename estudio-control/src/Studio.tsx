@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -52,6 +52,7 @@ type Page =
   | 'ideas'
   | 'ventas'
   | 'audiencia'
+  | 'cancion'
   | 'soporte'
   | 'flujos'
   | 'seo'
@@ -115,6 +116,7 @@ const NAV = [
     group: 'OPERACIONES',
   },
   { id: 'audiencia', label: 'Audiencia', icon: Users },
+  { id: 'cancion', label: 'Escuchas de la canción', icon: AudioLines },
   { id: 'soporte', label: 'Mensajes', icon: Mail },
   { id: 'flujos', label: 'Automatizaciones', icon: Workflow },
   { id: 'seo', label: 'SEO y sitio web', icon: SearchCheck },
@@ -129,6 +131,7 @@ const LABELS: Record<Page, string> = {
   ideas: 'Banco de ideas',
   ventas: 'Ventas e ingresos',
   audiencia: 'Nuestra audiencia',
+  cancion: 'Escuchas de la canción',
   soporte: 'Mensajes y ayuda',
   flujos: 'Automatizaciones',
   seo: 'SEO y sitio web',
@@ -226,6 +229,19 @@ function App() {
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [seriesTab,setSeriesTab] = useState<string>('all');
+  const [audioStats,setAudioStats] = useState<AudioStats|null>(null);
+  const [audioStatsLoading,setAudioStatsLoading] = useState(false);
+  const [audioStatsError,setAudioStatsError] = useState('');
+  const refreshAudioStats = useCallback(async () => {
+    if(!SUPABASE_ENABLED)return;
+    setAudioStatsLoading(true);setAudioStatsError('');
+    try { setAudioStats(await getThemeSongStats()); }
+    catch(e) { setAudioStatsError(e instanceof Error?e.message:'No se pudieron cargar las estadísticas.'); }
+    finally { setAudioStatsLoading(false); }
+  },[]);
+  useEffect(() => {
+    if(page==='cancion' && account) { void refreshAudioStats(); }
+  },[page,account,refreshAudioStats]);
   const [edit, setEdit] = useState<{
       kind: Kind;
       item: Partial<Row>;
@@ -421,6 +437,7 @@ function App() {
     await auth.signOut();
     setAccount(null);
     setData(null);
+    setAudioStats(null);
     setDenied(false);
     setRecording(false);
     setPage('inicio');
@@ -1375,6 +1392,48 @@ function App() {
                 <AlertCircle size={17} /> Los flujos funcionan en Make. Este
                 estado es la última revisión, no un monitoreo en vivo.
               </div>
+            </>
+          )}
+
+          {page === 'cancion' && (
+            <>
+              {head('La canción también tiene su historia', 'Las estadísticas corresponden exclusivamente al reproductor de la landing, no a Spotify ni a otras plataformas.')}
+              <div className="audio-stats-head">
+                <div><span className="eyebrow">NUESTRA CANCIÓN</span><h3>¿Cómo la están escuchando?</h3></div>
+                <button type="button" onClick={() => void refreshAudioStats()} disabled={audioStatsLoading}>
+                  <RotateCcw size={16} className={audioStatsLoading?'spinning':''} />
+                  {audioStatsLoading?'Actualizando…':'Actualizar cifras'}
+                </button>
+              </div>
+              {audioStatsError && <p className="audio-stats-error" role="alert">{audioStatsError}</p>}
+              <div className="audio-stats-grid">
+                {([
+                  ['Inicios de reproducción',audioStats?.plays,'Cada vez que se presiona Play para iniciar una escucha'],
+                  ['Sesiones diferentes',audioStats?.sessions,'Sesiones anónimas de navegador, no personas identificadas'],
+                  ['Llegaron al 75 %',audioStats?.three_quarters,'Escucharon aproximadamente tres cuartas partes'],
+                  ['Casi hasta el final',audioStats?.completed,'Alcanzaron al menos el 95 % de la duración']
+                ] as const).map(([label,value,note])=>(
+                  <div className="audio-stats-tile" key={label}>
+                    <span>{label}</span><strong>{audioStats ? Number(value||0).toLocaleString('es-US') : '—'}</strong><small>{note}</small>
+                  </div>
+                ))}
+              </div>
+              <section className="wide-panel audio-stats-trends">
+                <div className="panel-head"><div><span className="eyebrow">ÚLTIMOS 30 DÍAS</span><h3>Escuchas por día</h3></div></div>
+                {audioStats?.days?.length ? (
+                  <div className="audio-daily-chart" aria-label="Inicios de reproducción por fecha">
+                    {audioStats.days.map(day => (
+                      <div className="audio-daily-row" key={day.day}>
+                        <span>{new Date(day.day+'T12:00:00').toLocaleDateString('es-US',{month:'short',day:'numeric'})}</span>
+                        <div className="audio-daily-bar-track"><div style={{width:(Math.max(2,100*day.plays/Math.max(...audioStats.days.map(d=>d.plays),1)))+'%'}} /></div>
+                        <strong>{day.plays}</strong>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="audio-stats-empty">{audioStatsLoading?'Cargando escuchas…':'Todavía no hay escuchas registradas desde la landing.'}</p>}
+                {audioStats?.last_play_at && <p className="audio-stats-foot">Último inicio registrado: {new Date(audioStats.last_play_at).toLocaleString('es-US',{dateStyle:'medium',timeStyle:'short'})}</p>}
+              </section>
+              <div className="hint"><ShieldCheck size={17}/> No almacenamos nombres ni correos de quien escucha. Las cifras son aproximadas y pueden incluir reproducciones repetidas. Spotify mantiene sus propias estadísticas.</div>
             </>
           )}
           {page === 'seo' && (

@@ -172,6 +172,19 @@ export const auth={
     if(error)throw error;
   }
 };
+export type AudioStats = {
+  plays: number; sessions: number; quarter: number; half: number;
+  three_quarters: number; completed: number; last_play_at: string | null;
+  days: Array<{ day:string; plays:number; completed:number }>;
+};
+export async function getThemeSongStats():Promise<AudioStats> {
+  if(!client)throw new Error('Las estadísticas requieren Supabase.');
+  await owner();
+  const {data,error}=await client.rpc('podcast_audio_stats');
+  if(error)throw new Error('No se pudieron obtener las estadísticas de audio.');
+  if(!data || typeof data !== 'object')throw new Error('No hay respuesta de las estadísticas de audio.');
+  return data as AudioStats;
+}
 export const api={
   async get(path:string){
     if(!client)return localApi.get(path);
