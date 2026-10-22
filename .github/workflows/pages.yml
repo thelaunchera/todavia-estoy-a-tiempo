@@ -46,7 +46,7 @@ jobs:
         run: |
           mkdir -p _podcast_pages/estudio
           cp -R assets productos _podcast_pages/
-          cp -- *.html *.css *.js *.xml _podcast_pages/
+          cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
       - name: Empaquetar sitio estático
