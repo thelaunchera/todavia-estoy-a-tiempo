@@ -30,6 +30,8 @@ jobs:
           source = Path("assets/logo-podcast-04.svg").read_bytes()
           cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-email.png", output_width=900)
           cairosvg.svg2png(bytestring=source.replace(b'#131925', b'#f7f3eb'), write_to="assets/logo-podcast-04-light.png", output_width=900)
+          cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-social-dark.png", output_width=1600)
+          cairosvg.svg2png(bytestring=source.replace(b'#131925', b'#f7f3eb'), write_to="assets/logo-podcast-04-social-light.png", output_width=1600)
           PY
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
