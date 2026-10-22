@@ -54,3 +54,12 @@ No importa ventas ni direcciones de compradores porque estas no se pueden valida
 ## 8. Control de calidad del repositorio
 El despliegue de GitHub Pages ahora verifica `tests/check-schema.mjs` antes de compilar.
 La primera lectura real de Supabase, sus políticas RLS y el acceso por correo deben probarse tras crear el nuevo proyecto. No declarar «conectado» hasta que esa verificación sea satisfactoria.
+
+### Activación real — 22 octubre 2026
+- Proyecto nuevo creado: `fhrvuhikrybobidxpvnh`.
+- El esquema de ocho tablas está instalado y sus RLS están habilitadas.
+- El sitio GitHub Pages usa la URL y la **clave pública** Supabase de `src/public-supabase-config.ts`. Esto NO es una clave secreta.
+- En Supabase > Authentication > URL Configuration, añadir la URL exacta `https://podcast.thelaunchera.com/estudio/` a los redireccionamientos permitidos. Este ajuste aún debe hacerse en el Dashboard.
+- El primer propietario debe confirmar el enlace que llega a su correo. Después de eso, asignar su usuario ya confirmado a la tabla `podcast_studio_admins` mediante una operación administrativa segura. No se permite el acceso solo por crear una cuenta.
+- Hasta que la cuenta propietaria se autorice, el estudio bloqueará el acceso a datos remotos (esto es intencional).
+- Antes de migrar registros locales, exportar un respaldo cifrado desde la versión local. El proyecto nuevo no contiene esos datos todavía.

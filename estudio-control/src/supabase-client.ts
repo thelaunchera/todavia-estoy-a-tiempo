@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from './public-supabase-config';
 import {
   auth as localAuth, api as localApi, hasLocalVault,
   downloadEncryptedBackup, importEncryptedBackup
@@ -6,8 +7,8 @@ import {
 
 export { hasLocalVault, downloadEncryptedBackup, importEncryptedBackup };
 
-const url = (import.meta.env.VITE_PODCAST_SUPABASE_URL || '').trim();
-const key = (import.meta.env.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY || '').trim();
+const url = (import.meta.env.VITE_PODCAST_SUPABASE_URL || PUBLIC_SUPABASE_URL).trim();
+const key = (import.meta.env.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY || PUBLIC_SUPABASE_PUBLISHABLE_KEY).trim();
 export const SUPABASE_ENABLED = /^https:\/\/[^/]+\.supabase\.co\/?$/.test(url)
   && (key.startsWith('sb_publishable_') || key.startsWith('eyJ'));
 const client: SupabaseClient | null = SUPABASE_ENABLED
@@ -61,7 +62,7 @@ export const auth={
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Introduce un correo válido.');
     const redirect=window.location.origin+window.location.pathname;
     const {error}=await client.auth.signInWithOtp({
-      email, options:{emailRedirectTo:redirect,shouldCreateUser:false}
+      email, options:{emailRedirectTo:redirect,shouldCreateUser:true}
     });
     if(error)throw new Error('No pude enviar el enlace de acceso. Comprueba el correo configurado.');
     return {user:null,sent:true} as const;
