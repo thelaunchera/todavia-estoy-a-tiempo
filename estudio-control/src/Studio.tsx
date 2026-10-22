@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -179,6 +179,9 @@ function StatePill({ status }: { status?: string }) {
 function App() {
   const [passphrase, setPassphrase] = useState('');
   const [mailSent, setMailSent] = useState(false);
+  const [importSecret,setImportSecret] = useState('');
+  const [importing,setImporting] = useState(false);
+  const [importMessage,setImportMessage] = useState('');
   const [confirmPhrase, setConfirmPhrase] = useState('');
   const [vaultPresent, setVaultPresent] = useState(hasLocalVault());
   const [account, setAccount] = useState<{
@@ -1258,6 +1261,29 @@ function App() {
                       finally { event.currentTarget.value = ''; }
                     }} />
                   </label>
+                </div>
+              </div>}
+              {SUPABASE_ENABLED && hasLocalVault() && !recording && <div className="setting vault-backups">
+                <div>
+                  <b>Recuperar mis capítulos y tareas anteriores</b>
+                  <p>Importa tus registros guardados en este navegador a Supabase. No borra tu copia cifrada y no duplica datos si lo intentas de nuevo.</p>
+                  <label className="migration-label" htmlFor="import-vault-passphrase">Frase de acceso anterior</label>
+                  <input id="import-vault-passphrase" className="migration-input" type="password" autoComplete="off"
+                    value={importSecret} onChange={event=>setImportSecret(event.target.value)} placeholder="Tu frase de la bóveda local" />
+                  {importMessage && <p role="status" className="migration-status">{importMessage}</p>}
+                </div>
+                <div className="vault-backup-actions">
+                  <button type="button" disabled={importing || importSecret.length<10} onClick={async()=>{
+                    if(!window.confirm('¿Importar al estudio de Supabase los episodios, tareas, productos e ideas guardados en este dispositivo? Los archivos locales no se eliminarán.'))return;
+                    setImporting(true);setImportMessage('');
+                    try{
+                      const result=await importLocalRecords(importSecret);
+                      setImportMessage('Importación terminada: '+result.imported+' nuevos registros y '+result.existing+' que ya estaban guardados.');
+                      await refresh();
+                    }catch(e){
+                      setImportMessage(e instanceof Error?e.message:'No pude importar tus datos. Puedes volver a intentarlo.');
+                    }finally{setImportSecret('');setImporting(false);}
+                  }}>{importing?'Importando…':'Importar al estudio'}</button>
                 </div>
               </div>}
               <button className="logout" onClick={logout}>

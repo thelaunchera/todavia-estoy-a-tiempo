@@ -44,7 +44,7 @@ async function owner():Promise<{id:string;email:string}> {
   if(error||!user)throw new Error('Inicia sesión para continuar.');
   const {data:admin,error:roleError}=await client.from('podcast_studio_admins')
     .select('user_id').eq('user_id',user.id).maybeSingle();
-  if(roleError || !admin)throw Object.assign(new Error('Esta cuenta no tiene acceso al estudio.'),{code:'unauthorized'});
+  if(roleError || !admin){ await client.auth.signOut(); throw Object.assign(new Error('Esta cuenta no tiene acceso al estudio.'),{code:'unauthorized'}); }
   return {id:user.id,email:user.email||''};
 }
 export const auth={
@@ -77,13 +77,14 @@ export const api={
     if(!client)return localApi.get(path);
     if(path!=='/api/studio')throw new Error('Ruta desconocida.');
     await owner();
-    const [entries,sales,subscribers,messages,deliveries,runs]=await Promise.all([
+    const [entries,sales,subscribers,messages,deliveries,runs,integrations]=await Promise.all([
       client.from('podcast_studio_entries').select('id,kind,title,payload,user_id').order('created_at',{ascending:true}).limit(500),
       client.from('podcast_sales').select('id',{count:'exact',head:true}),
       client.from('podcast_subscribers').select('id',{count:'exact',head:true}).is('unsubscribed_at',null),
       client.from('podcast_support_messages').select('id',{count:'exact',head:true}),
       client.from('podcast_delivery_events').select('id',{count:'exact',head:true}),
-      client.from('podcast_automation_runs').select('id',{count:'exact',head:true})
+      client.from('podcast_automation_runs').select('id',{count:'exact',head:true}),
+      client.from('podcast_integrations').select('provider,status,last_sync_at').limit(20)
     ]);
     if(entries.error)throw entries.error;
     const records:Record<Kind,Entry[]>={episodios:[],tareas:[],productos:[],ideas:[]};
@@ -92,12 +93,13 @@ export const api={
       if(kinds.includes(r.kind))records[r.kind].push(mapped(r));
     }
     const fmt=(value:number|null,err:unknown)=>err?'Sin sincronizar':value===null?'Pendiente':String(value);
+    const active=(provider:string)=>!integrations.error && (integrations.data||[]).some(x=>x.provider===provider && x.status==='active');
     return {data:{
       records,
       sources:{
-        sales:'Pagos registrados: '+fmt(sales.count,sales.error)+'. Nuevos eventos de pago requieren un webhook verificado.',
-        subscribers:'Suscripciones vigentes registradas: '+fmt(subscribers.count,subscribers.error)+'. Sincronización desde Make pendiente.',
-        support:'Mensajes registrados: '+fmt(messages.count,messages.error)+'. Conexión con correo pendiente.',
+        sales:active('stripe')?'Pagos registrados en Supabase: '+fmt(sales.count,sales.error)+'. Solo eventos verificados cuentan.':'Pendiente: conectar eventos firmados de Stripe; ninguna cifra de ventas se presenta como confirmada.',
+        subscribers:active('make')?'Suscripciones vigentes registradas: '+fmt(subscribers.count,subscribers.error)+'.':'Pendiente: conectar de forma segura la lista de consentimientos de Make.',
+        support:active('resend')?'Mensajes registrados: '+fmt(messages.count,messages.error)+'.':'Pendiente: integrar la bandeja privada de ayuda y sus respuestas.',
         seo:'Sitemap publicado. Indexación en Search Console aún pendiente de comprobar.',
         lastVerified:'Base Supabase: '+(deliveries.error||runs.error?'verificación parcial':'lectura activa')
       }
@@ -138,3 +140,47 @@ export const api={
     return {data:{ok:true}};
   }
 };
+
+/**
+ * Migración manual del archivo cifrado del navegador al proyecto Supabase privado.
+ * Requiere sesión administradora y confirmación explícita desde la interfaz.
+ * Es idempotente: claves (user_id,kind,external_id) no duplican registros al reintentar.
+ * Solo importa contenido editorial; jamás almacena importes reales de ventas como fuente fiable.
+ */
+export async function importLocalRecords(passphrase: string) {
+  if (!client) throw new Error('Supabase no está conectado.');
+  if (!hasLocalVault()) throw new Error('No hay datos locales en este navegador.');
+  const user = await owner();
+  if (!passphrase || passphrase.length < 10) throw new Error('Introduce tu frase de acceso local.');
+  let localData: Record<Kind, Entry[]>;
+  try {
+    await localAuth.signIn(passphrase);
+    const response = await localApi.get('/api/studio');
+    localData = response.data.records as Record<Kind, Entry[]>;
+  } finally {
+    await localAuth.signOut();
+  }
+  const rows: Array<Record<string,unknown>> = [];
+  for (const kind of kinds) {
+    for (const record of localData[kind]||[]) {
+      const cleaned = payload(record);
+      if (!cleaned.title || !record.id) continue;
+      rows.push({
+        user_id:user.id,
+        kind,
+        title:cleaned.title,
+        payload:cleaned.payload,
+        external_id:'local:'+String(record.id).slice(0,180)
+      });
+    }
+  }
+  let imported=0;
+  for(let i=0;i<rows.length;i+=40) {
+    const chunk=rows.slice(i,i+40);
+    const {data,error} = await client.from('podcast_studio_entries')
+      .upsert(chunk,{onConflict:'user_id,kind,external_id',ignoreDuplicates:true}).select('id');
+    if(error) throw new Error('No se pudieron importar todos los registros. Puedes reintentar sin generar duplicados.');
+    imported+=(data||[]).length;
+  }
+  return { total:rows.length, imported, existing:rows.length-imported };
+}
