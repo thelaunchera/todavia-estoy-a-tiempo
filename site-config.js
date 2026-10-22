@@ -13,8 +13,8 @@ window.PODCAST_CONFIG = {
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   freeGuideUrl: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk',
   podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
-  // Esta URL queda vacía hasta subir el MP3 completo y comprobar su reproducción.
-  themeSongUrl: '',
+  // Canción del podcast: archivo AAC para reproducción web, sin inicio automático.
+  themeSongUrl: 'assets/tema-podcast.m4a',
   // Clave pública (no secreta) del proyecto dedicado exclusivamente al podcast.
   themeSongAnalytics: {
     endpoint: 'https://fhrvuhikrybobidxpvnh.supabase.co/rest/v1/podcast_audio_events',

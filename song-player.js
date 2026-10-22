@@ -6,8 +6,10 @@
   const audio = document.getElementById('theme-song-audio');
   const url = typeof config.themeSongUrl === 'string' ? config.themeSongUrl.trim() : '';
   // Un reproductor sin fuente no se debe mostrar a los visitantes.
-  if (!section || !audio || !url || !/^https:\/\//.test(new URL(url, window.location.href).href) && !url.startsWith('assets/')) return;
-  const src = new URL(url, window.location.href);
+  if (!section || !audio || !url) return;
+  let src;
+  try { src = new URL(url, window.location.href); }
+  catch { return; }
   if (!['https:', 'http:'].includes(src.protocol)) return;
   audio.src = src.href;
   section.hidden = false;
