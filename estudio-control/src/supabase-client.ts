@@ -76,11 +76,12 @@ function payload(input: unknown): {title:string;payload:Record<string,unknown>} 
   const value = input && typeof input==='object'?input as Record<string,unknown>:{};
   const title = String(value.title || '').trim().slice(0,180);
   const content:Record<string,unknown>={};
-  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','script','announcement_state','script_reviewed']) {
+  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','script','announcement_state','script_reviewed','number','series','series_number','spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes']) {
     const v=value[k];
+    if((k==='number'||k==='series_number') && typeof v==='number' && Number.isInteger(v) && v>=1 && v<=999) content[k]=v;
     if(k==='script_reviewed' && typeof v==='boolean') content[k]=v;
     if(k==='price' && typeof v==='number' && Number.isFinite(v) && v>=0) content[k]=Math.round(v*100)/100;
-    else if(typeof v==='string')content[k]=v.trim().slice(0,k==='script'?20000:k==='notes'?3000:500);
+    else if(typeof v==='string')content[k]=v.trim().slice(0,k==='script'?20000:k==='notes'?40000:['spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes'].includes(k)?12000:500);
   }
   return {title,payload:content};
 }

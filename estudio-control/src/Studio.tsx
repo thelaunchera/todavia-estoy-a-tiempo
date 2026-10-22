@@ -41,6 +41,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import './studio.css';
+import { groupEpisodes, narrationBlocks } from './episode-library';
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
@@ -74,7 +75,13 @@ type Row = {
   audio_ready?: boolean;
   number?: number;
   series?: string;
+  series_number?: number;
   script_reviewed?: boolean;
+  spotify_description?: string;
+  reel_excerpt?: string;
+  reel_overlay?: string;
+  visual_idea?: string;
+  performance_notes?: string;
 };
 type Data = {
   records: Record<Kind, Row[]>;
@@ -176,6 +183,18 @@ function StatePill({ status }: { status?: string }) {
     </Pill>
   );
 }
+function CopyText({ value, label = 'Copiar' }: { value: string; label?: string }) {
+  const [message, setMessage] = useState('');
+  return <span className="copy-text-control"><button type="button" onClick={async () => {
+    try { await navigator.clipboard.writeText(value); setMessage('Copiado'); }
+    catch { setMessage('Selecciona el texto para copiarlo.'); }
+  }}>{label}</button><small role="status">{message}</small></span>;
+}
+function NoteText({ text }: { text: string }) {
+  return <div className="research-note-text">{text.split(/(https:\/\/[^\s<>\]\)]+)/g).map((part, i) =>
+    part.startsWith('https://') ? <a key={i} href={part} target="_blank" rel="noreferrer">{part}</a> : part
+  )}</div>;
+}
 function App() {
   const [passphrase, setPassphrase] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -206,7 +225,7 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
-  const [seriesTab,setSeriesTab] = useState<'all'|'first'|'second'>('all');
+  const [seriesTab,setSeriesTab] = useState<string>('all');
   const [edit, setEdit] = useState<{
       kind: Kind;
       item: Partial<Row>;
@@ -423,12 +442,13 @@ function App() {
   );
   const tasks = items.tareas,
     products = items.productos;
+  const allSeries = groupEpisodes(episodes);
   const published = episodes.filter(x => x.status === 'publicado').length;
   const pending = tasks.filter(x => x.status !== 'completado').length;
   const next = episodes.find(x => x.status !== 'publicado');
   const visible = (xs: Row[]) =>
     xs.filter(x =>
-      (x.title + ' ' + (x.notes || '') + ' ' + (x.status || ''))
+      (x.title + ' ' + (x.notes || '') + ' ' + (x.status || '') + ' ' + (x.series || '') + ' ' + (x.script || '') + ' ' + (x.spotify_description || ''))
         .toLowerCase()
         .includes(search.toLowerCase())
     );
@@ -584,10 +604,7 @@ function App() {
   );
   const episodeRows=(
     <div className="episode-list episode-library">
-      {[
-        {id:'first',name:'Pensé que a esta edad…',number:'01',rows:visible(episodes).filter(x=>Number(x.number||0)<=8)},
-        {id:'second',name:'La vida que nadie ve',number:'02',rows:visible(episodes).filter(x=>Number(x.number||0)>=9)}
-      ].filter(g=>g.rows.length && (seriesTab==='all'||seriesTab===g.id)).map(group=>(
+      {groupEpisodes(visible(episodes)).filter(g=>g.rows.length && (seriesTab==='all'||seriesTab===g.id)).map(group=>(
         <section className="episode-series-group" key={group.id}>
           <header className="episode-series-heading">
             <span>SERIE {group.number}</span>
@@ -610,6 +627,35 @@ function App() {
                 <button onClick={()=>editRow('episodios',x)}><Pencil size={15}/> Editar diálogo</button>
               </div>
             </details>}
+            {x.script && Number(x.number) >= 20 && <details className="episode-script episode-production">
+              <summary><FileAudio size={17}/> Texto listo para ElevenLabs</summary>
+              <div className="episode-script-body">
+                <p>Solo narración. Copia los bloques en orden y conserva la misma voz y ajustes.</p>
+                <CopyText value={x.script} label="Copiar guion completo"/>
+                {narrationBlocks(x.script).map((block, index) => <section className="narration-block" key={index}>
+                  <h4>Bloque {index + 1}</h4>
+                  <textarea readOnly rows={7} value={block} aria-label={'Narración · bloque ' + (index + 1)} />
+                  <CopyText value={block} label={'Copiar bloque ' + (index + 1)}/>
+                </section>)}
+              </div>
+            </details>}
+            {(x.spotify_description || x.reel_excerpt || x.visual_idea) && <details className="episode-script episode-promotion">
+              <summary><Video size={17}/> Spotify, Reel y dirección visual</summary>
+              <div className="episode-script-body">
+                <span className="eyebrow">MATERIAL PROMOCIONAL</span>
+                {([
+                  ['Descripción para Spotify', x.spotify_description],
+                  ['Fragmento de narración para Reel', x.reel_excerpt],
+                  ['Texto sobre el Reel', x.reel_overlay],
+                  ['Idea visual de portada y promoción', x.visual_idea],
+                  ['Interpretación y cierre', x.performance_notes],
+                ] as const).filter(([, value]) => value).map(([label, value]) => <section className="promotion-field" key={label}>
+                  <h4>{label}</h4><div className="episode-script-text">{value}</div>
+                  <CopyText value={value!} label={'Copiar ' + label.toLowerCase()}/>
+                </section>)}
+                <button onClick={()=>editRow('episodios',x)}><Pencil size={15}/> Editar material promocional</button>
+              </div>
+            </details>}
             <div className="episode-actions">
               {x.status==='borrador privado'&&<button disabled={saving} onClick={()=>editRow('episodios',x)}><ShieldCheck size={15}/> Revisar borrador privado</button>}
               {x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
@@ -624,7 +670,7 @@ function App() {
       ))}
         </section>
       ))}
-      {!visible(episodes).some(x=>seriesTab==='all'||(seriesTab==='first'?Number(x.number||0)<=8:Number(x.number||0)>=9))&&empty}
+      {!groupEpisodes(visible(episodes)).some(group=>seriesTab==='all'||seriesTab===group.id)&&empty}
     </div>
   );
   const taskRows = (
@@ -1028,11 +1074,11 @@ function App() {
             <>
               {head(
                 'Biblioteca de guiones',
-                'Las dos series completas, con 19 capítulos. Abre cada diálogo para leerlo y editarlo; publica solo cuando el audio esté en Spotify.',
+                `${allSeries.length} series y ${episodes.length} capítulos. Abre el guion, prepara la narración y consulta el material de promoción de cada episodio.`,
                 'episodios'
               )}
               <div className="series-tabs" aria-label="Filtrar series">
-                {([{id:'all',label:'Todas · 19'},{id:'first',label:'Serie 01 · 8'},{id:'second',label:'Serie 02 · 11'}] as const).map(t=>(
+                {[{id:'all',label:`Todas · ${episodes.length}`},...allSeries.map(group=>({id:group.id,label:`Serie ${group.number} · ${group.rows.length}`}))].map(t=>(
                   <button type="button" key={t.id} className={seriesTab===t.id?'active':''} onClick={()=>setSeriesTab(t.id)} aria-pressed={seriesTab===t.id}>{t.label}</button>
                 ))}
               </div>
@@ -1156,10 +1202,12 @@ function App() {
                     </div>
                     <StatePill status={x.status} />
                     <h3>{x.title}</h3>
-                    <p>
-                      {x.notes ||
-                        'Escribe una nota para desarrollar esta idea.'}
-                    </p>
+                    {(x.notes||'').length > 600 ? <>
+                      <p>{x.notes!.slice(0,220)}…</p>
+                      <details className="episode-script research-dossier"><summary><BookOpen size={17}/> Leer investigación y notas</summary>
+                        <div className="episode-script-body"><NoteText text={x.notes!}/><CopyText value={x.notes!} label="Copiar documento"/></div>
+                      </details>
+                    </> : <p>{x.notes || 'Escribe una nota para desarrollar esta idea.'}</p>}
                     <small>{x.section || 'Idea libre'}</small>
                   </article>
                 ))}
@@ -1607,6 +1655,21 @@ function App() {
                     <textarea rows={18} maxLength={20000} value={edit.item.script||''} onChange={e=>setEdit({...edit,item:{...edit.item,script:e.target.value,script_reviewed:edit.item.number===19?false:edit.item.script_reviewed,status:edit.item.number===19?'borrador privado':edit.item.status}})} placeholder="Escribe, corrige y desarrolla aquí el diálogo del episodio…"/>
                     <small>Edítalo aquí como un documento. Guarda los cambios en Supabase. No se altera el audio publicado ni se envían correos por editar.</small>
                   </label>
+                  <label>Número de episodio
+                    <input type="number" min={1} max={999} value={edit.item.number ?? ''} onChange={e=>setEdit({...edit,item:{...edit.item,number:e.target.value?Number(e.target.value):undefined}})}/>
+                  </label>
+                  <label>Serie
+                    <input value={edit.item.series||''} onChange={e=>setEdit({...edit,item:{...edit.item,series:e.target.value}})} placeholder="Nombre de la serie"/>
+                  </label>
+                  {([
+                    ['spotify_description','Descripción para Spotify',5],
+                    ['reel_excerpt','Fragmento de narración para Reel',4],
+                    ['reel_overlay','Texto sobre el Reel',2],
+                    ['visual_idea','Idea visual de portada y promoción',5],
+                    ['performance_notes','Interpretación y cierre',3],
+                  ] as const).map(([field,label,rows])=><label className="full-script-label" key={field}>{label}
+                    <textarea rows={rows} maxLength={12000} value={edit.item[field]||''} onChange={e=>setEdit({...edit,item:{...edit.item,[field]:e.target.value}})}/>
+                  </label>)}
                   {edit.item.number===19&&<label className="episode-draft-approval">
                     <input type="checkbox" checked={Boolean(edit.item.script_reviewed)} onChange={e=>setEdit({...edit,item:{...edit.item,script_reviewed:e.target.checked,status:e.target.checked?'guion listo':'borrador privado'}})} />
                     <span><strong>Aprobé personalmente este guion.</strong> Solo después de marcar esta casilla podrá pasar a producción. Hasta entonces seguirá privado, sin publicarse ni avisar a oyentes.</span>

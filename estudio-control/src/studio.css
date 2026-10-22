@@ -2080,3 +2080,16 @@ a:focus-visible {
 .full-script-label textarea{min-height:355px;white-space:pre-wrap;font:16px/1.65 Georgia,serif;resize:vertical}
 .full-script-label small{display:block;font:12px/1.5 'DM Sans',Arial,sans-serif;color:#667f8c;padding-top:8px}
 @media(max-width:650px){.series-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.series-tabs button{flex:none;white-space:nowrap}.episode-series-heading{padding-top:17px}.full-script-label textarea{min-height:52dvh;font-size:16px}}
+
+
+/* Episode production and promotion remain separate from the spoken script. */
+.copy-text-control { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; }
+.copy-text-control small { color:var(--muted,#61748a); font-size:12px; }
+.narration-block,.promotion-field { margin:22px 0; min-width:0; }
+.narration-block h4,.promotion-field h4 { margin:0 0 10px; font-size:15px; }
+.narration-block textarea { width:100%; box-sizing:border-box; resize:vertical; border:1px solid #b8cadc; border-radius:12px; background:#fffdf9; padding:14px; color:#182339; font:inherit; line-height:1.65; }
+.research-note-text { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.8; font-size:14px; }
+.research-note-text a { text-decoration:underline; color:inherit; }
+.research-dossier { max-width:100%; }
+.idea:has(.research-dossier) { grid-column:1/-1; }
+.episode-production,.episode-promotion { margin-top:10px; }
