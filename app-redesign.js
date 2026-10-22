@@ -69,7 +69,7 @@
     const url = publicUrl(config.stripePaymentLinks?.[button.dataset.buy]);
     const ready = config.commerceEnabled === true && url !== null;
     button.disabled = !ready;
-    if (ready) button.textContent = 'Conseguir el cuaderno';
+    if (ready) button.textContent = button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $4.99' : 'Comprar mi cuaderno · $7.99';
     button.addEventListener('click', () => {
       if (ready) window.location.assign(url);
     });
