@@ -74,6 +74,7 @@ type Row = {
   audio_ready?: boolean;
   number?: number;
   series?: string;
+  script_reviewed?: boolean;
 };
 type Data = {
   records: Record<Kind, Row[]>;
@@ -127,7 +128,7 @@ const LABELS: Record<Page, string> = {
   ajustes: 'Configuración',
 };
 const STATES: Record<Kind, string[]> = {
-  episodios: ['guion listo','en producción','hecho','publicado'],
+  episodios: ['borrador privado','guion listo','en producción','hecho','publicado'],
   tareas: ['pendiente', 'en curso', 'completado'],
   productos: ['borrador', 'en preparación', 'disponible', 'publicado'],
   ideas: ['en exploración', 'seleccionada', 'en desarrollo', 'archivada'],
@@ -205,6 +206,7 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
+  const [seriesTab,setSeriesTab] = useState<'all'|'first'|'second'>('all');
   const [edit, setEdit] = useState<{
       kind: Kind;
       item: Partial<Row>;
@@ -412,9 +414,11 @@ function App() {
   };
   const episodes = useMemo(
     () =>
-      [...items.episodios].sort((a, b) =>
-        (a.date || '').localeCompare(b.date || '')
-      ),
+      [...items.episodios].sort((a,b) => {
+        const numberA=Number(a.number||0),numberB=Number(b.number||0);
+        if(numberA && numberB)return numberA-numberB;
+        return (a.date||'9999-12-31').localeCompare(b.date||'9999-12-31');
+      }),
     [items.episodios]
   );
   const tasks = items.tareas,
@@ -458,6 +462,11 @@ function App() {
   const validSpotifyEpisode=(value?:string)=>/^https:\/\/open\.spotify\.com\/episode\/[A-Za-z0-9]+(?:\?.*)?$/.test((value||'').trim());
   async function advanceEpisode(item:Row,nextStatus:'en producción'|'hecho'|'publicado') {
     if(recording||saving)return;
+    if(item.number===19&&!item.script_reviewed){
+      setEdit({kind:'episodios',item:{...item},newItem:false});
+      setFormError('Este borrador personal necesita tu aprobación explícita antes de producirse o publicarse.');
+      return;
+    }
     if(nextStatus==='publicado') {
       if(item.status!=='hecho') {setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Añade el enlace directo del episodio de Spotify, no el del programa.');return;}
@@ -476,6 +485,10 @@ function App() {
       return;
     }
     const original=edit.kind==='episodios'&&!edit.newItem?episodes.find(x=>x.id===edit.item.id):null;
+    if(edit.kind==='episodios' && original?.number===19 && edit.item.status!=='borrador privado' && !edit.item.script_reviewed){
+      setFormError('El capítulo 19 es personal. Aprueba primero el diálogo marcando la casilla al final del guion.');
+      return;
+    }
     if(edit.kind==='episodios'&&edit.item.status==='publicado'&&original?.status!=='publicado'){
       if(original?.status!=='hecho'){setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(edit.item.link)){setFormError('Añade el enlace directo: open.spotify.com/episode/…, no la página del programa.');return;}
@@ -571,23 +584,34 @@ function App() {
   );
   const episodeRows=(
     <div className="episode-list episode-library">
-      {visible(episodes).map((x,i)=>(
+      {[
+        {id:'first',name:'Pensé que a esta edad…',number:'01',rows:visible(episodes).filter(x=>Number(x.number||0)<=8)},
+        {id:'second',name:'La vida que nadie ve',number:'02',rows:visible(episodes).filter(x=>Number(x.number||0)>=9)}
+      ].filter(g=>g.rows.length && (seriesTab==='all'||seriesTab===g.id)).map(group=>(
+        <section className="episode-series-group" key={group.id}>
+          <header className="episode-series-heading">
+            <span>SERIE {group.number}</span>
+            <h3>{group.name}</h3>
+            <small>{group.rows.length} {group.rows.length===1?'capítulo':'capítulos'}</small>
+          </header>
+          {group.rows.map((x,i)=>(
         <article className="episode episode-editorial" key={x.id}>
           <div className="epi-no">{String(x.number||i+1).padStart(2,'0')}</div>
           <div className="epi-info">
             <div className="epi-line"><b>{x.title}</b><StatePill status={x.status}/></div>
-            <p>{x.series||'Primera serie · Pensé que a esta edad…'}</p>
+            <p>{x.series||'Primera serie · Pensé que a esta edad…'}{x.number===19&&<strong className="draft-private-label"> · Borrador personal · Revisión pendiente</strong>}</p>
             <small><CalendarDays size={14}/>{formatDate(x.date)} <span>·</span> {x.audio_ready||x.audio?'Audio creado':'Audio pendiente'} <span>·</span> {x.script?'Guion completo':'Sin guion'}</small>
             <div className="episode-progress" aria-label="Progreso editorial">{(['en producción','hecho','publicado'] as const).map(stage=><span key={stage} className={'progress-step '+(stage===x.status?'current':'')}>{stage}</span>)}</div>
             {x.script&&<details className="episode-script">
               <summary><BookOpen size={17}/> Leer guion completo</summary>
               <div className="episode-script-body">
-                <span className="eyebrow">PRIMERA SERIE · GUION DE NARRACIÓN</span><h3>{x.title}</h3>
+                <span className="eyebrow">{x.series || 'Serie del podcast'} · GUION DE NARRACIÓN</span><h3>{x.title}</h3>
                 <div className="episode-script-text">{x.script}</div>
-                <button onClick={()=>editRow('episodios',x)}><Pencil size={15}/> Editar guion</button>
+                <button onClick={()=>editRow('episodios',x)}><Pencil size={15}/> Editar diálogo</button>
               </div>
             </details>}
             <div className="episode-actions">
+              {x.status==='borrador privado'&&<button disabled={saving} onClick={()=>editRow('episodios',x)}><ShieldCheck size={15}/> Revisar borrador privado</button>}
               {x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
               {x.status==='en producción'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'hecho')}>Marcar hecho <CheckCircle2 size={15}/></button>}
               {x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar <ArrowUpRight size={15}/></button>}
@@ -597,6 +621,8 @@ function App() {
           </div>
           {buttons('episodios',x)}
         </article>
+      ))}
+        </section>
       ))}
       {visible(episodes).length===0&&empty}
     </div>
@@ -1001,17 +1027,18 @@ function App() {
           {page === 'episodios' && (
             <>
               {head(
-                'Primera serie',
-                'Tus ocho guiones completos. En producción → Hecho → Publicado: solo al publicar se avisa a los oyentes.',
+                'Biblioteca de guiones',
+                'Las dos series completas, con 19 capítulos. Abre cada diálogo para leerlo y editarlo; publica solo cuando el audio esté en Spotify.',
                 'episodios'
               )}
+              <div className="series-tabs" aria-label="Filtrar series">
+                {([{id:'all',label:'Todas · 19'},{id:'first',label:'Serie 01 · 8'},{id:'second',label:'Serie 02 · 11'}] as const).map(t=>(
+                  <button type="button" key={t.id} className={seriesTab===t.id?'active':''} onClick={()=>setSeriesTab(t.id)} aria-pressed={seriesTab===t.id}>{t.label}</button>
+                ))}
+              </div>
               <div className="search">
                 <SearchCheck size={17} />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Buscar capítulos…"
-                />
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar capítulos o diálogos…" />
               </div>
               {episodeRows}
             </>
@@ -1576,9 +1603,14 @@ function App() {
               )}
               {edit.kind === 'episodios' && (
                 <>
-                  <label className="full-script-label">Guion completo (editable)
-                    <textarea rows={14} maxLength={20000} value={edit.item.script||''} onChange={e=>setEdit({...edit,item:{...edit.item,script:e.target.value}})} placeholder="Texto para narrar…"/>
+                  <label className="full-script-label">Diálogo / guion completo
+                    <textarea rows={18} maxLength={20000} value={edit.item.script||''} onChange={e=>setEdit({...edit,item:{...edit.item,script:e.target.value,script_reviewed:edit.item.number===19?false:edit.item.script_reviewed,status:edit.item.number===19?'borrador privado':edit.item.status}})} placeholder="Escribe, corrige y desarrolla aquí el diálogo del episodio…"/>
+                    <small>Edítalo aquí como un documento. Guarda los cambios en Supabase. No se altera el audio publicado ni se envían correos por editar.</small>
                   </label>
+                  {edit.item.number===19&&<label className="episode-draft-approval">
+                    <input type="checkbox" checked={Boolean(edit.item.script_reviewed)} onChange={e=>setEdit({...edit,item:{...edit.item,script_reviewed:e.target.checked,status:e.target.checked?'guion listo':'borrador privado'}})} />
+                    <span><strong>Aprobé personalmente este guion.</strong> Solo después de marcar esta casilla podrá pasar a producción. Hasta entonces seguirá privado, sin publicarse ni avisar a oyentes.</span>
+                  </label>}
                   <p className="modal-helper">Después de «Hecho», marca «Publicado» solamente con el enlace directo del capítulo de Spotify. Esa acción avisará a los oyentes.</p>
                   <label>
                     Resumen
