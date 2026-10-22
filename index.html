@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Un podcast con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-mono-marquee">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-newsletter-footer2">
   <script defer src="site-config.js?v=20261022-spotify3"></script>
-  <script defer src="app-redesign.js?v=20261022-footer-cta-v1"></script>
+  <script defer src="app-redesign.js?v=20261022-newsletter-footer2"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
@@ -222,6 +222,29 @@
           <p>Hay cosas que toman tiempo. Aquí podemos hablar de ellas sin prisa.</p>
         </div>
 
+      </div>
+      <div class="footer-newsletter" aria-labelledby="footer-newsletter-title">
+        <div class="footer-newsletter-intro">
+          <p class="footer-newsletter-eyebrow">UNA NOTA DE VEZ EN CUANDO</p>
+          <h3 id="footer-newsletter-title">Nos seguimos <em>escuchando.</em></h3>
+          <p>Nuevos episodios y alguna reflexión para acompañarte, sin llenar tu bandeja de entrada.</p>
+        </div>
+        <form class="newsletter-form" id="newsletter-form" data-newsletter-form novalidate>
+          <label class="newsletter-label" for="newsletter-email">Tu correo electrónico</label>
+          <div class="newsletter-pill" data-newsletter-pill>
+            <input type="email" id="newsletter-email" name="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="Tu correo" aria-describedby="newsletter-feedback newsletter-note" required>
+            <button type="submit" class="newsletter-submit">Suscribirme</button>
+            <div class="newsletter-confirmation" aria-live="polite" aria-atomic="true" aria-hidden="true">
+              <span class="newsletter-confirmation-text"></span>
+              <svg class="newsletter-tick" viewBox="0 0 28 28" width="23" height="23" aria-hidden="true"><path d="m6 14 5.5 5.5L22 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24"/></svg>
+            </div>
+          </div>
+          <p id="newsletter-feedback" class="newsletter-feedback" aria-live="polite"></p>
+          <p id="newsletter-note" class="newsletter-note">Solo mensajes del podcast. Puedes darte de baja cuando quieras.</p>
+          <input type="hidden" name="consent" value="yes">
+          <input type="hidden" name="source" value="podcast_newsletter">
+          <div class="honeypot" aria-hidden="true"><label for="newsletter-website">Deja este campo vacío</label><input type="text" name="website" id="newsletter-website" tabindex="-1" autocomplete="off"></div>
+        </form>
       </div>
       <div class="footer-separator" aria-hidden="true"><span></span><span>·</span><span></span></div>
       <div class="footer-bottom">
