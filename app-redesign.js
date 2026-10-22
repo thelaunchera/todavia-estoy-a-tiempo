@@ -468,6 +468,79 @@
     footerObserver.observe(editorialFooter);
   }
 
+  // Newsletter is separate from the free guide: opt-in only, stored by Make/Resend.
+  // A successful server response is required before the field transforms.
+  const newsletterForm = document.querySelector('[data-newsletter-form]');
+  if (newsletterForm) {
+    const email = newsletterForm.querySelector('input[type="email"]');
+    const pill = newsletterForm.querySelector('[data-newsletter-pill]');
+    const button = newsletterForm.querySelector('.newsletter-submit');
+    const feedback = newsletterForm.querySelector('.newsletter-feedback');
+    const confirmation = newsletterForm.querySelector('.newsletter-confirmation');
+    const confirmationText = newsletterForm.querySelector('.newsletter-confirmation-text');
+    const validNewsletterEmail = value =>
+      value.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(value);
+    newsletterForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (newsletterForm.classList.contains('is-done') || button.disabled) return;
+      const value = email.value.trim();
+      feedback.textContent = '';
+      pill.classList.remove('has-error');
+      email.removeAttribute('aria-invalid');
+      if (!validNewsletterEmail(value)) {
+        pill.classList.add('has-error');
+        email.setAttribute('aria-invalid', 'true');
+        feedback.textContent = 'Escribe un correo válido para suscribirte.';
+        email.focus();
+        return;
+      }
+      if (newsletterForm.querySelector('[name="website"]')?.value) return;
+      const endpoint = publicUrl(config.newsletterEndpoint);
+      if (!endpoint) {
+        feedback.textContent = 'La suscripción no está disponible en este momento.';
+        return;
+      }
+      button.classList.add('is-pressing');
+      window.setTimeout(() => button.classList.remove('is-pressing'), 90);
+      email.disabled = true;
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = 'Enviando…';
+      try {
+        const payload = new URLSearchParams();
+        payload.set('email', value);
+        payload.set('source', 'podcast_newsletter');
+        payload.set('consent', 'yes');
+        payload.set('website', '');
+        const response = await fetch(endpoint, {
+          method: 'POST', mode: 'cors',
+          headers: { Accept: 'application/json' }, body: payload
+        });
+        if (!response.ok) throw new Error('Error ' + response.status);
+        const data = await response.json();
+        if (data?.ok !== true) throw new Error('Alta no confirmada');
+        confirmationText.textContent = '¡Ya estás dentro!';
+        confirmation.setAttribute('aria-hidden', 'false');
+        newsletterForm.classList.add('is-done');
+        feedback.textContent = 'Recibirás únicamente novedades del podcast.';
+        // Do not reset: successful subscriptions remain visibly confirmed.
+        button.textContent = originalText;
+      } catch {
+        email.disabled = false;
+        button.disabled = false;
+        button.textContent = originalText;
+        feedback.textContent = 'No pudimos confirmar tu suscripción. Inténtalo otra vez.';
+        pill.classList.add('has-error');
+      }
+    });
+    email.addEventListener('input', () => {
+      if (newsletterForm.classList.contains('is-done')) return;
+      pill.classList.remove('has-error');
+      feedback.textContent = '';
+      email.removeAttribute('aria-invalid');
+    });
+  }
+
   const progress = document.querySelector('.scroll-progress');
   let frame = 0;
   const draw = () => {
