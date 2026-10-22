@@ -53,7 +53,7 @@
         event.preventDefault();
         const email=input.value.trim().toLowerCase();
         status.textContent='';
-        const valid=email.length<=254&&/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email);
+        const valid=email.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
         if(!valid){status.textContent='Revisa tu correo para poder encontrarlo.';input.setAttribute('aria-invalid','true');input.focus();return;}
         const url=window.PODCAST_CONFIG?.unsubscribeEndpoint;
         try{
