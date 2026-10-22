@@ -187,6 +187,188 @@
     }
   }, { passive: true });
 
+
+  // Editorial paragraph reveal. The original sentence remains plain text and
+  // is measured per visual line for each viewport width, without layout jumps.
+  const lineTargets = [...document.querySelectorAll('[data-line-reveal]')];
+  const lineOriginal = new WeakMap();
+  const lineSeen = new WeakSet();
+  const prefersStillness = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const measureParagraph = element => {
+    const original = lineOriginal.get(element) || element.textContent.replace(/\s+/g, ' ').trim();
+    if (!original) return;
+    lineOriginal.set(element, original);
+    element.setAttribute('aria-label', original);
+    element.replaceChildren();
+    const measure = document.createElement('span');
+    measure.className = 'line-measure';
+    measure.setAttribute('aria-hidden', 'true');
+    const wordNodes = [];
+    for (const [i, word] of original.split(' ').entries()) {
+      if (i) measure.append(document.createTextNode(' '));
+      const node = document.createElement('span');
+      node.className = 'line-measure-word';
+      node.textContent = word;
+      measure.append(node);
+      wordNodes.push(node);
+    }
+    element.append(measure);
+    const lines = [];
+    let previousTop = null;
+    for (const word of wordNodes) {
+      const top = Math.round(word.offsetTop);
+      if (previousTop === null || Math.abs(top - previousTop) > 2) {
+        lines.push([word.textContent]);
+        previousTop = top;
+      } else {
+        lines[lines.length - 1].push(word.textContent);
+      }
+    }
+    const fragment = document.createDocumentFragment();
+    lines.forEach((words, index) => {
+      const span = document.createElement('span');
+      span.className = 'line-reveal-line';
+      if (index >= Math.ceil(lines.length / 2)) span.classList.add('is-muted');
+      span.style.setProperty('--i', index);
+      span.textContent = words.join(' ');
+      span.setAttribute('aria-hidden', 'true');
+      fragment.append(span);
+    });
+    element.replaceChildren(fragment);
+    element.classList.add('has-line-layout');
+    if (lineSeen.has(element) || prefersStillness.matches) element.classList.add('is-reflowed', 'is-visible');
+  };
+  lineTargets.forEach(measureParagraph);
+  if (!prefersStillness.matches && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= .4 && !lineSeen.has(entry.target)) {
+          lineSeen.add(entry.target);
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: [.4, 1] });
+    lineTargets.forEach(element => observer.observe(element));
+  } else {
+    lineTargets.forEach(element => {
+      lineSeen.add(element);
+      element.classList.add('is-visible', 'is-reflowed');
+    });
+  }
+  let lineResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(lineResizeTimer);
+    lineResizeTimer = setTimeout(() => lineTargets.forEach(measureParagraph), 120);
+  }, { passive: true });
+
+  // Submit-time validation, then gentle live corrections. Validation feedback
+  // takes reserved space, never moving the surrounding elements.
+  const validEmail = email =>
+    email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  const installEmailField = form => {
+    const input = form.querySelector('input[type="email"]');
+    const wrapper = input?.closest('[data-email-field]');
+    const feedback = form.querySelector('#' + input?.id + '-feedback');
+    if (!input || !wrapper || !feedback) return null;
+    let attempted = false;
+    const validate = (showShake = false) => {
+      const value = input.value.trim();
+      const valid = validEmail(value);
+      wrapper.classList.toggle('is-valid', valid);
+      wrapper.classList.toggle('has-error', !valid);
+      input.setAttribute('aria-invalid', String(!valid));
+      feedback.textContent = valid ? 'Correo válido' : (value ? 'Revisa tu correo, por ejemplo: nombre@correo.com.' : 'Escribe tu correo para continuar.');
+      if (!valid && showShake && !prefersStillness.matches) {
+        wrapper.classList.remove('is-shaking');
+        void wrapper.offsetWidth;
+        wrapper.classList.add('is-shaking');
+      }
+      return valid;
+    };
+    input.addEventListener('input', () => {
+      if (attempted) validate(false);
+    });
+    wrapper.addEventListener('animationend', () => wrapper.classList.remove('is-shaking'));
+    return {
+      input,
+      check(shake = false) { attempted = true; return validate(shake); },
+      clear() {
+        attempted = false;
+        wrapper.classList.remove('is-valid', 'has-error', 'is-shaking');
+        input.setAttribute('aria-invalid', 'false');
+        feedback.textContent = '';
+      }
+    };
+  };
+  for (const form of document.querySelectorAll('[data-podcast-form]')) {
+    const field = installEmailField(form);
+    const status = form.querySelector('.form-status');
+    const submit = form.querySelector('button[type="submit"]');
+    const buttonText = submit?.textContent;
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!field || !submit || !status) return;
+      status.replaceChildren();
+      status.classList.remove('is-success', 'is-error');
+      const emailOkay = field.check(true);
+      const requiredFields = [...form.querySelectorAll('[required]:not([type="email"])')];
+      let firstInvalid = null;
+      for (const input of requiredFields) {
+        const valid = input.checkValidity();
+        input.classList.toggle('has-form-error', !valid);
+        if (!valid && !firstInvalid) firstInvalid = input;
+      }
+      if (!emailOkay || firstInvalid) {
+        if (firstInvalid) status.textContent = 'Completa el nombre, el tema y un mensaje de al menos 10 caracteres.';
+        (emailOkay ? firstInvalid : field.input).focus();
+        return;
+      }
+      const kind = form.dataset.podcastForm;
+      const url = publicUrl(kind === 'guide' ? config.freeGuideEndpoint : config.helpEndpoint);
+      if (!url) {
+        status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
+        status.classList.add('is-error');
+        const link = document.createElement('a');
+        link.href = 'mailto:hello@thelaunchera.com';
+        link.textContent = ' Escribir por correo';
+        status.append(link);
+        return;
+      }
+      if (form.querySelector('[name="website"]')?.value) return;
+      const payload = new URLSearchParams(new FormData(form));
+      submit.disabled = true;
+      submit.textContent = kind === 'guide' ? 'Enviando tu guía…' : 'Enviando consulta…';
+      try {
+        const response = await fetch(url, { method: 'POST', mode: 'cors', headers: { Accept: 'application/json' }, body: payload });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (data?.ok !== true) throw new Error('Envío no confirmado');
+        status.textContent = kind === 'guide'
+          ? '¡Listo! Revisa tu correo para encontrar la guía. Mira también spam.'
+          : '¡Recibimos tu consulta! Te responderemos al correo que nos compartiste.';
+        status.classList.add('is-success');
+        form.reset();
+        field.clear();
+        requiredFields.forEach(input => input.classList.remove('has-form-error'));
+      } catch (error) {
+        status.textContent = 'No pudimos confirmar el envío. Inténtalo de nuevo o escríbenos directamente.';
+        status.classList.add('is-error');
+        const link = document.createElement('a');
+        link.href = 'mailto:hello@thelaunchera.com';
+        link.textContent = ' Abrir correo';
+        status.append(link);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = buttonText;
+      }
+    });
+    form.querySelectorAll('input[required]:not([type="email"]),textarea[required],select[required]').forEach(input => {
+      input.addEventListener('input', () => input.classList.remove('has-form-error'));
+      input.addEventListener('change', () => input.classList.remove('has-form-error'));
+    });
+  }
+
   const progress = document.querySelector('.scroll-progress');
   let frame = 0;
   const draw = () => {

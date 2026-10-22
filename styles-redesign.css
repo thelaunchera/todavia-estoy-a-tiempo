@@ -349,3 +349,153 @@ html{scroll-padding-top:96px}
 @media(max-width:850px){
   .header.detail-header .nav{background:#f7f4ed;color:#172940;border-color:#17294022}
 }
+
+
+/* Refinement: authentic note artwork, line-by-line hero reveal and welcoming forms */
+.hero .hero-visual{overflow:visible}
+.hero .hero-photo figcaption{z-index:2}
+.hero .hero-note-card{
+  position:absolute;z-index:5;left:-13px;bottom:6%;width:180px;
+  max-width:54%;height:auto;object-fit:contain;pointer-events:none;
+  filter:drop-shadow(0 8px 14px rgba(5,18,35,.17));
+  transform:rotate(-2deg);transform-origin:center center
+}
+@media(max-width:600px){
+  .hero .hero-note-card{
+    left:-8px;bottom:5%;width:148px;max-width:53%;
+    filter:drop-shadow(0 6px 11px rgba(5,18,35,.16));
+  }
+  .hero .hero-photo figcaption{display:none}
+  .hero .photo-index{left:11%}
+}
+.hero .hero-lede.line-reveal{
+  font-family:var(--sans);font-size:clamp(1.06rem,1.5vw,1.4rem);
+  font-weight:600;letter-spacing:-.025em;line-height:1.35;max-width:465px;
+  color:#f0eee9
+}
+.line-reveal .line-measure-word{display:inline-block;white-space:nowrap}
+.line-reveal .line-reveal-line{display:block}
+.line-reveal.has-line-layout:not(.is-visible) .line-reveal-line{
+  opacity:0;transform:translateY(16px)
+}
+.line-reveal.has-line-layout.is-visible:not(.is-reflowed) .line-reveal-line{
+  animation:heroLineReveal 700ms cubic-bezier(.32,.72,0,1) both;
+  animation-delay:calc(var(--i) * 170ms)
+}
+.line-reveal .line-reveal-line.is-muted{color:#b7c6d4}
+@keyframes heroLineReveal{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:none}
+}
+@media(max-width:600px){
+  .hero .hero-lede.line-reveal{font-size:1.08rem;line-height:1.37;max-width:345px}
+  .line-reveal .line-reveal-line.is-muted{color:#d0d8df}
+}
+@media(prefers-reduced-motion:reduce){
+  .line-reveal .line-reveal-line{opacity:1!important;transform:none!important;animation:none!important}
+  .hero .hero-note-card{transform:none!important}
+}
+/* Support and guide forms: premium, readable and no content jump on validation */
+.help-section{
+  background:
+    radial-gradient(ellipse at 17% 11%,rgba(185,201,207,.34),transparent 58%),
+    linear-gradient(142deg,#f8f4ed,#eaecea 68%,#f5f3ed)
+}
+.help-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:start;gap:clamp(36px,8vw,130px)}
+.help-intro .eyebrow{margin-bottom:23px}
+.help-intro h2{margin-bottom:28px}
+.help-intro>p:not(.eyebrow){color:var(--muted);font-size:1.02rem;line-height:1.85;max-width:425px}
+.help-signature{display:flex;align-items:center;gap:12px;margin-top:26px!important;font:italic 1.08rem var(--serif)!important}
+.help-signature .signature{color:var(--accent);font-size:2.1rem}
+.help-card{
+  background:#fffdf8;border:1px solid #d8d7d1;border-radius:24px;
+  padding:clamp(23px,3.6vw,46px);box-shadow:0 22px 70px rgba(26,38,48,.08)
+}
+.help-card-eyebrow{font-weight:600;letter-spacing:.14em;font-size:.61rem;color:var(--accent);margin-bottom:29px}
+.podcast-form{max-width:100%}
+.podcast-form label{display:block;font:.78rem/1.45 var(--sans);font-weight:600;color:var(--ink);margin-bottom:10px}
+.podcast-form input:not([type="hidden"]),.podcast-form select,.podcast-form textarea{
+  width:100%;font:400 1rem/1.5 var(--sans);color:var(--ink);
+  background:#fffefa;border:1px solid #b9c2c7;
+  padding:14px 15px;border-radius:11px;min-height:52px;
+  outline:0;transition:border-color .2s ease,box-shadow .2s ease
+}
+.podcast-form input::placeholder,.podcast-form textarea::placeholder{color:#677786}
+.podcast-form textarea{resize:vertical;min-height:127px}
+.podcast-form select{cursor:pointer}
+.podcast-form input:not([type="hidden"]):focus-visible,.podcast-form textarea:focus-visible,.podcast-form select:focus-visible{
+  border-color:#506b81;box-shadow:0 0 0 4px rgba(67,105,129,.15)
+}
+.podcast-form .form-field{margin-bottom:20px;min-width:0}
+.podcast-form .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.podcast-form .email-field{position:relative;border-radius:11px;transform:translateX(0)}
+.podcast-form .email-field input[type="email"]{padding-right:53px;display:block}
+.podcast-form .email-field.has-error input{
+  border-color:#b93342;box-shadow:0 0 0 4px rgba(189,48,68,.14)
+}
+.podcast-form .email-field.is-valid input{
+  border-color:#237a58;box-shadow:0 0 0 4px rgba(35,122,88,.11)
+}
+.podcast-form .email-check{
+  position:absolute;right:14px;top:50%;translate:0 -50%;display:grid;place-items:center;
+  width:27px;height:27px;border-radius:50%;background:#e4f5e9;color:#18794e;
+  border:1px solid #b3dbbe;font-weight:700;font-size:1.05rem;
+  opacity:0;transform:scale(.4);pointer-events:none
+}
+.podcast-form .email-field.is-valid .email-check{
+  opacity:1;animation:emailCheckSpring 480ms cubic-bezier(.18,.9,.27,1.22) forwards
+}
+.podcast-form .email-field.is-shaking{animation:emailShake 420ms cubic-bezier(.36,.07,.19,.97) both}
+@keyframes emailShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(3px)}
+}
+@keyframes emailCheckSpring{
+  0%{opacity:0;transform:scale(.4)}
+  64%{opacity:1;transform:scale(1.2)}
+  100%{opacity:1;transform:scale(1)}
+}
+.podcast-form .field-feedback{
+  min-height:26px;margin:6px 0 3px;
+  font-size:.77rem;line-height:1.4;color:#aa2436;
+  opacity:0;transform:translateY(-5px);transition:opacity .24s,transform .24s
+}
+.podcast-form .email-field.has-error + .field-feedback,
+.podcast-form .email-field.is-valid + .field-feedback{opacity:1;transform:none}
+.podcast-form .email-field.is-valid + .field-feedback{color:#18794e}
+.podcast-form .has-form-error{border-color:#b93342!important;box-shadow:0 0 0 4px rgba(189,48,68,.14)!important}
+.podcast-form .field-note{font-size:.73rem;color:var(--muted);line-height:1.5;margin-top:8px}
+.podcast-form .form-submit{margin-top:7px;border-radius:999px;min-height:54px}
+.podcast-form .form-status{
+  min-height:26px;margin-top:15px;font-size:.85rem;line-height:1.6;color:var(--muted)
+}
+.podcast-form .form-status.is-success{color:#237a58;font-weight:600}
+.podcast-form .form-status.is-error{color:#a42636}
+.podcast-form .form-status a{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.podcast-form small{display:block;font-size:.72rem;line-height:1.65;color:var(--muted);margin-top:10px}
+.podcast-form small a{text-underline-offset:3px}
+.podcast-form .honeypot{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.free-content .guide-form{max-width:430px;margin-top:21px}
+.free-content .guide-form label{margin-bottom:9px}
+.free-content .guide-form .form-submit{width:100%;justify-content:center;margin-top:0}
+.free-content .guide-form .field-feedback{margin-bottom:6px}
+@media(max-width:850px){
+  .help-grid{grid-template-columns:1fr;gap:40px}
+  .help-card{max-width:660px;width:100%;margin:auto}
+}
+@media(max-width:600px){
+  .help-section .shell{width:calc(100% - 38px)}
+  .help-intro>p:not(.eyebrow){font-size:.97rem}
+  .help-card{padding:24px 20px;border-radius:20px}
+  .podcast-form .form-grid{grid-template-columns:1fr;gap:0}
+  .podcast-form input:not([type="hidden"]),.podcast-form select,.podcast-form textarea{font-size:1rem}
+  .podcast-form .form-submit{width:100%;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){
+  .podcast-form .email-field.is-shaking{animation:none!important}
+  .podcast-form .email-field.is-valid .email-check{animation:none!important;transform:scale(1)}
+  .podcast-form .field-feedback{transition:none!important;transform:none!important}
+}

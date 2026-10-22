@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Un podcast con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-glass1">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261022-forms1">
   <script defer src="site-config.js"></script>
-  <script defer src="app-redesign.js?v=20261022-glass1"></script>
+  <script defer src="app-redesign.js?v=20261022-forms1"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
@@ -27,6 +27,7 @@
         <a href="#coleccion">La colección</a>
         <a href="#regalo">Un regalo para ti</a>
         <a href="#sobre-mi">Sobre Dailin</a>
+        <a href="#ayuda">¿Necesitas ayuda?</a>
         <a class="nav-cta" href="#escuchar">El podcast </a>
       </nav>
     </div>
@@ -42,7 +43,7 @@
             <span class="hero-title-line">estoy <button type="button" class="hero-pill hero-pill-second" data-hero-pill aria-label="Ampliar la ilustración de la colección" aria-controls="hero-image-overlay" aria-expanded="false" data-expanded-alt="Ilustración editorial de una mujer junto a la ventana"><img src="assets/productos/editorial/guia.webp" alt="" width="1086" height="1448"></button></span>
             <span class="hero-title-line"><em>a tiempo.</em></span>
           </h1>
-          <p class="hero-lede">Hay días en que miro mi vida y me pregunto si ya debería estar en otro lugar. Tal vez a ti también te pasa.</p>
+          <p class="hero-lede line-reveal" data-line-reveal>Hay días en que miro mi vida y me pregunto si ya debería estar en otro lugar. Tal vez a ti también te pasa.</p>
           <div class="hero-cta">
             <a href="#escuchar" class="button button-light">Encontrarnos en el podcast </a>
             <a href="#coleccion" class="fine-link">La colección digital </a>
@@ -56,11 +57,7 @@
             <img src="assets/dailin.webp" alt="Dailin junto a la ventana, creadora de Todavía estoy a tiempo" width="500" height="750" fetchpriority="high">
             <figcaption><span>LA VIDA REAL TAMBIÉN CUENTA.</span></figcaption>
           </figure>
-          <div class="hero-note" aria-label="Una nota para ti: Si hoy te sientes tarde, ven igual. Dailin">
-            <svg class="hero-note-line" viewBox="0 0 122 170" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M109 28C84 1 53 13 45 34c-14 19-9 38-2 50m54-60C70 6 40 37 43 66c1 18 9 23 21 32 4 4 1 10-6 11 5 6 9 8 16 8m-10-19c10-3 13-6 18-12m-14-22c7-4 12-3 17 0m-15 10c7 2 10 0 12-2M34 96c-6 24 7 43 37 54m24-36c-2 21 2 29 17 44" />
-            </svg>
-            <span>UNA NOTA PARA TI</span><p>Si hoy te sientes tarde,<br><em>ven igual.</em></p><b class="signature">Dailin</b></div>
+          <img class="hero-note-card" src="assets/hero-note-card.svg" alt="Una nota para ti. Si hoy te sientes tarde, ven igual. Dailin." width="240" height="303" loading="eager" decoding="async">
           <p class="photo-index">01 <span>—</span> UNA CONVERSACIÓN A LA VEZ</p>
         </div>
       </div>
@@ -91,7 +88,7 @@
           <p class="folio-hint">Desliza para explorar</p>
           <p class="folio-note">Una pequeña colección para esas preguntas grandes.</p>
         </div>
-        <p class="collection-status">Estamos preparando los archivos finales. Los cuadernos de pago estarán disponibles próximamente.</p>
+        <p class="collection-status">Los cuadernos de pago estarán disponibles próximamente. La guía gratuita ya se puede solicitar por correo.</p>
       </div>
     </section>
     <section class="quote-section dark-paper" aria-label="Del primer episodio">
@@ -110,8 +107,21 @@
           <p class="free-product-name">5 preguntas para cuando sientes que vas tarde</p>
           <p>Yo también conozco ese ruido entre lo que imaginabas para ti y lo que otras personas esperan. Hice esta guía para sentarnos un momento con cinco preguntas, sin prisa y sin respuestas perfectas.</p>
           <div class="resource-meta"><span>PDF DIGITAL</span><span>EN ESPAÑOL</span><strong>GRATIS</strong></div>
-          <button type="button" class="button button-navy" data-guide aria-describedby="guide-state">Quiero las 5 preguntas </button>
-          <small id="guide-state">Un recurso de reflexión gratuito. Sin compra.</small>
+          <form id="guide-form" class="podcast-form guide-form" data-podcast-form="guide" novalidate>
+            <label for="guide-email">¿A qué correo te envío la guía?</label>
+            <div class="email-field" data-email-field>
+              <input id="guide-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="guide-email-feedback guide-privacy">
+              <span class="email-check" aria-hidden="true">✓</span>
+            </div>
+            <p class="field-feedback" id="guide-email-feedback" aria-live="polite"></p>
+            <input type="hidden" name="resource" value="cinco_preguntas">
+            <input type="hidden" name="newsletter" value="no">
+            <input type="hidden" name="source" value="podcast_website">
+            <div class="honeypot" aria-hidden="true"><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
+            <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
+            <small id="guide-privacy">Te enviamos solo esta guía, sin suscribirte a publicidad. <a href="privacidad.html">Privacidad</a>.</small>
+          </form>
         </div>
       </div>
     </section>
@@ -124,12 +134,62 @@
     <section class="listen-section dark-paper" id="escuchar" aria-labelledby="listen-title">
       <div class="shell listen-layout reveal"><div><p class="eyebrow light-eyebrow">UN NUEVO CAPÍTULO CADA MARTES</p><h2 id="listen-title">Nos escuchamos<br><em>del otro lado.</em></h2></div><div class="listen-action"><p>Yo pongo el tema. Tú puedes llegar como estés.<br>Nos hacemos compañía un rato.</p><button type="button" class="button button-light" data-podcast aria-describedby="podcast-state">Escuchar el podcast </button><small id="podcast-state">El enlace oficial se añadirá aquí.</small></div></div>
     </section>
+    <section class="help-section paper section-pad" id="ayuda" aria-labelledby="help-title">
+      <div class="shell help-grid">
+        <div class="help-intro reveal">
+          <p class="eyebrow">04 / ESTOY AQUÍ PARA AYUDARTE</p>
+          <h2 id="help-title">¿Necesitas<br><em>una mano?</em></h2>
+          <p>Si tienes alguna pregunta sobre la guía, los cuadernos o cómo abrir tus archivos, escríbeme aquí. No hace falta tener todo claro para preguntar.</p>
+          <p class="help-signature">Con calma, <span class="signature">Dailin</span></p>
+        </div>
+        <div class="help-card reveal">
+          <p class="help-card-eyebrow">CUÉNTAME QUÉ NECESITAS</p>
+          <form id="help-form" class="podcast-form" data-podcast-form="help" novalidate>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="help-name">Tu nombre</label>
+                <input id="help-name" name="name" type="text" autocomplete="name" maxlength="80" placeholder="Cómo te llamas" required>
+              </div>
+              <div class="form-field">
+                <label for="help-topic">¿Sobre qué necesitas ayuda?</label>
+                <select id="help-topic" name="topic" required>
+                  <option value="" disabled selected>Elige un tema</option>
+                  <option value="Guía gratuita">La guía gratuita</option>
+                  <option value="No voy tarde">No voy tarde</option>
+                  <option value="Empezar de nuevo">Empezar de nuevo</option>
+                  <option value="Podcast u otra consulta">Podcast u otra consulta</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="help-email">Tu correo electrónico</label>
+              <div class="email-field" data-email-field>
+                <input id="help-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="help-email-feedback help-privacy">
+                <span class="email-check" aria-hidden="true">✓</span>
+              </div>
+              <p class="field-feedback" id="help-email-feedback" aria-live="polite"></p>
+            </div>
+            <div class="form-field">
+              <label for="help-message">Tu mensaje</label>
+              <textarea id="help-message" name="message" rows="4" minlength="10" maxlength="2000" placeholder="Cuéntame qué pasó o qué necesitas..." required></textarea>
+              <p class="field-note">Mínimo 10 caracteres. No incluyas información sensible.</p>
+            </div>
+            <input type="hidden" name="resource" value="podcast_help">
+            <input type="hidden" name="source" value="podcast_website">
+            <div class="honeypot" aria-hidden="true"><label for="help-website">Deja este campo vacío</label><input id="help-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="button button-navy form-submit">Enviar mi consulta</button>
+            <p class="form-status" id="help-form-status" role="status" aria-live="polite"></p>
+            <small id="help-privacy">Usaremos tu correo solo para responderte. Sin publicidad. Consulta la <a href="privacidad.html">privacidad</a>.</small>
+          </form>
+        </div>
+      </div>
+    </section>
     <section class="faq-section paper section-pad" aria-labelledby="faq-title">
-      <div class="shell faq-grid"><div class="reveal"><p class="eyebrow">04 / CON CALMA Y SIN DUDAS</p><h2 id="faq-title">Antes<br><em>de empezar.</em></h2></div><div class="faqs reveal">
-        <details><summary>¿Son libros físicos o digitales?</summary><p>Son recursos digitales en formato PDF. No enviamos un libro físico. Los archivos finales están en preparación y los cuadernos de pago estarán disponibles próximamente.</p></details>
+      <div class="shell faq-grid"><div class="reveal"><p class="eyebrow">05 / CON CALMA Y SIN DUDAS</p><h2 id="faq-title">Antes<br><em>de empezar.</em></h2></div><div class="faqs reveal">
+        <details><summary>¿Son libros físicos o digitales?</summary><p>Son recursos digitales en formato PDF. No enviamos un libro físico. Los cuadernos de pago estarán disponibles próximamente. La guía gratuita se envía por correo.</p></details>
         <details><summary>¿Necesito escuchar el podcast para usarlos?</summary><p>No. Nacen de las conversaciones del podcast, pero puedes leerlos y hacer sus ejercicios por separado, a tu propio ritmo.</p></details>
         <details><summary>¿Puedo leerlos desde el teléfono?</summary><p>Sí, son archivos PDF para leer desde el teléfono, la tablet o la computadora. También podrás imprimir las páginas si prefieres escribir a mano.</p></details>
-        <details><summary>¿Las cinco preguntas son gratis?</summary><p>Sí. La guía «5 preguntas para cuando sientes que vas tarde» será gratuita. Encontrarás la descarga en esta página cuando esté lista.</p></details>
+        <details><summary>¿Las cinco preguntas son gratis?</summary><p>Sí. Déjanos tu correo en el formulario y te enviaremos la guía gratuita, sin suscribirte a publicidad.</p></details>
         <details><summary>¿Cuándo podré conseguir los cuadernos?</summary><p>Estamos terminando la colección. Los precios previstos son $4.99 USD para «No voy tarde» y $7.99 USD para «Empezar de nuevo». La compra se abrirá cuando los archivos y su entrega estén listos.</p></details>
       </div></div>
     </section>
