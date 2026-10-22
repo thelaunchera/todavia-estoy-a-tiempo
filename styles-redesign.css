@@ -336,3 +336,16 @@ html{scroll-padding-top:96px}
     top:85px;right:14px;padding:10px 14px;font-size:.77rem;
   }
 }
+
+
+/* Product detail pages start on light paper: keep brand visible without dark scroll state. */
+.header.detail-header{color:#172940}
+.header.detail-header::before{
+  opacity:1;background:rgba(249,247,242,.81);
+  -webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)
+}
+.header.detail-header .wordmark>.brand-logo-04{filter:none}
+.header.detail-header .menu-toggle{color:#172940;border-color:rgba(23,41,64,.24)}
+@media(max-width:850px){
+  .header.detail-header .nav{background:#f7f4ed;color:#172940;border-color:#17294022}
+}
