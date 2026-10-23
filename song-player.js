@@ -33,7 +33,7 @@
     return sum;
   };
   function emit(name) {
-    if (!analyticsOk || !playbackId || milestones.has(name)) return;
+    if (!analyticsOk || !playbackId || milestones.has(name) || window.PODCAST_VISITOR_MODE?.isTest()) return;
     milestones.add(name);
     const seconds = Math.floor(Math.min(7200, Math.max(0, playedSeconds() - playedBeforeThisStart)));
     fetch(endpoint, {
