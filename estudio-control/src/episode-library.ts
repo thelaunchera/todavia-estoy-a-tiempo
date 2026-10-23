@@ -51,3 +51,26 @@ export function narrationBlocks(script: string, limit = 4300): string[] {
   if (remaining) blocks.push(remaining);
   return blocks;
 }
+
+/** Ajustes editoriales de narración para episodios todavía no publicados.
+ * No modifica el episodio 1 ni la voz autobiográfica de la presentadora.
+ * Se aplica a la lectura, copia y edición; los textos de origen se conservan
+ * hasta que se guarden expresamente en el Estudio.
+ */
+export function dialogueForAudience(script: string, episodeNumber?: number): string {
+  if (!script || episodeNumber === 1) return script;
+  return script
+    .replace(/^\\[(?:softly|thoughtful|laughs|whispers|sighs)\\]\\s*/gim, '')
+    .replace(/\\bBienvenida a «Todavía estoy a tiempo»/g, 'Qué bueno que estés aquí en «Todavía estoy a tiempo»')
+    .replace(/\\bbienvenida a «Todavía estoy a tiempo»/g, 'qué bueno que estés aquí en «Todavía estoy a tiempo»')
+    .replace(/\\bBienvenida\\b/g, 'Gracias por acompañarme')
+    .replace(/\\bbienvenida\\b/g, 'gracias por acompañarme')
+    .replace(/\\bnosotras mismas\\b/gi, 'cada quien')
+    .replace(/\\buna misma\\b/gi, 'uno mismo')
+    .replace(/\\buna responde\\b/gi, 'respondes')
+    .replace(/\\buna está\\b/gi, 'estás')
+    .replace(/\\buna siente\\b/gi, 'se siente')
+    .replace(/\\b¿Estás segura\\?/gi, '¿Lo tienes claro?')
+    .replace(/\\bestás cansada\\b/gi, 'sientes cansancio')
+    .replace(/\\bestás sola\\b/gi, 'te sientes sin compañía');
+}
