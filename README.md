@@ -43,3 +43,11 @@ Navegación con teclado, cierre del menú con Escape, FAQ nativo, avisos con `ar
 ## Publicación
 
 El flujo existente de GitHub Pages publica la rama `main`.
+
+## Estudio de Control (privado)
+
+El Estudio de Control es una aplicación independiente de la landing pública. Enlace de acceso: https://estudio-de-control-todavia-estoy-a-tiempo-c09dcu.v2.appdeploy.ai/
+
+La landing pública está en https://podcast.thelaunchera.com/ y **no** debe utilizarse como enlace al Estudio. No incluir el acceso privado en la navegación pública sin autorización.
+
+Dirección editorial: el podcast está dirigido a cualquier persona que conecte con sus temas; tono natural, conversacional y cercano, sin recurrir repetidamente a «chica» ni asumir una audiencia exclusivamente femenina.
