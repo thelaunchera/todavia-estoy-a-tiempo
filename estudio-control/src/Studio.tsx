@@ -1130,7 +1130,7 @@ function App() {
                       (x.status === 'publicado' ? 'done' : '')
                     }
                   >
-                    <span>{String(i + 1).padStart(2, '0')} / 08</span>
+                    <span>EP {String(x.number || i + 1).padStart(2, '0')}</span>
                     <b>{formatDate(x.date)}</b>
                     <strong>{x.title}</strong>
                     <StatePill status={x.status} />
