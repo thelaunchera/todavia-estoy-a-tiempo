@@ -1,4 +1,4 @@
-name: Publicar el landing del podcast
+name: Publicar landing y Estudio del podcast
 on:
   push:
     branches: [main]
@@ -9,12 +9,9 @@ permissions:
   id-token: write
 concurrency:
   group: github-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Obtener archivos
@@ -83,10 +80,24 @@ jobs:
           cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
+      - name: Verificar que se publican landing y Estudio
+        run: |
+          test -s _podcast_pages/index.html
+          test -s _podcast_pages/estudio/index.html
+          test -s _podcast_pages/estudio/manifest.webmanifest
+          grep -q 'src="./assets/' _podcast_pages/estudio/index.html || grep -q 'src="/assets/' _podcast_pages/estudio/index.html
+          echo 'Landing y Estudio presentes en el artefacto de Pages.'
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
         with:
           path: _podcast_pages
-      - name: Publicar página
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar landing y Estudio
         id: deployment
         uses: actions/deploy-pages@v4
