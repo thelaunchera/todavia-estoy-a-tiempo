@@ -41,7 +41,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import './studio.css';
-import { groupEpisodes, narrationBlocks } from './episode-library';
+import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
@@ -262,7 +262,8 @@ function App() {
     setLoading(true);
     try {
       const r = await api.get('/api/studio');
-      setData(r.data as Data);
+      const incoming = r.data as Data;
+      setData({ ...incoming, records: { ...incoming.records, episodios: (incoming.records.episodios || []).map(item => ({ ...item, script: dialogueForAudience(item.script || '', item.number) })) } });
       setDenied(false);
       setError('');
     } catch {
