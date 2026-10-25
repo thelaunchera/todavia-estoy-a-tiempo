@@ -11,6 +11,9 @@
   try { src = new URL(url, window.location.href); }
   catch { return; }
   if (!['https:', 'http:'].includes(src.protocol)) return;
+  // Adelanta solo la introducción en la web; el MP3 original se conserva completo.
+  const startSeconds = Number(config.themeSongStartSeconds);
+  if (Number.isFinite(startSeconds) && startSeconds > 0) src.hash = `t=${startSeconds}`;
   audio.src = src.href;
   section.hidden = false;
 
