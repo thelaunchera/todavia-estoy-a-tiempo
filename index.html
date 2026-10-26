@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head>
+<head><script src="privacy-controls.js?v=20261026-1" data-site="podcast"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#101d34">
@@ -191,7 +191,7 @@
                   <option value="Guía gratuita">La guía gratuita</option>
                   <option value="No voy tarde">No voy tarde</option>
                   <option value="Empezar de nuevo">Empezar de nuevo</option>
-                  <option value="Podcast u otra consulta">Podcast u otra consulta</option>
+                  <option value="Privacidad o eliminación de datos">Privacidad o eliminación de datos</option><option value="Podcast u otra consulta">Podcast u otra consulta</option>
                 </select>
               </div>
             </div>
@@ -208,7 +208,7 @@
               <textarea id="help-message" name="message" rows="4" minlength="10" maxlength="2000" placeholder="Cuéntame qué pasó o qué necesitas..." required></textarea>
               <p class="field-note">Mínimo 10 caracteres. No incluyas información sensible.</p>
             </div>
-            <input type="hidden" name="resource" value="podcast_help">
+            <p class="form-note">Usamos tus datos para responder a esta consulta. <a href="privacidad.html">Privacidad</a>.</p><input type="hidden" name="resource" value="podcast_help">
             <input type="hidden" name="source" value="podcast_website">
             <div class="honeypot" aria-hidden="true" hidden><label for="help-website">Deja este campo vacío</label><input id="help-website" name="website" tabindex="-1" autocomplete="off"></div>
             <button type="submit" class="button button-navy form-submit">Enviar mi consulta</button>
@@ -274,7 +274,7 @@
             </div>
           </div>
           <p id="newsletter-feedback" class="newsletter-feedback" aria-live="polite"></p>
-          <p id="newsletter-note" class="newsletter-note">Solo avisos de nuevos episodios. <a href="baja.html">Dejar de recibirlos</a> cuando quieras.</p>
+          <p id="newsletter-note" class="newsletter-note">Solo avisos de nuevos episodios. Al suscribirte aceptas recibirlos. <a href="privacidad.html">Privacidad</a>. <a href="baja.html">Dejar de recibirlos</a> cuando quieras.</p>
           <input type="hidden" name="consent" value="yes">
           <input type="hidden" name="source" value="podcast_newsletter">
           <div class="honeypot" aria-hidden="true" hidden><label for="newsletter-website">Deja este campo vacío</label><input type="text" name="website" id="newsletter-website" tabindex="-1" autocomplete="off"></div>
@@ -283,7 +283,7 @@
       <div class="footer-separator" aria-hidden="true"><span></span><span>·</span><span></span></div>
       <div class="footer-bottom">
         <div class="footer-brand"><img class="footer-official-logo" src="assets/logo-podcast-04.svg" alt="Todavía estoy a tiempo" width="726" height="250" loading="lazy"><small>Un podcast con Dailin</small></div>
-        <nav class="footer-links" aria-label="Enlaces del pie de página"><a href="#nuestra-cancion">Nuestra canción</a><a href="#coleccion">La colección</a><a href="#regalo">Guía gratuita</a><a href="#ayuda">Pedir ayuda</a><a href="privacidad.html">Privacidad</a></nav>
+        <nav class="footer-links" aria-label="Enlaces del pie de página"><a href="#nuestra-cancion">Nuestra canción</a><a href="#coleccion">La colección</a><a href="#regalo">Guía gratuita</a><a href="#ayuda">Pedir ayuda</a><a href="privacidad.html">Privacidad</a><a href="terminos.html">Términos</a><a href="reembolsos.html">Reembolsos</a><a href="cookies.html">Cookies</a><a href="tus-datos.html">Tus datos</a><button type="button" class="privacy-settings" data-privacy-settings>Ajustes de cookies</button></nav>
         <div class="footer-credits">
           <span class="footer-copyright">© 2026 · HECHO CON CALMA</span>
           <a class="footer-powered-by" href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer" lang="en">Powered by <span>The Launch Era</span></a>
