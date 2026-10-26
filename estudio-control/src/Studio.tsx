@@ -1,3 +1,4 @@
+import SupportInbox from './SupportInbox';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, type AudioStats } from './supabase-client';
 import {
@@ -1309,27 +1310,7 @@ function App() {
               </div>
             </>
           )}
-          {page === 'soporte' && (
-            <>
-              {head(
-                'Responder con calma',
-                'Las consultas existen fuera del estudio mientras conectamos el buzón privado.'
-              )}
-              {statusPanel(
-                'Bandeja privada pendiente',
-                data?.sources.support ||
-                  'Los correos de confirmación funcionan, pero sus mensajes todavía no están en este panel.'
-              )}
-              <a
-                className="plain-link"
-                href={SITE + '#ayuda'}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Abrir formulario público <ArrowUpRight size={16} />
-              </a>
-            </>
-          )}
+          {page === 'soporte' && <SupportInbox />}
           {page === 'flujos' && (
             <>
               {head(
@@ -1367,8 +1348,8 @@ function App() {
                   ],
                   [
                     'Bandeja de mensajes',
-                    'Sincronización de solicitudes pendientes.',
-                    false,
+                    'Consultas del landing disponibles en Mensajes.',
+                    true,
                   ],
                 ].map(([title, desc, ok], i) => {
                   const Icon = [

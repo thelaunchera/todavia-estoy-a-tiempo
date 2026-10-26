@@ -185,6 +185,19 @@ export async function getThemeSongStats():Promise<AudioStats> {
   if(!data || typeof data !== 'object')throw new Error('No hay respuesta de las estadísticas de audio.');
   return data as AudioStats;
 }
+export type SupportMessage = {
+  id: string; sender_name: string; sender_email: string;
+  subject: string; body: string; status: string; created_at: string;
+};
+export async function getSupportMessages(): Promise<SupportMessage[]> {
+  if (!client) throw new Error('La bandeja requiere conexión con Supabase.');
+  await owner();
+  const { data, error } = await client.from('podcast_support_messages')
+    .select('id,sender_name,sender_email,subject,body,status,created_at')
+    .order('created_at', { ascending: false }).limit(100);
+  if (error) throw new Error('No se pudieron cargar los mensajes. Inténtalo de nuevo.');
+  return (data || []) as SupportMessage[];
+}
 export const api={
   async get(path:string){
     if(!client)return localApi.get(path);
@@ -212,7 +225,7 @@ export const api={
       sources:{
         sales:active('stripe')?'Pagos registrados en Supabase: '+fmt(sales.count,sales.error)+'. Solo eventos verificados cuentan.':'Pendiente: conectar eventos firmados de Stripe; ninguna cifra de ventas se presenta como confirmada.',
         subscribers:active('make')?'Suscripciones vigentes registradas: '+fmt(subscribers.count,subscribers.error)+'.':'Pendiente: conectar de forma segura la lista de consentimientos de Make.',
-        support:active('resend')?'Mensajes registrados: '+fmt(messages.count,messages.error)+'.':'Pendiente: integrar la bandeja privada de ayuda y sus respuestas.',
+        support:messages.error?'No se pudo comprobar la bandeja de mensajes.':'Consultas recibidas desde el landing: '+fmt(messages.count,messages.error)+'. Disponibles en Mensajes.',
         seo:'Sitemap publicado. Indexación en Search Console aún pendiente de comprobar.',
         lastVerified:'Base Supabase: '+(deliveries.error||runs.error?'verificación parcial':'lectura activa')
       }
