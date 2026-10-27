@@ -73,6 +73,7 @@ type Row = {
   priority?: string;
   audio?: string;
   art?: string;
+  email_art_url?: string;
   script?: string;
   announcement_state?: string;
   audio_ready?: boolean;
@@ -96,6 +97,13 @@ type Data = {
     seo: string;
   };
 };
+function validEmailArtUrl(value?:string){
+  try {
+    const url = new URL((value||'').trim());
+    return url.protocol==='https:' && !url.username && !url.password &&
+      /\.(?:png|jpe?g|webp)$/i.test(url.pathname);
+  } catch { return false; }
+}
 const SITE = 'https://podcast.thelaunchera.com/';
 const LOGO = SITE + 'assets/logo-podcast-04.svg';
 const COVER = SITE + 'assets/podcast-episodio-01-azul-v3.webp';
@@ -515,6 +523,7 @@ function App() {
     if(nextStatus==='publicado') {
       if(item.status!=='hecho') {setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError(SPOTIFY_EPISODE_ERROR);return;}
+      if(!validEmailArtUrl(item.email_art_url)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Antes de avisar a los oyentes, guarda una imagen pública directa de este capítulo (.png, .jpg o .webp).');return;}
       if(!window.confirm('¿Confirmas que ya publicaste este capítulo en Spotify? Enviaremos un aviso a los oyentes suscritos.'))return;
     }
     setSaving(true);
@@ -537,6 +546,7 @@ function App() {
     if(edit.kind==='episodios'&&edit.item.status==='publicado'&&original?.status!=='publicado'){
       if(original?.status!=='hecho'){setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(edit.item.link)){setFormError(SPOTIFY_EPISODE_ERROR);return;}
+      if(!validEmailArtUrl(edit.item.email_art_url)){setFormError('El capítulo necesita su imagen pública directa (.png, .jpg o .webp) antes de notificar por correo.');return;}
       if(!window.confirm('¿Este capítulo ya está publicado en Spotify? Confirmar enviará el aviso a los oyentes suscritos.'))return;
       edit.item.announcement_state='pending';
     }
@@ -1760,6 +1770,22 @@ function App() {
                         })
                       }
                     />
+                  </label>
+                  <label>
+                    Foto pública del capítulo para el correo
+                    <input
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://.../portada-episodio.png"
+                      value={edit.item.email_art_url || ''}
+                      onChange={e =>
+                        setEdit({
+                          ...edit,
+                          item: { ...edit.item, email_art_url: e.target.value },
+                        })
+                      }
+                    />
+                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). El enlace privado de Biblioteca no se mostrará en los correos. Guárdalo antes de publicar el episodio.</small>
                   </label>
                 </>
               )}
