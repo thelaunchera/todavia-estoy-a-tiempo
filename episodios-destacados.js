@@ -18,7 +18,7 @@
       title: 'Estoy cansada de ser fuerte todo el tiempo',
       summary: 'El trabajo que queda fuera de un «tú siempre resuelves»: lo que pospones, lo que sigues recordando y lo que casi nadie pregunta después.',
       url: 'https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ',
-      art: null,
+      art: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/bece4d27-8d21-4669-8baa-fcd83c65dd55.png',
       published: true
     }
   ];
@@ -40,6 +40,19 @@
   text('[data-ep-art-title]', latest.title);
   text('[data-ep-art-number]', String(latest.number).padStart(2, '0'));
   text('[data-ep-summary]', latest.summary);
+  const art = section.querySelector('[data-ep-poster]');
+  const cover = section.querySelector('.episode-curated-art');
+  if (art && cover) {
+    if (latest.art && /^https:\/\//.test(latest.art)) {
+      art.src = latest.art;
+      art.alt = `Portada oficial del episodio ${latest.number}: ${latest.title}`;
+      art.hidden = false;
+      cover.classList.add('has-real-poster');
+    } else {
+      art.hidden = true;
+      cover.classList.remove('has-real-poster');
+    }
+  }
   for (const link of section.querySelectorAll('[data-ep-link]')) {
     link.href = latest.url;
     link.setAttribute('aria-label', `Escuchar episodio ${latest.number}: ${latest.title} en Spotify (abre otra pestaña)`);
