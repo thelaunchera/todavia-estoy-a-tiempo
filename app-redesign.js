@@ -52,13 +52,17 @@
   document.addEventListener('click', event => {
     if (nav?.classList.contains('open') && !nav.contains(event.target) && !menu?.contains(event.target)) closeMenu();
   });
+  // La guia gratuita se entrega exclusivamente por correo.
   document.querySelectorAll('[data-guide]').forEach(button => {
-    const url = publicUrl(config.freeGuideUrl);
-    if (url) {
-      const note = document.querySelector('#guide-state');
-      if (note) note.textContent = 'Recurso gratuito en PDF. Sin compra.';
-    }
-    button.addEventListener('click', () => url ? window.location.assign(url) : info('Estamos preparando las cinco preguntas. La descarga gratuita aparecerá aquí cuando esté lista.'));
+    const note = document.querySelector('#guide-state');
+    if (note) note.textContent = 'Guía gratuita enviada por correo, sin compra.';
+    button.addEventListener('click', () => {
+      const form = document.getElementById('guide-form');
+      if (form) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        form.querySelector('input[type="email"]')?.focus({ preventScroll: true });
+      } else info('Solicita la guía desde el formulario para recibirla por correo.');
+    });
   });
   document.querySelectorAll('[data-podcast]').forEach(button => {
     const url = publicUrl(config.podcastUrl);
@@ -308,15 +312,6 @@
     const status = form.querySelector('.form-status');
     const submit = form.querySelector('button[type="submit"]');
     const buttonText = submit?.textContent;
-    const revealGuide = () => {
-      if (form.dataset.podcastForm !== 'guide') return;
-      const box = document.getElementById('guide-direct-access');
-      const link = document.getElementById('guide-direct-link');
-      const url = publicUrl(config.freeGuideUrl);
-      if (!box || !link || !url) return;
-      link.href = url;
-      box.hidden = false;
-    };
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!field || !submit || !status) return;
@@ -341,7 +336,6 @@
       if (!url) {
         status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
         status.classList.add('is-error');
-        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Escribir por correo';
@@ -358,10 +352,9 @@
         const data = await response.json();
         if (data?.ok !== true) throw new Error('Envío no confirmado');
         status.textContent = kind === 'guide'
-          ? 'Tu solicitud se procesó. Revisa tu correo y spam; también puedes abrir la guía aquí mismo.'
+          ? 'Te enviamos la guía a tu correo. Revisa tu bandeja de entrada y spam.'
           : '¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.';
         status.classList.add('is-success');
-        revealGuide();
         // The freebie never depends on subscribing. Save permission only when
         // the person explicitly checked the optional box.
         if (wantsEpisodeNotes) {
@@ -391,10 +384,9 @@
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
       } catch (error) {
         status.textContent = kind === 'guide'
-          ? 'No pudimos confirmar el correo, pero puedes abrir la guía gratis aquí mismo.'
+          ? 'No pudimos confirmar el envío de tu guía. Inténtalo otra vez o escríbenos.'
           : 'No pudimos confirmar la consulta. Inténtalo de nuevo o escríbenos directamente.';
         status.classList.add('is-error');
-        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Abrir correo';
