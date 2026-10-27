@@ -37,21 +37,32 @@
   };
   text('[data-ep-kicker]', `EPISODIO ${String(latest.number).padStart(2, '0')} · YA DISPONIBLE`);
   text('[data-ep-title]', latest.title);
-  text('[data-ep-art-title]', latest.title);
-  text('[data-ep-art-number]', String(latest.number).padStart(2, '0'));
   text('[data-ep-summary]', latest.summary);
   const art = section.querySelector('[data-ep-poster]');
   const cover = section.querySelector('.episode-curated-art');
+  const fallback = section.querySelector('[data-ep-fallback]');
   if (art && cover) {
-    if (latest.art && /^https:\/\//.test(latest.art)) {
-      art.src = latest.art;
+    const hasImage = typeof latest.art === 'string' &&
+      (/^https:\/\//.test(latest.art) || /^assets\//.test(latest.art));
+    const showFallback = () => {
+      art.hidden = true;
+      if (fallback) {
+        fallback.textContent = `Todavía estoy a tiempo · Episodio ${String(latest.number).padStart(2, '0')}`;
+        fallback.hidden = false;
+      }
+      cover.classList.remove('has-real-poster');
+    };
+    if (hasImage) {
+      // Do not reset src on every refresh: resetting produces a visible
+      // old cover/background while a second request for the same photo starts.
+      if (art.getAttribute('src') !== latest.art) art.setAttribute('src', latest.art);
       art.alt = `Portada oficial del episodio ${latest.number}: ${latest.title}`;
       art.hidden = false;
+      if (fallback) fallback.hidden = true;
       cover.classList.add('has-real-poster');
-    } else {
-      art.hidden = true;
-      cover.classList.remove('has-real-poster');
-    }
+      art.addEventListener('error', showFallback, { once: true });
+      if (art.complete && art.naturalWidth === 0) showFallback();
+    } else showFallback();
   }
   for (const link of section.querySelectorAll('[data-ep-link]')) {
     link.href = latest.url;
