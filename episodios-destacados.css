@@ -36,3 +36,15 @@
 @media(max-width:900px){.podcast-episodes-curated .episode-curated-head{align-items:start;flex-direction:column;gap:10px}.episode-curated-grid{gap:30px}.episode-curated-art{min-height:320px}.episode-curated-art .episode-curated-cover-number{font-size:6rem}.episode-curated-art .episode-curated-cover-title{font-size:1.55rem}.episode-curated-copy h3{font-size:clamp(2rem,4.1vw,3.1rem)}}
 @media(max-width:680px){.podcast-episodes-curated .episode-curated-head{margin-bottom:26px}.podcast-episodes-curated .episode-curated-head h2{font-size:clamp(2.4rem,9.5vw,3.55rem)}.episode-curated-grid{grid-template-columns:1fr;gap:27px}.episode-curated-art{width:100%;max-width:420px;min-height:330px;aspect-ratio:1/1.02;margin-inline:auto;border-radius:17px}.episode-curated-art .episode-curated-cover-number{font-size:6.9rem;margin:2px 0 8px}.episode-curated-art .episode-curated-cover-title{font-size:clamp(1.45rem,6.3vw,2rem)}.episode-curated-art .episode-curated-cover-logo{max-width:170px;margin-bottom:15px}.episode-curated-copy .episode-curated-kicker{font-size:.63rem;margin-bottom:10px}.episode-curated-copy h3{font-size:clamp(2.4rem,9.5vw,3.7rem);margin-bottom:16px}.episode-curated-copy .episode-curated-summary{font-size:.96rem;line-height:1.7;margin-bottom:23px}.episode-curated-copy .episode-curated-button{width:100%}.episode-previous{gap:15px;margin-top:30px}.episode-previous .episode-previous-image{flex-basis:71px;width:71px;height:71px}.episode-curated-bottom{margin-top:24px;padding-top:23px;gap:10px}}
 @media(prefers-reduced-motion:reduce){.episode-curated-art,.episode-curated-copy .episode-curated-button{transition:none!important}}
+
+/* Portada real del último episodio; oculta el título duplicado dibujado encima. */
+.episode-curated-art .episode-curated-poster{
+  display:block;position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;z-index:3;border-radius:inherit;
+}
+.episode-curated-art .episode-curated-poster[hidden]{display:none!important}
+.episode-curated-art.has-real-poster .episode-curated-cover-label,
+.episode-curated-art.has-real-poster .episode-curated-cover-number,
+.episode-curated-art.has-real-poster .episode-curated-cover-logo,
+.episode-curated-art.has-real-poster .episode-curated-cover-title,
+.episode-curated-art.has-real-poster .episode-curated-cover-footer{visibility:hidden}
