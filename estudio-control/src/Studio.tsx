@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import './studio.css';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
+import { normalizeSpotifyEpisodeLink, validSpotifyEpisode, SPOTIFY_EPISODE_ERROR } from './spotify-links';
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
@@ -504,7 +505,6 @@ function App() {
     setFormError('');
     setEdit({ kind, item: { ...item }, newItem: false });
   };
-  const validSpotifyEpisode=(value?:string)=>/^https:\/\/open\.spotify\.com\/episode\/[A-Za-z0-9]+(?:\?.*)?$/.test((value||'').trim());
   async function advanceEpisode(item:Row,nextStatus:'en producción'|'hecho'|'publicado') {
     if(recording||saving)return;
     if(item.number===19&&!item.script_reviewed){
@@ -514,12 +514,12 @@ function App() {
     }
     if(nextStatus==='publicado') {
       if(item.status!=='hecho') {setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Primero marca el episodio como hecho.');return;}
-      if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Añade el enlace directo del episodio de Spotify, no el del programa.');return;}
+      if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError(SPOTIFY_EPISODE_ERROR);return;}
       if(!window.confirm('¿Confirmas que ya publicaste este capítulo en Spotify? Enviaremos un aviso a los oyentes suscritos.'))return;
     }
     setSaving(true);
     try {
-      await api.put('/api/items/episodios/'+item.id,{title:item.title,status:nextStatus,...(nextStatus==='publicado'?{announcement_state:'pending',link:item.link}: {})});
+      await api.put('/api/items/episodios/'+item.id,{title:item.title,status:nextStatus,...(nextStatus==='publicado'?{announcement_state:'pending',link:normalizeSpotifyEpisodeLink(item.link)}: {})});
       await refresh();
     }catch(e){setError(e instanceof Error?e.message:'No se pudo cambiar el capítulo.');}finally{setSaving(false);}
   }
@@ -536,18 +536,21 @@ function App() {
     }
     if(edit.kind==='episodios'&&edit.item.status==='publicado'&&original?.status!=='publicado'){
       if(original?.status!=='hecho'){setFormError('Primero marca el episodio como hecho.');return;}
-      if(!validSpotifyEpisode(edit.item.link)){setFormError('Añade el enlace directo: open.spotify.com/episode/…, no la página del programa.');return;}
+      if(!validSpotifyEpisode(edit.item.link)){setFormError(SPOTIFY_EPISODE_ERROR);return;}
       if(!window.confirm('¿Este capítulo ya está publicado en Spotify? Confirmar enviará el aviso a los oyentes suscritos.'))return;
       edit.item.announcement_state='pending';
     }
     setSaving(true);
     setFormError('');
     try {
-      if (edit.newItem) await api.post('/api/items/' + edit.kind, edit.item);
+      const savedItem = edit.kind === 'episodios'
+        ? { ...edit.item, link: normalizeSpotifyEpisodeLink(edit.item.link) || (edit.item.link || '').trim() }
+        : edit.item;
+      if (edit.newItem) await api.post('/api/items/' + edit.kind, savedItem);
       else
         await api.put(
           '/api/items/' + edit.kind + '/' + edit.item.id,
-          edit.item
+          savedItem
         );
       setEdit(null);
       await refresh();
@@ -1762,8 +1765,9 @@ function App() {
               )}
               {(edit.kind === 'productos' || edit.kind === 'episodios') && (
                 <label>
-                  {edit.kind === 'episodios' ? 'Enlace directo del episodio en Spotify' : 'Enlace principal'}
+                  {edit.kind === 'episodios' ? 'Enlace del episodio en Spotify' : 'Enlace principal'}
                   <input
+                    aria-describedby={edit.kind === 'episodios' ? 'spotify-link-help' : undefined}
                     value={edit.item.link || ''}
                     onChange={e =>
                       setEdit({
@@ -1772,6 +1776,7 @@ function App() {
                       })
                     }
                   />
+                  {edit.kind === 'episodios' && <small id="spotify-link-help">Acepta el enlace del capítulo de Spotify o el compartido desde Spotify for Creators. Usa un capítulo, no la página general del podcast.</small>}
                 </label>
               )}
               {(edit.kind === 'tareas' || edit.kind === 'ideas') && (

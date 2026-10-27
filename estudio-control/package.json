@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "test:spotify-links": "node --experimental-strip-types --test tests/spotify-links.test.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
