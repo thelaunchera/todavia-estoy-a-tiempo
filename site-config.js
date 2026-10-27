@@ -21,7 +21,7 @@ window.PODCAST_CONFIG = {
 
   productPhotos: [
     { file: 'assets/productos/editorial/guia.webp', alt: '5 preguntas para cuando sientes que vas tarde' },
-    { file: 'assets/productos/editorial/diario.webp', alt: 'No voy tarde: un diario para volver a mí' },
-    { file: 'assets/productos/editorial/workbook.webp', alt: 'Empezar de nuevo: sin tener todo resuelto' }
+    { file: 'assets/productos/editorial/diario-carta-20261027.webp', alt: 'No voy tarde: un diario para volver a mí' },
+    { file: 'assets/productos/editorial/workbook-puerta-20261027.webp', alt: 'Empezar de nuevo: sin tener todo resuelto' }
   ]
 };
