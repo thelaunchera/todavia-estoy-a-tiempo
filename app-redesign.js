@@ -53,12 +53,13 @@
     if (nav?.classList.contains('open') && !nav.contains(event.target) && !menu?.contains(event.target)) closeMenu();
   });
   document.querySelectorAll('[data-guide]').forEach(button => {
-    const url = publicUrl(config.freeGuideUrl);
-    if (url) {
-      const note = document.querySelector('#guide-state');
-      if (note) note.textContent = 'Recurso gratuito en PDF. Sin compra.';
-    }
-    button.addEventListener('click', () => url ? window.location.assign(url) : info('Estamos preparando las cinco preguntas. La descarga gratuita aparecerá aquí cuando esté lista.'));
+    button.addEventListener('click', () => {
+      const form = document.getElementById('guide-form');
+      if (form) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        form.querySelector('input[type="email"]')?.focus({ preventScroll: true });
+      } else info('Solicita las 5 preguntas desde el formulario para recibirlas por correo.');
+    });
   });
   document.querySelectorAll('[data-podcast]').forEach(button => {
     const url = publicUrl(config.podcastUrl);
@@ -69,7 +70,7 @@
     const url = publicUrl(config.stripePaymentLinks?.[button.dataset.buy]);
     const ready = config.commerceEnabled === true && url !== null;
     button.disabled = !ready;
-    if (ready) button.textContent = button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $4.99' : 'Comprar mi cuaderno · $7.99';
+    if (ready) button.textContent = button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $1.99' : 'Comprar mi cuaderno · $3.99';
     button.addEventListener('click', () => {
       if (ready) window.location.assign(url);
     });
