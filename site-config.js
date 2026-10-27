@@ -1,7 +1,7 @@
 // Configuración pública del podcast.
 window.PODCAST_CONFIG = {
   commerceEnabled: true,
-  stripePaymentLinks: {
+  checkoutLinks: {
     noVoyTarde: 'https://buy.stripe.com/8x2dR81YHe5PfgJdru93y0X',
     empezarDeNuevo: 'https://buy.stripe.com/5kQ6oGeLt2n75G9afi93y0Y'
   },
@@ -9,7 +9,6 @@ window.PODCAST_CONFIG = {
   newsletterEndpoint: 'https://hook.us2.make.com/7yyoehld3g2sh2afq1l6bcw24ct65niw',
   unsubscribeEndpoint: 'https://hook.us2.make.com/5sgoykwaxvn52xmv817h8dgro7yxtm2h',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
-  freeGuideUrl: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view?usp=drivesdk',
   podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
   // Canción oficial del podcast: MP3 alojado en CDN para reproducción web; sin inicio automático.
   themeSongUrl: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/6245b40c-583e-42f0-bc44-e1ebfd096c2c.mp3',
