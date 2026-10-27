@@ -1,0 +1,38 @@
+/* Episodios destacados — sistema editorial que no crece con los lanzamientos. */
+.podcast-episodes-curated{background:#f6f3eb;overflow:hidden}
+.podcast-episodes-curated .episode-curated-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:42px}
+.podcast-episodes-curated .episode-curated-head h2{margin:7px 0 0;max-width:770px;font:400 clamp(2.25rem,4.5vw,4.65rem)/1.075 var(--serif);letter-spacing:-.035em;color:#24334d}
+.podcast-episodes-curated .episode-curated-head h2 em{font-style:italic;color:#9d718b}
+.podcast-episodes-curated .episode-curated-intro{max-width:280px;margin:0 0 6px;color:#627083;font:.91rem/1.7 var(--sans)}
+.episode-curated-grid{display:grid;grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr);gap:clamp(32px,6vw,96px);align-items:center}
+.episode-curated-art{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;min-height:410px;aspect-ratio:1/1.08;max-width:510px;padding:32px;text-align:center;text-decoration:none;background:linear-gradient(150deg,#e9d8e2 0%,#f3e9e8 46%,#d9e3ed 100%);border-radius:20px;box-shadow:0 19px 46px rgba(42,44,62,.1);color:#26374f;transition:transform .25s ease,box-shadow .25s ease}
+.episode-curated-art::before{content:"";position:absolute;z-index:-1;top:-18%;right:-31%;width:83%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(150,113,141,.28);box-shadow:0 0 0 37px rgba(255,255,255,.1),0 0 0 74px rgba(246,222,230,.22)}
+.episode-curated-art::after{content:"";position:absolute;z-index:-1;bottom:-31%;left:-27%;width:75%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(194,210,228,.65),transparent 73%)}
+.episode-curated-art:hover{transform:translateY(-4px);box-shadow:0 26px 58px rgba(42,44,62,.17)}
+.episode-curated-art:focus-visible,.episode-curated-copy a:focus-visible,.episode-previous-link:focus-visible,.episode-curated-bottom a:focus-visible{outline:3px solid #9e7390;outline-offset:4px}
+.episode-curated-art .episode-curated-cover-label{font:700 .65rem/1.4 var(--sans);letter-spacing:.25em;color:#785f75}
+.episode-curated-art .episode-curated-cover-number{display:block;font:400 clamp(5.8rem,14vw,9.8rem)/1 var(--serif);letter-spacing:-.08em;color:rgba(84,71,92,.16);margin:20px 0 -2px}
+.episode-curated-art .episode-curated-cover-logo{display:block;max-width:212px;width:56%;height:auto;margin:0 auto 20px;opacity:.91}
+.episode-curated-art .episode-curated-cover-title{font:400 clamp(1.45rem,2.8vw,2.1rem)/1.15 var(--serif);max-width:365px;color:#26374f;text-wrap:balance}
+.episode-curated-art .episode-curated-cover-footer{position:absolute;bottom:21px;left:24px;right:24px;font:600 .65rem/1.3 var(--sans);letter-spacing:.18em;color:#8a687d}
+.episode-curated-copy{min-width:0}
+.episode-curated-copy .episode-curated-kicker{font:700 .68rem/1.5 var(--sans);letter-spacing:.2em;color:#986f86;margin:0 0 18px}
+.episode-curated-copy h3{font:400 clamp(2.35rem,4.7vw,4.85rem)/1.07 var(--serif);letter-spacing:-.04em;color:#223550;margin:0 0 23px;text-wrap:balance}
+.episode-curated-copy .episode-curated-summary{max-width:555px;margin:0 0 27px;font:400 clamp(.99rem,1.15vw,1.08rem)/1.8 var(--sans);color:#5b6a7b}
+.episode-curated-copy .episode-curated-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:51px;padding:13px 22px;border-radius:999px;background:#26374f;color:#fff;text-decoration:none;font:700 .82rem/1.5 var(--sans);box-shadow:0 10px 28px #20314920;transition:transform .22s ease,background .22s ease}
+.episode-curated-copy .episode-curated-button:hover{background:#395a78;transform:translateY(-2px)}
+.episode-curated-copy .episode-curated-button svg{flex:none;width:23px;height:23px}
+.episode-previous{display:flex;align-items:center;gap:18px;margin-top:36px;padding:19px 0 0;border-top:1px solid #ced2d5}
+.episode-previous[hidden]{display:none!important}
+.episode-previous .episode-previous-image{flex:0 0 83px;display:block;width:83px;height:83px;border-radius:12px;overflow:hidden;background:#dce5ee}
+.episode-previous .episode-previous-image img{display:block;width:100%;height:100%;object-fit:cover}
+.episode-previous .episode-previous-detail{flex:1;min-width:0}
+.episode-previous .episode-previous-kicker{font:700 .58rem/1.5 var(--sans);letter-spacing:.15em;color:#977b8b;margin:0 0 5px}
+.episode-previous .episode-previous-link{display:inline-block;font:400 clamp(1.08rem,1.85vw,1.4rem)/1.2 var(--serif);color:#24354d;text-decoration:none}
+.episode-previous .episode-previous-link:hover{text-decoration:underline;text-decoration-color:#977b8b;text-underline-offset:5px}
+.episode-curated-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;padding-top:30px;margin-top:40px;border-top:1px solid #ced2d5}
+.episode-curated-bottom a{font:700 .79rem/1.5 var(--sans);color:#284d73;text-decoration:underline;text-underline-offset:5px}
+.episode-curated-bottom p{margin:0;color:#728092;font:.79rem/1.55 var(--sans)}
+@media(max-width:900px){.podcast-episodes-curated .episode-curated-head{align-items:start;flex-direction:column;gap:10px}.episode-curated-grid{gap:30px}.episode-curated-art{min-height:320px}.episode-curated-art .episode-curated-cover-number{font-size:6rem}.episode-curated-art .episode-curated-cover-title{font-size:1.55rem}.episode-curated-copy h3{font-size:clamp(2rem,4.1vw,3.1rem)}}
+@media(max-width:680px){.podcast-episodes-curated .episode-curated-head{margin-bottom:26px}.podcast-episodes-curated .episode-curated-head h2{font-size:clamp(2.4rem,9.5vw,3.55rem)}.episode-curated-grid{grid-template-columns:1fr;gap:27px}.episode-curated-art{width:100%;max-width:420px;min-height:330px;aspect-ratio:1/1.02;margin-inline:auto;border-radius:17px}.episode-curated-art .episode-curated-cover-number{font-size:6.9rem;margin:2px 0 8px}.episode-curated-art .episode-curated-cover-title{font-size:clamp(1.45rem,6.3vw,2rem)}.episode-curated-art .episode-curated-cover-logo{max-width:170px;margin-bottom:15px}.episode-curated-copy .episode-curated-kicker{font-size:.63rem;margin-bottom:10px}.episode-curated-copy h3{font-size:clamp(2.4rem,9.5vw,3.7rem);margin-bottom:16px}.episode-curated-copy .episode-curated-summary{font-size:.96rem;line-height:1.7;margin-bottom:23px}.episode-curated-copy .episode-curated-button{width:100%}.episode-previous{gap:15px;margin-top:30px}.episode-previous .episode-previous-image{flex-basis:71px;width:71px;height:71px}.episode-curated-bottom{margin-top:24px;padding-top:23px;gap:10px}}
+@media(prefers-reduced-motion:reduce){.episode-curated-art,.episode-curated-copy .episode-curated-button{transition:none!important}}
