@@ -67,7 +67,7 @@
     button.addEventListener('click', () => url ? window.open(url, '_blank', 'noopener,noreferrer') : info('El enlace oficial del podcast se añadirá aquí. Nos escuchamos cada martes.'));
   });
   document.querySelectorAll('[data-buy]').forEach(button => {
-    const url = publicUrl(config.stripePaymentLinks?.[button.dataset.buy]);
+    const url = publicUrl(config.checkoutLinks?.[button.dataset.buy]);
     const ready = config.commerceEnabled === true && url !== null;
     button.disabled = !ready;
     if (ready) button.textContent = button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $1.99' : 'Comprar mi cuaderno · $3.99';
@@ -309,15 +309,6 @@
     const status = form.querySelector('.form-status');
     const submit = form.querySelector('button[type="submit"]');
     const buttonText = submit?.textContent;
-    const revealGuide = () => {
-      if (form.dataset.podcastForm !== 'guide') return;
-      const box = document.getElementById('guide-direct-access');
-      const link = document.getElementById('guide-direct-link');
-      const url = publicUrl(config.freeGuideUrl);
-      if (!box || !link || !url) return;
-      link.href = url;
-      box.hidden = false;
-    };
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!field || !submit || !status) return;
@@ -342,7 +333,6 @@
       if (!url) {
         status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
         status.classList.add('is-error');
-        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Escribir por correo';
@@ -359,10 +349,9 @@
         const data = await response.json();
         if (data?.ok !== true) throw new Error('Envío no confirmado');
         status.textContent = kind === 'guide'
-          ? 'Tu solicitud se procesó. Revisa tu correo y spam; también puedes abrir la guía aquí mismo.'
+          ? 'Te enviamos la guía por correo. Revisa tu bandeja de entrada y la carpeta Spam.'
           : '¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.';
         status.classList.add('is-success');
-        revealGuide();
         // The freebie never depends on subscribing. Save permission only when
         // the person explicitly checked the optional box.
         if (wantsEpisodeNotes) {
@@ -392,10 +381,9 @@
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
       } catch (error) {
         status.textContent = kind === 'guide'
-          ? 'No pudimos confirmar el correo, pero puedes abrir la guía gratis aquí mismo.'
+          ? 'No pudimos confirmar el envío de la guía. Inténtalo otra vez o escríbenos.'
           : 'No pudimos confirmar la consulta. Inténtalo de nuevo o escríbenos directamente.';
         status.classList.add('is-error');
-        revealGuide();
         const link = document.createElement('a');
         link.href = 'mailto:hello@thelaunchera.com';
         link.textContent = ' Abrir correo';
