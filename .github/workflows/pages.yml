@@ -69,6 +69,8 @@ jobs:
         run: node estudio-control/tests/check-schema.mjs
       - name: Validar instalación de la web app
         run: node estudio-control/tests/check-pwa.mjs
+      - name: Validar privacidad compacta y portada de episodio sin destellos
+        run: node estudio-control/tests/check-landing-privacy.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
