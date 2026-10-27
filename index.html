@@ -13,6 +13,7 @@
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles-redesign.css?v=20261022-cancion-publicada-v1">
   <link rel="stylesheet" href="episodios-destacados.css?v=20261027-mobile-crop-v2">
+  <link rel="stylesheet" href="theme-song-compact.css?v=20261027-v1">
   <link rel="stylesheet" href="visitor-mode.css?v=20261023-prueba-v1">
   <script defer src="visitor-mode.js?v=20261023-prueba-v1"></script>
   <script defer src="site-config.js?v=20261025-intro-v1"></script>
@@ -111,21 +112,18 @@
     </section>
 
     <!-- El reproductor se muestra cuando la canción oficial tiene una URL válida. -->
-    <section class="theme-song-section paper" id="nuestra-cancion" aria-labelledby="theme-song-title" hidden>
+    <section class="theme-song-section theme-song-compact paper" id="nuestra-cancion" aria-labelledby="theme-song-title" hidden>
       <div class="shell theme-song-layout">
-        <div class="theme-song-art" aria-hidden="true">
-          <span class="theme-song-art-overline">UNA CANCIÓN PARA VOLVER A TI</span>
-          <img src="assets/logo-podcast-04.svg" alt="" width="726" height="250" loading="lazy">
-          <span class="theme-song-art-wave">〰 〰 〰</span>
-        </div>
-        <div class="theme-song-copy">
-          <p class="eyebrow">LA MÚSICA DEL PODCAST</p>
-          <h2 id="theme-song-title">Hay palabras que se quedan. <em>Y canciones también.</em></h2>
-          <p>Esta canción acompaña nuestro espacio. Escúchala aquí, sin salir de la página.</p>
-          <div class="theme-song-player">
-            <p class="theme-song-player-title">Canción oficial · Todavía estoy a tiempo</p>
-            <audio id="theme-song-audio" controls preload="metadata" controlslist="nodownload" aria-label="Reproductor de la canción del podcast"></audio>
+        <div class="theme-song-art theme-song-card">
+          <p class="theme-song-art-overline">UNA CANCIÓN PARA VOLVER A TI</p>
+          <img src="assets/logo-podcast-04.svg" alt="Todavía estoy a tiempo" width="726" height="250" loading="lazy">
+          <span class="theme-song-art-wave" aria-hidden="true">〰 〰 〰</span>
+          <h2 class="theme-song-compact-title" id="theme-song-title">Nuestra canción</h2>
+          <p class="theme-song-compact-description">Escúchala aquí, sin salir de la página.</p>
+          <div class="theme-song-player theme-song-player-embedded">
+            <audio id="theme-song-audio" controls preload="metadata" controlslist="nodownload" playsinline aria-label="Reproducir la canción oficial de Todavía estoy a tiempo"></audio>
           </div>
+          <p class="theme-song-compact-credit">Powered by <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">The Launch Era</a></p>
         </div>
       </div>
     </section>
