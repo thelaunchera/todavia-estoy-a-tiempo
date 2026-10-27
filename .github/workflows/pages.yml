@@ -61,6 +61,7 @@ jobs:
         run: |
           cd estudio-control
           npm install --no-audit --no-fund
+          npm run test:spotify-links
           npm run build
       - name: Generar iconos del Estudio para iPhone y Android
         run: |
