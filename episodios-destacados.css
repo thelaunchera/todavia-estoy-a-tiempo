@@ -48,3 +48,8 @@
 .episode-curated-art.has-real-poster .episode-curated-cover-logo,
 .episode-curated-art.has-real-poster .episode-curated-cover-title,
 .episode-curated-art.has-real-poster .episode-curated-cover-footer{visibility:hidden}
+
+/* Móvil: baja ligeramente la portada dentro del encuadre para que «CAPÍTULO 02» no quede cortado. */
+@media(max-width:680px){
+  .episode-curated-art .episode-curated-poster{object-position:center 33%}
+}
