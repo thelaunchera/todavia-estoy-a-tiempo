@@ -19,8 +19,8 @@ Azul noche `#101D34`, ivory `#F6F3EB`, azul suave `#B8CADC` y líneas doradas di
 | Producto | Precio previsto |
 | --- | --- |
 | 5 preguntas para cuando sientes que vas tarde | Gratis |
-| No voy tarde — Un diario para volver a mí | $4.99 USD |
-| Empezar de nuevo — Sin tener todo resuelto | $7.99 USD |
+| No voy tarde — Un diario para volver a mí | $1.99 USD |
+| Empezar de nuevo — Sin tener todo resuelto | $3.99 USD |
 
 ## Vista local
 
