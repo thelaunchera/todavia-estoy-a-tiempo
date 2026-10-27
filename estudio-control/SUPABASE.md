@@ -1,11 +1,11 @@
 # Backend Supabase — Todavía estoy a tiempo
 
-**Estado: preparado en GitHub, todavía sin proyecto Supabase exclusivo activado.**
+**Estado: proyecto Supabase exclusivo del podcast activo desde el 22 de octubre de 2026.**
 
 El podcast no debe compartir las bases de datos **The Launch Era Cleaning App** ni **The Launch Era Cleaning App — Testing**.
 
-## 1. Crear un proyecto exclusivo
-Crear un proyecto de Supabase llamado `Todavía estoy a tiempo — Podcast` en la organización que elijas, después de confirmar cualquier costo. No reutilizar credenciales ni tablas de TLE.
+## 1. Proyecto exclusivo existente
+El proyecto `Todavía estoy a tiempo — Podcast` está activo y separado de los proyectos comerciales de The Launch Era. No reutilizar credenciales ni tablas de TLE.
 
 ## 2. Configurar la base
 Ejecutar `sql/estructura-podcast.sql` únicamente en el **nuevo proyecto** desde SQL Editor.
@@ -21,7 +21,7 @@ values ('UUID_DE_LA_CUENTA_ADMINISTRADORA','owner');
 Usar solo el UUID; no publicar correos ni secretos en el repositorio. No habilitar creación abierta de usuarios del estudio.
 
 ## 4. Configurar autenticación y dominios
-En Auth > URL Configuration, usar `https://podcast.thelaunchera.com/estudio/` como redirección admitida. Se utiliza **magic link** al correo autorizado, no la contraseña local.
+En Auth > URL Configuration, mantener permitida `https://podcast.thelaunchera.com/estudio/` como redirección. La cuenta de administración utiliza contraseña de Supabase; el enlace de recuperación sirve para establecerla. La bóveda local es compatibilidad con datos anteriores.
 El login debe comprobar membresía admin, además de las políticas de base de datos.
 
 ## 5. Variables públicas del frontend
@@ -31,7 +31,7 @@ GitHub Actions puede compilar Vite con:
 
 Estas dos variables **son públicas por diseño**. NUNCA exponer `service_role`, `sb_secret_`, llaves privadas de Stripe, Resend o Make en GitHub Pages ni en variables `VITE_`.
 
-**Hasta que ambas variables estén configuradas, el sitio sigue usando su bóveda local cifrada.** No hay migración automática de esos datos: exportar/importar solo tras validar un proceso autorizado. El cambio de backend debe anunciarse para que ningún dato local se pierda.
+La URL y la clave publicable ya están configuradas en el frontend. La bóveda local antigua solo debe importarse expresamente tras verificar un respaldo.
 
 ## 6. Eventos reales
 Las tablas `podcast_sales`, `podcast_subscribers`, `podcast_support_messages`,
@@ -59,7 +59,13 @@ La primera lectura real de Supabase, sus políticas RLS y el acceso por correo d
 - Proyecto nuevo creado: `fhrvuhikrybobidxpvnh`.
 - El esquema de ocho tablas está instalado y sus RLS están habilitadas.
 - El sitio GitHub Pages usa la URL y la **clave pública** Supabase de `src/public-supabase-config.ts`. Esto NO es una clave secreta.
-- En Supabase > Authentication > URL Configuration, añadir la URL exacta `https://podcast.thelaunchera.com/estudio/` a los redireccionamientos permitidos. Este ajuste aún debe hacerse en el Dashboard.
-- El primer propietario debe confirmar el enlace que llega a su correo. Después de eso, asignar su usuario ya confirmado a la tabla `podcast_studio_admins` mediante una operación administrativa segura. No se permite el acceso solo por crear una cuenta.
-- Hasta que la cuenta propietaria se autorice, el estudio bloqueará el acceso a datos remotos (esto es intencional).
-- Antes de migrar registros locales, exportar un respaldo cifrado desde la versión local. El proyecto nuevo no contiene esos datos todavía.
+- En Supabase > Authentication > URL Configuration, mantener permitida la dirección `https://podcast.thelaunchera.com/estudio/` y verificarla al cambiar la recuperación.
+- El primer propietario ya consta en `podcast_studio_admins`. No se permite el acceso solo por crear una cuenta.
+- Las cuentas sin autorización explícita seguirán bloqueadas.
+- Antes de migrar registros locales, exportar un respaldo cifrado desde la versión local. El proyecto activo ya contiene registros; no reimportar respaldos sin revisar duplicados.
+
+### Verificación 27 de octubre de 2026
+- Proyecto activo con diez tablas `podcast_*` y RLS habilitada.
+- Precios oficiales: diario $1.99 y cuaderno $3.99; los registros de productos del Estudio se han sincronizado.
+- La tabla de entregas personalizadas carece de políticas públicas intencionalmente: solo acceso del servidor autorizado.
+- Advertencia pendiente de seguridad: habilitar protección de contraseñas comprometidas en Auth desde el panel privado.

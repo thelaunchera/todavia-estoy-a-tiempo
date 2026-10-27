@@ -768,11 +768,11 @@ function App() {
             Las ideas también <em>necesitan un lugar</em> donde quedarse.
           </h1>
           <p>
-            Un estudio que funciona desde GitHub. {SUPABASE_ENABLED ? 'Tus registros se sincronizan con la base de datos privada del podcast.' : 'Tus notas se guardan cifradas en este dispositivo.'}
+            Tu espacio de trabajo, con tus capítulos, ideas y próximos pasos. {SUPABASE_ENABLED ? 'Solo las personas autorizadas pueden entrar.' : 'Tus notas permanecen protegidas en este dispositivo.'}
           </p>
           {denied && (
             <div className="login-warning">
-              <LockKeyhole size={17} /> {SUPABASE_ENABLED ? 'El acceso de Supabase aún no está verificado.' : 'No pude abrir la bóveda local. Vuelve a intentarlo.'}
+              <LockKeyhole size={17} /> {SUPABASE_ENABLED ? 'Tu acceso todavía no está autorizado.' : 'No pude abrir la bóveda local. Vuelve a intentarlo.'}
             </div>
           )}
           {!!error && <div className="login-warning" role="alert">{error}</div>}
@@ -824,7 +824,7 @@ function App() {
             </form>
           )}
           {resetMessage && <p className="login-success" role="status">{resetMessage}</p>}
-          <p className="login-install-tip">📱 En iPhone, abre el Centro de Comando en Safari. Si quieres, añádelo a la pantalla de inicio como una app.</p>
+          <p className="login-install-tip">📱 En Safari, toca Compartir y después Añadir a pantalla de inicio para abrir tu estudio como una app.</p>
           <small><ShieldCheck size={15} /> {SUPABASE_ENABLED ? 'Tu acceso se recordará cinco días en este dispositivo. Tu contraseña no se guarda en la página.' : 'Acceso recordado durante 5 días en este navegador. Tu frase no se guarda. En dispositivos compartidos, cierra sesión.'}</small>
         </section>
         <aside className="login-art">

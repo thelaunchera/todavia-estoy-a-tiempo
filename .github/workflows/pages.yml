@@ -71,6 +71,8 @@ jobs:
         run: node estudio-control/tests/check-pwa.mjs
       - name: Validar privacidad compacta y portada de episodio sin destellos
         run: node estudio-control/tests/check-landing-privacy.mjs
+      - name: Verificar precios, enlaces y créditos públicos
+        run: node estudio-control/tests/check-public-consistency.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}

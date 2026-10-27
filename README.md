@@ -16,7 +16,7 @@ Azul noche `#101D34`, ivory `#F6F3EB`, azul suave `#B8CADC` y líneas doradas di
 
 ## Colección
 
-| Producto | Precio previsto |
+| Producto | Precio público |
 | --- | --- |
 | 5 preguntas para cuando sientes que vas tarde | Gratis |
 | No voy tarde — Un diario para volver a mí | $1.99 USD |
@@ -28,13 +28,7 @@ Ejecutar `python3 -m http.server 8015` y abrir `http://localhost:8015`.
 
 ## Enlaces y ventas
 
-La tienda permanece en preparación. `site-config.js` contiene únicamente configuración pública.
-
-- `commerceEnabled: false` mantiene los botones de compra desactivados, incluso si hay un enlace de pago.
-- Antes de activar ventas: terminar los PDF y verificar el pago, la confirmación y la entrega de archivos de extremo a extremo.
-- Después de esa prueba: añadir los enlaces públicos de Stripe y activar `commerceEnabled` explícitamente.
-- `freeGuideUrl` y `podcastUrl` quedan vacíos hasta disponer de sus enlaces oficiales; la interfaz muestra ese estado sin simular descargas o reproducciones.
-- No guardar claves secretas, tokens ni datos personales en este repositorio.
+La venta está activa (`commerceEnabled: true` en `site-config.js`). Los productos de $1.99 y $3.99 utilizan Stripe Checkout; el recurso gratuito, la suscripción y la ayuda usan automatización de correo. El PDF personalizado se entrega mediante la función privada del proyecto del podcast. No añadir claves secretas ni tokens de descarga a archivos del repositorio. Las claves publicables de Supabase no son secretos. Tras modificar pagos o correos, comprobar sus flujos de extremo a extremo.
 
 ## Accesibilidad y movimiento
 
@@ -46,6 +40,6 @@ El flujo existente de GitHub Pages publica la rama `main`.
 
 ## Estudio de Control
 
-El Estudio de Control del podcast debe localizarse y verificarse en el repositorio y despliegue correspondientes antes de documentar su URL. No confundir el panel privado con la landing pública (`https://podcast.thelaunchera.com/`) ni con aplicaciones de prueba. No publicar enlaces privados en la navegación pública.
+El Estudio de Control protegido se encuentra en `https://podcast.thelaunchera.com/estudio/`. El proyecto exclusivo de Supabase está activo y exige una cuenta autorizada. No enlazar el estudio desde el menú público ni mostrar proveedores internos en la pantalla de acceso.
 
 Dirección editorial: el podcast se dirige a todas las personas; voz natural y cercana, sin repetir «chica» ni asumir una audiencia exclusivamente femenina.

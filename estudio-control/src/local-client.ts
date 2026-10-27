@@ -64,8 +64,8 @@ function initial(): Vault {
     ],
     productos: [
       { id: 'guia', title: '5 preguntas para cuando sientes que vas tarde', subtitle: 'Recurso gratuito', price: 0, status: 'disponible', link: 'https://drive.google.com/file/d/1FAJd-pAgQUynFLAeB5wdnsf1Broi5SDo/view', notes: 'Entrega automática por correo.' },
-      { id: 'diario', title: 'No voy tarde', subtitle: 'Un diario para volver a mí', price: 4.99, status: 'publicado', link: 'https://podcast.thelaunchera.com/productos/no-voy-tarde.html' },
-      { id: 'empezar', title: 'Empezar de nuevo', subtitle: 'Sin tener todo resuelto', price: 7.99, status: 'publicado', link: 'https://podcast.thelaunchera.com/productos/empezar-de-nuevo.html' }
+      { id: 'diario', title: 'No voy tarde', subtitle: 'Un diario para volver a mí', price: 1.99, status: 'publicado', link: 'https://podcast.thelaunchera.com/productos/no-voy-tarde.html' },
+      { id: 'empezar', title: 'Empezar de nuevo', subtitle: 'Sin tener todo resuelto', price: 3.99, status: 'publicado', link: 'https://podcast.thelaunchera.com/productos/empezar-de-nuevo.html' }
     ],
     ideas: [{ id: 'comunidad', title: 'Una comunidad para seguir conversando', section: 'Comunidad', status: 'en exploración', notes: 'Explorar más adelante, no publicado.' }]
   }};
