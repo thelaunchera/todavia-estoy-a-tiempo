@@ -53,8 +53,7 @@
       text('[data-ep-previous-number]', `EPISODIO ${String(previous.number).padStart(2, '0')} · POR SI TE LO PERDISTE`);
       text('[data-ep-previous-title]', previous.title);
       text('[data-ep-previous-summary]', previous.summary);
-      const previousLink = previousCard.querySelector('a');
-      if (previousLink) {
+      for (const previousLink of previousCard.querySelectorAll('a')) {
         previousLink.href = previous.url;
         previousLink.setAttribute('aria-label', `Escuchar episodio ${previous.number}: ${previous.title} en Spotify (abre otra pestaña)`);
       }
@@ -63,7 +62,9 @@
         image.src = previous.art;
         image.alt = `Portada del episodio ${previous.number} de Todavía estoy a tiempo`;
       } else if (image) {
-        image.hidden = true;
+        image.src = 'assets/logo-podcast-04.svg';
+        image.alt = 'Logo del podcast Todavía estoy a tiempo';
+        image.hidden = false;
       }
     }
   }
