@@ -50,9 +50,9 @@ assert.match(classPage,/negocios locales/i,'Comunica la oportunidad de servicio 
 assert.match(classPage,/Inscripciones aún no disponibles/,'No se promete compra abierta');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
-assert.match(classPage,/data-preview-choice="limpieza"/);
-assert.match(classPage,/data-preview-choice="belleza"/);
-assert.match(classPage,/data-preview-choice="cafe"/);
+assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
+assert.match(classPage,/src="\.\.\/assets\/clase-hero-dailin-ai\.webp"/,'Se publica el retrato aprobado para la clase');
+assert.match(newStyles,/class-hero-grid/,'El layout del hero tiene estilos responsivos');
 assert.match(classPage,/role="tablist"/);
 assert.match(classPage,/role="tabpanel"/);
 assert.match(classPage,/id="class-copy-prompt"/);
