@@ -1,4 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
+import {mountMateriales} from './materiales-interactivos.js';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
@@ -253,6 +254,12 @@ async function showCourse(email,asAdmin=false){
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
  display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('lecciones',{scroll:false});
+ void mountMateriales($('materiales-interactivos'),{
+  db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
+ }).catch(()=>{
+  const root=$('materiales-interactivos');
+  root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
+ });
  if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
 async function refreshAuth(){
