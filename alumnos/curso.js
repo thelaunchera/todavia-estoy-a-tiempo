@@ -28,7 +28,7 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', lecciones:'Mis lecciones', materiales:'Mis materiales',
+ inicio:'Mi inicio', lecciones:'Mis lecciones', materiales:'Mis materiales', prompts:'Biblioteca de prompts',
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';
@@ -241,10 +241,22 @@ async function showCourse(email,asAdmin=false){
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
   if(!item.url || !/^https:\/\//i.test(item.url)){a.removeAttribute('href');a.removeAttribute('target');}
   escapedText(a,'span',asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL','resource-tag');
-  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir ↗':'En preparación','resource-link');
+  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir':'En preparación','resource-link');
   resources.appendChild(a);
  });
  $('empty-resources').hidden=Boolean(generalResources.length);
+ // Cargar después de verificar compra o sesión autorizada de administración.
+ // El sitio original es público para quien disponga de su enlace.
+ try{
+  const {mountPromptLibrary}=await import('./prompts-biblioteca.js?v=20261028-v1');
+  mountPromptLibrary($('prompt-library'));
+ }catch(error){
+  const root=$('prompt-library');
+  const note=document.createElement('p');note.className='empty';
+  note.textContent='No se pudo abrir la biblioteca integrada. Actualiza el aula o utiliza el enlace de Sites incluido en tu PDF.';
+  root.replaceChildren(note);
+  console.error('Prompt library could not load',error?.code||'unknown');
+ }
  $('assigned-bonus-list').replaceChildren();
  $('assigned-bonuses').hidden=true;
  $('admin-preview-banner').hidden=!asAdmin;
