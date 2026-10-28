@@ -1,0 +1,45 @@
+name: Importar imagen de hero nueva
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/import-class-bot-photo.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar e incorporar fotografía aprobada
+        env:
+          MEDIA_URL: 'https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2F5e9250e7-05a5-40c9-8187-bb3ab5f843c8/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAAFiF64ERtDWUeuYjRk3jCHESPdhXn05BZb5Ta0doSfib&exp=1793220759&osig=AAAAAAAAAAAAAAAAAAAAANWIyKSREbgzHv8bnLtlZiglBl_4mFUT_OtPzq5F61gV&signer=media-rpc&token=AAIAAU0AJDVlOTI1MGU3LTA1YTUtNDBjOS04MTg3LWJiM2FiNWY4NDNjOAAAAAABoYRJTdhjLfTE0j3UdZ9IpBv4_ufQQLzfc3-Mqyf9aSM_UG3xqw&x-canva-quality=thumbnail'
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageFilter
+          import urllib.request,io,os
+          request=urllib.request.Request(os.environ['MEDIA_URL'],headers={'User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(request,timeout=20) as response:
+            data=response.read(8000000)
+          with Image.open(io.BytesIO(data)) as input_image:
+            print('Source dimensions:',input_image.size)
+            if input_image.width<140 or input_image.height<180:
+              raise SystemExit('Thumbnail unexpectedly small; no change.')
+            image=input_image.convert('RGB')
+          # Soft enhanced preview while source-resolution delivery is pending.
+          image=image.resize((640,800),Image.Resampling.LANCZOS)
+          image=image.filter(ImageFilter.UnsharpMask(radius=1.25,percent=45,threshold=3))
+          output=Path('assets/clase-hero-bot-mano.webp')
+          image.save(output,format='WEBP',quality=87,method=6)
+          print('Wrote:',output,output.stat().st_size)
+          PY
+      - name: Versionar la fotografía
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/clase-hero-bot-mano.webp
+          git rm .github/workflows/import-class-bot-photo.yml
+          git commit -m "assets: add new editorial portrait with AI agent in hand"
+          git pull --rebase origin main
+          git push origin main
