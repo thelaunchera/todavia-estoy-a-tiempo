@@ -1309,15 +1309,14 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 }
 
 
-/* Órbitas del hero · 22s horario exterior, 14s antihorario interior.
+/* Órbitas de Aprende algo que puedas usar · 22s horario exterior, 14s antihorario interior.
  * Los iconos giran en sentido contrario a su pista y quedan DERECHOS.
  * Decorativo: sin botones, sin enlaces nuevos ni logos de apps ajenas. */
-.class-page-v2 .class-hero .class-hero-art{position:relative;isolation:isolate;overflow:visible!important}
-.class-page-v2 .class-hero .class-hero-orbit{
- position:absolute;
- right:-3.5%;
- bottom:-1.5%;
- width:clamp(210px,21vw,278px);
+ .class-page-v2 .class-value-orbit{
+ position:relative;
+ flex-shrink:0;
+ width:clamp(240px,28vw,320px);
+ margin:0 auto;
  aspect-ratio:1;
  z-index:3;
  display:grid;
@@ -1326,28 +1325,28 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  border-radius:50%;
  background:radial-gradient(circle,#eff6f8ed 0%,#eaf2f7dc 42%,#e5f0f7ad 65%,transparent 75%);
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel{
+.class-page-v2 .class-value-orbit .class-orbit-wheel{
  position:absolute;
  display:block;
  left:50%;top:50%;
  aspect-ratio:1;
  border-radius:50%;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel::before{
+.class-page-v2 .class-value-orbit .class-orbit-wheel::before{
  content:"";
  position:absolute;inset:0;
  border:1.5px dashed #6487a5a8;
  border-radius:50%;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--outer{
  width:91%;
  animation:classOrbitClockwise 22s linear infinite;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--inner{
  width:58%;
  animation:classOrbitCounterClockwise 14s linear infinite;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-icon{
+.class-page-v2 .class-value-orbit .class-orbit-icon{
  position:absolute;
  display:grid;place-items:center;
  left:50%;top:50%;
@@ -1361,35 +1360,35 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  border:1px solid #c9dce8;
  box-shadow:0 6px 13px #223d5932;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-icon--north{top:0}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--south{top:100%}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--east{left:100%}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--west{left:0}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--northeast{top:15%;left:85%}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--northwest{top:15%;left:15%}
-.class-page-v2 .class-hero-orbit .class-orbit-icon-upright{
+.class-page-v2 .class-value-orbit .class-orbit-icon--north{top:0}
+.class-page-v2 .class-value-orbit .class-orbit-icon--south{top:100%}
+.class-page-v2 .class-value-orbit .class-orbit-icon--east{left:100%}
+.class-page-v2 .class-value-orbit .class-orbit-icon--west{left:0}
+.class-page-v2 .class-value-orbit .class-orbit-icon--northeast{top:15%;left:85%}
+.class-page-v2 .class-value-orbit .class-orbit-icon--northwest{top:15%;left:15%}
+.class-page-v2 .class-value-orbit .class-orbit-icon-upright{
  display:grid;place-items:center;
  width:100%;height:100%;
  transform-origin:center;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
  animation:classOrbitCounterClockwise 22s linear infinite;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
  animation:classOrbitClockwise 14s linear infinite;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-icon svg{
+.class-page-v2 .class-value-orbit .class-orbit-icon svg{
  width:58%;height:58%;
  stroke-width:1.65px;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-icon--chat{color:#265f78;background:#e2f4f7}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--image{color:#6772a4;background:#f0ecfa}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--web{color:#396b86;background:#edf5f9}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--mail{color:#4f768e;background:#f3f9fd}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--calendar{color:#427780;background:#e9f5f1}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--doc{color:#68788e;background:#f3f4f9}
-.class-page-v2 .class-hero-orbit .class-orbit-icon--design{color:#6672a9;background:#edf0fb}
-.class-page-v2 .class-hero-orbit .class-orbit-core{
+.class-page-v2 .class-value-orbit .class-orbit-icon--chat{color:#265f78;background:#e2f4f7}
+.class-page-v2 .class-value-orbit .class-orbit-icon--image{color:#6772a4;background:#f0ecfa}
+.class-page-v2 .class-value-orbit .class-orbit-icon--web{color:#396b86;background:#edf5f9}
+.class-page-v2 .class-value-orbit .class-orbit-icon--mail{color:#4f768e;background:#f3f9fd}
+.class-page-v2 .class-value-orbit .class-orbit-icon--calendar{color:#427780;background:#e9f5f1}
+.class-page-v2 .class-value-orbit .class-orbit-icon--doc{color:#68788e;background:#f3f4f9}
+.class-page-v2 .class-value-orbit .class-orbit-icon--design{color:#6672a9;background:#edf0fb}
+.class-page-v2 .class-value-orbit .class-orbit-core{
  position:relative;z-index:4;
  width:27%;aspect-ratio:1;
  display:grid;place-items:center;
@@ -1398,7 +1397,7 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  background:#fffcf4;
  box-shadow:0 8px 25px #24415b30;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-core img{
+.class-page-v2 .class-value-orbit .class-orbit-core img{
  width:73%;height:73%;
  aspect-ratio:1!important;
  object-fit:contain!important;
@@ -1417,52 +1416,82 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 /* Icons don't translate: rotation-only inverse, exactly matching the ring period. */
 @keyframes classOrbitIconClockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes classOrbitIconCounterClockwise{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
  animation-name:classOrbitIconCounterClockwise;
 }
-.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
+.class-page-v2 .class-value-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
  animation-name:classOrbitIconClockwise;
 }
 @media(max-width:900px){
- .class-page-v2 .class-hero .class-hero-orbit{
-   width:clamp(176px,31vw,246px);
-   right:0;
-   bottom:1%;
- }
+ .class-page-v2 .class-value-orbit{width:clamp(235px,34vw,290px)}
 }
 @media(max-width:650px){
- .class-page-v2 .class-hero .class-hero-orbit{
-   width:clamp(174px,48vw,213px);
-   right:0%;
-   bottom:1.8%;
- }
- .class-page-v2 .class-hero-orbit .class-orbit-icon{
+ .class-page-v2 .class-value-orbit{width:clamp(230px,70vw,285px);margin:7px auto 0}
+ .class-page-v2 .class-value-orbit .class-orbit-icon{
    width:33px;height:33px;
    margin-left:-16.5px;margin-top:-16.5px;
    border-radius:11px;
  }
- .class-page-v2 .class-hero-orbit .class-orbit-wheel--outer{width:87%}
- .class-page-v2 .class-hero-orbit .class-orbit-wheel--inner{width:58%}
+ .class-page-v2 .class-value-orbit .class-orbit-wheel--outer{width:87%}
+ .class-page-v2 .class-value-orbit .class-orbit-wheel--inner{width:58%}
 }
 @media(max-width:375px){
- .class-page-v2 .class-hero .class-hero-orbit{width:168px;bottom:2%;right:0}
- .class-page-v2 .class-hero-orbit .class-orbit-icon{
+ .class-page-v2 .class-value-orbit{width:clamp(222px,76vw,260px)}
+ .class-page-v2 .class-value-orbit .class-orbit-icon{
    width:30px;height:30px;margin-left:-15px;margin-top:-15px;
  }
 }
 @media(prefers-reduced-motion:reduce){
- .class-page-v2 .class-hero-orbit .class-orbit-wheel,
- .class-page-v2 .class-hero-orbit .class-orbit-icon-upright{
+ .class-page-v2 .class-value-orbit .class-orbit-wheel,
+ .class-page-v2 .class-value-orbit .class-orbit-icon-upright{
    animation:none!important;
    transform:translate(-50%,-50%)!important;
  }
- .class-page-v2 .class-hero-orbit .class-orbit-icon-upright{transform:none!important}
+ .class-page-v2 .class-value-orbit .class-orbit-icon-upright{transform:none!important}
 }
 
-/* Lectura equilibrada en escritorio/tablet y sin mancha visual sobre el texto. */
-.learning-section{background:linear-gradient(180deg,#f8f7f2 0%,#f0f3f4 100%);border-color:#dce3e5}
-.learning-section::before{display:none}
-.learning-section .learning-grid{width:100%;max-width:1060px;margin-inline:auto;gap:clamp(28px,5vw,76px)}
-@media(min-width:921px){.learning-section .learning-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-@media(min-width:1200px){.learning-section .shell{width:min(1100px,calc(100% - 120px))}}
-@media(min-width:921px){.learning-section .learning-copy{padding-inline:clamp(0px,1.4vw,18px) 0}}
+
+/* Visual junto a su explicación: orbitas a la derecha en escritorio y
+   centradas bajo el texto en teléfonos, sin superponer tarjetas o retratos. */
+.class-page-v2 .class-value-feature{
+ display:grid;
+ grid-template-columns:minmax(0,1.2fr) minmax(245px,.8fr);
+ gap:clamp(24px,4vw,64px);
+ align-items:center;
+ margin-bottom:clamp(27px,4vw,51px);
+}
+.class-page-v2 .class-value-feature .class-value-intro{
+ min-width:0;
+ margin:0;
+ text-align:left;
+}
+.class-page-v2 .class-value-feature .class-value-intro h2{
+ max-width:690px;
+}
+.class-page-v2 .class-value-feature .class-value-intro p:last-child{
+ max-width:550px;
+}
+.class-page-v2 .class-value-feature .class-value-orbit{place-self:center}
+@media(max-width:900px){
+ .class-page-v2 .class-value-feature{
+  grid-template-columns:minmax(0,1fr);
+  gap:10px;
+  margin-bottom:27px;
+ }
+ .class-page-v2 .class-value-feature .class-value-intro{
+  text-align:center;
+ }
+ .class-page-v2 .class-value-feature .class-value-intro p:last-child{
+  margin-inline:auto;
+ }
+}
+@media(max-width:650px){
+ .class-page-v2 .class-value-feature{gap:9px}
+ .class-page-v2 .class-value-feature .class-value-intro{
+  padding:0 1px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .class-page-v2 .class-value-orbit .class-orbit-wheel{animation:none!important;transform:translate(-50%,-50%) rotate(0deg)!important}
+ .class-page-v2 .class-value-orbit .class-orbit-icon-upright{animation:none!important;transform:none!important}
+}
