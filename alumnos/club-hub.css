@@ -35,7 +35,7 @@
 .club-aula-action-featured{background:#243e58;border-color:#243e58;color:#f8f8f4}
 .club-aula-action-featured:hover{border-color:#456d8b;box-shadow:0 13px 27px rgba(24,47,68,.13)}
 .club-aula-action-top{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:32px;color:#8caabe}
-.club-aula-action-top>span:last-child{font:400 22px/1 'DM Sans',Arial,sans-serif}
+.club-aula-action-tag{font:800 9px/1.4 'DM Sans',Arial,sans-serif;letter-spacing:.1em;color:#839dad}
 .club-aula-action-featured .club-aula-action-top{color:#b4ccda}
 .club-aula-action-number{font:400 27px/1 'DM Serif Display',Georgia,serif}
 .club-aula-action>strong{
