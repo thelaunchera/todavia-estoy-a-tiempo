@@ -22,6 +22,11 @@ assert.match(waitlist,/auth\.signInWithOtp/);
 assert.match(waitlist,/shouldCreateUser:true/);
 assert.match(waitlist,/consent_scope:'class_01_launch_only'/);
 assert.match(waitlist,/podcast_class_waitlist/);
+assert.match(classPage,/id="course-waitlist-dismiss"/,'La confirmación se puede cerrar sin desuscribirse');
+assert.match(waitlist,/if\(!user\|\|!returning\)return;/,'No confirmar ni saltar a la lista en visitas normales');
+assert.doesNotMatch(waitlist,/!returning && !requested\(\).*showConfirmation/,'No activar éxito por una sesión antigua');
+assert.match(waitlist,/history\.replaceState\(history\.state,'',url\.pathname\+url\.search\);/,'Limpiar hash tras confirmar');
+
 assert.match(waitlist,/course-unsubscribe/,'Puede solicitar la baja');
 assert.doesNotMatch(waitlist,/podcast_subscribers|podcast_delivery_events|podcast_studio_entries/,'No reutilizar suscriptores ni contenidos');
 assert.match(room,/robots" content="noindex,nofollow/);

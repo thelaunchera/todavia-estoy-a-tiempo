@@ -1713,3 +1713,14 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
   .class-page-v2 .class-topbar .class-flip-digit{font-size:16px!important}
   .class-page-v2 .class-topbar .class-flip-label{font-size:8px!important}
 }
+
+/* La confirmación es una pantalla temporal, no una redirección permanente. */
+.class-page-v2 .class-success-dismiss{
+ display:block;align-self:center;border:0;background:transparent;
+ color:#405d75;font:600 .82rem/1.5 var(--sans,Arial,sans-serif);
+ padding:12px 8px;text-decoration:underline;text-underline-offset:4px;
+ cursor:pointer;min-height:44px;
+}
+.class-page-v2 .class-success-dismiss:focus-visible{
+ outline:2px solid #7998b0;outline-offset:3px;border-radius:8px;
+}

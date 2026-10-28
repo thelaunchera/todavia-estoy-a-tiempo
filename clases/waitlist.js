@@ -43,7 +43,7 @@ function clearReturn(){
  url.searchParams.delete('huella');
  url.searchParams.delete('reto');
  returning=false;expectedHash='';salt='';
- history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+ history.replaceState(history.state,'',url.pathname+url.search);
 }
 function showConfirmation(email){
  emailEl.value=email;
@@ -153,7 +153,7 @@ async function manage(user){
  let data;
  try{data=await readMembership(email);}catch{return;}
  if(!data||data.unsubscribed_at)return;
- if(!returning && !requested() && !feedback.dataset.ok?.includes('true'))showConfirmation(email);
+ // Never reveal the success panel simply because this browser has a saved login.
  if(document.querySelector('#course-unsubscribe'))return;
  const b=document.createElement('button');
  b.type='button';b.id='course-unsubscribe';b.className='class-waitlist-optout';
@@ -171,10 +171,27 @@ async function manage(user){
  document.querySelector('#course-waitlist-success-optout').appendChild(b);
 }
 async function detectSession(user){
- if(!user)return;
- if(returning||requested()===normal(user.email))await subscribe(user);
- else await manage(user);
+ // A returning visitor can browse normally, even when already signed in.
+ // Only an actual email-confirmation callback may complete an enrollment on page load.
+ if(!user||!returning)return;
+ await subscribe(user);
 }
+document.querySelector('#course-waitlist-dismiss').addEventListener('click',()=>{
+ // Close the one-time receipt without cancelling the confirmed subscription.
+ document.querySelector('#course-waitlist-success').hidden=true;
+ document.querySelector('#course-waitlist-pending').hidden=true;
+ document.querySelector('#course-waitlist-success-optout').replaceChildren();
+ form.hidden=false;
+ submit.disabled=false;
+ consentEl.checked=false;
+ emailEl.value='';
+ sessionStorage.removeItem(INTENT);
+ const url=new URL(location.href);
+ ['confirmar-lista','huella','reto'].forEach(param=>url.searchParams.delete(param));
+ history.replaceState(history.state,'',url.pathname+url.search);
+ window.scrollTo({top:0,behavior:'smooth'});
+ message('Ya formas parte de la lista de espera. Puedes seguir explorando la clase.');
+});
 document.querySelector('#course-waitlist-edit').addEventListener('click',()=>{
  returning=false;expectedHash='';salt='';
  sessionStorage.removeItem(INTENT);
@@ -196,7 +213,7 @@ db.auth.getUser().then(({data:{user}})=>{
  if(user)void detectSession(user);
  else if(returning)message('No encontramos una sesión confirmada. Abre de nuevo el enlace del correo en este navegador.');
 }).catch(()=>{
- if(returning)message('No pudimos completar la verificación. Intenta abrir el enlace de tu correo otra vez.');
+ if(returning)document.querySelector('#course-waitlist-pending-description').textContent='No pudimos completar la verificación. Solicita otro enlace e inténtalo de nuevo.';
 });
 db.auth.onAuthStateChange((_event,session)=>{
  if(session?.user)window.setTimeout(()=>void detectSession(session.user),0);
