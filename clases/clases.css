@@ -1458,3 +1458,11 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  }
  .class-page-v2 .class-hero-orbit .class-orbit-icon-upright{transform:none!important}
 }
+
+/* Lectura equilibrada en escritorio/tablet y sin mancha visual sobre el texto. */
+.learning-section{background:linear-gradient(180deg,#f8f7f2 0%,#f0f3f4 100%);border-color:#dce3e5}
+.learning-section::before{display:none}
+.learning-section .learning-grid{width:100%;max-width:1060px;margin-inline:auto;gap:clamp(28px,5vw,76px)}
+@media(min-width:921px){.learning-section .learning-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(min-width:1200px){.learning-section .shell{width:min(1100px,calc(100% - 120px))}}
+@media(min-width:921px){.learning-section .learning-copy{padding-inline:clamp(0px,1.4vw,18px) 0}}
