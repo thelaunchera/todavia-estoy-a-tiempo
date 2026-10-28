@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=aula-personal-20261028">
+<link rel="stylesheet" href="./curso.css?v=aula-club-bono-v2">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -47,13 +47,9 @@
   </section>
   <section id="class-content" hidden>
    <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administración · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
-   <div class="club-aula-entry">
-    <div><span class="eyebrow">NUEVO · TU COMUNIDAD PRIVADA</span><h2>Club de <em>Ideas.</em></h2><p>Muestra tu proyecto, recibe comentarios y descubre lo que están creando otros alumnos. Un espacio para aprender acompañándonos.</p><small>Solo para miembros con acceso verificado. Tus datos de compra nunca se muestran.</small></div>
-    <a href="./comunidad.html" class="club-aula-button">Entrar al Club de Ideas <span aria-hidden="true">↗</span></a>
-   </div>
    <section class="student-greeting" aria-labelledby="student-greeting-title">
      <div class="student-greeting-copy"><p class="eyebrow">TU ESPACIO PARA APRENDER</p>
-       <h2 id="student-greeting-title">¡Hola, <span id="student-name">bienvenido</span>!</h2>
+       <h2 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>!</h2>
        <p id="student-greeting-message">Cada lección es un paso más para tener tu web lista.</p>
      </div>
      <div class="student-progress-card">
@@ -80,24 +76,39 @@
        <button type="button" id="lesson-next">Siguiente lección</button>
       </div>
     </div>
-    <aside class="student-sidebar" aria-label="Materiales y bono de la clase">
+    <aside class="student-sidebar" aria-label="Materiales de la clase">
      <section class="resources" aria-labelledby="student-resources-heading">
        <p class="eyebrow">A MANO MIENTRAS APRENDES</p><h2 id="student-resources-heading">Tus materiales</h2>
        <p>Abre las guías y ejercicios cuando los necesites.</p><div id="resource-list" class="resource-grid"></div>
        <p id="empty-resources" class="empty">Los materiales aparecerán aquí cuando estén listos.</p>
      </section>
-     <section class="student-bonus" aria-labelledby="student-bonus-heading">
+    </aside>
+   </div>
+   <section class="club-aula-entry" aria-labelledby="club-aula-heading">
+     <div class="club-aula-copy">
+       <span class="eyebrow">DESPUÉS DE CADA LECCIÓN, SIGUE CREANDO</span>
+       <h2 id="club-aula-heading">Tu proyecto merece <em>compartirse.</em></h2>
+       <p>En <strong>Club de Ideas</strong> puedes mostrar cómo va quedando tu web, pedir opiniones y descubrir lo que están creando otras personas de la clase.</p>
+       <div class="club-aula-points"><span>Comparte una captura</span><span>Recibe comentarios</span><span>Inspírate con otros proyectos</span></div>
+       <a href="./comunidad.html" class="club-aula-button">Entrar al Club de Ideas <span aria-hidden="true">↗</span></a>
+     </div>
+     <div class="club-aula-visual" aria-hidden="true">
+       <div class="club-aula-example"><span class="club-aula-example-top"><i></i><i></i><i></i> MI PRIMERA WEB</span><div class="club-aula-example-hero"></div><div class="club-aula-example-line"></div><div class="club-aula-example-line short"></div><div class="club-aula-example-cta"></div></div>
+       <span class="club-aula-sticker club-aula-sticker-heart">♡ Me gusta</span>
+       <span class="club-aula-sticker club-aula-sticker-chat">✦ ¡Va quedando!</span>
+     </div>
+   </section>
+   <section class="student-bonus" aria-labelledby="student-bonus-heading">
        <span class="student-bonus-icon" aria-hidden="true">✦</span><p class="eyebrow">UN REGALO POR TU ESFUERZO</p>
-       <h2 id="student-bonus-heading">Tu bono gratis</h2>
-       <p>Termina todas las lecciones y comparte tu primera web en el Club de Ideas para recibir un bono especial.</p>
+       <h2 id="student-bonus-heading">Desbloquea tu bono</h2>
+       <p>Tu bono se activa <strong>solo cuando hayas terminado la última lección</strong> y hayas publicado tu primera web en <strong>Proyectos</strong>, dentro del Club de Ideas.</p>
        <div class="student-bonus-checks" aria-live="polite">
          <p id="bonus-lessons"><span aria-hidden="true">○</span> Terminar todas las lecciones</p>
          <p id="bonus-project"><span aria-hidden="true">○</span> Compartir tu primera web en el club</p>
        </div>
-       <p id="bonus-status" class="student-bonus-status">Pronto te contaremos qué incluye el bono.</p>
-     </section>
-    </aside>
-   </div>
+       <p id="bonus-status" class="student-bonus-status">Bono bloqueado · completa los dos pasos para habilitarlo.</p>
+       <div id="bonus-unlocked" class="bonus-unlocked" hidden role="status"><strong>¡Reto completado!</strong><p>Cumpliste los requisitos del bono. El material aparecerá aquí cuando esté publicado.</p></div>
+   </section>
    <div class="help"><h2>¿Te atascaste?</h2><p>Guarda una captura y apunta tu pregunta. El alcance y el canal de revisión individual se informarán en los materiales cuando estén confirmados.</p><a class="outline" href="../index.html#ayuda">Ir a Ayuda</a></div>
   </section>
  </div>
