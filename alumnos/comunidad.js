@@ -260,7 +260,7 @@ async function init(){
    $('club-post-scope').querySelector('[value=curso]').disabled=true;
    $('club-view-scope').querySelector('[value=curso]').disabled=true;
   }
-  await loadMyProfile();await loadFeed();message('Bienvenida al Club de Ideas. Este espacio es privado para miembros.','good');
+  await loadMyProfile();await loadFeed();message('Qué bueno verte en el Club de Ideas. Este espacio es privado para miembros.','good');
  }catch(e){console.error('Community init failed',e?.code||e?.message||'unknown');showLocked('No pudimos comprobar tus permisos. Actualiza la página y vuelve a entrar desde tu aula.');}
 }
 await init();
