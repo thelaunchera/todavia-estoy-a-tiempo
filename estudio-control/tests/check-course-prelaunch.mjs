@@ -328,7 +328,8 @@ for(const view of ['inicio','lecciones','materiales','comunidad','bonos']){
  assert.match(room,new RegExp('data-aula-view="'+view+'"'),'Navegación: '+view);
 }
 assert.match(aulaSidebarCss,/#aula-layout\.room-grid\{display:grid;grid-template-columns:258px minmax\(0,1fr\)/,'Sidebar fijo desktop');
-assert.match(aulaSidebarCss,/@media\(max-width:900px\)/,'Sidebar móvil adaptable');
+assert.match(aulaSidebarCss,/@media\(min-width:760px\) and \(max-width:990px\)/,'Sidebar permanente en iPad vertical');
+assert.match(aulaSidebarCss,/@media\(max-width:759px\)/,'Menú desplegable solo en teléfonos');
 assert.match(aulaSidebarCss,/body\.aula-menu-open/,'Menú móvil funcional');
 assert.match(roomScript,/function setAulaView\(/,'Navegación interactiva');
 assert.match(roomScript,/setAulaView\('lecciones'\)/,'Seleccionar lección abre pantalla');
