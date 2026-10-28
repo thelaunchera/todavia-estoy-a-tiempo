@@ -74,7 +74,10 @@ jobs:
       - name: Verificar precios, enlaces y créditos públicos
         run: node estudio-control/tests/check-public-consistency.mjs
       - name: Revisar preventa y privacidad del aula antes de empaquetar
-        run: node estudio-control/tests/check-course-prelaunch.mjs
+        run: |
+          node --check clases/experience.js
+          node --check clases/waitlist.js
+          node estudio-control/tests/check-course-prelaunch.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
@@ -113,6 +116,7 @@ jobs:
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
           test -s _podcast_pages/clases/waitlist.js
+          test -s _podcast_pages/clases/experience.js
           grep -q 'src="./assets/' _podcast_pages/estudio/index.html || grep -q 'src="/assets/' _podcast_pages/estudio/index.html
           echo 'Landing y Estudio presentes en el artefacto de Pages.'
       - name: Empaquetar sitio estático
