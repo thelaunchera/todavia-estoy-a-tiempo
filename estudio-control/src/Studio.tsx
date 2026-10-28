@@ -2,7 +2,7 @@ import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import { CLASS_SECTION } from './class-course';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, type AudioStats } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -250,6 +250,14 @@ function App() {
     [search, setSearch] = useState('');
   const [seriesTab,setSeriesTab] = useState<string>('all');
   const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
+  const [classStats,setClassStats] = useState<ClassLaunchStats|null>(null);
+  useEffect(() => {
+    if(page !== 'clases' || !account || !SUPABASE_ENABLED) return;
+    let cancelled=false;
+    getClassLaunchStats().then(result=>{if(!cancelled)setClassStats(result);})
+      .catch(()=>{if(!cancelled)setClassStats(null);});
+    return () => {cancelled=true;};
+  },[page,account]);
   const [audioStats,setAudioStats] = useState<AudioStats|null>(null);
   const [audioStatsLoading,setAudioStatsLoading] = useState(false);
   const [audioStatsError,setAudioStatsError] = useState('');
@@ -1253,7 +1261,7 @@ function App() {
             </>
           )}
           {page === 'clases' && (
-            <ClassProduction entries={items.ideas} onSave={async (entry, changes) => {
+            <ClassProduction entries={items.ideas} launchStats={classStats} onSave={async (entry, changes) => {
               await api.put('/api/items/ideas/' + entry.id, { ...entry, ...changes });
               await refresh();
             }} />

@@ -9,6 +9,7 @@ export type ClassEntry = {
 };
 type Props = {
   entries: ClassEntry[];
+  launchStats?: {waitlist:number; buyers:number}|null;
   onSave: (item: ClassEntry, fields: Pick<ClassEntry,'status'|'notes'|'link'|'performance_notes'>) => Promise<void>;
 };
 function validVideoLink(value: string): boolean {
@@ -20,7 +21,7 @@ function safeStatus(value?:string) {
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
 
-export default function ClassProduction({entries,onSave}:Props) {
+export default function ClassProduction({entries,launchStats,onSave}:Props) {
  const [lessonId,setLessonId]=useState('00');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
@@ -79,9 +80,15 @@ export default function ClassProduction({entries,onSave}:Props) {
       <small>{recorded} grabados o en edición</small>
     </div>
   </header>
-  <div className="class-links">
+  <div className="class-funnel-stats" aria-label="Primeras ventas y lista de espera">
+    <div><strong>{launchStats?.waitlist ?? '—'}</strong><span>Correos confirmados de la clase</span></div>
+    <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
+    <div><strong>Inactivo</strong><span>Checkout de la clase, pendiente de activar</span></div>
+   </div>
+   <div className="class-links">
     <a href={CLASS_NOTION} target="_blank" rel="noreferrer"><BookOpen size={16}/> Estudio privado de la clase <ExternalLink size={13}/></a>
     <a href={CLASS_PLAN} target="_blank" rel="noreferrer"><FileText size={16}/> Producción detallada <ExternalLink size={13}/></a>
+    <a href="https://app.notion.com/p/407a68f2ee6e81f1b331eebd75b2e3d9?pvs=204" target="_blank" rel="noreferrer"><FileText size={16}/> Plan de primera venta <ExternalLink size={13}/></a>
     <a href={CLASS_DRIVE} target="_blank" rel="noreferrer"><FileText size={16}/> Materiales · Drive <ExternalLink size={13}/></a>
     <a href={CLASS_PROMPTS} target="_blank" rel="noreferrer"><Clipboard size={16}/> 12 prompts <ExternalLink size={13}/></a>
   </div>
