@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=club-clean-20261028-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4">
+<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=club-clean-20261028-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261028-final-v1">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -76,26 +76,69 @@
     </header>
        <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administración · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
 
-    <div data-aula-panel="inicio" class="aula-panel" hidden>
-         <section class="student-greeting" aria-labelledby="student-greeting-title">
-     <div class="student-greeting-copy"><p class="eyebrow">TU ESPACIO PARA APRENDER</p>
-       <h2 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>!</h2>
-       <p id="student-greeting-message">Cada lección es un paso más para tener tu web lista.</p>
-     </div>
-     <div class="student-progress-card">
-       <div class="student-progress-top"><span>Tu avance</span><strong id="progress-percent">0%</strong></div>
-       <p><strong id="progress-label">0 de 0 lecciones completadas</strong></p>
-       <div class="track" id="student-progress" role="progressbar" aria-label="Progreso de la clase" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-bar"></div></div>
-     </div>
-   </section>
+    <div data-aula-panel="inicio" class="aula-panel aula-home-dashboard" hidden>
+      <section class="dashboard-hero" aria-labelledby="student-greeting-title">
+        <div class="dashboard-hero-copy">
+          <p class="dashboard-overline">MI ESPACIO PARA APRENDER</p>
+          <h1 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>!</h1>
+          <p id="student-greeting-message">Aquí tienes un lugar para crear a tu ritmo.</p>
+          <div class="dashboard-welcome-note">Una idea, una lección y un paso a la vez.</div>
+        </div>
+        <div class="dashboard-progress-card" id="dashboard-progress-shell">
+          <p class="dashboard-progress-heading">TU RECORRIDO</p>
+          <div id="dashboard-progress-real" hidden>
+            <div class="dashboard-progress-top"><span>Tu avance</span><strong id="progress-percent">0%</strong></div>
+            <strong id="progress-label">0 lecciones completadas</strong>
+            <div class="track" id="student-progress" role="progressbar" aria-label="Progreso de la clase" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-bar"></div></div>
+          </div>
+          <div id="dashboard-progress-empty">
+            <h2 class="dashboard-progress-empty-title" id="dashboard-progress-empty-title">Un espacio para empezar</h2>
+            <p class="dashboard-progress-empty-desc" id="dashboard-progress-empty-desc">Tu recorrido aparecerá aquí cuando esté disponible la primera lección.</p>
+          </div>
+        </div>
+      </section>
 
-      <div class="aula-home-actions">
-        <button type="button" class="aula-primary-action" data-aula-view="lecciones">Continuar mis lecciones</button>
-        <button type="button" class="aula-secondary-action" data-aula-view="prompts">Biblioteca de prompts</button>
-        <button type="button" class="aula-secondary-action" data-aula-view="materiales">Ver mis materiales</button>
+      <div class="dashboard-grid">
+        <section class="dashboard-next-card" aria-labelledby="dashboard-next-title">
+          <p class="dashboard-next-kicker" id="dashboard-next-kicker">TU SIGUIENTE PASO</p>
+          <h2 id="dashboard-next-title">Un paso a la vez.</h2>
+          <p id="dashboard-next-description">Todo lo que necesitas para seguir creando estará aquí.</p>
+          <div class="dashboard-next-bottom">
+            <span class="dashboard-next-detail" id="dashboard-next-detail">Tu clase</span>
+            <button id="dashboard-next-action" class="dashboard-next-action" type="button">Ver mis lecciones</button>
+          </div>
+        </section>
+        <section class="dashboard-announcements" aria-labelledby="dashboard-announcements-title">
+          <div class="dashboard-announcements-header">
+            <div><p>LO QUE NECESITAS SABER</p><h2 id="dashboard-announcements-title">Avisos del aula</h2></div>
+            <span class="dashboard-count" aria-label="Tres avisos">03</span>
+          </div>
+          <ul class="dashboard-notices" id="dashboard-notices" aria-live="polite" aria-relevant="additions text"></ul>
+        </section>
       </div>
-         <div class="help"><p class="eyebrow">ACOMPAÑAMIENTO EN TU AULA</p><h2>¿Te atascaste?</h2><p>Cuéntame qué pasó o qué parte de la lección te resulta difícil. Puedes pedir ayuda sin salir del aula ni perder tu avance.</p><button class="outline" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button></div>
 
+      <section class="dashboard-tools" aria-labelledby="dashboard-tools-title">
+        <div class="dashboard-tools-heading"><div><p class="dashboard-overline">TODO A MANO</p><h2 id="dashboard-tools-title">Tu espacio de trabajo</h2></div><p>Entra directamente a lo que necesitas.</p></div>
+        <div class="dashboard-tools-grid">
+          <button type="button" class="dashboard-tool" data-aula-view="prompts">
+            <span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span>
+            <strong>Biblioteca de prompts</strong><span>Guarda tiempo con instrucciones para copiar y adaptar.</span>
+          </button>
+          <button type="button" class="dashboard-tool" data-aula-view="materiales">
+            <span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v11H3zM3 7V4h7l2 3"/></svg></span>
+            <strong>Mis materiales</strong><span id="dashboard-tool-materials">Recursos en preparación</span>
+          </button>
+          <button type="button" class="dashboard-tool" data-aula-view="comunidad">
+            <span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><path d="M2.5 20v-2a5.5 5.5 0 0 1 11 0v2zM17 5a3 3 0 0 1 0 6M17.5 15a5 5 0 0 1 4 5"/></svg></span>
+            <strong>Club de Ideas</strong><span id="dashboard-tool-community">Comparte tus avances</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="dashboard-support" aria-label="Ayuda para estudiantes">
+        <div><strong>¿Algo no te sale como esperabas?</strong><p>Escríbeme desde aquí, sin salir del aula ni perder tu avance.</p></div>
+        <button type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button>
+      </section>
     </div>
     <div data-aula-panel="lecciones" class="aula-panel">
       <div class="aula-section-heading"><p class="eyebrow">APRENDE PASO A PASO</p><h1>Mis lecciones</h1><p>Elige una lección en el menú. Tus avances se guardan en tu cuenta.</p></div>
@@ -212,5 +255,5 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=club-clean-20261028-v1"></script>
+<script type="module" src="./curso.js?v=dashboard-final-20261028-v1"></script>
 </body></html>

@@ -80,7 +80,7 @@ jobs:
           node --check clases/waitlist.js
           node --check alumnos/comunidad.js
           node estudio-control/tests/check-course-prelaunch.mjs
-          node --test estudio-control/tests/aula-privacidad-regresion.test.mjs
+          node --test estudio-control/tests/aula-privacidad-regresion.test.mjs alumnos/dashboard-inicio.test.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}

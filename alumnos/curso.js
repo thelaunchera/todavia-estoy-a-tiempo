@@ -1,12 +1,13 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {mountMateriales} from './materiales-interactivos.js?v=club-clean-20261028-v1';
+import {renderAulaInicio} from './dashboard-inicio.js?v=20261028-final-v1';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
 const out=$('logout');
 let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false,projectShared=false;
-let materialsController=null;
+let materialsController=null,courseResources=[];
 const adminMarkerKey='podcast_studio_password_login_deadline_v1';
 function hasValidStudioSession(id){
  try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
@@ -143,6 +144,9 @@ function bonusState(){
   status.dataset.state='pending';
  }
 }
+function updateDashboard(){
+ renderAulaInicio({lessons,done,resources:courseResources,adminPreview,projectShared,onLesson:i=>choose(i),onView:setAulaView});
+}
 function setProgress(){
  const {total,completed,percent}=progressStats();
  $('progress-label').textContent=completed+' de '+total+' lecciones completadas';
@@ -150,6 +154,7 @@ function setProgress(){
  $('progress-bar').style.width=percent+'%';
  $('student-progress').setAttribute('aria-valuenow',String(percent));
  if(!adminPreview)bonusState();
+ updateDashboard();
 }
 function congratulate(item){
  const {total,completed}=progressStats();
@@ -170,7 +175,7 @@ async function loadMemberName(who,asAdmin){
  $('student-name').textContent=name||'qué gusto verte';
 }
 async function checkProjectShared(){
- if(adminPreview||!user){projectShared=false;bonusState();return;}
+ if(adminPreview||!user){projectShared=false;bonusState();updateDashboard();return;}
  try{
   const {data,error}=await db.from('podcast_club_posts')
    .select('id,scope,course_id,channel,image_path,project_url')
@@ -181,7 +186,7 @@ async function checkProjectShared(){
     &&Boolean(post.image_path||post.project_url)
   );
  }catch{projectShared=false;}
- bonusState();
+ bonusState();updateDashboard();
 }
 function choose(i){
  selected=i;
@@ -237,9 +242,10 @@ async function showCourse(email,asAdmin=false){
  asAdmin ? Promise.resolve({data:[],error:null}) : db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email)
  ]);
  if(l.error||r.error||p.error)throw l.error||r.error||p.error;
- lessons=l.data||[];done=new Set((p.data||[]).map(x=>x.lesson_code));
- const allResources=r.data||[];
- const generalResources=allResources.filter(item=>!item.resource_code.startsWith('bonus_'));
+ lessons=asAdmin?(l.data||[]):(l.data||[]).filter(item=>item.status==='ready'&&validVideoId(item.youtube_video_id));
+ done=new Set((p.data||[]).map(x=>x.lesson_code));
+ courseResources=asAdmin?(r.data||[]):(r.data||[]).filter(item=>item.status==='ready');
+ const generalResources=courseResources.filter(item=>!item.resource_code.startsWith('bonus_'));
  const resources=$('resource-list');resources.replaceChildren();
  generalResources.forEach(item=>{
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
@@ -256,7 +262,7 @@ async function showCourse(email,asAdmin=false){
  $('progress-label').hidden=asAdmin;
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
- display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('lecciones',{scroll:false});
+ display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('inicio',{scroll:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
