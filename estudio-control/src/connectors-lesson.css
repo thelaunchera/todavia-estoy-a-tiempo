@@ -1,0 +1,46 @@
+.recording-start-card{margin:20px 0;padding:22px;border:1px solid rgba(28,34,60,.14);background:#faf8f3;border-radius:18px;color:#191c2b}
+.recording-start-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.recording-start-card h4{font-size:1.15rem;margin:0 0 7px}
+.recording-start-card p{line-height:1.55;margin:7px 0 12px}
+.recording-start-card ul,.recording-start-card ol{padding-left:22px;line-height:1.65;margin:8px 0 16px}
+.recording-start-card li+li{margin-top:4px}
+.recording-start-card h5{margin:16px 0 6px;font-size:.94rem}
+.recording-start-card .recording-start-small{font-size:.86rem;opacity:.81}
+.recording-start-card .recording-start-fin{border-top:1px solid rgba(28,34,60,.13);padding-top:12px}
+.recording-start-card .recording-start-copy{background:#222b4a;color:white;border:0;border-radius:99px;padding:10px 16px;cursor:pointer}
+.recording-start-card .recording-ready-prompt{padding:14px 16px;background:white;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.connectors-lesson{margin:30px 0;padding:28px;background:#f8f5f0;color:#182035;border:1px solid #e5dfd5;border-radius:24px}
+.connectors-heading>span{display:flex;align-items:center;gap:8px;font-size:.76rem;letter-spacing:.1em;font-weight:700;color:#435579}
+.connectors-heading h3{font-size:clamp(1.6rem,3.5vw,2.45rem);line-height:1.1;letter-spacing:-.03em;margin:12px 0}
+.connectors-heading p{max-width:68ch;line-height:1.6}
+.connectors-path{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:25px 0}
+.connectors-path>div{background:white;border:1px solid #e4ddd2;border-radius:15px;padding:16px;display:grid;gap:6px}
+.connectors-path b{font-size:.83rem;line-height:1.4}
+.connectors-path small{font-size:.82rem;color:#657086;line-height:1.45}
+.connectors-grid{display:grid;grid-template-columns:minmax(180px,230px) minmax(0,1fr);gap:17px;align-items:start}
+.connectors-tabs{display:grid;gap:7px}
+.connectors-tabs button{border:1px solid #dedcd8;background:white;text-align:left;border-radius:13px;padding:13px;cursor:pointer;color:#25314a;display:grid;gap:3px}
+.connectors-tabs button.selected{background:#e4eafb;border-color:#8298c5;box-shadow:inset 3px 0 #5274b7}
+.connectors-tabs strong{font-size:.9rem}
+.connectors-tabs small{font-size:.76rem;color:#59677b}
+.connectors-detail{background:white;border:1px solid #dfddd7;border-radius:16px;padding:23px;min-width:0}
+.connectors-detail h4{font-size:1.8rem;line-height:1.15;margin:8px 0}
+.connectors-detail h5{font-size:1rem;margin:20px 0 12px}
+.connectors-level{font-size:.72rem;text-transform:uppercase;font-weight:700;letter-spacing:.08em;color:#5274b7}
+.connectors-why{line-height:1.55;font-size:1rem}
+.connectors-cost{display:flex;align-items:flex-start;gap:8px;padding:12px 0;font-weight:600;line-height:1.5}
+.connectors-detail ol{padding-left:24px;line-height:1.65}
+.connectors-detail li{padding-left:2px;margin:0 0 12px}
+.connectors-prompt{background:#f1f4fa;border-radius:14px;padding:16px;margin-top:18px}
+.connectors-prompt>div{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.connectors-prompt h5{margin:0}
+.connectors-prompt button{display:flex;align-items:center;gap:8px;border:0;border-radius:99px;background:#253454;color:white;padding:9px 12px;cursor:pointer}
+.connectors-prompt p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.connectors-warning{display:flex;align-items:flex-start;gap:10px;margin:17px 0;padding:13px;background:#fff7e9;border-radius:12px;font-size:.9rem;line-height:1.55}
+.connectors-warning svg{flex:none}
+.connectors-source{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:underline;color:#345788}
+.connectors-bottom{display:flex;gap:12px;align-items:flex-start;line-height:1.6;margin-top:20px}
+.connectors-bottom p{margin:0}
+.connectors-bottom svg{flex:none}
+@media(max-width:850px){.connectors-path{grid-template-columns:1fr}.connectors-grid{grid-template-columns:1fr}.connectors-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.connectors-lesson{padding:15px;border-radius:16px}.connectors-detail{padding:16px}.connectors-tabs button{padding:12px}.recording-start-card{padding:16px}.connectors-detail h4{font-size:1.48rem}}

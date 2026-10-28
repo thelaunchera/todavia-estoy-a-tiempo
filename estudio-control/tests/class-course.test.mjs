@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import {classLessons,classRecordingScript,classTotalMinutes,CLASS_SECTION,CLASS_TASK_SECTION,CLASS_CHECKLIST,CLASS_LAUNCH} from '../src/class-course.ts';
+import {recordingStarts} from '../src/recording-starts.ts';
 
 test('la clase contiene nueve videos únicos y un objetivo de 53 minutos',()=>{
  assert.equal(classLessons.length,9);
@@ -44,11 +45,36 @@ test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>
  assert.match(production,/<ClassWeeklyPlan tasks=\{tasks\}/);
 });
 
-test('el ejemplo regulado es ficticio y el checkout se enseña con otro producto',()=>{
- const demo=classLessons.find(x=>x.id==='00');
+test('una sola demo informativa: publicar gratis y separar los pagos',()=>{
+ const intro=classLessons.find(x=>x.id==='00');
+ const build=classLessons.find(x=>x.id==='05');
  const pay=classLessons.find(x=>x.id==='07');
- assert.match(demo.beats.map(x=>x.say).join(' '),/ficticia|ficticio/);
- assert.match(demo.beats.map(x=>x.show).join(' '),/SIN COMPRAS/);
- assert.match(pay.beats.map(x=>x.say).join(' '),/producto digital|guía digital/);
- assert.match(pay.prompt,/PERMITIDO/);
+ assert.match(intro.beats.map(x=>x.say).join(' '),/ficticia|ficticio/);
+ assert.match(intro.beats.map(x=>x.show).join(' '),/SIN COMPRAS/);
+ assert.match(build.beats.map(x=>x.say).join(' '),/AppDeploy/);
+ assert.match(build.prompt,/AppDeploy/);
+ assert.match(pay.beats.map(x=>x.say).join(' '),/Stripe/);
+ assert.match(pay.beats.map(x=>x.say).join(' '),/Make/);
+ assert.match(pay.beats.map(x=>x.say).join(' '),/Resend/);
+ assert.match(pay.beats.map(x=>x.say).join(' '),/sin pedidos ni cobros/);
+});
+test('cada ficha tiene inicio repetible, clics y prompt completo, sin nuevas filas del aula',()=>{
+ assert.deepEqual(Object.keys(recordingStarts).sort(),classLessons.map(x=>x.id));
+ for(const lesson of classLessons){
+  const guide=recordingStarts[lesson.id];
+  assert.ok(guide.tabs.length>=2);
+  assert.ok(guide.actions.length>=3);
+  assert.ok(guide.savedPoint.length>=45);
+  assert.ok(guide.finish.length>=35);
+  assert.ok(guide.readyPrompt.length>=100);
+ }
+ const production=readFileSync('src/ClassProduction.tsx','utf8');
+ const connector=readFileSync('src/ConnectorsLesson.tsx','utf8');
+ assert.match(production,/recordingStart\.savedPoint/);
+ assert.match(production,/recordingStart\.readyPrompt/);
+ assert.match(production,/<ConnectorsLesson\/>/);
+ assert.match(connector,/AppDeploy/);
+ assert.match(connector,/Namecheap/);
+ assert.match(connector,/Resend/);
+ assert.match(connector,/Supabase/);
 });

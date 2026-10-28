@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
+import ConnectorsLesson from './ConnectorsLesson';
+import {recordingStarts, RECORDING_EXAMPLE} from './recording-starts';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
@@ -37,6 +39,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const [copied,setCopied]=useState('');
  const [showAdminRoom,setShowAdminRoom]=useState(false);
  const lesson=useMemo(()=>classLessons.find(x=>x.id===lessonId)||classLessons[0],[lessonId]);
+ const recordingStart=recordingStarts[lesson.id];
  const records=useMemo(()=>entries.filter(x=>x.section===CLASS_SECTION),[entries]);
  const record=records.find(x=>x.subtitle===lesson.id);
  const done=records.filter(x=>x.status==='aprobado').length;
@@ -73,8 +76,8 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   <header className="class-intro">
     <div>
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
-      <h2>Tu primera landing <em>con IA.</em></h2>
-      <p>Nueve grabaciones cortas. Un ejemplo en pantalla, guion por escenas y todo lo que necesitas mostrar, sin mezclar el estudio privado con lo que recibe el alumno.</p>
+      <h2>Tu primera web <em>con IA.</em></h2>
+      <p>Nueve grabaciones cortas de una sola web, con guion por escenas y clics reales. Además, un módulo extra de conectores para quien quiera vender o automatizar después.</p>
       <div className="class-intro-tags"><span>9 videos</span><span>{classTotalMinutes} min editados aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
     </div>
     <div className="class-overview">
@@ -131,6 +134,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <span className="class-mini-heading">VIDEO {Number(lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
        <h3>{lesson.title}</h3>
        <p>{lesson.outcome}</p>
+       <p><strong>Ejemplo de toda la clase:</strong> {RECORDING_EXAMPLE}</p>
       </div>
       <div className="class-method">
        <div><span>01</span><b>Prepara</b><small>Abre las pestañas y materiales de este video.</small></div>
@@ -145,6 +149,16 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
         <button type="button" onClick={()=>void copy(clipName(lesson.id),'file')}><Clipboard size={14}/> {copied==='file'?'Nombre copiado':'Copiar nombre del archivo'}</button>
         <code>{clipName(lesson.id)}</code>
        </div>
+      </div>
+      <div className="recording-start-card">
+       <div className="recording-start-head"><h4>Tu sesión lista para grabar</h4><span className="recording-start-small">No es otra lección del alumno</span></div>
+       <p>Abre solo estas pestañas y sigue los clics. Si debes repetir una escena, vuelve al punto guardado sin rehacer todo el proyecto.</p>
+       <h5>Pestañas que preparas</h5><ul>{recordingStart.tabs.map(item=><li key={item}>{item}</li>)}</ul>
+       <h5>Dónde tocar, en orden</h5><ol>{recordingStart.actions.map(item=><li key={item}>{item}</li>)}</ol>
+       <h5>Punto de partida para repetir</h5><p>{recordingStart.savedPoint}</p>
+       <h5>Hasta dónde grabar</h5><p className="recording-start-fin">{recordingStart.finish}</p>
+       <div className="recording-start-head"><h5>Prompt ya rellenado con el proyecto de ejemplo</h5><button className="recording-start-copy" type="button" onClick={()=>void copy(recordingStart.readyPrompt,'filled')}>{copied==='filled'?'Prompt copiado':'Copiar prompt completo'}</button></div>
+       <p className="recording-ready-prompt">{recordingStart.readyPrompt}</p>
       </div>
       <div className="class-scene-head">
        <div><h4>Guion para grabar</h4><p>La frase que dices y la pantalla que enseñas, escena por escena.</p></div>
@@ -205,5 +219,6 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
       </footer>
     </div>
   </div>
+  <ConnectorsLesson/>
  </section>;
 }
