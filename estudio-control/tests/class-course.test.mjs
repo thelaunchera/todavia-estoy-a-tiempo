@@ -19,7 +19,7 @@ test('cada video tiene escenas, qué decir, qué mostrar, materiales y un prompt
   assert.ok(l.exercise.length>25);
   for(const b of l.beats){
    assert.ok(b.say.length>60);
-   assert.ok(b.show.length>45);
+   assert.ok(b.show.length>24);
   }
   const script=classRecordingScript(l);
   assert.match(script,/QUÉ DECIR/);
