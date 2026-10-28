@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#172b45">
+<meta name="description" content="Sala privada de alumnos de Tu primera landing con IA.">
+<title>Mi aula · Tu primera landing con IA | Todavía estoy a tiempo</title>
+<link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./curso.css">
+</head>
+<body>
+<a class="skip" href="#aula">Saltar al aula</a>
+<header class="top">
+ <div class="wrap top-inner">
+  <a href="../index.html" aria-label="Volver al podcast"><img src="../assets/logo-podcast-04.svg" width="726" height="250" alt="Todavía estoy a tiempo"></a>
+  <span>MI AULA <b>·</b> CLASE 01</span>
+  <button id="logout" hidden type="button">Salir de mi cuenta</button>
+ </div>
+</header>
+<main id="aula">
+ <section class="hero">
+  <div class="wrap">
+   <p class="eyebrow">UN ESPACIO PARA APRENDER A TU RITMO</p>
+   <h1>De tu idea, <em>a tu primera página.</em></h1>
+   <p>Tu clase por partes: mira el video, aplica el ejercicio y sigue al próximo módulo cuando quieras.</p>
+  </div>
+ </section>
+ <div class="wrap">
+  <p id="room-message" class="message" role="status">Comprobando el acceso privado…</p>
+  <section id="login-panel" class="panel" hidden>
+   <p class="eyebrow">ACCESO POR CORREO</p>
+   <h2>Entra a tu aula.</h2>
+   <p>Utiliza el mismo correo con el que compraste la clase. Te enviaremos un enlace para entrar sin contraseña.</p>
+   <form id="login-form">
+    <label for="login-email">Correo de la compra</label>
+    <div class="formline"><input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com" maxlength="254"><button type="submit">Enviar enlace</button></div>
+   </form>
+   <small>Si aún no compraste, aquí no se activará ningún video. La compra debe estar confirmada en nuestro sistema.</small>
+  </section>
+  <section id="no-access" class="panel" hidden>
+   <p class="eyebrow">AÚN NO HAY COMPRA VERIFICADA</p>
+   <h2>Tu aula todavía no está activada.</h2>
+   <p>No encontramos una compra confirmada vinculada a ese correo. Si ya compraste, comprueba que usaste el mismo email o utiliza el formulario de ayuda.</p>
+   <a class="outline" href="../clases/primera-landing.html">Conocer la clase</a>
+   <a class="support" href="../index.html#ayuda">Solicitar ayuda</a>
+  </section>
+  <section id="class-content" hidden>
+   <div class="welcome">
+    <p class="eyebrow">BIENVENIDA AL AULA</p>
+    <h2>Tu primera landing con IA</h2>
+    <p>Las lecciones aparecen únicamente cuando cada video está aprobado. Ve a tu ritmo y marca lo que terminaste.</p>
+    <p><strong id="progress-label">0 de 9 lecciones completadas</strong></p>
+    <div class="track"><div id="progress-bar"></div></div>
+   </div>
+   <div class="room-grid">
+    <aside class="lesson-index" aria-label="Lista de lecciones"><h3>Mis lecciones</h3><div id="lesson-buttons"></div></aside>
+    <div class="lesson-stage">
+      <div id="lesson-player" class="video-box" hidden></div>
+      <p id="empty-lessons" class="empty">Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.</p>
+      <div id="lesson-info" hidden>
+       <p class="eyebrow" id="lesson-number"></p>
+       <h3 id="lesson-title"></h3>
+       <p id="lesson-description"></p>
+       <label class="lesson-completed"><input type="checkbox" id="lesson-done"> Ya terminé esta lección</label>
+       <button type="button" id="lesson-next">Siguiente lección</button>
+      </div>
+    </div>
+   </div>
+   <div class="resources"><p class="eyebrow">TU MATERIA DE TRABAJO</p><h2>Documentos y prompts</h2>
+    <p>Los materiales aparecerán aquí cuando hayan pasado la prueba de acceso desde una cuenta de comprador.</p>
+    <div id="resource-list" class="resource-grid"></div>
+    <p id="empty-resources" class="empty">Los recursos todavía están en revisión de entrega.</p>
+   </div>
+   <div class="help"><h2>¿Te atascaste?</h2><p>Guarda una captura y apunta tu pregunta. El alcance y el canal de revisión individual se informarán en los materiales cuando estén confirmados.</p><a class="outline" href="../index.html#ayuda">Ir a Ayuda</a></div>
+  </section>
+ </div>
+</main>
+<footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html">Privacidad</a> · <a href="../terminos.html">Términos</a></span></div></footer>
+<script type="module" src="./curso.js"></script>
+</body></html>
