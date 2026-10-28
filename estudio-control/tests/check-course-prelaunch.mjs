@@ -142,16 +142,17 @@ console.log('Club de Ideas: acceso privado, captura, reacciones, comentarios, mo
 /* UX regression: retrato real, navegación arriba, materiales legibles y footer. */
 assert.match(classPage,/clase-trabajo-web-2026\.webp/);
 assert.match(classPage,/width="768" height="768"/);
-assert.match(classPage,/id="class-floating-top"/);
+assert.doesNotMatch(classPage,/id="class-floating-top"/,'Sin botón flotante tapando el contenido');
 assert.match(classPage,/class-back-to-top"/);
 assert.match(classPage,/class-transform-arrow[\s\S]*?<svg/);
 assert.doesNotMatch(classPage,/[↗⬆]/,'Flechas emoji de sistema prohibidas en el diseño editorial');
 assert.match(newStyles,/class-material-tabs\{\s*display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.match(newStyles,/class-footer-brand img\{filter:brightness\(0\) invert\(1\)/);
 assert.match(newStyles,/body\.class-page-v2:has\(#privacy-notice:not\(\[hidden\]\)\)/);
-assert.match(newExperience,/footerBack\?\.addEventListener\('click', scrollToStart\)/);
+assert.match(newExperience,/footerBack\?\.addEventListener\('click', event =>/);
 assert.match(newExperience,/window\.scrollTo\(\{top:0/);
-console.log('QA móvil: retrato original, tabs 2x2, footer contrastado y volver arriba OK');
+assert.match(newStyles,/Reloj editorial compacto: cifras/,'Cuenta regresiva legible en móvil');
+console.log('QA móvil: retrato original, reloj legible, sin botón flotante, footer contrastado y acceso al inicio OK');
 
 /* Fotos originales independientes para tres secciones (no collage). */
 const podcastCss = read('episodios-destacados.css');

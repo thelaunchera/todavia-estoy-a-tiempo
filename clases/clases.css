@@ -1604,3 +1604,112 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
   .class-page-v2 .class-waitlist-success,
   .class-page-v2 .class-waitlist-pending{padding:27px 24px;border-radius:21px}
 }
+
+
+/* Reloj editorial compacto: cifras enteras y legibles en lugar de mitades animadas.
+   El JS mantiene los 4 tiempos exactos; solo se simplifica su presentación. */
+.class-page-v2 .class-topbar .class-topbar-inner{
+  min-height:74px;gap:18px;padding-top:9px;padding-bottom:9px;
+}
+.class-page-v2 .class-topbar .class-launch-clock{
+  display:grid;grid-template-columns:auto auto auto;
+  grid-template-areas:"label timer button";
+  gap:15px;align-items:center;
+  width:auto;max-width:none;min-width:0;
+  padding:0;margin:0;border:0;border-radius:0;
+  background:transparent;box-shadow:none;overflow:visible;
+}
+.class-page-v2 .class-topbar .class-launch-clock-heading{grid-area:label}
+.class-page-v2 .class-topbar .class-launch-clock-kicker{
+  font-size:10px;letter-spacing:.13em;font-weight:750;white-space:nowrap;
+}
+.class-page-v2 .class-topbar .class-flip-timer{
+  grid-area:timer;display:flex;gap:13px;align-items:center;
+  justify-content:flex-start;margin:0;width:auto;min-width:0;
+}
+.class-page-v2 .class-topbar .class-flip-unit{
+  display:flex;flex-direction:column;align-items:center;
+  gap:2px;flex:0 0 auto;min-width:0;
+}
+.class-page-v2 .class-topbar .class-flip-digits{display:flex;gap:1px}
+.class-page-v2 .class-topbar .class-flip-digit{
+  position:relative;display:block;flex:none;isolation:auto;
+  width:.66em;height:1.18em;perspective:none;
+  font:700 clamp(19px,1.7vw,24px)/1.18 Georgia,"Times New Roman",serif;
+  color:#f6f3eb;text-align:center;
+}
+.class-page-v2 .class-topbar .class-flip-digit > span{display:none!important}
+.class-page-v2 .class-topbar .class-flip-digit .class-flip-static-top{
+  position:absolute;display:block!important;inset:0;
+  width:100%;height:100%;border:0;border-radius:0;
+  background:transparent;box-shadow:none;overflow:visible;
+}
+.class-page-v2 .class-topbar .class-flip-digit .class-flip-glyph{
+  position:absolute;inset:0!important;display:flex;
+  width:100%;height:100%;align-items:center;justify-content:center;
+  line-height:1;letter-spacing:0;text-shadow:none;
+}
+.class-page-v2 .class-topbar .class-flip-digit .class-flip-static-bottom,
+.class-page-v2 .class-topbar .class-flip-digit .class-flip-flap-top,
+.class-page-v2 .class-topbar .class-flip-digit .class-flip-flap-bottom{display:none!important}
+.class-page-v2 .class-topbar .class-flip-label{
+  font-size:9px;line-height:1.2;letter-spacing:.045em;
+  font-weight:650;color:#c4d7e7;white-space:nowrap;
+}
+.class-page-v2 .class-topbar .class-flip-divider{display:none}
+.class-page-v2 .class-topbar .class-launch-clock-footer{
+  grid-area:button;margin:0;padding:0;border:0;
+  display:flex;justify-content:flex-end;align-items:center;
+}
+.class-page-v2 .class-topbar .class-launch-clock-cta{
+  min-height:39px;padding:9px 15px;
+  font-size:12px;font-weight:750;line-height:1;
+}
+/* El enlace al inicio solo existe en el footer; nada flota sobre las secciones. */
+.class-page-v2 .class-floating-top{display:none!important}
+@media(max-width:720px){
+  .class-page-v2 .class-topbar .class-topbar-inner{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:auto auto;
+    align-items:center;justify-content:stretch;
+    min-height:0!important;padding:9px 0 7px;
+    gap:4px 11px;
+  }
+  .class-page-v2 .class-topbar .class-wordmark{grid-column:1;grid-row:1;justify-self:start}
+  .class-page-v2 .class-topbar .class-wordmark img{
+    width:clamp(127px,37vw,159px);max-height:52px;
+  }
+  .class-page-v2 .class-topbar .class-launch-clock{display:contents}
+  .class-page-v2 .class-topbar .class-launch-clock-heading{display:none!important}
+  .class-page-v2 .class-topbar .class-launch-clock-footer{
+    grid-area:auto;grid-column:2;grid-row:1;justify-self:end;
+  }
+  .class-page-v2 .class-topbar .class-launch-clock-cta{
+    min-height:38px;padding:9px 17px;
+    font-size:12px!important;border-radius:999px!important;
+  }
+  .class-page-v2 .class-topbar .class-flip-timer{
+    grid-area:auto;grid-column:1/-1;grid-row:2;
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));
+    width:100%;gap:0;margin:0;padding:7px 0 1px;
+    border-top:1px solid #b1ccde33;
+    align-items:center;justify-items:center;
+  }
+  .class-page-v2 .class-topbar .class-flip-unit{
+    display:flex;flex-direction:row;justify-content:center;
+    width:100%;gap:5px;align-items:baseline;
+  }
+  .class-page-v2 .class-topbar .class-flip-digit{
+    font-size:17px!important;width:.66em;height:1.1em;
+  }
+  .class-page-v2 .class-topbar .class-flip-label{
+    font-size:9px!important;letter-spacing:.01em;
+  }
+}
+@media(max-width:360px){
+  .class-page-v2 .class-topbar .class-wordmark img{width:120px}
+  .class-page-v2 .class-topbar .class-flip-unit{gap:3px}
+  .class-page-v2 .class-topbar .class-flip-digit{font-size:16px!important}
+  .class-page-v2 .class-topbar .class-flip-label{font-size:8px!important}
+}
