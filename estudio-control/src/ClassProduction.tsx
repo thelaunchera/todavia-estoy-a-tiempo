@@ -68,7 +68,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
    finally{setSaving(false);}
  }
  function togglePrep(i:number) {setChecked(prev=>prev.includes(i)?prev.filter(x=>x!==i):[...prev,i]);}
- const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; pantalla horizontal 16:9 y zoom legible; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade voz natural con ElevenLabs y revisa cada clic. El ejemplo de brownies infusionados es ficticio y no tiene cobros.';
+ const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; pantalla horizontal 16:9 y zoom legible; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade voz natural con ElevenLabs y revisa cada clic. El ejemplo de brownies tradicionales es ficticio y no tiene cobros.';
  return <section className="class-room">
   <header className="class-intro">
     <div>
@@ -113,7 +113,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <a href={CLASS_DRIVE} target="_blank" rel="noreferrer"><FileText size={16}/> Materiales · Drive <ExternalLink size={13}/></a>
     <a href={CLASS_PROMPTS} target="_blank" rel="noreferrer"><Clipboard size={16}/> 12 prompts <ExternalLink size={13}/></a>
   </div>
-  <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> El alumno crea su propia landing. El ejemplo de brownies infusionados es un prototipo visual sin checkout, sin datos de clientes y sin cobros. Para enseñar pagos, utiliza un producto digital permitido en modo de prueba.</span></div>
+  <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> El alumno crea su propia landing. El ejemplo de brownies tradicionales es un prototipo visual sin pedidos ni cobros reales. Para enseñar pagos, utiliza Stripe en modo de prueba sin datos de clientes.</span></div>
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
