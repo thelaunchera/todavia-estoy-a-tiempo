@@ -374,4 +374,22 @@ courseHelpForm.addEventListener('submit',async event=>{
 });
 
 await refreshAuth();
-db.auth.onAuthStateChange((_event,session)=>{if(session?.user && session.user.id!==user?.id)window.setTimeout(()=>void refreshAuth(),0);});
+// Si la sesión termina en otra pestaña, recargar vacía los datos privados de este documento.
+// También evita que un cambio de cuenta conserve material de la sesión anterior.
+db.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_OUT'){
+  display(login);out.hidden=true;
+  status('Tu sesión terminó. Vuelve a entrar para continuar.');
+  location.replace('./');
+  return;
+ }
+ if(session?.user && user?.id && session.user.id!==user.id){
+  display(login);out.hidden=true;
+  status('La cuenta cambió. Comprobando el acceso de nuevo…');
+  location.replace('./');
+  return;
+ }
+ if(session?.user && session.user.id!==user?.id){
+  window.setTimeout(()=>void refreshAuth(),0);
+ }
+});
