@@ -321,3 +321,17 @@ assert.match(bonusMigration,/class_resources_assigned_bonus_read/,'Solo se compa
 assert.match(bonusMigration,/resource_code !~ '\^bonus_'/,'Los bonos se excluyen de materiales generales pagados');
 assert.match(bonusUnlock,/count\(\*\).*lesson|lesson.*count\(\*\)/s,'La entrega se comprueba también en el servidor');
 console.log('QA: alumnos separados, asignación por persona, RLS y navegación interna del aula OK');
+
+
+// Corrección del layout que colocaba materiales debajo de la altura completa
+// de los nueve módulos en las vistas tablet y de administradora.
+const tabletCss=read('alumnos/curso.css');
+assert.doesNotMatch(tabletCss,/\.student-sidebar\{grid-column:2;grid-row:2;display:grid/,'No forzar materiales a la segunda fila bajo el índice de lecciones');
+assert.match(tabletCss,/@media\(min-width:770px\) and \(max-width:950px\)/,'Tablet normal conserva las tres columnas');
+assert.match(tabletCss,/\.student-sidebar\{grid-column:3;grid-row:1;display:flex/,'Materiales al lado del video');
+assert.match(tabletCss,/@media\(min-width:650px\) and \(max-width:769px\)/,'Tablet estrecha muestra lecciones y materiales lado a lado');
+assert.match(room,/curso\.css\?v=tablet-materiales-en-columna-20261028-v2/,'Cache CSS de Safari renovada');
+assert.match(studioShell,/studentCenterTab==='people'/,'Se puede gestionar alumnos sin abrir la vista previa');
+assert.match(studioShell,/studentCenterTab==='classroom'/,'Vista del aula en pestaña independiente');
+assert.match(studioShell,/\{studentCenterTab==='people' \? \(/,'Las vistas no se apilan al mismo tiempo');
+console.log('QA: materiales a la derecha en tablet y administración separada del aula OK');
