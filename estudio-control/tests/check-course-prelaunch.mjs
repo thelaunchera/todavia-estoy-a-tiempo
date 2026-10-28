@@ -295,3 +295,27 @@ assert.match(newStyles,/\.class-topbar \.class-launch-clock/);
 assert.match(newStyles,/--flip-w:14px/);
 assert.doesNotMatch(room,/BIENVENIDA AL AULA|Tu primera landing con IA/);
 console.log('QA: reloj mini a la derecha del logo, Club tras lecciones y bono con doble condición OK');
+
+
+// Validación de bonos individuales y navegación cerrada del aula (28 oct 2026).
+const studioShell=read('estudio-control/src/Studio.tsx');
+const studentManager=read('estudio-control/src/StudentManager.tsx');
+const bonusLibrary=read('estudio-control/src/BonusLibrary.tsx');
+const studioClient=read('estudio-control/src/supabase-client.ts');
+const bonusMigration=read('estudio-control/sql/bonos-individuales-20261028.sql');
+assert.match(room,/<a href="#aula" aria-label="Ir al inicio de mi aula">/,'El logo permanece dentro del aula');
+assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'El logo no sale al landing');
+assert.doesNotMatch(room,/href="\.\.\/clases\/primera-landing\.html"/,'El aula no invita a salir a la página de ventas');
+assert.match(room,/id="assigned-bonuses"[^>]*hidden/,'La sección privada de bonos está oculta de entrada');
+assert.match(roomScript,/personalBonuses=asAdmin\?\[\]:allResources\.filter/,'La vista de admin no se hace pasar por una cuenta de alumno');
+assert.match(roomScript,/personalBox\.hidden=asAdmin\|\|personalBonuses\.length===0/,'Solo se muestran bonos asignados y listos');
+assert.match(studioShell,/import StudentManager from/,'Mi Estudio integra la gestión de alumnos');
+assert.match(studioShell,/<StudentManager \/>/,'El panel de alumnos está dentro del centro de alumnos');
+assert.match(studentManager,/getStudioStudents\(\)/,'Lista real de compradores, separada de audiencia');
+assert.match(studentManager,/setStudentBonusGrant/,'Permite asignar por persona');
+assert.match(bonusLibrary,/setStudioBonusAvailability/,'Permite preparar o activar cada bono individualmente');
+assert.match(studioClient,/podcast_class_bonus_grants/,'Asignación durable en Supabase, no en estado local');
+assert.match(bonusMigration,/enable row level security/,'La tabla de asignaciones requiere RLS');
+assert.match(bonusMigration,/class_resources_assigned_bonus_read/,'Solo se comparte un recurso listo con su destinatario');
+assert.match(bonusMigration,/resource_code !~ '\^bonus_'/,'Los bonos se excluyen de materiales generales pagados');
+console.log('QA: alumnos separados, asignación por persona, RLS y navegación interna del aula OK');
