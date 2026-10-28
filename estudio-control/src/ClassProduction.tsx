@@ -37,11 +37,11 @@ export default function ClassProduction({entries,onSave}:Props) {
  const done=records.filter(x=>x.status==='aprobado').length;
  const recorded=records.filter(x=>x.status==='grabado'||x.status==='editando'||x.status==='aprobado').length;
  const originalStatus=safeStatus(record?.status);
- const originalChecked=(record?.performance_notes||'').split(',').map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length);
+ const originalChecked=(record?.performance_notes||'').split(',').filter(Boolean).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length);
  const changed=status!==originalStatus || notes!==(record?.notes||'') || url!==(record?.link||'') || JSON.stringify([...checked].sort())!==JSON.stringify([...originalChecked].sort());
  useEffect(()=>{
    setStatus(safeStatus(record?.status));setNotes(record?.notes||'');setUrl(record?.link||'');
-   setChecked((record?.performance_notes||'').split(',').map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length));
+   setChecked((record?.performance_notes||'').split(',').filter(Boolean).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length));
    setNotice('');setScene(0);setCopied('');
  },[lessonId,record?.id]);
  function choose(id:string){
@@ -103,6 +103,12 @@ export default function ClassProduction({entries,onSave}:Props) {
        <span className="class-mini-heading">VIDEO {lesson.id} / 08 · META {lesson.minutes} MIN</span>
        <h3>{lesson.title}</h3>
        <p>{lesson.outcome}</p>
+      </div>
+      <div className="class-method">
+       <div><span>01</span><b>Prepara</b><small>Abre las pestañas y materiales de este video.</small></div>
+       <div><span>02</span><b>Graba la pantalla</b><small>Una escena cada vez, horizontal y sin notificaciones.</small></div>
+       <div><span>03</span><b>Añade tu voz</b><small>Narra después con ElevenLabs, sin leer botones que no existen.</small></div>
+       <div><span>04</span><b>Revisa y guarda</b><small>Guarda el enlace del video; no se publica automáticamente.</small></div>
       </div>
       <div className="class-prepare">
        <div className="class-section-heading"><h4>Antes de grabar</h4><span>{checked.length}/{lesson.prep.length} listos</span></div>
