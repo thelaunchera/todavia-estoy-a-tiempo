@@ -10,7 +10,19 @@ const feedback=document.querySelector('#course-waitlist-feedback');
 const submit=form.querySelector('button[type=submit]');
 const INTENT='podcast_class01_waitlist_confirm_intent';
 const RETURN_PARAM='confirmar-lista';
-const returning=new URLSearchParams(location.search).get(RETURN_PARAM)==='1';
+const search=new URLSearchParams(location.search);
+let returning=search.get(RETURN_PARAM)==='1';
+let expectedHash=search.get('huella')||'';
+let salt=search.get('reto')||'';
+async function emailFingerprint(email,nonce){
+ const bytes=new TextEncoder().encode(nonce+':'+normal(email));
+ const hash=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function isIntendedEmail(email){
+ if(returning&&expectedHash&&salt)return (await emailFingerprint(email,salt))===expectedHash;
+ return requested()===email;
+}
 let subscribing=false;
 
 function message(text,good=false){
@@ -28,13 +40,23 @@ function clearReturn(){
  if(!returning)return;
  const url=new URL(location.href);
  url.searchParams.delete(RETURN_PARAM);
+ url.searchParams.delete('huella');
+ url.searchParams.delete('reto');
+ returning=false;expectedHash='';salt='';
  history.replaceState(history.state,'',url.pathname+url.search+url.hash);
 }
 function showConfirmation(email){
  emailEl.value=email;
  submit.disabled=true;
- message('¡Ya estás en la lista de espera! 💙 Tu correo quedó confirmado. Te enviaré un mensaje de bienvenida y novedades periódicas de «Tu primera web con IA». No has realizado ninguna compra.',true);
- if(returning)document.querySelector('#lista-espera')?.scrollIntoView({behavior:'auto',block:'center'});
+ message('¡Tu inscripción está confirmada!',true);
+ form.hidden=true;
+ document.querySelector('#course-waitlist-pending').hidden=true;
+ const success=document.querySelector('#course-waitlist-success');
+ success.hidden=false;
+ requestAnimationFrame(()=>{
+  success.scrollIntoView({behavior:'smooth',block:'center'});
+  success.focus({preventScroll:true});
+ });
 }
 async function readMembership(email){
  const {data,error}=await db.from('podcast_class_waitlist')
@@ -45,7 +67,17 @@ async function readMembership(email){
 }
 async function subscribe(user){
  const email=normal(user?.email);
- if(!email || !(returning || requested()===email) || subscribing)return;
+ if(!email||subscribing)return;
+ if(!(await isIntendedEmail(email))){
+  if(returning){
+   const p=document.querySelector('#course-waitlist-pending');
+   document.querySelector('#course-waitlist-pending-title').textContent='El correo aún no está registrado';
+   document.querySelector('#course-waitlist-pending-description').textContent='Este navegador tiene abierta otra cuenta. Solicita un enlace nuevo con el correo que deseas registrar.';
+   form.hidden=true;p.hidden=false;
+   p.scrollIntoView({block:'center'});
+  }
+  return;
+ }
  if(!(user.email_confirmed_at||user.confirmed_at)){
   message('Revisa el enlace que te enviamos por correo para verificar tu dirección.');
   return;
@@ -64,8 +96,10 @@ async function subscribe(user){
    });
    if(error && error.code!=='23505')throw error;
   }
-  clearReturn();
+  const record=await readMembership(email);
+  if(!record||record.unsubscribed_at)throw new Error('Registro no guardado');
   showConfirmation(email);
+  clearReturn();
   void manage(user);
  }catch(error){
   submit.disabled=false;
@@ -94,13 +128,20 @@ form.addEventListener('submit',async event=>{
   // La inscripción real continúa exigiendo una sesión autenticada por Supabase.
   const redirect=new URL(location.origin+location.pathname);
   redirect.searchParams.set(RETURN_PARAM,'1');
+  const nonce=crypto.randomUUID();
+  redirect.searchParams.set('reto',nonce);
+  redirect.searchParams.set('huella',await emailFingerprint(email,nonce));
   redirect.hash='lista-espera';
   const {error}=await db.auth.signInWithOtp({
    email,
    options:{emailRedirectTo:redirect.toString(),shouldCreateUser:true}
   });
   if(error)throw error;
-  message('Paso 1 de 2 · Te enviamos un correo para verificar tu dirección. Pulsa el enlace de ese correo; volverás aquí y verás «¡Ya estás en la lista de espera!».');
+  const p=document.querySelector('#course-waitlist-pending');
+  document.querySelector('#course-waitlist-pending-title').textContent='Revisa tu correo';
+  document.querySelector('#course-waitlist-pending-description').textContent='Te enviamos un enlace para verificar tu correo. Al abrirlo volverás aquí y verás tu inscripción confirmada.';
+  form.hidden=true;p.hidden=false;
+  requestAnimationFrame(()=>p.scrollIntoView({behavior:'smooth',block:'center'}));
  }catch(error){
   submit.disabled=false;
   message('No pudimos enviar la verificación. Revisa el correo e inténtalo de nuevo.');
@@ -113,7 +154,7 @@ async function manage(user){
  try{data=await readMembership(email);}catch{return;}
  if(!data||data.unsubscribed_at)return;
  if(!returning && !requested() && !feedback.dataset.ok?.includes('true'))showConfirmation(email);
- if(form.querySelector('#course-unsubscribe'))return;
+ if(document.querySelector('#course-unsubscribe'))return;
  const b=document.createElement('button');
  b.type='button';b.id='course-unsubscribe';b.className='class-waitlist-optout';
  b.textContent='Darme de baja de esta lista';
@@ -124,17 +165,33 @@ async function manage(user){
   if(error){
    b.disabled=false;message('No pudimos tramitar la baja. Inténtalo de nuevo.');return;
   }
-  b.remove();submit.disabled=false;consentEl.checked=false;
+  b.remove();document.querySelector('#course-waitlist-success').hidden=true;form.hidden=false;submit.disabled=false;consentEl.checked=false;
   message('Tu solicitud se canceló. No recibirás más avisos sobre esta clase.',true);
  });
- form.appendChild(b);
+ document.querySelector('#course-waitlist-success-optout').appendChild(b);
 }
 async function detectSession(user){
  if(!user)return;
  if(returning||requested()===normal(user.email))await subscribe(user);
  else await manage(user);
 }
-if(returning)message('Verificando tu correo y completando la inscripción…');
+document.querySelector('#course-waitlist-edit').addEventListener('click',()=>{
+ returning=false;expectedHash='';salt='';
+ sessionStorage.removeItem(INTENT);
+ const url=new URL(location.href);
+ ['confirmar-lista','huella','reto'].forEach(p=>url.searchParams.delete(p));
+ history.replaceState(history.state,'',url.pathname+url.search+'#lista-espera');
+ document.querySelector('#course-waitlist-pending').hidden=true;
+ document.querySelector('#course-waitlist-success').hidden=true;
+ form.hidden=false;
+ submit.disabled=false;emailEl.value='';consentEl.checked=false;
+ message('Puedes escribir otro correo y solicitar un nuevo enlace.');
+ emailEl.focus();
+});
+if(returning){
+ const p=document.querySelector('#course-waitlist-pending');
+ p.hidden=false;form.hidden=true;
+}
 db.auth.getUser().then(({data:{user}})=>{
  if(user)void detectSession(user);
  else if(returning)message('No encontramos una sesión confirmada. Abre de nuevo el enlace del correo en este navegador.');

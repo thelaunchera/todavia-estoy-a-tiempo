@@ -255,6 +255,21 @@
           <p id="course-waitlist-feedback" aria-live="polite" class="class-waitlist-feedback">Dos pasos: solicita el aviso y confirma tu correo desde el enlace que te enviaremos.</p>
           <small>Tratamos tu correo según nuestra <a href="../privacidad.html">política de privacidad</a>.</small>
         </form>
+        <section id="course-waitlist-success" class="class-waitlist-success" tabindex="-1" role="status" aria-live="polite" hidden>
+          <div class="class-success-mark" aria-hidden="true">✓</div>
+          <p class="class-mini-caption">INSCRIPCIÓN CONFIRMADA</p>
+          <h3>Ya estás en la lista.</h3>
+          <p>Tu correo quedó verificado y tu registro está guardado. Te escribiré con novedades de <strong>Tu primera web con IA</strong> y te avisaré cuando abran las inscripciones.</p>
+          <p class="class-success-detail">No has realizado una compra ni reservado una plaza. Por ahora, no necesitas hacer nada más.</p>
+          <a class="class-success-link" href="#recorrido">Ver lo que aprenderás</a>
+          <div id="course-waitlist-success-optout" class="class-success-optout"></div>
+        </section>
+        <section id="course-waitlist-pending" class="class-waitlist-pending" role="status" tabindex="-1" aria-live="polite" hidden>
+          <p class="class-mini-caption">UN PASO MÁS</p>
+          <h3 id="course-waitlist-pending-title">Revisa tu correo</h3>
+          <p id="course-waitlist-pending-description">Te enviamos un enlace para verificar tu correo. Al pulsarlo volverás aquí y verás la confirmación de tu registro.</p>
+          <button id="course-waitlist-edit" class="class-pending-edit" type="button">Cambiar el correo</button>
+        </section>
       </div>
     </section>
   </main>
@@ -277,7 +292,7 @@
   </footer>
   <button type="button" id="class-floating-top" class="class-floating-top" aria-label="Volver arriba" hidden><svg class="class-inline-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 20V4m-7 7 7-7 7 7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Arriba</span></button>
   <script src="../privacy-controls.js?v=20261027-compact-v2" data-site="podcast"></script>
-  <script type="module" src="waitlist.js?v=20261028-confirmacion-v2"></script>
+  <script type="module" src="waitlist.js?v=20261028-confirmacion-visual-v3"></script>
   <script defer src="experience.js?v=20261028-idea-transform-v1"></script>
   <script defer src="countdown.js?v=20261028-flipclock-v1"></script>
 </body>
