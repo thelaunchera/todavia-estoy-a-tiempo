@@ -72,5 +72,6 @@ assert.match(newExperience,/aria-pressed/);
 assert.match(newExperience,/ArrowRight/);
 assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(newStyles,/@media\(max-width:650px\)/);
-assert.match(flow,/clases\/experience\.js/);
+assert.match(classPage,/src="experience\.js"/);
+assert.match(workflow,/clases\/experience\.js/);
 console.log('Auditoría editorial 3/30 segundos, efectos, footer y privacidad: OK');
