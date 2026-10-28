@@ -51,7 +51,7 @@ assert.match(classPage,/Inscripciones desde el 3 de diciembre/,'Lista de espera 
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
 assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
-assert.match(classPage,/src="\.\.\/assets\/clase-hero-bot-mano\.webp"/,'Se publica el retrato aprobado para la clase');
+assert.match(classPage,/src="\.\.\/assets\/clase-hero-portrait-original\.webp"/,'Se publica la foto original nítida aportada por la creadora');
 assert.match(newStyles,/class-hero-grid/,'El layout del hero tiene estilos responsivos');
 assert.match(classPage,/role="tablist"/);
 assert.match(classPage,/role="tabpanel"/);
