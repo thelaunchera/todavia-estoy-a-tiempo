@@ -6,6 +6,7 @@ const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
 const out=$('logout');
 let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false,projectShared=false;
+let materialsController=null;
 const adminMarkerKey='podcast_studio_password_login_deadline_v1';
 function hasValidStudioSession(id){
  try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
@@ -29,7 +30,7 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', lecciones:'Mis lecciones', materiales:'Mis materiales',
+ inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';
@@ -49,8 +50,10 @@ function setAulaView(view,{scroll=true}={}){
  if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
  currentAulaView=view;
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
-  section.hidden=section.getAttribute('data-aula-panel')!==view;
+  section.hidden=section.getAttribute('data-aula-panel')!==(view==='prompts'?'materiales':view);
  });
+ if(view==='prompts')materialsController?.go('prompts');
+ if(view==='materiales')materialsController?.go('inicio');
  document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
@@ -254,8 +257,12 @@ async function showCourse(email,asAdmin=false){
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
  display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('lecciones',{scroll:false});
+ materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
+ }).then(controller=>{
+  materialsController=controller||null;
+  if(currentAulaView==='prompts')materialsController?.go('prompts');
  }).catch(()=>{
   const root=$('materiales-interactivos');
   root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
