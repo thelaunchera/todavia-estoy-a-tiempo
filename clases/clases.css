@@ -585,3 +585,11 @@ html:has(.class-page-v2){scroll-padding-top:84px}
   .class-page-v2 .class-price-bottom-row{gap:13px}
   .class-page-v2 .class-price-bottom-row>strong{font-size:3.6rem}
 }
+
+
+/* Uniformidad final: cualquier botón de la landing, incluso los controles
+   de privacidad que se incorporan después, mantiene forma de pastilla. */
+.class-page-v2 button:not(.menu-toggle),
+.class-page-v2 input[type="submit"]{
+  border-radius:999px!important;
+}
