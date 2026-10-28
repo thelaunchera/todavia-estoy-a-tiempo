@@ -4,7 +4,18 @@ const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:t
 const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
 const out=$('logout');
-let user=null,lessons=[],done=new Set(),selected=0;
+let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false;
+const adminMarkerKey='podcast_studio_password_login_deadline_v1';
+function hasValidStudioSession(id){
+ try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
+ catch {return false;}
+}
+async function isAuthorizedOwner(who){
+ if(!hasValidStudioSession(who.id))return false;
+ const {data,error}=await db.from('podcast_studio_admins').select('role').eq('user_id',who.id).maybeSingle();
+ if(error)throw error;
+ return data?.role==='owner';
+}
 function status(text,ok=false){message.textContent=text;message.dataset.ok=ok?'true':'false';}
 function display(panel){[login,noAccess,course].forEach(el=>el.hidden=(el!==panel));}
 function validVideoId(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
@@ -18,18 +29,22 @@ function setProgress(){
 function choose(i){
  selected=i;
  const item=lessons[i];
- if(!item || !validVideoId(item.youtube_video_id))return;
- const box=$('lesson-player');box.replaceChildren();box.hidden=false;
- const frame=document.createElement('iframe');
- frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(item.youtube_video_id)+'?rel=0';
- frame.title='Video '+item.lesson_code+' · '+item.title;
- frame.loading='lazy';frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
- frame.referrerPolicy='strict-origin-when-cross-origin';frame.allowFullscreen=true;
- box.appendChild(frame);
+ if(!item)return;
+ const box=$('lesson-player');box.replaceChildren();box.hidden=!validVideoId(item.youtube_video_id);
+ if(!box.hidden){
+  const frame=document.createElement('iframe');
+  frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(item.youtube_video_id)+'?rel=0';
+  frame.title='Video '+item.lesson_code+' · '+item.title;
+  frame.loading='lazy';frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+  frame.referrerPolicy='strict-origin-when-cross-origin';frame.allowFullscreen=true;
+  box.appendChild(frame);
+ }
+ $('lesson-unavailable').hidden=!box.hidden;
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
  $('lesson-title').textContent=item.title;
  $('lesson-description').textContent=item.description;
  $('lesson-done').checked=done.has(item.lesson_code);
+ $('lesson-done').closest('label').hidden=adminPreview;
  $('lesson-info').hidden=false;
  $('lesson-next').disabled=i>=lessons.length-1;
  document.querySelectorAll('.lesson-index button[data-index]').forEach(button=>{
@@ -49,35 +64,44 @@ function lessonsUI(){
  });
  setProgress();choose(0);
 }
-async function showCourse(email){
- const {data:entitlement,error:lookupError}=await db.from('podcast_class_access').select('status').eq('course_id',courseId).eq('buyer_email',email).maybeSingle();
- if(lookupError)throw lookupError;
- if(entitlement?.status!=='active'){
-  display(noAccess);status('Acceso pendiente de compra verificada.');return;
+async function showCourse(email,asAdmin=false){
+ adminPreview=asAdmin;
+ if(!asAdmin){
+  const {data:entitlement,error:lookupError}=await db.from('podcast_class_access').select('status,revoked_at').eq('course_id',courseId).eq('buyer_email',email).maybeSingle();
+  if(lookupError)throw lookupError;
+  if(entitlement?.status!=='active'||entitlement.revoked_at){
+   display(noAccess);status('Acceso pendiente de compra verificada.');return;
+  }
  }
  const [l,r,p]=await Promise.all([
- db.from('podcast_class_lessons').select('lesson_code,position,title,minutes,description,youtube_video_id').eq('course_id',courseId).order('position',{ascending:true}),
- db.from('podcast_class_resources').select('resource_code,title,url').eq('course_id',courseId).order('resource_code'),
- db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email)
+ db.from('podcast_class_lessons').select('lesson_code,position,title,minutes,description,youtube_video_id,status').eq('course_id',courseId).order('position',{ascending:true}),
+ db.from('podcast_class_resources').select('resource_code,title,url,status').eq('course_id',courseId).order('resource_code'),
+ asAdmin ? Promise.resolve({data:[],error:null}) : db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email)
  ]);
  if(l.error||r.error||p.error)throw l.error||r.error||p.error;
  lessons=l.data||[];done=new Set((p.data||[]).map(x=>x.lesson_code));
  const resources=$('resource-list');resources.replaceChildren();
  (r.data||[]).forEach(item=>{
-  const a=document.createElement('a');a.href=item.url;a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
-  escapedText(a,'span','GUÍA / MATERIAL','resource-tag');escapedText(a,'strong',item.title);escapedText(a,'span','Abrir ↗','resource-link');
+  const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
+  if(!item.url || !/^https:\/\//i.test(item.url)){a.removeAttribute('href');a.removeAttribute('target');}
+  escapedText(a,'span',asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL','resource-tag');
+  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir ↗':'En preparación','resource-link');
   resources.appendChild(a);
  });
  $('empty-resources').hidden=Boolean((r.data||[]).length);
- display(course);status('Acceso verificado.',true);lessonsUI();
+ $('admin-preview-banner').hidden=!asAdmin;
+ $('student-progress').hidden=asAdmin;
+ $('progress-label').hidden=asAdmin;
+ display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();
 }
 async function refreshAuth(){
  try{
   const {data:{user:who},error}=await db.auth.getUser();
   if(error && !/Auth session missing/i.test(error.message||''))throw error;
   if(!who){out.hidden=true;display(login);status('Entra con el correo que usaste en la compra.');return;}
-  user=who;out.hidden=false;status('Comprobando tu compra…');
-  await showCourse((who.email||'').trim().toLowerCase());
+  user=who;out.hidden=false;status('Comprobando permisos…');
+  const owner=await isAuthorizedOwner(who);
+  await showCourse((who.email||'').trim().toLowerCase(),owner);
  }catch(e){display(login);status('No pudimos comprobar el acceso en este momento. Actualiza la página o pide ayuda si continúa.');console.error('Course portal auth check error',e?.code||'unknown');}
 }
 $('login-form').addEventListener('submit',async e=>{
@@ -94,7 +118,7 @@ $('login-form').addEventListener('submit',async e=>{
  finally{button.disabled=false;}
 });
 $('lesson-done').addEventListener('change',async e=>{
- const box=e.currentTarget;const item=lessons[selected];if(!user||!item)return;
+ const box=e.currentTarget;const item=lessons[selected];if(adminPreview||!user||!item){box.checked=false;return;}
  box.disabled=true;
  const email=(user.email||'').trim().toLowerCase();
  const values={course_id:courseId,buyer_email:email,lesson_code:item.lesson_code};
@@ -108,6 +132,9 @@ $('lesson-done').addEventListener('change',async e=>{
  finally{box.disabled=false;}
 });
 $('lesson-next').addEventListener('click',()=>choose(Math.min(selected+1,lessons.length-1)));
-out.addEventListener('click',async()=>{await db.auth.signOut();location.replace('./');});
+out.addEventListener('click',async()=>{
+ if(adminPreview){location.assign('../estudio/');return;}
+ await db.auth.signOut();location.replace('./');
+});
 await refreshAuth();
 db.auth.onAuthStateChange((_event,session)=>{if(session?.user && session.user.id!==user?.id)window.setTimeout(()=>void refreshAuth(),0);});
