@@ -7,7 +7,6 @@
 .mi-header h2{font:400 clamp(30px,3.7vw,46px)/1.12 'DM Serif Display',Georgia,serif;color:#1a354f;letter-spacing:-.025em;margin:12px 0 8px}
 .mi-header h2 span{color:#9cbccc}
 .mi-header p{font-size:14px;line-height:1.7;color:#5a7284;max-width:640px;margin:0}
-.mi-header-symbol{font:400 72px/1 Georgia,serif;opacity:.4;color:#91b3c3;align-self:start}
 .mi-save{grid-column:1/-1;justify-self:start;color:#58758b;background:#ecf2f5;border:1px solid #dce6ea;border-radius:99px;font-weight:700;padding:7px 11px;font-size:11px;min-height:28px;cursor:default}
 .mi-save-error{color:#934f3d;background:#ffefea;cursor:pointer}
 .mi-tabs{display:flex;gap:5px;overflow-x:auto;scrollbar-width:thin;margin:19px 0 24px;padding:6px;background:#eef2f3;border:1px solid #e1e8eb;border-radius:14px;scroll-snap-type:x proximity}
