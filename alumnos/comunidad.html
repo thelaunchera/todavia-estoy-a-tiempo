@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#f8f5ed">
+<meta name="description" content="Club de Ideas: comunidad privada para compartir los proyectos de tus clases, conversar y aprender en compañía.">
+<title>Club de Ideas · Todavía estoy a tiempo</title>
+<link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./comunidad.css?v=20261028">
+</head>
+<body>
+<a class="club-skip" href="#club-contenido">Saltar al contenido</a>
+<header class="club-top">
+ <div class="club-wrap club-top-inner">
+  <a href="../alumnos/" aria-label="Volver al Centro de alumnos"><img src="../assets/logo-podcast-04.svg" width="726" height="250" alt="Todavía estoy a tiempo"></a>
+  <nav aria-label="Navegación de la comunidad"><a class="club-top-link" href="../alumnos/">Mi aula</a><a class="club-top-link" href="../estudio/" id="club-studio-link" hidden>Mi Estudio</a></nav>
+ </div>
+</header>
+<main id="club-contenido">
+ <section class="club-hero">
+  <div class="club-wrap club-hero-inner">
+   <div class="club-hero-copy"><span class="club-overline">UN ESPACIO PARA CREAR EN COMPAÑÍA</span>
+    <h1>Club de <em>Ideas.</em></h1>
+    <p>Una comunidad para compartir lo que estás creando, inspirarnos y ayudarnos a seguir. Aquí los proyectos no tienen que estar perfectos para tener un lugar.</p>
+   </div>
+   <div class="club-hero-mark" aria-hidden="true"><span>01</span><strong>Ideas que<br>se vuelven<br>reales.</strong><i>✳</i></div>
+  </div>
+ </section>
+ <div class="club-wrap">
+  <p class="club-alert" id="club-feedback" role="status" aria-live="polite">Comprobando el acceso privado…</p>
+  <section class="club-locked" id="club-locked" hidden>
+   <h2>Este espacio es privado.</h2>
+   <p id="club-locked-message">El club está reservado a alumnas con acceso verificado y a la administradora del Estudio.</p>
+   <a href="../alumnos/">Volver al Centro de alumnos</a>
+  </section>
+  <div id="club-members" hidden>
+   <div id="club-admin-banner" class="club-admin-banner" hidden>
+    <span>✦ Vista de administradora · puedes revisar y moderar todas las conversaciones.</span>
+    <a href="../estudio/">Volver al Estudio</a>
+   </div>
+   <section class="club-welcome">
+    <div><span class="club-overline">BIENVENIDA A TU COMUNIDAD</span><h2>Aquí también se aprende <em>compartiendo.</em></h2><p>Publica una captura, cuenta en qué estás trabajando o pide una segunda opinión. Cada mensaje lo verán las personas con acceso al espacio correspondiente.</p></div>
+    <div class="club-profile">
+     <label for="club-display-name">Cómo quieres que te llamen</label>
+     <div class="club-name-row"><input id="club-display-name" maxlength="32" minlength="2" autocomplete="nickname" placeholder="Tu nombre o apodo"><button id="club-save-name" type="button">Guardar</button></div>
+     <small>Solo mostramos tu nombre elegido. Nunca tu correo.</small>
+    </div>
+   </section>
+   <div class="club-layout">
+    <div class="club-main">
+     <nav class="club-channels" role="tablist" aria-label="Espacios del club">
+      <button type="button" role="tab" data-channel="charla" aria-selected="true" class="active">💬 Comunidad</button>
+      <button type="button" role="tab" data-channel="proyectos" aria-selected="false">✦ Proyectos</button>
+      <button type="button" role="tab" data-channel="preguntas" aria-selected="false">? Preguntas</button>
+     </nav>
+     <section class="club-composer" aria-labelledby="club-compose-heading">
+      <div class="club-compose-top"><span class="club-small-avatar" aria-hidden="true">✳</span><div><span class="club-overline">TIENES LA PALABRA</span><h2 id="club-compose-heading">¿Qué estás creando?</h2></div></div>
+      <form id="club-post-form">
+       <label for="club-post-body">Cuéntanos tu idea, avance o pregunta</label>
+       <textarea id="club-post-body" maxlength="2000" minlength="2" rows="4" required placeholder="Hoy avancé con mi primera landing…"></textarea>
+       <div class="club-form-row">
+        <label>Compartir en
+         <select id="club-post-scope"><option value="club">Todo el club</option><option value="curso">Clase 01 · Mi primera web con IA</option></select>
+        </label>
+        <label>Nombre de tu proyecto (opcional)
+         <input id="club-post-title" maxlength="100" placeholder="Mi primera página">
+        </label>
+       </div>
+       <label class="club-url-field" for="club-post-url">Enlace de tu web (opcional)<input id="club-post-url" type="url" inputmode="url" maxlength="500" placeholder="https://mi-proyecto.com"></label>
+       <div class="club-image-picker">
+        <label for="club-post-image" class="club-upload-button">📷 Añadir captura de mi proyecto</label>
+        <input type="file" id="club-post-image" accept="image/png,image/jpeg,image/webp">
+        <span id="club-image-label">PNG, JPG o WebP · máximo 5 MB</span>
+       </div>
+       <div id="club-image-preview" class="club-image-preview" hidden><img alt="Vista previa de la captura antes de publicarla"><button type="button" id="club-clear-image">Quitar foto</button></div>
+       <div class="club-compose-bottom"><p>Comparte solo imágenes y datos que quieras mostrar a otros miembros. Evita contraseñas, teléfonos, direcciones y datos de clientes.</p><button type="submit" id="club-submit">Publicar en el club <span aria-hidden="true">↗</span></button></div>
+      </form>
+     </section>
+     <section aria-labelledby="club-feed-title" class="club-feed-section">
+       <div class="club-feed-heading"><div><span class="club-overline">HABLEMOS DE LO QUE CREAS</span><h2 id="club-feed-title">Conversaciones</h2></div><button id="club-refresh" type="button">↻ Actualizar</button></div>
+       <div class="club-filter-row">
+        <label for="club-view-scope">Ver publicaciones de</label>
+        <select id="club-view-scope"><option value="all">Mis espacios disponibles</option><option value="club">Todo el club</option><option value="curso">Mi clase</option></select>
+       </div>
+       <div id="club-feed" class="club-feed" aria-live="polite"></div>
+       <p id="club-feed-empty" class="club-empty" hidden>Este espacio todavía está esperando su primera conversación. Puedes empezar compartiendo un pequeño avance o una pregunta. ✨</p>
+     </section>
+    </div>
+    <aside class="club-aside">
+     <div class="club-side-card"><span class="club-overline">EMPIEZA POR AQUÍ</span><h3>Tu primer proyecto merece mostrarse.</h3><p>Una captura del móvil, el enlace de tu web o una pregunta concreta son suficientes para comenzar.</p><span class="club-side-flower" aria-hidden="true">✳</span></div>
+     <div class="club-side-card club-guide"><span class="club-overline">CONVIVENCIA</span><h3>Un espacio bonito también se cuida.</h3><p>Comparte con respeto. Da opiniones útiles. No publiques datos privados, contenido de terceros sin permiso ni mensajes comerciales no solicitados.</p><p>Los mensajes pueden ser reportados y moderados.</p></div>
+     <div class="club-side-card club-other-classes"><span class="club-overline">TUS CLASES</span><h3>Aprender y compartir, todo en un lugar.</h3><a href="../alumnos/">Tu primera web con IA <span>↗</span></a><small>Próximos talleres aparecerán aquí cuando estén disponibles.</small></div>
+    </aside>
+   </div>
+  </div>
+ </div>
+</main>
+<footer class="club-footer"><div class="club-wrap"><span>© 2026 · Todavía estoy a tiempo</span><span>Solo para miembros · <a href="../privacidad.html">Privacidad</a> · <a href="../terminos.html">Términos</a></span></div></footer>
+<script type="module" src="./comunidad.js?v=20261028"></script>
+</body>
+</html>
