@@ -21,8 +21,7 @@ import {
   SearchCheck,
   Settings2,
   Plus,
-  ArrowUpRight,
-  ArrowRight,
+
   Check,
   Clock3,
   Pencil,
@@ -738,11 +737,11 @@ function App() {
             </details>}
             <div className="episode-actions">
               {x.status==='borrador privado'&&<button disabled={saving} onClick={()=>editRow('episodios',x)}><ShieldCheck size={15}/> Revisar borrador privado</button>}
-              {!x.archived&&x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
+              {!x.archived&&x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción </button>}
               {!x.archived&&x.status==='en producción'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'hecho')}>Marcar hecho <CheckCircle2 size={15}/></button>}
-              {!x.archived&&x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar <ArrowUpRight size={15}/></button>}
+              {!x.archived&&x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar </button>}
               {x.status==='publicado'&&<span className="episode-announcement">{x.announcement_state==='disabled'?'Publicado · sin aviso retroactivo':x.announcement_state==='sent'?'Aviso enviado':x.announcement_state==='pending'?'Aviso en cola':'Publicado'}</span>}
-              {validSpotifyEpisode(x.link)&&<a href={x.link} target="_blank" rel="noreferrer">Escuchar en Spotify <ArrowUpRight size={14}/></a>}
+              {validSpotifyEpisode(x.link)&&<a href={x.link} target="_blank" rel="noreferrer">Escuchar en Spotify </a>}
             </div>
           </div>
           {buttons('episodios',x)}
@@ -833,7 +832,7 @@ function App() {
                 <input id="studio-new-password" type="password" autoComplete="new-password" minLength={10} required value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="Mínimo 10 caracteres"/>
                 <label htmlFor="studio-new-repeat">Repite la contraseña</label>
                 <input id="studio-new-repeat" type="password" autoComplete="new-password" minLength={10} required value={repeatPassword} onChange={e=>setRepeatPassword(e.target.value)} placeholder="Repite tu contraseña"/>
-                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Guardando…':'Guardar mi contraseña'} <ArrowUpRight size={19}/></button>
+                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Guardando…':'Guardar mi contraseña'} </button>
               </form>
             ) : authView === 'request' ? (
               <form className="vault-form" onSubmit={event=>{ event.preventDefault(); void requestPasswordReset(); }}>
@@ -841,7 +840,7 @@ function App() {
                 <p>Para configurar tu contraseña por primera vez, te enviaremos un único enlace seguro. Luego iniciarás sesión normalmente.</p>
                 <label htmlFor="studio-reset-email">Correo de administración</label>
                 <input id="studio-reset-email" type="email" autoComplete="email" required value={resetEmail} onChange={e=>setResetEmail(e.target.value)} placeholder="tu@correo.com"/>
-                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Solicitando…':'Enviarme enlace para crear contraseña'} <ArrowUpRight size={19}/></button>
+                <button type="submit" className="login-cta" disabled={resetting}>{resetting?'Solicitando…':'Enviarme enlace para crear contraseña'} </button>
                 <button type="button" className="login-text-action" onClick={()=>{setAuthView('login');setError('');}}>Volver a entrar</button>
               </form>
             ) : (
@@ -850,7 +849,7 @@ function App() {
                 <input id="studio-passphrase" type="email" autoComplete="username" required value={passphrase} onChange={e=>setPassphrase(e.target.value)} placeholder="tu@correo.com"/>
                 <label htmlFor="studio-account-password">Tu contraseña</label>
                 <input id="studio-account-password" type="password" autoComplete="current-password" required value={loginPassword} onChange={e=>setLoginPassword(e.target.value)} placeholder="Tu contraseña"/>
-                <button type="submit" disabled={signing} className="login-cta">{signing?'Entrando…':'Abrir mi estudio'} <ArrowUpRight size={19}/></button>
+                <button type="submit" disabled={signing} className="login-cta">{signing?'Entrando…':'Abrir mi estudio'} </button>
                 <button type="button" className="login-text-action" onClick={()=>{setResetEmail(passphrase);setAuthView('request');setError('');setResetMessage('');}}>Crear contraseña por primera vez / ¿La olvidaste?</button>
               </form>
             )
@@ -862,7 +861,7 @@ function App() {
                 <label htmlFor="studio-passphrase-confirm">Repite la frase</label>
                 <input id="studio-passphrase-confirm" type="password" required minLength={10} autoComplete="new-password" value={confirmPhrase} onChange={event=>setConfirmPhrase(event.target.value)} placeholder="Confirma tu frase"/>
               </>}
-              <button type="submit" disabled={signing} className="login-cta">{signing?'Comprobando…':vaultPresent?'Abrir mi estudio':'Crear mi estudio'} <ArrowUpRight size={19}/></button>
+              <button type="submit" disabled={signing} className="login-cta">{signing?'Comprobando…':vaultPresent?'Abrir mi estudio':'Crear mi estudio'} </button>
             </form>
           )}
           {resetMessage && <p className="login-success" role="status">{resetMessage}</p>}
@@ -927,7 +926,7 @@ function App() {
             rel="noreferrer"
             aria-label="Abrir el podcast"
           >
-            <ArrowUpRight size={16} />
+            
           </a>
         </div>
       </aside>
@@ -1011,10 +1010,10 @@ function App() {
                   </p>
                   <div className="hero-actions">
                     <button onClick={() => change('episodios')}>
-                      Organizar capítulos <ArrowRight size={16} />
+                      Organizar capítulos 
                     </button>
                     <a href={SITE} target="_blank" rel="noreferrer">
-                      Ver el podcast <ArrowUpRight size={16} />
+                      Ver el podcast 
                     </a>
                   </div>
                 </div>
@@ -1063,7 +1062,7 @@ function App() {
                       <h3>El próximo estreno</h3>
                     </div>
                     <button onClick={() => change('calendario')}>
-                      Ver calendario <ArrowRight size={15} />
+                      Ver calendario 
                     </button>
                   </div>
                   <div className="next">
@@ -1132,7 +1131,7 @@ function App() {
                       <b>Cada capítulo cuenta.</b>
                       <p>Una primera serie que crece a su ritmo.</p>
                       <button onClick={() => change('episodios')}>
-                        Ver progreso <ArrowUpRight size={16} />
+                        Ver progreso 
                       </button>
                     </div>
                   </div>
@@ -1145,7 +1144,7 @@ function App() {
                     <h3>Lo siguiente en tu lista</h3>
                   </div>
                   <button onClick={() => change('tareas')}>
-                    Abrir tareas <ArrowRight size={15} />
+                    Abrir tareas 
                   </button>
                 </div>
                 {taskRows}
@@ -1200,7 +1199,7 @@ function App() {
                     {x.episode_format && <small>{x.episode_format} · {x.planning_status}</small>}
                     <StatePill status={x.status} />
                     <small>
-                      Editar capítulo <ArrowUpRight size={15} />
+                      Editar capítulo 
                     </small>
                   </button>
                 ))}
@@ -1259,7 +1258,7 @@ function App() {
                             rel="noreferrer"
                             aria-label={'Abrir ' + x.title}
                           >
-                            <ArrowUpRight size={19} />
+                            
                           </a>
                         )}
                         {buttons('productos', x)}
@@ -1599,7 +1598,7 @@ function App() {
                       <b>{x[0]}</b>
                       <small>{x[2]}</small>
                     </div>
-                    <ArrowUpRight size={18} />
+                    
                   </a>
                 ))}
               </div>
@@ -1949,7 +1948,7 @@ function App() {
               <button onClick={() => setEdit(null)}>Cancelar</button>
               <button disabled={saving} onClick={save}>
                 {saving ? 'Guardando…' : 'Guardar cambios'}
-                <ArrowRight size={16} />
+                
               </button>
             </div>
           </div>
