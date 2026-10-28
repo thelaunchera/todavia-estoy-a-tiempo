@@ -1,6 +1,7 @@
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import BonusLibrary from './BonusLibrary';
+import StudentManager from './StudentManager';
 import { CLASS_SECTION } from './class-course';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
@@ -1271,6 +1272,8 @@ function App() {
             </>
           )}
           {page === 'alumnos' && (
+            <>
+            <StudentManager />
             <section className="studio-student-center">
               <div className="studio-student-center-intro">
                 <div>
@@ -1282,6 +1285,7 @@ function App() {
               </div>
               <iframe title="Centro de alumnos · vista privada de administración" src="../alumnos/?vista=admin" loading="lazy" referrerPolicy="same-origin"/>
             </section>
+            </>
           )}
           {page === 'club' && (
             <section className="studio-student-center">
