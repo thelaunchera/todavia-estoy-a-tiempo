@@ -42,3 +42,35 @@ assert.match(workflow,/cp -R assets productos clases alumnos/);
 assert.match(workflow,/test -s _podcast_pages\/alumnos\/index\.html/);
 assert.match(workflow,/test -s _podcast_pages\/clases\/waitlist\.js/);
 console.log('Validación de preventa, aula, consentimientos, rutas y acceso: OK');
+
+const newExperience=read('clases/experience.js');
+const newStyles=read('clases/clases.css');
+assert.match(classPage,/Crea una landing/,'Mensaje inmediato de valor');
+assert.match(classPage,/negocios locales/i,'Comunica la oportunidad de servicio local');
+assert.match(classPage,/Inscripciones aún no disponibles/,'No se promete compra abierta');
+assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
+assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
+assert.match(classPage,/data-preview-choice="limpieza"/);
+assert.match(classPage,/data-preview-choice="belleza"/);
+assert.match(classPage,/data-preview-choice="cafe"/);
+assert.match(classPage,/role="tablist"/);
+assert.match(classPage,/role="tabpanel"/);
+assert.match(classPage,/id="class-copy-prompt"/);
+assert.match(classPage,/id="class-scroll-progress"/);
+assert.match(classPage,/id="preguntas"/);
+assert.match(classPage,/aria-label="Navegación de la clase"/);
+for(const path of ['privacidad.html','terminos.html','reembolsos.html','cookies.html','tus-datos.html']){
+  assert.ok(classPage.includes('../'+path),'Footer legal: '+path);
+}
+assert.match(classPage,/logo-podcast-04.svg/);
+assert.match(classPage,/Powered by The Launch Era/);
+assert.match(classPage,/data-privacy-settings/);
+assert.match(newExperience,/prefers-reduced-motion/);
+assert.match(newExperience,/IntersectionObserver/);
+assert.match(newExperience,/aria-selected/);
+assert.match(newExperience,/aria-pressed/);
+assert.match(newExperience,/ArrowRight/);
+assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
+assert.match(newStyles,/@media\(max-width:650px\)/);
+assert.match(flow,/clases\/experience\.js/);
+console.log('Auditoría editorial 3/30 segundos, efectos, footer y privacidad: OK');
