@@ -281,3 +281,12 @@
 @media(prefers-reduced-motion:reduce){
  #class-content>.club-aula-entry .club-aula-button{transition:none!important}
 }
+
+/* Personalized workshop bonuses: never renders an unassigned resource. */
+.assigned-bonuses{border:1px solid #b9d4df;background:linear-gradient(145deg,#f7fbfa,#edf5f8);border-radius:20px;padding:clamp(18px,2.4vw,25px);display:grid;gap:11px}
+.assigned-bonuses[hidden]{display:none!important}
+.assigned-bonuses h2{color:#223950;font-size:clamp(1.24rem,2vw,1.52rem);line-height:1.22;margin:0}
+.assigned-bonuses>p:not(.eyebrow){font-size:.88rem;line-height:1.65;color:#557081;margin:0 0 3px}
+.assigned-bonuses .resource-grid{display:grid;gap:10px}
+.assigned-bonuses .resource{background:#fff;border:1px solid #d1e3e9;border-radius:13px;min-width:0}
+@media(prefers-reduced-motion:reduce){.assigned-bonuses *{animation:none!important;transition:none!important}}
