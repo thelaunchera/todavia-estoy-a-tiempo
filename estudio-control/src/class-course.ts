@@ -5,6 +5,9 @@ export type ClassLesson = {
  beats: ClassBeat[]; prompt: string; exercise: string;
 };
 export const CLASS_SECTION='clase-01-produccion-privada';
+/** La única categoría de tareas de lanzamiento, ya presente en el Estudio. */
+export const CLASS_TASK_SECTION='Clase 01 · Lanzamiento 3 dic';
+export const CLASS_CHECKLIST='https://app.notion.com/p/407a68f2ee6e81e6b616e22c9fe73021';
 export const CLASS_LAUNCH='2026-12-03';
 export const CLASS_NOTION='https://app.notion.com/p/407a68f2ee6e818f9df0fa30f853c384';
 export const CLASS_PLAN='https://app.notion.com/p/407a68f2ee6e81f4a273f7fe4be627d8';
