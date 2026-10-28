@@ -30,6 +30,14 @@ assert.match(room,/id="class-content" hidden/);
 assert.match(room,/id="no-access" class="panel" hidden/);
 assert.match(room,/id="lesson-buttons"/);
 assert.match(room,/id="resource-list"/);
+assert.match(room,/id="course-help-form"/,'La ayuda se solicita desde el aula sin navegar al landing');
+assert.match(room,/data-course-help/,'El aula tiene controles de ayuda interna');
+assert.match(room,/id="course-help-status"/,'Estado de envío accesible');
+assert.doesNotMatch(room,/href="\.\.\/index\.html#ayuda"/,'Ayuda del aula no debe llevar al landing');
+assert.match(roomScript,/PODCAST_CONFIG\?\.helpEndpoint/,'El formulario reutiliza la integración existente de soporte');
+assert.match(roomScript,/courseHelpForm\.addEventListener\('submit'/,'El soporte envía la consulta dentro del aula');
+assert.match(roomScript,/courseHelpPanel\.scrollIntoView/,'Se mantiene la navegación interna');
+
 assert.match(roomScript,/from\('podcast_class_access'\)/);
 assert.match(roomScript,/entitlement\?\.status!=='active'/);
 assert.match(roomScript,/from\('podcast_class_lessons'\)/);

@@ -36,14 +36,14 @@
     <label for="login-email">Correo de la compra</label>
     <div class="formline"><input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com" maxlength="254"><button type="submit">Enviar enlace</button></div>
    </form>
-   <small>Si aún no compraste, aquí no se activará ningún video. La compra debe estar confirmada en nuestro sistema.</small>
+   <small>Si aún no compraste, aquí no se activará ningún video. La compra debe estar confirmada en nuestro sistema.</small><p><a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a></p>
   </section>
   <section id="no-access" class="panel" hidden>
    <p class="eyebrow">AÚN NO HAY COMPRA VERIFICADA</p>
    <h2>Tu aula todavía no está activada.</h2>
    <p>No encontramos una compra confirmada vinculada a ese correo. Si ya compraste, comprueba que usaste el mismo email o utiliza el formulario de ayuda.</p>
    <a class="outline" href="../clases/primera-landing.html">Explora la clase</a>
-   <a class="support" href="../index.html#ayuda">Solicitar ayuda</a>
+   <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">Solicitar ayuda aquí</a>
   </section>
   <section id="class-content" hidden>
    <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administradora · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
@@ -78,10 +78,39 @@
     <div id="resource-list" class="resource-grid"></div>
     <p id="empty-resources" class="empty">Los recursos todavía están en revisión de entrega.</p>
    </div>
-   <div class="help"><h2>¿Te atascaste?</h2><p>Guarda una captura y apunta tu pregunta. El alcance y el canal de revisión individual se informarán en los materiales cuando estén confirmados.</p><a class="outline" href="../index.html#ayuda">Ir a Ayuda</a></div>
+   <div class="help"><p class="eyebrow">ACOMPAÑAMIENTO EN TU AULA</p><h2>¿Te atascaste?</h2><p>Cuéntame qué pasó o qué parte de la lección te resulta difícil. Puedes pedir ayuda sin salir del aula ni perder tu avance.</p><button class="outline" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button></div>
+  </section>
+  <section id="soporte-aula" class="course-support-panel" aria-labelledby="course-help-title" hidden>
+    <div class="course-support-heading">
+      <div><p class="eyebrow">AYUDA DENTRO DEL AULA</p><h2 id="course-help-title">Cuéntame qué necesitas.</h2><p>Tu clase seguirá aquí cuando termines. Te responderé directamente por correo.</p></div>
+      <button type="button" id="close-course-help" class="course-help-close" aria-label="Cerrar ayuda">Cerrar ×</button>
+    </div>
+    <form id="course-help-form" novalidate>
+      <div class="course-help-fields">
+        <div><label for="course-help-name">Tu nombre</label><input id="course-help-name" name="name" autocomplete="name" maxlength="80" placeholder="Cómo te llamas" required></div>
+        <div><label for="course-help-email">Tu correo electrónico</label><input id="course-help-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="tu@email.com" required></div>
+      </div>
+      <label for="course-help-topic">¿Con qué necesitas ayuda?</label>
+      <select id="course-help-topic" name="topic" required>
+        <option value="" selected disabled>Elige un tema</option>
+        <option value="Clase · acceso al aula">Acceso a mi aula</option>
+        <option value="Clase · videos y lecciones">Videos y lecciones</option>
+        <option value="Clase · recursos y prompts">Materiales y prompts</option>
+        <option value="Clase · Club de Ideas">Club de Ideas</option>
+        <option value="Clase · otra consulta">Otra pregunta sobre la clase</option>
+      </select>
+      <label for="course-help-message">Tu mensaje</label>
+      <textarea id="course-help-message" name="message" rows="4" minlength="10" maxlength="2000" placeholder="Cuéntame qué pasó y en qué parte necesitas ayuda..." required></textarea>
+      <p class="course-help-note">No incluyas contraseñas ni información sensible. Usaremos tus datos solamente para responderte. <a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>.</p>
+      <input type="hidden" name="resource" value="podcast_help"><input type="hidden" name="source" value="podcast_website">
+      <input class="course-help-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="course-help-actions"><button type="submit">Enviar mi consulta</button><button type="button" id="cancel-course-help">Volver a mi aula</button></div>
+      <p id="course-help-status" role="status" aria-live="polite"></p>
+    </form>
   </section>
  </div>
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html">Privacidad</a> · <a href="../terminos.html">Términos</a></span></div></footer>
+<script defer src="../site-config.js"></script>
 <script type="module" src="./curso.js"></script>
 </body></html>

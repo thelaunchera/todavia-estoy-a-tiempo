@@ -136,5 +136,61 @@ out.addEventListener('click',async()=>{
  if(adminPreview){location.assign('../estudio/');return;}
  await db.auth.signOut();location.replace('./');
 });
+
+const courseHelpPanel=$('soporte-aula');
+const courseHelpForm=$('course-help-form');
+const courseHelpStatus=$('course-help-status');
+let lastHelpTrigger=null;
+function toggleCourseHelp(open) {
+ courseHelpPanel.hidden=!open;
+ document.querySelectorAll('[data-course-help]').forEach(control=>control.setAttribute('aria-expanded',String(open)));
+ if(open){
+  const email=(user?.email||$('login-email').value||'').trim().toLowerCase();
+  if(email && !$('course-help-email').value)$('course-help-email').value=email;
+  const firstName=String(user?.user_metadata?.full_name||user?.user_metadata?.name||'').slice(0,80);
+  if(firstName && !$('course-help-name').value)$('course-help-name').value=firstName;
+  courseHelpPanel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+  $('course-help-name').focus({preventScroll:true});
+ }else{
+  lastHelpTrigger?.focus({preventScroll:true});
+ }
+}
+document.querySelectorAll('[data-course-help]').forEach(control=>control.addEventListener('click',event=>{
+ event.preventDefault();lastHelpTrigger=control;toggleCourseHelp(true);
+}));
+$('close-course-help').addEventListener('click',()=>toggleCourseHelp(false));
+$('cancel-course-help').addEventListener('click',()=>toggleCourseHelp(false));
+courseHelpForm.addEventListener('submit',async event=>{
+ event.preventDefault();
+ courseHelpStatus.textContent='';courseHelpStatus.dataset.state='';
+ if(!courseHelpForm.reportValidity())return;
+ if(courseHelpForm.querySelector('[name="website"]')?.value)return;
+ const endpoint=window.PODCAST_CONFIG?.helpEndpoint;
+ if(typeof endpoint!=='string'||!/^https:\/\//.test(endpoint)){
+  courseHelpStatus.textContent='La ayuda no está disponible ahora. Escríbenos a hello@thelaunchera.com.';
+  courseHelpStatus.dataset.state='error';return;
+ }
+ const button=courseHelpForm.querySelector('button[type="submit"]');
+ const payload=new URLSearchParams(new FormData(courseHelpForm));
+ const title=payload.get('topic')||'Clase · consulta';
+ payload.set('topic',String(title));
+ payload.set('message','[Centro de alumnos · Tu primera web con IA]'+
+    (lessons[selected]?.title?' [Lección: '+lessons[selected].title+']':'')+'\n'+String(payload.get('message')||''));
+ button.disabled=true;button.textContent='Enviando consulta…';
+ try{
+  const response=await fetch(endpoint,{method:'POST',mode:'cors',headers:{Accept:'application/json'},body:payload});
+  if(!response.ok)throw Error('Error de envío');
+  const data=await response.json();
+  if(data?.ok!==true)throw Error('Sin confirmación');
+  courseHelpStatus.textContent='¡Recibí tu consulta! Te envié una confirmación por correo. Puedes continuar con tu clase.';
+  courseHelpStatus.dataset.state='success';
+  courseHelpForm.reset();
+  if(user?.email)$('course-help-email').value=user.email.trim().toLowerCase();
+ }catch{
+  courseHelpStatus.textContent='No pudimos confirmar el envío. Intenta otra vez o escribe a hello@thelaunchera.com.';
+  courseHelpStatus.dataset.state='error';
+ }finally{button.disabled=false;button.textContent='Enviar mi consulta';}
+});
+
 await refreshAuth();
 db.auth.onAuthStateChange((_event,session)=>{if(session?.user && session.user.id!==user?.id)window.setTimeout(()=>void refreshAuth(),0);});
