@@ -244,7 +244,7 @@ function App() {
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [seriesTab,setSeriesTab] = useState<string>('all');
-  const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'|'archived'>('active');
+  const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
   const [audioStats,setAudioStats] = useState<AudioStats|null>(null);
   const [audioStatsLoading,setAudioStatsLoading] = useState(false);
   const [audioStatsError,setAudioStatsError] = useState('');
@@ -483,7 +483,7 @@ function App() {
   const tasks = items.tareas,
     products = items.productos;
   const plan = editorialPlan(episodes);
-  const libraryEpisodes = plan[episodeScope];
+  const libraryEpisodes = episodeScope === 'month' ? plan.month : episodeScope === 'published' ? plan.published : plan.active;
   const allSeries = groupEpisodes(libraryEpisodes);
   const published = plan.published.length;
   const pending = tasks.filter(x => x.status !== 'completado').length;
@@ -1129,8 +1129,8 @@ function App() {
                 `${plan.label} · ${plan.month.length} capítulos en el plan del mes. Los episodios publicados y el trabajo anterior se conservan en sus pestañas.`,
                 'episodios'
               )}
-              <div className="series-tabs" aria-label="Elegir archivo de episodios">
-                {([['active', `Todos · ${plan.active.length}`], ['month', `Plan del mes · ${plan.month.length}`], ['published', `Publicados · ${plan.published.length}`], ['archived', `Archivo · ${plan.archived.length}`]] as const).map(([scope, label]) => (
+              <div className="series-tabs" aria-label="Filtrar episodios">
+                {([['active', `Todos · ${plan.active.length}`], ['month', `Plan del mes · ${plan.month.length}`], ['published', `Publicados · ${plan.published.length}`]] as const).map(([scope, label]) => (
                   <button type="button" key={scope} className={episodeScope===scope?'active':''} onClick={()=>{setEpisodeScope(scope);setSeriesTab('all');setSearch('');}} aria-pressed={episodeScope===scope}>{label}</button>
                 ))}
               </div>
