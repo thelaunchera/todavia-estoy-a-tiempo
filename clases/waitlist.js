@@ -28,6 +28,7 @@ async function subscribe(user){
    if(error && error.code!=='23505')throw error;
   }
   sessionStorage.removeItem(INTENT);
+  void manage(user);
   message('¡Confirmado! Estás en la lista para recibir información sobre el lanzamiento de esta clase. No te hemos inscrito en el newsletter del podcast.',true);
   form.querySelector('button[type=submit]').disabled=true;
  }catch(error){message('No pudimos confirmar tu registro. Prueba a abrir esta página después de entrar con el enlace del correo.');console.error('Class waitlist failed:',error?.code||'unknown');}
@@ -48,5 +49,28 @@ form.addEventListener('submit',async event=>{
   message('Te enviamos un enlace de confirmación al correo. Ábrelo y regresa a esta página para completar tu registro.');
  }catch(e){submit.disabled=false;message('No pudimos enviar el enlace de confirmación. Comprueba el correo e inténtalo de nuevo.');}
 });
-db.auth.getUser().then(({data:{user}})=>{if(user)void subscribe(user);}).catch(()=>{});
-db.auth.onAuthStateChange((_event,session)=>{if(session?.user)void subscribe(session.user);});
+async function manage(user){
+ if(!user?.email)return;
+ const email=normal(user.email);
+ const {data,error}=await db.from('podcast_class_waitlist').select('email,unsubscribed_at').eq('course_id',courseId).eq('email',email).maybeSingle();
+ if(error || !data || data.unsubscribed_at)return;
+ if(form.querySelector('#course-unsubscribe'))return;
+ const b=document.createElement('button');b.type='button';b.id='course-unsubscribe';b.className='class-waitlist-optout';b.textContent='Darme de baja de esta lista';
+ b.addEventListener('click',async()=>{
+  b.disabled=true;
+  const {error}=await db.from('podcast_class_waitlist').update({unsubscribed_at:new Date().toISOString()}).eq('course_id',courseId).eq('email',email);
+  if(error){b.disabled=false;message('No se pudo confirmar la baja; inténtalo de nuevo.');return;}
+  b.remove();form.querySelector('button[type=submit]').disabled=false;
+  message('Se canceló tu solicitud. No recibirás avisos de esta clase.',true);
+ });
+ form.appendChild(b);
+}
+async function detectSession(user){
+ if(!user)return;
+ if(requested())await subscribe(user);
+ await manage(user);
+}
+db.auth.getUser().then(({data:{user}})=>{if(user)void detectSession(user);}).catch(()=>{});
+db.auth.onAuthStateChange((_event,session)=>{
+ if(session?.user)window.setTimeout(()=>void detectSession(session.user),0);
+});
