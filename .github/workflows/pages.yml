@@ -82,6 +82,7 @@ jobs:
           npm install --no-audit --no-fund
           npm run test:spotify-links
           npm run test:editorial-plan
+          npm run test:classes
           npm run build
       - name: Generar iconos del Estudio para iPhone y Android
         run: |

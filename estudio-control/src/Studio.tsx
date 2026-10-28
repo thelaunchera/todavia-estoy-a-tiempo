@@ -1,4 +1,6 @@
 import SupportInbox from './SupportInbox';
+import ClassProduction from './ClassProduction';
+import { CLASS_SECTION } from './class-course';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, type AudioStats } from './supabase-client';
 import {
@@ -49,6 +51,7 @@ type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
   | 'episodios'
+  | 'clases'
   | 'calendario'
   | 'tareas'
   | 'productos'
@@ -120,6 +123,7 @@ const NAV = [
     group: 'ESPACIO DE CREACIÓN',
   },
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
+  { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Tareas', icon: ListChecks },
   { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
@@ -140,6 +144,7 @@ const NAV = [
 const LABELS: Record<Page, string> = {
   inicio: 'Mi estudio',
   episodios: 'Episodios',
+  clases: 'Clases · grabación',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
   productos: 'Colección digital',
@@ -471,6 +476,7 @@ function App() {
     productos: [],
     ideas: [],
   };
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION);
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -939,7 +945,9 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : 'PODCAST / DIRECCIÓN EDITORIAL'}
+                  : page === 'clases'
+                    ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
+                    : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
               <h1>{LABELS[page]}</h1>
             </div>
@@ -1244,6 +1252,12 @@ function App() {
               </div>
             </>
           )}
+          {page === 'clases' && (
+            <ClassProduction entries={items.ideas} onSave={async (entry, changes) => {
+              await api.put('/api/items/ideas/' + entry.id, { ...entry, ...changes });
+              await refresh();
+            }} />
+          )}
           {page === 'ideas' && (
             <>
               {head(
@@ -1252,7 +1266,7 @@ function App() {
                 'ideas'
               )}
               <div className="ideas">
-                {items.ideas.map(x => (
+                {editorialIdeas.map(x => (
                   <article className="idea" key={x.id}>
                     <div className="idea-top">
                       <Lightbulb size={19} />
@@ -1269,7 +1283,7 @@ function App() {
                     <small>{x.section || 'Idea libre'}</small>
                   </article>
                 ))}
-                {!items.ideas.length && empty}
+                {!editorialIdeas.length && empty}
               </div>
             </>
           )}
