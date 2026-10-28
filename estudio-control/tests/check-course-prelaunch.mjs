@@ -13,7 +13,7 @@ assert.match(classPage,/id="course-waitlist-form"/);
 assert.match(classPage,/id="course-waitlist-consent"/);
 assert.match(classPage,/type="checkbox" required/);
 assert.match(classPage,/id="course-waitlist-feedback"/);
-assert.match(classPage,/src="waitlist\.js"/);
+assert.match(classPage,/src="waitlist\.js(?:\?[^"]+)?"/);
 assert.match(classPage,/3 de diciembre de 2026/);
 assert.match(classPage,/Lista de espera abierta/i);
 assert.doesNotMatch(classPage,/buy\.stripe\.com|checkout\.stripe\.com|href="https:\/\/buy\./,'No hay checkout público mientras las compras están cerradas');
