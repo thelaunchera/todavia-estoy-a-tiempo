@@ -1,8 +1,10 @@
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
+import ReelsProduction from './ReelsProduction';
 import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
+import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
@@ -34,6 +36,7 @@ import {
   AlertCircle,
   Menu,
   Video,
+  Film,
   EyeOff,
   FileAudio,
   Globe2,
@@ -52,6 +55,7 @@ type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
   | 'episodios'
+  | 'reels'
   | 'clases'
   | 'alumnos'
   | 'bonos'
@@ -127,6 +131,7 @@ const NAV = [
     group: 'ESPACIO DE CREACIÓN',
   },
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
+  { id: 'reels', label: 'Reels · producción', icon: Film },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
   { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
@@ -151,6 +156,7 @@ const NAV = [
 const LABELS: Record<Page, string> = {
   inicio: 'Mi estudio',
   episodios: 'Episodios',
+  reels: 'Reels · producción',
   clases: 'Clases · grabación',
   alumnos: 'Centro de alumnos',
   bonos: 'Biblioteca de bonos',
@@ -495,7 +501,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION);
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION);
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -1174,6 +1180,15 @@ function App() {
               </div>
               {episodeRows}
             </>
+          )}
+          {page === 'reels' && (
+            <ReelsProduction entries={items.ideas} onSave={async (entry,patch)=>{
+              await api.put('/api/items/ideas/'+entry.id,{...entry,...patch});
+              await refresh();
+            }} onCreate={async (record)=>{
+              await api.post('/api/items/ideas',record);
+              await refresh();
+            }} />
           )}
           {page === 'calendario' && (
             <>
