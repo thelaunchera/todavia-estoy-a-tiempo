@@ -38,6 +38,28 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  <div class="mi-content" aria-live="polite"></div>
  <div class="mi-footer"><span>Un paso claro es mejor que diez pantallas bonitas.</span><span>Materiales de Tu primera web con IA · Uso personal</span></div>`;
  const tabs=app.querySelector('.mi-tabs'), content=app.querySelector('.mi-content');
+ const tools=el('div','mi-toolbar');
+ tools.innerHTML='<span>Elige lo que necesitas para tu proyecto.</span><button type="button" class="mi-print">Imprimir o guardar en PDF</button>';
+ tabs.after(tools);
+ tools.querySelector('button').addEventListener('click',()=>window.print());
+ if(ownerPreview){
+  const {data:pdfs}=await db.from('podcast_class_resources')
+   .select('resource_code,title,url,status').eq('course_id',courseId).like('resource_code','pdf_%').order('resource_code');
+  if(pdfs?.length){
+   const details=el('details','mi-owner-pdfs');
+   const summary=el('summary',null,'Revisar los 5 PDF nuevos en Drive · solo administración');
+   const links=el('div','mi-owner-pdf-links');
+   for(const pdf of pdfs){
+    if(!/^https:\/\//.test(pdf.url||''))continue;
+    const a=el('a',null,pdf.title);
+    a.href=pdf.url;a.target='_blank';a.rel='noopener noreferrer';
+    links.append(a);
+   }
+   details.append(summary,links);
+   tools.after(details);
+  }
+ }
+
  const saveBadge=el('div','mi-save');
  if(ownerPreview){saveBadge.textContent='Vista de administración · no guarda respuestas';}
  else {saveBadge.textContent='Cargando tu cuaderno…';}
