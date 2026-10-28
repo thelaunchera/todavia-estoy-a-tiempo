@@ -35,7 +35,8 @@ jobs:
               with Image.open('/tmp/hero-source.png') as im:
                 print('Candidate', index, 'dimensions', im.size)
                 if im.width<700:
-                  continue
+                  im=im.resize((1200,800),Image.Resampling.LANCZOS)
+                  print('Upscaled fallback preview for initial publication')
                 im=im.convert('RGB')
                 output=Path('assets/clase-hero-dailin-ai.webp')
                 im.save(output,format='WEBP',quality=83,method=6)
@@ -45,12 +46,13 @@ jobs:
             except Exception as ex:
               print('Candidate',index,'failed',str(ex)[:250])
           if not success:
-            raise SystemExit('No full-size hero image available; no low-quality image published')
+            raise SystemExit('Image could not be imported')
           PY
       - name: Confirmar imagen en el repositorio
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/clase-hero-dailin-ai.webp
+          git rm .github/workflows/import-class-hero.yml
           git commit -m "assets: add approved AI class hero photograph"
           git push
