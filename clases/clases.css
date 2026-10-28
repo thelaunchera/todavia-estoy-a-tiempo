@@ -888,3 +888,73 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 .class-page-v2 .class-material-tab{border-radius:999px!important}
 .class-page-v2 .class-floating-top .class-inline-arrow{width:16px;height:16px}
 .class-page-v2 .class-back-to-top .class-inline-arrow{width:16px;height:16px}
+
+
+/* Nueva dirección fotográfica — tres imágenes individuales, sin collage. */
+/* Podcast principal: fotografía con el bot en lugar de un cuaderno simulado. */
+.learning-section .learning-visual{min-height:0}
+.learning-section .learning-photo{
+ position:relative;display:block;width:min(100%,475px);margin:0;
+ background:radial-gradient(circle at 68% 45%,#e3ecf1 0%,#f6f5ef 74%);
+ border:1px solid #dce5e9;overflow:hidden;
+ border-radius:29px;box-shadow:0 20px 45px #1d354a13;
+}
+.learning-section .learning-photo img{
+ display:block;width:100%;height:auto;aspect-ratio:1000/914;
+ object-fit:cover;object-position:center;
+}
+.learning-section .learning-photo figcaption{
+ position:absolute;left:19px;right:19px;bottom:17px;
+ width:max-content;max-width:calc(100% - 38px);
+ background:#fffef5e8;backdrop-filter:blur(8px);
+ border:1px solid #fff;border-radius:999px;
+ color:#243d55;padding:10px 15px;
+ font:600 .72rem/1.4 var(--sans,Arial,sans-serif);
+}
+/* Clase: retrato con laptop en hero; foto de teléfono y bot en evidencia. */
+.class-page-v2 .class-hero-art .class-hero-image-frame{
+ aspect-ratio:1/1;
+ background:#f7f7f4;border-radius:25px;
+}
+.class-page-v2 .class-hero-art .class-hero-image-frame img{
+ width:100%;height:100%;object-fit:cover!important;
+ object-position:center 45%!important;
+}
+.class-page-v2 .class-evidence-photo{
+ width:100%;max-width:520px;margin:0 auto;
+ display:flex;flex-direction:column;align-items:center;gap:10px;
+ background:#eef2f5;border:1px solid #d9e4eb;border-radius:23px;
+ overflow:hidden;box-shadow:0 17px 39px #243e5614;
+}
+.class-page-v2 .class-evidence-photo img{
+ width:100%;height:auto;aspect-ratio:1/1;object-fit:contain;
+ object-position:center;background:#fff;
+}
+.class-page-v2 .class-evidence-photo figcaption{
+ width:100%;font:italic clamp(1.05rem,2vw,1.3rem)/1.4 var(--serif,Georgia,serif);
+ text-align:center;color:#2e526a;padding:0 18px 18px;
+}
+@media(max-width:900px){
+ .learning-section .learning-grid{gap:22px}
+ .learning-section .learning-visual{min-height:0}
+ .learning-section .learning-photo{max-width:455px}
+ .class-page-v2 .class-hero-art .class-hero-image-frame{
+  aspect-ratio:5/4;border-radius:20px!important;
+ }
+ .class-page-v2 .class-hero-art .class-hero-image-frame img{
+  object-position:center 35%!important;
+ }
+}
+@media(max-width:650px){
+ .learning-section{padding:48px 0 44px}
+ .learning-section .learning-grid{gap:19px}
+ .learning-section .learning-copy h2{font-size:clamp(2.45rem,11vw,3.6rem)}
+ .learning-section .learning-copy>p:not(.eyebrow){line-height:1.58;margin-top:14px}
+ .learning-section .learning-benefits{margin:15px 0}
+ .learning-section .learning-photo{max-width:100%;border-radius:22px}
+ .learning-section .learning-photo figcaption{font-size:.67rem;left:12px;right:12px;bottom:12px;max-width:calc(100% - 24px)}
+ .class-page-v2 .class-hero-art .class-hero-image-frame{aspect-ratio:5/4;border-radius:18px!important}
+ .class-page-v2 .class-hero-art .class-hero-image-frame img{object-position:center 34%!important}
+ .class-page-v2 .class-evidence-photo{border-radius:18px}
+ .class-page-v2 .class-evidence-photo figcaption{font-size:1.05rem;padding:0 14px 14px}
+}
