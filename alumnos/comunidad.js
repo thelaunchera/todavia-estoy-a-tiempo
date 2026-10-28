@@ -260,7 +260,20 @@ async function init(){
    $('club-post-scope').querySelector('[value=curso]').disabled=true;
    $('club-view-scope').querySelector('[value=curso]').disabled=true;
   }
-  await loadMyProfile();await loadFeed();message('Qué bueno verte en el Club de Ideas. Este espacio es privado para miembros.','good');
+  const requested = new URLSearchParams(window.location.search);
+  const channel = requested.get('canal');
+  if (channel && Object.prototype.hasOwnProperty.call(channelNames,channel)) {
+    state.channel = channel;
+  }
+  await loadMyProfile();
+  await loadFeed();
+  updateComposerChannel();
+  message('Qué bueno verte en el Club de Ideas. Este espacio es privado para miembros.','good');
+  if(requested.get('accion')==='publicar'){
+    const target=state.profile?$('club-post-body'):$('club-display-name');
+    target?.scrollIntoView({behavior:'smooth',block:'center'});
+    target?.focus({preventScroll:true});
+  }
  }catch(e){console.error('Community init failed',e?.code||e?.message||'unknown');showLocked('No pudimos comprobar tus permisos. Actualiza la página y vuelve a entrar desde tu aula.');}
 }
 await init();
