@@ -30,9 +30,9 @@
           <p class="class-lede">Tienes una idea y quieres darle un lugar propio en internet. En esta clase te acompaño a investigar, crear imágenes con ChatGPT, escribir el contenido y construir una página que se entienda, incluso en el teléfono.</p>
           <div class="class-hero-actions">
             <a class="class-primary-button" href="#programa">Conocer lo que aprenderás</a>
-            <a class="class-ghost-button" href="#incluye">Ver los materiales</a>
+            <a class="class-ghost-button" href="#lista-espera">Avísame cuando abra</a>
           </div>
-          <p class="class-notice">Clase en preparación · Inscripciones todavía no disponibles</p>
+          <p class="class-notice">Fecha objetivo: 3 de diciembre de 2026 · Precio e inscripciones aún por confirmar</p>
         </div>
         <div class="class-hero-art" aria-label="Ilustración editorial de la portada de la clase">
           <div class="learning-book-scene">
@@ -115,16 +115,30 @@
           <details><summary>¿Necesito saber crear páginas web?</summary><p>No necesitas programar para seguir la demostración. Las herramientas disponibles y sus planes pueden variar, así que te indicaré qué debes comprobar antes de elegir un constructor.</p></details>
           <details><summary>¿Puedo crear una landing de otro tipo de negocio?</summary><p>Sí. El ejemplo del video es un concepto ficticio de diseño. Tú adaptarás la estructura, las imágenes y la llamada a la acción al producto o servicio que realmente puedas ofrecer.</p></details>
           <details><summary>¿Incluye cobrar a mis clientes?</summary><p>La clase explicará cómo verificar el recorrido del botón, y una demostración de checkout para un producto admitido. El proveedor de pagos puede tener restricciones, requisitos de cuenta y tarifas según tu actividad.</p></details>
-          <details><summary>¿Cuándo podré acceder?</summary><p>La clase está en preparación. La fecha de publicación, el precio y la forma de acceso se anunciarán cuando los videos y la entrega hayan sido probados.</p></details>
+          <details><summary>¿Cuándo podré acceder?</summary><p>La fecha objetivo es el 3 de diciembre de 2026. Antes de activar las ventas comprobamos videos, recursos, precio y entrega. Te avisaremos si solicitas información de esta clase.</p></details>
+          <details><summary>¿Dónde veré las clases después de comprar?</summary><p>En una sala de alumnos dentro de nuestra web, organizada por los nueve videos. Entrarás con el correo de la compra, cuando el pago esté confirmado. Los videos no listados de YouTube se reproducirán dentro del aula y los PDF estarán junto a las lecciones, sujetos a las pruebas de acceso.</p></details>
         </div>
       </div>
     </section>
-    <section class="class-section--dark class-final" aria-labelledby="final-title">
-      <div class="shell">
-        <p class="class-eyebrow">CLASE 01 · PRÓXIMAMENTE</p>
-        <h2 id="final-title">Tu idea también merece un lugar.</h2>
-        <p>Prefiero mostrarte el proceso completo, con sus correcciones reales, antes que prometer una página lista con un solo clic. Esta clase se publicará cuando todo esté preparado.</p>
-        <a class="class-primary-button" href="../index.html">Seguir explorando el podcast</a>
+    <section class="class-section--dark class-final" id="lista-espera" aria-labelledby="final-title">
+      <div class="shell class-waitlist-grid">
+        <div>
+          <p class="class-eyebrow">CLASE 01 · LISTA DE ESPERA</p>
+          <h2 id="final-title">Tu idea también merece un lugar.</h2>
+          <p>La fecha objetivo es el 3 de diciembre. Estoy preparando videos cortos y materiales para que puedas crear tu landing con calma. Si quieres saber cuándo estarán listos, confirma tu correo. No te inscribiré en otros correos del podcast por hacerlo.</p>
+          <p class="class-waitlist-note">Apuntarte es gratis. No es una compra, una reserva de plaza ni un compromiso de pago.</p>
+        </div>
+        <form id="course-waitlist-form" class="class-waitlist-form" aria-label="Solicitar aviso de lanzamiento">
+          <label for="course-waitlist-email">Tu correo electrónico</label>
+          <input id="course-waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="tu@correo.com">
+          <label class="class-waitlist-checkbox" for="course-waitlist-consent">
+            <input id="course-waitlist-consent" type="checkbox" required>
+            <span>Quiero recibir información sobre el lanzamiento de «Tu primera landing con IA». Esta autorización es solo para esta clase, no para el newsletter ni para otras ofertas. Puedo darme de baja cuando quiera.</span>
+          </label>
+          <button class="class-primary-button" type="submit">Quiero que me avises</button>
+          <p id="course-waitlist-feedback" aria-live="polite" class="class-waitlist-feedback">Te enviaremos un enlace para verificar tu correo antes de guardar la solicitud.</p>
+          <small>Consulta nuestra <a href="../privacidad.html">política de privacidad</a>. Tu solicitud no activa ningún cobro.</small>
+        </form>
       </div>
     </section>
   </main>
@@ -134,5 +148,6 @@
       <span><a href="../privacidad.html">Privacidad</a> · <a href="../terminos.html">Términos</a> · <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">Powered by The Launch Era</a></span>
     </div>
   </footer>
+  <script type="module" src="waitlist.js"></script>
 </body>
 </html>
