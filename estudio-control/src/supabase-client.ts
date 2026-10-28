@@ -335,3 +335,29 @@ export async function getClassLaunchStats(): Promise<ClassLaunchStats> {
   if(waitlist.error || access.error) throw new Error('No se pudo verificar la lista de espera o las compras.');
   return {waitlist:waitlist.count||0,buyers:access.count||0};
 }
+/**
+ * Owner-facing workshop bonus catalog. Only draft/private items are stored here
+ * until the owner deliberately publishes student materials separately.
+ */
+export type StudioBonusResource = {
+  resource_code: string;
+  title: string;
+  url: string;
+  status: 'draft' | 'ready';
+};
+export async function getStudioBonusResources(): Promise<StudioBonusResource[]> {
+  if (!client) throw new Error('El Estudio no está conectado.');
+  await owner();
+  const { data, error } = await client.from('podcast_class_resources')
+    .select('resource_code,title,url,status')
+    .eq('course_id', 'primera-landing-ia-01')
+    .like('resource_code', 'bonus_%')
+    .order('title', { ascending: true });
+  if (error) throw new Error('No se pudo consultar el catálogo privado de bonos.');
+  return (data || []).map((row) => ({
+    resource_code: String(row.resource_code),
+    title: String(row.title),
+    url: String(row.url),
+    status: row.status === 'ready' ? 'ready' : 'draft',
+  }));
+}
