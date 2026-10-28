@@ -244,7 +244,7 @@ function App() {
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [seriesTab,setSeriesTab] = useState<string>('all');
-  const [episodeScope,setEpisodeScope] = useState<'month'|'published'|'archived'>('month');
+  const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'|'archived'>('active');
   const [audioStats,setAudioStats] = useState<AudioStats|null>(null);
   const [audioStatsLoading,setAudioStatsLoading] = useState(false);
   const [audioStatsError,setAudioStatsError] = useState('');
@@ -1130,7 +1130,7 @@ function App() {
                 'episodios'
               )}
               <div className="series-tabs" aria-label="Elegir archivo de episodios">
-                {([['month', `Plan del mes · ${plan.month.length}`], ['published', `Publicados · ${plan.published.length}`], ['archived', `Archivo · ${plan.archived.length}`]] as const).map(([scope, label]) => (
+                {([['active', `Todos · ${plan.active.length}`], ['month', `Plan del mes · ${plan.month.length}`], ['published', `Publicados · ${plan.published.length}`], ['archived', `Archivo · ${plan.archived.length}`]] as const).map(([scope, label]) => (
                   <button type="button" key={scope} className={episodeScope===scope?'active':''} onClick={()=>{setEpisodeScope(scope);setSeriesTab('all');setSearch('');}} aria-pressed={episodeScope===scope}>{label}</button>
                 ))}
               </div>
