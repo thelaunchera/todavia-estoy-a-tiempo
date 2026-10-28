@@ -183,7 +183,7 @@ console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografí
 const heroCopy=classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('</section>',classPage.indexOf('<section class="class-hero"')));
 const publicReadable=classPage.replace(/<script\b[\s\S]*?<\/script>/gi,'').replace(/<svg\b[\s\S]*?<\/svg>/gi,'');
 assert.match(heroCopy,/Explora la clase/);
-assert.match(heroCopy,/No tienes que saber de coding ni ser experta en tecnología/);
+assert.match(heroCopy,/No necesitas saber de coding ni manejar mucha tecnología/);
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
 assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
 assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
@@ -214,3 +214,32 @@ assert.match(newStyles,/class-hero-intro>\.class-launch-clock/);
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1);
 assert.doesNotMatch(classPage,/href="[^"]*(buy\.stripe|checkout\.stripe)/);
 console.log('QA reloj: 4 grupos, flip 250+250ms, medianoche EST y botón a lista de espera OK');
+
+
+/* Hero con órbitas reales en direcciones opuestas + CTA simplificado. */
+const orbitSection=classPage.slice(classPage.indexOf('<figure class="class-hero-art">'),classPage.indexOf('</figure>',classPage.indexOf('<figure class="class-hero-art">')));
+assert.match(orbitSection,/class-hero-orbit/);
+assert.match(orbitSection,/class-orbit-wheel--outer/);
+assert.match(orbitSection,/class-orbit-wheel--inner/);
+assert.match(orbitSection,/monograma-podcast-04\.svg/);
+assert.equal((orbitSection.match(/class-orbit-icon-upright/g)||[]).length,7);
+assert.match(newStyles,/\.class-orbit-wheel--outer\{\s*width:91%;\s*animation:classOrbitClockwise 22s linear infinite/);
+assert.match(newStyles,/\.class-orbit-wheel--inner\{\s*width:58%;\s*animation:classOrbitCounterClockwise 14s linear infinite/);
+assert.match(newStyles,/\.class-orbit-wheel--outer \.class-orbit-icon-upright\{/);
+assert.match(newStyles,/animation-name:classOrbitIconCounterClockwise/);
+assert.match(newStyles,/animation-name:classOrbitIconClockwise/);
+assert.match(newStyles,/\.class-hero-orbit \.class-orbit-wheel::before/);
+assert.match(newStyles,/border:1\.5px dashed/);
+assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
+assert.match(newStyles,/\.class-hero-orbit \.class-orbit-wheel/);
+assert.match(home,/No necesitas saber de coding ni dominar mucha tecnología/);
+assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
+assert.doesNotMatch(home,/experta|experto/i);
+assert.doesNotMatch(clubPage,/reservado a alumnas|BIENVENIDA A TU COMUNIDAD/);
+assert.match(clubPage,/ESTE ES TU ESPACIO/);
+assert.doesNotMatch(room,/BIENVENIDA AL AULA|Tu primera landing con IA/);
+assert.equal((classPage.match(/href="#lista-espera"/g)||[]).length,1,'Un enlace de aviso junto al reloj; envío solamente en el formulario');
+assert.doesNotMatch(classPage,/class-nav-cta|class-ghost-button/,'No repetir CTAs de espera en el header ni hero');
+assert.match(classPage,/Explora la clase/);
+assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
+console.log('QA: órbitas contrarias 14/22s, iconos derechos, lenguaje inclusivo y CTAs necesarios OK');

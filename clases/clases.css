@@ -1307,3 +1307,154 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  .class-page-v2 .class-flip-digit.is-flipping .class-flip-flap-bottom{display:none!important;animation:none!important}
  .class-page-v2 .class-launch-clock-cta{transition:none!important}
 }
+
+
+/* Órbitas del hero · 22s horario exterior, 14s antihorario interior.
+ * Los iconos giran en sentido contrario a su pista y quedan DERECHOS.
+ * Decorativo: sin botones, sin enlaces nuevos ni logos de apps ajenas. */
+.class-page-v2 .class-hero .class-hero-art{position:relative;isolation:isolate;overflow:visible!important}
+.class-page-v2 .class-hero .class-hero-orbit{
+ position:absolute;
+ right:-3.5%;
+ bottom:-1.5%;
+ width:clamp(210px,21vw,278px);
+ aspect-ratio:1;
+ z-index:3;
+ display:grid;
+ place-items:center;
+ pointer-events:none;
+ border-radius:50%;
+ background:radial-gradient(circle,#eff6f8ed 0%,#eaf2f7dc 42%,#e5f0f7ad 65%,transparent 75%);
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel{
+ position:absolute;
+ display:block;
+ left:50%;top:50%;
+ aspect-ratio:1;
+ border-radius:50%;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel::before{
+ content:"";
+ position:absolute;inset:0;
+ border:1.5px dashed #6487a5a8;
+ border-radius:50%;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer{
+ width:91%;
+ animation:classOrbitClockwise 22s linear infinite;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner{
+ width:58%;
+ animation:classOrbitCounterClockwise 14s linear infinite;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-icon{
+ position:absolute;
+ display:grid;place-items:center;
+ left:50%;top:50%;
+ width:clamp(31px,3.8vw,42px);
+ height:clamp(31px,3.8vw,42px);
+ margin-left:calc(clamp(31px,3.8vw,42px) / -2);
+ margin-top:calc(clamp(31px,3.8vw,42px) / -2);
+ border-radius:13px;
+ background:#f8fbff;
+ color:#315575;
+ border:1px solid #c9dce8;
+ box-shadow:0 6px 13px #223d5932;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--north{top:0}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--south{top:100%}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--east{left:100%}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--west{left:0}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--northeast{top:15%;left:85%}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--northwest{top:15%;left:15%}
+.class-page-v2 .class-hero-orbit .class-orbit-icon-upright{
+ display:grid;place-items:center;
+ width:100%;height:100%;
+ transform-origin:center;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
+ animation:classOrbitCounterClockwise 22s linear infinite;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
+ animation:classOrbitClockwise 14s linear infinite;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-icon svg{
+ width:58%;height:58%;
+ stroke-width:1.65px;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--chat{color:#265f78;background:#e2f4f7}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--image{color:#6772a4;background:#f0ecfa}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--web{color:#396b86;background:#edf5f9}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--mail{color:#4f768e;background:#f3f9fd}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--calendar{color:#427780;background:#e9f5f1}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--doc{color:#68788e;background:#f3f4f9}
+.class-page-v2 .class-hero-orbit .class-orbit-icon--design{color:#6672a9;background:#edf0fb}
+.class-page-v2 .class-hero-orbit .class-orbit-core{
+ position:relative;z-index:4;
+ width:27%;aspect-ratio:1;
+ display:grid;place-items:center;
+ border:1px solid #cadbe6;
+ border-radius:50%;
+ background:#fffcf4;
+ box-shadow:0 8px 25px #24415b30;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-core img{
+ width:73%;height:73%;
+ aspect-ratio:1!important;
+ object-fit:contain!important;
+ mix-blend-mode:normal!important;
+ opacity:1;
+ border-radius:0!important;
+}
+@keyframes classOrbitClockwise{
+ from{transform:translate(-50%,-50%) rotate(0deg)}
+ to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+@keyframes classOrbitCounterClockwise{
+ from{transform:translate(-50%,-50%) rotate(0deg)}
+ to{transform:translate(-50%,-50%) rotate(-360deg)}
+}
+/* Icons don't translate: rotation-only inverse, exactly matching the ring period. */
+@keyframes classOrbitIconClockwise{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes classOrbitIconCounterClockwise{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--outer .class-orbit-icon-upright{
+ animation-name:classOrbitIconCounterClockwise;
+}
+.class-page-v2 .class-hero-orbit .class-orbit-wheel--inner .class-orbit-icon-upright{
+ animation-name:classOrbitIconClockwise;
+}
+@media(max-width:900px){
+ .class-page-v2 .class-hero .class-hero-orbit{
+   width:clamp(176px,31vw,246px);
+   right:0;
+   bottom:1%;
+ }
+}
+@media(max-width:650px){
+ .class-page-v2 .class-hero .class-hero-orbit{
+   width:clamp(174px,48vw,213px);
+   right:0%;
+   bottom:1.8%;
+ }
+ .class-page-v2 .class-hero-orbit .class-orbit-icon{
+   width:33px;height:33px;
+   margin-left:-16.5px;margin-top:-16.5px;
+   border-radius:11px;
+ }
+ .class-page-v2 .class-hero-orbit .class-orbit-wheel--outer{width:87%}
+ .class-page-v2 .class-hero-orbit .class-orbit-wheel--inner{width:58%}
+}
+@media(max-width:375px){
+ .class-page-v2 .class-hero .class-hero-orbit{width:168px;bottom:2%;right:0}
+ .class-page-v2 .class-hero-orbit .class-orbit-icon{
+   width:30px;height:30px;margin-left:-15px;margin-top:-15px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .class-page-v2 .class-hero-orbit .class-orbit-wheel,
+ .class-page-v2 .class-hero-orbit .class-orbit-icon-upright{
+   animation:none!important;
+   transform:translate(-50%,-50%)!important;
+ }
+ .class-page-v2 .class-hero-orbit .class-orbit-icon-upright{transform:none!important}
+}
