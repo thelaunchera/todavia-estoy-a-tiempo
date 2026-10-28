@@ -15,3 +15,131 @@
 .club-aula-entry>div{min-width:0}.club-aula-entry h2{font:400 clamp(1.9rem,3vw,3rem)/1.05 'DM Serif Display',Georgia,serif;letter-spacing:-.025em;color:#172b45;margin:7px 0}.club-aula-entry h2 em{color:#658cac}.club-aula-entry p{line-height:1.7;color:#566f81;font-size:.84rem;margin:8px 0}.club-aula-entry small{color:#6b8191;font-size:.7rem;line-height:1.5}
 .club-aula-button{display:inline-flex;align-items:center;justify-content:center;gap:11px;text-align:center;flex-shrink:0;min-height:49px;background:#14253e;color:#fff;text-decoration:none;font-size:.84rem;font-weight:700;border-radius:999px;padding:13px 20px}
 @media(max-width:720px){.club-aula-entry{flex-direction:column;align-items:stretch;padding:20px}.club-aula-button{width:100%}}
+
+
+/* AULA PERSONAL · editorial y ordenada, materiales a la derecha. */
+.student-greeting{
+ display:grid;grid-template-columns:minmax(0,1.15fr) minmax(230px,.75fr);
+ gap:clamp(16px,3vw,35px);
+ align-items:center;
+ margin:23px 0 17px;
+ padding:clamp(23px,3.5vw,37px);
+ border-radius:24px;
+ background:linear-gradient(128deg,#e4edf4 0%,#f4f3ef 76%);
+ border:1px solid #cedee7;
+}
+.student-greeting h2{
+ margin:0 0 9px;
+ font:400 clamp(28px,4vw,42px)/1.12 'DM Serif Display',Georgia,serif;
+ letter-spacing:-.02em;color:#1b324a;
+ overflow-wrap:anywhere;
+}
+.student-greeting-copy>p:last-child{color:#587084;font-size:14px;line-height:1.65;margin:0}
+.student-progress-card{
+ padding:20px;background:#fffdf8;
+ border:1px solid #d6e0e5;border-radius:20px;
+ box-shadow:0 13px 25px #243b5020;
+}
+.student-progress-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.student-progress-top>span{font-size:13px;font-weight:700;color:#46687f}
+.student-progress-top>strong{
+ font:400 33px/1 'DM Serif Display',Georgia,serif;color:#17415f;
+ font-variant-numeric:tabular-nums;
+}
+.student-progress-card>p{margin:13px 0 0}
+.student-progress-card #progress-label{font-size:12px;color:#50677b}
+.student-progress-card .track{margin-top:14px;height:9px}
+.lesson-celebration:not([hidden]){
+ display:flex;align-items:flex-start;justify-content:space-between;
+ gap:14px;margin:13px 0 19px;padding:17px 19px;
+ background:#e8f3f0;border:1px solid #94bbaf;
+ border-radius:19px;color:#1e5a4a;
+ animation:lessonCongratsIn .35s both;
+}
+.lesson-celebration>div{min-width:0}
+.lesson-celebration-spark{font-size:25px;vertical-align:middle;margin-right:8px}
+.lesson-celebration strong{font-size:15px;line-height:1.5}
+.lesson-celebration p{margin:7px 0 0;line-height:1.6;font-size:13px}
+.lesson-celebration button{
+ color:#1e5a4a;background:transparent;
+ border:1px solid #a6c5b9;border-radius:999px;
+ width:34px;height:34px;font-size:22px;flex:0 0 auto;
+}
+@keyframes lessonCongratsIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.room-grid{
+ display:grid;
+ grid-template-columns:minmax(166px,215px) minmax(0,1fr) minmax(224px,280px);
+ gap:14px;align-items:start;
+}
+.lesson-index,.lesson-stage,.resources,.student-bonus{border-radius:19px}
+.lesson-index{position:sticky;top:15px;padding:19px 14px}
+.lesson-index button{padding:12px 9px}
+.lesson-stage{padding:22px;min-width:0}
+.student-sidebar{display:flex;flex-direction:column;gap:15px;min-width:0;align-self:start}
+.student-sidebar .resources{
+ margin:0;padding:23px 18px;
+ min-width:0;
+ background:#fffdf8;
+ box-shadow:0 10px 24px #263e5010;
+}
+.student-sidebar .resources h2,.student-bonus h2{
+ font:400 clamp(25px,2.5vw,30px)/1.15 'DM Serif Display',Georgia,serif;
+ margin:3px 0 11px;color:#1e3955;
+}
+.student-sidebar .resources>p:not(.eyebrow){line-height:1.6;margin:0;color:#65788a;font-size:12px}
+.student-sidebar .resource-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:14px}
+.student-sidebar .resource{padding:13px 14px;border-radius:13px;gap:7px}
+.student-sidebar .resource strong{font-size:13px}
+.student-sidebar .empty{padding:14px;font-size:12px;line-height:1.55;margin-top:13px}
+.student-bonus{
+ padding:23px 18px;
+ background:linear-gradient(147deg,#172f4b,#244b66);
+ border:1px solid #305c76;
+ color:#f7f9f6;box-shadow:0 12px 25px #1a344a21;
+}
+.student-bonus .eyebrow{color:#b9d8e8;font-size:10px}
+.student-bonus h2{color:#f6f7f2}
+.student-bonus>p:not(.eyebrow){font-size:12px;line-height:1.7;color:#d5e4ee;margin:7px 0 14px}
+.student-bonus-icon{
+ display:grid;place-items:center;width:42px;height:42px;
+ border:1px solid #9bb7c9;background:#eaf1f5;color:#345b7a;border-radius:50%;
+ font-size:24px;margin-bottom:15px;
+}
+.student-bonus-checks{border-top:1px solid #66859c60;border-bottom:1px solid #66859c60;padding:8px 0;margin:13px 0}
+.student-bonus-checks p{display:flex;gap:8px;align-items:baseline;color:#d9e5ed;font-size:12px;line-height:1.5;margin:9px 0}
+.student-bonus-checks span{font-size:17px;flex:0 0 auto}
+.student-bonus-checks .is-done{color:#c0f2d6}
+.student-bonus-status{font-size:12px!important;line-height:1.55;color:#e8f1f5!important;margin:12px 0 0!important}
+.student-bonus-status[data-state=earned]{color:#c4ffdc!important;font-weight:700}
+.club-aula-entry{margin-top:19px}
+@media(min-width:1200px){.wrap{width:min(1270px,calc(100% - 62px))}}
+@media(min-width:951px) and (max-width:1200px){
+ .room-grid{grid-template-columns:minmax(150px,185px) minmax(0,1fr) minmax(205px,245px);gap:12px}
+ .lesson-stage{padding:17px}
+ .student-sidebar .resources,.student-bonus{padding:19px 15px}
+}
+@media(max-width:950px){
+ .room-grid{grid-template-columns:minmax(150px,210px) minmax(0,1fr);gap:14px}
+ .student-sidebar{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .lesson-index{position:static}
+}
+@media(max-width:750px){
+ .student-greeting{grid-template-columns:1fr;padding:22px 20px;gap:18px}
+ .room-grid{grid-template-columns:1fr;gap:14px}
+ .lesson-index{grid-column:1;grid-row:auto}
+ .lesson-stage{grid-column:1;grid-row:auto}
+ .student-sidebar{grid-column:1;grid-row:auto;grid-template-columns:1fr 1fr;gap:12px}
+ .student-sidebar .resources,.student-bonus{padding:18px}
+}
+@media(max-width:520px){
+ .student-greeting{padding:20px 17px;margin-top:16px}
+ .student-sidebar{grid-template-columns:1fr}
+ .student-progress-card{padding:17px}
+ .lesson-celebration:not([hidden]){padding:15px}
+ .student-sidebar .resource-grid{grid-template-columns:1fr}
+ .club-aula-entry{margin-top:17px}
+}
+@media(prefers-reduced-motion:reduce){
+ .lesson-celebration:not([hidden]){animation:none!important}
+ .track div{transition:none!important}
+}
