@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, Check, Copy, ExternalLink, Gift, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
-import { getStudioBonusResources, type StudioBonusResource } from './supabase-client';
+import { getStudioBonusResources, setStudioBonusAvailability, type StudioBonusResource } from './supabase-client';
 import './bonus-library.css';
 
 export default function BonusLibrary() {
@@ -9,6 +9,8 @@ export default function BonusLibrary() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const [revision, setRevision] = useState(0);
+  const [saving, setSaving] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +33,19 @@ export default function BonusLibrary() {
     }
   }
 
+  async function toggleAvailability(item: StudioBonusResource) {
+    const activating = item.status !== 'ready';
+    if (activating && !window.confirm('¿Activar este bono? Solo lo verán los alumnos a quienes lo hayas asignado individualmente.')) return;
+    setSaving(item.resource_code); setError(''); setNotice('');
+    try {
+      await setStudioBonusAvailability(item.resource_code, activating);
+      setResources(previous => previous.map(row => row.resource_code===item.resource_code
+        ? {...row, status: activating ? 'ready' : 'draft'} : row));
+      setNotice(activating ? 'El bono está activo exclusivamente para alumnos asignados.' : 'El bono volvió a borrador y dejó de verse en las aulas.');
+    } catch { setError('No se pudo cambiar la disponibilidad. Actualiza la página y prueba otra vez.'); }
+    finally { setSaving(''); }
+  }
+
   return (
     <section className="studio-bonus-library" aria-label="Biblioteca privada de bonos">
       <header className="bonus-library-header">
@@ -49,6 +64,7 @@ export default function BonusLibrary() {
 
       {loading && <p className="bonus-library-feedback" role="status">Cargando los recursos guardados…</p>}
       {error && <p className="bonus-library-feedback bonus-library-error" role="alert">{error}</p>}
+      {notice && <p className="bonus-library-feedback" role="status">{notice}</p>}
       {!loading && !error && resources.length === 0 && (
         <div className="bonus-library-empty"><BookOpen size={25} /><h3>Tu biblioteca está lista para crecer.</h3><p>Aquí aparecerán los bonos que guardemos para la clase.</p></div>
       )}
@@ -58,7 +74,7 @@ export default function BonusLibrary() {
           <article className="bonus-library-card" key={item.resource_code}>
             <div className="bonus-library-card-top">
               <span className="bonus-library-icon"><Sparkles size={20} /></span>
-              <span className="bonus-library-draft">{item.status === 'ready' ? 'Listo para revisión' : 'Borrador privado'}</span>
+              <span className="bonus-library-draft">{item.status === 'ready' ? 'Activo solo para asignados' : 'Borrador privado'}</span>
             </div>
             <h3>{item.title}</h3>
             <p>{item.resource_code === 'bonus_motion_studio' ? '130 demostraciones de efectos para páginas web. Previsualiza las animaciones y copia los prompts o el código de cada ejemplo.' : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
@@ -69,11 +85,12 @@ export default function BonusLibrary() {
                 {copied === item.resource_code ? <Check size={16} /> : <Copy size={16} />}
                 {copied === item.resource_code ? 'Copiado' : 'Copiar enlace'}
               </button>
+              <button type="button" disabled={Boolean(saving)} onClick={() => void toggleAvailability(item)}>{saving===item.resource_code ? 'Guardando…' : item.status==='ready' ? 'Pausar entrega' : 'Activar para asignados'}</button>
             </div>
           </article>
         ))}
       </div>
-      <div className="bonus-library-bottom"><ShieldCheck size={17} /><span>Esta sección está dentro de Mi Estudio. Los estudiantes solo verán los bonos que decidamos publicar más adelante.</span></div>
+      <div className="bonus-library-bottom"><ShieldCheck size={17} /><span>Esta sección está dentro de Mi Estudio. Activar un bono no lo envía a todo el curso: solo se verá en las cuentas donde lo asignes desde Centro de alumnos.</span></div>
     </section>
   );
 }
