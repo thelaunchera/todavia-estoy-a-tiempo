@@ -273,7 +273,7 @@ console.log('QA aula personal: sidebar, progreso persistido, felicitación, bono
 
 /* Guardas del nuevo diseño sin sobreescribir cambios de soporte del aula. */
 const lessonsPos=room.indexOf('class="room-grid"');
-const clubPos=room.indexOf('class="club-aula-entry"');
+const clubPos=room.indexOf('class="club-aula-hub"');
 const bonusPos=room.indexOf('class="student-bonus"');
 assert.ok(lessonsPos>=0&&clubPos>lessonsPos&&bonusPos>clubPos, 'Club y bono deben ir después de las lecciones');
 assert.match(room,/id="bonus-unlocked"[^>]+hidden/);
@@ -282,7 +282,7 @@ assert.match(coursePersonalJs,/completed===REQUIRED_LESSON_COUNT/);
 assert.match(coursePersonalJs,/l.status==='ready'&&validVideoId/);
 assert.match(coursePersonalJs,/const eligible=allDone&&projectShared&&!adminPreview/);
 assert.match(coursePersonalJs,/\$\('bonus-unlocked'\)\.hidden=!eligible/);
-assert.match(coursePersonalCss,/\.club-aula-visual/);
+assert.match(room,/Mostrar mi proyecto/,'Club tiene opciones reales para publicar');
 assert.match(coursePersonalCss,/#class-content>.student-bonus/);
 assert.match(classPage,/<header class="class-topbar"[\s\S]*?id="reloj-lanzamiento"[\s\S]*?<\/header>/);
 assert.match(newStyles,/\.class-topbar \.class-launch-clock/);
@@ -334,8 +334,8 @@ assert.match(roomScript,/function setAulaView\(/,'Navegación interactiva');
 assert.match(roomScript,/setAulaView\('lecciones'\)/,'Seleccionar lección abre pantalla');
 assert.match(roomScript,/if\(panel!==course\)closeAulaMenu\(\)/,'Cierra menú si la sesión termina');
 assert.match(room,/aula-sidebar\.css\?v=/,'Stylesheet de sidebar con cache-bust');
-assert.match(studioShell,/studentCenterTab==='people'/,'Gestión de alumnos separada');
-assert.match(studioShell,/studentCenterTab==='classroom'/,'Vista del aula en pestaña propia');
+assert.match(studioShell,/className="studio-student-tab-current"/,'La lista de alumnos está en Mi Estudio');
+assert.match(studioShell,/href="\.\.\/alumnos\/\?vista=admin"/,'Vista del aula se abre a pantalla completa');
 assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'Logo no sale al landing');
 console.log('QA: sidebar real, cinco secciones, menú móvil y estudio separado OK');
 
@@ -355,3 +355,17 @@ assert.match(interactiveJs,/function renderChecks/,'Lista de revisión real');
 assert.match(interactiveCss,/--mi-ink:#192d46/,'Paleta azul profunda del podcast');
 assert.match(interactiveCss,/@media\(max-width:440px\)/,'Materiales legibles en teléfono');
 console.log('QA: cinco guías interactivas privadas, guardado por alumno y paleta editorial OK');
+
+const clubHubCss=read('alumnos/club-hub.css');
+assert.match(room,/href="\.\/comunidad\.html\?canal=proyectos&amp;accion=publicar"/,'Abrir publicación directa de proyectos');
+assert.match(room,/href="\.\/comunidad\.html\?canal=preguntas&amp;accion=publicar"/,'Abrir preguntas sin rodeos');
+assert.match(room,/href="\.\/comunidad\.html\?canal=proyectos"/,'Explorar proyectos');
+assert.match(room,/club-hub\.css\?v=/,'Estilos propios y actualizados del Club');
+assert.doesNotMatch(room,/club-editorial-flow|club-aula-visual/,'Sin tarjetas decorativas que deformen la vista');
+assert.match(clubHubCss,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/,'Club compacto en escritorio');
+assert.match(clubHubCss,/@media\(max-width:700px\)/,'Club apilado en teléfono');
+assert.match(clubJs,/requested\.get\('canal'\)/,'Acciones abren su canal real');
+assert.match(clubJs,/requested\.get\('accion'\)==='publicar'/,'Publicar enfoca la entrada real');
+assert.match(studioShell,/Ver aula completa/,'Botón único de vista completa');
+assert.doesNotMatch(studioShell,/iframe title="Centro de alumnos · vista privada/,'No anidar la aplicación del aula');
+console.log('QA: club compacto e interactivo, vista de administradora sin iframe duplicado OK');
