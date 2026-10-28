@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-v1">
+<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-v1"><link rel="stylesheet" href="./prompts-library.css?v=20261028-v1">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -58,7 +58,9 @@
       <button class="aula-side-link" type="button" data-aula-view="inicio" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg></span><span>Mi inicio</span></button>
       <button class="aula-side-link" type="button" data-aula-view="lecciones" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H3z"/><path d="M21 5h-5a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h5z"/></svg></span><span>Mis lecciones</span></button>
       <div class="lesson-index" aria-label="Lista de lecciones"><h3>CONTENIDO DE LA CLASE</h3><div id="lesson-buttons"></div></div>
-      <p class="aula-nav-group">MIS RECURSOS</p>
+      <p class="aula-nav-group">MIS HERRAMIENTAS</p>
+      <button class="aula-side-link" type="button" data-aula-view="prompts" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>Biblioteca de prompts</span></button>
+      
       <button class="aula-side-link" type="button" data-aula-view="materiales" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3z"/><path d="M3 7V4h7l2 3"/></svg></span><span>Materiales</span></button>
       <button class="aula-side-link" type="button" data-aula-view="bonos" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18M12 9C6 9 5 3 8 3c3 0 4 6 4 6Zm0 0c6 0 7-6 4-6s-4 6-4 6Z"/></svg></span><span>Mis bonos</span></button>
       <button class="aula-side-link" type="button" data-aula-view="comunidad" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2zM17 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5"/></svg></span><span>Club de Ideas</span></button>
@@ -90,7 +92,7 @@
 
       <div class="aula-home-actions">
         <button type="button" class="aula-primary-action" data-aula-view="lecciones">Continuar mis lecciones</button>
-        <button type="button" class="aula-secondary-action" data-aula-view="materiales">Ver mis materiales</button>
+        <button type="button" class="aula-secondary-action" data-aula-view="prompts">Abrir biblioteca de prompts</button>
       </div>
          <div class="help"><p class="eyebrow">ACOMPAÑAMIENTO EN TU AULA</p><h2>¿Te atascaste?</h2><p>Cuéntame qué pasó o qué parte de la lección te resulta difícil. Puedes pedir ayuda sin salir del aula ni perder tu avance.</p><button class="outline" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button></div>
 
@@ -115,6 +117,15 @@
       </div>
     </div>
 
+    </div>
+    <div data-aula-panel="prompts" class="aula-panel" hidden>
+      <div class="aula-section-heading"><p class="eyebrow">COPIA · ADAPTA · CONSTRUYE</p><h1>Biblioteca de prompts</h1><p>No necesitas empezar desde cero. Elige lo que quieres hacer, copia el prompt y completa los espacios entre corchetes con tu idea.</p></div>
+      <div class="aula-prompts-intro"><div><strong>Tu caja de herramientas, siempre a mano.</strong><p>Los prompts de la clase están aquí para trabajar durante cada lección. Tus bonos personales siguen en una sección aparte.</p></div><span aria-hidden="true">✦</span></div>
+      <div class="aula-prompts-toolbar"><label for="prompt-search" class="sr-only">Buscar en la biblioteca</label><input type="search" id="prompt-search" placeholder="Buscar por tema o tarea..." autocomplete="off"><span id="prompt-count" class="prompt-count" aria-live="polite"></span></div>
+      <div id="prompt-categories" class="prompt-categories" aria-label="Filtrar por categoría"></div>
+      <p id="prompt-feedback" class="prompt-library-status" role="status"></p>
+      <div id="student-prompts-grid" class="prompt-grid"></div>
+      <p id="prompt-empty" class="prompt-library-empty" hidden>No hay resultados. Prueba otra palabra o elige «Todas».</p>
     </div>
     <div data-aula-panel="materiales" class="aula-panel" hidden>
       <div class="aula-section-heading"><p class="eyebrow">TODO EN UN SOLO LUGAR</p><h1>Mis materiales</h1><p>Guías y ejercicios para acompañarte en cada módulo.</p></div>
@@ -203,5 +214,5 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=aula-sidebar-20261028-v1"></script>
+<script type="module" src="./curso.js?v=private-prompts-20261028-v1"></script>
 </body></html>
