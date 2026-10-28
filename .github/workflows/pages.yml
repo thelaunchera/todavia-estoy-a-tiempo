@@ -77,6 +77,7 @@ jobs:
         run: |
           node --check clases/experience.js
           node --check clases/waitlist.js
+          node --check alumnos/comunidad.js
           node estudio-control/tests/check-course-prelaunch.mjs
       - name: Compilar el estudio desde el repositorio
         env:
@@ -115,6 +116,9 @@ jobs:
           test -s _podcast_pages/clases/primera-landing.html
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
+          test -s _podcast_pages/alumnos/comunidad.html
+          test -s _podcast_pages/alumnos/comunidad.js
+          test -s _podcast_pages/alumnos/comunidad.css
           test -s _podcast_pages/clases/waitlist.js
           test -s _podcast_pages/clases/experience.js
           grep -q 'src="./assets/' _podcast_pages/estudio/index.html || grep -q 'src="/assets/' _podcast_pages/estudio/index.html
