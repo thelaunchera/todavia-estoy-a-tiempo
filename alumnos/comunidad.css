@@ -55,3 +55,6 @@
  .club-top a:first-child{width:147px}
  .club-top-link{font-size:.73rem;padding:9px 12px}
 }
+
+/* Mensaje de privacidad sin sellos ni iconos: solo visible a miembros autorizados. */
+.club-welcome .club-private-note{margin:15px 0 0;max-width:none;font:650 11px/1.55 'DM Sans',Arial,sans-serif;letter-spacing:.005em;color:#647f90}
