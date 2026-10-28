@@ -1,0 +1,30 @@
+name: Verificar fichas y conectores del Studio (sin publicar)
+on:
+  pull_request:
+    paths:
+      - "estudio-control/src/ClassProduction.tsx"
+      - "estudio-control/src/ConnectorsLesson.tsx"
+      - "estudio-control/src/class-course.ts"
+      - "estudio-control/src/recording-starts.ts"
+      - "estudio-control/src/connectors-lesson.css"
+      - ".github/workflows/studio-course-review.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-studio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar dependencias sin publicar
+        working-directory: estudio-control
+        run: npm install --no-audit --no-fund
+      - name: Compilar Studio
+        working-directory: estudio-control
+        run: npm run build
+      - name: Comprobar estructura y guiones
+        working-directory: estudio-control
+        run: npm run test:classes
