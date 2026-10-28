@@ -1050,3 +1050,29 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
    object-position:center center!important;
  }
 }
+
+
+/* Móvil · ritmo editorial del texto debajo de la foto del hero.
+   p.class-lede tenía un margin shorthand más específico que desplazaba el texto a x=0. */
+@media(max-width:900px){
+  .class-page-v2 .class-hero .class-hero-grid > .class-hero-intro > p.class-lede{
+    display:block;
+    grid-area:description;
+    width:calc(100% - 36px)!important;
+    max-width:650px;
+    margin:18px auto 0!important;
+    padding-inline:0;
+    box-sizing:border-box;
+    color:#344f65!important;
+    line-height:1.6;
+    font-size:clamp(.94rem,1.65vw,1.05rem);
+  }
+}
+@media(max-width:650px){
+  .class-page-v2 .class-hero .class-hero-grid > .class-hero-intro > p.class-lede{
+    margin:20px auto 0!important;
+    width:calc(100% - 36px)!important;
+    font-size:1rem;
+    line-height:1.58;
+  }
+}
