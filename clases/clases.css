@@ -662,3 +662,7 @@ html:has(.class-page-v2){scroll-padding-top:84px}
   .class-page-v2 .class-hero .class-primary-button,.class-page-v2 .class-hero .class-ghost-button{width:100%;min-height:52px;text-align:center}
   .class-page-v2 .class-hero .class-notice{margin-top:12px}
 }
+
+/* Fotografía vertical completa, sin recortar el rostro ni el agente en iPhone. */
+@media(max-width:900px){.class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}}
+@media(max-width:650px){.class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}}
