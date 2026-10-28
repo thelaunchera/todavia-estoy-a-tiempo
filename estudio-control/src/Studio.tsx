@@ -258,7 +258,7 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
-  const [studentCenterTab,setStudentCenterTab] = useState<'people'|'classroom'>('people');
+
   const [seriesTab,setSeriesTab] = useState<string>('all');
   const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
   const [classStats,setClassStats] = useState<ClassLaunchStats|null>(null);
@@ -1276,35 +1276,14 @@ function App() {
           )}
           {page === 'alumnos' && (
             <section className="studio-students-workspace">
-              <nav className="studio-student-tabs" aria-label="Administración del Centro de alumnos">
-                <button type="button"
-                  className={studentCenterTab==='people' ? 'active' : ''}
-                  aria-pressed={studentCenterTab==='people'}
-                  onClick={()=>setStudentCenterTab('people')}>
-                  <Users size={17}/> Alumnos y bonos
-                </button>
-                <button type="button"
-                  className={studentCenterTab==='classroom' ? 'active' : ''}
-                  aria-pressed={studentCenterTab==='classroom'}
-                  onClick={()=>setStudentCenterTab('classroom')}>
-                  <BookOpen size={17}/> Vista del aula
-                </button>
+              <nav className="studio-student-tabs" aria-label="Centro de alumnos: administración y vista del aula">
+                <span className="studio-student-tab-current"><Users size={17}/> Alumnos y bonos</span>
+                <a className="studio-student-tab-link" href="../alumnos/?vista=admin" aria-label="Ver aula completa como administradora, sin alterar el progreso">
+                  <BookOpen size={17}/> Ver aula completa <ExternalLink size={15}/>
+                </a>
               </nav>
-              {studentCenterTab==='people' ? (
-                <StudentManager />
-              ) : (
-                <section className="studio-student-center">
-                  <div className="studio-student-center-intro">
-                    <div>
-                      <span className="eyebrow">VISTA PRIVADA DE ADMINISTRADORA</span>
-                      <h2>Revisa el aula como administradora.</h2>
-                      <p>Las lecciones y los materiales se muestran sin alterar el progreso de los alumnos. Para asignar un bono, vuelve a la pestaña Alumnos y bonos.</p>
-                    </div>
-                    <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir aula completa <ExternalLink size={16}/></a>
-                  </div>
-                  <iframe title="Centro de alumnos · vista privada de administración" src="../alumnos/?vista=admin" loading="lazy" referrerPolicy="same-origin"/>
-                </section>
-              )}
+              <StudentManager />
+              <p className="studio-student-qa-note">La vista del aula se abre en pantalla completa, sin barras duplicadas ni ventanas dentro de ventanas. Regresas aquí desde «Volver a Mi Estudio».</p>
             </section>
           )}
           {page === 'club' && (
