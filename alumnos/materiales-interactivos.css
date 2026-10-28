@@ -120,3 +120,13 @@
  .mi-app{max-width:none}.mi-header,.mi-prompt,.mi-step,.mi-check,.mi-work-step{break-inside:avoid}
  .mi-work-step:not([open]) .mi-work-body{display:block}.mi-section-head{margin-top:14px}
 }
+
+/* Utilidades que no sustituyen las actividades; PDF solo como respaldo. */
+.mi-toolbar{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;margin:-13px 1px 22px;color:#708799;font-size:12px}
+.mi-toolbar button{min-height:38px;border:1px solid #cad9e1;background:#fffdfa;color:#375e75;border-radius:99px;padding:9px 13px;font-size:11px;font-weight:800;cursor:pointer}
+.mi-owner-pdfs{margin:0 1px 24px;background:#e9f0f3;border:1px solid #cadce5;border-radius:12px;padding:13px 17px;color:#28536b;font-size:12px}
+.mi-owner-pdfs summary{cursor:pointer;font-weight:800}
+.mi-owner-pdf-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px}
+.mi-owner-pdf-links a{padding:12px;background:#fffefa;color:#214b67;text-decoration:none;border-radius:10px;border:1px solid #dce6ea;line-height:1.4;font-weight:700}
+.mi-owner-pdf-links a:hover{text-decoration:underline}
+@media print{.mi-toolbar,.mi-owner-pdfs{display:none!important}}
