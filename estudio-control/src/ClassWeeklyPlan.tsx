@@ -63,7 +63,7 @@ export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
    return true;
   });
  },[tasks]);
- const byWeek=classWeeks.map(w=>unique.filter(t=>Boolean(t.date)&&t.date!>=w.start&&t.date!<=w.end).sort((a,b)=>(a.date||'').localeCompare(b.date||'')));
+ const byWeek=classWeeks.map(w=>unique.filter(t=>Boolean(t.date)&&(t.date||'')>=w.start&&(t.date||'')<=w.end).sort((a,b)=>(a.date||'').localeCompare(b.date||'')));
  const allDone=unique.filter(t=>t.status==='completado').length;
  const approved=classLessons.filter(l=>lessons.some(x=>x.section===CLASS_SECTION&&x.subtitle===l.id&&x.status==='aprobado')).length;
  const selectedWeek=classWeeks[selected], selectedTasks=byWeek[selected];
