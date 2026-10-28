@@ -17,7 +17,64 @@ async function isAuthorizedOwner(who){
  return data?.role==='owner';
 }
 function status(text,ok=false){message.textContent=text;message.dataset.ok=ok?'true':'false';}
-function display(panel){[login,noAccess,course].forEach(el=>el.hidden=(el!==panel));}
+function display(panel){
+ [login,noAccess,course].forEach(el=>el.hidden=(el!==panel));
+ document.body.classList.toggle('aula-member',panel===course);
+ if(panel!==course)closeAulaMenu();
+}
+const aulaTitle=$('aula-active-title');
+const aulaOpen=$('aula-menu-open');
+const aulaClose=$('aula-rail-close');
+const aulaBack=$('aula-rail-backdrop');
+const aulaSidebar=$('aula-rail');
+const aulaViews={
+ inicio:'Mi inicio', lecciones:'Mis lecciones', materiales:'Mis materiales',
+ bonos:'Mis bonos', comunidad:'Club de Ideas'
+};
+let currentAulaView='lecciones';
+function closeAulaMenu(){
+ document.body.classList.remove('aula-menu-open');
+ aulaBack.hidden=true;
+ aulaOpen.setAttribute('aria-expanded','false');
+}
+function openAulaMenu(){
+ document.body.classList.add('aula-menu-open');
+ aulaBack.hidden=false;
+ aulaOpen.setAttribute('aria-expanded','true');
+ const active=aulaSidebar.querySelector('.aula-side-link[aria-current="page"]');
+ (active||aulaClose).focus({preventScroll:true});
+}
+function setAulaView(view,{scroll=true}={}){
+ if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
+ currentAulaView=view;
+ document.querySelectorAll('[data-aula-panel]').forEach(section=>{
+  section.hidden=section.getAttribute('data-aula-panel')!==view;
+ });
+ document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
+  const selected=control.dataset.aulaView===view;
+  control.setAttribute('aria-current',selected?'page':'false');
+ });
+ aulaTitle.textContent=aulaViews[view];
+ closeAulaMenu();
+ if(scroll&&document.body.classList.contains('aula-member')){
+  window.scrollTo({top:0,behavior:'auto'});
+ }
+}
+document.querySelectorAll('[data-aula-view]').forEach(control=>{
+ control.addEventListener('click',event=>{
+  event.preventDefault();
+  setAulaView(control.dataset.aulaView);
+ });
+});
+aulaOpen.addEventListener('click',()=>document.body.classList.contains('aula-menu-open')?closeAulaMenu():openAulaMenu());
+aulaClose.addEventListener('click',()=>{closeAulaMenu();aulaOpen.focus({preventScroll:true});});
+aulaBack.addEventListener('click',()=>{closeAulaMenu();aulaOpen.focus({preventScroll:true});});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&document.body.classList.contains('aula-menu-open')){
+  closeAulaMenu();aulaOpen.focus({preventScroll:true});
+ }
+});
+
 function validVideoId(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
 function escapedText(parent,tag,value,klass){const node=document.createElement(tag);node.textContent=value;if(klass)node.className=klass;parent.appendChild(node);return node;}
 function progressStats(){
@@ -126,6 +183,7 @@ function choose(i){
  selected=i;
  const item=lessons[i];
  if(!item)return;
+ setAulaView('lecciones');
  const box=$('lesson-player');box.replaceChildren();box.hidden=!validVideoId(item.youtube_video_id);
  if(!box.hidden){
   const frame=document.createElement('iframe');
@@ -194,7 +252,7 @@ async function showCourse(email,asAdmin=false){
  $('progress-label').hidden=asAdmin;
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
- display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();
+ display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('lecciones',{scroll:false});
  if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
 async function refreshAuth(){
