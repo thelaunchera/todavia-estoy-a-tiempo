@@ -354,7 +354,7 @@ export async function getStudioBonusResources(): Promise<StudioBonusResource[]> 
     .like('resource_code', 'bonus_%')
     .order('title', { ascending: true });
   if (error) throw new Error('No se pudo consultar el catálogo privado de bonos.');
-  return (data || []).map((row) => ({
+  return (data || []).map((row): StudioBonusResource => ({
     resource_code: String(row.resource_code),
     title: String(row.title),
     url: String(row.url),
