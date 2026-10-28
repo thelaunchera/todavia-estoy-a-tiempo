@@ -45,7 +45,7 @@ console.log('Validación de preventa, aula, consentimientos, rutas y acceso: OK'
 
 const newExperience=read('clases/experience.js');
 const newStyles=read('clases/clases.css');
-assert.match(classPage,/Una idea puede convertirse en <em>un negocio/,'Mensaje inmediato de valor');
+assert.match(classPage,/<h1 id="class-title">Tu primera web <em>con IA\.<\/em><\/h1>/,'Hero en español claro: Tu primera web con IA');
 assert.match(classPage,/negocios locales/i,'Comunica la oportunidad de servicio local');
 assert.match(classPage,/Inscripciones desde el 3 de diciembre/,'Lista de espera sin compra habilitada');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
