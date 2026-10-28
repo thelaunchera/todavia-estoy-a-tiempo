@@ -33,3 +33,18 @@ test('publishing a monthly episode keeps it in that month without returning it t
   assert.equal(plan.published.length, 2);
   assert.match(plan.label, /noviembre.*2026/);
 });
+
+test('published chapters from prior month stay visible in default Todos and Publicados', () => {
+  const episode1 = { id:'ep1',status:'publicado',date:'2026-10-20',archived:false,audio:'01.mp3' };
+  const episode2 = { id:'ep2',status:'publicado',date:'2026-10-27',archived:false,audio:'02.mp3' };
+  const november = { id:'nov3',status:'en producción',date:'2026-11-03',planning_month:'2026-11' };
+  const archived = { id:'old',archived:true,status:'en producción',date:'2026-09-07' };
+  const data = [episode1,episode2,november,archived];
+  const original = structuredClone(data);
+  const plan = editorialPlan(data);
+  assert.deepEqual(plan.active.map(row=>row.id),['ep1','ep2','nov3']);
+  assert.deepEqual(plan.published.map(row=>row.id),['ep1','ep2']);
+  assert.deepEqual(plan.month.map(row=>row.id),['nov3']);
+  assert.deepEqual(plan.archived.map(row=>row.id),['old']);
+  assert.deepEqual(data, original,'switching episode tabs must never mutate audio or publication states');
+});
