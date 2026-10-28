@@ -464,3 +464,14 @@ html:has(.class-page-v2){scroll-padding-top:84px}
   .class-page-v2 .class-hero-art img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain}
   .class-page-v2 .class-primary-button{min-height:52px;padding:13px 16px}
 }
+
+/* Garantiza orden de lectura: título → fotografía → CTA en iPhone/tablet. */
+@media(max-width:920px){
+  .class-page-v2 .class-hero-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"intro" "visual" "bottom";
+    gap:0;
+  }
+  .class-page-v2 .class-hero-art{grid-area:visual;width:min(100%,650px)}
+}
