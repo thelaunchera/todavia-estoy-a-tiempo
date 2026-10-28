@@ -1,0 +1,29 @@
+name: Revisar privacidad del aula (sin publicar)
+
+on:
+  pull_request:
+    paths:
+      - "alumnos/**"
+      - "estudio-control/tests/aula-privacidad-regresion.test.mjs"
+      - ".github/workflows/student-privacy-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comprobar-aula:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener código del PR
+        uses: actions/checkout@v4
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Comprobar sintaxis del aula
+        run: |
+          node --check alumnos/curso.js
+          node --check alumnos/materiales-interactivos.js
+      - name: Ejecutar controles de privacidad y bibliotecas sin duplicar
+        run: node --test estudio-control/tests/aula-privacidad-regresion.test.mjs
