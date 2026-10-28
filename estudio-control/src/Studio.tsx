@@ -53,6 +53,7 @@ type Page =
   | 'episodios'
   | 'clases'
   | 'alumnos'
+  | 'club'
   | 'calendario'
   | 'tareas'
   | 'productos'
@@ -126,6 +127,7 @@ const NAV = [
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
+  { id: 'club', label: 'Club de Ideas', icon: Users },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Tareas', icon: ListChecks },
   { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
@@ -148,6 +150,7 @@ const LABELS: Record<Page, string> = {
   episodios: 'Episodios',
   clases: 'Clases · grabación',
   alumnos: 'Centro de alumnos',
+  club: 'Club de Ideas',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
   productos: 'Colección digital',
@@ -956,7 +959,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : (page === 'clases' || page === 'alumnos')
+                  : (page === 'clases' || page === 'alumnos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
@@ -1274,6 +1277,19 @@ function App() {
                 <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir aula completa <ExternalLink size={16}/></a>
               </div>
               <iframe title="Centro de alumnos · vista privada de administración" src="../alumnos/?vista=admin" loading="lazy" referrerPolicy="same-origin"/>
+            </section>
+          )}
+          {page === 'club' && (
+            <section className="studio-student-center">
+              <div className="studio-student-center-intro">
+                <div>
+                  <span className="eyebrow">TU COMUNIDAD PRIVADA · ADMINISTRACIÓN</span>
+                  <h2>Un lugar para compartir lo que crean.</h2>
+                  <p>Publicaciones, proyectos con capturas, preguntas, comentarios y me gusta. Desde aquí puedes publicar como anfitriona, revisar reportes y ocultar contenido inapropiado, con tu sesión actual de administradora.</p>
+                </div>
+                <a href="../alumnos/comunidad.html" target="_blank" rel="noopener noreferrer">Abrir comunidad completa <ExternalLink size={16}/></a>
+              </div>
+              <iframe title="Club de Ideas · gestión privada de la comunidad" src="../alumnos/comunidad.html" loading="lazy" referrerPolicy="same-origin"/>
             </section>
           )}
           {page === 'clases' && (
