@@ -75,3 +75,19 @@ assert.match(newStyles,/@media\(max-width:650px\)/);
 assert.match(classPage,/src="experience\.js"/);
 assert.match(workflow,/clases\/experience\.js/);
 console.log('Auditoría editorial 3/30 segundos, efectos, footer y privacidad: OK');
+
+/* Precio de lanzamiento aprobado; precio de referencia FUTURO, nunca atribuir ventas anteriores. */
+assert.match(classPage,/PRECIO DE LANZAMIENTO · PAGO ÚNICO/);
+assert.match(classPage,/<strong>\$9\.99<\/strong>/);
+assert.match(classPage,/<del>\$39\.99<\/del>/);
+assert.match(classPage,/precio futuro previsto, no un precio anterior de venta/i);
+assert.match(classPage,/Lanzamiento oficial: 3 de diciembre de 2026/);
+assert.doesNotMatch(classPage,/Fecha objetivo:|Objetivo de apertura:|precio todavía no está publicado|Precio e inscripciones aún por confirmar/i);
+assert.doesNotMatch(classPage,/checkout\.stripe\.com|buy\.stripe\.com|href="[^"]*pagar|href="[^"]*comprar/i);
+assert.match(newStyles,/class-price-inline/);
+assert.match(newStyles,/class-price-bottom/);
+assert.match(newStyles,/\.class-page-v2 \.class-hero \.class-primary-button[\s\S]*?border-radius:999px!important/);
+assert.match(newStyles,/\.class-page-v2 :is\(/);
+assert.match(newStyles,/\.class-page-v2 \.class-material-tab\{border-radius:999px!important\}/);
+assert.match(newStyles,/\.class-page-v2 \.class-waitlist-form>input\[type="email"\]/);
+console.log('QA precio $9.99/39.99 previsto, fecha oficial y botones ovalados: OK');
