@@ -84,7 +84,19 @@ button:focus-visible,.aula-rail a:focus-visible{outline:3px solid #87b5d0;outlin
  .aula-panel .student-greeting{grid-template-columns:1fr}
  .aula-panel .club-aula-entry{grid-template-columns:1fr}
 }
-@media(max-width:900px){
+/* En iPad vertical, mantener visible el sidebar como una aplicación real. */
+@media(min-width:760px) and (max-width:990px){
+ #aula-layout.room-grid{grid-template-columns:224px minmax(0,1fr)}
+ #aula-layout .aula-rail{height:100dvh}
+ .aula-rail-brand{padding:20px 17px 13px;min-height:88px}
+ .aula-rail-workspace{margin:0 10px 12px;padding:11px 8px;font-size:8px}
+ .aula-navigation{padding:0 7px 10px}
+ .aula-side-link{padding:9px 10px;font-size:11.5px}
+ .aula-rail .lesson-index{margin-left:7px;padding-left:9px}
+ .aula-rail .lesson-index .index-title{font-size:10px}
+ .aula-main{padding:0 20px 46px}
+}
+@media(max-width:759px){
  #aula-layout.room-grid{grid-template-columns:minmax(0,1fr);min-height:100dvh}
  #aula-layout .aula-rail{position:fixed;top:0;bottom:0;left:0;z-index:102;height:100dvh;width:min(88vw,298px);transform:translateX(-105%);transition:transform .25s ease;box-shadow:12px 0 35px #14283a21;border-right:1px solid #d7e2e8;visibility:hidden}
  body.aula-menu-open #aula-layout .aula-rail{transform:translateX(0);visibility:visible}
