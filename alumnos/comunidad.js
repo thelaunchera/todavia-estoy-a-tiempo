@@ -111,15 +111,15 @@ $('club-post-form').addEventListener('submit',async ev=>{
   const {error}=await db.from('podcast_club_posts').insert(row);
   if(error)throw error;
   $('club-post-form').reset();clearImage();
-  message('¡Tu publicación ya forma parte del club! ✨','good');await loadFeed();
+  message('Ya quedó publicado. Puedes verlo en el Club.','good');await loadFeed();
  }catch(e){
   if(imagePath)await db.storage.from(bucket).remove([imagePath]).catch(()=>{});
   message(e.message||'No pudimos publicar. Prueba otra vez.','error');
- }finally{state.busy=false;$('club-submit').disabled=false;$('club-submit').textContent='Publicar en el club ↗';}
+ }finally{state.busy=false;$('club-submit').disabled=false;$('club-submit').textContent='Publicar en el club';}
 });
 function updateComposerChannel(){
  $('club-compose-heading').textContent=state.channel==='proyectos'?'Muéstranos tu proyecto':state.channel==='preguntas'?'¿Qué necesitas resolver?':'¿Qué estás creando?';
- $('club-post-body').placeholder=state.channel==='proyectos'?'Así va mi proyecto. Me gustaría recibir opiniones sobre…':state.channel==='preguntas'?'Estoy haciendo mi web y necesito ayuda con…':'Hoy avancé con mi primera landing…';
+ $('club-post-body').placeholder=state.channel==='proyectos'?'Así va mi proyecto. Me gustaría recibir opiniones sobre…':state.channel==='preguntas'?'Estoy haciendo mi web y necesito ayuda con…':'Hoy avancé con mi primera web…';
  $('club-feed-title').textContent=channelNames[state.channel];
  document.querySelectorAll('[data-channel]').forEach(el=>{const yes=el.dataset.channel===state.channel;el.classList.toggle('active',yes);el.setAttribute('aria-selected',String(yes));});
  render();
@@ -215,7 +215,7 @@ function render(){
     const im=node('img','club-post-image');im.src=state.images.get(post.image_path);im.alt='Captura compartida del proyecto de '+nameOf(post.author_id);im.loading='lazy';article.append(im);
   }
   if(post.project_url&&validUrl(post.project_url)){
-    const a=node('a','club-post-link','Ver el proyecto ↗');
+    const a=node('a','club-post-link','Ver el proyecto');
     a.href=post.project_url;a.target='_blank';a.rel='nofollow noopener noreferrer';article.append(a);
   }
   const actions=node('div','club-post-actions');
