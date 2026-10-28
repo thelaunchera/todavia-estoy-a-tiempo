@@ -1,0 +1,57 @@
+.weekly-plan{background:#f8fafb;border:1px solid #dce5ed;border-radius:22px;padding:clamp(17px,3vw,29px);margin:22px 0 30px;color:#182e46;min-width:0}
+.weekly-plan *{box-sizing:border-box}
+.weekly-plan button{cursor:pointer;font:inherit}
+.weekly-plan-header{display:grid;grid-template-columns:minmax(0,1fr) 166px;align-items:center;gap:24px;margin-bottom:24px}
+.weekly-plan-eyebrow{display:flex;gap:7px;align-items:center;letter-spacing:.13em;color:#607a91;font-size:10px;font-weight:750}
+.weekly-plan-header h3{font:400 clamp(28px,3vw,38px)/1.16 'DM Serif Display',Georgia,serif;letter-spacing:-.025em;margin:11px 0}
+.weekly-plan-header p{font-size:13px;line-height:1.7;max-width:630px;color:#5e7081;margin:0}
+.weekly-plan-totals{border:1px solid #d5e3ed;background:#e9f2f8;border-radius:15px;padding:17px;display:flex;flex-direction:column;gap:3px;align-items:stretch;text-align:center}
+.weekly-plan-totals strong{font:400 38px/1.2 'DM Serif Display',Georgia,serif}
+.weekly-plan-totals strong span{font-size:20px;color:#63839a}
+.weekly-plan-totals small{font-size:11px;color:#5f7385}
+.weekly-plan-meter{background:#c9dbe7;height:6px;border-radius:8px;overflow:hidden;margin:10px 0 6px}
+.weekly-plan-meter span{display:block;height:100%;background:#446c87;border-radius:8px;transition:width .2s ease}
+.weekly-plan-weeks{display:grid;grid-template-columns:repeat(7,minmax(142px,1fr));gap:9px;overflow-x:auto;padding-bottom:9px;scroll-snap-type:x proximity}
+.weekly-plan-week{display:flex;min-width:142px;min-height:133px;flex-direction:column;gap:7px;text-align:left;padding:14px;border:1px solid #dce4e9;border-radius:14px;background:#fff;color:#2a4259;scroll-snap-align:start}
+.weekly-plan-week:hover{background:#eff5fa}
+.weekly-plan-week.selected{border-color:#537995;background:#eaf3f9;box-shadow:0 0 0 1px #537995 inset}
+.weekly-plan-week.current{border-bottom:3px solid #7095ac}
+.weekly-plan-week-top{color:#5d7a90;letter-spacing:.1em;font-size:9px;font-weight:750;display:flex;gap:4px;align-items:center}
+.weekly-plan-week-top em{font-size:8px;letter-spacing:0;color:#36566e;background:#d6e8f2;padding:3px 5px;border-radius:4px;font-style:normal}
+.weekly-plan-week b{font-size:12px;line-height:1.3}
+.weekly-plan-week small{font-size:11px;line-height:1.3;color:#6f8393;flex:1}
+.weekly-plan-week-foot{border-top:1px solid #e4e9ed;padding-top:7px;font-size:10px;color:#4c7189;display:flex;justify-content:space-between;gap:5px;align-items:center}
+.weekly-plan-detail{background:#fff;border:1px solid #dce5eb;border-radius:17px;padding:clamp(15px,2.5vw,25px);margin-top:8px}
+.weekly-plan-detail-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:19px}
+.weekly-plan-detail-head span{font-size:10px;letter-spacing:.11em;font-weight:700;color:#647d92}
+.weekly-plan-detail-head h4{font:400 clamp(23px,2.5vw,30px)/1.17 'DM Serif Display',Georgia,serif;margin:8px 0}
+.weekly-plan-detail-head p{font-size:12px;line-height:1.65;color:#617587;max-width:580px;margin:0}
+.weekly-plan-detail-head .weekly-plan-now{display:flex;align-items:center;gap:6px;white-space:nowrap;letter-spacing:0;font-size:10px;color:#365c77;background:#edf4f7;padding:8px;border-radius:30px}
+.weekly-plan-list{display:flex;flex-direction:column;gap:9px}
+.weekly-plan-item{border:1px solid #e0e7ec;border-radius:13px;background:#fdfefe;display:flex;align-items:flex-start;gap:13px;padding:15px}
+.weekly-plan-item.is-done{background:#f5f8f8}
+.weekly-plan-check{width:30px;height:30px;border-radius:9px;border:1px solid #bad0df;background:#e9f2f7;color:#446b85;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.weekly-plan-item.is-done .weekly-plan-check{background:#dfeee9;border-color:#bdd9d0;color:#2a665c}
+.weekly-plan-check:disabled{opacity:.55;cursor:wait}
+.weekly-plan-item-main{min-width:0;flex:1}
+.weekly-plan-item-row{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.weekly-plan-item-row strong{font-size:13px;line-height:1.5;font-weight:700}
+.weekly-plan-item-row>span{font-size:10px;color:#698293;white-space:nowrap}
+.weekly-plan-item.is-done .weekly-plan-item-row strong{text-decoration:line-through;text-decoration-color:#b5c7cf;color:#718493}
+.weekly-plan-item-main p{font-size:12px;color:#62778a;line-height:1.6;margin:5px 0}
+.weekly-plan-item-state{font-size:10px;color:#8393a1;display:block;margin-top:6px}
+.weekly-plan-video{display:flex;align-items:center;gap:5px;color:#4d748e;font-size:11px;margin-top:8px}
+.weekly-plan-video a{display:inline-flex;gap:3px;align-items:center;text-decoration:underline;text-underline-offset:3px}
+.weekly-plan-gate{display:flex;gap:9px;align-items:flex-start;background:#f8f2e7;border:1px solid #e8dcc6;color:#6c5a41;padding:13px;border-radius:11px;margin-bottom:15px;font-size:12px;line-height:1.6}
+.weekly-plan-gate svg{flex-shrink:0}
+.weekly-plan-empty{font-size:12px;color:#627486;line-height:1.7;padding:15px 0}
+.weekly-plan-actions{display:flex;gap:10px;justify-content:space-between;margin-top:18px}
+.weekly-plan-actions button{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #d1dfe7;border-radius:100px;color:#35556e;font-size:11px;padding:10px 14px}
+.weekly-plan-actions button:disabled{opacity:.38;cursor:default}
+.weekly-plan-error{color:#a33b3b;font-size:12px;margin:12px 0}
+.weekly-plan-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:16px;color:#718292;font-size:11px;line-height:1.55}
+.weekly-plan-footer span,.weekly-plan-footer a{display:flex;align-items:center;gap:6px}
+.weekly-plan-footer a{text-underline-offset:3px;color:#416984}
+@media(max-width:1150px){.weekly-plan-weeks{grid-template-columns:repeat(7,155px)}}
+@media(max-width:650px){.weekly-plan{padding:14px;margin:14px 0 23px}.weekly-plan-header{grid-template-columns:1fr;gap:14px}.weekly-plan-totals{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px}.weekly-plan-totals strong{font-size:28px}.weekly-plan-totals .weekly-plan-meter{flex-basis:100%;order:4}.weekly-plan-week{min-height:117px}.weekly-plan-detail-head{flex-direction:column;gap:9px}.weekly-plan-detail-head .weekly-plan-now{width:fit-content}.weekly-plan-item-row{flex-direction:column;gap:3px}.weekly-plan-item{padding:12px;gap:9px}.weekly-plan-footer{flex-direction:column;align-items:flex-start}.weekly-plan-video{flex-wrap:wrap}.weekly-plan-actions button{font-size:10px;padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){.weekly-plan-meter span{transition:none}}
