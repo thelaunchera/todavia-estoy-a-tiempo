@@ -2191,3 +2191,31 @@ a:focus-visible {
  .studio-student-tabs button{padding:11px 8px;font-size:.79rem}
  .studio-students-workspace .studio-student-center iframe{min-height:650px}
 }
+
+/* Aula de administradora: abrir a pantalla completa, no anidar dos aplicaciones. */
+.studio-student-tabs .studio-student-tab-current,
+.studio-student-tabs .studio-student-tab-link{
+ display:inline-flex;align-items:center;justify-content:center;gap:9px;
+ min-height:46px;border:1px solid transparent;border-radius:11px;padding:11px 18px;
+ font-size:.86rem;font-weight:750;line-height:1.35;text-decoration:none;
+}
+.studio-student-tabs .studio-student-tab-current{
+ background:#fff;color:#183b54;border-color:#c2d5e0;
+ box-shadow:0 3px 10px rgba(31,61,82,.06);
+}
+.studio-student-tabs .studio-student-tab-link{
+ background:#1d405c;color:#fff;border-color:#1d405c;
+}
+.studio-student-tabs .studio-student-tab-link:hover{background:#305a78}
+.studio-student-tabs .studio-student-tab-link:focus-visible{outline:3px solid #87b7d2;outline-offset:3px}
+.studio-student-qa-note{
+ margin:0;color:#688092;font-size:.78rem;line-height:1.65;
+ padding:0 5px;
+}
+@media(max-width:610px){
+ .studio-student-tabs .studio-student-tab-current,
+ .studio-student-tabs .studio-student-tab-link{
+   min-width:0;width:100%;font-size:.76rem;gap:6px;padding:10px 8px;
+ }
+ .studio-student-tabs .studio-student-tab-link svg:last-child{display:none}
+}
