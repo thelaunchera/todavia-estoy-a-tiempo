@@ -69,6 +69,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  function go(view){
   if(!headers.some(h=>h[0]===view))return;
   current=view;
+  const headline=app.querySelector('.mi-header h2');
+  const intro=app.querySelector('.mi-header p');
+  if(headline) headline.textContent=view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
+  if(intro) intro.textContent=view==='prompts'?'12 prompts para copiar, adaptar y usar mientras construyes tu propia página.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===view?'page':'false'));
   content.replaceChildren();
   if(view==='inicio')renderStart();
@@ -193,4 +197,5 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const b=el('button',null,title);b.type='button';b.dataset.view=view;b.setAttribute('aria-current',view===current?'page':'false');b.addEventListener('click',()=>go(view));tabs.append(b);
  });
  go('inicio');
+ return {go};
 }
