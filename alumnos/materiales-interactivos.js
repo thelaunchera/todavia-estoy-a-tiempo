@@ -33,7 +33,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
  root.appendChild(app);
- app.innerHTML=`<div class="mi-header"><div><span class="mi-eyebrow">TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA</span><h2>Tu mesa de trabajo<span>.</span></h2><p>Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.</p></div><div class="mi-header-symbol" aria-hidden="true">✳</div></div>
+ app.innerHTML=`<div class="mi-header"><div><span class="mi-eyebrow">TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA</span><h2>Tu mesa de trabajo<span>.</span></h2><p>Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.</p></div></div>
  <nav class="mi-tabs" aria-label="Materiales de la clase"></nav>
  <div class="mi-content" aria-live="polite"></div>
  <div class="mi-footer"><span>Un paso claro es mejor que diez pantallas bonitas.</span><span>Materiales de Tu primera web con IA · Uso personal</span></div>`;
