@@ -198,4 +198,4 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  });
  go('inicio');
  return {go};
-
+}
