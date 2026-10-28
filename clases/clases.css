@@ -156,3 +156,6 @@
 .class-waitlist-form small{font-size:.73rem;line-height:1.5;color:#b9cbd8}
 .class-waitlist-form small a{color:#fff;text-underline-offset:3px}
 @media(max-width:800px){.class-waitlist-grid{grid-template-columns:1fr}}
+
+.class-waitlist-optout{align-self:flex-start;color:#eaf4f6;text-decoration:underline;text-underline-offset:3px;border:0;background:transparent;font-size:.75rem;padding:3px 0;cursor:pointer}
+.class-waitlist-optout:disabled{opacity:.55}
