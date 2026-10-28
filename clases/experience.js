@@ -128,6 +128,23 @@
     });
   }
 
+  // Volver al inicio: siempre disponible aunque el aviso de cookies esté visible.
+  const toTop = document.getElementById('class-floating-top');
+  const footerBack = document.querySelector('.class-back-to-top');
+  function scrollToStart(event) {
+    event?.preventDefault();
+    window.scrollTo({top:0,left:0,behavior:reducedMotion.matches?'instant':'smooth'});
+  }
+  footerBack?.addEventListener('click', scrollToStart);
+  toTop?.addEventListener('click', scrollToStart);
+  function syncTopButton() {
+    if(!toTop)return;
+    toTop.hidden=window.scrollY<650;
+  }
+  window.addEventListener('scroll', syncTopButton, {passive:true});
+  window.addEventListener('resize', syncTopButton);
+  syncTopButton();
+
   const progress = document.getElementById('class-scroll-progress');
   if (progress) {
     let queued = false;
