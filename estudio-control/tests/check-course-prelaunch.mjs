@@ -251,7 +251,7 @@ console.log('QA: transformación interactiva, movimiento reducido, lenguaje incl
 /* Aula personal: navegación real, progreso y bono sin entrega automática. */
 const coursePersonalCss=read('alumnos/curso.css');
 const coursePersonalJs=read('alumnos/curso.js');
-for(const id of ['student-greeting-title','student-name','progress-percent','student-progress','aula-rail','student-resources-heading','student-bonus-heading','bonus-lessons','bonus-project','bonus-status','lesson-celebration','lesson-celebration-close']){
+for(const id of ['student-greeting-title','student-name','progress-percent','student-progress','aula-rail','materiales-interactivos','student-bonus-heading','bonus-lessons','bonus-project','bonus-status','lesson-celebration','lesson-celebration-close']){
  assert.match(room,new RegExp('id="'+id+'"|class="'+id+'"'));
 }
 assert.match(room,/<aside class="aula-rail"/);
@@ -338,3 +338,20 @@ assert.match(studioShell,/studentCenterTab==='people'/,'Gestión de alumnos sepa
 assert.match(studioShell,/studentCenterTab==='classroom'/,'Vista del aula en pestaña propia');
 assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'Logo no sale al landing');
 console.log('QA: sidebar real, cinco secciones, menú móvil y estudio separado OK');
+
+// Materiales: revisión del reemplazo de los PDF defectuosos.
+const interactiveJs=read('alumnos/materiales-interactivos.js');
+const interactiveCss=read('alumnos/materiales-interactivos.css');
+assert.match(room,/id="materiales-interactivos"/,'Aula tiene el nuevo estudio de materiales');
+assert.match(room,/materiales-interactivos\.css\?v=/,'CSS editorial enlazado');
+assert.match(roomScript,/import \{mountMateriales\}/,'Se instala después de comprobar acceso');
+assert.match(interactiveJs,/podcast_class_learning_assets/,'Contenido privado procedente de Supabase');
+assert.match(interactiveJs,/podcast_class_workbook/,'Cuaderno con guardado por alumno');
+assert.doesNotMatch(interactiveJs,/const PROMPTS=\[/,'Los prompts no están publicados en JavaScript');
+assert.match(interactiveJs,/navigator\.clipboard\.writeText/,'Prompts con botón para copiar');
+assert.match(interactiveJs,/function renderWorkbook/,'Cuaderno editable');
+assert.match(interactiveJs,/function renderExample/,'Ejemplo con vistas móvil y escritorio');
+assert.match(interactiveJs,/function renderChecks/,'Lista de revisión real');
+assert.match(interactiveCss,/--mi-ink:#192d46/,'Paleta azul profunda del podcast');
+assert.match(interactiveCss,/@media\(max-width:440px\)/,'Materiales legibles en teléfono');
+console.log('QA: cinco guías interactivas privadas, guardado por alumno y paleta editorial OK');
