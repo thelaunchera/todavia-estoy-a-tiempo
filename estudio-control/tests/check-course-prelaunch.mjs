@@ -58,7 +58,7 @@ assert.match(classPage,/role="tabpanel"/);
 assert.match(classPage,/id="class-copy-prompt"/);
 assert.match(classPage,/id="class-scroll-progress"/);
 assert.match(classPage,/id="preguntas"/);
-assert.match(classPage,/aria-label="Navegación de la clase"/);
+assert.match(classPage,/<header class="class-topbar"[^>]*>[\s\S]*?id="reloj-lanzamiento"/);
 for(const path of ['privacidad.html','terminos.html','reembolsos.html','cookies.html','tus-datos.html']){
   assert.ok(classPage.includes('../'+path),'Footer legal: '+path);
 }
@@ -210,7 +210,7 @@ assert.match(countdownJs,/classFlipFold|is-flipping/);
 assert.match(newStyles,/animation:classFlipFold 250ms/);
 assert.match(newStyles,/animation:classFlipUnfold 250ms[^;]*250ms/);
 assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(newStyles,/class-hero-intro>\.class-launch-clock/);
+assert.match(newStyles,/\.class-topbar \.class-launch-clock/);
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1);
 assert.doesNotMatch(classPage,/href="[^"]*(buy\.stripe|checkout\.stripe)/);
 console.log('QA reloj: 4 grupos, flip 250+250ms, medianoche EST y botón a lista de espera OK');
@@ -253,7 +253,7 @@ for(const id of ['student-greeting-title','student-name','progress-percent','stu
  assert.match(room,new RegExp('id="'+id+'"|class="'+id+'"'));
 }
 assert.match(room,/<aside class="student-sidebar"/);
-assert.match(room,/Tu bono gratis/);
+assert.match(room,/Desbloquea tu bono/);
 assert.match(room,/Club de Ideas/);
 assert.match(coursePersonalCss,/\.room-grid\{\s*display:grid;\s*grid-template-columns:minmax\(166px,215px\) minmax\(0,1fr\) minmax\(224px,280px\)/);
 assert.match(coursePersonalCss,/\.student-sidebar/);
@@ -267,3 +267,26 @@ assert.match(coursePersonalJs,/post.image_path\|\|post.project_url/);
 assert.match(coursePersonalJs,/dataset.state='earned'/);
 assert.doesNotMatch(coursePersonalJs,/service_role|SUPABASE_SERVICE_ROLE_KEY/);
 console.log('QA aula personal: sidebar, progreso persistido, felicitación, bono y seguridad OK');
+
+
+/* Aula reordenada y bono protegido por 9 lecciones completas + proyecto real. */
+const roomGridEnd=room.indexOf('class="room-grid"');
+const clubPos=room.indexOf('class="club-aula-entry"');
+const bonusPos=room.indexOf('class="student-bonus"');
+const helpPos=room.indexOf('class="help"');
+assert.ok(roomGridEnd>=0&&clubPos>roomGridEnd&&bonusPos>clubPos&&helpPos>bonusPos,
+ 'Lecciones, comunidad, bono y ayuda van en ese orden');
+assert.match(room,/id="bonus-unlocked"[^>]+hidden/);
+assert.match(coursePersonalJs,/REQUIRED_LESSON_COUNT=9/);
+assert.match(coursePersonalJs,/completed===REQUIRED_LESSON_COUNT/);
+assert.match(coursePersonalJs,/l.status==='ready'&&validVideoId/);
+assert.match(coursePersonalJs,/post.image_path\|\|post.project_url/);
+assert.match(coursePersonalJs,/const eligible=allDone&&projectShared&&!adminPreview/);
+assert.match(coursePersonalJs,/\$\('bonus-unlocked'\)\.hidden=!eligible/);
+assert.match(coursePersonalCss,/\.club-aula-visual/);
+assert.match(coursePersonalCss,/#class-content>.student-bonus/);
+assert.match(classPage,/<header class="class-topbar"[\s\S]*?id="reloj-lanzamiento"[\s\S]*?<\/header>/);
+assert.match(newStyles,/\.class-topbar \.class-launch-clock/);
+assert.match(newStyles,/--flip-w:14px/);
+assert.doesNotMatch(room,/BIENVENIDA AL AULA|Tu primera landing con IA/);
+console.log('QA aula: club debajo de lecciones, bono cerrado hasta 9 lecciones + proyecto real, reloj mini en el banner OK');
