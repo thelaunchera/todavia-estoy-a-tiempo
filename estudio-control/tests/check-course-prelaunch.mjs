@@ -45,9 +45,9 @@ console.log('Validación de preventa, aula, consentimientos, rutas y acceso: OK'
 
 const newExperience=read('clases/experience.js');
 const newStyles=read('clases/clases.css');
-assert.match(classPage,/Crea una landing/,'Mensaje inmediato de valor');
+assert.match(classPage,/Tu primera web <em>con IA/,'Mensaje inmediato de valor');
 assert.match(classPage,/negocios locales/i,'Comunica la oportunidad de servicio local');
-assert.match(classPage,/Inscripciones aún no disponibles/,'No se promete compra abierta');
+assert.match(classPage,/Inscripciones desde el 3 de diciembre/,'Lista de espera sin compra habilitada');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
 assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
