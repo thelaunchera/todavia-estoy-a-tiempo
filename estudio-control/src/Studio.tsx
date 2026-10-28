@@ -44,6 +44,7 @@ import {
 import './studio.css';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
 import { normalizeSpotifyEpisodeLink, validSpotifyEpisode, SPOTIFY_EPISODE_ERROR } from './spotify-links';
+import { editorialPlan } from './editorial-plan';
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
@@ -86,6 +87,10 @@ type Row = {
   reel_overlay?: string;
   visual_idea?: string;
   performance_notes?: string;
+  archived?: boolean;
+  episode_format?: string;
+  planning_status?: string;
+  planning_month?: string;
 };
 type Data = {
   records: Record<Kind, Row[]>;
@@ -239,6 +244,7 @@ function App() {
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [seriesTab,setSeriesTab] = useState<string>('all');
+  const [episodeScope,setEpisodeScope] = useState<'month'|'published'|'archived'>('month');
   const [audioStats,setAudioStats] = useState<AudioStats|null>(null);
   const [audioStatsLoading,setAudioStatsLoading] = useState(false);
   const [audioStatsError,setAudioStatsError] = useState('');
@@ -476,10 +482,12 @@ function App() {
   );
   const tasks = items.tareas,
     products = items.productos;
-  const allSeries = groupEpisodes(episodes);
-  const published = episodes.filter(x => x.status === 'publicado').length;
+  const plan = editorialPlan(episodes);
+  const libraryEpisodes = plan[episodeScope];
+  const allSeries = groupEpisodes(libraryEpisodes);
+  const published = plan.published.length;
   const pending = tasks.filter(x => x.status !== 'completado').length;
-  const next = episodes.find(x => x.status !== 'publicado');
+  const next = plan.planned[0];
   const visible = (xs: Row[]) =>
     xs.filter(x =>
       (x.title + ' ' + (x.notes || '') + ' ' + (x.status || '') + ' ' + (x.series || '') + ' ' + (x.script || '') + ' ' + (x.spotify_description || ''))
@@ -502,7 +510,7 @@ function App() {
         title: '',
         status: STATES[kind][0],
         date: ['episodios', 'tareas'].includes(kind)
-          ? new Date().toISOString().slice(0, 10)
+          ? (kind === 'episodios' ? next?.date : undefined) || new Date().toISOString().slice(0, 10)
           : undefined,
         price: kind === 'productos' ? 0 : undefined,
       },
@@ -514,7 +522,7 @@ function App() {
     setEdit({ kind, item: { ...item }, newItem: false });
   };
   async function advanceEpisode(item:Row,nextStatus:'en producción'|'hecho'|'publicado') {
-    if(recording||saving)return;
+    if(recording||saving||item.archived)return;
     if(item.number===19&&!item.script_reviewed){
       setEdit({kind:'episodios',item:{...item},newItem:false});
       setFormError('Este borrador personal necesita tu aprobación explícita antes de producirse o publicarse.');
@@ -539,6 +547,10 @@ function App() {
       return;
     }
     const original=edit.kind==='episodios'&&!edit.newItem?episodes.find(x=>x.id===edit.item.id):null;
+    if(original?.archived && edit.item.status !== original.status){
+      setFormError('Este capítulo está conservado en Archivo, fuera del calendario activo.');
+      return;
+    }
     if(edit.kind==='episodios' && original?.number===19 && edit.item.status!=='borrador privado' && !edit.item.script_reviewed){
       setFormError('El capítulo 19 es personal. Aprueba primero el diálogo marcando la casilla al final del guion.');
       return;
@@ -642,7 +654,7 @@ function App() {
   );
   const episodeRows=(
     <div className="episode-list episode-library">
-      {groupEpisodes(visible(episodes)).filter(g=>g.rows.length && (seriesTab==='all'||seriesTab===g.id)).map(group=>(
+      {groupEpisodes(visible(libraryEpisodes)).filter(g=>g.rows.length && (seriesTab==='all'||seriesTab===g.id)).map(group=>(
         <section className="episode-series-group" key={group.id}>
           <header className="episode-series-heading">
             <span>SERIE {group.number}</span>
@@ -653,7 +665,9 @@ function App() {
         <article className="episode episode-editorial" key={x.id}>
           <div className="epi-no">{String(x.number||i+1).padStart(2,'0')}</div>
           <div className="epi-info">
-            <div className="epi-line"><b>{x.title}</b><StatePill status={x.status}/></div>
+            <div className="epi-line"><b>{x.title}</b><StatePill status={x.archived?'archivado':x.status}/></div>
+            {x.summary && <p>{x.summary}</p>}
+            {x.episode_format && <small>{x.episode_format} · {x.planning_status}</small>}
             <p>{x.series||'Primera serie · Pensé que a esta edad…'}{x.number===19&&<strong className="draft-private-label"> · Borrador personal · Revisión pendiente</strong>}</p>
             <small><CalendarDays size={14}/>{formatDate(x.date)} <span>·</span> {x.audio_ready||x.audio?'Audio creado':'Audio pendiente'} <span>·</span> {x.script?'Guion completo':'Sin guion'}</small>
             <div className="episode-progress" aria-label="Progreso editorial">{(['en producción','hecho','publicado'] as const).map(stage=><span key={stage} className={'progress-step '+(stage===x.status?'current':'')}>{stage}</span>)}</div>
@@ -696,9 +710,9 @@ function App() {
             </details>}
             <div className="episode-actions">
               {x.status==='borrador privado'&&<button disabled={saving} onClick={()=>editRow('episodios',x)}><ShieldCheck size={15}/> Revisar borrador privado</button>}
-              {x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
-              {x.status==='en producción'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'hecho')}>Marcar hecho <CheckCircle2 size={15}/></button>}
-              {x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar <ArrowUpRight size={15}/></button>}
+              {!x.archived&&x.status==='guion listo'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'en producción')}>Iniciar producción <ArrowRight size={15}/></button>}
+              {!x.archived&&x.status==='en producción'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'hecho')}>Marcar hecho <CheckCircle2 size={15}/></button>}
+              {!x.archived&&x.status==='hecho'&&<button disabled={saving} onClick={()=>void advanceEpisode(x,'publicado')}>Publicado en Spotify · Avisar <ArrowUpRight size={15}/></button>}
               {x.status==='publicado'&&<span className="episode-announcement">{x.announcement_state==='disabled'?'Publicado · sin aviso retroactivo':x.announcement_state==='sent'?'Aviso enviado':x.announcement_state==='pending'?'Aviso en cola':'Publicado'}</span>}
               {validSpotifyEpisode(x.link)&&<a href={x.link} target="_blank" rel="noreferrer">Escuchar en Spotify <ArrowUpRight size={14}/></a>}
             </div>
@@ -708,7 +722,7 @@ function App() {
       ))}
         </section>
       ))}
-      {!groupEpisodes(visible(episodes)).some(group=>seriesTab==='all'||seriesTab===group.id)&&empty}
+      {!groupEpisodes(visible(libraryEpisodes)).some(group=>seriesTab==='all'||seriesTab===group.id)&&empty}
     </div>
   );
   const taskRows = (
@@ -985,9 +999,9 @@ function App() {
                   <span>Episodios publicados</span>
                   <strong>
                     {published}
-                    <small> / {episodes.length}</small>
+                    <small> / {plan.active.length}</small>
                   </strong>
-                  <p>Primera serie</p>
+                  <p>{plan.planned.length} capítulos en el plan activo</p>
                 </div>
                 <div className="stat">
                   <CalendarDays size={20} />
@@ -1074,14 +1088,14 @@ function App() {
                           strokeLinecap="round"
                           strokeDasharray="289"
                           strokeDashoffset={
-                            289 * (1 - published / Math.max(episodes.length, 1))
+                            289 * (1 - published / Math.max(plan.active.length, 1))
                           }
                           transform="rotate(-90 56 56)"
                         />
                       </svg>
                       <strong>
                         {published}
-                        <small> de {episodes.length}</small>
+                        <small> de {plan.active.length}</small>
                       </strong>
                     </div>
                     <div>
@@ -1112,11 +1126,16 @@ function App() {
             <>
               {head(
                 'Biblioteca de guiones',
-                `${allSeries.length} series y ${episodes.length} capítulos. Abre el guion, prepara la narración y consulta el material de promoción de cada episodio.`,
+                `${plan.label} · ${plan.month.length} capítulos en el plan del mes. Los episodios publicados y el trabajo anterior se conservan en sus pestañas.`,
                 'episodios'
               )}
+              <div className="series-tabs" aria-label="Elegir archivo de episodios">
+                {([['month', `Plan del mes · ${plan.month.length}`], ['published', `Publicados · ${plan.published.length}`], ['archived', `Archivo · ${plan.archived.length}`]] as const).map(([scope, label]) => (
+                  <button type="button" key={scope} className={episodeScope===scope?'active':''} onClick={()=>{setEpisodeScope(scope);setSeriesTab('all');setSearch('');}} aria-pressed={episodeScope===scope}>{label}</button>
+                ))}
+              </div>
               <div className="series-tabs" aria-label="Filtrar series">
-                {[{id:'all',label:`Todas · ${episodes.length}`},...allSeries.map(group=>({id:group.id,label:`Serie ${group.number} · ${group.rows.length}`}))].map(t=>(
+                {[{id:'all',label:`Todas · ${libraryEpisodes.length}`},...allSeries.map(group=>({id:group.id,label:`Serie ${group.number} · ${group.rows.length}`}))].map(t=>(
                   <button type="button" key={t.id} className={seriesTab===t.id?'active':''} onClick={()=>setSeriesTab(t.id)} aria-pressed={seriesTab===t.id}>{t.label}</button>
                 ))}
               </div>
@@ -1130,12 +1149,12 @@ function App() {
           {page === 'calendario' && (
             <>
               {head(
-                'Un capítulo cada martes',
-                'Primero publica el audio en Spotify. Después marca «Publicado» en el estudio para enviar el aviso a oyentes.',
+                `Plan de ${plan.label}`,
+                'Un capítulo cada martes: dos temas por investigar, una habilidad y preguntas de la audiencia. Las fichas son planificación; todavía no hay guiones ni audios nuevos.',
                 'episodios'
               )}
               <div className="calendar">
-                {episodes.map((x, i) => (
+                {plan.month.map((x, i) => (
                   <button
                     disabled={recording}
                     onClick={() => editRow('episodios', x)}
@@ -1148,6 +1167,7 @@ function App() {
                     <span>EP {String(x.number || i + 1).padStart(2, '0')}</span>
                     <b>{formatDate(x.date)}</b>
                     <strong>{x.title}</strong>
+                    {x.episode_format && <small>{x.episode_format} · {x.planning_status}</small>}
                     <StatePill status={x.status} />
                     <small>
                       Editar capítulo <ArrowUpRight size={15} />
