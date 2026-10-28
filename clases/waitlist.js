@@ -77,7 +77,7 @@ form.addEventListener('submit',async event=>{
  event.preventDefault();
  if(!consentEl.checked){message('Marca la casilla para recibir las novedades de esta clase.');return;}
  const email=normal(emailEl.value);
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254){
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){
   message('Revisa la dirección de correo electrónico.');return;
  }
  submit.disabled=true;
