@@ -1542,3 +1542,65 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 @media(prefers-reduced-motion:reduce){
  .class-transform-options button{transition:none}
 }
+
+
+/* Confirmation states: visible, self-contained, and usable in Gmail/Safari on iPhone. */
+.class-page-v2 .class-waitlist-form[hidden],
+.class-page-v2 .class-waitlist-success[hidden],
+.class-page-v2 .class-waitlist-pending[hidden]{display:none!important}
+.class-page-v2 .class-waitlist-success,
+.class-page-v2 .class-waitlist-pending{
+  display:flex;flex-direction:column;align-items:flex-start;gap:17px;
+  background:#f8f5ee;color:#14263e;text-align:left;
+  border:1px solid #e4dcd1;border-radius:24px;
+  padding:clamp(25px,4vw,42px);
+  box-shadow:0 18px 44px rgba(4,18,36,.14);
+  scroll-margin-top:150px;
+}
+.class-page-v2 .class-waitlist-success:focus,
+.class-page-v2 .class-waitlist-pending:focus{outline:none}
+.class-page-v2 .class-success-mark{
+  display:grid;place-items:center;width:47px;height:47px;
+  border:1px solid #a8bfd1;border-radius:50%;background:#dce9f4;
+  font-family:Arial,sans-serif;font-size:1.45rem;color:#14263e;
+}
+.class-page-v2 .class-waitlist-success .class-mini-caption,
+.class-page-v2 .class-waitlist-pending .class-mini-caption{
+  font-size:.69rem;letter-spacing:.17em;font-weight:750;color:#486880;margin:1px 0 0;
+}
+.class-page-v2 .class-waitlist-success h3,
+.class-page-v2 .class-waitlist-pending h3{
+  font-family:var(--serif,Georgia,serif);font-weight:400;
+  font-size:clamp(2.2rem,4vw,3.5rem);line-height:1.08;letter-spacing:-.035em;
+  margin:0;color:#152940;
+}
+.class-page-v2 .class-waitlist-success p,
+.class-page-v2 .class-waitlist-pending p{
+  color:#334b60;font-size:clamp(.91rem,1.5vw,1.03rem);
+  line-height:1.7;margin:0;max-width:100%;
+}
+.class-page-v2 .class-waitlist-success .class-success-detail{
+  color:#536a7b;font-size:.86rem;
+  border-top:1px solid #d6dfe5;padding-top:17px;width:100%;
+}
+.class-page-v2 .class-waitlist-success .class-success-link,
+.class-page-v2 .class-waitlist-pending .class-pending-edit{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:48px;width:100%;border-radius:999px;
+  background:#1d3b57;color:#fff;font-size:.88rem;
+  font-weight:700;padding:12px 22px;text-decoration:none;
+  border:1px solid #1d3b57;cursor:pointer;
+}
+.class-page-v2 .class-waitlist-success .class-success-optout{width:100%}
+.class-page-v2 .class-success-optout .class-waitlist-optout{
+  display:block;margin:0 auto;font-size:.79rem;color:#405d75;
+  background:transparent;width:auto;border:0;text-decoration:underline;
+  text-underline-offset:3px;
+}
+.class-page-v2 .class-waitlist-pending .class-pending-edit{
+  color:#193751;background:transparent;border-color:#bacbd7;
+}
+@media(max-width:650px){
+  .class-page-v2 .class-waitlist-success,
+  .class-page-v2 .class-waitlist-pending{padding:27px 24px;border-radius:21px}
+}
