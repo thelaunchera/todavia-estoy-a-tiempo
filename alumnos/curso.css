@@ -235,25 +235,6 @@
 }
 #class-content>.club-aula-entry .club-aula-button:focus-visible{outline:3px solid #95bfd5;outline-offset:3px}
 .club-aula-visual{height:265px;position:relative;display:grid;place-items:center;min-width:0}
-.club-aula-example{
- position:relative;width:min(260px,88%);height:234px;padding:15px 17px;
- border-radius:20px;background:#fffdfa;border:1px solid #d5e1e9;
- box-shadow:0 17px 34px #21415e26;
- transform:rotate(-4deg);
-}
-.club-aula-example-top{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.13em;color:#637c8f}
-.club-aula-example-top i{height:5px;width:5px;border-radius:50%;background:#9ebbd0}
-.club-aula-example-hero{height:95px;margin:15px 0 11px;border-radius:10px;background:linear-gradient(115deg,#d2e0ea,#8fb6cb 63%,#dce8ee)}
-.club-aula-example-line{height:9px;border-radius:999px;background:#dce7ed;width:78%;margin-bottom:9px}
-.club-aula-example-line.short{width:55%}
-.club-aula-example-cta{height:19px;width:87px;background:#18334d;border-radius:999px;margin-top:12px}
-.club-aula-sticker{
- position:absolute;background:#fffefc;border:1px solid #d1e0e6;
- box-shadow:0 7px 17px #243f571e;border-radius:999px;padding:9px 14px;
- color:#385d75;font-size:12px;font-weight:700;
-}
-.club-aula-sticker-heart{right:1%;top:24px;transform:rotate(6deg)}
-.club-aula-sticker-chat{left:0;bottom:13px;transform:rotate(5deg)}
 #class-content>.student-bonus{
  margin-top:17px;display:grid;
  grid-template-columns:auto minmax(0,1fr);
@@ -314,3 +295,17 @@
 .assigned-bonuses .resource-grid{display:grid;gap:10px}
 .assigned-bonuses .resource{background:#fff;border:1px solid #d1e3e9;border-radius:13px;min-width:0}
 @media(prefers-reduced-motion:reduce){.assigned-bonuses *{animation:none!important;transition:none!important}}
+
+
+/* Club de Ideas: explicación editorial útil, sin simulaciones de proyectos. */
+.club-aula-copy{flex:1 1 55%}
+.club-aula-visual{flex:1 1 40%;height:auto;min-height:0;display:block}
+.club-editorial-flow{width:100%;max-width:420px;margin-left:auto;padding:clamp(22px,3vw,32px);background:#fcfbf7;border:1px solid #cbd7dd;border-top:3px solid #315c7a;border-radius:3px 17px 17px 3px;box-shadow:0 17px 38px #1d395512}
+.club-flow-eyebrow{margin:0 0 18px!important;color:#385e7b!important;font:700 10px/1.6 'DM Sans',Arial,sans-serif!important;letter-spacing:.16em}
+.club-flow-step{display:grid;grid-template-columns:37px minmax(0,1fr);gap:16px;align-items:start;padding:17px 0;border-top:1px solid #dfe5e8}
+.club-flow-number{font:italic 24px/1 'DM Serif Display',Georgia,serif;color:#7697ae}
+.club-flow-step strong{display:block;font-size:14px;color:#1d3349;letter-spacing:-.01em}
+.club-flow-step small{display:block;margin-top:5px;font-size:12px;line-height:1.65;color:#536e82}
+.club-flow-note{border-top:1px solid #dfe5e8;margin:4px 0 0!important;padding-top:17px;color:#526a7c!important;font-size:12px!important;font-style:italic}
+@media(max-width:720px){.club-aula-copy,.club-aula-visual{flex:1 1 auto;width:100%}.club-editorial-flow{max-width:none;margin:8px 0 0}.club-aula-entry{gap:24px}}
+@media(prefers-reduced-motion:reduce){.club-editorial-flow,.club-flow-step{transition:none!important;animation:none!important}}

@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react';
-import {ArrowRight, BookOpen, CalendarDays, Check, CheckCircle2, Circle, Clock3, ExternalLink, LockKeyhole, ShieldCheck, Video} from 'lucide-react';
+import {BookOpen, CalendarDays, Check, CheckCircle2, Circle, Clock3, ExternalLink, LockKeyhole, ShieldCheck, Video} from 'lucide-react';
 import {classLessons, CLASS_SECTION, CLASS_TASK_SECTION, CLASS_CHECKLIST} from './class-course';
 import './class-weekly-plan.css';
 
@@ -119,7 +119,7 @@ export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
       <div className="weekly-plan-item-main">
        <div className="weekly-plan-item-row"><strong>{t.title.replace(/^CLASE 01 · /,'')}</strong><span>{t.date?shortDate(t.date):'Sin fecha'}</span></div>
        {t.summary&&<p>{t.summary}</p>}
-       {video&&<small className="weekly-plan-video"><Video size={13}/>{video} · <a href="#class-filming-workspace">Abrir fichas <ArrowRight size={12}/></a></small>}
+       {video&&<small className="weekly-plan-video"><Video size={13}/>{video} · <a href="#class-filming-workspace">Abrir fichas </a></small>}
        <small className="weekly-plan-item-state">{done?'Completado y guardado':t.status==='en curso'?'En curso':'Pendiente'}</small>
       </div>
      </article>;
@@ -127,7 +127,7 @@ export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
    </div>:<p className="weekly-plan-empty">Esta semana no tiene tareas nuevas. Revisa las fichas de grabación y no adelantes la apertura sin tener todo aprobado.</p>}
    <div className="weekly-plan-actions">
     <button type="button" disabled={selected===0} onClick={()=>setSelected(v=>Math.max(0,v-1))}>Semana anterior</button>
-    <button type="button" disabled={selected===classWeeks.length-1} onClick={()=>setSelected(v=>Math.min(classWeeks.length-1,v+1))}>Siguiente semana <ArrowRight size={15}/></button>
+    <button type="button" disabled={selected===classWeeks.length-1} onClick={()=>setSelected(v=>Math.min(classWeeks.length-1,v+1))}>Siguiente semana </button>
    </div>
    {feedback&&<p className="weekly-plan-error" role="alert">{feedback}</p>}
   </div>

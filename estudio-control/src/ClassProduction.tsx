@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
+import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
 
@@ -122,13 +122,13 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        return <button key={item.id} type="button" className={'class-module '+(item.id===lesson.id?'selected':'')} onClick={()=>choose(item.id)} aria-current={item.id===lesson.id?'step':undefined}>
         <span className="class-number">{item.id}</span>
         <span className="class-module-main"><b>{item.title}</b><small>{item.minutes} min aprox. · {stage}</small></span>
-        {stage==='aprobado'?<CheckCircle2 size={17}/>:<ArrowRight size={16}/>}
+        {stage==='aprobado'&&<CheckCircle2 size={17}/>}
        </button>;
       })}
     </aside>
     <div className="class-workspace">
       <div className="class-lesson-header">
-       <span className="class-mini-heading">VIDEO {lesson.id} / 08 · META {lesson.minutes} MIN</span>
+       <span className="class-mini-heading">VIDEO {Number(lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
        <h3>{lesson.title}</h3>
        <p>{lesson.outcome}</p>
       </div>
@@ -165,9 +165,9 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
         <p>{lesson.beats[scene].show}</p>
        </div>
        <div className="class-scene-nav">
-        <button type="button" disabled={scene===0} onClick={()=>{setScene(scene-1);setCopied('');}}><ArrowLeft size={17}/> Anterior</button>
+        <button type="button" disabled={scene===0} onClick={()=>{setScene(scene-1);setCopied('');}}> Anterior</button>
         <span>{scene+1} / {lesson.beats.length}</span>
-        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(scene+1);setCopied('');}}>Siguiente escena <ArrowRight size={17}/></button>
+        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(scene+1);setCopied('');}}>Siguiente escena </button>
        </div>
       </div> : <div className="class-overview-beats">{lesson.beats.map((beat,i)=><article key={i}><h5>{i+1}. {beat.label}</h5><b>Qué decir</b><p>{beat.say}</p><b>Qué enseñar</b><p>{beat.show}</p></article>)}</div>}
       <div className="class-copy-row class-prompt-actions">
@@ -200,7 +200,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <span>Clase 01 · Archivo de producción privado · 9 videos · {classTotalMinutes} minutos objetivo</span>
        <div>
         <a href={CLASS_STUDENT} target="_blank" rel="noreferrer">Paquete del alumno <ExternalLink size={13}/></a>
-        {lesson.id!=='08'&&<button type="button" onClick={()=>choose(classLessons[Number(lesson.id)+1].id)}>Próximo video <ArrowRight size={16}/></button>}
+        {lesson.id!=='08'&&<button type="button" onClick={()=>choose(classLessons[Number(lesson.id)+1].id)}>Próximo video </button>}
        </div>
       </footer>
     </div>
