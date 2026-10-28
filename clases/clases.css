@@ -958,3 +958,95 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  .class-page-v2 .class-evidence-photo{border-radius:18px}
  .class-page-v2 .class-evidence-photo figcaption{font-size:1.05rem;padding:0 14px 14px}
 }
+
+
+/* FIX · hero editorial 28 oct: sin recortar pelo, sin tarjeta sobre fondo claro.
+   Muestra la foto de laptop COMPLETA usando contain, bordes sin marcos y
+   mezcla sobre el color del hero para disolver el blanco de la fotografía. */
+.class-page-v2 .class-hero .class-hero-art{
+ align-self:center;
+ width:min(100%,540px);
+ max-width:540px;
+ padding:clamp(10px,1.6vw,25px) 0 0;
+ overflow:visible!important;
+ margin-inline:auto;
+}
+.class-page-v2 .class-hero .class-hero-art .class-hero-image-frame{
+ display:block;
+ width:100%;
+ height:auto!important;
+ min-height:0!important;
+ aspect-ratio:auto!important;
+ overflow:visible!important;
+ background:transparent!important;
+ border:0!important;
+ outline:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+.class-page-v2 .class-hero .class-hero-art .class-hero-image-frame img{
+ display:block;
+ width:100%;
+ height:auto!important;
+ max-height:none!important;
+ aspect-ratio:1/1!important;
+ object-fit:contain!important;
+ object-position:center center!important;
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ mix-blend-mode:multiply;
+}
+/* Contraste real sobre marfil: evitar tipografía pálida sobre fondo pálido.
+   Estos textos no pertenecen a bloques con fondo navy. */
+.class-page-v2 .class-hero .class-price-inline .class-price-label{
+ color:#3b617e!important;
+ font-weight:800;
+}
+.class-page-v2 .class-hero .class-price-inline .class-price-regular span{
+ color:#405e77!important;
+}
+.class-page-v2 .class-hero .class-price-inline .class-price-regular del{
+ color:#47677f!important;
+ text-decoration-color:#496d86!important;
+}
+.class-page-v2 .class-hero .class-price-current strong{color:#132e48!important}
+.class-page-v2 .class-hero .class-availability{color:#335871!important}
+.class-page-v2 .class-hero .class-notice,
+.class-page-v2 .class-hero .class-notice strong{
+ color:#193a56!important;
+ font-weight:700;
+}
+.class-page-v2 .class-hero .class-lede{color:#344f65!important}
+.class-page-v2 .class-hero .class-opportunity{color:#1b3f5b!important}
+@media(max-width:900px){
+ .class-page-v2 .class-hero .class-hero-art{
+   width:calc(100% - 28px);
+   max-width:520px;
+   margin-top:9px;
+   padding-top:13px;
+ }
+ .class-page-v2 .class-hero .class-hero-art img{
+   object-fit:contain!important;
+   object-position:center center!important;
+ }
+}
+@media(max-width:650px){
+ .class-page-v2 .class-hero .class-hero-art{
+   width:calc(100% - 20px);
+   max-width:none;
+   padding-top:12px;
+   margin:8px auto 0;
+ }
+ .class-page-v2 .class-hero .class-hero-art .class-hero-image-frame{
+   aspect-ratio:auto!important;
+   border-radius:0!important;
+   box-shadow:none!important;
+ }
+ .class-page-v2 .class-hero .class-hero-art .class-hero-image-frame img{
+   aspect-ratio:1/1!important;
+   object-fit:contain!important;
+   object-position:center center!important;
+ }
+}
