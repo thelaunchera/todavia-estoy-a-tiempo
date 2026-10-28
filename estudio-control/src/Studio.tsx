@@ -1,7 +1,7 @@
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import BonusLibrary from './BonusLibrary';
-import { CLASS_SECTION } from './class-course';
+import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
@@ -506,6 +506,8 @@ function App() {
   );
   const tasks = items.tareas,
     products = items.productos;
+  // Una sola lista de trabajo de la clase: vive en Clases · grabación, no se duplica en Tareas.
+  const generalTasks=tasks.filter(x=>x.section!==CLASS_TASK_SECTION);
   const plan = editorialPlan(episodes);
   const libraryEpisodes = episodeScope === 'month' ? plan.month : episodeScope === 'published' ? plan.published : plan.active;
   const allSeries = groupEpisodes(libraryEpisodes);
@@ -751,7 +753,7 @@ function App() {
   );
   const taskRows = (
     <div className="task-list">
-      {visible(tasks).map(x => (
+      {visible(generalTasks).map(x => (
         <div
           className={'task ' + (x.status === 'completado' ? 'done' : '')}
           key={x.id}
@@ -774,7 +776,7 @@ function App() {
           {buttons('tareas', x)}
         </div>
       ))}
-      {visible(tasks).length === 0 && empty}
+      {visible(generalTasks).length === 0 && empty}
     </div>
   );
   const statusPanel = (title: string, desc: string) => (
@@ -1219,6 +1221,7 @@ function App() {
                 />
               </div>
               {taskRows}
+              <p className="hint"><BookOpen size={16}/> Las tareas semanales de la clase se gestionan en <button type="button" onClick={()=>change('clases')} className="class-plan-inline-link">Clases · grabación</button>, sin duplicarlas aquí.</p>
             </>
           )}
           {page === 'productos' && (
@@ -1298,7 +1301,10 @@ function App() {
           )}
           {page === 'bonos' && <BonusLibrary />}
           {page === 'clases' && (
-            <ClassProduction entries={items.ideas} launchStats={classStats} onSave={async (entry, changes) => {
+            <ClassProduction entries={items.ideas} tasks={items.tareas} launchStats={classStats} onTaskToggle={async (task,next) => {
+              await api.put('/api/items/tareas/'+task.id, { ...task, status:next });
+              await refresh();
+            }} onSave={async (entry, changes) => {
               await api.put('/api/items/ideas/' + entry.id, { ...entry, ...changes });
               await refresh();
             }} />
