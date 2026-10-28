@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:spotify-links": "node --experimental-strip-types --test tests/spotify-links.test.mjs",
+    "test:editorial-plan": "node --experimental-strip-types --test tests/editorial-plan.test.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
