@@ -147,15 +147,33 @@ async function showCourse(email,asAdmin=false){
  ]);
  if(l.error||r.error||p.error)throw l.error||r.error||p.error;
  lessons=l.data||[];done=new Set((p.data||[]).map(x=>x.lesson_code));
+ const allResources=r.data||[];
+ const generalResources=allResources.filter(item=>!item.resource_code.startsWith('bonus_'));
+ const personalBonuses=asAdmin?[]:allResources.filter(item=>item.resource_code.startsWith('bonus_')&&item.status==='ready');
  const resources=$('resource-list');resources.replaceChildren();
- (r.data||[]).forEach(item=>{
+ generalResources.forEach(item=>{
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
   if(!item.url || !/^https:\/\//i.test(item.url)){a.removeAttribute('href');a.removeAttribute('target');}
   escapedText(a,'span',asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL','resource-tag');
   escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir ↗':'En preparación','resource-link');
   resources.appendChild(a);
  });
- $('empty-resources').hidden=Boolean((r.data||[]).length);
+ $('empty-resources').hidden=Boolean(generalResources.length);
+ const personalBox=$('assigned-bonuses');
+ const personalList=$('assigned-bonus-list');
+ personalList.replaceChildren();
+ personalBonuses.forEach(item=>{
+  const link=document.createElement('a');
+  link.className='resource';
+  link.href=item.url;
+  link.rel='noopener noreferrer';
+  link.target='_blank';
+  escapedText(link,'span','BONO PARA TI','resource-tag');
+  escapedText(link,'strong',item.title);
+  escapedText(link,'span','Abrir bono ↗','resource-link');
+  personalList.appendChild(link);
+ });
+ personalBox.hidden=asAdmin||personalBonuses.length===0;
  $('admin-preview-banner').hidden=!asAdmin;
  $('student-progress').hidden=asAdmin;
  $('progress-label').hidden=asAdmin;
