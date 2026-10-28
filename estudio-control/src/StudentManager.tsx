@@ -101,12 +101,12 @@ export default function StudentManager() {
                     return <label className={'student-manager-bonus-option '+(checked?'assigned':'')} key={resource.resource_code}>
                       <input type="checkbox" checked={checked} disabled={!eligible||Boolean(saving)} onChange={e=>void toggle(student.buyer_email,resource.resource_code,e.target.checked)}/>
                       <span className="student-manager-bonus-text"><strong>{resource.title}</strong>
-                      <small>{resource.status==='ready'?'Disponible para el alumno asignado':'En preparación · no visible todavía para el alumno'}{saving===key?' · Guardando…':''}</small></span>
+                      <small>{resource.status==='ready'?'Asignado · se entrega tras completar las 9 lecciones y publicar el proyecto':'En preparación · no visible todavía para el alumno'}{saving===key?' · Guardando…':''}</small></span>
                       {checked&&<Check size={18}/>}
                     </label>;
                   })}
                 </div>
-                <p className="student-manager-note">Solo verá los bonos marcados aquí que estén activados en Biblioteca de bonos. Quitar la marca retira su acceso desde el aula.</p>
+                <p className="student-manager-note">El bono se mostrará únicamente a esta persona cuando esté activado y haya completado las nueve lecciones y compartido su proyecto. Quitar la marca retira la asignación.</p>
               </div>}
             </article>;
           })}
