@@ -322,3 +322,32 @@ export async function importLocalRecords(passphrase: string) {
   }
   return { total:rows.length, imported, existing:rows.length-imported, verified:rows.length };
 }
+
+/**
+ * Subida privada por sesión de administradora a un contenedor público SOLO para
+ * portadas de episodios. No se permite subir los MP3 ni documentos privados.
+ * Requiere aplicar estudio-control/sql/portadas-episodios-publicas.sql.
+ */
+export async function uploadEpisodeArt(file: File): Promise<string> {
+  if (!client || !SUPABASE_ENABLED) throw new Error('La carga de imágenes solo está disponible con Supabase conectado.');
+  const supported: Record<string,string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp'
+  };
+  const ext = supported[file.type];
+  if (!ext) throw new Error('Sube un archivo PNG, JPG o WebP.');
+  if (file.size < 1 || file.size > 5 * 1024 * 1024) throw new Error('La portada debe pesar entre 1 byte y 5 MB.');
+  const currentOwner = await owner();
+  const bucket = 'podcast-episode-art';
+  const filePath = currentOwner.id + '/' + crypto.randomUUID() + '.' + ext;
+  const { error } = await client.storage.from(bucket).upload(filePath,file,{
+    contentType:file.type,
+    cacheControl:'31536000',
+    upsert:false
+  });
+  if (error) throw new Error('No se pudo guardar la foto pública. Revisa la configuración del almacenamiento o prueba otro archivo.');
+  const { data } = client.storage.from(bucket).getPublicUrl(filePath);
+  if (!data?.publicUrl) throw new Error('La foto se subió pero no pudimos obtener su enlace público.');
+  return data.publicUrl;
+}
