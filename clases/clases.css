@@ -1495,3 +1495,122 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
  .class-page-v2 .class-value-orbit .class-orbit-wheel{animation:none!important;transform:translate(-50%,-50%) rotate(0deg)!important}
  .class-page-v2 .class-value-orbit .class-orbit-icon-upright{animation:none!important;transform:none!important}
 }
+
+/* Countdown mini dentro del banner, A LA DERECHA del logo.
+ * No se repite como tarjeta bajo el título de la clase. */
+.class-page-v2 .class-topbar .class-topbar-inner{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:clamp(10px,2vw,24px);min-height:95px;
+}
+.class-page-v2 .class-topbar .class-wordmark{
+ display:flex;align-items:center;min-width:0;flex:0 1 auto;
+}
+.class-page-v2 .class-topbar .class-wordmark img{
+ width:clamp(140px,18vw,185px);
+ height:auto;max-height:66px;object-fit:contain;
+}
+.class-page-v2 .class-topbar .class-launch-clock{
+ --flip-w:20px;
+ --flip-h:30px;
+ width:fit-content;max-width:340px;min-width:0;flex:0 1 auto;
+ display:grid;grid-template-columns:1fr auto;grid-template-areas:"label button" "timer button";
+ align-items:center;column-gap:15px;row-gap:5px;
+ margin:0;padding:8px 11px;
+ box-shadow:none;border:1px solid #536d86;
+ border-radius:16px;background:#1b344e;
+}
+.class-page-v2 .class-topbar .class-launch-clock-heading{grid-area:label;display:block}
+.class-page-v2 .class-topbar .class-launch-clock-kicker{
+ font-size:.53rem;letter-spacing:.14em;line-height:1;color:#b9d5e5;
+}
+.class-page-v2 .class-topbar .class-launch-clock-heading p,
+.class-page-v2 .class-topbar .class-launch-clock-status,
+.class-page-v2 .class-topbar .class-launch-clock-fallback{
+ display:none!important;
+}
+.class-page-v2 .class-topbar .class-flip-timer{
+ grid-area:timer;margin:0;gap:4px;justify-content:flex-start;
+ align-self:center;align-items:start;
+}
+.class-page-v2 .class-topbar .class-flip-unit{gap:3px}
+.class-page-v2 .class-topbar .class-flip-digits{gap:2px}
+.class-page-v2 .class-topbar .class-flip-digit{
+ font-size:1.12rem;--flip-w:20px;--flip-h:30px;
+}
+.class-page-v2 .class-topbar .class-flip-label{
+ font-size:.43rem;letter-spacing:.06em;line-height:1;
+}
+.class-page-v2 .class-topbar .class-flip-divider{
+ height:30px;font-size:.75rem;align-items:center;
+}
+.class-page-v2 .class-topbar .class-launch-clock-footer{
+ grid-area:button;margin:0;padding:0;border:0;
+ justify-content:flex-end;
+}
+.class-page-v2 .class-topbar .class-launch-clock-cta{
+ min-height:36px;padding:7px 11px;gap:5px;
+ font-size:.69rem;white-space:nowrap;
+}
+.class-page-v2 .class-topbar .class-launch-clock-cta .class-inline-arrow{width:12px;height:12px}
+@media(max-width:720px){
+ .class-page-v2 .class-topbar .class-topbar-inner{
+   min-height:83px;gap:8px;padding-inline:12px;
+ }
+ .class-page-v2 .class-topbar .class-wordmark img{
+   width:clamp(112px,33vw,152px);max-height:57px;
+ }
+ .class-page-v2 .class-topbar .class-launch-clock{
+   --flip-w:14px;--flip-h:23px;
+   grid-template-areas:"label label" "timer button";
+   grid-template-columns:minmax(0,1fr) auto;
+   width:min(205px,55vw);
+   padding:6px 8px;column-gap:8px;row-gap:5px;
+   border-radius:14px;
+ }
+ .class-page-v2 .class-topbar .class-flip-timer{gap:2px;justify-content:space-between}
+ .class-page-v2 .class-topbar .class-flip-digits{gap:1px}
+ .class-page-v2 .class-topbar .class-flip-digit{
+   font-size:.79rem;--flip-w:14px;--flip-h:23px;
+ }
+ .class-page-v2 .class-topbar .class-flip-divider{
+   font-size:.58rem;height:23px;
+ }
+ .class-page-v2 .class-topbar .class-flip-label{font-size:.39rem;letter-spacing:0}
+ .class-page-v2 .class-topbar .class-launch-clock-cta{
+   min-height:29px;font-size:.61rem;padding:6px 9px;
+ }
+ .class-page-v2 .class-topbar .class-launch-clock-cta svg{display:none}
+}
+@media(max-width:380px){
+ .class-page-v2 .class-topbar .class-wordmark img{width:110px}
+ .class-page-v2 .class-topbar .class-launch-clock{
+   width:188px;max-width:calc(100vw - 135px);
+   padding:6px 7px;column-gap:6px;
+ }
+ .class-page-v2 .class-topbar .class-flip-digit{
+   --flip-w:12px;--flip-h:22px;font-size:.75rem;
+ }
+ .class-page-v2 .class-topbar .class-launch-clock-cta{font-size:.57rem;padding:6px 7px}
+}
+@media(min-width:721px) and (max-width:960px){
+ .class-page-v2 .class-topbar .class-launch-clock{
+   max-width:330px;
+ }
+ .class-page-v2 .class-topbar .class-wordmark img{width:165px}
+}
+/* La fila del hero ya no reserva un hueco para el contador. */
+@media(max-width:900px){
+ .class-page-v2 .class-hero-grid{
+   grid-template-areas:
+     "eyebrow"
+     "heading"
+     "opportunity"
+     "visual"
+     "description"
+     "chips"
+     "price"
+     "actions"
+     "availability"
+     "launch";
+ }
+}

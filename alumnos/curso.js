@@ -24,23 +24,32 @@ function progressStats(){
  const total=lessons.length,completed=lessons.filter(l=>done.has(l.lesson_code)).length;
  return {total,completed,percent:total?Math.round(100*completed/total):0};
 }
+// Solo la clase completa y aprobada puede generar acceso al reto del bono.
+const REQUIRED_LESSON_COUNT=9;
 function bonusState(){
- const {total,completed}=progressStats(),allDone=total>0&&total===completed;
+ const {total,completed}=progressStats();
+ const allDone=total===REQUIRED_LESSON_COUNT
+  &&completed===REQUIRED_LESSON_COUNT
+  &&lessons.every(l=>done.has(l.lesson_code)&&l.status==='ready'&&validVideoId(l.youtube_video_id));
  const l=$('bonus-lessons'),p=$('bonus-project');
- l.classList.toggle('is-done',allDone);p.classList.toggle('is-done',projectShared);
- l.querySelector('span').textContent=allDone?'✓':'○';p.querySelector('span').textContent=projectShared?'✓':'○';
+ l.classList.toggle('is-done',allDone);
+ p.classList.toggle('is-done',projectShared);
+ l.querySelector('span').textContent=allDone?'✓':'○';
+ p.querySelector('span').textContent=projectShared?'✓':'○';
+ const eligible=allDone&&projectShared&&!adminPreview;
  const status=$('bonus-status');
- if(allDone&&projectShared){
-  status.textContent='¡Completaste los dos pasos! Tu bono está pendiente de anuncio y entrega.';
+ $('bonus-unlocked').hidden=!eligible;
+ if(eligible){
+  status.textContent='¡Completaste las lecciones y compartiste tu web! Requisitos del bono cumplidos.';
   status.dataset.state='earned';
  }else if(allDone){
-  status.textContent='¡Terminaste las lecciones! Comparte tu primera web en el Club de Ideas.';
+  status.textContent='Te falta un paso: publica tu primera web en Proyectos, dentro del Club de Ideas.';
   status.dataset.state='progress';
  }else if(projectShared){
-  status.textContent='¡Ya compartiste tu proyecto! Continúa con las lecciones.';
+  status.textContent='¡Tu web ya está en el club! Termina las lecciones para activar el bono.';
   status.dataset.state='progress';
  }else{
-  status.textContent='Pronto te contaremos qué incluye el bono.';
+  status.textContent='Bono bloqueado · termina las lecciones y comparte tu web en el Club de Ideas.';
   status.dataset.state='pending';
  }
 }
