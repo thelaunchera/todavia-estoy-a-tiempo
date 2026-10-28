@@ -1,6 +1,6 @@
 import SupportInbox from './SupportInbox';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, type AudioStats } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, uploadEpisodeArt, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -270,6 +270,7 @@ function App() {
       newItem: boolean;
     } | null>(null),
     [saving, setSaving] = useState(false),
+    [artUploading, setArtUploading] = useState(false),
     [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<{ kind: Kind; item: Row } | null>(
     null
@@ -1792,6 +1793,33 @@ function App() {
                     />
                   </label>
                   <label>
+                    Subir foto del capítulo para portada y correo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      disabled={artUploading || saving}
+                      onChange={async event => {
+                        const input = event.currentTarget;
+                        const file = input.files?.[0];
+                        if (!file) return;
+                        setArtUploading(true);
+                        setFormError('');
+                        try {
+                          const publicUrl = await uploadEpisodeArt(file);
+                          setEdit(current => current
+                            ? { ...current, item: { ...current.item, art: publicUrl, email_art_url: publicUrl } }
+                            : current);
+                        } catch (error) {
+                          setFormError(error instanceof Error ? error.message : 'No se pudo subir la foto.');
+                        } finally {
+                          setArtUploading(false);
+                          input.value = '';
+                        }
+                      }}
+                    />
+                    <small>{artUploading ? 'Subiendo la imagen pública…' : 'PNG, JPG o WebP · máximo 5 MB. La imagen subida se usa también en el correo de aviso; no se manda ningún correo al subirla.'}</small>
+                  </label>
+                  <label>
                     Foto pública del capítulo para el correo
                     <input
                       type="url"
@@ -1805,9 +1833,27 @@ function App() {
                         })
                       }
                     />
-                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). El enlace privado de Biblioteca no se mostrará en los correos. Guárdalo antes de publicar el episodio.</small>
+                    <small>También puedes pegar una URL pública directa (PNG, JPG o WebP). Nunca uses un enlace privado de Biblioteca.</small>
                   </label>
+                  {validEmailArtUrl(edit.item.email_art_url) && (
+                    <div className="episode-cover-preview">
+                      <img
+                        src={edit.item.email_art_url}
+                        alt={'Vista previa de la foto que irá en el correo de ' + (edit.item.title || 'este capítulo')}
+                        width="160"
+                        height="160"
+                        style={{ objectFit:'cover', borderRadius:12, maxWidth:'100%' }}
+                      />
+                      <small>Esta es la foto que aparecerá en el correo de lanzamiento del capítulo. Revísala antes de publicar.</small>
+                    </div>
+                  )}
                 </>
+              )}
+              {edit.kind === 'episodios' && (
+                <p className="episode-publish-helper">
+                  <a href="https://creators.spotify.com/" target="_blank" rel="noopener noreferrer">Abrir Spotify for Creators para subir el MP3 <ArrowUpRight size={14}/></a>
+                  <small>El Estudio prepara el audio, la portada y el correo; marcar «Publicado» NO sube el archivo a Spotify. Hazlo solo cuando Spotify confirme el enlace del episodio.</small>
+                </p>
               )}
               {(edit.kind === 'productos' || edit.kind === 'episodios') && (
                 <label>
@@ -1860,8 +1906,8 @@ function App() {
             )}
             <div className="modal-foot">
               <button onClick={() => setEdit(null)}>Cancelar</button>
-              <button disabled={saving} onClick={save}>
-                {saving ? 'Guardando…' : 'Guardar cambios'}
+              <button disabled={saving || artUploading} onClick={save}>
+                {saving ? 'Guardando…' : artUploading ? 'Subiendo foto…' : 'Guardar cambios'}
                 <ArrowRight size={16} />
               </button>
             </div>
