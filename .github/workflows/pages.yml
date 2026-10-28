@@ -73,6 +73,8 @@ jobs:
         run: node estudio-control/tests/check-landing-privacy.mjs
       - name: Verificar precios, enlaces y créditos públicos
         run: node estudio-control/tests/check-public-consistency.mjs
+      - name: Revisar preventa y privacidad del aula antes de empaquetar
+        run: node estudio-control/tests/check-course-prelaunch.mjs
       - name: Compilar el estudio desde el repositorio
         env:
           VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
@@ -98,7 +100,7 @@ jobs:
       - name: Empaquetar el podcast y su estudio
         run: |
           mkdir -p _podcast_pages/estudio
-          cp -R assets productos _podcast_pages/
+          cp -R assets productos clases alumnos _podcast_pages/
           cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
@@ -107,6 +109,10 @@ jobs:
           test -s _podcast_pages/index.html
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
+          test -s _podcast_pages/clases/primera-landing.html
+          test -s _podcast_pages/alumnos/index.html
+          test -s _podcast_pages/alumnos/curso.js
+          test -s _podcast_pages/clases/waitlist.js
           grep -q 'src="./assets/' _podcast_pages/estudio/index.html || grep -q 'src="/assets/' _podcast_pages/estudio/index.html
           echo 'Landing y Estudio presentes en el artefacto de Pages.'
       - name: Empaquetar sitio estático
