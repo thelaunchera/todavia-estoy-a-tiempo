@@ -46,17 +46,19 @@
    <a class="support" href="../index.html#ayuda">Solicitar ayuda</a>
   </section>
   <section id="class-content" hidden>
+   <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administradora · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
    <div class="welcome">
     <p class="eyebrow">BIENVENIDA AL AULA</p>
     <h2>Tu primera landing con IA</h2>
     <p>Las lecciones aparecen únicamente cuando cada video está aprobado. Ve a tu ritmo y marca lo que terminaste.</p>
     <p><strong id="progress-label">0 de 9 lecciones completadas</strong></p>
-    <div class="track"><div id="progress-bar"></div></div>
+    <div class="track" id="student-progress"><div id="progress-bar"></div></div>
    </div>
    <div class="room-grid">
     <aside class="lesson-index" aria-label="Lista de lecciones"><h3>Mis lecciones</h3><div id="lesson-buttons"></div></aside>
     <div class="lesson-stage">
       <div id="lesson-player" class="video-box" hidden></div>
+      <p id="lesson-unavailable" class="empty" hidden>Este video todavía está en preparación. Cuando se publique su enlace aprobado aparecerá aquí, sin cambiar el diseño del aula.</p>
       <p id="empty-lessons" class="empty">Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.</p>
       <div id="lesson-info" hidden>
        <p class="eyebrow" id="lesson-number"></p>
