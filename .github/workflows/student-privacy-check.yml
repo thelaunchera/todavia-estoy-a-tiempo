@@ -26,4 +26,4 @@ jobs:
           node --check alumnos/curso.js
           node --check alumnos/materiales-interactivos.js
       - name: Ejecutar controles de privacidad y bibliotecas sin duplicar
-        run: node --test estudio-control/tests/aula-privacidad-regresion.test.mjs
+        run: node --test estudio-control/tests/aula-privacidad-regresion.test.mjs alumnos/dashboard-inicio.test.mjs
