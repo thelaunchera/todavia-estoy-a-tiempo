@@ -143,3 +143,115 @@
  .lesson-celebration:not([hidden]){animation:none!important}
  .track div{transition:none!important}
 }
+
+
+/* Clase → Club → Bono: un recorrido vertical natural. */
+#class-content>.club-aula-entry{
+ margin:24px 0 0;
+ display:grid;grid-template-columns:minmax(0,1.2fr) minmax(235px,.8fr);
+ align-items:center;gap:clamp(20px,4vw,50px);
+ padding:clamp(25px,4vw,45px);
+ background:linear-gradient(137deg,#eff4f6 0%,#f8f7f2 80%);
+ border:1px solid #d4e0e7;border-radius:27px;
+ box-shadow:0 12px 30px #243e5512;
+ min-width:0;
+}
+#class-content>.club-aula-entry .club-aula-copy{min-width:0}
+#class-content>.club-aula-entry .eyebrow{
+ color:#48728c;font-size:10px;line-height:1.5;letter-spacing:.12em;
+}
+#class-content>.club-aula-entry h2{
+ font:400 clamp(31px,4vw,51px)/1.09 'DM Serif Display',Georgia,serif;
+ letter-spacing:-.035em;color:#18324b;margin:8px 0 13px;max-width:550px;
+}
+#class-content>.club-aula-entry h2 em{color:#648cac}
+#class-content>.club-aula-entry p{font-size:clamp(14px,1.45vw,16px);line-height:1.68;color:#48657a;max-width:570px}
+#class-content>.club-aula-entry strong{color:#1b3a53;font-weight:700}
+#class-content>.club-aula-entry .club-aula-points{
+ display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px;
+}
+#class-content>.club-aula-entry .club-aula-points span{
+ border:1px solid #bbcfdb;background:#fffef9;color:#31566d;
+ border-radius:999px;padding:8px 11px;font-size:11px;line-height:1.35;
+}
+#class-content>.club-aula-entry .club-aula-button{
+ margin-top:0;padding:13px 22px;min-height:49px;
+ background:#18334d;color:#fff;border-radius:999px;
+ text-decoration:none;display:inline-flex;width:max-content;max-width:100%;
+ font-size:13px;
+}
+#class-content>.club-aula-entry .club-aula-button:hover{
+ background:#254e6d;transform:translateY(-2px);
+}
+#class-content>.club-aula-entry .club-aula-button:focus-visible{outline:3px solid #95bfd5;outline-offset:3px}
+.club-aula-visual{height:265px;position:relative;display:grid;place-items:center;min-width:0}
+.club-aula-example{
+ position:relative;width:min(260px,88%);height:234px;padding:15px 17px;
+ border-radius:20px;background:#fffdfa;border:1px solid #d5e1e9;
+ box-shadow:0 17px 34px #21415e26;
+ transform:rotate(-4deg);
+}
+.club-aula-example-top{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.13em;color:#637c8f}
+.club-aula-example-top i{height:5px;width:5px;border-radius:50%;background:#9ebbd0}
+.club-aula-example-hero{height:95px;margin:15px 0 11px;border-radius:10px;background:linear-gradient(115deg,#d2e0ea,#8fb6cb 63%,#dce8ee)}
+.club-aula-example-line{height:9px;border-radius:999px;background:#dce7ed;width:78%;margin-bottom:9px}
+.club-aula-example-line.short{width:55%}
+.club-aula-example-cta{height:19px;width:87px;background:#18334d;border-radius:999px;margin-top:12px}
+.club-aula-sticker{
+ position:absolute;background:#fffefc;border:1px solid #d1e0e6;
+ box-shadow:0 7px 17px #243f571e;border-radius:999px;padding:9px 14px;
+ color:#385d75;font-size:12px;font-weight:700;
+}
+.club-aula-sticker-heart{right:1%;top:24px;transform:rotate(6deg)}
+.club-aula-sticker-chat{left:0;bottom:13px;transform:rotate(5deg)}
+#class-content>.student-bonus{
+ margin-top:17px;display:grid;
+ grid-template-columns:auto minmax(0,1fr);
+ align-items:center;gap:0 19px;
+ padding:clamp(23px,3vw,33px);
+ border-radius:24px;max-width:none;
+}
+#class-content>.student-bonus .student-bonus-icon{grid-row:1 / span 2;margin:0}
+#class-content>.student-bonus .eyebrow{grid-column:2;margin:0 0 2px}
+#class-content>.student-bonus h2{grid-column:2;font-size:clamp(29px,3vw,39px);margin:0}
+#class-content>.student-bonus>p:not(.eyebrow){
+ grid-column:1/-1;font-size:14px;line-height:1.65;margin:12px 0 6px;
+ max-width:750px;
+}
+#class-content>.student-bonus>p strong{color:#fff;font-weight:800}
+#class-content>.student-bonus .student-bonus-checks{
+ grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 25px;
+ margin:9px 0;padding:12px 0;
+}
+#class-content>.student-bonus .student-bonus-checks p{
+ flex:1 1 260px;font-size:13px;line-height:1.5;margin:0;
+}
+#class-content>.student-bonus .student-bonus-status{grid-column:1/-1;font-size:13px!important}
+#class-content>.student-bonus .bonus-unlocked:not([hidden]){
+ grid-column:1/-1;display:block;background:#e3f2eb;color:#214e45;
+ border-radius:16px;padding:16px 18px;margin-top:16px;
+}
+#class-content>.student-bonus .bonus-unlocked strong{font-size:16px}
+#class-content>.student-bonus .bonus-unlocked p{font-size:13px;line-height:1.6;margin:6px 0 0;color:#285b4e}
+@media(max-width:790px){
+ #class-content>.club-aula-entry{
+  grid-template-columns:1fr;gap:9px;margin-top:17px;padding:23px 20px;
+ }
+ #class-content>.club-aula-entry .club-aula-visual{height:235px;order:0}
+ .club-aula-example{height:208px;width:220px}
+ .club-aula-example-hero{height:81px}
+}
+@media(max-width:520px){
+ #class-content>.club-aula-entry{padding:21px 17px;border-radius:20px}
+ #class-content>.club-aula-entry h2{font-size:clamp(30px,8.1vw,39px)}
+ #class-content>.club-aula-entry .club-aula-points{gap:6px;margin:14px 0 16px}
+ #class-content>.club-aula-entry .club-aula-points span{font-size:10px}
+ #class-content>.club-aula-entry .club-aula-button{width:100%}
+ #class-content>.student-bonus{margin-top:13px;padding:20px 17px;gap:0 12px}
+ #class-content>.student-bonus .student-bonus-checks{flex-direction:column;gap:13px}
+ #class-content>.student-bonus .student-bonus-checks p{flex-basis:auto}
+ #class-content>.club-aula-entry .club-aula-visual{height:215px}
+}
+@media(prefers-reduced-motion:reduce){
+ #class-content>.club-aula-entry .club-aula-button{transition:none!important}
+}
