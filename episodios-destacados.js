@@ -1,4 +1,4 @@
-/* Una sección de escucha, no una lista infinita.
+/* Una sección de escucha en orden cronológico, no una lista infinita.
    Añadir cada episodio publicado a este catálogo; la portada muestra automáticamente
    el más reciente y el anterior. Los demás se descubren en el enlace a Spotify.
    Nunca añadir borradores ni enlaces de la página general a este catálogo. */
@@ -27,8 +27,11 @@
     Number.isInteger(e.number) && spotifyEpisode.test(e.url))
     .sort((a, b) => b.number - a.number);
   if (!published.length) return;
-  const latest = published[0];
-  const previous = published[1];
+  // Mostrar los dos últimos publicados en orden cronológico: 01, luego 02.
+  // A partir del episodio 3 se mantiene el catálogo compacto (02, 03, etc.).
+  const visible = published.slice(0, 2).sort((a, b) => a.number - b.number);
+  const latest = visible[0];
+  const previous = visible[1];
   const section = document.getElementById('escuchar');
   if (!section) return;
   const text = (selector, value) => {
@@ -74,7 +77,7 @@
       previousCard.hidden = true;
     } else {
       previousCard.hidden = false;
-      text('[data-ep-previous-number]', `EPISODIO ${String(previous.number).padStart(2, '0')} · POR SI TE LO PERDISTE`);
+      text('[data-ep-previous-number]', `EPISODIO ${String(previous.number).padStart(2, '0')} · YA DISPONIBLE`);
       text('[data-ep-previous-title]', previous.title);
       text('[data-ep-previous-summary]', previous.summary);
       for (const previousLink of previousCard.querySelectorAll('a')) {

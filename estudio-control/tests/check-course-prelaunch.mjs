@@ -159,3 +159,21 @@ assert.doesNotMatch(classPage,/class-evidence-board/);
 assert.match(podcastCss,/episodes-compact-v2 \.episode-curated-grid/);
 assert.match(podcastHeroCss,/Podcast · mensaje claro en una mirada/);
 console.log('QA: podcast claro, episodios 01 y 02 compactos y tres fotografías independientes OK');
+
+
+/* Revisión pública: hero íntegro, contraste claro y episodios cronológicos. */
+const episodeOrderJs=read('episodios-destacados.js');
+const episodeOrderStart=home.indexOf('<div class="episode-curated-grid">');
+const episodeOrderEnd=home.indexOf('<div class="episode-curated-bottom">',episodeOrderStart);
+const episodeOrderMarkup=home.slice(episodeOrderStart,episodeOrderEnd);
+assert.ok(episodeOrderStart>=0 && episodeOrderEnd>episodeOrderStart);
+assert.ok(episodeOrderMarkup.indexOf('EPISODIO 01')<episodeOrderMarkup.indexOf('EPISODIO 02'),'El episodio 01 aparece primero');
+assert.ok(episodeOrderMarkup.includes('21aYHKY0kodWEzg1835xcD'),'Ep 01 Spotify real');
+assert.ok(episodeOrderMarkup.includes('6ICSx9E7BVlU8Qi8rFC0s3'),'Ep 02 Spotify real');
+assert.match(episodeOrderJs,/published\.slice\(0, 2\)\.sort\(\(a, b\) => a\.number - b\.number\)/);
+assert.match(newStyles,/class-hero .class-hero-art .class-hero-image-frame img\{/);
+assert.match(newStyles,/object-fit:contain!important/);
+assert.match(newStyles,/mix-blend-mode:multiply/);
+assert.match(newStyles,/class-hero .class-notice strong\{/);
+assert.match(newStyles,/color:#193a56!important/);
+console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografía contrastada OK');
