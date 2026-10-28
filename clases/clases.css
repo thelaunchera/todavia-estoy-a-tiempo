@@ -593,3 +593,72 @@ html:has(.class-page-v2){scroll-padding-top:84px}
 .class-page-v2 input[type="submit"]{
   border-radius:999px!important;
 }
+
+
+/* Clase 01 · hero editorial con fotografía protagonista y lectura móvil primero. */
+.class-page-v2 .class-hero{
+  padding:clamp(35px,4vw,62px) 0 clamp(52px,6vw,90px);
+  background:radial-gradient(ellipse at 90% 12%,#dfe9ee 0%,transparent 51%),linear-gradient(140deg,#f8f9f7 0%,#f9f6ee 100%);
+  color:#13243d;
+}
+.class-page-v2 .class-hero::before{display:none}
+.class-page-v2 .class-hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+  grid-template-areas:"intro visual";
+  align-items:center;
+  gap:clamp(24px,5vw,74px);
+}
+.class-page-v2 .class-hero-intro{grid-area:intro;align-self:center;min-width:0}
+.class-page-v2 .class-hero-art{grid-area:visual;align-self:center;margin:0;min-width:0;width:100%;max-height:none}
+.class-page-v2 .class-hero .class-eyebrow{font-size:.67rem;color:#486b88;line-height:1.5;letter-spacing:.16em}
+.class-page-v2 .class-hero h1{
+  max-width:650px;
+  font-size:clamp(3.45rem,5.9vw,6.5rem);
+  line-height:1.015;
+  letter-spacing:-.057em;
+  margin:18px 0 0;
+  text-wrap:balance;
+  color:#101d34;
+}
+.class-page-v2 .class-hero h1 em{color:#537fa2}
+.class-page-v2 .class-hero p.class-lede{color:#4b6072;max-width:555px;font-size:clamp(.97rem,1.27vw,1.12rem);line-height:1.7;margin:24px 0 0}
+.class-page-v2 .class-hero-image-frame{overflow:hidden;border-radius:30px;background:#dee7ef;border:1px solid #d1dfe8;box-shadow:0 25px 75px #1c33401f}
+.class-page-v2 .class-hero-art img{width:100%;height:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 45%;display:block}
+.class-page-v2 .class-hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0}
+.class-page-v2 .class-hero-chips span{display:inline-flex;align-items:center;min-height:35px;border:1px solid #c4d2dc;background:#ffffff9c;border-radius:999px;padding:8px 12px;font-size:.72rem;font-weight:650;color:#304c63;line-height:1.2}
+.class-page-v2 .class-hero .class-price-inline{border-color:#c9d6de;margin-top:24px;padding-top:18px}
+.class-page-v2 .class-hero .class-price-current strong{color:#101d34}
+.class-page-v2 .class-hero .class-price-regular,.class-page-v2 .class-hero .class-price-label,.class-page-v2 .class-hero .class-price-clarifier{color:#5b7081}
+.class-page-v2 .class-hero .class-hero-actions{margin-top:23px;gap:10px;display:flex;flex-wrap:wrap}
+.class-page-v2 .class-hero .class-primary-button{background:#101d34;color:#fff;border-color:#101d34;border-radius:999px}
+.class-page-v2 .class-hero .class-primary-button:hover{background:#274b69;color:#fff}
+.class-page-v2 .class-hero .class-ghost-button{color:#152f49;border:1px solid #9fb8c9;border-radius:999px;background:transparent}
+.class-page-v2 .class-hero .class-ghost-button:hover{color:#152f49;background:#e5eef3}
+.class-page-v2 .class-hero .class-availability,.class-page-v2 .class-hero .class-notice{color:#62798d;line-height:1.6;font-size:.75rem}
+.class-page-v2 .class-hero .class-pulse{background:#568b77}
+@media(max-width:900px){
+  .class-page-v2 .class-hero{padding:14px 0 56px}
+  .class-page-v2 .class-hero-grid{grid-template-columns:1fr;grid-template-areas:"visual" "intro";gap:0}
+  .class-page-v2 .class-hero-art{grid-area:visual;max-width:620px;width:100%;margin:0 auto 23px}
+  .class-page-v2 .class-hero-image-frame{border-radius:23px}
+  .class-page-v2 .class-hero-art img{aspect-ratio:5/4;object-fit:cover;object-position:50% 45%}
+  .class-page-v2 .class-hero-intro{grid-area:intro}
+}
+@media(max-width:650px){
+  .class-page-v2 .class-hero{padding:0 0 54px}
+  .class-page-v2 .class-hero-grid{width:100%;gap:0;grid-template-areas:"visual" "intro";grid-template-columns:1fr}
+  .class-page-v2 .class-hero-art{width:100%;max-width:100%;margin:0 0 24px}
+  .class-page-v2 .class-hero-image-frame{border:0;border-radius:0;box-shadow:none}
+  .class-page-v2 .class-hero-art img{aspect-ratio:1.24;object-fit:cover;object-position:50% 46%}
+  .class-page-v2 .class-hero-intro{padding:0 18px;width:100%;max-width:540px;margin:0 auto}
+  .class-page-v2 .class-hero .class-eyebrow{font-size:.6rem;letter-spacing:.13em}
+  .class-page-v2 .class-hero h1{font-size:clamp(2.55rem,10.5vw,4rem);line-height:1.04;margin-top:14px;letter-spacing:-.055em}
+  .class-page-v2 .class-hero p.class-lede{font-size:.95rem;line-height:1.65;margin-top:17px}
+  .class-page-v2 .class-hero-chips{gap:7px;margin-top:17px}
+  .class-page-v2 .class-hero-chips span{font-size:.67rem;min-height:33px;padding:7px 10px}
+  .class-page-v2 .class-hero .class-price-inline{margin-top:20px;padding-top:16px}
+  .class-page-v2 .class-hero .class-hero-actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:20px}
+  .class-page-v2 .class-hero .class-primary-button,.class-page-v2 .class-hero .class-ghost-button{width:100%;min-height:52px;text-align:center}
+  .class-page-v2 .class-hero .class-notice{margin-top:12px}
+}
