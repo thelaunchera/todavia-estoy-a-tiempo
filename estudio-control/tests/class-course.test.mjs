@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {classLessons,classRecordingScript,classTotalMinutes,CLASS_SECTION,CLASS_LAUNCH} from '../src/class-course.ts';
+import {readFileSync} from 'node:fs';
+import {classLessons,classRecordingScript,classTotalMinutes,CLASS_SECTION,CLASS_TASK_SECTION,CLASS_CHECKLIST,CLASS_LAUNCH} from '../src/class-course.ts';
 
 test('la clase contiene nueve videos únicos y un objetivo de 53 minutos',()=>{
  assert.equal(classLessons.length,9);
@@ -27,6 +28,22 @@ test('cada video tiene escenas, qué decir, qué mostrar, materiales y un prompt
   assert.match(script,/ESCENA 1/);
  }
 });
+test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>{
+ const component=readFileSync('src/ClassWeeklyPlan.tsx','utf8');
+ const studio=readFileSync('src/Studio.tsx','utf8');
+ const production=readFileSync('src/ClassProduction.tsx','utf8');
+ assert.equal(CLASS_TASK_SECTION,'Clase 01 · Lanzamiento 3 dic');
+ assert.match(CLASS_CHECKLIST,/app\.notion\.com\/p\//);
+ assert.match(component,/export const classWeeks=/);
+ assert.match(component,/onToggle\(t,/);
+ assert.match(component,/classLessons\.filter/);
+ assert.match(component,/visited\.has\(key\)/);
+ assert.doesNotMatch(component,/api\.post|localStorage|sessionStorage/);
+ assert.match(studio,/generalTasks=tasks\.filter\(x=>x\.section!==CLASS_TASK_SECTION\)/);
+ assert.match(studio,/onTaskToggle=/);
+ assert.match(production,/<ClassWeeklyPlan tasks=\{tasks\}/);
+});
+
 test('el ejemplo regulado es ficticio y el checkout se enseña con otro producto',()=>{
  const demo=classLessons.find(x=>x.id==='00');
  const pay=classLessons.find(x=>x.id==='07');
