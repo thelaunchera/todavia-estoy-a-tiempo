@@ -2166,3 +2166,13 @@ a:focus-visible {
 .support-message-sender { display:flex; flex-wrap:wrap; gap:8px 16px; overflow-wrap:anywhere; }
 .support-message-body { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.75; margin-bottom:0; }
 @media(max-width:600px) { .support-inbox-heading { flex-direction:column; } .support-message { padding:18px; } }
+
+/* Acceso permanente al Centro de alumnos en la navegación privada. */
+.studio-student-center{border:1px solid #bed0dc;background:#e8eff3;border-radius:22px;overflow:hidden;min-width:0}
+.studio-student-center-intro{display:flex;align-items:center;justify-content:space-between;gap:26px;padding:clamp(20px,3vw,30px);background:linear-gradient(120deg,#f4f7f5,#e4eef3)}
+.studio-student-center-intro>div{min-width:0}
+.studio-student-center-intro h2{font-size:clamp(1.55rem,3vw,2.35rem);line-height:1.2;margin:9px 0;color:#172f4b}
+.studio-student-center-intro p{color:#536b7d;line-height:1.65;max-width:690px;margin:0;font-size:.91rem}
+.studio-student-center-intro a{flex-shrink:0;display:inline-flex;gap:9px;align-items:center;justify-content:center;min-height:45px;padding:11px 17px;border-radius:999px;background:#14243b;color:white;text-decoration:none;font-size:.84rem;font-weight:650}
+.studio-student-center iframe{display:block;width:100%;border:0;height:min(90vh,950px);min-height:620px;background:#fffdf8}
+@media(max-width:800px){.studio-student-center-intro{flex-direction:column;align-items:stretch}.studio-student-center-intro a{width:100%}.studio-student-center iframe{min-height:730px}}
