@@ -145,24 +145,48 @@
  .lesson-stage{padding:17px}
  .student-sidebar .resources,.student-bonus{padding:19px 15px}
 }
-@media(max-width:950px){
- .room-grid{grid-template-columns:minmax(150px,210px) minmax(0,1fr);gap:14px}
- .student-sidebar{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:14px}
- .lesson-index{position:static}
+/* Mantener materiales JUNTO a la lección en tablets y en el iframe de Mi Estudio.
+   Antes, grid-row:2 los situaba bajo la altura completa de las 9 lecciones. */
+@media(min-width:770px) and (max-width:950px){
+ .room-grid{
+  grid-template-columns:minmax(135px,175px) minmax(0,1fr) minmax(190px,225px);
+  gap:10px;align-items:start;
+ }
+ .lesson-index{grid-column:1;grid-row:1;position:static;padding:15px 9px}
+ .lesson-index button{padding:10px 6px;gap:7px}
+ .index-title{font-size:11px}
+ .lesson-stage{grid-column:2;grid-row:1;padding:17px;min-height:0}
+ .student-sidebar{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:12px;align-self:start}
+ .student-sidebar .resources,.student-bonus{padding:17px 13px}
+ .student-sidebar .resource{padding:11px}
 }
-@media(max-width:750px){
+/* Tabletas estrechas: lecciones en una tira y contenido + materiales lado a lado. */
+@media(min-width:650px) and (max-width:769px){
  .student-greeting{grid-template-columns:1fr;padding:22px 20px;gap:18px}
- .room-grid{grid-template-columns:1fr;gap:14px}
- .lesson-index{grid-column:1;grid-row:auto}
- .lesson-stage{grid-column:1;grid-row:auto}
- .student-sidebar{grid-column:1;grid-row:auto;grid-template-columns:1fr 1fr;gap:12px}
+ .room-grid{grid-template-columns:minmax(0,1.15fr) minmax(220px,.85fr);gap:12px;align-items:start}
+ .lesson-index{grid-column:1/-1;grid-row:1;position:static;padding:14px}
+ .lesson-index>div{display:flex;flex-direction:row;gap:8px;overflow-x:auto;scroll-snap-type:x proximity}
+ .lesson-index button{flex:0 0 165px;min-width:165px;scroll-snap-align:start}
+ .lesson-stage{grid-column:1;grid-row:2;min-height:0;padding:18px}
+ .student-sidebar{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:12px}
+ .student-sidebar .resources,.student-bonus{padding:17px 14px}
+}
+/* Solo en teléfonos se apilan los bloques; jamás dejar un hueco de grid entre ellos. */
+@media(max-width:649px){
+ .student-greeting{grid-template-columns:1fr;padding:22px 20px;gap:18px}
+ .room-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:13px;align-items:start}
+ .lesson-index{grid-column:1;grid-row:auto;position:static;padding:16px}
+ .lesson-index>div{display:flex;flex-direction:row;gap:8px;overflow-x:auto;scroll-snap-type:x proximity}
+ .lesson-index button{flex:0 0 170px;min-width:170px;scroll-snap-align:start}
+ .lesson-stage{grid-column:1;grid-row:auto;min-height:0;padding:18px}
+ .student-sidebar{grid-column:1;grid-row:auto;display:flex;flex-direction:column;gap:12px}
  .student-sidebar .resources,.student-bonus{padding:18px}
 }
 @media(max-width:520px){
  .student-greeting{padding:20px 17px;margin-top:16px}
- .student-sidebar{grid-template-columns:1fr}
  .student-progress-card{padding:17px}
  .lesson-celebration:not([hidden]){padding:15px}
+ .lesson-stage{padding:17px}
  .student-sidebar .resource-grid{grid-template-columns:1fr}
  .club-aula-entry{margin-top:17px}
 }
