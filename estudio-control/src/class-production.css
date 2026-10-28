@@ -90,3 +90,10 @@
 @media(max-width:1180px){.class-body{grid-template-columns:1fr}.class-module-list{position:static;display:flex;flex-direction:row;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px}.class-module-list>.class-mini-heading{display:none}.class-module{min-width:177px;max-width:215px;scroll-snap-align:start}.class-number{font-size:18px}}
 @media(max-width:640px){.class-intro{grid-template-columns:1fr;padding:25px 19px}.class-overview{max-width:100%;padding:13px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px}.class-overview strong{font-size:34px}.class-overview .class-progress-track{grid-column:1/-1;width:100%;margin:3px 0}.class-overview>small{grid-column:1/-1}.class-intro h2{font-size:34px}.class-links a{flex:1 1 46%}.class-lesson-header{padding:20px}.class-scene-head{flex-direction:column;align-items:stretch}.class-segment{align-self:start}.class-form-grid{grid-template-columns:1fr}.class-prompter-meta{flex-direction:column;align-items:flex-start;gap:4px}.class-script-box{padding:20px}.class-script-box>p{font-size:22px}.class-screen-box{margin:0 12px 12px}.class-footer{flex-direction:column;align-items:flex-start}.class-safety{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.class-progress-track div{transition:none}}
+
+.class-method{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.class-method>div{background:#eff4f7;border:1px solid #d8e3ec;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.class-method span{color:#64829c;font:400 18px/1 'DM Serif Display',Georgia,serif}
+.class-method b{color:#2b4e6d;font-size:11px}
+.class-method small{color:#708499;line-height:1.55;font-size:10px}
+@media(max-width:700px){.class-method{grid-template-columns:repeat(2,minmax(0,1fr))}}
