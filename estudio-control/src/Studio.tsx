@@ -1,5 +1,6 @@
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
+import BonusLibrary from './BonusLibrary';
 import { CLASS_SECTION } from './class-course';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
@@ -53,6 +54,7 @@ type Page =
   | 'episodios'
   | 'clases'
   | 'alumnos'
+  | 'bonos'
   | 'club'
   | 'calendario'
   | 'tareas'
@@ -127,6 +129,7 @@ const NAV = [
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
+  { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
   { id: 'club', label: 'Club de Ideas', icon: Users },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Tareas', icon: ListChecks },
@@ -150,6 +153,7 @@ const LABELS: Record<Page, string> = {
   episodios: 'Episodios',
   clases: 'Clases · grabación',
   alumnos: 'Centro de alumnos',
+  bonos: 'Biblioteca de bonos',
   club: 'Club de Ideas',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
@@ -959,7 +963,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : (page === 'clases' || page === 'alumnos' || page === 'club')
+                  : (page === 'clases' || page === 'alumnos' || page === 'bonos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
@@ -1292,6 +1296,7 @@ function App() {
               <iframe title="Club de Ideas · gestión privada de la comunidad" src="../alumnos/comunidad.html" loading="lazy" referrerPolicy="same-origin"/>
             </section>
           )}
+          {page === 'bonos' && <BonusLibrary />}
           {page === 'clases' && (
             <ClassProduction entries={items.ideas} launchStats={classStats} onSave={async (entry, changes) => {
               await api.put('/api/items/ideas/' + entry.id, { ...entry, ...changes });
