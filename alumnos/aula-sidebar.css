@@ -131,3 +131,9 @@ button:focus-visible,.aula-rail a:focus-visible{outline:3px solid #87b5d0;outlin
  .aula-panel{animation:none!important}
  #aula-layout .aula-rail{transition:none!important}
 }
+
+/* Nota de privacidad visible solo dentro del aula autenticada. */
+.aula-main-actions{display:flex;align-items:center;gap:16px;min-width:0;flex-shrink:0}
+.aula-access-note{font:650 10px/1.4 'DM Sans',Arial,sans-serif;letter-spacing:.015em;color:#6c8799;white-space:nowrap}
+@media(max-width:600px){.aula-main-actions{gap:8px}.aula-access-note{font-size:9px;max-width:67px;white-space:normal;text-align:right;line-height:1.2}}
+@media(max-width:370px){.aula-access-note{max-width:55px}}
