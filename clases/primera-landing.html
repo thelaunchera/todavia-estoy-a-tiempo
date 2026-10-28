@@ -11,7 +11,7 @@
   <title>Tu primera web con IA · Clase práctica | Todavía estoy a tiempo</title>
   <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../styles-redesign.css">
-  <link rel="stylesheet" href="clases.css?v=20261028-copy-latino-spacing-v1">
+  <link rel="stylesheet" href="clases.css?v=20261028-flipclock-v1">
 </head>
 <body class="class-page class-page-v2">
   <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -41,6 +41,29 @@
           <p class="class-eyebrow">DE TU IDEA A TU PRIMERA WEB</p>
           <h1 id="class-title">Tu primera web <em>con IA.</em></h1>
           <p class="class-opportunity">Una idea puede convertirse en <em>un negocio.</em></p>
+
+          <div class="class-launch-clock" id="reloj-lanzamiento" data-launch-at="2026-12-03T00:00:00-05:00" aria-labelledby="class-launch-heading">
+            <div class="class-launch-clock-heading">
+              <span class="class-launch-clock-kicker">CUENTA REGRESIVA</span>
+              <p id="class-launch-heading">Cada vez falta menos para abrir la clase.</p>
+            </div>
+            <div class="class-flip-timer" role="timer" aria-live="off" aria-label="Tiempo restante hasta el lanzamiento oficial">
+              <div class="class-flip-unit" data-unit="days"><div class="class-flip-digits" data-digits="days"><span class="class-flip-placeholder">––</span></div><span class="class-flip-label">DÍAS</span></div>
+              <span class="class-flip-divider" aria-hidden="true">:</span>
+              <div class="class-flip-unit" data-unit="hours"><div class="class-flip-digits" data-digits="hours"><span class="class-flip-placeholder">––</span></div><span class="class-flip-label">HORAS</span></div>
+              <span class="class-flip-divider" aria-hidden="true">:</span>
+              <div class="class-flip-unit" data-unit="minutes"><div class="class-flip-digits" data-digits="minutes"><span class="class-flip-placeholder">––</span></div><span class="class-flip-label">MIN</span></div>
+              <span class="class-flip-divider" aria-hidden="true">:</span>
+              <div class="class-flip-unit" data-unit="seconds"><div class="class-flip-digits" data-digits="seconds"><span class="class-flip-placeholder">––</span></div><span class="class-flip-label">SEG</span></div>
+            </div>
+            <div class="class-launch-clock-footer">
+              <span class="class-launch-clock-status" id="class-launch-status">Tu primera web está más cerca.</span>
+              <a class="class-launch-clock-cta" href="#lista-espera">Avísame <svg class="class-inline-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 18 18 6M9 6h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+            <p class="class-launch-clock-fallback" hidden>La cuenta regresiva está disponible con JavaScript.</p>
+            <span class="class-launch-clock-reader" id="class-launch-reader" aria-live="off"></span>
+          </div>
+
           <p class="class-lede">Aprende a crear una página web sencilla con ayuda de ChatGPT. Puedes usarla para tu idea o hacer páginas para negocios de tu zona. No tienes que saber de coding ni ser experta en tecnología.</p>
           <div class="class-hero-chips" aria-label="Lo que aprenderás"><span>Para tu idea</span><span>Negocios de tu zona</span><span>Paso a paso</span></div>
           <div class="class-price-inline" aria-label="Precio de lanzamiento de la clase">
@@ -223,5 +246,6 @@
   <script src="../privacy-controls.js?v=20261027-compact-v2" data-site="podcast"></script>
   <script type="module" src="waitlist.js"></script>
   <script defer src="experience.js"></script>
+  <script defer src="countdown.js?v=20261028-flipclock-v1"></script>
 </body>
 </html>
