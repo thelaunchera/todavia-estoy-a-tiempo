@@ -72,3 +72,13 @@
   .club-aula-action-bottom{margin-top:14px}
 }
 @media(prefers-reduced-motion:reduce){.club-aula-action{transition:none}.club-aula-action:hover{transform:none}}
+/* iPad portrait: side navigation stays visible, content cards become compact rows. */
+@media(min-width:760px) and (max-width:990px){
+ .club-aula-actions{grid-template-columns:minmax(0,1fr)}
+ .club-aula-action,.club-aula-action:last-child{
+  grid-column:auto;min-height:0;padding:17px 19px;
+ }
+ .club-aula-action-top{margin-bottom:7px}
+ .club-aula-action>strong{font-size:23px;margin-bottom:5px}
+ .club-aula-action-bottom{margin-top:10px}
+}
