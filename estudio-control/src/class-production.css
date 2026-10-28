@@ -103,3 +103,19 @@
 .class-funnel-stats strong{font:400 25px/1.1 'DM Serif Display',Georgia,serif;color:#2b5473;word-break:break-word}
 .class-funnel-stats span{font-size:11px;line-height:1.5;color:#6c8196}
 @media(max-width:600px){.class-funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Centro de alumnos · acceso de revisión desde el Estudio protegido */
+.class-admin-room-entry{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:clamp(20px,3vw,30px);border:1px solid #bdd2e0;border-radius:20px;background:linear-gradient(110deg,#f1f6f7,#e5eff5);margin:24px 0 14px}
+.class-admin-room-entry>div:first-child{min-width:0}
+.class-admin-room-entry h3{margin:8px 0 7px;font-size:clamp(1.35rem,2.3vw,2rem);line-height:1.2;color:#142b44}
+.class-admin-room-entry p{margin:0;max-width:690px;color:#4a6072;line-height:1.6;font-size:.9rem}
+.class-admin-room-entry small{display:block;margin-top:9px;color:#56798b}
+.class-admin-room-actions{display:flex;gap:9px;flex-direction:column;min-width:220px}
+.class-admin-room-actions button,.class-admin-room-actions a{min-height:43px;padding:11px 15px;border:1px solid #1a3751;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:.79rem;text-decoration:none;cursor:pointer}
+.class-admin-room-actions button{background:#102139;color:#fff}
+.class-admin-room-actions a{color:#102139;background:#fff}
+.class-admin-room-preview{border:1px solid #c2d4df;border-radius:20px;overflow:hidden;background:#e9f0f4;margin:0 0 20px}
+.class-admin-preview-heading{padding:13px 17px;display:flex;justify-content:space-between;gap:10px;align-items:center;color:#264a61;font-size:.77rem}
+.class-admin-preview-heading span{color:#597489}
+.class-admin-room-preview iframe{display:block;width:100%;height:min(85vh,860px);min-height:620px;border:0;background:#f8f8f5}
+@media(max-width:800px){.class-admin-room-entry{flex-direction:column;align-items:stretch}.class-admin-room-actions{min-width:0}.class-admin-preview-heading{flex-direction:column;align-items:flex-start}.class-admin-room-preview iframe{min-height:700px}}
