@@ -879,3 +879,12 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 @media(prefers-reduced-motion:reduce){
  html:has(body.class-page-v2){scroll-behavior:auto}
 }
+
+
+/* Iconos vectoriales originales: evitar caracteres convertidos a emoji en iOS. */
+.class-page-v2 .class-inline-arrow{display:inline-block;vertical-align:middle;flex-shrink:0;width:17px;height:17px;stroke:currentColor}
+.class-page-v2 .class-journey-icon .class-inline-arrow{width:29px;height:29px}
+.class-page-v2 .class-nav-cta{display:inline-flex;align-items:center;gap:7px}
+.class-page-v2 .class-material-tab{border-radius:999px!important}
+.class-page-v2 .class-floating-top .class-inline-arrow{width:16px;height:16px}
+.class-page-v2 .class-back-to-top .class-inline-arrow{width:16px;height:16px}
