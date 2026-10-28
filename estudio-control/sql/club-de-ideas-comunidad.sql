@@ -50,7 +50,7 @@ create table if not exists public.podcast_club_posts(
   channel text not null default 'charla' check(channel in ('charla','proyectos','preguntas')),
   title text check(title is null or char_length(title)<=100),
   body text not null check(char_length(trim(body)) between 2 and 2000),
-  image_path text check(image_path is null or (char_length(image_path)<=300 and image_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\\.(png|jpg|webp)$')),
+  image_path text check(image_path is null or (char_length(image_path)<=300 and image_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}[.](png|jpg|webp)$')),
   status text not null default 'visible' check(status in ('visible','oculto')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
