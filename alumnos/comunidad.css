@@ -17,3 +17,42 @@
 @media(max-width:950px){.club-layout{grid-template-columns:minmax(0,1fr)}.club-aside{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.club-side-card{margin:0}.club-hero-mark{min-height:200px}.club-welcome{grid-template-columns:minmax(0,1fr) minmax(230px,.8fr)}}
 @media(max-width:650px){.club-wrap{width:calc(100% - 30px)}.club-top-inner{min-height:72px}.club-top a:first-child{width:160px}.club-top-link{font-size:.73rem}.club-hero{padding:37px 0 43px}.club-hero-inner{grid-template-columns:1fr}.club-hero h1{font-size:clamp(3.55rem,13vw,5rem)}.club-hero p{font-size:.92rem}.club-hero-mark{display:none}.club-welcome{grid-template-columns:1fr;padding:32px 0 24px;gap:18px}.club-welcome h2{font-size:2.27rem}.club-layout{gap:25px}.club-channels{gap:4px;margin-bottom:16px;padding:5px}.club-channels button{font-size:.75rem;min-height:47px;padding:10px 5px}.club-composer{padding:18px;border-radius:18px}.club-form-row{grid-template-columns:1fr;gap:4px}.club-compose-bottom{flex-direction:column;align-items:stretch}.club-compose-bottom button{width:100%}.club-feed-heading{padding-top:30px}.club-feed-heading h2{font-size:2rem}.club-post{padding:17px;border-radius:17px}.club-post-tag{font-size:.58rem}.club-comment-form{flex-wrap:wrap}.club-comment-form button{white-space:nowrap}.club-aside{grid-template-columns:1fr}.club-admin-banner{flex-direction:column;align-items:stretch}.club-admin-banner a{text-align:center}.club-footer .club-wrap{flex-direction:column}.club-side-card{padding:20px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Club de Ideas · portada editorial, una sola navegación útil y sin números internos. */
+.club-hero{
+  background:radial-gradient(ellipse at 78% 10%,#355473 0,transparent 54%),
+    linear-gradient(115deg,#14253f,#244762);
+  padding:clamp(37px,5vw,65px) 0;
+}
+.club-hero-inner{gap:clamp(20px,4vw,44px);grid-template-columns:minmax(0,1.35fr) minmax(220px,.65fr)}
+.club-hero h1{font-size:clamp(3.5rem,7vw,6.7rem);margin:12px 0}
+.club-hero p{font-size:clamp(.93rem,1.27vw,1.08rem);line-height:1.65}
+.club-hero-mark{
+  min-height:190px;max-width:310px;width:100%;
+  margin-left:auto;border-radius:24px;
+  padding:24px 26px;transform:rotate(2deg);
+  background:#f7f6f10f;
+  border:1px solid #c4d6e34d;
+}
+.club-hero-mark span{line-height:1.7;font-size:.59rem}
+.club-hero-mark strong{font-size:clamp(1.5rem,2.2vw,2.3rem)}
+.club-hero-mark i{font-size:2.7rem}
+.club-welcome{padding:clamp(28px,4vw,45px) 0 27px}
+.club-welcome h2{font-size:clamp(2.1rem,3.5vw,3.3rem)}
+.club-welcome p{line-height:1.65}
+.club-top-link{border-bottom:0;border-radius:999px;padding:10px 15px;background:#eef3f6}
+.club-top-link:focus-visible{outline:3px solid #83afca;outline-offset:2px}
+@media(max-width:730px){
+  .club-hero-inner{grid-template-columns:1fr;gap:18px}
+  .club-hero-mark{margin:0;max-width:100%;min-height:128px;padding:18px 21px;transform:none}
+  .club-hero-mark strong{font-size:1.7rem}
+  .club-hero-mark i{right:17px;bottom:9px;font-size:2.3rem}
+  .club-hero{padding:32px 0 35px}
+  .club-hero h1{font-size:clamp(3.45rem,11vw,5.2rem)}
+}
+@media(max-width:380px){
+ .club-top-inner{gap:10px}
+ .club-top a:first-child{width:147px}
+ .club-top-link{font-size:.73rem;padding:9px 12px}
+}
