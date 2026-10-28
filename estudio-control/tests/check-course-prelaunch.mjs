@@ -80,7 +80,7 @@ assert.match(newExperience,/aria-pressed/);
 assert.match(newExperience,/ArrowRight/);
 assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
 assert.match(newStyles,/@media\(max-width:650px\)/);
-assert.match(classPage,/src="experience\.js"/);
+assert.match(classPage,/src="experience\.js(?:\?[^" ]+)?"/);
 assert.match(workflow,/clases\/experience\.js/);
 console.log('Auditoría editorial 3/30 segundos, efectos, footer y privacidad: OK');
 
@@ -144,7 +144,7 @@ assert.match(classPage,/clase-trabajo-web-2026\.webp/);
 assert.match(classPage,/width="768" height="768"/);
 assert.match(classPage,/id="class-floating-top"/);
 assert.match(classPage,/class-back-to-top"/);
-assert.match(classPage,/class-demo-arrow[\s\S]*?<svg/);
+assert.match(classPage,/class-transform-arrow[\s\S]*?<svg/);
 assert.doesNotMatch(classPage,/[↗⬆]/,'Flechas emoji de sistema prohibidas en el diseño editorial');
 assert.match(newStyles,/class-material-tabs\{\s*display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.match(newStyles,/class-footer-brand img\{filter:brightness\(0\) invert\(1\)/);
@@ -224,23 +224,17 @@ assert.doesNotMatch(classPage,/href="[^"]*(buy\.stripe|checkout\.stripe)/);
 console.log('QA reloj: 4 grupos, flip 250+250ms, medianoche EST y botón a lista de espera OK');
 
 
-/* Valor con órbitas reales en direcciones opuestas + CTA simplificado. */
-const orbitSection=classPage.slice(classPage.indexOf('<section class="class-fast-value"'),classPage.indexOf('<section class="class-demo-strip"'));
-assert.match(orbitSection,/class-value-orbit/);
-assert.doesNotMatch(classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('<section class="class-fast-value"')),/class-value-orbit/);
-assert.match(orbitSection,/class-orbit-wheel--outer/);
-assert.match(orbitSection,/class-orbit-wheel--inner/);
-assert.match(orbitSection,/monograma-podcast-04\.svg/);
-assert.equal((orbitSection.match(/class-orbit-icon-upright/g)||[]).length,7);
-assert.match(newStyles,/\.class-orbit-wheel--outer\{\s*width:91%;\s*animation:classOrbitClockwise 22s linear infinite/);
-assert.match(newStyles,/\.class-orbit-wheel--inner\{\s*width:58%;\s*animation:classOrbitCounterClockwise 14s linear infinite/);
-assert.match(newStyles,/\.class-orbit-wheel--outer \.class-orbit-icon-upright\{/);
-assert.match(newStyles,/animation-name:classOrbitIconCounterClockwise/);
-assert.match(newStyles,/animation-name:classOrbitIconClockwise/);
-assert.match(newStyles,/\.class-value-orbit \.class-orbit-wheel::before/);
-assert.match(newStyles,/border:1\.5px dashed/);
-assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(newStyles,/\.class-value-orbit \.class-orbit-wheel/);
+/* La comparación de notas y web reemplaza la órbita y el antes/después estático. */
+assert.doesNotMatch(classPage,/class-value-orbit|class-orbit-wheel|class-demo-before|class-demo-after/);
+assert.doesNotMatch(newStyles,/classOrbitClockwise|classOrbitCounterClockwise/);
+assert.match(classPage,/id="de-idea-a-web"/);
+assert.match(classPage,/type="range" min="0" max="100"/);
+assert.match(classPage,/aria-controls="transform-scene"/);
+assert.match(classPage,/data-transform-to="0"/);
+assert.match(classPage,/data-transform-to="100"/);
+assert.match(classPage,/Ejemplo ilustrativo de lo que puedes crear en la clase/);
+assert.match(newExperience,/ideaProgress.addEventListener\('input'/);
+assert.match(newExperience,/reducedMotion.matches \|\| start === target/);
 assert.match(home,/No necesitas saber de coding ni dominar mucha tecnología/);
 assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
 assert.doesNotMatch(home,/experta|experto/i);
@@ -251,7 +245,7 @@ assert.equal((classPage.match(/href="#lista-espera"/g)||[]).length,1,'Un enlace 
 assert.doesNotMatch(classPage,/class-nav-cta|class-ghost-button/,'No repetir CTAs de espera en el header ni hero');
 assert.match(classPage,/Explora la clase/);
 assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
-console.log('QA: órbitas en sección de valor, iconos derechos, lenguaje inclusivo y CTAs únicos OK');
+console.log('QA: transformación interactiva, movimiento reducido, lenguaje inclusivo y CTAs únicos OK');
 
 
 /* Aula personal: saludo, progreso, felicitación, materiales a la derecha y bono sin entrega automática. */

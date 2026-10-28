@@ -4,6 +4,67 @@
   const root = document.querySelector('.class-page-v2');
   if (!root) return;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Transformación dirigida por la persona: sin autoplay ni ciclos decorativos.
+  const transformation = document.querySelector('[data-idea-transform]');
+  const ideaProgress = document.getElementById('idea-progress');
+  if (transformation && ideaProgress) {
+    const choices = Array.from(transformation.querySelectorAll('[data-transform-to]'));
+    const before = transformation.querySelector('[data-transform-caption="before"]');
+    const after = transformation.querySelector('[data-transform-caption="after"]');
+    const scene = document.getElementById('transform-scene');
+    let animation = null;
+    function renderIdea(value) {
+      const progress = Math.max(0, Math.min(100, Number(value) || 0));
+      const complete = progress >= 50;
+      transformation.style.setProperty('--formation', String(progress / 100));
+      transformation.style.setProperty('--formed-opacity', String(Math.max(0, (progress - 15) / 85)));
+      ideaProgress.style.setProperty('--fill', progress + '%');
+      ideaProgress.value = String(progress);
+      const description = progress === 0 ? 'Antes: tu idea en tus notas' : progress === 100 ? 'Tu primera web: lista para mostrar lo que ofreces' : 'Tu idea está tomando forma: ' + Math.round(progress) + '%';
+      ideaProgress.setAttribute('aria-valuetext', description);
+      scene?.setAttribute('aria-label', complete ? 'Ejemplo de tu primera web: un titular, tu servicio y cómo contactarte.' : 'Tu idea en tres notas: qué ofreces, para quién y cómo contactarte.');
+      choices.forEach(choice => choice.setAttribute('aria-pressed', String(Number(choice.dataset.transformTo) === (complete ? 100 : 0))));
+      if (before) before.hidden = complete;
+      if (after) after.hidden = !complete;
+    }
+    function stopTransformation() {
+      if (animation !== null) window.cancelAnimationFrame(animation);
+      animation = null;
+    }
+    choices.forEach(choice => choice.addEventListener('click', () => {
+      stopTransformation();
+      const target = Number(choice.dataset.transformTo);
+      const start = Number(ideaProgress.value);
+      if (reducedMotion.matches || start === target) {
+        renderIdea(target);
+        return;
+      }
+      const began = performance.now();
+      function step(now) {
+        const elapsed = Math.min(1, (now - began) / 650);
+        const eased = elapsed * elapsed * (3 - 2 * elapsed);
+        renderIdea(start + (target - start) * eased);
+        if (elapsed < 1) animation = window.requestAnimationFrame(step);
+        else animation = null;
+      }
+      animation = window.requestAnimationFrame(step);
+    }));
+    ideaProgress.addEventListener('input', () => {
+      stopTransformation();
+      renderIdea(ideaProgress.value);
+    });
+    ideaProgress.addEventListener('pointerdown', stopTransformation);
+    ideaProgress.addEventListener('keydown', stopTransformation);
+    reducedMotion.addEventListener?.('change', event => {
+      if (event.matches) {
+        stopTransformation();
+        renderIdea(Number(ideaProgress.value) >= 50 ? 100 : 0);
+      }
+    });
+    renderIdea(ideaProgress.value);
+    transformation.classList.add('is-interactive');
+    transformation.querySelectorAll('.class-transform-hint, .class-transform-options, .class-transform-control').forEach(element => {element.hidden = false;});
+  }
   const preview = document.querySelector('.class-browser');
   const previewCopy = {
     limpieza: {
