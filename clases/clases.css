@@ -453,3 +453,14 @@ html:has(.class-page-v2){scroll-padding-top:84px}
   .class-hero h1{font-size:clamp(2.55rem,10.8vw,3.05rem)}
   .class-hero .class-eyebrow{font-size:.56rem}
 }
+
+/* Specificity guard: mobile layout remains legible after class-page-v2 theme rules. */
+@media(max-width:650px){
+  .class-page-v2 .class-hero{padding:31px 0 54px}
+  .class-page-v2 .class-hero h1{font-size:clamp(2.75rem,11vw,4rem);line-height:1.04;letter-spacing:-.055em}
+  .class-page-v2 .class-hero p.class-lede{font-size:.96rem;line-height:1.65;margin-top:18px}
+  .class-page-v2 .class-hero-actions{margin-top:23px}
+  .class-page-v2 .class-hero-art{margin-top:22px;max-height:none}
+  .class-page-v2 .class-hero-art img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain}
+  .class-page-v2 .class-primary-button{min-height:52px;padding:13px 16px}
+}
