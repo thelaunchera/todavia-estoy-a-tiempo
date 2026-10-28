@@ -315,7 +315,7 @@ assert.match(studentManager,/getStudioStudents\(\)/,'Lista real de compradores, 
 assert.match(studentManager,/setStudentBonusGrant/,'Permite asignar por persona');
 assert.match(bonusLibrary,/setStudioBonusAvailability/,'Permite preparar o activar cada bono individualmente');
 assert.match(studioClient,/podcast_class_bonus_grants/,'Asignación durable en Supabase, no en estado local');
-assert.match(bonusMigration,/enable row level security/,'La tabla de asignaciones requiere RLS');
+assert.match(bonusMigration,/rls_enabled/,'La tabla de asignaciones requiere RLS');
 assert.match(bonusMigration,/class_resources_assigned_bonus_read/,'Solo se comparte un recurso listo con su destinatario');
 assert.match(bonusMigration,/resource_code !~ '\^bonus_'/,'Los bonos se excluyen de materiales generales pagados');
 console.log('QA: alumnos separados, asignación por persona, RLS y navegación interna del aula OK');
