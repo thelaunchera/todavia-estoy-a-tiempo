@@ -41,7 +41,7 @@ export default function BonusLibrary() {
       await setStudioBonusAvailability(item.resource_code, activating);
       setResources(previous => previous.map(row => row.resource_code===item.resource_code
         ? {...row, status: activating ? 'ready' : 'draft'} : row));
-      setNotice(activating ? 'El bono está activo exclusivamente para alumnos asignados.' : 'El bono volvió a borrador y dejó de verse en las aulas.');
+      setNotice(activating ? 'El bono se entregará solo a alumnos asignados que completen el reto.' : 'El bono volvió a borrador y dejó de verse en las aulas.');
     } catch { setError('No se pudo cambiar la disponibilidad. Actualiza la página y prueba otra vez.'); }
     finally { setSaving(''); }
   }
@@ -74,7 +74,7 @@ export default function BonusLibrary() {
           <article className="bonus-library-card" key={item.resource_code}>
             <div className="bonus-library-card-top">
               <span className="bonus-library-icon"><Sparkles size={20} /></span>
-              <span className="bonus-library-draft">{item.status === 'ready' ? 'Activo solo para asignados' : 'Borrador privado'}</span>
+              <span className="bonus-library-draft">{item.status === 'ready' ? 'Listo · entrega individual tras el reto' : 'Borrador privado'}</span>
             </div>
             <h3>{item.title}</h3>
             <p>{item.resource_code === 'bonus_motion_studio' ? '130 demostraciones de efectos para páginas web. Previsualiza las animaciones y copia los prompts o el código de cada ejemplo.' : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
@@ -90,7 +90,7 @@ export default function BonusLibrary() {
           </article>
         ))}
       </div>
-      <div className="bonus-library-bottom"><ShieldCheck size={17} /><span>Esta sección está dentro de Mi Estudio. Activar un bono no lo envía a todo el curso: solo se verá en las cuentas donde lo asignes desde Centro de alumnos.</span></div>
+      <div className="bonus-library-bottom"><ShieldCheck size={17} /><span>Esta sección está dentro de Mi Estudio. Activar un bono no lo envía a todo el curso: cada alumno deberá tener asignación individual y completar las nueve lecciones y su proyecto.</span></div>
     </section>
   );
 }
