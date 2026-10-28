@@ -1,0 +1,56 @@
+name: Importar foto aprobada de hero
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/import-class-hero.yml']
+permissions:
+  contents: write
+jobs:
+  import-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Importar imagen aprobada y optimizarla para móvil
+        env:
+          SIGNED_CANVA_URL: 'https://media.canva.com/v2/image-resize/format:PNG/height:133/quality:100/uri:ifs%3A%2F%2FM%2F6b0f8a86-dee7-4847-b569-b2487298e897/watermark:F/width:200?csig=AAAAAAAAAAAAAAAAAAAAAJXZHEZ6iBvWelilNPKAdAwUdz3f2MUxKTSrSOhrqO1g&exp=1793217376&osig=AAAAAAAAAAAAAAAAAAAAAMUAxuQXVknD0eVWKfCZLXKX2MAKg10UxOMs6xmVmzzc&signer=media-rpc&token=AAIAAU0AJDZiMGY4YTg2LWRlZTctNDg0Ny1iNTY5LWIyNDg3Mjk4ZTg5NwAAAAABoYQVrwCYIzlQ-czTPEstSGv2jOXEnkLSvRpbIzjhak4N0rE06Q&x-canva-quality=thumbnail'
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          import os,urllib.request,subprocess
+          from pathlib import Path
+          from PIL import Image
+          url=os.environ['SIGNED_CANVA_URL']
+          variants=[
+            url.replace('/height:133/','/height:1024/').replace('/width:200?','/width:1536?').replace('x-canva-quality=thumbnail','x-canva-quality=original'),
+            url.replace('/height:133/','/height:1024/').replace('/width:200?','/width:1536?'),
+            url
+          ]
+          success=False
+          for index,link in enumerate(variants):
+            try:
+              request=urllib.request.Request(link,headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(request,timeout=30) as response:
+                data=response.read(10_000_000)
+              Path('/tmp/hero-source.png').write_bytes(data)
+              with Image.open('/tmp/hero-source.png') as im:
+                print('Candidate', index, 'dimensions', im.size)
+                if im.width<700:
+                  continue
+                im=im.convert('RGB')
+                output=Path('assets/clase-hero-dailin-ai.webp')
+                im.save(output,format='WEBP',quality=83,method=6)
+                print('Created',output,'size',output.stat().st_size)
+                success=True
+                break
+            except Exception as ex:
+              print('Candidate',index,'failed',str(ex)[:250])
+          if not success:
+            raise SystemExit('No full-size hero image available; no low-quality image published')
+          PY
+      - name: Confirmar imagen en el repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/clase-hero-dailin-ai.webp
+          git commit -m "assets: add approved AI class hero photograph"
+          git push
