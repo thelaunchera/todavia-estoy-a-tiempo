@@ -1,0 +1,74 @@
+/* Club de Ideas — hub auténtico, sin maquetas, flechas decorativas ni tarjetas enormes. */
+.aula-panel .club-aula-hub{
+  --club-ink:#172c43;--club-muted:#5b7183;--club-line:#dce5e9;
+  margin:24px 0 0;max-width:1100px;
+  border-radius:22px;background:transparent;color:var(--club-ink);
+}
+.club-aula-hub-heading{
+  max-width:730px;padding:12px 2px 22px;
+}
+.club-aula-eyebrow{
+  display:flex;align-items:center;gap:8px;margin:0;
+  font:750 10px/1.4 'DM Sans',Arial,sans-serif;letter-spacing:.13em;color:#68869c;
+}
+.club-aula-eyebrow-dot{width:7px;height:7px;background:#7e9fb4;border-radius:100%}
+.club-aula-hub-heading h2{
+  font:400 clamp(34px,4vw,54px)/1.13 'DM Serif Display',Georgia,serif;
+  letter-spacing:-.03em;margin:12px 0 12px;color:#1a334d;
+}
+.club-aula-hub-heading h2 em{color:#688ba7;font-weight:400}
+.club-aula-hub-heading>p:last-child{margin:0;max-width:640px;color:#586f82;font-size:14px;line-height:1.72}
+.club-aula-actions{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;align-items:stretch;
+}
+.club-aula-action{
+  display:flex;flex-direction:column;align-items:flex-start;
+  min-height:238px;min-width:0;
+  padding:23px 20px 20px;border:1px solid #dbe4e8;border-radius:18px;
+  background:#fffdfa;color:#1d3850;text-decoration:none;
+  box-shadow:0 8px 18px rgba(19,46,68,.035);
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.club-aula-action:hover{transform:translateY(-3px);border-color:#aac3d1;box-shadow:0 13px 24px rgba(24,47,68,.09)}
+.club-aula-action:focus-visible{outline:3px solid #80b3d0;outline-offset:3px}
+.club-aula-action-featured{background:#243e58;border-color:#243e58;color:#f8f8f4}
+.club-aula-action-featured:hover{border-color:#456d8b;box-shadow:0 13px 27px rgba(24,47,68,.13)}
+.club-aula-action-top{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:32px;color:#8caabe}
+.club-aula-action-top>span:last-child{font:400 22px/1 'DM Sans',Arial,sans-serif}
+.club-aula-action-featured .club-aula-action-top{color:#b4ccda}
+.club-aula-action-number{font:400 27px/1 'DM Serif Display',Georgia,serif}
+.club-aula-action>strong{
+  font:400 clamp(20px,2.2vw,27px)/1.18 'DM Serif Display',Georgia,serif;
+  letter-spacing:-.015em;margin-bottom:11px;
+}
+.club-aula-action-description{color:#5f7686;font:400 12px/1.65 'DM Sans',Arial,sans-serif;flex:1;max-width:310px}
+.club-aula-action-featured .club-aula-action-description{color:#d9e4e9}
+.club-aula-action-bottom{
+  display:inline-flex;align-items:center;margin-top:22px;padding-bottom:3px;
+  border-bottom:1px solid #aac3d2;
+  font-size:11px;font-weight:750;line-height:1.4;color:#3a647e;
+}
+.club-aula-action-featured .club-aula-action-bottom{color:#e4edf2;border-color:#90b1c4}
+.club-aula-privacy{
+  display:flex;align-items:start;gap:9px;padding:18px 3px;margin:3px 0 0;
+  color:#6b8190;font:400 12px/1.6 'DM Sans',Arial,sans-serif;
+}
+.club-aula-privacy>span{color:#7798ab;font-size:17px;line-height:1.2}
+@media(max-width:1000px) and (min-width:701px){
+  .club-aula-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .club-aula-action:last-child{grid-column:1/-1;min-height:0}
+  .club-aula-action{min-height:210px}
+  .club-aula-action-top{margin-bottom:20px}
+}
+@media(max-width:700px){
+  .aula-panel .club-aula-hub{margin:16px 0 0}
+  .club-aula-hub-heading{padding:6px 0 17px}
+  .club-aula-hub-heading h2{font-size:clamp(32px,8vw,43px)}
+  .club-aula-actions{grid-template-columns:1fr;gap:11px}
+  .club-aula-action{min-height:0;padding:19px;gap:0}
+  .club-aula-action-top{margin-bottom:12px}
+  .club-aula-action-description{max-width:none}
+  .club-aula-action-bottom{margin-top:14px}
+}
+@media(prefers-reduced-motion:reduce){.club-aula-action{transition:none}.club-aula-action:hover{transform:none}}
