@@ -101,7 +101,7 @@ async function refreshPersonalBonuses(){
     link.className='resource';link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
     escapedText(link,'span','BONO PERSONAL','resource-tag');
     escapedText(link,'strong',item.title);
-    escapedText(link,'span','Abrir bono ↗','resource-link');
+    escapedText(link,'span','Abrir bono','resource-link');
     list.appendChild(link);
   });
   box.hidden=list.children.length===0;
@@ -245,7 +245,7 @@ async function showCourse(email,asAdmin=false){
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
   if(!item.url || !/^https:\/\//i.test(item.url)){a.removeAttribute('href');a.removeAttribute('target');}
   escapedText(a,'span',asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL','resource-tag');
-  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir ↗':'En preparación','resource-link');
+  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir':'En preparación','resource-link');
   resources.appendChild(a);
  });
  $('empty-resources').hidden=Boolean(generalResources.length);
