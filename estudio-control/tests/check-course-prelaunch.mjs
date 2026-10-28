@@ -15,7 +15,7 @@ assert.match(classPage,/type="checkbox" required/);
 assert.match(classPage,/id="course-waitlist-feedback"/);
 assert.match(classPage,/src="waitlist\.js"/);
 assert.match(classPage,/3 de diciembre de 2026/);
-assert.match(classPage,/Inscripciones desde el 3 de diciembre/i);
+assert.match(classPage,/Lista de espera abierta/i);
 assert.doesNotMatch(classPage,/buy\.stripe\.com|checkout\.stripe\.com|href="https:\/\/buy\./,'No hay checkout público mientras las compras están cerradas');
 assert.match(classPage,/noindex,nofollow/,'La página previa no está indexada');
 assert.match(waitlist,/auth\.signInWithOtp/);
@@ -47,7 +47,7 @@ const newExperience=read('clases/experience.js');
 const newStyles=read('clases/clases.css');
 assert.match(classPage,/<h1 id="class-title">Tu primera web <em>con IA\.<\/em><\/h1>/,'Hero en español claro: Tu primera web con IA');
 assert.match(classPage,/negocios locales/i,'Comunica la oportunidad de servicio local');
-assert.match(classPage,/Inscripciones desde el 3 de diciembre/,'Lista de espera sin compra habilitada');
+assert.match(classPage,/Lista de espera abierta/,'Lista de espera sin compra habilitada');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
 assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
@@ -177,3 +177,15 @@ assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
 console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografía contrastada OK');
+
+
+/* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
+const heroCopy=classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('</section>',classPage.indexOf('<section class="class-hero"')));
+const publicReadable=classPage.replace(/<script\b[\s\S]*?<\/script>/gi,'').replace(/<svg\b[\s\S]*?<\/svg>/gi,'');
+assert.match(heroCopy,/Explora la clase/);
+assert.match(heroCopy,/No tienes que saber de coding ni ser experta en tecnología/);
+assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
+assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
+assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
+assert.match(home,/href="clases\/primera-landing.html">Explora la clase<\/a>/);
+console.log('QA: copy latino, CTA explora, sin número público y texto móvil con margen');
