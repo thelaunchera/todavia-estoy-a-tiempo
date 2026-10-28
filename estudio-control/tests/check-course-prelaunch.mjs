@@ -92,7 +92,8 @@ assert.match(newStyles,/\.class-page-v2 \.class-material-tab\{border-radius:999p
 assert.match(newStyles,/\.class-page-v2 \.class-waitlist-form>input\[type="email"\]/);
 console.log('QA precio $9.99/39.99 previsto, fecha oficial y botones ovalados: OK');
 
-assert.match(classPage,/Tu primera web <em>con IA/);
+assert.match(classPage,/Tu primera web con IA/i,'Nombre de la clase presente');
+assert.match(classPage,/Una idea puede convertirse en <em>un negocio/,'Titular editorial del hero');
 assert.doesNotMatch(classPage,/no un precio anterior de venta|no una venta anterior|comprobar que los materiales funcionan|clase en preparación|fecha objetivo/i);
 assert.doesNotMatch(classPage,/Stripe|Supabase|Make|nota interna|borrador de producción/i);
 console.log('QA editorial: contenido orientado al alumno sin procesos internos OK');
