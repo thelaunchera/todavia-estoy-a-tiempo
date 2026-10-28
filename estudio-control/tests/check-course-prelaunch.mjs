@@ -248,17 +248,17 @@ assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
 console.log('QA: transformación interactiva, movimiento reducido, lenguaje inclusivo y CTAs únicos OK');
 
 
-/* Aula personal: saludo, progreso, felicitación, materiales a la derecha y bono sin entrega automática. */
+/* Aula personal: navegación real, progreso y bono sin entrega automática. */
 const coursePersonalCss=read('alumnos/curso.css');
 const coursePersonalJs=read('alumnos/curso.js');
-for(const id of ['student-greeting-title','student-name','progress-percent','student-progress','student-sidebar','student-resources-heading','student-bonus-heading','bonus-lessons','bonus-project','bonus-status','lesson-celebration','lesson-celebration-close']){
+for(const id of ['student-greeting-title','student-name','progress-percent','student-progress','aula-rail','student-resources-heading','student-bonus-heading','bonus-lessons','bonus-project','bonus-status','lesson-celebration','lesson-celebration-close']){
  assert.match(room,new RegExp('id="'+id+'"|class="'+id+'"'));
 }
-assert.match(room,/<aside class="student-sidebar"/);
+assert.match(room,/<aside class="aula-rail"/);
 assert.match(room,/Desbloquea tu bono/);
 assert.match(room,/Club de Ideas/);
-assert.match(coursePersonalCss,/\.room-grid\{\s*display:grid;\s*grid-template-columns:minmax\(166px,215px\) minmax\(0,1fr\) minmax\(224px,280px\)/);
-assert.match(coursePersonalCss,/\.student-sidebar/);
+assert.match(room,/id="aula-layout"/);
+assert.match(room,/data-aula-panel="materiales"/);
 assert.match(coursePersonalJs,/getUser\(\)/);
 assert.match(coursePersonalJs,/email_confirmed_at/);
 assert.match(coursePersonalJs,/podcast_class_progress/);
@@ -317,15 +317,24 @@ assert.match(bonusUnlock,/count\(\*\).*lesson|lesson.*count\(\*\)/s,'La entrega 
 console.log('QA: alumnos separados, asignación por persona, RLS y navegación interna del aula OK');
 
 
-// Corrección del layout que colocaba materiales debajo de la altura completa
-// de los nueve módulos en las vistas tablet y de administradora.
-const tabletCss=read('alumnos/curso.css');
-assert.doesNotMatch(tabletCss,/\.student-sidebar\{grid-column:2;grid-row:2;display:grid/,'No forzar materiales a la segunda fila bajo el índice de lecciones');
-assert.match(tabletCss,/@media\(min-width:770px\) and \(max-width:950px\)/,'Tablet normal conserva las tres columnas');
-assert.match(tabletCss,/\.student-sidebar\{grid-column:3;grid-row:1;display:flex/,'Materiales al lado del video');
-assert.match(tabletCss,/@media\(min-width:650px\) and \(max-width:769px\)/,'Tablet estrecha muestra lecciones y materiales lado a lado');
-assert.match(room,/curso\.css\?v=tablet-materiales-en-columna-20261028-v2/,'Cache CSS de Safari renovada');
-assert.match(studioShell,/studentCenterTab==='people'/,'Se puede gestionar alumnos sin abrir la vista previa');
-assert.match(studioShell,/studentCenterTab==='classroom'/,'Vista del aula en pestaña independiente');
-assert.match(studioShell,/\{studentCenterTab==='people' \? \(/,'Las vistas no se apilan al mismo tiempo');
-console.log('QA: materiales a la derecha en tablet y administración separada del aula OK');
+// Sidebar real del aula, con secciones independientes y menú móvil.
+const aulaSidebarCss=read('alumnos/aula-sidebar.css');
+assert.match(room,/class="aula-rail" id="aula-rail"/,'Sidebar de navegación real');
+assert.match(room,/class="lesson-index"/,'Las lecciones aparecen dentro del sidebar');
+assert.match(room,/id="aula-menu-open"/,'Menú para teléfonos y tablet');
+assert.match(room,/id="aula-rail-backdrop"[^>]*hidden/,'Overlay de navegación privado');
+for(const view of ['inicio','lecciones','materiales','comunidad','bonos']){
+ assert.match(room,new RegExp('data-aula-panel="'+view+'"'),'Pantalla propia: '+view);
+ assert.match(room,new RegExp('data-aula-view="'+view+'"'),'Navegación: '+view);
+}
+assert.match(aulaSidebarCss,/#aula-layout\.room-grid\{display:grid;grid-template-columns:258px minmax\(0,1fr\)/,'Sidebar fijo desktop');
+assert.match(aulaSidebarCss,/@media\(max-width:900px\)/,'Sidebar móvil adaptable');
+assert.match(aulaSidebarCss,/body\.aula-menu-open/,'Menú móvil funcional');
+assert.match(roomScript,/function setAulaView\(/,'Navegación interactiva');
+assert.match(roomScript,/setAulaView\('lecciones'\)/,'Seleccionar lección abre pantalla');
+assert.match(roomScript,/if\(panel!==course\)closeAulaMenu\(\)/,'Cierra menú si la sesión termina');
+assert.match(room,/aula-sidebar\.css\?v=/,'Stylesheet de sidebar con cache-bust');
+assert.match(studioShell,/studentCenterTab==='people'/,'Gestión de alumnos separada');
+assert.match(studioShell,/studentCenterTab==='classroom'/,'Vista del aula en pestaña propia');
+assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'Logo no sale al landing');
+console.log('QA: sidebar real, cinco secciones, menú móvil y estudio separado OK');
