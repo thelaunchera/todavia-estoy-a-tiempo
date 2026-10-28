@@ -86,7 +86,7 @@ $('login-form').addEventListener('submit',async e=>{
  try{
   const email=$('login-email').value.trim().toLowerCase();
   const {error}=await db.auth.signInWithOtp({
-    email,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:false}
+    email,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}
   });
   if(error)throw error;
   status('Si existe una cuenta con ese correo, recibirás un enlace para entrar. Ábrelo desde el mismo navegador. Si no llega, consulta Ayuda.');
