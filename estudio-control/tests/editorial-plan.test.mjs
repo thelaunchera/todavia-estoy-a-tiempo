@@ -48,3 +48,15 @@ test('published chapters from prior month stay visible in default Todos and Publ
   assert.deepEqual(plan.archived.map(row=>row.id),['old']);
   assert.deepEqual(data, original,'switching episode tabs must never mutate audio or publication states');
 });
+
+test('all visible episode filters exclude archived originals without deleting their content', () => {
+  const older = { id:'backed-up',title:'Texto original',archived:true,status:'guion listo',script:'Guion completo',audio:'audio.mp3',date:'2026-09-01' };
+  const published = { id:'published',archived:false,status:'publicado',date:'2026-10-27' };
+  const next = { id:'next',archived:false,status:'en producción',date:'2026-11-03',planning_month:'2026-11' };
+  const source = [older,published,next];
+  const plan = editorialPlan(source);
+  for (const tab of [plan.active,plan.month,plan.published]) {
+    assert.ok(tab.every(episode=>episode.archived!==true),'visible tabs must omit archived originals');
+  }
+  assert.deepEqual(plan.archived,[older],'original audio and script remain safely stored');
+});
