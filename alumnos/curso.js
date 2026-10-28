@@ -1,4 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
+import {mountPromptLibrary} from './prompts-library.js';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
@@ -28,7 +29,7 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', lecciones:'Mis lecciones', materiales:'Mis materiales',
+ inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';
@@ -253,6 +254,7 @@ async function showCourse(email,asAdmin=false){
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
  display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('lecciones',{scroll:false});
+ await mountPromptLibrary(db,courseId,asAdmin);
  if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
 async function refreshAuth(){
