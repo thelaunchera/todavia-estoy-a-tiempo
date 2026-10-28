@@ -322,3 +322,16 @@ export async function importLocalRecords(passphrase: string) {
   }
   return { total:rows.length, imported, existing:rows.length-imported, verified:rows.length };
 }
+
+/** Métricas privadas: solo contadores, nunca correos ni datos de compradores. */
+export type ClassLaunchStats = { waitlist: number; buyers: number };
+export async function getClassLaunchStats(): Promise<ClassLaunchStats> {
+  if(!client)throw new Error('Estadísticas de clases no disponibles sin Supabase.');
+  await owner();
+  const [waitlist,access]=await Promise.all([
+    client.from('podcast_class_waitlist').select('email',{count:'exact',head:true}).eq('course_id','primera-landing-ia-01').is('unsubscribed_at',null),
+    client.from('podcast_class_access').select('id',{count:'exact',head:true}).eq('course_id','primera-landing-ia-01').eq('status','active')
+  ]);
+  if(waitlist.error || access.error) throw new Error('No se pudo verificar la lista de espera o las compras.');
+  return {waitlist:waitlist.count||0,buyers:access.count||0};
+}
