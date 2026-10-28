@@ -13,8 +13,8 @@
   <meta property="og:type" content="website">
   <title>Todavía estoy a tiempo | Podcast en español con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles-redesign.css?v=20261022-cancion-publicada-v1">
-  <link rel="stylesheet" href="episodios-destacados.css?v=20261027-no-photo-flash-v3">
+  <link rel="stylesheet" href="styles-redesign.css?v=20261028-short-home-v2">
+  <link rel="stylesheet" href="episodios-destacados.css?v=20261028-compact-v2">
   <link rel="stylesheet" href="theme-song-compact.css?v=20261027-v1">
   <link rel="stylesheet" href="visitor-mode.css?v=20261023-prueba-v1">
   <link rel="stylesheet" href="clases/clases.css?v=20261028-prelanzamiento-v1">
@@ -48,8 +48,8 @@
       <div class="shell hero-layout">
         <div class="hero-content reveal">
           <p class="eyebrow light-eyebrow">UN PODCAST CON DAILIN</p>
-          <h1 id="hero-title">Conversaciones para cuando sientes que vas <em>tarde.</em></h1>
-          <p class="hero-lede line-reveal" data-line-reveal>Sobre lo que imaginabas, lo que estás viviendo y todo lo que todavía quieres intentar.</p>
+          <h1 id="hero-title">Historias sobre la vida real <em>y volver a empezar.</em></h1>
+          <p class="hero-lede line-reveal" data-line-reveal>Expectativas, cambios y esos sentimientos que a veces callamos. Un podcast cercano, para escucharte sin prisa.</p>
           <div class="hero-cta">
             <a href="https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh" target="_blank" rel="noopener noreferrer" class="button button-light" aria-label="Escuchar el podcast en Spotify, abre otra pestaña">Escuchar en Spotify</a>
             <a href="#coleccion" class="fine-link">Explorar la colección</a>
@@ -76,37 +76,40 @@
         </span>
       </span>
     </a>
-    <section class="featured-episode section-pad paper podcast-episodes-curated" id="escuchar" aria-labelledby="episode-title">
+    <section class="featured-episode section-pad paper podcast-episodes-curated episodes-compact-v2" id="escuchar" aria-labelledby="episode-title">
       <div class="shell">
         <div class="episode-curated-head reveal">
           <div>
-            <p class="eyebrow">LAS HISTORIAS DEL PODCAST</p>
-            <h2 id="episode-title">Una conversación <em>a la vez.</em></h2>
+            <p class="eyebrow">ELIGE UNA HISTORIA</p>
+            <h2 id="episode-title">Escucha los <em>episodios.</em></h2>
           </div>
-          <p class="episode-curated-intro">Una historia para hoy y otra por si te quedaste con ganas de escuchar.</p>
         </div>
         <div class="episode-curated-grid">
-          <a class="episode-curated-art reveal has-real-poster" data-ep-link href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 2 en Spotify, abre otra pestaña">
-            <img class="episode-curated-poster" data-ep-poster src="https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/bece4d27-8d21-4669-8baa-fcd83c65dd55.png" alt="Portada oficial del episodio 2: Estoy cansada de ser fuerte todo el tiempo" loading="eager" decoding="async" fetchpriority="high" width="1080" height="1080">
-            <span class="episode-curated-poster-fallback" data-ep-fallback hidden>Portada del podcast · Todavía estoy a tiempo</span>
-          </a>
-          <div class="episode-curated-copy reveal">
-            <p class="episode-curated-kicker" data-ep-kicker>EPISODIO 02 · YA DISPONIBLE</p>
-            <h3 data-ep-title>Estoy cansada de ser fuerte todo el tiempo</h3>
-            <p class="episode-curated-summary" data-ep-summary>El trabajo que queda fuera de un «tú siempre resuelves»: lo que pospones, lo que sigues recordando y lo que casi nadie pregunta después.</p>
-            <a class="episode-curated-button" data-ep-link href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer" aria-label="Escuchar el episodio 02 en Spotify"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1DB954"/><path d="M6 9.25c3.6-1 8.3-.63 12.2 1.15M6.8 12.5c3-.75 7.2-.44 10.4 1.3M7.6 15.65c2.6-.6 5.9-.18 8.55 1.24" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg> Escuchar en Spotify</a>
-            <aside class="episode-previous" data-ep-previous aria-label="Episodio anterior">
-              <a class="episode-previous-image" href="https://open.spotify.com/episode/21aYHKY0kodWEzg1835xcD" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 1 en Spotify"><img src="assets/episodio-01-estudio-dailin.jpg" alt="Fotografía de Dailin en el estudio del podcast" width="1254" height="1254" loading="lazy" decoding="async"></a>
-              <div class="episode-previous-detail">
-                <p class="episode-previous-kicker" data-ep-previous-number>EPISODIO 01 · POR SI TE LO PERDISTE</p>
-                <a class="episode-previous-link" data-ep-previous-title href="https://open.spotify.com/episode/21aYHKY0kodWEzg1835xcD" target="_blank" rel="noopener noreferrer">Tengo 30 y pensé que mi vida sería diferente</a>
-              </div>
-            </aside>
-          </div>
+          <article class="episode-mini-card episode-mini-card-latest">
+            <a class="episode-curated-art has-real-poster" data-ep-link href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 2 en Spotify">
+              <img class="episode-curated-poster" data-ep-poster src="https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/bece4d27-8d21-4669-8baa-fcd83c65dd55.png" alt="Portada oficial del episodio 2" loading="lazy" width="1080" height="1080" decoding="async">
+              <span class="episode-curated-poster-fallback" data-ep-fallback hidden>Portada del episodio</span>
+            </a>
+            <div class="episode-curated-copy">
+              <p class="episode-curated-kicker" data-ep-kicker>EPISODIO 02 · YA DISPONIBLE</p>
+              <h3 data-ep-title>Estoy cansada de ser fuerte todo el tiempo</h3>
+              <a class="episode-curated-button" data-ep-link href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 02 en Spotify">Escuchar <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <aside class="episode-previous episode-mini-card" data-ep-previous aria-label="Episodio anterior">
+            <a class="episode-previous-image" href="https://open.spotify.com/episode/21aYHKY0kodWEzg1835xcD" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 1 en Spotify">
+              <img src="assets/episodio-01-estudio-dailin.jpg" alt="Fotografía del episodio 1" width="1254" height="1254" loading="lazy" decoding="async">
+            </a>
+            <div class="episode-previous-detail">
+              <p class="episode-previous-kicker" data-ep-previous-number>EPISODIO 01 · POR SI TE LO PERDISTE</p>
+              <a class="episode-previous-link" data-ep-previous-title href="https://open.spotify.com/episode/21aYHKY0kodWEzg1835xcD" target="_blank" rel="noopener noreferrer">Tengo 30 y pensé que mi vida sería diferente</a>
+              <a class="episode-previous-cta" href="https://open.spotify.com/episode/21aYHKY0kodWEzg1835xcD" target="_blank" rel="noopener noreferrer">Escuchar <span aria-hidden="true">↗</span></a>
+            </div>
+          </aside>
         </div>
         <div class="episode-curated-bottom">
           <a href="https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh" target="_blank" rel="noopener noreferrer">Ver todos los episodios en Spotify</a>
-          <p>Nuevos capítulos los martes · Siempre a tu ritmo.</p>
+          <p>Nuevos episodios cada martes.</p>
         </div>
       </div>
     </section>
@@ -132,7 +135,7 @@
       <div class="shell learning-grid">
         <div class="learning-copy">
           <p class="eyebrow">UNA HABILIDAD PARA EMPEZAR · CLASE 01</p>
-          <h2 id="learning-title">Una idea puede convertirse en <em>una página.</em></h2>
+          <h2 id="learning-title">Crea tu primera <em>web con IA.</em></h2>
           <p>Aprende a crear una web de presentación con ChatGPT para tu idea o los servicios de negocios locales. Paso a paso, sin programar.</p>
           <ul class="learning-benefits" aria-label="Material incluido">
             <li>Para tu proyecto</li>
@@ -145,18 +148,10 @@
           </div>
         </div>
         <div class="learning-visual">
-          <div class="learning-book-scene" role="img" aria-label="Ilustración editorial del cuaderno de la clase Tu primera web con IA">
-            <div class="learning-book">
-              <span class="learning-book-top">TODAVÍA ESTOY A TIEMPO / CUADERNOS</span>
-              <span class="learning-book-number" aria-hidden="true">01</span>
-              <h3>De la idea a tu primera web.</h3>
-              <div class="learning-book-bottom">
-                <span>UNA CLASE<br>PARA EMPEZAR</span>
-                <img src="assets/logo-podcast-04.svg" alt="" width="91" height="39" loading="lazy">
-              </div>
-            </div>
-            <span class="learning-caption">Hecho a tu ritmo.</span>
-          </div>
+          <figure class="learning-photo editorial-photo">
+            <img src="assets/clase-bot-home-2026.webp" alt="Dailin mostrando un asistente de inteligencia artificial en su mano" width="1000" height="914" loading="lazy" decoding="async">
+            <figcaption>De una idea a tu primera web.</figcaption>
+          </figure>
         </div>
       </div>
     </section>
