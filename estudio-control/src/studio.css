@@ -2176,3 +2176,18 @@ a:focus-visible {
 .studio-student-center-intro a{flex-shrink:0;display:inline-flex;gap:9px;align-items:center;justify-content:center;min-height:45px;padding:11px 17px;border-radius:999px;background:#14243b;color:white;text-decoration:none;font-size:.84rem;font-weight:650}
 .studio-student-center iframe{display:block;width:100%;border:0;height:min(90vh,950px);min-height:620px;background:#fffdf8}
 @media(max-width:800px){.studio-student-center-intro{flex-direction:column;align-items:stretch}.studio-student-center-intro a{width:100%}.studio-student-center iframe{min-height:730px}}
+
+/* Centro de Alumnos: gestión individual y vista previa son pantallas alternativas,
+   nunca dos bloques largos apilados en el mismo espacio. */
+.studio-students-workspace{display:grid;gap:18px;min-width:0}
+.studio-student-tabs{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px;border:1px solid #cbdce6;border-radius:16px;background:#edf3f6}
+.studio-student-tabs button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:45px;border:1px solid transparent;border-radius:11px;padding:11px 18px;background:transparent;color:#49667a;font-weight:700;font-size:.87rem;cursor:pointer}
+.studio-student-tabs button.active,.studio-student-tabs button[aria-pressed=true]{background:#fff;color:#183b54;border-color:#c2d5e0;box-shadow:0 3px 10px rgba(31,61,82,.06)}
+.studio-student-tabs button:focus-visible{outline:3px solid #86b5d1;outline-offset:2px}
+.studio-students-workspace .studio-students{margin:0}
+.studio-students-workspace .studio-student-center{min-height:0}
+@media(max-width:610px){
+ .studio-student-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .studio-student-tabs button{padding:11px 8px;font-size:.79rem}
+ .studio-students-workspace .studio-student-center iframe{min-height:650px}
+}
