@@ -1,47 +1,7 @@
 /* Tu primera landing con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
-const PROMPTS=[
- ['Define tu oferta','Aterriza qué vendes antes de abrir el editor.',`Estoy preparando una página para ofrecer [PRODUCTO O SERVICIO]. Mi cliente ideal es [PERSONA]. Esto incluye [QUÉ RECIBE] y mi precio o forma de cotizar es [DATO REAL]. Ayúdame a escribir mi oferta en dos frases sencillas. Señala lo que falta confirmar y hazme máximo tres preguntas. No inventes detalles.`],
- ['Busca referencias útiles','Aprende observando sin copiar diseños.',`Quiero ver tres ejemplos de páginas sobre [TIPO DE NEGOCIO] para [CLIENTE]. Compara cómo presentan el producto, las fotos, el botón principal y las dudas que responden. Incluye enlaces verificables. Si no puedes comprobar algo, dilo. No copies textos ni imágenes.`],
- ['Decide qué adaptar','Elige una idea que funcione para tu negocio.',`Estas son tres páginas que revisé: [URL Y NOTAS DE CADA UNA]. Mi oferta es [TU OFERTA]. Dime qué tres decisiones de diseño o contenido puedo adaptar y qué cosas debo evitar. Quiero una propuesta original, no una copia.`],
- ['Escribe tu página','Pasa de ideas sueltas a texto claro.',`Escribe el texto de una página de ventas en español latino para [PRODUCTO/SERVICIO]. Ya confirmé estos datos: [INFORMACIÓN]. Necesito un título claro, explicación breve, qué incluye, cómo funciona, preguntas frecuentes y un botón que diga [ACCIÓN REAL]. Tono natural, sin promesas exageradas. Señala información pendiente.`],
- ['Arma tu primera versión','Pon el contenido en orden.',`Ayúdame a construir una primera versión de página con mi oferta [OFERTA], estos textos [TEXTOS] y estas fotos autorizadas [IMÁGENES]. Primero explica qué secciones necesito y en qué orden. Prioriza que se lea bien en teléfono. No inventes botones de compra ni reservas funcionales.`],
- ['Revisa cómo se ve en teléfono','Detecta problemas antes de publicar.',`Revisa estas capturas o URL de mi página: [CAPTURAS O ENLACE]. Comprueba si se entiende el título, si se recortan las fotos, si los botones se pueden tocar y si hay textos muy pequeños. Dime qué cambiar primero y qué debo probar yo en el teléfono.`],
- ['Define cómo cobrar (si aplica)','No todos los negocios necesitan checkout.',`Mi producto o servicio es [OFERTA], lo ofrezco en [PAÍS] y quiero cobrar mediante [PROVEEDOR]. Antes de dar pasos, ayúdame a comprobar si ese proveedor acepta mi actividad y mi región. Si no tengo confirmación, no me digas que ya puedo cobrar. También puedo usar reserva o consulta en lugar de compra.`],
- ['Prepara una prueba de pago','Primero prueba, después activa.',`Mi proveedor de pagos confirmó que admite [OFERTA] y tengo un entorno de prueba [DATOS NO SENSIBLES]. Indica cómo comprobar precio, moneda, nombre del producto y resultado de una compra de prueba. No pidas claves, contraseñas ni datos bancarios.`],
- ['Conecta el botón correcto','Cada clic debe llevar a un destino real.',`Mi botón dice [TEXTO DEL BOTÓN] y debe llevar a [ENLACE REAL O ACCIÓN]. Ayúdame a comprobar el enlace desde teléfono y computadora. Si todavía es una demostración, explícame cómo identificarlo claramente como demo. No asumas que un botón visible significa que funciona.`],
- ['Organiza la entrega','Explica qué pasa después del clic.',`Después de [COMPRA / RESERVA / CONSULTA] necesito entregar [PRODUCTO O RESPUESTA] en [PLAZO REAL]. Ayúdame a redactar la confirmación y un correo claro con el próximo paso y la forma de pedir ayuda. Si hay pago, la entrega debe depender de la confirmación real, no de visitar una página de gracias.`],
- ['Prueba el recorrido completo','Revisa con hechos, no suposiciones.',`Estas son las pruebas que hice: [LISTA O CAPTURAS]. Clasifica cada una como comprobada, falló o pendiente. Revisa texto, fotos, botones, formularios, pago si aplica y entrega. Indica un cambio concreto por cada problema y cómo volver a probarlo.`],
- ['Prepárate para publicar','Haz tu anuncio con información real.',`Mi oferta confirmada es [OFERTA] y estas son las pruebas que ya pasé: [RESULTADOS REALES]. Revisa si mi página está lista para compartir. Ayúdame a escribir un anuncio breve con un título natural, qué recibe la persona y un llamado a la acción. No inventes reseñas, resultados, descuentos ni urgencia.`]
-];
-const WORKBOOK=[
- {title:'Tu oferta',sub:'Que cualquier persona entienda qué haces.',example:'Vendo cajas de galletas artesanales por encargo.',qs:[['oferta','¿Qué vendes exactamente?','Ej.: una caja de 12 galletas por pedido'],['cliente','¿Para quién está pensada?','Ej.: personas que quieren un regalo sencillo'],['incluye','¿Qué recibe esa persona?','Ej.: caja surtida y tarjeta de mensaje']]},
- {title:'Precio y entrega',sub:'Sin prometer cosas que todavía no están claras.',qs:[['precio','¿Cuánto cuesta o cómo cotizas?','Precio, moneda o cómo solicitar cotización'],['entrega','¿Cómo y cuándo se entrega?','Recogida, envío, descarga, respuesta…'],['condiciones','¿Qué debe saber antes de pedir?','Disponibilidad, tiempo mínimo, cambios…']]},
- {title:'Tus referencias',sub:'Inspírate sin copiar textos ni fotos.',qs:[['ref1','Primera referencia y qué aprendiste','Pega el enlace y explica qué te gustó'],['ref2','Segunda referencia y qué aprendiste','Ej.: forma de mostrar el producto'],['ref3','Tercera referencia y qué aprendiste','Ej.: claridad del botón principal']]},
- {title:'Estilo y fotos',sub:'Un estilo coherente vale más que veinte efectos.',qs:[['colores','¿Qué colores y ambiente quieres usar?','Ej.: crema, azul humo, luz de ventana'],['heroFoto','¿Qué debe verse en la foto principal?','Describe el producto o servicio real'],['otrasFotos','¿Qué otras dos fotos necesitas?','Una general y otra de un detalle']]},
- {title:'Texto de tu página',sub:'Escribe lo que tu cliente necesita saber.',qs:[['titular','Tu título principal, en palabras sencillas','Ej.: Galletas recién hechas para regalar'],['beneficios','Tres cosas concretas que sí ofreces','Qué incluye, cómo funciona, qué lo distingue'],['preguntas','Dos dudas que deberías responder','Ej.: ¿Con cuánto tiempo debo pedir?']]},
- {title:'Construcción y móvil',sub:'Haz una versión que funcione en el teléfono.',qs:[['enlace','Enlace de tu borrador','URL, si ya tienes una'],['secciones','¿Qué secciones construiste?','Ej.: portada, detalles, proceso, contacto'],['mejora','¿Qué corregiste en el teléfono?','Ej.: tamaño del texto o recorte de fotos']]},
- {title:'Botón y entrega',sub:'Explica lo que pasa al hacer clic.',qs:[['boton','¿Qué dice tu botón principal?','Ej.: Pedir información o Ver opciones'],['destino','¿A dónde lleva?','Formulario, reserva, contacto o checkout admitido'],['confirmacion','¿Qué recibe la persona después?','Confirmación, respuesta, descarga…']]},
- {title:'Tu revisión',sub:'Un detalle comprobado vale más que cien suposiciones.',qs:[['funciono','¿Qué probaste y funcionó?','Cuenta lo que hiciste y viste'],['corregir','¿Qué vas a corregir primero?','Un error concreto'],['capturas','¿Qué capturas vas a compartir en el club?','Portada móvil, página, botón y destino']]}
-];
-const CHECKS=[
- {name:'La oferta se entiende',how:'Pídele a alguien que lea la primera pantalla y te diga qué vendes sin explicárselo.',done:'Puede describir qué ofreces y para quién.'},
- {name:'Los datos son reales',how:'Comprueba nombre, precio, características, tiempos y disponibilidad.',done:'No hay promesas ni datos pendientes mostrados como confirmados.'},
- {name:'Se lee bien en teléfono',how:'Abre la web en tu teléfono y recorre todas las secciones.',done:'No tienes que hacer zoom ni girar el teléfono.'},
- {name:'Las imágenes son fieles',how:'Revisa el tamaño del producto, los recortes y que las fotos sean tuyas o autorizadas.',done:'No se deforman ni muestran cosas que el producto no tiene.'},
- {name:'El botón lleva a su destino',how:'Toca el botón desde una ventana privada y comprueba dónde llegas.',done:'Lleva a la acción que promete, sin enlaces de prueba.'},
- {name:'Los formularios sí llegan',how:'Envía una consulta de prueba desde otro correo.',done:'Recibes el mensaje y puedes responderlo.'},
- {name:'Tu proveedor admite el producto',how:'Si vas a cobrar en línea, revisa las reglas de la plataforma y de tu región.',done:'Está confirmado que puedes usar ese proveedor.'},
- {name:'El pago de prueba funciona',how:'Cuando aplique, prueba precio, moneda, confirmación y error sin cobrar dinero real.',done:'No confundes una página de gracias con un pago confirmado.'},
- {name:'La confirmación explica qué sigue',how:'Lee el mensaje que ve el cliente después de comprar, reservar o consultar.',done:'Sabe qué pasará y en qué plazo.'},
- {name:'La entrega está probada',how:'Prueba el envío de correo, descarga, respuesta o reserva.',done:'Sabes qué hacer si falla.'},
- {name:'El enlace abre fuera de tu cuenta',how:'Usa otro navegador o una ventana privada.',done:'El público correcto puede entrar.'},
- {name:'Hay una manera de pedir ayuda',how:'Prueba los enlaces de contacto y revisa las condiciones relevantes.',done:'Una persona no tiene que adivinar cómo escribirte.'},
- {name:'Tu anuncio dice qué vendes',how:'Escribe un mensaje corto con producto, a quién va dirigido y enlace.',done:'La promesa coincide con la página.'},
- {name:'Tu siguiente publicación ayuda',how:'Explica cómo funciona o responde una pregunta frecuente.',done:'Aporta información sin inventar reseñas.'},
- {name:'Mides hechos, no impresiones',how:'Anota consultas, reservas o pagos confirmados si aplica.',done:'No confundes visitas con ventas.'},
- {name:'Sabes qué corregir',how:'Elige el primer problema que afecta claridad o funcionamiento.',done:'Tienes un cambio concreto para probar.'}
-];
+/* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
+let PROMPTS=[],WORKBOOK=[],CHECKS=[];
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const headers=[
@@ -55,6 +15,20 @@ let running=0;
 export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons}){
  if(!root||root.dataset.mounted==='true')return;
  root.dataset.mounted='true';
+ const {data:resource,error:resourceError}=await db.from('podcast_class_learning_assets')
+  .select('payload,status')
+  .eq('course_id',courseId).eq('asset_code','interactive_guides_v1').maybeSingle();
+ if(resourceError||!resource?.payload){
+  root.textContent='Los materiales todavía están en preparación. Podrás usarlos cuando se active la clase.';
+  return;
+ }
+ PROMPTS=Array.isArray(resource.payload.prompts)?resource.payload.prompts:[];
+ WORKBOOK=Array.isArray(resource.payload.workbook)?resource.payload.workbook:[];
+ CHECKS=Array.isArray(resource.payload.checks)?resource.payload.checks:[];
+ if(PROMPTS.length!==12||WORKBOOK.length!==8||CHECKS.length!==16){
+  root.textContent='La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
+  return;
+ }
  const ownerPreview=adminPreview||!user;
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
