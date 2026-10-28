@@ -52,6 +52,7 @@ type Page =
   | 'inicio'
   | 'episodios'
   | 'clases'
+  | 'alumnos'
   | 'calendario'
   | 'tareas'
   | 'productos'
@@ -124,6 +125,7 @@ const NAV = [
   },
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
+  { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Tareas', icon: ListChecks },
   { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
@@ -145,6 +147,7 @@ const LABELS: Record<Page, string> = {
   inicio: 'Mi estudio',
   episodios: 'Episodios',
   clases: 'Clases · grabación',
+  alumnos: 'Centro de alumnos',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
   productos: 'Colección digital',
@@ -953,7 +956,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : page === 'clases'
+                  : (page === 'clases' || page === 'alumnos')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
@@ -1259,6 +1262,19 @@ function App() {
                 conectarlas.
               </div>
             </>
+          )}
+          {page === 'alumnos' && (
+            <section className="studio-student-center">
+              <div className="studio-student-center-intro">
+                <div>
+                  <span className="eyebrow">VISTA DE ADMINISTRADORA · NO ES UNA COMPRA</span>
+                  <h2>Así va quedando tu aula.</h2>
+                  <p>Abre los nueve módulos y los materiales dentro de tu Estudio. Tu sesión de administradora permite ver lecciones en preparación sin volver a iniciar sesión ni modificar el progreso de ningún alumno.</p>
+                </div>
+                <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir aula completa <ExternalLink size={16}/></a>
+              </div>
+              <iframe title="Centro de alumnos · vista privada de administración" src="../alumnos/?vista=admin" loading="lazy" referrerPolicy="same-origin"/>
+            </section>
           )}
           {page === 'clases' && (
             <ClassProduction entries={items.ideas} launchStats={classStats} onSave={async (entry, changes) => {
