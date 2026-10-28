@@ -15,7 +15,7 @@ assert.match(classPage,/type="checkbox" required/);
 assert.match(classPage,/id="course-waitlist-feedback"/);
 assert.match(classPage,/src="waitlist\.js"/);
 assert.match(classPage,/3 de diciembre de 2026/);
-assert.match(classPage,/Inscripciones aún no disponibles|Las compras todavía no están abiertas/i);
+assert.match(classPage,/Inscripciones desde el 3 de diciembre/i);
 assert.doesNotMatch(classPage,/buy\.stripe\.com|checkout\.stripe\.com|href="https:\/\/buy\./,'No hay checkout público mientras las compras están cerradas');
 assert.match(classPage,/noindex,nofollow/,'La página previa no está indexada');
 assert.match(waitlist,/auth\.signInWithOtp/);
@@ -80,7 +80,7 @@ console.log('Auditoría editorial 3/30 segundos, efectos, footer y privacidad: O
 assert.match(classPage,/PRECIO DE LANZAMIENTO · PAGO ÚNICO/);
 assert.match(classPage,/<strong>\$9\.99<\/strong>/);
 assert.match(classPage,/<del>\$39\.99<\/del>/);
-assert.match(classPage,/precio futuro previsto, no un precio anterior de venta/i);
+assert.match(classPage,/Precio regular futuro/i);
 assert.match(classPage,/Lanzamiento oficial: 3 de diciembre de 2026/);
 assert.doesNotMatch(classPage,/Fecha objetivo:|Objetivo de apertura:|precio todavía no está publicado|Precio e inscripciones aún por confirmar/i);
 assert.doesNotMatch(classPage,/checkout\.stripe\.com|buy\.stripe\.com|href="[^"]*pagar|href="[^"]*comprar/i);
@@ -91,3 +91,8 @@ assert.match(newStyles,/\.class-page-v2 :is\(/);
 assert.match(newStyles,/\.class-page-v2 \.class-material-tab\{border-radius:999px!important\}/);
 assert.match(newStyles,/\.class-page-v2 \.class-waitlist-form>input\[type="email"\]/);
 console.log('QA precio $9.99/39.99 previsto, fecha oficial y botones ovalados: OK');
+
+assert.match(classPage,/Tu primera web <em>con IA/);
+assert.doesNotMatch(classPage,/no un precio anterior de venta|no una venta anterior|comprobar que los materiales funcionan|clase en preparación|fecha objetivo/i);
+assert.doesNotMatch(classPage,/Stripe|Supabase|Make|nota interna|borrador de producción/i);
+console.log('QA editorial: contenido orientado al alumno sin procesos internos OK');
