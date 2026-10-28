@@ -33,8 +33,15 @@ function clearReturn(){
 function showConfirmation(email){
  emailEl.value=email;
  submit.disabled=true;
- message('¡Ya estás en la lista de espera! 💙 Tu correo quedó confirmado. Te enviaré un mensaje de bienvenida y novedades periódicas de «Tu primera web con IA». No has realizado ninguna compra.',true);
- if(returning)document.querySelector('#lista-espera')?.scrollIntoView({behavior:'auto',block:'center'});
+ message('¡Tu inscripción está confirmada!',true);
+ form.hidden=true;
+ document.querySelector('#course-waitlist-pending').hidden=true;
+ const success=document.querySelector('#course-waitlist-success');
+ success.hidden=false;
+ requestAnimationFrame(()=>{
+  success.scrollIntoView({behavior:'smooth',block:'center'});
+  success.focus({preventScroll:true});
+ });
 }
 async function readMembership(email){
  const {data,error}=await db.from('podcast_class_waitlist')
@@ -113,7 +120,7 @@ async function manage(user){
  try{data=await readMembership(email);}catch{return;}
  if(!data||data.unsubscribed_at)return;
  if(!returning && !requested() && !feedback.dataset.ok?.includes('true'))showConfirmation(email);
- if(form.querySelector('#course-unsubscribe'))return;
+ if(document.querySelector('#course-unsubscribe'))return;
  const b=document.createElement('button');
  b.type='button';b.id='course-unsubscribe';b.className='class-waitlist-optout';
  b.textContent='Darme de baja de esta lista';
@@ -124,10 +131,10 @@ async function manage(user){
   if(error){
    b.disabled=false;message('No pudimos tramitar la baja. Inténtalo de nuevo.');return;
   }
-  b.remove();submit.disabled=false;consentEl.checked=false;
+  b.remove();document.querySelector('#course-waitlist-success').hidden=true;form.hidden=false;submit.disabled=false;consentEl.checked=false;
   message('Tu solicitud se canceló. No recibirás más avisos sobre esta clase.',true);
  });
- form.appendChild(b);
+ document.querySelector('#course-waitlist-success-optout').appendChild(b);
 }
 async function detectSession(user){
  if(!user)return;
