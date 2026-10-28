@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
@@ -9,6 +10,8 @@ export type ClassEntry = {
 };
 type Props = {
   entries: ClassEntry[];
+  tasks: ClassWeeklyTask[];
+  onTaskToggle: (task:ClassWeeklyTask,next:'pendiente'|'completado')=>Promise<void>;
   launchStats?: {waitlist:number; buyers:number}|null;
   onSave: (item: ClassEntry, fields: Pick<ClassEntry,'status'|'notes'|'link'|'performance_notes'>) => Promise<void>;
 };
@@ -21,7 +24,7 @@ function safeStatus(value?:string) {
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
 
-export default function ClassProduction({entries,launchStats,onSave}:Props) {
+export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,onSave}:Props) {
  const [lessonId,setLessonId]=useState('00');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
@@ -86,6 +89,7 @@ export default function ClassProduction({entries,launchStats,onSave}:Props) {
     <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
     <div><strong>Inactivo</strong><span>Checkout de la clase, pendiente de activar</span></div>
    </div>
+   <ClassWeeklyPlan tasks={tasks} lessons={entries} onToggle={onTaskToggle}/>
    <div className="class-admin-room-entry">
     <div>
       <span className="class-overline"><ShieldCheck size={15}/> ACCESO DE ADMINISTRADORA</span>
@@ -110,7 +114,7 @@ export default function ClassProduction({entries,launchStats,onSave}:Props) {
     <a href={CLASS_PROMPTS} target="_blank" rel="noreferrer"><Clipboard size={16}/> 12 prompts <ExternalLink size={13}/></a>
   </div>
   <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> El alumno crea su propia landing. El ejemplo de brownies infusionados es un prototipo visual sin checkout, sin datos de clientes y sin cobros. Para enseñar pagos, utiliza un producto digital permitido en modo de prueba.</span></div>
-  <div className="class-body">
+  <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
       {classLessons.map(item=>{
