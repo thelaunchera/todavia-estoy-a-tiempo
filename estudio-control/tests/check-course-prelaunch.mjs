@@ -51,7 +51,7 @@ assert.match(classPage,/Inscripciones desde el 3 de diciembre/,'Lista de espera 
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
 assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
-assert.match(classPage,/src="\.\.\/assets\/clase-hero-portrait-original\.webp"/,'Se publica la foto original nítida aportada por la creadora');
+assert.match(classPage,/src="\.\.\/assets\/clase-trabajo-web-2026\.webp"/,'Se publica la foto independiente de laptop en el hero');
 assert.match(newStyles,/class-hero-grid/,'El layout del hero tiene estilos responsivos');
 assert.match(classPage,/role="tablist"/);
 assert.match(classPage,/role="tabpanel"/);
@@ -132,8 +132,8 @@ console.log('Club de Ideas: acceso privado, captura, reacciones, comentarios, mo
 
 
 /* UX regression: retrato real, navegación arriba, materiales legibles y footer. */
-assert.match(classPage,/clase-hero-portrait-original\.webp/);
-assert.match(classPage,/width="1400" height="933"/);
+assert.match(classPage,/clase-trabajo-web-2026\.webp/);
+assert.match(classPage,/width="768" height="768"/);
 assert.match(classPage,/id="class-floating-top"/);
 assert.match(classPage,/class-back-to-top"/);
 assert.match(classPage,/class-demo-arrow[\s\S]*?<svg/);
@@ -144,3 +144,18 @@ assert.match(newStyles,/body\.class-page-v2:has\(#privacy-notice:not\(\[hidden\]
 assert.match(newExperience,/footerBack\?\.addEventListener\('click', scrollToStart\)/);
 assert.match(newExperience,/window\.scrollTo\(\{top:0/);
 console.log('QA móvil: retrato original, tabs 2x2, footer contrastado y volver arriba OK');
+
+/* Fotos originales independientes para tres secciones (no collage). */
+const podcastCss = read('episodios-destacados.css');
+const podcastHeroCss = read('styles-redesign.css');
+assert.match(home,/assets\/clase-bot-home-2026\.webp/);
+assert.match(home,/Historias sobre la vida real/);
+assert.match(home,/episode-mini-card-latest/);
+assert.match(home,/episode-previous episode-mini-card/);
+assert.doesNotMatch(home,/class="learning-book-scene"/);
+assert.match(classPage,/assets\/clase-trabajo-web-2026\.webp/);
+assert.match(classPage,/assets\/clase-mostrar-web-2026\.webp/);
+assert.doesNotMatch(classPage,/class-evidence-board/);
+assert.match(podcastCss,/episodes-compact-v2 \.episode-curated-grid/);
+assert.match(podcastHeroCss,/Podcast · mensaje claro en una mirada/);
+console.log('QA: podcast claro, episodios 01 y 02 compactos y tres fotografías independientes OK');
