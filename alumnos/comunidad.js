@@ -264,6 +264,24 @@ async function init(){
  }catch(e){console.error('Community init failed',e?.code||e?.message||'unknown');showLocked('No pudimos comprobar tus permisos. Actualiza la página y vuelve a entrar desde tu aula.');}
 }
 await init();
+// Supabase Realtime notifies the club about new posts, comments and reactions.
+// All actual content is re-read through member-scoped RLS policies.
+let realtimeRefresh=null;
+function refreshOnCommunityEvent(){
+ if(!state.user||document.visibilityState==='hidden'||state.busy)return;
+ if(document.activeElement?.matches('input,textarea,select'))return;
+ if(realtimeRefresh)clearTimeout(realtimeRefresh);
+ realtimeRefresh=setTimeout(()=>{
+  realtimeRefresh=null;void loadFeed().catch(()=>{});
+ },750);
+}
+if(state.user){
+ db.channel('podcast-club-live')
+  .on('postgres_changes',{event:'*',schema:'public',table:'podcast_club_posts'},refreshOnCommunityEvent)
+  .on('postgres_changes',{event:'*',schema:'public',table:'podcast_club_comments'},refreshOnCommunityEvent)
+  .on('postgres_changes',{event:'*',schema:'public',table:'podcast_club_likes'},refreshOnCommunityEvent)
+  .subscribe();
+}
 // Refresh only when not editing; preserve unfinished messages and scroll.
 window.setInterval(()=>{
  if(!state.user||document.visibilityState!=='visible'||state.busy)return;
