@@ -4,7 +4,7 @@ const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:t
 const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
 const out=$('logout');
-let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false;
+let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false,projectShared=false;
 const adminMarkerKey='podcast_studio_password_login_deadline_v1';
 function hasValidStudioSession(id){
  try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
@@ -20,11 +20,69 @@ function status(text,ok=false){message.textContent=text;message.dataset.ok=ok?'t
 function display(panel){[login,noAccess,course].forEach(el=>el.hidden=(el!==panel));}
 function validVideoId(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
 function escapedText(parent,tag,value,klass){const node=document.createElement(tag);node.textContent=value;if(klass)node.className=klass;parent.appendChild(node);return node;}
+function progressStats(){
+ const total=lessons.length,completed=lessons.filter(l=>done.has(l.lesson_code)).length;
+ return {total,completed,percent:total?Math.round(100*completed/total):0};
+}
+function bonusState(){
+ const {total,completed}=progressStats(),allDone=total>0&&total===completed;
+ const l=$('bonus-lessons'),p=$('bonus-project');
+ l.classList.toggle('is-done',allDone);p.classList.toggle('is-done',projectShared);
+ l.querySelector('span').textContent=allDone?'✓':'○';p.querySelector('span').textContent=projectShared?'✓':'○';
+ const status=$('bonus-status');
+ if(allDone&&projectShared){
+  status.textContent='¡Completaste los dos pasos! Tu bono está pendiente de anuncio y entrega.';
+  status.dataset.state='earned';
+ }else if(allDone){
+  status.textContent='¡Terminaste las lecciones! Comparte tu primera web en el Club de Ideas.';
+  status.dataset.state='progress';
+ }else if(projectShared){
+  status.textContent='¡Ya compartiste tu proyecto! Continúa con las lecciones.';
+  status.dataset.state='progress';
+ }else{
+  status.textContent='Pronto te contaremos qué incluye el bono.';
+  status.dataset.state='pending';
+ }
+}
 function setProgress(){
- const total=lessons.length;
- const n=lessons.filter(l=>done.has(l.lesson_code)).length;
- $('progress-label').textContent=n+' de '+total+' lecciones disponibles completadas';
- $('progress-bar').style.width=(total?100*n/total:0)+'%';
+ const {total,completed,percent}=progressStats();
+ $('progress-label').textContent=completed+' de '+total+' lecciones completadas';
+ $('progress-percent').textContent=percent+'%';
+ $('progress-bar').style.width=percent+'%';
+ $('student-progress').setAttribute('aria-valuenow',String(percent));
+ if(!adminPreview)bonusState();
+}
+function congratulate(item){
+ const {total,completed}=progressStats();
+ $('lesson-celebration-title').textContent='¡Bien hecho! Terminaste una lección.';
+ $('lesson-celebration-description').textContent=total&&completed===total
+  ? '¡Completaste todas las lecciones! Ahora comparte tu primera web en el Club de Ideas para cumplir el reto del bono.'
+  : 'Terminaste «'+item.title+'». Ya llevas '+completed+' de '+total+'. ¡Sigue así!';
+ $('lesson-celebration').hidden=false;
+}
+async function loadMemberName(who,asAdmin){
+ let name=String(who?.user_metadata?.full_name||who?.user_metadata?.name||'').trim();
+ if(!asAdmin){
+  const {data,error}=await db.from('podcast_club_profiles').select('display_name').eq('user_id',who.id).maybeSingle();
+  if(!error&&data?.display_name)name=data.display_name;
+ }
+ if(!name){name=String(who?.email||'').split('@')[0].replace(/[._0-9-]+/g,' ').trim();}
+ name=name.split(/\s+/).slice(0,2).join(' ').slice(0,40);
+ $('student-name').textContent=name||'qué gusto verte';
+}
+async function checkProjectShared(){
+ if(adminPreview||!user){projectShared=false;bonusState();return;}
+ try{
+  const {data,error}=await db.from('podcast_club_posts')
+   .select('id,scope,course_id,channel,image_path,project_url')
+   .eq('author_id',user.id).eq('status','visible').eq('channel','proyectos').limit(40);
+  if(error)throw error;
+  projectShared=(data||[]).some(post=>
+    (post.scope==='club'||(post.scope==='curso'&&post.course_id===courseId))
+    &&Boolean(post.image_path||post.project_url)
+  );
+ }catch{projectShared=false;}
+ bonusState();
 }
 function choose(i){
  selected=i;
@@ -92,7 +150,10 @@ async function showCourse(email,asAdmin=false){
  $('admin-preview-banner').hidden=!asAdmin;
  $('student-progress').hidden=asAdmin;
  $('progress-label').hidden=asAdmin;
+ $('progress-percent').hidden=asAdmin;
+ $('lesson-celebration').hidden=true;
  display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();
+ if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
 async function refreshAuth(){
  try{
@@ -101,6 +162,7 @@ async function refreshAuth(){
   if(!who){out.hidden=true;display(login);status('Entra con el correo que usaste en la compra.');return;}
   user=who;out.hidden=false;status('Comprobando permisos…');
   const owner=await isAuthorizedOwner(who);
+  if(!owner&&!who.email_confirmed_at){display(noAccess);status('Confirma tu correo antes de entrar al aula.');return;}
   await showCourse((who.email||'').trim().toLowerCase(),owner);
  }catch(e){display(login);status('No pudimos comprobar el acceso en este momento. Actualiza la página o pide ayuda si continúa.');console.error('Course portal auth check error',e?.code||'unknown');}
 }
@@ -128,15 +190,20 @@ $('lesson-done').addEventListener('change',async e=>{
   if(response.error && !(box.checked&&response.error.code==='23505'))throw response.error;
   if(box.checked)done.add(item.lesson_code);else done.delete(item.lesson_code);
   setProgress();
+  if(box.checked){congratulate(item);await checkProjectShared();}
+  else $('lesson-celebration').hidden=true;
  }catch{box.checked=!box.checked;status('No pudimos guardar tu avance. Vuelve a intentarlo.');}
  finally{box.disabled=false;}
 });
 $('lesson-next').addEventListener('click',()=>choose(Math.min(selected+1,lessons.length-1)));
+$('lesson-celebration-close').addEventListener('click',()=>$('lesson-celebration').hidden=true);
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden&&!adminPreview&&user&&!course.hidden)void checkProjectShared();
+});
 out.addEventListener('click',async()=>{
  if(adminPreview){location.assign('../estudio/');return;}
  await db.auth.signOut();location.replace('./');
 });
-
 const courseHelpPanel=$('soporte-aula');
 const courseHelpForm=$('course-help-form');
 const courseHelpStatus=$('course-help-status');
