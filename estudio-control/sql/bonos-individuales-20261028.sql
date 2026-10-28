@@ -7,6 +7,7 @@
 --   podcast_class_resources: excluye bonus_ de la lectura general de compradores.
 --   class_resources_assigned_bonus_read solo publica estado ready a asignados.
 --   Los recursos en draft se conservan ocultos, incluso si existe asignación.
+-- Política aplicada: class_resources_paid_view contiene resource_code !~ '^bonus_' para no revelar bonos globalmente.
 --   Nunca publicar claves ni usar service_role en el navegador.
 -- Comprobación del estado real: consultar pg_policies, pg_class.relrowsecurity y table_privileges.
 select 'class_bonus_grants_status' as diagnostic,
