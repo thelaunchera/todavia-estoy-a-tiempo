@@ -189,3 +189,28 @@ assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
 assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
 assert.match(home,/href="clases\/primera-landing.html">Explora la clase<\/a>/);
 console.log('QA: copy latino, CTA explora, sin número público y texto móvil con margen');
+
+
+/* Flip clock de lanzamiento, enlazado SOLO al consentimiento de espera. */
+const countdownJs=read('clases/countdown.js');
+assert.match(classPage,/id="reloj-lanzamiento"/);
+assert.match(classPage,/data-launch-at="2026-12-03T00:00:00-05:00"/);
+assert.match(classPage,/class-flip-timer/);
+for(const unit of ['days','hours','minutes','seconds']){
+  assert.match(classPage,new RegExp('data-digits="'+unit+'"'));
+}
+assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
+assert.match(classPage,/src="countdown\.js\?v=/);
+assert.match(countdownJs,/Date\.parse\(clock\.dataset\.launchAt/);
+assert.match(countdownJs,/Math\.ceil\(\(target - now\) \/ 1000\)/);
+assert.match(countdownJs,/getRemaining/);
+assert.match(countdownJs,/reducedMotion\.matches/);
+assert.match(countdownJs,/document\.hidden/);
+assert.match(countdownJs,/classFlipFold|is-flipping/);
+assert.match(newStyles,/animation:classFlipFold 250ms/);
+assert.match(newStyles,/animation:classFlipUnfold 250ms[^;]*250ms/);
+assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
+assert.match(newStyles,/class-hero-intro>\.class-launch-clock/);
+assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1);
+assert.doesNotMatch(classPage,/href="[^"]*(buy\.stripe|checkout\.stripe)/);
+console.log('QA reloj: 4 grupos, flip 250+250ms, medianoche EST y botón a lista de espera OK');
