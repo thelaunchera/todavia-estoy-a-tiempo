@@ -128,7 +128,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     </aside>
     <div className="class-workspace">
       <div className="class-lesson-header">
-       <span className="class-mini-heading">VIDEO {lesson.id} / 08 · META {lesson.minutes} MIN</span>
+       <span className="class-mini-heading">VIDEO {Number(lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
        <h3>{lesson.title}</h3>
        <p>{lesson.outcome}</p>
       </div>
