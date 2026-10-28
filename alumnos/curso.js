@@ -26,6 +26,30 @@ function progressStats(){
 }
 // Solo la clase completa y aprobada puede generar acceso al reto del bono.
 const REQUIRED_LESSON_COUNT=9;
+async function refreshPersonalBonuses(){
+ if(adminPreview||!user)return;
+ const box=$('assigned-bonuses'),list=$('assigned-bonus-list');
+ try{
+  const {data,error}=await db.from('podcast_class_resources')
+   .select('resource_code,title,url,status')
+   .eq('course_id',courseId).like('resource_code','bonus_%').eq('status','ready');
+  if(error)throw error;
+  list.replaceChildren();
+  (data||[]).filter(item=>item.resource_code.startsWith('bonus_')&&/^https:\/\//.test(item.url||'')).forEach(item=>{
+    const link=document.createElement('a');
+    link.className='resource';link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
+    escapedText(link,'span','BONO PERSONAL','resource-tag');
+    escapedText(link,'strong',item.title);
+    escapedText(link,'span','Abrir bono ↗','resource-link');
+    list.appendChild(link);
+  });
+  box.hidden=list.children.length===0;
+ }catch{
+  list.replaceChildren();box.hidden=true;
+  status('No pudimos actualizar tus bonos. Vuelve a entrar o solicita ayuda.');
+ }
+}
+
 function bonusState(){
  const {total,completed}=progressStats();
  const allDone=total===REQUIRED_LESSON_COUNT
@@ -39,6 +63,11 @@ function bonusState(){
  const eligible=allDone&&projectShared&&!adminPreview;
  const status=$('bonus-status');
  $('bonus-unlocked').hidden=!eligible;
+ if(eligible)void refreshPersonalBonuses();
+ else {
+  $('assigned-bonus-list').replaceChildren();
+  $('assigned-bonuses').hidden=true;
+ }
  if(eligible){
   status.textContent='¡Completaste las lecciones y compartiste tu web! Requisitos del bono cumplidos.';
   status.dataset.state='earned';
@@ -149,7 +178,6 @@ async function showCourse(email,asAdmin=false){
  lessons=l.data||[];done=new Set((p.data||[]).map(x=>x.lesson_code));
  const allResources=r.data||[];
  const generalResources=allResources.filter(item=>!item.resource_code.startsWith('bonus_'));
- const personalBonuses=asAdmin?[]:allResources.filter(item=>item.resource_code.startsWith('bonus_')&&item.status==='ready');
  const resources=$('resource-list');resources.replaceChildren();
  generalResources.forEach(item=>{
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
@@ -159,21 +187,8 @@ async function showCourse(email,asAdmin=false){
   resources.appendChild(a);
  });
  $('empty-resources').hidden=Boolean(generalResources.length);
- const personalBox=$('assigned-bonuses');
- const personalList=$('assigned-bonus-list');
- personalList.replaceChildren();
- personalBonuses.forEach(item=>{
-  const link=document.createElement('a');
-  link.className='resource';
-  link.href=item.url;
-  link.rel='noopener noreferrer';
-  link.target='_blank';
-  escapedText(link,'span','BONO PARA TI','resource-tag');
-  escapedText(link,'strong',item.title);
-  escapedText(link,'span','Abrir bono ↗','resource-link');
-  personalList.appendChild(link);
- });
- personalBox.hidden=asAdmin||personalBonuses.length===0;
+ $('assigned-bonus-list').replaceChildren();
+ $('assigned-bonuses').hidden=true;
  $('admin-preview-banner').hidden=!asAdmin;
  $('student-progress').hidden=asAdmin;
  $('progress-label').hidden=asAdmin;
