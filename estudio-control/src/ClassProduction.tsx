@@ -32,6 +32,7 @@ export default function ClassProduction({entries,launchStats,onSave}:Props) {
  const [saving,setSaving]=useState(false);
  const [notice,setNotice]=useState('');
  const [copied,setCopied]=useState('');
+ const [showAdminRoom,setShowAdminRoom]=useState(false);
  const lesson=useMemo(()=>classLessons.find(x=>x.id===lessonId)||classLessons[0],[lessonId]);
  const records=useMemo(()=>entries.filter(x=>x.section===CLASS_SECTION),[entries]);
  const record=records.find(x=>x.subtitle===lesson.id);
@@ -85,7 +86,23 @@ export default function ClassProduction({entries,launchStats,onSave}:Props) {
     <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
     <div><strong>Inactivo</strong><span>Checkout de la clase, pendiente de activar</span></div>
    </div>
-   <div className="class-links">
+   <div className="class-admin-room-entry">
+    <div>
+      <span className="class-overline"><ShieldCheck size={15}/> ACCESO DE ADMINISTRADORA</span>
+      <h3>Centro de alumnos</h3>
+      <p>Revisa el aula tal como se va construyendo: los módulos, videos en preparación y materiales. Abre con tu sesión actual del Estudio, sin otra contraseña ni una compra.</p>
+      <small>La vista es privada y no modifica el avance de los alumnos.</small>
+    </div>
+    <div className="class-admin-room-actions">
+      <button type="button" onClick={()=>setShowAdminRoom(!showAdminRoom)} aria-expanded={showAdminRoom} aria-controls="studio-classroom-preview"><MonitorPlay size={17}/>{showAdminRoom?'Cerrar vista del aula':'Ver el Centro de alumnos'}</button>
+      <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir pantalla completa <ExternalLink size={15}/></a>
+    </div>
+  </div>
+  {showAdminRoom && <div id="studio-classroom-preview" className="class-admin-room-preview">
+    <div className="class-admin-preview-heading"><strong>Vista real del aula</strong><span>Solo tu sesión autorizada de administradora</span></div>
+    <iframe src="../alumnos/?vista=admin" title="Vista administrativa del Centro de alumnos" loading="lazy" referrerPolicy="same-origin"/>
+  </div>}
+  <div className="class-links">
     <a href={CLASS_NOTION} target="_blank" rel="noreferrer"><BookOpen size={16}/> Estudio privado de la clase <ExternalLink size={13}/></a>
     <a href={CLASS_PLAN} target="_blank" rel="noreferrer"><FileText size={16}/> Producción detallada <ExternalLink size={13}/></a>
     <a href="https://app.notion.com/p/407a68f2ee6e81f1b331eebd75b2e3d9?pvs=204" target="_blank" rel="noreferrer"><FileText size={16}/> Plan de primera venta <ExternalLink size={13}/></a>
