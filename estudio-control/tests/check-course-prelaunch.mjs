@@ -97,3 +97,35 @@ assert.match(classPage,/Tu primera web <em>con IA/,'Título claro para visitante
 assert.doesNotMatch(classPage,/no un precio anterior de venta|no una venta anterior|comprobar que los materiales funcionan|clase en preparación|fecha objetivo/i);
 assert.doesNotMatch(classPage,/Stripe|Supabase|Make|nota interna|borrador de producción/i);
 console.log('QA editorial: contenido orientado al alumno sin procesos internos OK');
+
+/* Club de Ideas · verifica acceso privado, pantallas y ausencia de credenciales. */
+const clubPage=read('alumnos/comunidad.html');
+const clubJs=read('alumnos/comunidad.js');
+const clubStyles=read('alumnos/comunidad.css');
+const clubSchema=read('estudio-control/sql/club-de-ideas-comunidad.sql');
+const classPortal=read('alumnos/index.html');
+const studio=read('estudio-control/src/Studio.tsx');
+assert.match(clubPage,/noindex,nofollow/);
+assert.match(clubPage,/id="club-locked"/);
+assert.match(clubPage,/id="club-members" hidden/);
+assert.match(clubPage,/id="club-post-image"/);
+assert.match(clubPage,/data-channel="charla"/);
+assert.match(clubPage,/data-channel="proyectos"/);
+assert.match(clubPage,/data-channel="preguntas"/);
+assert.match(clubPage,/id="club-post-form"/);
+assert.match(clubJs,/podcast_class_access/);
+assert.match(clubJs,/podcast_studio_admins/);
+assert.match(clubJs,/sessionIsStudioOwner/);
+assert.match(clubJs,/from\('podcast_club_posts'\)/);
+assert.match(clubJs,/from\('podcast_club_comments'\)/);
+assert.match(clubJs,/from\('podcast_club_likes'\)/);
+assert.match(clubJs,/from\('podcast_club_reports'\)/);
+assert.match(clubJs,/createSignedUrl/);
+assert.match(clubJs,/textContent/);
+assert.doesNotMatch(clubJs,/service_role|sk_live_|rk_live_|whsec_/);
+assert.match(clubSchema,/enable row level security/g);
+assert.match(clubSchema,/storage[.]buckets/);
+assert.match(classPortal,/comunidad[.]html/);
+assert.match(studio,/Club de Ideas/);
+assert.match(clubStyles,/@media\(max-width:650px\)/);
+console.log('Club de Ideas: acceso privado, captura, reacciones, comentarios, moderación y móvil OK');
