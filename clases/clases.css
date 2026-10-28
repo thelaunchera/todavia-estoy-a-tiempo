@@ -671,3 +671,64 @@ html:has(.class-page-v2){scroll-padding-top:84px}
 .class-page-v2 .class-opportunity{font:400 clamp(1.35rem,2.2vw,2.05rem)/1.24 var(--serif,Georgia,serif);letter-spacing:-.025em;color:#26455f;max-width:520px;margin:17px 0 0}
 .class-page-v2 .class-opportunity em{color:#567fa2}
 @media(max-width:650px){.class-page-v2 .class-opportunity{font-size:clamp(1.32rem,5.1vw,1.64rem);margin:13px 0 0}}
+
+
+/* QA móvil y tablet: el mensaje de tres segundos debe preceder a la fotografía.
+   Mantener la imagen protagonista sin recortar ni repetir titulares. */
+@media(max-width:900px){
+ .class-page-v2 .class-hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:
+   "eyebrow"
+   "heading"
+   "opportunity"
+   "visual"
+   "description"
+   "chips"
+   "price"
+   "actions"
+   "availability"
+   "launch";
+  align-items:start;
+  gap:0;
+ }
+ .class-page-v2 .class-hero-intro{display:contents}
+ .class-page-v2 .class-hero-intro>.class-eyebrow{grid-area:eyebrow}
+ .class-page-v2 .class-hero-intro>h1{grid-area:heading}
+ .class-page-v2 .class-hero-intro>.class-opportunity{grid-area:opportunity}
+ .class-page-v2 .class-hero-art{grid-area:visual}
+ .class-page-v2 .class-hero-intro>.class-lede{grid-area:description}
+ .class-page-v2 .class-hero-intro>.class-hero-chips{grid-area:chips}
+ .class-page-v2 .class-hero-intro>.class-price-inline{grid-area:price}
+ .class-page-v2 .class-hero-intro>.class-hero-actions{grid-area:actions}
+ .class-page-v2 .class-hero-intro>.class-availability{grid-area:availability}
+ .class-page-v2 .class-hero-intro>.class-notice{grid-area:launch}
+ .class-page-v2 .class-hero-intro>.class-eyebrow,
+ .class-page-v2 .class-hero-intro>h1,
+ .class-page-v2 .class-hero-intro>.class-opportunity,
+ .class-page-v2 .class-hero-intro>.class-lede,
+ .class-page-v2 .class-hero-intro>.class-hero-chips,
+ .class-page-v2 .class-hero-intro>.class-price-inline,
+ .class-page-v2 .class-hero-intro>.class-hero-actions,
+ .class-page-v2 .class-hero-intro>.class-availability,
+ .class-page-v2 .class-hero-intro>.class-notice{
+   min-width:0;
+   width:calc(100% - 36px);
+   max-width:650px;
+   margin-left:auto;
+   margin-right:auto;
+ }
+ .class-page-v2 .class-hero{padding-top:20px}
+ .class-page-v2 .class-hero-art{margin:18px auto 0;max-width:470px}
+ .class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}
+ .class-page-v2 .class-hero-intro>h1{margin-top:10px}
+ .class-page-v2 .class-hero-intro>.class-opportunity{margin-top:10px}
+ .class-page-v2 .class-hero-intro>.class-lede{margin-top:20px}
+}
+@media(max-width:650px){
+ .class-page-v2 .class-hero{padding-top:14px}
+ .class-page-v2 .class-hero-art{max-width:100%;margin:17px auto 0}
+ .class-page-v2 .class-hero-image-frame{border-radius:0;box-shadow:none}
+ .class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}
+}
