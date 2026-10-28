@@ -475,3 +475,113 @@ html:has(.class-page-v2){scroll-padding-top:84px}
   }
   .class-page-v2 .class-hero-art{grid-area:visual;width:min(100%,650px)}
 }
+
+
+/* Clase 01 — tarifa aprobada, lanzamiento oficial y controles ovalados.
+   Precio tachado identificado como precio futuro previsto; NO precio anterior. */
+.class-page-v2 .class-price-inline{
+  display:flex;flex-wrap:wrap;align-items:end;gap:clamp(16px,3vw,34px);
+  border-top:1px solid #aac8dd3b;padding-top:18px;margin:23px 0 0;
+}
+.class-page-v2 .class-price-current,
+.class-page-v2 .class-price-regular{display:flex;flex-direction:column;gap:3px;min-width:0}
+.class-page-v2 .class-price-label{font-size:.61rem;line-height:1.6;letter-spacing:.13em;font-weight:700;color:#cde2ef}
+.class-page-v2 .class-price-current strong{
+  display:block;color:#fffdf6;font:400 clamp(2.95rem,5vw,4.45rem)/1 var(--serif,Georgia,serif);
+  font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.04em;
+}
+.class-page-v2 .class-price-regular span{font-size:.71rem;color:#c1d4df;line-height:1.5}
+.class-page-v2 .class-price-regular del{
+  color:#a9c4d5;text-decoration-thickness:1.5px;text-decoration-color:#d5e1e9;
+  font-size:clamp(1.2rem,1.85vw,1.5rem);line-height:1.35;font-variant-numeric:tabular-nums;
+}
+.class-page-v2 .class-price-clarifier{color:#b7cbd9;font-size:.65rem;line-height:1.55;margin:7px 0 0;max-width:560px}
+.class-page-v2 .class-hero .class-hero-actions{margin-top:18px}
+.class-page-v2 .class-hero .class-availability{margin-top:15px}
+.class-page-v2 .class-hero .class-notice{font-size:.79rem;margin-top:15px}
+.class-page-v2 .class-hero .class-notice strong{font-weight:700;color:#e5f0f6}
+.class-page-v2 .class-price-bottom{
+  border-top:1px solid #c8e2f53b;
+  border-bottom:1px solid #c8e2f53b;
+  padding:22px 0 17px;margin:23px 0 19px;
+}
+.class-page-v2 .class-price-bottom-caption{
+  color:#c2d6e7;font-size:.66rem;letter-spacing:.13em;font-weight:700;
+}
+.class-page-v2 .class-price-bottom-row{display:flex;flex-wrap:wrap;align-items:end;gap:20px;margin:6px 0 3px}
+.class-page-v2 .class-price-bottom-row>strong{
+  color:#fffef7;font:400 clamp(3.3rem,5.2vw,5.2rem)/1 var(--serif,Georgia,serif);
+  letter-spacing:-.055em;font-variant-numeric:tabular-nums;
+}
+.class-page-v2 .class-price-bottom-row>span{
+  display:inline-flex;flex-direction:column;color:#c2d5e3;font-size:.72rem;line-height:1.6;padding-bottom:6px;
+}
+.class-page-v2 .class-price-bottom-row del{
+  color:#bfd1dc;text-decoration-thickness:1.6px;font:400 1.42rem/1.3 var(--sans,Arial,sans-serif);
+}
+.class-page-v2 .class-price-bottom small{display:block;color:#b6cbd8;font-size:.65rem;line-height:1.6}
+
+/* Una sola familia de botones tipo píldora, sin esquinas cuadradas.
+   Los campos del formulario usan el mismo lenguaje de diseño. */
+.class-page-v2 :is(
+  .class-primary-button,.class-nav-cta,.class-ghost-button,
+  .class-copy-sample,.class-material-tab,.class-preview-choice,
+  .class-text-link,.class-journey-bridge a,.class-back-to-top,
+  .class-waitlist-form button,.class-waitlist-optout,
+  .class-footer-nav button
+){border-radius:999px!important;}
+.class-page-v2 .class-hero .class-primary-button,
+.class-page-v2 .class-waitlist-form .class-primary-button{
+  border-radius:999px!important;
+  min-height:52px;
+  padding:13px 23px;
+  justify-content:center;
+  gap:14px;
+  box-shadow:0 8px 23px #071b3040;
+}
+.class-page-v2 .class-hero .class-ghost-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid #d0e3f07c;
+  padding:12px 19px;
+  min-height:49px;
+  text-align:center;
+  background:transparent;
+  color:#f6f8f9;
+  font-weight:600;
+  transition:background .25s ease,transform .25s ease,border-color .25s ease;
+}
+.class-page-v2 .class-hero .class-ghost-button:hover{
+  background:#ffffff15;
+  border-color:#fff;
+  transform:translateY(-2px);
+}
+.class-page-v2 .class-material-tab{border-radius:999px!important}
+.class-page-v2 .class-copy-sample{border-radius:999px!important;padding:12px 18px}
+.class-page-v2 .class-journey-bridge a,
+.class-page-v2 .class-text-link{
+  border:1px solid #a3bece;
+  background:#f2f7f9;
+  padding:10px 16px;
+  border-radius:999px!important;
+}
+.class-page-v2 .class-footer-nav button{border:1px solid #a7c4d064;padding:8px 12px}
+.class-page-v2 .class-waitlist-form>input[type="email"]{
+  border-radius:999px!important;
+  padding-inline:20px;
+}
+.class-page-v2 .class-faq details{border-radius:14px;}
+.class-page-v2 .class-outcome,.class-page-v2 .class-journey-card,
+.class-page-v2 .class-materials-workbench,.class-page-v2 .class-evidence-board,
+.class-page-v2 .class-waitlist-form{border-radius:24px;}
+
+@media(max-width:650px){
+  .class-page-v2 .class-price-inline{margin-top:19px;padding-top:15px;gap:17px}
+  .class-page-v2 .class-price-current strong{font-size:3.05rem}
+  .class-page-v2 .class-price-regular del{font-size:1.2rem}
+  .class-page-v2 .class-price-label{font-size:.58rem;letter-spacing:.085em}
+  .class-page-v2 .class-price-clarifier{font-size:.62rem}
+  .class-page-v2 .class-hero .class-hero-actions{gap:10px;margin-top:18px}
+  .class-page-v2 .class-hero .class-ghost-button{width:100%;padding:10px 15px}
+  .class-page-v2 .class-price-bottom-row{gap:13px}
+  .class-page-v2 .class-price-bottom-row>strong{font-size:3.6rem}
+}
