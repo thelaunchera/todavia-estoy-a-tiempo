@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=tablet-materiales-en-columna-20261028-v2">
+<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-v1">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -46,8 +46,37 @@
    <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">Solicitar ayuda aquí</a>
   </section>
   <section id="class-content" hidden>
-   <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administración · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
-   <section class="student-greeting" aria-labelledby="student-greeting-title">
+<div class="room-grid" id="aula-layout">
+  <aside class="aula-rail" id="aula-rail" aria-label="Menú de mi aula">
+    <div class="aula-rail-brand">
+      <a href="#aula" data-aula-view="inicio" aria-label="Inicio de mi aula"><img src="../assets/logo-podcast-04.svg" width="726" height="250" alt="Todavía estoy a tiempo"></a>
+      <button type="button" class="aula-rail-close" id="aula-rail-close" aria-label="Cerrar menú">×</button>
+    </div>
+    <div class="aula-rail-workspace"><span class="aula-rail-dot" aria-hidden="true"></span> CENTRO DE ALUMNOS <span>01</span></div>
+    <nav class="aula-navigation" aria-label="Secciones de tu clase">
+      <p class="aula-nav-group">TU ESPACIO</p>
+      <button class="aula-side-link" type="button" data-aula-view="inicio" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg></span><span>Mi inicio</span></button>
+      <button class="aula-side-link" type="button" data-aula-view="lecciones" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H3z"/><path d="M21 5h-5a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h5z"/></svg></span><span>Mis lecciones</span></button>
+      <div class="lesson-index" aria-label="Lista de lecciones"><h3>CONTENIDO DE LA CLASE</h3><div id="lesson-buttons"></div></div>
+      <p class="aula-nav-group">MIS RECURSOS</p>
+      <button class="aula-side-link" type="button" data-aula-view="materiales" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3z"/><path d="M3 7V4h7l2 3"/></svg></span><span>Materiales</span></button>
+      <button class="aula-side-link" type="button" data-aula-view="bonos" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18M12 9C6 9 5 3 8 3c3 0 4 6 4 6Zm0 0c6 0 7-6 4-6s-4 6-4 6Z"/></svg></span><span>Mis bonos</span></button>
+      <button class="aula-side-link" type="button" data-aula-view="comunidad" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2zM17 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5"/></svg></span><span>Club de Ideas</span></button>
+      <button class="aula-side-link" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg></span><span>Necesito ayuda</span></button>
+    </nav>
+    <div class="aula-rail-footer"><span class="aula-rail-foot-icon" aria-hidden="true">✦</span><div><strong>Aprende a tu ritmo.</strong><small>Un paso a la vez.</small></div></div>
+  </aside>
+  <button id="aula-rail-backdrop" class="aula-rail-backdrop" type="button" hidden aria-label="Cerrar menú"></button>
+  <div class="aula-main">
+    <header class="aula-main-top">
+      <button type="button" id="aula-menu-open" class="aula-menu-open" aria-controls="aula-rail" aria-expanded="false" aria-label="Abrir menú del aula"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menú</span></button>
+      <div class="aula-main-location"><span>MI AULA</span><span class="aula-main-separator" aria-hidden="true">/</span><strong id="aula-active-title">Mis lecciones</strong></div>
+      <button type="button" class="aula-quick-help" data-course-help aria-controls="soporte-aula" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg><span>Ayuda</span></button>
+    </header>
+       <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administración · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
+
+    <div data-aula-panel="inicio" class="aula-panel" hidden>
+         <section class="student-greeting" aria-labelledby="student-greeting-title">
      <div class="student-greeting-copy"><p class="eyebrow">TU ESPACIO PARA APRENDER</p>
        <h2 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>!</h2>
        <p id="student-greeting-message">Cada lección es un paso más para tener tu web lista.</p>
@@ -58,13 +87,22 @@
        <div class="track" id="student-progress" role="progressbar" aria-label="Progreso de la clase" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-bar"></div></div>
      </div>
    </section>
-   <div class="lesson-celebration" id="lesson-celebration" hidden role="status" aria-live="polite">
+
+      <div class="aula-home-actions">
+        <button type="button" class="aula-primary-action" data-aula-view="lecciones">Continuar mis lecciones <span aria-hidden="true">↗</span></button>
+        <button type="button" class="aula-secondary-action" data-aula-view="materiales">Ver mis materiales</button>
+      </div>
+         <div class="help"><p class="eyebrow">ACOMPAÑAMIENTO EN TU AULA</p><h2>¿Te atascaste?</h2><p>Cuéntame qué pasó o qué parte de la lección te resulta difícil. Puedes pedir ayuda sin salir del aula ni perder tu avance.</p><button class="outline" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button></div>
+
+    </div>
+    <div data-aula-panel="lecciones" class="aula-panel">
+      <div class="aula-section-heading"><p class="eyebrow">APRENDE PASO A PASO</p><h1>Mis lecciones</h1><p>Elige una lección en el menú. Tus avances se guardan en tu cuenta.</p></div>
+         <div class="lesson-celebration" id="lesson-celebration" hidden role="status" aria-live="polite">
      <div><span class="lesson-celebration-spark" aria-hidden="true">✦</span><strong id="lesson-celebration-title">¡Lo lograste!</strong><p id="lesson-celebration-description">Una lección más completada. Sigue a tu ritmo.</p></div>
      <button type="button" id="lesson-celebration-close" aria-label="Cerrar felicitación">×</button>
    </div>
-   <div class="room-grid">
-    <aside class="lesson-index" aria-label="Lista de lecciones"><h3>Mis lecciones</h3><div id="lesson-buttons"></div></aside>
-    <div class="lesson-stage">
+
+          <div class="lesson-stage">
       <div id="lesson-player" class="video-box" hidden></div>
       <p id="lesson-unavailable" class="empty" hidden>Este video todavía está en preparación. Cuando se publique su enlace aprobado aparecerá aquí, sin cambiar el diseño del aula.</p>
       <p id="empty-lessons" class="empty">Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.</p>
@@ -76,21 +114,19 @@
        <button type="button" id="lesson-next">Siguiente lección</button>
       </div>
     </div>
-    <aside class="student-sidebar" aria-label="Materiales de la clase">
-     <section class="resources" aria-labelledby="student-resources-heading">
+
+    </div>
+    <div data-aula-panel="materiales" class="aula-panel" hidden>
+      <div class="aula-section-heading"><p class="eyebrow">TODO EN UN SOLO LUGAR</p><h1>Mis materiales</h1><p>Guías y ejercicios para acompañarte en cada módulo.</p></div>
+           <section class="resources" aria-labelledby="student-resources-heading">
        <p class="eyebrow">A MANO MIENTRAS APRENDES</p><h2 id="student-resources-heading">Tus materiales</h2>
        <p>Abre las guías y ejercicios cuando los necesites.</p><div id="resource-list" class="resource-grid"></div>
        <p id="empty-resources" class="empty">Los materiales aparecerán aquí cuando estén listos.</p>
      </section>
-   <section class="assigned-bonuses" id="assigned-bonuses" aria-labelledby="assigned-bonuses-heading" hidden>
-     <p class="eyebrow">ELEGIDOS PARA TI</p>
-     <h2 id="assigned-bonuses-heading">Tus bonos personales</h2>
-     <p>Estos recursos fueron seleccionados especialmente para tu cuenta.</p>
-     <div id="assigned-bonus-list" class="resource-grid"></div>
-   </section>
-    </aside>
-   </div>
-   <section class="club-aula-entry" aria-labelledby="club-aula-heading">
+
+    </div>
+    <div data-aula-panel="comunidad" class="aula-panel" hidden>
+         <section class="club-aula-entry" aria-labelledby="club-aula-heading">
      <div class="club-aula-copy">
        <span class="eyebrow">DESPUÉS DE CADA LECCIÓN, SIGUE CREANDO</span>
        <h2 id="club-aula-heading">Tu proyecto merece <em>compartirse.</em></h2>
@@ -104,7 +140,18 @@
        <span class="club-aula-sticker club-aula-sticker-chat">✦ ¡Va quedando!</span>
      </div>
    </section>
-   <section class="student-bonus" aria-labelledby="student-bonus-heading">
+
+    </div>
+    <div data-aula-panel="bonos" class="aula-panel" hidden>
+      <div class="aula-section-heading"><p class="eyebrow">EXCLUSIVO PARA TU CUENTA</p><h1>Mis bonos</h1><p>Al completar la clase y compartir tu proyecto, podrás abrir los bonos que se te hayan asignado.</p></div>
+         <section class="assigned-bonuses" id="assigned-bonuses" aria-labelledby="assigned-bonuses-heading" hidden>
+     <p class="eyebrow">ELEGIDOS PARA TI</p>
+     <h2 id="assigned-bonuses-heading">Tus bonos personales</h2>
+     <p>Estos recursos fueron seleccionados especialmente para tu cuenta.</p>
+     <div id="assigned-bonus-list" class="resource-grid"></div>
+   </section>
+
+         <section class="student-bonus" aria-labelledby="student-bonus-heading">
        <span class="student-bonus-icon" aria-hidden="true">✦</span><p class="eyebrow">UN REGALO POR TU ESFUERZO</p>
        <h2 id="student-bonus-heading">Desbloquea tu bono</h2>
        <p>Tu bono se activa <strong>solo cuando hayas terminado la última lección</strong> y hayas publicado tu primera web en <strong>Proyectos</strong>, dentro del Club de Ideas.</p>
@@ -115,7 +162,10 @@
        <p id="bonus-status" class="student-bonus-status">Bono bloqueado · completa los dos pasos para habilitarlo.</p>
        <div id="bonus-unlocked" class="bonus-unlocked" hidden role="status"><strong>¡Reto completado!</strong><p>Cumpliste los requisitos del bono. El material aparecerá aquí cuando esté publicado.</p></div>
    </section>
-   <div class="help"><p class="eyebrow">ACOMPAÑAMIENTO EN TU AULA</p><h2>¿Te atascaste?</h2><p>Cuéntame qué pasó o qué parte de la lección te resulta difícil. Puedes pedir ayuda sin salir del aula ni perder tu avance.</p><button class="outline" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button></div>
+
+    </div>
+  </div>
+</div>
   </section>
   <section id="soporte-aula" class="course-support-panel" aria-labelledby="course-help-title" hidden>
     <div class="course-support-heading">
