@@ -216,9 +216,10 @@ assert.doesNotMatch(classPage,/href="[^"]*(buy\.stripe|checkout\.stripe)/);
 console.log('QA reloj: 4 grupos, flip 250+250ms, medianoche EST y botón a lista de espera OK');
 
 
-/* Hero con órbitas reales en direcciones opuestas + CTA simplificado. */
-const orbitSection=classPage.slice(classPage.indexOf('<figure class="class-hero-art">'),classPage.indexOf('</figure>',classPage.indexOf('<figure class="class-hero-art">')));
-assert.match(orbitSection,/class-hero-orbit/);
+/* Valor con órbitas reales en direcciones opuestas + CTA simplificado. */
+const orbitSection=classPage.slice(classPage.indexOf('<section class="class-fast-value"'),classPage.indexOf('<section class="class-demo-strip"'));
+assert.match(orbitSection,/class-value-orbit/);
+assert.doesNotMatch(classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('<section class="class-fast-value"')),/class-value-orbit/);
 assert.match(orbitSection,/class-orbit-wheel--outer/);
 assert.match(orbitSection,/class-orbit-wheel--inner/);
 assert.match(orbitSection,/monograma-podcast-04\.svg/);
@@ -228,10 +229,10 @@ assert.match(newStyles,/\.class-orbit-wheel--inner\{\s*width:58%;\s*animation:cl
 assert.match(newStyles,/\.class-orbit-wheel--outer \.class-orbit-icon-upright\{/);
 assert.match(newStyles,/animation-name:classOrbitIconCounterClockwise/);
 assert.match(newStyles,/animation-name:classOrbitIconClockwise/);
-assert.match(newStyles,/\.class-hero-orbit \.class-orbit-wheel::before/);
+assert.match(newStyles,/\.class-value-orbit \.class-orbit-wheel::before/);
 assert.match(newStyles,/border:1\.5px dashed/);
 assert.match(newStyles,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(newStyles,/\.class-hero-orbit \.class-orbit-wheel/);
+assert.match(newStyles,/\.class-value-orbit \.class-orbit-wheel/);
 assert.match(home,/No necesitas saber de coding ni dominar mucha tecnología/);
 assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
 assert.doesNotMatch(home,/experta|experto/i);
@@ -242,4 +243,27 @@ assert.equal((classPage.match(/href="#lista-espera"/g)||[]).length,1,'Un enlace 
 assert.doesNotMatch(classPage,/class-nav-cta|class-ghost-button/,'No repetir CTAs de espera en el header ni hero');
 assert.match(classPage,/Explora la clase/);
 assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
-console.log('QA: órbitas contrarias 14/22s, iconos derechos, lenguaje inclusivo y CTAs necesarios OK');
+console.log('QA: órbitas en sección de valor, iconos derechos, lenguaje inclusivo y CTAs únicos OK');
+
+
+/* Aula personal: saludo, progreso, felicitación, materiales a la derecha y bono sin entrega automática. */
+const coursePersonalCss=read('alumnos/curso.css');
+const coursePersonalJs=read('alumnos/curso.js');
+for(const id of ['student-greeting-title','student-name','progress-percent','student-progress','student-sidebar','student-resources-heading','student-bonus-heading','bonus-lessons','bonus-project','bonus-status','lesson-celebration','lesson-celebration-close']){
+ assert.match(room,new RegExp('id="'+id+'"|class="'+id+'"'));
+}
+assert.match(room,/<aside class="student-sidebar"/);
+assert.match(room,/Tu bono gratis/);
+assert.match(room,/Club de Ideas/);
+assert.match(coursePersonalCss,/\.room-grid\{\s*display:grid;\s*grid-template-columns:minmax\(166px,215px\) minmax\(0,1fr\) minmax\(224px,280px\)/);
+assert.match(coursePersonalCss,/\.student-sidebar/);
+assert.match(coursePersonalJs,/getUser\(\)/);
+assert.match(coursePersonalJs,/email_confirmed_at/);
+assert.match(coursePersonalJs,/podcast_class_progress/);
+assert.match(coursePersonalJs,/congratulate\(item\)/);
+assert.match(coursePersonalJs,/checkProjectShared\(\)/);
+assert.match(coursePersonalJs,/eq\('author_id',user.id\)/);
+assert.match(coursePersonalJs,/post.image_path\|\|post.project_url/);
+assert.match(coursePersonalJs,/dataset.state='earned'/);
+assert.doesNotMatch(coursePersonalJs,/service_role|SUPABASE_SERVICE_ROLE_KEY/);
+console.log('QA aula personal: sidebar, progreso persistido, felicitación, bono y seguridad OK');
