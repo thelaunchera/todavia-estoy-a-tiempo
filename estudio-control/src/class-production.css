@@ -97,3 +97,9 @@
 .class-method b{color:#2b4e6d;font-size:11px}
 .class-method small{color:#708499;line-height:1.55;font-size:10px}
 @media(max-width:700px){.class-method{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.class-funnel-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:18px}
+.class-funnel-stats>div{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #dfe5ea;border-radius:14px;padding:15px}
+.class-funnel-stats strong{font:400 25px/1.1 'DM Serif Display',Georgia,serif;color:#2b5473;word-break:break-word}
+.class-funnel-stats span{font-size:11px;line-height:1.5;color:#6c8196}
+@media(max-width:600px){.class-funnel-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
