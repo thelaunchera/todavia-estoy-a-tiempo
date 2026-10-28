@@ -10,7 +10,19 @@ const feedback=document.querySelector('#course-waitlist-feedback');
 const submit=form.querySelector('button[type=submit]');
 const INTENT='podcast_class01_waitlist_confirm_intent';
 const RETURN_PARAM='confirmar-lista';
-const returning=new URLSearchParams(location.search).get(RETURN_PARAM)==='1';
+const search=new URLSearchParams(location.search);
+const returning=search.get(RETURN_PARAM)==='1';
+const expectedHash=search.get('huella')||'';
+const salt=search.get('reto')||'';
+async function emailFingerprint(email,nonce){
+ const bytes=new TextEncoder().encode(nonce+':'+normal(email));
+ const hash=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function isIntendedEmail(email){
+ if(returning&&expectedHash&&salt)return (await emailFingerprint(email,salt))===expectedHash;
+ return requested()===email;
+}
 let subscribing=false;
 
 function message(text,good=false){
@@ -28,6 +40,8 @@ function clearReturn(){
  if(!returning)return;
  const url=new URL(location.href);
  url.searchParams.delete(RETURN_PARAM);
+ url.searchParams.delete('huella');
+ url.searchParams.delete('reto');
  history.replaceState(history.state,'',url.pathname+url.search+url.hash);
 }
 function showConfirmation(email){
@@ -52,7 +66,17 @@ async function readMembership(email){
 }
 async function subscribe(user){
  const email=normal(user?.email);
- if(!email || !(returning || requested()===email) || subscribing)return;
+ if(!email||subscribing)return;
+ if(!(await isIntendedEmail(email))){
+  if(returning){
+   const p=document.querySelector('#course-waitlist-pending');
+   document.querySelector('#course-waitlist-pending-title').textContent='El correo aún no está registrado';
+   document.querySelector('#course-waitlist-pending-description').textContent='Este navegador tiene abierta otra cuenta. Solicita un enlace nuevo con el correo que deseas registrar.';
+   form.hidden=true;p.hidden=false;
+   p.scrollIntoView({block:'center'});
+  }
+  return;
+ }
  if(!(user.email_confirmed_at||user.confirmed_at)){
   message('Revisa el enlace que te enviamos por correo para verificar tu dirección.');
   return;
@@ -71,8 +95,10 @@ async function subscribe(user){
    });
    if(error && error.code!=='23505')throw error;
   }
-  clearReturn();
+  const record=await readMembership(email);
+  if(!record||record.unsubscribed_at)throw new Error('Registro no guardado');
   showConfirmation(email);
+  clearReturn();
   void manage(user);
  }catch(error){
   submit.disabled=false;
@@ -101,6 +127,9 @@ form.addEventListener('submit',async event=>{
   // La inscripción real continúa exigiendo una sesión autenticada por Supabase.
   const redirect=new URL(location.origin+location.pathname);
   redirect.searchParams.set(RETURN_PARAM,'1');
+  const nonce=crypto.randomUUID();
+  redirect.searchParams.set('reto',nonce);
+  redirect.searchParams.set('huella',await emailFingerprint(email,nonce));
   redirect.hash='lista-espera';
   const {error}=await db.auth.signInWithOtp({
    email,
