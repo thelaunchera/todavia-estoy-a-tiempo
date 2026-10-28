@@ -666,3 +666,8 @@ html:has(.class-page-v2){scroll-padding-top:84px}
 /* Fotografía vertical completa, sin recortar el rostro ni el agente en iPhone. */
 @media(max-width:900px){.class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}}
 @media(max-width:650px){.class-page-v2 .class-hero-art img{aspect-ratio:4/5;object-fit:cover;object-position:center}}
+
+/* Mensaje de posibilidad real, subordinado al nombre claro de la clase. */
+.class-page-v2 .class-opportunity{font:400 clamp(1.35rem,2.2vw,2.05rem)/1.24 var(--serif,Georgia,serif);letter-spacing:-.025em;color:#26455f;max-width:520px;margin:17px 0 0}
+.class-page-v2 .class-opportunity em{color:#567fa2}
+@media(max-width:650px){.class-page-v2 .class-opportunity{font-size:clamp(1.32rem,5.1vw,1.64rem);margin:13px 0 0}}
