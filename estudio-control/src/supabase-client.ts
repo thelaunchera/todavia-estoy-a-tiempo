@@ -361,3 +361,72 @@ export async function getStudioBonusResources(): Promise<StudioBonusResource[]> 
     status: row.status === 'ready' ? 'ready' : 'draft',
   }));
 }
+
+export type StudioStudent = {
+  buyer_email: string;
+  status: 'pending' | 'active' | 'refunded' | 'revoked';
+  paid_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+};
+export type StudioBonusGrant = {
+  buyer_email: string;
+  resource_code: string;
+};
+const WORKSHOP_COURSE_ID = 'primera-landing-ia-01';
+
+/** Separate course buyers from podcast subscribers. Includes pending / revoked records. */
+export async function getStudioStudents(): Promise<StudioStudent[]> {
+  if (!client) throw new Error('El Estudio no está conectado.');
+  await owner();
+  const { data, error } = await client.from('podcast_class_access')
+    .select('buyer_email,status,paid_at,created_at,revoked_at')
+    .eq('course_id',WORKSHOP_COURSE_ID)
+    .order('created_at',{ascending:false});
+  if (error) throw new Error('No se pudo consultar la lista de alumnos.');
+  return (data || []).map((row): StudioStudent => ({
+    buyer_email: String(row.buyer_email),
+    status: row.status as StudioStudent['status'],
+    paid_at: row.paid_at,
+    created_at: String(row.created_at),
+    revoked_at: row.revoked_at,
+  }));
+}
+export async function getStudioBonusGrants(): Promise<StudioBonusGrant[]> {
+  if (!client) throw new Error('El Estudio no está conectado.');
+  await owner();
+  const { data, error } = await client.from('podcast_class_bonus_grants')
+    .select('buyer_email,resource_code').eq('course_id',WORKSHOP_COURSE_ID);
+  if (error) throw new Error('No pudimos comprobar los bonos asignados.');
+  return (data || []).map((row): StudioBonusGrant => ({
+    buyer_email: String(row.buyer_email),
+    resource_code: String(row.resource_code),
+  }));
+}
+/** Save one student's grant, never a bulk/global assignment. */
+export async function setStudentBonusGrant(
+  buyerEmail: string, resourceCode: string, grant: boolean,
+): Promise<void> {
+  if (!client) throw new Error('El Estudio no está conectado.');
+  await owner();
+  const email = buyerEmail.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^bonus_[a-z0-9_]{2,80}$/.test(resourceCode))
+    throw new Error('Correo o bono inválido.');
+  const builder = client.from('podcast_class_bonus_grants');
+  const {error} = grant
+    ? await builder.upsert({course_id:WORKSHOP_COURSE_ID,buyer_email:email,resource_code:resourceCode},
+        {onConflict:'course_id,buyer_email,resource_code',ignoreDuplicates:true})
+    : await builder.delete().eq('course_id',WORKSHOP_COURSE_ID)
+        .eq('buyer_email',email).eq('resource_code',resourceCode);
+  if(error) throw new Error('No se pudo guardar el cambio para este alumno.');
+}
+export async function setStudioBonusAvailability(resourceCode: string, ready: boolean): Promise<void> {
+  if (!client) throw new Error('El Estudio no está conectado.');
+  await owner();
+  if (!/^bonus_[a-z0-9_]{2,80}$/.test(resourceCode)) throw new Error('Bono inválido.');
+  const {data,error} = await client.from('podcast_class_resources')
+    .update({status:ready?'ready':'draft'})
+    .eq('course_id',WORKSHOP_COURSE_ID).eq('resource_code',resourceCode)
+    .select('resource_code,status');
+  if(error || !data || data.length!==1) throw new Error('No se pudo actualizar la disponibilidad del bono.');
+}
