@@ -1,4 +1,6 @@
-import {ExternalLink, Film, BookOpen, CheckCircle2, FolderOpen} from 'lucide-react';
+import {useState} from 'react';
+import {ExternalLink, Film, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
+import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import './finished-demos.css';
 
 type Demo = {
@@ -28,6 +30,12 @@ const finishedDemos:Demo[]=[
  }
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
+ const [copied,setCopied]=useState('');
+ const [notice,setNotice]=useState('');
+ async function copy(text:string,key:string) {
+   try {await navigator.clipboard.writeText(text);setCopied(key);setNotice('Prompt copiado.');}
+   catch {setNotice('Selecciona el texto para copiarlo manualmente.');}
+ }
  return <section className="finished-demos" aria-label="Biblioteca de demos terminados">
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
@@ -46,9 +54,25 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio <ExternalLink size={14}/></a>
        </div>
        <small>{d.note}</small>
+       <details className="finished-demo-prompts">
+         <summary>Prompts para reconstruir desde cero <span>{demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].length} pasos</span></summary>
+         <div className="finished-demo-prompt-list">
+           <p className="finished-demo-prompt-context">Cuaderno privado para tu grabación: abre la app de práctica en AppDeploy y copia un prompt por vez. Compara el resultado con la web terminada. No se construye ni publica nada al abrir o copiar.</p>
+           {demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].map((item,i)=>(
+             <article className="finished-demo-prompt" key={d.id+'-'+i}>
+               <div className="finished-demo-prompt-heading">
+                 <div><span>{item.step}</span><h4>{item.title}</h4></div>
+                 <button type="button" onClick={()=>void copy(item.prompt,d.id+'-'+i)}><Copy size={14}/>{copied===d.id+'-'+i?'Copiado':'Copiar prompt'}</button>
+               </div>
+               <p>{item.prompt}</p>
+             </article>
+           ))}
+         </div>
+       </details>
      </div>
    </article>)}
    </div>
+   <p className="finished-demos-prompt-notice" role="status">{notice}</p>
    <div className="finished-demos-class-note">
     <BookOpen size={20}/>
     <div><strong>El demo de AppDeploy desde cero no va aquí.</strong>
