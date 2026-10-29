@@ -110,3 +110,19 @@ test('automatizaciones, seguridad y footer se enseñan dentro de las nueve ficha
  assert.match(module,/navigator\.clipboard\.writeText/);
  assert.doesNotMatch(module,/private_key|sk_test_|sk_live_/,'sin claves reales');
 });
+
+test('biblioteca privada Casa Brownie no duplica lecciones y reserva video para bono',()=>{
+ const studio=readFileSync('src/Studio.tsx','utf8');
+ const production=readFileSync('src/ClassProduction.tsx','utf8');
+ const kit=readFileSync('src/CasaBrownieStudioKit.tsx','utf8');
+ const guide=readFileSync('src/recording-starts.ts','utf8');
+ assert.match(studio,/clase-01-recursos-visuales/,'no aparece como idea editorial duplicada');
+ assert.match(production,/<CasaBrownieStudioKit entry=\{visualKit\}\/>/);
+ assert.match(kit,/CASA_BROWNIE_KIT_SECTION='clase-01-recursos-visuales'/);
+ assert.match(kit,/promptFilter/);
+ assert.match(kit,/navigator\.clipboard\.writeText/);
+ assert.match(kit,/p\.lesson!=='bonus'/,'los prompts de bonos no aparecen en la formación base');
+ assert.match(kit,/lesson==='bonus'/,'el video tiene su pestaña independiente');
+ assert.match(guide,/\?etapa=sin-video/,'primero versión estática');
+ assert.equal(classLessons.length,9,'no debe agregarse video como clase 10');
+});
