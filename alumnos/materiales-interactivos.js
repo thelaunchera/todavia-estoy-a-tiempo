@@ -1,8 +1,9 @@
 import {renderWebBasics,renderProjectOrder} from './guia-principiantes.js';
+import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide} from './recursos-avanzados.js';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
-let PROMPTS=[],WORKBOOK=[],CHECKS=[];
+let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={};
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const headers=[
@@ -10,6 +11,10 @@ const headers=[
  ['funciona','Cómo funciona mi web','Distingue el diseño de los procesos internos.'],
  ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
  ['prompts','12 prompts para copiar','Pide lo que necesitas y revisa el resultado.'],
+ ['mara','Mara · mi guía web','Prepara tu proyecto privado y empieza.'],
+ ['make','Make gratis','Escenarios con Gmail, paso a paso.'],
+ ['seguridad','Contraseñas y claves','Tus accesos siempre privados.'],
+ ['legal','Footer y legales','Enlaces y textos reales según tu negocio.'],
  ['cuaderno','Mi cuaderno','Tus decisiones, guardadas en tu cuenta.'],
  ['ejemplo','Ejemplo explicado','Mira qué tiene cada sección de una página.'],
  ['revision','Antes de publicar','Comprueba cada paso en tu proyecto.']
@@ -28,6 +33,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  PROMPTS=Array.isArray(resource.payload.prompts)?resource.payload.prompts:[];
  WORKBOOK=Array.isArray(resource.payload.workbook)?resource.payload.workbook:[];
  CHECKS=Array.isArray(resource.payload.checks)?resource.payload.checks:[];
+ EXTRAS=(resource.payload.extras&&typeof resource.payload.extras==='object')?resource.payload.extras:{};
  if(PROMPTS.length!==12||WORKBOOK.length!==8||CHECKS.length!==16){
   root.textContent='La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
   return;
@@ -104,6 +110,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(view==='funciona')renderWebBasics(content,go);
   if(view==='organizacion')renderProjectOrder(content);
   if(view==='prompts')renderPrompts();
+  if(view==='mara')renderWebGuide(content,EXTRAS);
+  if(view==='make')renderMakeResources(content,EXTRAS);
+  if(view==='seguridad')renderSafetyResources(content,EXTRAS);
+  if(view==='legal')renderLegalResources(content,EXTRAS);
   if(view==='cuaderno')renderWorkbook();
   if(view==='ejemplo')renderExample();
   if(view==='revision')renderChecks();
@@ -128,7 +138,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   for(const [i,item] of items.entries()){
    const c=el('article','mi-step');c.innerHTML='<span>0'+(i+1)+'</span><h4>'+esc(item[0])+'</h4><p>'+esc(item[1])+'</p>';grid.append(c);
   }content.append(grid);
-  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="funciona">Entender cómo funciona</button><button type="button" class="mi-quiet" data-go="organizacion">Organizar mi proyecto</button>';content.append(actions);
+  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="mara">Configurar mi guía web</button><button type="button" class="mi-quiet" data-go="funciona">Entender mi web</button>';content.append(actions);
   actions.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
