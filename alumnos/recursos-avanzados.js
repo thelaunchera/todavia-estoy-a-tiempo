@@ -71,3 +71,15 @@ export function renderWebGuide(root,extras){
  note.append(make('strong','','Lo que no hace por sí sola'),make('p','','No crea una cuenta, no publica una página ni conecta o ejecuta automatizaciones sin herramientas disponibles, permisos y comprobaciones. No le envíes información privada.'));
  root.append(note);
 }
+
+export function renderConnectorPrompts(root,extras){
+ heading(root,'CONEXIONES / UN PASO A LA VEZ','Qué pedirle a ChatGPT con cada herramienta.','Primero conecta tus propias cuentas y revisa permisos. Estos comandos NO conceden acceso ni ejecutan una acción por sí mismos. Si no tienes el plugin, ChatGPT debe explicarte cómo hacerlo en la página oficial.');
+ if(!Array.isArray(extras?.connector_prompts))return missing(root);
+ extras.connector_prompts.forEach((item,i)=>{
+  const box=make('article','mi-extras-card');
+  box.append(make('span','mi-extras-kicker','CONEXIÓN '+String(i+1).padStart(2,'0')),make('h4','',item.name),make('p','',item.purpose));
+  box.append(make('h5','','Primero prepara esto'));list(box,item.steps);
+  prompt(box,'Comando para ChatGPT',item.prompt);root.append(box);
+ });
+ root.append(make('p','mi-note','Cada conexión tiene permisos distintos y el servicio puede limitar su plan gratuito. No publiques una web, no cobres y no envíes mensajes sin revisar primero qué hace la acción.'));
+}
