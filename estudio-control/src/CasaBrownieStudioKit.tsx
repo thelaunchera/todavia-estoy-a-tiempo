@@ -8,7 +8,7 @@ type Step={number:number;name:string;where:string;deliverable:string;say:string}
 type Prompt={id:string;title:string;lesson:string;kind:string;description:string;prompt:string};
 export type CasaBrownieKitEntry={
  id:string; title:string; section?:string; photos?:Photo[];steps?:Step[];prompts?:Prompt[];
- official_url?:string;static_url?:string;warning?:string;bonus_after_main_course?:boolean;
+ official_url?:string;static_url?:string;practice_app_url?:string;practice_note?:string;warning?:string;bonus_after_main_course?:boolean;
 };
 type Tab='ruta'|'fotos'|'prompts'|'bono';
 function validUrl(input?:string){
@@ -33,11 +33,12 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
   <div className="cb-kit-intro">
    <div><span className="cb-kit-eyebrow">CLASE 01 · CUADERNO DE PRODUCCIÓN PRIVADO</span>
     <h3>Casa Brownie · <em>de cero al demo final.</em></h3>
-    <p>La web oficial ya existe. Primero enseñarás la vista SIN VIDEO y la reconstruirás en un proyecto nuevo, escena por escena, como lo haría alguien que empieza hoy. <b>Primero sin video; el movimiento del hero es un bono.</b></p>
+    <p>La práctica empieza desde una página básica nueva de AppDeploy, no desde la demo terminada. Primero construirás las secciones y el hero SIN VIDEO. <b>El video animado se muestra únicamente como bono final.</b></p>
    </div>
    <button type="button" className="cb-kit-toggle" onClick={()=>setExpanded(x=>!x)} aria-expanded={expanded}>{expanded?'Cerrar materiales':'Abrir fotos y prompts'}</button>
   </div>
   <div className="cb-kit-links">
+    {validUrl(entry?.practice_app_url)&&<a href={entry!.practice_app_url} target="_blank" rel="noopener noreferrer"><Camera size={15}/> AppDeploy · Mi proyecto desde cero <ExternalLink size={13}/></a>}
     {validUrl(entry?.static_url)&&<a href={entry!.static_url} target="_blank" rel="noopener noreferrer"><Camera size={15}/> Paso principal · Web sin video <ExternalLink size={13}/></a>}
     {validUrl(entry?.official_url)&&<a href={entry!.official_url} target="_blank" rel="noopener noreferrer"><Film size={15}/> Demo final aprobado · Con video <ExternalLink size={13}/></a>}
   </div>
@@ -47,7 +48,7 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
       ['ruta','Paso a paso'],['fotos','Fotos oficiales'],['prompts','Prompts por sección'],['bono','Bono del video']
     ] as const).map(([id,label])=><button key={id} type="button" className={tab===id?'active':''} aria-pressed={tab===id} onClick={()=>{setTab(id);setCopied('');}}>{label}</button>)}</div>
     {tab==='ruta'&&<>
-     <div className="cb-kit-explain"><strong>Cómo grabar algo que ya construiste</strong><p>Mostrar primero la versión SIN VIDEO; después abrir ChatGPT y un proyecto de práctica VACÍO. La versión animada se revela únicamente como bono al final. Grabar cada avance desde cero, guardando capturas y versiones. No presentar grabaciones reconstruidas como si fueran las originales.</p></div>
+     <div className="cb-kit-explain"><strong>Cómo grabar algo que ya construiste</strong><p>Abre AppDeploy desde tu panel y selecciona «Casa Brownie · Taller desde cero». Esta página básica es tu punto de partida: no tiene logo final, catálogo, fotografías ni video. Graba cada cambio en esta app independiente mientras vas pegando los prompts y aprobando cada sección. La web oficial SIN VIDEO sirve solo de referencia; el video animado se revela en el bono. No presentes las tomas nuevas como grabaciones antiguas.</p>{validUrl(entry.practice_app_url)&&<p><a href="https://dashboard.appdeploy.ai" target="_blank" rel="noopener noreferrer">Abrir panel de AppDeploy para editar esta práctica <ExternalLink size={12}/></a></p>}</div>
      <div className="cb-kit-steps">{(entry.steps||[]).map(step=><article key={step.number} className="cb-kit-step">
        <span>{String(step.number).padStart(2,'0')}</span><div><h4>{step.name}</h4><p><b>Abre:</b> {step.where}</p><p><b>Di:</b> {step.say}</p><p><b>Guarda:</b> {step.deliverable}</p></div>
        </article>)}</div>
