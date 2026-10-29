@@ -129,3 +129,25 @@
 .mi-owner-pdf-links a{padding:12px;background:#fffefa;color:#214b67;text-decoration:none;border-radius:10px;border:1px solid #dce6ea;line-height:1.4;font-weight:700}
 .mi-owner-pdf-links a:hover{text-decoration:underline}
 @media print{.mi-toolbar,.mi-owner-pdfs{display:none!important}}
+
+/* Guía breve: lo visible, procesos y organización del proyecto. */
+.mi-structure-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:18px 0}
+.mi-structure-card{background:#fffdfa;border:1px solid #d9e5ec;border-radius:16px;padding:20px;display:grid;align-content:start;gap:9px;color:#284961}
+.mi-structure-card h4{font-size:clamp(16px,2.5vw,20px);margin:0;color:#22435b;line-height:1.3}
+.mi-structure-card p{font-size:13px;line-height:1.75;margin:0}
+.mi-structure-card small{font-size:12px;line-height:1.65;color:#607989}
+.mi-structure-example{border:1px solid #cfdfeb;background:#edf5f8;color:#27465d;border-radius:15px;padding:18px 20px;margin:15px 0;font-size:13px;line-height:1.7}
+.mi-structure-example p{margin:8px 0 0}
+.mi-structure-example ol{margin:9px 0 0;padding-left:21px}
+.mi-structure-example li{padding-left:3px;margin-bottom:7px}
+.mi-folder-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.mi-folder-card{background:#fffdfa;border:1px solid #d9e5ec;border-radius:13px;padding:16px;display:grid;gap:5px;color:#31536b;min-width:0}
+.mi-folder-card strong{font-size:13px;overflow-wrap:anywhere}
+.mi-folder-card span{font-size:12px;line-height:1.65}
+.mi-structure-prompt{border-radius:15px;background:#f2f5f8;border:1px solid #d9e5ec;padding:18px;color:#2c4a61}
+.mi-structure-prompt h4{font-size:15px;margin:0 0 9px}
+.mi-structure-prompt p{font-size:12px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+.mi-structure-prompt button{border:none;border-radius:99px;background:#294b63;color:white;font-size:12px;font-weight:700;padding:10px 15px;cursor:pointer}
+.mi-structure-prompt small{display:block;margin-top:9px}
+@media(max-width:650px){.mi-structure-grid,.mi-folder-grid{grid-template-columns:1fr}.mi-structure-card,.mi-folder-card{padding:15px}}
+@media print{.mi-structure-card,.mi-folder-card,.mi-structure-example{break-inside:avoid}}
