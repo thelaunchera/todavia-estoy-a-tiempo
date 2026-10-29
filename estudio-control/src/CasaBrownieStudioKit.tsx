@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {BookOpen,Copy,Camera,Film,ExternalLink,Check,ShieldCheck} from 'lucide-react';
+import {Copy,Camera,Film,ExternalLink,ShieldCheck} from 'lucide-react';
 import './casa-brownie-kit.css';
 
 export const CASA_BROWNIE_KIT_SECTION='clase-01-recursos-visuales';
