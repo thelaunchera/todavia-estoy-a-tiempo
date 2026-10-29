@@ -57,14 +57,44 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
        <details className="finished-demo-prompts">
          <summary>Prompts para reconstruir desde cero <span>{demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].length} pasos</span></summary>
          <div className="finished-demo-prompt-list">
-           <p className="finished-demo-prompt-context">Cuaderno privado para tu grabación: abre la app de práctica en AppDeploy y copia un prompt por vez. Compara el resultado con la web terminada. No se construye ni publica nada al abrir o copiar.</p>
+           <p className="finished-demo-prompt-context">Guía privada de grabación: en cada sección tienes qué decir en voz alta, qué enseñar y el prompt exacto para copiar a ChatGPT. Trabaja en la app de práctica, no en el demo oficial. Aquí no se genera ni publica ninguna web.</p>
+           <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
+             <strong>Cómo pedir fotos sin confundir a ChatGPT</strong>
+             <p><b>Fotografía individual:</b> copia UN comando, pide UNA imagen en UN archivo, revisa el resultado y solo después pasa a la siguiente. Nunca solicites seis fotos en un mismo mensaje: puede devolver un collage o mezclar sabores.</p>
+             <p><b>Brand board:</b> ese es el único caso donde pedimos UNA imagen compuesta con 14 escenas. Es una referencia visual; después usamos 14 comandos separados para conseguir archivos individuales utilizables.</p>
+             <p><b>Para que quede como el demo aprobado:</b> adjunta las fotografías originales de referencia. Un prompt de generación ayuda a mantener el estilo, pero por sí solo no reproduce píxel por píxel una foto anterior.</p>
+           </div>
            {demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].map((item,i)=>(
              <article className="finished-demo-prompt" key={d.id+'-'+i}>
                <div className="finished-demo-prompt-heading">
                  <div><span>{item.step}</span><h4>{item.title}</h4></div>
-                 <button type="button" onClick={()=>void copy(item.prompt,d.id+'-'+i)}><Copy size={14}/>{copied===d.id+'-'+i?'Copiado':'Copiar prompt'}</button>
                </div>
-               <p>{item.prompt}</p>
+               <div className="finished-demo-lesson-talk">
+                 <div className="finished-demo-lesson-label">
+                   <strong>Lo que digo durante la clase</strong>
+                   <button type="button" onClick={()=>void copy(item.say,d.id+'-say-'+i)}><Copy size={13}/>{copied===d.id+'-say-'+i?'Copiado':'Copiar guion'}</button>
+                 </div>
+                 <p>{item.say}</p>
+                 <p className="finished-demo-show"><b>Qué muestro en pantalla:</b> {item.show}</p>
+               </div>
+               <div className="finished-demo-command">
+                 <div className="finished-demo-lesson-label">
+                   <strong>Prompt para pegar en ChatGPT</strong>
+                   <button type="button" onClick={()=>void copy(item.prompt,d.id+'-prompt-'+i)}><Copy size={13}/>{copied===d.id+'-prompt-'+i?'Copiado':'Copiar prompt'}</button>
+                 </div>
+                 <p>{item.prompt}</p>
+               </div>
+               {!!item.photoCommands?.length&&<details className="finished-demo-photo-steps">
+                 <summary>Comandos de fotos individuales <span>{item.photoCommands.length} fotos · una por vez</span></summary>
+                 <p className="finished-demo-photo-help">Copia solo un comando y genera UNA imagen. Comprueba la fotografía y apruébala antes de continuar. No pegues los comandos juntos.</p>
+                 {item.photoCommands.map((photo,j)=><div className="finished-demo-photo-step" key={photo.title}>
+                   <div className="finished-demo-lesson-label">
+                     <strong>{photo.title}</strong>
+                     <button type="button" onClick={()=>void copy(photo.prompt,d.id+'-photo-'+i+'-'+j)}><Copy size={13}/>{copied===d.id+'-photo-'+i+'-'+j?'Copiado':'Copiar foto'}</button>
+                   </div>
+                   <p>{photo.prompt}</p>
+                 </div>)}
+               </details>}
              </article>
            ))}
          </div>
