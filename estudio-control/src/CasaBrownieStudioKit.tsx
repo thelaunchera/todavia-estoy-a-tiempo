@@ -1,13 +1,14 @@
 import {useState} from 'react';
 import {Copy,Camera,Film,ExternalLink,ShieldCheck} from 'lucide-react';
 import './casa-brownie-kit.css';
+import CasaBrowniePhotoSteps,{type PhotoShot} from './CasaBrowniePhotoSteps';
 
 export const CASA_BROWNIE_KIT_SECTION='clase-01-recursos-visuales';
 type Photo={id:string;title:string;src:string;type:'foto'|'video';provenance?:string;use?:string;studentVisibility?:string};
 type Step={number:number;name:string;where:string;deliverable:string;say:string};
 type Prompt={id:string;title:string;lesson:string;kind:string;description:string;prompt:string};
 export type CasaBrownieKitEntry={
- id:string; title:string; section?:string; photos?:Photo[];steps?:Step[];prompts?:Prompt[];
+ id:string; title:string; section?:string; photos?:Photo[];steps?:Step[];prompts?:Prompt[];photo_shots?:PhotoShot[];photo_workflow?:string[];
  official_url?:string;static_url?:string;practice_app_url?:string;practice_note?:string;warning?:string;bonus_after_main_course?:boolean;
 };
 type Tab='ruta'|'fotos'|'prompts'|'bono';
@@ -45,7 +46,7 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
   {expanded&&<div className="cb-kit-inner">
     {!entry?<p>Los recursos todavía no se han sincronizado. Actualiza tu Studio.</p>:<>
     <div className="cb-kit-tabs" role="group" aria-label="Elegir recursos">{([
-      ['ruta','Paso a paso'],['fotos','Fotos oficiales'],['prompts','Prompts por sección'],['bono','Bono del video']
+      ['ruta','Paso a paso'],['fotos','Crear cada foto'],['prompts','Prompts por sección'],['bono','Bono del video']
     ] as const).map(([id,label])=><button key={id} type="button" className={tab===id?'active':''} aria-pressed={tab===id} onClick={()=>{setTab(id);setCopied('');}}>{label}</button>)}</div>
     {tab==='ruta'&&<>
      <div className="cb-kit-explain"><strong>Cómo grabar algo que ya construiste</strong><p>Abre AppDeploy desde tu panel y selecciona «Casa Brownie · Taller desde cero». Esta página básica es tu punto de partida: no tiene logo final, catálogo, fotografías ni video. Graba cada cambio en esta app independiente mientras vas pegando los prompts y aprobando cada sección. La web oficial SIN VIDEO sirve solo de referencia; el video animado se revela en el bono. No presentes las tomas nuevas como grabaciones antiguas.</p>{validUrl(entry.practice_app_url)&&<p><a href="https://dashboard.appdeploy.ai" target="_blank" rel="noopener noreferrer">Abrir panel de AppDeploy para editar esta práctica <ExternalLink size={12}/></a></p>}</div>
@@ -54,13 +55,16 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
        </article>)}</div>
     </>}
     {tab==='fotos'&&<>
-      <p className="cb-kit-small">Estas imágenes están guardadas en el repositorio oficial y enlazadas aquí para que no se creen copias distintas. Puedes abrir el archivo original. No se incluyen como recursos propios las seis fotos de sabores que todavía dependen de sitios externos.</p>
-      <div className="cb-kit-gallery">{photos.map(photo=><article key={photo.id}>
+      {entry.photo_shots?.length?<CasaBrowniePhotoSteps shots={entry.photo_shots} workflow={entry.photo_workflow||[]}/>:<p className="cb-kit-small">Los prompts de fotografías están en preparación. Consulta el material guardado en el Studio.</p>}
+      <details className="cb-kit-originals"><summary>Ver los recursos ya aprobados en el demo</summary>
+       <p className="cb-kit-small">Enlaces a los archivos locales de la web oficial. Estos archivos son referencias de la grabación, no fotografías del catálogo para entregar a terceros.</p>
+       <div className="cb-kit-gallery">{photos.map(photo=><article key={photo.id}>
         <a href={photo.src} target="_blank" rel="noopener noreferrer"><img loading="lazy" src={photo.src} alt={photo.title} /></a>
         <div><h4>{photo.title}</h4><p>{photo.use}</p><small>{photo.provenance}</small>
           <a href={photo.src} target="_blank" rel="noopener noreferrer">Abrir fotografía <ExternalLink size={12}/></a></div>
-      </article>)}</div>
-      <div className="cb-kit-note"><ShieldCheck size={18}/><p>Faltan seis fotos originales individuales de sabores antes de compartir un paquete descargable. Las fotos del catálogo actual provienen de fuentes externas y deben sustituirse o contar con permiso.</p></div>
+       </article>)}</div>
+      </details>
+      <div className="cb-kit-note"><ShieldCheck size={18}/><p>Las seis fotografías de sabores del demo aún dependen de sitios externos. Para el curso deben crearse imágenes originales o verificarse sus permisos. No entregarlas como fotos nuestras.</p></div>
     </>}
     {tab==='prompts'&&<>
       <p className="cb-kit-small">Copia el prompt correspondiente a la sección que vas a grabar. Haz una sola parte cada vez, toma captura, aprueba y guarda la versión antes de seguir. El proyecto de AppDeploy es nuevo, nunca el demo oficial.</p>
