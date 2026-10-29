@@ -4,6 +4,7 @@ on:
     paths:
       - "estudio-control/src/ClassProduction.tsx"
       - "estudio-control/src/CasaBrownieStudioKit.tsx"
+      - "estudio-control/src/CasaBrowniePhotoSteps.tsx"
       - "estudio-control/src/casa-brownie-kit.css"
       - "estudio-control/src/Studio.tsx"
       - "estudio-control/src/ConnectorsLesson.tsx"

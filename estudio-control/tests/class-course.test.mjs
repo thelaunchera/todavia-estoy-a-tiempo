@@ -128,3 +128,20 @@ test('biblioteca privada Casa Brownie no duplica lecciones y reserva video para 
  assert.match(guide,/\?etapa=sin-video/,'primero versión estática');
  assert.equal(classLessons.length,9,'no debe agregarse video como clase 10');
 });
+
+test('Casa Brownie muestra las fichas de fotografía de forma individual',()=>{
+ const studio=readFileSync('src/CasaBrownieStudioKit.tsx','utf8');
+ const component=readFileSync('src/CasaBrowniePhotoSteps.tsx','utf8');
+ assert.match(studio,/photo_shots\?:PhotoShot\[\]/);
+ assert.match(studio,/photo_workflow\?:string\[\]/);
+ assert.match(studio,/<CasaBrowniePhotoSteps/);
+ assert.match(studio,/Crear cada foto/);
+ assert.match(component,/shots\.map/);
+ assert.match(component,/navigator\.clipboard\.writeText/);
+ assert.match(component,/data-photo-step/);
+ assert.match(component,/shot\.key/);
+ assert.match(component,/shot\.check/);
+ assert.match(component,/shot\.ratio/);
+ assert.match(studio,/practice_app_url/);
+ assert.match(studio,/lesson!=='bonus'/);
+});
