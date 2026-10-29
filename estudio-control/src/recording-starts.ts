@@ -54,17 +54,17 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Analiza estas capturas REALES de Casa Brownie en teléfono y escritorio [ADJUNTOS]. Señala solo problemas observables de legibilidad, foto recortada, contraste, botón o desbordamiento horizontal. Propón dos correcciones concretas para aplicar con AppDeploy, manteniendo contenido y marca. No inventes resultados de pruebas.'
  },
  '07':{
-  tabs:['Web ficticia Casa Brownie: sin cobros','Stripe en modo de prueba, con datos privados ocultos','Make con Gmail (escenario desactivado)','Guía de conexiones del Studio'],
-  actions:['Mantén la web ficticia sin cobros y muestra solo un mapa de lo que ocurriría detrás.','Abre el modo de prueba de Stripe y explica elegibilidad y verificación en Estados Unidos, sin datos privados.','En Make muestra un escenario no activado: Stripe con pago confirmado, filtro, control de duplicados y Gmail Send an email.','Explica Create a connection → Sign in with Google, destinatario, asunto y cuerpo; prueba únicamente con tu propio correo.'],
+  tabs:['Web ficticia Casa Brownie: sin cobros','Stripe en modo de prueba, con datos privados ocultos','Make con Gmail (escenario desactivado)','Guía de conexiones del Studio','Aula → Materiales → Make gratis y Contraseñas'],
+  actions:['Mantén la web ficticia sin cobros y muestra solo un mapa de lo que ocurriría detrás.','Abre el modo de prueba de Stripe y explica elegibilidad y verificación en Estados Unidos, sin datos privados.','En Make muestra un escenario no activado: Stripe con pago confirmado, filtro, control de duplicados y Gmail Send an email.','Explica Create a connection → Sign in with Google, destinatario, asunto y cuerpo; prueba únicamente con tu propio correo.','Muestra los 2 escenarios activos posibles en Make gratis, el límite de 1,000 créditos al mes y los prompts para que ChatGPT explique cada conexión.','Abre las guías de contraseñas y API keys: nunca pegarlas en prompts ni ponerlas en frontend.'],
   savedPoint:'Deja una captura del Dashboard en modo de prueba sin saldo, nombres, claves ni emails privados.',
   finish:'Termina cuando el alumno diferencie publicar una web, cobrar de verdad y confirmar una compra antes de entregar.',
   readyPrompt:'Explícame paso a paso cómo probar Stripe para un producto real permitido en Estados Unidos. Después enséñame a preparar en Make un escenario sin activar: pago confirmado de Stripe → filtro y evitar duplicados → Gmail Send an email. Detalla cómo conectar Gmail mediante Sign in with Google y rellenar To, Subject y Body usando mi propio correo de prueba. No pidas contraseñas, SSN ni datos bancarios.'
  },
  '08':{
-  tabs:['URL final de Casa Brownie en AppDeploy','Checklist de publicación','Carpeta 08_CAPTURAS'],
-  actions:['Recorre la página de arriba abajo desde móvil.','Abre cada enlace y comprueba que no haya promesas ni ventas inexistentes.','Guarda captura de hero, página completa, botón y URL; escribe una pregunta concreta.'],
+  tabs:['URL final de Casa Brownie en AppDeploy','Checklist de publicación','Aula → Materiales → Footer y legales','Carpeta 08_CAPTURAS'],
+  actions:['Recorre la página de arriba abajo desde móvil.','Abre cada enlace y comprueba que no haya promesas ni ventas inexistentes.','Explica qué debe verificarse en footer: negocio, contacto, privacidad si hay datos, términos y devoluciones si se vende, cookies según tracking y accesibilidad.','Abre los cuatro prompts del aula; deja claro que son borradores condicionados a la ley aplicable.','Guarda captura de hero, footer, página completa, botón y URL; escribe una pregunta concreta.'],
   savedPoint:'Conserva la URL y la versión aprobada de AppDeploy para evitar rehacer el proyecto al repetir.',
   finish:'Termina con la URL compartible y una lista honesta de lo que funciona y de lo que falta.',
-  readyPrompt:'Evalúa mi web Casa Brownie [URL Y CAPTURAS] como un visitante nuevo. Prioriza tres mejoras concretas en claridad, fotos, lectura móvil y navegación. No presupongas ventas, cobros, reseñas ni formularios conectados. Dame un checklist para verificar cada mejora.'
+  readyPrompt:'Evalúa la web informativa Casa Brownie [URL Y CAPTURAS]. Revisa claridad, fotos, móvil, enlaces, footer y accesibilidad. Señala qué páginas legales se deben revisar de acuerdo con los datos que REALMENTE se recogen y con el país o estado; no inventes políticas, ventas ni cumplimiento. Dame un checklist de pruebas concretas.'
  }
 };
