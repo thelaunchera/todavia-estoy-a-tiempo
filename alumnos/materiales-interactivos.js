@@ -1,5 +1,5 @@
 import {renderWebBasics,renderProjectOrder} from './guia-principiantes.js';
-import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide} from './recursos-avanzados.js';
+import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
@@ -13,6 +13,7 @@ const headers=[
  ['prompts','12 prompts para copiar','Pide lo que necesitas y revisa el resultado.'],
  ['mara','Mara · mi guía web','Prepara tu proyecto privado y empieza.'],
  ['make','Make gratis','Escenarios con Gmail, paso a paso.'],
+ ['conectores','Comandos de conectores','Cada servicio explicado sin programación.'],
  ['seguridad','Contraseñas y claves','Tus accesos siempre privados.'],
  ['legal','Footer y legales','Enlaces y textos reales según tu negocio.'],
  ['cuaderno','Mi cuaderno','Tus decisiones, guardadas en tu cuenta.'],
@@ -112,6 +113,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(view==='prompts')renderPrompts();
   if(view==='mara')renderWebGuide(content,EXTRAS);
   if(view==='make')renderMakeResources(content,EXTRAS);
+  if(view==='conectores')renderConnectorPrompts(content,EXTRAS);
   if(view==='seguridad')renderSafetyResources(content,EXTRAS);
   if(view==='legal')renderLegalResources(content,EXTRAS);
   if(view==='cuaderno')renderWorkbook();
