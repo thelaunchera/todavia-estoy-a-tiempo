@@ -145,3 +145,18 @@ test('Casa Brownie muestra las fichas de fotografía de forma individual',()=>{
  assert.match(studio,/practice_app_url/);
  assert.match(studio,/lesson!=='bonus'/);
 });
+
+
+test('los guiones del alumno parten del acceso comprado, no de la lista de espera',()=>{
+ const intro=classLessons[0];
+ const spoken=classLessons.flatMap(lesson=>lesson.beats.map(beat=>beat.say)).join(' ');
+ const prompts=classLessons.map(lesson=>lesson.prompt).join(' ');
+ assert.match(intro.beats[0].say,/Ya estás dentro del aula/);
+ assert.match(intro.beats[0].say,/ChatGPT Plus/);
+ assert.match(intro.beats[0].say,/teléfono/);
+ assert.match(intro.beats[0].say,/Casa Brownie/);
+ assert.match(recordingStarts['00'].readyPrompt,/Casa Brownie/);
+ assert.doesNotMatch(spoken,/lista de espera|pago único de la clase|cuando la clase esté disponible/i);
+ assert.doesNotMatch(prompts,/\blanding\b/i);
+ assert.doesNotMatch(spoken,/\blanding\b/i);
+});
