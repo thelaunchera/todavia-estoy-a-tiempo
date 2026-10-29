@@ -10,7 +10,7 @@ export const recordingStarts:Record<string,RecordingStart>={
   actions:['Primero abre la versión SIN VIDEO. Explica que el demo ya estaba creado y que ahora vas a reconstruir una práctica desde cero. NO muestres el video animado en la introducción: lo revelaremos únicamente en el bono final.','Muestra fotos, textos y botón: eso es frontend, la parte visible.','Explica que guardar datos, confirmar pagos y enviar correos son procesos internos (backend); una web informativa no los necesita.','Abre la carpeta de trabajo y enseña qué documento completará el estudiante.'],
   savedPoint:'Guarda captura 00_INICIO.png de la página tal como está antes de explicar.',
   finish:'Termina cuando el alumno sepa qué web va a construir y haya abierto su carpeta.',
-  readyPrompt:'Quiero crear una web informativa de una página para mi idea de negocio. Hazme cinco preguntas sencillas sobre qué ofrezco, a quién ayudo, qué fotos usaré y qué acción quiero que tome la persona. No inventes testimonios ni ventas.'
+  readyPrompt:'Estoy preparando Casa Brownie, una web informativa de una página para un concepto ficticio de brownies tradicionales. La usaremos para aprender a crear una web desde cero; no tendrá pedidos ni pagos reales. Hazme cinco preguntas claras sobre el objetivo de la página, a quién va dirigida, qué fotografías necesito, qué botón informativo tendrá y qué datos faltan por comprobar. No inventes precios, ingredientes, testimonios, ventas, permisos ni entregas.'
  },
  '01':{
   tabs:['ChatGPT, conversación de Casa Brownie','Drive, carpeta única CASA_BROWNIE','Cuaderno: 01_FICHA_DE_OFERTA'],
