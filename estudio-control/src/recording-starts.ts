@@ -6,14 +6,14 @@ export const RECORDING_EXAMPLE = 'Casa Brownie · concepto ficticio de brownies 
 export const recordingStarts:Record<string,RecordingStart>={
  '00':{
   tabs:['Vista previa de Casa Brownie (sin checkout)','Carpeta de materiales en Drive','Biblioteca de prompts'],
-  actions:['Abre la vista previa del ejemplo con la etiqueta DEMO · SIN COMPRAS.','Muestra brevemente hero, tres fotografías y contacto informativo.','Abre la carpeta de trabajo y señala qué documento completará la persona.'],
+  actions:['Abre Casa Brownie con la etiqueta DEMO · SIN COMPRAS.','Muestra fotos, textos y botón: eso es frontend, la parte visible.','Explica que guardar datos, confirmar pagos y enviar correos son procesos internos (backend); una web informativa no los necesita.','Abre la carpeta de trabajo y enseña qué documento completará el estudiante.'],
   savedPoint:'Guarda captura 00_INICIO.png de la página tal como está antes de explicar.',
   finish:'Termina cuando el alumno sepa qué web va a construir y haya abierto su carpeta.',
   readyPrompt:'Quiero crear una web informativa de una página para mi idea de negocio. Hazme cinco preguntas sencillas sobre qué ofrezco, a quién ayudo, qué fotos usaré y qué acción quiero que tome la persona. No inventes testimonios ni ventas.'
  },
  '01':{
-  tabs:['ChatGPT, conversación de Casa Brownie','Cuaderno: 01_FICHA_DE_OFERTA'],
-  actions:['Abre una conversación nueva y escribe «Casa Brownie» como negocio de ejemplo ficticio.','Pega el prompt ya completado, léelo y envíalo.','Copia en la ficha público, producto, objetivo y datos que faltan; no añadas ingredientes ni precios inventados.'],
+  tabs:['ChatGPT, conversación de Casa Brownie','Drive, carpeta única CASA_BROWNIE','Cuaderno: 01_FICHA_DE_OFERTA'],
+  actions:['En Drive crea una carpeta llamada CASA_BROWNIE y dentro ocho subcarpetas: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS, 07_GASTOS.','Abre ChatGPT y escribe «Casa Brownie» como negocio de ejemplo ficticio.','Pega el prompt de oferta preparado, envíalo y separa lo confirmado de lo pendiente.','Guarda 01_FICHA_DE_OFERTA en 00_IDEA; conserva secretos fuera de carpetas compartidas.'],
   savedPoint:'Antes de enviar el mensaje, copia el texto del prompt a 01_PROMPT_INICIAL.txt para repetir la toma.',
   finish:'Termina al guardar la ficha, con los datos conocidos separados de los pendientes.',
   readyPrompt:'Mi proyecto es Casa Brownie, una marca ficticia de brownies tradicionales. Quiero una web de presentación de una página, sin compras ni reservas activas. Público: personas que quieren conocer un producto artesanal. Acción: leer los detalles y contactar cuando exista información real. Crea una ficha de oferta y separa hechos, decisiones creativas y datos pendientes. No inventes ingredientes, disponibilidad, precios, reseñas ni permisos.'
@@ -41,7 +41,7 @@ export const recordingStarts:Record<string,RecordingStart>={
  },
  '05':{
   tabs:['ChatGPT con el conector AppDeploy autorizado, si está disponible','03_FOTOS: HERO, PRODUCTO, DETALLE','04_TEXTOS_DE_LANDING','Vista previa de AppDeploy'],
-  actions:['En ChatGPT busca AppDeploy en Plugins; conéctalo y autoriza desde su pantalla oficial si tu plan lo permite.','Pega el prompt preparado e incorpora los textos y fotos reales de la carpeta.','Pide construir y desplegar la web; revisa el enlace público de AppDeploy sin comprar dominio.','Prueba el botón, la navegación móvil y que no existan formularios de cobro ni pedidos.'],
+  actions:['Muestra en Casa Brownie qué es frontend: fotos, textos, colores y botones. Explica por qué esta web no necesita backend propio.','En ChatGPT busca AppDeploy en Plugins, conéctalo y autoriza solo si tu plan lo permite.','Pega el prompt preparado y adjunta los textos y fotos guardados en su carpeta.','Publica la web con dirección HTTPS, guárdala en 05_WEB y comprueba el botón y el teléfono.'],
   savedPoint:'Guarda prompt completo, archivos y URL de la primera versión antes de pedir cambios. Usa historial/rollback de AppDeploy si está disponible.',
   finish:'Termina cuando tengas una URL pública comprobada y un botón informativo que funcione.',
   readyPrompt:'Usa AppDeploy para crear y publicar una web responsiva de una página para Casa Brownie, concepto ficticio de brownies tradicionales. Usa exactamente mis textos revisados [PEGAR TEXTOS] y estas tres imágenes [ADJUNTAR HERO, PRODUCTO Y DETALLE]. Secciones: portada, presentación, galería, preguntas frecuentes y contacto informativo. Diseño editorial cálido, legible en móvil, fotografías reales y botón «Conoce el proyecto» que lleva a una sección interna. Muestra claramente DEMO · SIN COMPRAS. No crees checkout, base de datos, login ni formulario que guarde datos. Comprueba navegación y devuelve URL pública HTTPS. Antes de cada cambio importante conserva una versión.'
@@ -54,11 +54,11 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Analiza estas capturas REALES de Casa Brownie en teléfono y escritorio [ADJUNTOS]. Señala solo problemas observables de legibilidad, foto recortada, contraste, botón o desbordamiento horizontal. Propón dos correcciones concretas para aplicar con AppDeploy, manteniendo contenido y marca. No inventes resultados de pruebas.'
  },
  '07':{
-  tabs:['Web ficticia Casa Brownie: sin checkout','Stripe Dashboard en modo de prueba (cuenta propia, datos ocultos)','Guía de conexiones en este Studio'],
-  actions:['Explica que el ejemplo de brownies permanece sin cobrar; no habilites su checkout.','Muestra dónde se encuentra el modo de prueba de Stripe y qué datos necesita verificar un negocio estadounidense.','Presenta Payment Links como camino sin código PARA UN NEGOCIO Y PRODUCTO REAL, verificado y permitido.','Dibuja el recorrido de Stripe → Make → correo, sin fingir que hay una venta ni utilizar llaves reales.'],
+  tabs:['Web ficticia Casa Brownie: sin cobros','Stripe en modo de prueba, con datos privados ocultos','Make con Gmail (escenario desactivado)','Guía de conexiones del Studio'],
+  actions:['Mantén la web ficticia sin cobros y muestra solo un mapa de lo que ocurriría detrás.','Abre el modo de prueba de Stripe y explica elegibilidad y verificación en Estados Unidos, sin datos privados.','En Make muestra un escenario no activado: Stripe con pago confirmado, filtro, control de duplicados y Gmail Send an email.','Explica Create a connection → Sign in with Google, destinatario, asunto y cuerpo; prueba únicamente con tu propio correo.'],
   savedPoint:'Deja una captura del Dashboard en modo de prueba sin saldo, nombres, claves ni emails privados.',
   finish:'Termina cuando el alumno diferencie publicar una web, cobrar de verdad y confirmar una compra antes de entregar.',
-  readyPrompt:'Explícame paso a paso, para una persona principiante en Estados Unidos, cómo verificar si puede usar Stripe para su negocio y su producto permitido. Después describe cómo crear un Payment Link de prueba y validar el pago antes de enviar un correo con Make. Separa configuración, pruebas y activación real; no solicites secretos, SSN ni datos bancarios en este chat.'
+  readyPrompt:'Explícame paso a paso cómo probar Stripe para un producto real permitido en Estados Unidos. Después enséñame a preparar en Make un escenario sin activar: pago confirmado de Stripe → filtro y evitar duplicados → Gmail Send an email. Detalla cómo conectar Gmail mediante Sign in with Google y rellenar To, Subject y Body usando mi propio correo de prueba. No pidas contraseñas, SSN ni datos bancarios.'
  },
  '08':{
   tabs:['URL final de Casa Brownie en AppDeploy','Checklist de publicación','Carpeta 08_CAPTURAS'],
