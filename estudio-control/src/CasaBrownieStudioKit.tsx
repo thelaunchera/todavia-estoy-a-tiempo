@@ -33,7 +33,7 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
   <div className="cb-kit-intro">
    <div><span className="cb-kit-eyebrow">CLASE 01 · CUADERNO DE PRODUCCIÓN PRIVADO</span>
     <h3>Casa Brownie · <em>de cero al demo final.</em></h3>
-    <p>La web ya existe. Ahora vas a reconstruirla en un proyecto nuevo, escena por escena, para enseñar exactamente cómo lo haría alguien que empieza hoy. <b>Primero sin video; el movimiento del hero es un bono.</b></p>
+    <p>La web oficial ya existe. Primero enseñarás la vista SIN VIDEO y la reconstruirás en un proyecto nuevo, escena por escena, como lo haría alguien que empieza hoy. <b>Primero sin video; el movimiento del hero es un bono.</b></p>
    </div>
    <button type="button" className="cb-kit-toggle" onClick={()=>setExpanded(x=>!x)} aria-expanded={expanded}>{expanded?'Cerrar materiales':'Abrir fotos y prompts'}</button>
   </div>
@@ -47,7 +47,7 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
       ['ruta','Paso a paso'],['fotos','Fotos oficiales'],['prompts','Prompts por sección'],['bono','Bono del video']
     ] as const).map(([id,label])=><button key={id} type="button" className={tab===id?'active':''} aria-pressed={tab===id} onClick={()=>{setTab(id);setCopied('');}}>{label}</button>)}</div>
     {tab==='ruta'&&<>
-     <div className="cb-kit-explain"><strong>Cómo grabar algo que ya construiste</strong><p>Mostrar el resultado final en la introducción; después abrir ChatGPT y un proyecto de práctica VACÍO. Grabar cada avance desde cero, guardando capturas y versiones. No presentar grabaciones reconstruidas como si fueran las originales.</p></div>
+     <div className="cb-kit-explain"><strong>Cómo grabar algo que ya construiste</strong><p>Mostrar primero la versión SIN VIDEO; después abrir ChatGPT y un proyecto de práctica VACÍO. La versión animada se revela únicamente como bono al final. Grabar cada avance desde cero, guardando capturas y versiones. No presentar grabaciones reconstruidas como si fueran las originales.</p></div>
      <div className="cb-kit-steps">{(entry.steps||[]).map(step=><article key={step.number} className="cb-kit-step">
        <span>{String(step.number).padStart(2,'0')}</span><div><h4>{step.name}</h4><p><b>Abre:</b> {step.where}</p><p><b>Di:</b> {step.say}</p><p><b>Guarda:</b> {step.deliverable}</p></div>
        </article>)}</div>
