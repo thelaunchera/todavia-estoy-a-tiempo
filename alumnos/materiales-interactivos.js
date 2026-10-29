@@ -1,4 +1,5 @@
-/* Tu primera landing con IA · Materiales activos de la clase
+import {renderWebBasics,renderProjectOrder} from './guia-principiantes.js';
+/* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
 let PROMPTS=[],WORKBOOK=[],CHECKS=[];
@@ -6,6 +7,8 @@ function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const headers=[
  ['inicio','Empieza aquí','Primero entiende lo que vas a construir.'],
+ ['funciona','Cómo funciona mi web','Distingue el diseño de los procesos internos.'],
+ ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
  ['prompts','12 prompts para copiar','Pide lo que necesitas y revisa el resultado.'],
  ['cuaderno','Mi cuaderno','Tus decisiones, guardadas en tu cuenta.'],
  ['ejemplo','Ejemplo explicado','Mira qué tiene cada sección de una página.'],
@@ -98,6 +101,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===view?'page':'false'));
   content.replaceChildren();
   if(view==='inicio')renderStart();
+  if(view==='funciona')renderWebBasics(content,go);
+  if(view==='organizacion')renderProjectOrder(content);
   if(view==='prompts')renderPrompts();
   if(view==='cuaderno')renderWorkbook();
   if(view==='ejemplo')renderExample();
@@ -123,7 +128,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   for(const [i,item] of items.entries()){
    const c=el('article','mi-step');c.innerHTML='<span>0'+(i+1)+'</span><h4>'+esc(item[0])+'</h4><p>'+esc(item[1])+'</p>';grid.append(c);
   }content.append(grid);
-  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="cuaderno">Empezar mi cuaderno</button><button type="button" class="mi-quiet" data-go="prompts">Explorar prompts</button>';content.append(actions);
+  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="funciona">Entender cómo funciona</button><button type="button" class="mi-quiet" data-go="organizacion">Organizar mi proyecto</button>';content.append(actions);
   actions.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
@@ -182,11 +187,11 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   actions.children[1].addEventListener('click',()=>window.print());
  }
  function renderExample(){
-  section('04 / UN EJEMPLO EXPLICADO','Así se ve una página que se entiende.','Vamos a usar un ejemplo ficticio: una caja de galletas artesanales por encargo. El objetivo es entender la estructura, no copiar su marca.');
+  section('06 / EL MISMO EJEMPLO DE TODA LA CLASE','Así se ve una página que se entiende.','Seguimos con Casa Brownie, el concepto ficticio de brownies tradicionales. No se aceptan pedidos ni cobros: se trata de una web informativa.');
   const guide=el('div','mi-demo-controls');guide.innerHTML='<div><button type="button" data-device="mobile">Ver en teléfono</button><button type="button" data-device="desktop" aria-pressed="true">Ver en computadora</button></div><p>Ejemplo visual · los botones no procesan pedidos</p>';content.append(guide);
-  const frame=el('div','mi-demo-screen desktop');frame.innerHTML='<div class="mi-demo-browser"><i></i><i></i><i></i><small>VISTA DE EJEMPLO</small></div><div class="mi-demo-site"><div class="mi-demo-menu"><span>CASA MIGA</span><span>Por encargo · Preguntas</span></div><div class="mi-demo-hero"><div><span>HORNEADAS PARA COMPARTIR</span><h4>Galletas artesanales para regalar.</h4><p>Cajas por encargo, preparadas con cuidado. Consulta sabores y disponibilidad antes de pedir.</p><button type="button" class="mi-demo-cta">Preguntar por una caja</button></div><div class="mi-cookie-scene" aria-label="Ilustración editorial de tres galletas"><i></i><i></i><i></i></div></div><div class="mi-demo-details"><div><strong>¿Qué recibes?</strong><span>Una caja surtida. Los sabores se confirman al pedir.</span></div><div><strong>¿Cómo funciona?</strong><span>Escribes, confirmamos disponibilidad y acordamos la entrega.</span></div></div></div>';content.append(frame);
-  const state=el('p','mi-demo-state','Este es un ejemplo visual, no una tienda real.');content.append(state);
-  frame.querySelector('.mi-demo-cta').addEventListener('click',()=>state.textContent='Así debe funcionar un botón real: abrir una consulta verificada. En esta muestra no se envía ningún pedido.');
+  const frame=el('div','mi-demo-screen desktop');frame.innerHTML='<div class="mi-demo-browser"><i></i><i></i><i></i><small>VISTA DE EJEMPLO</small></div><div class="mi-demo-site"><div class="mi-demo-menu"><span>CASA BROWNIE</span><span>Por encargo · Preguntas</span></div><div class="mi-demo-hero"><div><span>UNA IDEA PARA COMPARTIR</span><h4>Brownies tradicionales, una idea por descubrir.</h4><p>Te mostramos cómo podría verse una web para presentar brownies tradicionales. No se aceptan pedidos.</p><button type="button" class="mi-demo-cta">Conoce el proyecto</button></div><div class="mi-cookie-scene" aria-label="Ilustración editorial de brownies"><i></i><i></i><i></i></div></div><div class="mi-demo-details"><div><strong>¿Qué recibes?</strong><span>Una presentación ficticia con imágenes y textos claros.</span></div><div><strong>¿Cómo funciona?</strong><span>La persona conoce la idea, revisa fotos y detalles.</span></div></div></div>';content.append(frame);
+  const state=el('p','mi-demo-state','Este es un ejemplo visual: no se venden brownies.');content.append(state);
+  frame.querySelector('.mi-demo-cta').addEventListener('click',()=>state.textContent='El botón es informativo; este ejemplo no envía pedidos ni guarda datos.');
   guide.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const mobile=b.dataset.device==='mobile';frame.classList.toggle('mobile',mobile);frame.classList.toggle('desktop',!mobile);guide.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));}));
   const notes=el('div','mi-explain-list');content.append(notes);
   const items=[
