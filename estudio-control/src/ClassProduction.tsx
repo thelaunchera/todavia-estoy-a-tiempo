@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ConnectorsLesson from './ConnectorsLesson';
-import {recordingStarts, RECORDING_EXAMPLE} from './recording-starts';
+import {recordingStarts, RECORDING_EXAMPLE, OFFICIAL_DEMO_URL} from './recording-starts';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
@@ -115,8 +115,9 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <a href="https://app.notion.com/p/407a68f2ee6e81f1b331eebd75b2e3d9?pvs=204" target="_blank" rel="noreferrer"><FileText size={16}/> Plan de primera venta <ExternalLink size={13}/></a>
     <a href={CLASS_DRIVE} target="_blank" rel="noreferrer"><FileText size={16}/> Materiales · Drive <ExternalLink size={13}/></a>
     <a href={CLASS_PROMPTS} target="_blank" rel="noreferrer"><Clipboard size={16}/> 12 prompts <ExternalLink size={13}/></a>
+    <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={16}/> Demo Casa Brownie aprobado <ExternalLink size={13}/></a>
   </div>
-  <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> El alumno crea su propia landing. El ejemplo de brownies tradicionales es un prototipo visual sin pedidos ni cobros reales. Para enseñar pagos, utiliza Stripe en modo de prueba sin datos de clientes.</span></div>
+  <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> La versión aprobada de Casa Brownie es exclusivamente la publicada desde el repositorio en thelaunchera.com/demos/casa-brownie/. AppDeploy es solo para construir la práctica del alumno; nunca sobrescribas el demo oficial. El prototipo no tiene pedidos ni cobros reales. Para enseñar pagos, utiliza Stripe en modo de prueba sin datos de clientes.</span></div>
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
