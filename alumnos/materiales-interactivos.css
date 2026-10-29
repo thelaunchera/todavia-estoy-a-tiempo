@@ -151,3 +151,9 @@
 .mi-structure-prompt small{display:block;margin-top:9px}
 @media(max-width:650px){.mi-structure-grid,.mi-folder-grid{grid-template-columns:1fr}.mi-structure-card,.mi-folder-card{padding:15px}}
 @media print{.mi-structure-card,.mi-folder-card,.mi-structure-example{break-inside:avoid}}
+
+/* La única demostración del taller es una web de brownies tradicionales. */
+.mi-cookie-scene i{width:104px;height:94px;border-radius:12px;background:linear-gradient(148deg,rgba(249,226,180,.20),transparent 39%),radial-gradient(ellipse at 60% 28%,#6b4030 0%,transparent 42%),linear-gradient(135deg,#513023 8%,#69402d 53%,#3d281e 100%);border:6px solid #6d452f;box-shadow:9px 13px 18px #6b4c3655,inset 0 5px 7px #966a4b88}
+.mi-cookie-scene i:nth-child(1){top:15%;left:13%;transform:rotate(-10deg)}
+.mi-cookie-scene i:nth-child(2){top:27%;left:51%;transform:rotate(13deg)}
+.mi-cookie-scene i:nth-child(3){top:53%;left:32%;transform:rotate(5deg)}
