@@ -55,7 +55,9 @@ test('una sola demo informativa: publicar gratis y separar los pagos',()=>{
  assert.match(build.prompt,/AppDeploy/);
  assert.match(pay.beats.map(x=>x.say).join(' '),/Stripe/);
  assert.match(pay.beats.map(x=>x.say).join(' '),/Make/);
- assert.match(pay.beats.map(x=>x.say).join(' '),/Resend/);
+ assert.match(pay.beats.map(x=>x.say).join(' '),/Gmail/);
+ assert.match(classLessons[0].beats.map(x=>x.say).join(' '),/frontend/);
+ assert.match(classLessons[0].beats.map(x=>x.say).join(' '),/backend/);
  assert.match(pay.beats.map(x=>x.say).join(' '),/sin pedidos ni cobros/);
 });
 test('cada ficha tiene inicio repetible, clics y prompt completo, sin nuevas filas del aula',()=>{
@@ -75,6 +77,15 @@ test('cada ficha tiene inicio repetible, clics y prompt completo, sin nuevas fil
  assert.match(production,/<ConnectorsLesson\/>/);
  assert.match(connector,/AppDeploy/);
  assert.match(connector,/Namecheap/);
- assert.match(connector,/Resend/);
+ assert.match(connector,/Gmail/);
+ assert.match(connector,/frontend/i);
+ assert.match(connector,/backend/i);
+ const studentGuide=readFileSync('../alumnos/guia-principiantes.js','utf8');
+ const materials=readFileSync('../alumnos/materiales-interactivos.js','utf8');
+ assert.match(studentGuide,/Stripe/);
+ assert.match(studentGuide,/Gmail/);
+ assert.match(studentGuide,/00_IDEA/);
+ assert.match(materials,/renderWebBasics/);
+ assert.match(materials,/renderProjectOrder/);
  assert.match(connector,/Supabase/);
 });

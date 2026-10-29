@@ -8,6 +8,9 @@ on:
       - "estudio-control/src/recording-starts.ts"
       - "estudio-control/src/connectors-lesson.css"
       - "estudio-control/tests/class-course.test.mjs"
+      - "alumnos/guia-principiantes.js"
+      - "alumnos/materiales-interactivos.js"
+      - "alumnos/materiales-interactivos.css"
       - ".github/workflows/studio-course-review.yml"
   workflow_dispatch:
 permissions:
@@ -23,6 +26,10 @@ jobs:
       - name: Instalar dependencias sin publicar
         working-directory: estudio-control
         run: npm install --no-audit --no-fund
+      - name: Revisar sintaxis de los recursos nuevos del aula
+        run: |
+          node --check alumnos/guia-principiantes.js
+          node --check alumnos/materiales-interactivos.js
       - name: Compilar Studio
         working-directory: estudio-control
         run: npm run build
