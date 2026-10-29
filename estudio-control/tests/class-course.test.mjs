@@ -4,9 +4,9 @@ import {readFileSync} from 'node:fs';
 import {classLessons,classRecordingScript,classTotalMinutes,CLASS_SECTION,CLASS_TASK_SECTION,CLASS_CHECKLIST,CLASS_LAUNCH} from '../src/class-course.ts';
 import {recordingStarts} from '../src/recording-starts.ts';
 
-test('la clase contiene nueve videos únicos y un objetivo de 53 minutos',()=>{
+test('la clase contiene nueve videos únicos y guiones ampliados para seguridad y legales',()=>{
  assert.equal(classLessons.length,9);
- assert.equal(classTotalMinutes,53);
+ assert.equal(classTotalMinutes,57);
  assert.deepEqual(classLessons.map(x=>x.id),['00','01','02','03','04','05','06','07','08']);
  assert.equal(new Set(classLessons.map(x=>x.title)).size,9);
  assert.equal(CLASS_SECTION,'clase-01-produccion-privada');
@@ -88,4 +88,25 @@ test('cada ficha tiene inicio repetible, clics y prompt completo, sin nuevas fil
  assert.match(materials,/renderWebBasics/);
  assert.match(materials,/renderProjectOrder/);
  assert.match(connector,/Supabase/);
+});
+
+test('automatizaciones, seguridad y footer se enseñan dentro de las nueve fichas',()=>{
+ const pay=classLessons.find(l=>l.id==='07'), end=classLessons.find(l=>l.id==='08');
+ const p=pay.beats.map(b=>b.say).join(' ');
+ const e=end.beats.map(b=>b.say).join(' ');
+ assert.match(p,/escenarios activos/);
+ assert.match(p,/gestor de contraseñas/);
+ assert.match(p,/API/);
+ assert.match(e,/pie de página/);
+ assert.match(e,/privacidad/);
+ assert.match(e,/accesibilidad/);
+ const learner=readFileSync('../alumnos/materiales-interactivos.js','utf8');
+ const module=readFileSync('../alumnos/recursos-avanzados.js','utf8');
+ assert.match(learner,/resource\.payload\.extras/,'carga las guías de la tabla privada');
+ assert.match(learner,/renderWebGuide/);
+ assert.match(learner,/renderMakeResources/);
+ assert.match(learner,/renderSafetyResources/);
+ assert.match(learner,/renderLegalResources/);
+ assert.match(module,/navigator\.clipboard\.writeText/);
+ assert.doesNotMatch(module,/private_key|sk_test_|sk_live_/,'sin claves reales');
 });
