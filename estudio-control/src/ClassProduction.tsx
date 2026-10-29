@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ConnectorsLesson from './ConnectorsLesson';
+import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
 import {recordingStarts, RECORDING_EXAMPLE, OFFICIAL_DEMO_URL} from './recording-starts';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
@@ -41,6 +42,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const lesson=useMemo(()=>classLessons.find(x=>x.id===lessonId)||classLessons[0],[lessonId]);
  const recordingStart=recordingStarts[lesson.id];
  const records=useMemo(()=>entries.filter(x=>x.section===CLASS_SECTION),[entries]);
+ const visualKit=entries.find(x=>x.section===CASA_BROWNIE_KIT_SECTION) as CasaBrownieKitEntry|undefined;
  const record=records.find(x=>x.subtitle===lesson.id);
  const done=records.filter(x=>x.status==='aprobado').length;
  const recorded=records.filter(x=>x.status==='grabado'||x.status==='editando'||x.status==='aprobado').length;
@@ -77,7 +79,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <div>
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
       <h2>Tu primera web <em>con IA.</em></h2>
-      <p>Nueve grabaciones cortas de una sola web, con guion por escenas y clics reales. Además, un módulo extra de conectores para quien quiera vender o automatizar después.</p>
+      <p>Nueve grabaciones cortas reconstruyendo desde cero una versión estática del demo aprobado. El video animado del hero se enseña solo como bono final. Además, hay una guía opcional de conectores.</p>
       <div className="class-intro-tags"><span>9 videos</span><span>{classTotalMinutes} min editados aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
     </div>
     <div className="class-overview">
@@ -118,6 +120,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={16}/> Demo Casa Brownie aprobado <ExternalLink size={13}/></a>
   </div>
   <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> La versión aprobada de Casa Brownie es exclusivamente la publicada desde el repositorio en thelaunchera.com/demos/casa-brownie/. AppDeploy es solo para construir la práctica del alumno; nunca sobrescribas el demo oficial. El prototipo no tiene pedidos ni cobros reales. Para enseñar pagos, utiliza Stripe en modo de prueba sin datos de clientes.</span></div>
+  <CasaBrownieStudioKit entry={visualKit}/>
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
