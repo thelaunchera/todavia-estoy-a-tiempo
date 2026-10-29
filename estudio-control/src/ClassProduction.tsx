@@ -29,6 +29,7 @@ function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'
 
 export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,onSave}:Props) {
  const [lessonId,setLessonId]=useState('00');
+ const [area,setArea]=useState<'grabar'|'recursos'|'plan'>('grabar');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
  const [status,setStatus]=useState('pendiente');
@@ -79,7 +80,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <div>
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
       <h2>Tu primera web <em>con IA.</em></h2>
-      <p>Nueve grabaciones cortas reconstruyendo desde cero una versión estática del demo aprobado. El video animado del hero se enseña solo como bono final. Además, hay una guía opcional de conectores.</p>
+      <p>Aquí grabas una lección a la vez, con el guion y los clics a mano. Los demos terminados, materiales y tareas de lanzamiento tienen su propio espacio.</p>
       <div className="class-intro-tags"><span>9 videos</span><span>{classTotalMinutes} min editados aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
     </div>
     <div className="class-overview">
@@ -89,12 +90,20 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
       <small>{recorded} grabados o en edición</small>
     </div>
   </header>
+  <nav className="class-area-nav" aria-label="Organización de la clase">
+    <button type="button" className={area==='grabar'?'active':''} aria-current={area==='grabar'?'page':undefined} onClick={()=>setArea('grabar')}><Video size={16}/> 1. Grabar clase</button>
+    <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><BookOpen size={16}/> 2. Materiales y referencia</button>
+    <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 3. Plan y lanzamiento</button>
+  </nav>
+  {area==='plan'&&<div className="class-plan-panel">
   <div className="class-funnel-stats" aria-label="Primeras ventas y lista de espera">
     <div><strong>{launchStats?.waitlist ?? '—'}</strong><span>Correos confirmados de la clase</span></div>
     <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
     <div><strong>Inactivo</strong><span>Checkout de la clase, pendiente de activar</span></div>
    </div>
    <ClassWeeklyPlan tasks={tasks} lessons={entries} onToggle={onTaskToggle}/>
+  </div>}
+  {area==='recursos'&&<div className="class-resources-panel">
    <div className="class-admin-room-entry">
     <div>
       <span className="class-overline"><ShieldCheck size={15}/> ACCESO DE ADMINISTRADORA</span>
@@ -121,6 +130,13 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   </div>
   <div className="class-safety"><ShieldCheck size={19}/><span><b>Solo producción privada.</b> La versión aprobada de Casa Brownie es exclusivamente la publicada desde el repositorio en thelaunchera.com/demos/casa-brownie/. AppDeploy es solo para construir la práctica del alumno; nunca sobrescribas el demo oficial. El prototipo no tiene pedidos ni cobros reales. Para enseñar pagos, utiliza Stripe en modo de prueba sin datos de clientes.</span></div>
   <CasaBrownieStudioKit entry={visualKit}/>
+  <ConnectorsLesson/>
+  </div>}
+  {area==='grabar'&&<>
+   <section className="class-start-here" aria-label="Punto de partida de grabación">
+    <div className="class-start-here-copy"><span className="class-mini-heading">TU PUNTO DE PARTIDA · SOLO GRABACIÓN</span><h3>Casa Brownie · comienza desde cero.</h3><p>Esta es la app limpia para mostrar cada paso en pantalla. No abras el demo terminado para grabar la construcción; úsalo solo como referencia del resultado.</p></div>
+    <div className="class-start-here-actions"><a className="class-primary-link" href="https://casa-brownie-taller-desde-cero-b37dq5.v2.appdeploy.ai/" target="_blank" rel="noopener noreferrer">Abrir AppDeploy desde cero <ExternalLink size={15}/></a><a href="https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video" target="_blank" rel="noopener noreferrer">Ver resultado sin video <ExternalLink size={14}/></a></div>
+   </section>
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
@@ -140,12 +156,13 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <p>{lesson.outcome}</p>
        <p><strong>Ejemplo de toda la clase:</strong> {RECORDING_EXAMPLE}</p>
       </div>
-      <div className="class-method">
+      <details className="class-extra class-method-details"><summary>Cómo grabar esta sesión</summary><div className="class-method">
        <div><span>01</span><b>Prepara</b><small>Abre las pestañas y materiales de este video.</small></div>
        <div><span>02</span><b>Graba la pantalla</b><small>Una escena cada vez, horizontal y sin notificaciones.</small></div>
        <div><span>03</span><b>Añade tu voz</b><small>Narra después con ElevenLabs, sin leer botones que no existen.</small></div>
        <div><span>04</span><b>Revisa y guarda</b><small>Guarda el enlace del video; no se publica automáticamente.</small></div>
       </div>
+      </details>
       <div className="class-prepare">
        <div className="class-section-heading"><h4>Antes de grabar</h4><span>{checked.length}/{lesson.prep.length} listos</span></div>
        {lesson.prep.map((step,i)=><label key={i} className="class-prep-row"><input type="checkbox" checked={checked.includes(i)} onChange={()=>togglePrep(i)}/><span>{step}</span></label>)}
@@ -154,7 +171,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
         <code>{clipName(lesson.id)}</code>
        </div>
       </div>
-      <div className="recording-start-card">
+      <details className="class-extra class-start-details"><summary>Pestañas, clics exactos y prompt de esta sesión</summary><div className="recording-start-card">
        <div className="recording-start-head"><h4>Tu sesión lista para grabar</h4><span className="recording-start-small">No es otra lección del alumno</span></div>
        <p>Abre solo estas pestañas y sigue los clics. Si debes repetir una escena, vuelve al punto guardado sin rehacer todo el proyecto.</p>
        <h5>Pestañas que preparas</h5><ul>{recordingStart.tabs.map(item=><li key={item}>{item}</li>)}</ul>
@@ -164,6 +181,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <div className="recording-start-head"><h5>Prompt ya rellenado con el proyecto de ejemplo</h5><button className="recording-start-copy" type="button" onClick={()=>void copy(recordingStart.readyPrompt,'filled')}>{copied==='filled'?'Prompt copiado':'Copiar prompt completo'}</button></div>
        <p className="recording-ready-prompt">{recordingStart.readyPrompt}</p>
       </div>
+      </details>
       <div className="class-scene-head">
        <div><h4>Guion para grabar</h4><p>La frase que dices y la pantalla que enseñas, escena por escena.</p></div>
        <div className="class-segment">
@@ -192,11 +210,12 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <button type="button" onClick={()=>void copy(classRecordingScript(lesson),'script')}><Clipboard size={15}/>{copied==='script'?'Guion copiado':'Copiar guion completo'}</button>
        <button type="button" onClick={()=>void copy(recordingGuide,'guide')}><Clipboard size={15}/>{copied==='guide'?'Guía copiada':'Copiar guía de grabación'}</button>
       </div>
-      <div className="class-prompt-section">
+      <details className="class-extra class-prompt-details"><summary>Prompt y actividad para el alumno</summary><div className="class-prompt-section">
        <div className="class-section-heading"><h4>Prompt del módulo</h4><button type="button" onClick={()=>void copy(lesson.prompt,'prompt')}><Clipboard size={15}/>{copied==='prompt'?'Copiado':'Copiar prompt'}</button></div>
        <p>{lesson.prompt}</p>
        <div className="class-student-task"><Check size={17}/> <span><b>Resultado del alumno:</b> {lesson.exercise}</span></div>
       </div>
+      </details>
       <div className="class-production-state">
        <div className="class-section-heading"><h4>Guarda tu avance</h4><span>No publica nada</span></div>
        <div className="class-form-grid">
@@ -223,6 +242,6 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
       </footer>
     </div>
   </div>
-  <ConnectorsLesson/>
+  </>}
  </section>;
 }
