@@ -27,21 +27,21 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Estoy diseñando Casa Brownie, una web ficticia de brownies tradicionales. Tras revisar estas tres webs y anotar lo que me gustó [PEGAR MIS OBSERVACIONES], propón una dirección editorial propia: colores, fotografía, tipografías y jerarquía en móvil. No copies textos, fotos, marcas ni estructura completa.'
  },
  '03':{
-  tabs:['ChatGPT con generación de imágenes disponible','Paleta y referencias de 02_REFERENCIAS','Carpeta 03_FOTOS'],
+  tabs:['ChatGPT con generación de imágenes disponible','Paleta y referencias de 02_REFERENCIAS','Carpeta 02_FOTOS'],
   actions:['Pega el prompt de imagen horizontal y genera el hero.','Revisa manos extrañas, etiquetas ficticias y letras dibujadas.','Usa el hero como referencia para dos fotografías coherentes y guarda cada archivo.'],
   savedPoint:'Guarda HERO_ORIGINAL.png antes de producir variaciones; podrás regresar a él.',
   finish:'Termina con HERO, PRODUCTO y DETALLE guardados por separado.',
   readyPrompt:'Crea una fotografía editorial realista para Casa Brownie, un proyecto ficticio de brownies tradicionales. Formato horizontal 16:9, luz natural lateral, mesa de madera clara, brownies simples de chocolate, fondo cálido con espacio libre para un título externo. Sin texto impreso, logos, personas, empaques con ingredientes inventados ni reseñas.'
  },
  '04':{
-  tabs:['ChatGPT','01_FICHA_DE_OFERTA','04_TEXTOS_DE_LANDING'],
+  tabs:['ChatGPT','01_FICHA_DE_OFERTA','03_TEXTOS_DE_WEB'],
   actions:['Pega la ficha de Casa Brownie, diferenciando lo confirmado de lo pendiente.','Pide hero, presentación, galería, preguntas frecuentes y contacto informativo.','Elimina palabras vacías y cualquier promesa sobre disponibilidad, precio o ingredientes.'],
   savedPoint:'Duplica la primera versión de textos antes de editar para mostrar un antes y después auténtico.',
   finish:'Termina con el título, subtítulo, secciones y CTA informativo guardados.',
   readyPrompt:'Para Casa Brownie, web informativa de un concepto ficticio de brownies tradicionales, escribe un título claro, subtítulo breve, galería de producto, sección de presentación, tres preguntas frecuentes y un botón «Conoce el proyecto». Usa lenguaje humano y cálido. No inventes precios, pedidos, entregas, ingredientes, licencias ni comentarios de clientes.'
  },
  '05':{
-  tabs:['Demo aprobada SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo oficial con VIDEO para el bono final (no sobrescribir)','ChatGPT con AppDeploy para el proyecto NUEVO del estudiante, si está disponible','03_FOTOS: HERO, PRODUCTO, DETALLE','04_TEXTOS_DE_LANDING','Vista previa de AppDeploy'],
+  tabs:['Demo aprobada SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo oficial con VIDEO para el bono final (no sobrescribir)','ChatGPT con AppDeploy para el proyecto NUEVO del estudiante, si está disponible','02_FOTOS: HERO, PRODUCTO, DETALLE','03_TEXTOS_DE_WEB','Vista previa de AppDeploy'],
   actions:['Muestra en Casa Brownie qué es frontend: fotos, textos, colores y botones. Explica por qué esta web no necesita backend propio.','En ChatGPT busca AppDeploy en Plugins, conéctalo y autoriza solo si tu plan lo permite.','Pega el prompt preparado y adjunta los textos y fotos guardados en su carpeta.','Publica la versión de práctica del estudiante con dirección HTTPS distinta de la demo oficial; guárdala en 05_WEB y comprueba botón y móvil. Nunca sobrescribas Casa Brownie del repo.'],
   savedPoint:'Guarda prompt completo, archivos y URL de la primera versión antes de pedir cambios. Usa historial/rollback de AppDeploy si está disponible.',
   finish:'Termina cuando tengas una URL pública comprobada y un botón informativo que funcione.',
@@ -62,7 +62,7 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Explícame paso a paso cómo probar Stripe para un producto real permitido en Estados Unidos. Después enséñame a preparar en Make un escenario sin activar: pago confirmado de Stripe → filtro y evitar duplicados → Gmail Send an email. Detalla cómo conectar Gmail mediante Sign in with Google y rellenar To, Subject y Body usando mi propio correo de prueba. No pidas contraseñas, SSN ni datos bancarios.'
  },
  '08':{
-  tabs:['Versión principal sin video, para terminar la clase','URL separada de la práctica del estudiante','Versión oficial animada, únicamente para presentar el bono','Checklist de publicación','Aula → Materiales → Footer y legales','Carpeta 08_CAPTURAS'],
+  tabs:['Versión principal sin video, para terminar la clase','URL separada de la práctica del estudiante','Versión oficial animada, únicamente para presentar el bono','Checklist de publicación','Aula → Materiales → Footer y legales','Carpeta 06_PRUEBAS'],
   actions:['Recorre la página de arriba abajo desde móvil.','Abre cada enlace y comprueba que no haya promesas ni ventas inexistentes.','Explica qué debe verificarse en footer: negocio, contacto, privacidad si hay datos, términos y devoluciones si se vende, cookies según tracking y accesibilidad.','Abre los cuatro prompts del aula; deja claro que son borradores condicionados a la ley aplicable.','Guarda captura de hero, footer, página completa, botón y URL; escribe una pregunta concreta.'],
   savedPoint:'Conserva las DOS vistas del mismo repo: ?etapa=sin-video para la clase y URL limpia con video únicamente como bono. Guarda aparte las versiones de práctica del estudiante.',
   finish:'Termina con la URL compartible y una lista honesta de lo que funciona y de lo que falta.',
