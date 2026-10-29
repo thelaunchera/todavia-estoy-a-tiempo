@@ -262,7 +262,7 @@ async function showCourse(email,asAdmin=false){
  $('progress-label').hidden=asAdmin;
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
- display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView('inicio',{scroll:false});
+ display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
