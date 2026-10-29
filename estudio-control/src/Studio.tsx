@@ -501,7 +501,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION);
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales');
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
