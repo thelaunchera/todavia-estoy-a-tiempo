@@ -44,3 +44,20 @@
 .connectors-bottom svg{flex:none}
 @media(max-width:850px){.connectors-path{grid-template-columns:1fr}.connectors-grid{grid-template-columns:1fr}.connectors-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:500px){.connectors-lesson{padding:15px;border-radius:16px}.connectors-detail{padding:16px}.connectors-tabs button{padding:12px}.recording-start-card{padding:16px}.connectors-detail h4{font-size:1.48rem}}
+
+/* Dos conceptos claros y una sola carpeta para toda la clase */
+.connectors-foundation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:22px}
+.connectors-foundation article{border:1px solid #dedbd5;border-radius:17px;background:#fff;padding:21px}
+.connectors-foundation h4,.connectors-compare h4,.connectors-organization h4{font-size:1.25rem;line-height:1.25;margin:10px 0;color:#20314c}
+.connectors-foundation p,.connectors-compare p,.connectors-organization p{line-height:1.65}
+.connectors-compare,.connectors-organization{background:#fff;border:1px solid #dedbd5;border-radius:17px;padding:22px;margin-top:14px}
+.connectors-choice{display:flex;gap:8px;flex-wrap:wrap}
+.connectors-choice button{border-radius:99px;border:1px solid #b7c5d6;background:#f4f7fb;color:#223653;padding:10px 15px;cursor:pointer}
+.connectors-choice button[aria-pressed=true]{background:#263b61;color:white;border-color:#263b61}
+.connectors-flow-result{margin-top:17px;padding:16px 18px;background:#eff4fa;border-radius:12px;line-height:1.6}
+.connectors-flow-result p{margin:6px 0 0}
+.connectors-folder-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.connectors-folder-grid>div{background:#f5f7fb;border:1px solid #dfe7ef;padding:13px;border-radius:11px;display:grid;gap:5px;min-width:0}
+.connectors-folder-grid strong{font-size:.83rem;color:#28486d;overflow-wrap:anywhere}
+.connectors-folder-grid span{font-size:.85rem;line-height:1.5;color:#43566e}
+@media(max-width:650px){.connectors-foundation{grid-template-columns:1fr}.connectors-folder-grid{grid-template-columns:1fr}.connectors-compare,.connectors-organization{padding:16px}}
