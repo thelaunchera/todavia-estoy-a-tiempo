@@ -1864,3 +1864,17 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 @media(prefers-reduced-motion:reduce){
   .class-page-v2 #course-waitlist-form .class-primary-button{transition:none}
 }
+
+/* Clase 01 · Requisitos transparentes antes de la inscripción (29 oct 2026). */
+.class-requirements{padding:clamp(36px,6vw,64px) 0;background:#f6f3eb;border-top:1px solid #c8d4dc}
+.class-requirements-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:clamp(20px,4vw,54px);align-items:center;padding:clamp(23px,3.5vw,42px);border:1px solid #cbd6db;border-radius:20px;background:#fffefa;box-shadow:0 12px 38px #14263e0a}
+.class-requirements h2{margin:0 0 14px;font:400 clamp(2rem,3vw,3rem)/1.1 var(--serif,Georgia,serif);color:#14263e;letter-spacing:-.03em}
+.class-requirements h2 em{color:#4d738b}
+.class-requirements .class-eyebrow{margin:0 0 15px}
+.class-requirements-copy>p:last-child{margin:0;max-width:440px;color:#456073;line-height:1.7}
+.class-requirements-detail{border-left:1px solid #d4dfe5;padding-left:clamp(18px,3vw,34px);color:#20384c}
+.class-requirements-detail>span{display:block;font-size:.7rem;font-weight:700;letter-spacing:.14em;color:#5a7181;margin-bottom:10px}
+.class-requirements-detail strong{display:block;font:400 clamp(1.35rem,2.2vw,1.8rem)/1.22 var(--serif,Georgia,serif);margin-bottom:10px}
+.class-requirements-detail p{font-size:.93rem;line-height:1.65;margin:0 0 12px}
+.class-requirements-detail small{display:block;color:#597080;font-size:.79rem;line-height:1.58}
+@media(max-width:700px){.class-requirements-inner{grid-template-columns:1fr;gap:20px}.class-requirements-detail{border-left:0;border-top:1px solid #d4dfe5;padding:20px 0 0}}
