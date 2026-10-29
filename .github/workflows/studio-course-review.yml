@@ -11,6 +11,9 @@ on:
       - "alumnos/guia-principiantes.js"
       - "alumnos/materiales-interactivos.js"
       - "alumnos/materiales-interactivos.css"
+      - "alumnos/recursos-avanzados.js"
+      - "alumnos/curso.js"
+      - "alumnos/index.html"
       - ".github/workflows/studio-course-review.yml"
   workflow_dispatch:
 permissions:
@@ -30,6 +33,7 @@ jobs:
         run: |
           node --check alumnos/guia-principiantes.js
           node --check alumnos/materiales-interactivos.js
+          node --check alumnos/recursos-avanzados.js
       - name: Compilar Studio
         working-directory: estudio-control
         run: npm run build
