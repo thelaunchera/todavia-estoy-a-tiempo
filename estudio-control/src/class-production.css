@@ -119,3 +119,30 @@
 .class-admin-preview-heading span{color:#597489}
 .class-admin-room-preview iframe{display:block;width:100%;height:min(85vh,860px);min-height:620px;border:0;background:#f8f8f5}
 @media(max-width:800px){.class-admin-room-entry{flex-direction:column;align-items:stretch}.class-admin-room-actions{min-width:0}.class-admin-preview-heading{flex-direction:column;align-items:flex-start}.class-admin-room-preview iframe{min-height:700px}}
+
+
+/* Focused private classroom · keep filming separate from materials and launch. */
+.class-area-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:16px 0 21px}
+.class-area-nav button{display:flex;justify-content:center;align-items:center;gap:8px;text-align:center;min-height:52px;padding:12px;border-radius:12px;border:1px solid #d8e1e7;background:#fff;color:#536779;font-size:12px;font-weight:750;line-height:1.25}
+.class-area-nav button.active{background:#1b3b53;border-color:#1b3b53;color:#fff;box-shadow:0 7px 16px #1b3b5322}
+.class-area-nav button:focus-visible{outline:3px solid #9ac4dd;outline-offset:2px}
+.class-plan-panel,.class-resources-panel{min-width:0}
+.class-start-here{display:flex;align-items:center;justify-content:space-between;gap:26px;padding:25px;border-radius:17px;background:#faf7f1;border:1px solid #e3d8c9;margin-bottom:20px}
+.class-start-here-copy{min-width:0;flex:1}
+.class-start-here h3{font:400 clamp(24px,2.3vw,33px)/1.15 'DM Serif Display',Georgia,serif;color:#203c52;margin:8px 0}
+.class-start-here p{font-size:12px;line-height:1.65;color:#647381;max-width:620px}
+.class-start-here-actions{display:flex;flex-direction:column;gap:9px;min-width:235px}
+.class-start-here-actions a{min-height:43px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid #ccd7df;padding:11px 13px;border-radius:10px;text-decoration:none;color:#27475d;font-size:11px;font-weight:750;text-align:center;background:#fff}
+.class-start-here-actions a.class-primary-link{background:#203f56;border-color:#203f56;color:white}
+.class-extra{background:#fff;border:1px solid #e0e6ea;border-radius:14px;margin:0 0 16px;overflow:hidden}
+.class-extra>summary{display:flex;align-items:center;gap:11px;cursor:pointer;padding:17px 19px;color:#27475b;font-size:12px;font-weight:800;list-style:none;user-select:none}
+.class-extra>summary::-webkit-details-marker{display:none}
+.class-extra>summary:before{content:'+';font-size:20px;font-weight:400;color:#7a8c99;flex-shrink:0}
+.class-extra[open]>summary:before{content:'−'}
+.class-extra>summary:focus-visible{outline:3px solid #96bcd5;outline-offset:-3px}
+.class-extra .class-method{margin:0 16px 16px}
+.class-extra .recording-start-card{border:0;border-top:1px solid #e8e9e6;border-radius:0;margin:0}
+.class-extra .class-prompt-section{margin:0;border:0;border-top:1px solid #e8e9e6;border-radius:0}
+.class-area-nav button svg,.class-start-here-actions a svg{flex-shrink:0}
+@media(max-width:900px){.class-start-here{flex-direction:column;align-items:stretch}.class-start-here-actions{min-width:0;flex-direction:row}.class-start-here-actions a{flex:1}}
+@media(max-width:650px){.class-area-nav{grid-template-columns:1fr;gap:7px}.class-area-nav button{min-height:44px;justify-content:flex-start;padding:10px 15px}.class-start-here{padding:19px}.class-start-here-actions{flex-direction:column}.class-body{grid-template-columns:1fr}.class-module-list{position:static}}

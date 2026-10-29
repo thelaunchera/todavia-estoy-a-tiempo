@@ -1,5 +1,6 @@
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
+import FinishedDemos from './FinishedDemos';
 import ReelsProduction from './ReelsProduction';
 import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
@@ -57,6 +58,7 @@ type Page =
   | 'episodios'
   | 'reels'
   | 'clases'
+  | 'demos'
   | 'alumnos'
   | 'bonos'
   | 'club'
@@ -133,6 +135,7 @@ const NAV = [
   { id: 'episodios', label: 'Episodios', icon: Mic2 },
   { id: 'reels', label: 'Reels · producción', icon: Film },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
+  { id: 'demos', label: 'Demos terminados', icon: Globe2 },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
   { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
   { id: 'club', label: 'Club de Ideas', icon: Users },
@@ -158,6 +161,7 @@ const LABELS: Record<Page, string> = {
   episodios: 'Episodios',
   reels: 'Reels · producción',
   clases: 'Clases · grabación',
+  demos: 'Demos terminados',
   alumnos: 'Centro de alumnos',
   bonos: 'Biblioteca de bonos',
   club: 'Club de Ideas',
@@ -972,7 +976,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : (page === 'clases' || page === 'alumnos' || page === 'bonos' || page === 'club')
+                  : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'bonos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
@@ -1315,6 +1319,7 @@ function App() {
             </section>
           )}
           {page === 'bonos' && <BonusLibrary />}
+          {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} />}
           {page === 'clases' && (
             <ClassProduction entries={items.ideas} tasks={items.tareas} launchStats={classStats} onTaskToggle={async (task,next) => {
               await api.put('/api/items/tareas/'+task.id, { ...task, status:next });
