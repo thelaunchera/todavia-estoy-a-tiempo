@@ -120,6 +120,8 @@ test('biblioteca privada Casa Brownie no duplica lecciones y reserva video para 
  assert.match(production,/<CasaBrownieStudioKit entry=\{visualKit\}\/>/);
  assert.match(kit,/CASA_BROWNIE_KIT_SECTION='clase-01-recursos-visuales'/);
  assert.match(kit,/promptFilter/);
+ assert.match(kit,/practice_app_url/,'studio exposes the separate AppDeploy practice project');
+ assert.match(kit,/dashboard\.appdeploy\.ai/,'teacher can open the AppDeploy dashboard to edit the starter');
  assert.match(kit,/navigator\.clipboard\.writeText/);
  assert.match(kit,/p\.lesson!=='bonus'/,'los prompts de bonos no aparecen en la formación base');
  assert.match(kit,/lesson==='bonus'/,'el video tiene su pestaña independiente');
