@@ -6,8 +6,8 @@ export const OFFICIAL_DEMO_URL = 'https://thelaunchera.com/demos/casa-brownie/';
 export const RECORDING_EXAMPLE = 'Casa Brownie · concepto ficticio de brownies tradicionales · web informativa sin pedidos ni cobros';
 export const recordingStarts:Record<string,RecordingStart>={
  '00':{
-  tabs:['Demo oficial CON video, solo para mostrar el resultado','Versión de clase SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Carpeta de materiales en Drive','Biblioteca de prompts'],
-  actions:['Muestra un momento el resultado oficial con video e indica que ya fue creado antes de grabar. Después abre la versión SIN VIDEO para construirla desde un proyecto nuevo; ese video será solo un bono al final.','Muestra fotos, textos y botón: eso es frontend, la parte visible.','Explica que guardar datos, confirmar pagos y enviar correos son procesos internos (backend); una web informativa no los necesita.','Abre la carpeta de trabajo y enseña qué documento completará el estudiante.'],
+  tabs:['Versión de clase SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo final CON video: reservar enlace solo para el bono','Carpeta de materiales en Drive','Biblioteca de prompts'],
+  actions:['Primero abre la versión SIN VIDEO. Explica que el demo ya estaba creado y que ahora vas a reconstruir una práctica desde cero. NO muestres el video animado en la introducción: lo revelaremos únicamente en el bono final.','Muestra fotos, textos y botón: eso es frontend, la parte visible.','Explica que guardar datos, confirmar pagos y enviar correos son procesos internos (backend); una web informativa no los necesita.','Abre la carpeta de trabajo y enseña qué documento completará el estudiante.'],
   savedPoint:'Guarda captura 00_INICIO.png de la página tal como está antes de explicar.',
   finish:'Termina cuando el alumno sepa qué web va a construir y haya abierto su carpeta.',
   readyPrompt:'Quiero crear una web informativa de una página para mi idea de negocio. Hazme cinco preguntas sencillas sobre qué ofrezco, a quién ayudo, qué fotos usaré y qué acción quiero que tome la persona. No inventes testimonios ni ventas.'
