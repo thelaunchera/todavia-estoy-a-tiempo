@@ -32,3 +32,25 @@
 .cb-kit-status{min-height:15px;font-size:12px;color:#496b81}
 @media(max-width:780px){.cb-kit-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.cb-kit-intro{flex-direction:column;align-items:stretch}.cb-kit-gallery{grid-template-columns:1fr}.cb-kit-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cb-kit-prompt-title{flex-direction:column}.cb-kit-step{grid-template-columns:27px 1fr}.cb-kit-toggle{width:100%}}
+
+
+.cb-photo-steps{display:grid;gap:12px;margin:14px 0 24px}
+.cb-photo-steps h4{font:400 24px Georgia,serif;color:#254760}
+.cb-photo-steps p{font-size:12px;line-height:1.7;color:#526e80}
+.cb-photo-steps ol{background:#f0f5f8;border:1px solid #d9e6ed;border-radius:13px;padding:16px 18px 16px 35px;max-height:260px;overflow:auto}
+.cb-photo-steps li{font-size:12px;line-height:1.65;margin:6px 0;color:#425f73}
+.cb-photo-step{border:1px solid #dae6ee;border-radius:14px;background:#fff;overflow:hidden}
+.cb-photo-step summary{cursor:pointer;padding:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px}
+.cb-photo-step summary strong{font-size:14px;color:#31536d}
+.cb-photo-step summary small{font-size:11px;color:#6b879a}
+.cb-photo-step[open] summary{border-bottom:1px solid #e1e9ef;background:#f8fbfd}
+.cb-photo-step-body{padding:16px}
+.cb-photo-copy{display:inline-flex;gap:7px;align-items:center;border:1px solid #bbd1df;border-radius:25px;background:#eaf3f8;padding:10px 14px;font-size:12px;cursor:pointer}
+.cb-photo-prompt{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f7f9;border:1px solid #dce7ed;border-radius:12px;padding:15px;max-height:360px;overflow:auto}
+.cb-photo-reference{display:flex;align-items:center;gap:12px;color:#315b75;font-size:12px;font-weight:700}
+.cb-photo-reference img{height:112px;width:130px;object-fit:cover;border-radius:10px}
+.cb-photo-feedback,.cb-photo-caution{font-size:12px;line-height:1.65;color:#577489}
+.cb-photo-caution{background:#eff5f8;border-radius:10px;padding:12px}
+.cb-kit-originals{padding:15px;border-radius:14px;background:#f6f9fb;border:1px solid #dbe6ee}
+.cb-kit-originals summary{cursor:pointer;font-weight:700;color:#315b74;font-size:12px}
+@media(max-width:640px){.cb-photo-step summary small{display:block}.cb-photo-step-body{padding:13px}.cb-photo-reference img{width:94px;height:100px}}
