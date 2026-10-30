@@ -152,7 +152,8 @@ test('los guiones del alumno parten del acceso comprado, no de la lista de esper
  const spoken=classLessons.flatMap(lesson=>lesson.beats.map(beat=>beat.say)).join(' ');
  const prompts=classLessons.map(lesson=>lesson.prompt).join(' ');
  assert.match(intro.beats[0].say,/Ya estás dentro del aula/);
- assert.match(intro.beats[0].say,/ChatGPT Plus/);
+ assert.match(intro.beats.map(beat=>beat.say).join(' '),/ChatGPT Plus/);
+  assert.ok(intro.beats.some(beat=>beat.label==='Una inversión con intención'),'El guion explica la herramienta como inversión consciente');
  assert.match(intro.beats[0].say,/teléfono/);
  assert.match(intro.beats[0].say,/Casa Brownie/);
  assert.match(recordingStarts['00'].readyPrompt,/Casa Brownie/);
