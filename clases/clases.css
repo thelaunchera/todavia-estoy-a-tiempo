@@ -1878,3 +1878,43 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
 .class-requirements-detail p{font-size:.93rem;line-height:1.65;margin:0 0 12px}
 .class-requirements-detail small{display:block;color:#597080;font-size:.79rem;line-height:1.58}
 @media(max-width:700px){.class-requirements-inner{grid-template-columns:1fr;gap:20px}.class-requirements-detail{border-left:0;border-top:1px solid #d4dfe5;padding:20px 0 0}}
+
+
+/* Masterclass · retratos proporcionados para la landing (30 oct 2026).
+   Mantener las fotografías completas y sin estirar/cortar en móvil y tablet. */
+.class-page-v2 .class-hero .class-hero-art .class-hero-image-frame{
+  width:100%;
+  max-width:540px;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  overflow:hidden!important;
+  background:#f7f5ef!important;
+  border:0!important;
+  border-radius:22px!important;
+  box-shadow:0 15px 38px rgba(25,45,62,.10)!important;
+  margin-inline:auto;
+}
+.class-page-v2 .class-hero .class-hero-art .class-hero-image-frame img{
+  display:block;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.class-page-v2 .class-evidence-photo img{
+  display:block;
+  width:100%;
+  height:auto!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#f7f5ef;
+}
+@media(max-width:650px){
+  .class-page-v2 .class-hero .class-hero-art .class-hero-image-frame{
+    border-radius:18px!important;
+    box-shadow:none!important;
+  }
+}
