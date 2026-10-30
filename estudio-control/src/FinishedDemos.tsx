@@ -23,7 +23,7 @@ const finishedDemos:Demo[]=[
   title:'CRUMB',
   category:'Tienda de cookies · demo interactivo',
   description:'Identidad de marca, seis sabores, fotografías, caja personalizada y entrega local de demostración.',
-  image:'https://thelaunchera.com/demos/crumb/assets/hero-mobile.webp',
+  image:'https://thelaunchera.com/demos/crumb/assets/CRUMB_Storefront_Approved_20261030.webp?v=20261030-studio',
   url:'https://thelaunchera.com/demos/crumb/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/crumb',
   note:'Demo ficticio: no acepta pedidos ni pagos reales.'
