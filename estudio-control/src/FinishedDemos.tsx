@@ -1,22 +1,36 @@
 import {useState} from 'react';
-import {ExternalLink, Film, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
+import {ExternalLink, Film, Camera, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import './finished-demos.css';
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
- url:string; source:string; note:string;
+ url:string; source:string; note:string; kind:'static'|'video'|'other';
+ promptsFor?:'casa-brownie'|'crumb';
 };
 const finishedDemos:Demo[]=[
  {
+  id:'casa-brownie-static',
+  title:'Casa Brownie · Foto estática',
+  category:'Web de brownies · clase principal',
+  description:'La misma web aprobada con fotografía fija en el hero. Úsala como referencia mientras grabas la construcción de Casa Brownie desde cero.',
+  image:'https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp',
+  url:'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/casa-brownie',
+  note:'Sin video en el hero. Es una vista del mismo demo oficial, no una copia ni una segunda web.',
+  kind:'static',
+  promptsFor:'casa-brownie'
+ },
+ {
   id:'casa-brownie',
-  title:'Casa Brownie',
-  category:'Web de brownies · resultado final',
-  description:'Demo terminado para mostrar el resultado de la clase. El proceso de reconstrucción empieza aparte, desde una app vacía.',
+  title:'Casa Brownie · Con video',
+  category:'Web de brownies · bono final',
+  description:'La misma web con el hero animado. Úsala para mostrar el antes y después cuando presentes el bono del video.',
   image:'https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp',
   url:'https://thelaunchera.com/demos/casa-brownie/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/casa-brownie',
-  note:'El video del hero pertenece al bono, no a la primera grabación.'
+  note:'Versión con video: reservar para el bono, después de grabar la web con foto estática.',
+  kind:'video'
  },
  {
   id:'crumb',
@@ -26,7 +40,9 @@ const finishedDemos:Demo[]=[
   image:'https://thelaunchera.com/demos/crumb/assets/CRUMB_Storefront_Approved_20261030.webp?v=20261030-studio',
   url:'https://thelaunchera.com/demos/crumb/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/crumb',
-  note:'Demo ficticio: no acepta pedidos ni pagos reales.'
+  note:'Demo ficticio: no acepta pedidos ni pagos reales.',
+  kind:'other',
+  promptsFor:'crumb'
  }
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
@@ -40,22 +56,22 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Aquí encuentras las versiones aprobadas para enseñar o consultar. Cada demo abre su web oficial y su carpeta editable en el repositorio.</p>
+     <p>Aquí encuentras Casa Brownie con foto estática, Casa Brownie con video y CRUMB. Ambas vistas de Casa Brownie comparten la misma web oficial: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
-     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/></div>
+     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:<CheckCircle2 size={14}/>} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':'DEMO INTERACTIVO'}</span></div>
      <div className="finished-demo-body">
        <span className="finished-demo-status"><CheckCircle2 size={14}/> Demo terminado</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
        <div className="finished-demo-actions">
-         <a href={d.url} target="_blank" rel="noopener noreferrer">Abrir demo <ExternalLink size={15}/></a>
+         <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':'Abrir demo'} <ExternalLink size={15}/></a>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio <ExternalLink size={14}/></a>
        </div>
        <small>{d.note}</small>
-       <details className="finished-demo-prompts">
-         <summary>Prompts para reconstruir desde cero <span>{demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].length} pasos</span></summary>
+       {d.promptsFor&&<details className="finished-demo-prompts">
+         <summary>Prompts para reconstruir desde cero <span>{demoRebuildPrompts[d.promptsFor].length} pasos</span></summary>
          <div className="finished-demo-prompt-list">
            <p className="finished-demo-prompt-context">Guía privada de grabación: en cada sección tienes qué decir en voz alta, qué enseñar y el prompt exacto para copiar a ChatGPT. Trabaja en la app de práctica, no en el demo oficial. Aquí no se genera ni publica ninguna web.</p>
            <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
@@ -64,7 +80,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
              <p><b>Brand board:</b> ese es el único caso donde pedimos UNA imagen compuesta con 14 escenas. Es una referencia visual; después usamos 14 comandos separados para conseguir archivos individuales utilizables.</p>
              <p><b>Para que quede como el demo aprobado:</b> adjunta las fotografías originales de referencia. Un prompt de generación ayuda a mantener el estilo, pero por sí solo no reproduce píxel por píxel una foto anterior.</p>
            </div>
-           {demoRebuildPrompts[d.id as 'casa-brownie'|'crumb'].map((item,i)=>(
+           {demoRebuildPrompts[d.promptsFor].map((item,i)=>(
              <article className="finished-demo-prompt" key={d.id+'-'+i}>
                <div className="finished-demo-prompt-heading">
                  <div><span>{item.step}</span><h4>{item.title}</h4></div>
@@ -98,7 +114,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
              </article>
            ))}
          </div>
-       </details>
+       </details>}
      </div>
    </article>)}
    </div>
