@@ -556,6 +556,32 @@
     });
   }
 
+  // El contacto del podcast se abre solo cuando lo solicita la persona.
+  // Conservamos intacto el formulario y su conexión de soporte.
+  const helpToggle = document.getElementById('help-toggle');
+  const helpPanel = document.getElementById('help-panel');
+  const helpClose = document.getElementById('help-close');
+  if (helpToggle && helpPanel) {
+    const setHelpOpen = open => {
+      helpPanel.hidden = !open;
+      helpToggle.setAttribute('aria-expanded', String(open));
+      helpToggle.textContent = open ? 'Formulario abierto' : 'Escríbeme';
+      if (open) {
+        const firstField = helpPanel.querySelector('#help-name');
+        firstField?.focus({ preventScroll: true });
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        helpPanel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+      } else {
+        helpToggle.focus({ preventScroll: true });
+      }
+    };
+    helpToggle.addEventListener('click', () => setHelpOpen(helpPanel.hidden));
+    helpClose?.addEventListener('click', () => setHelpOpen(false));
+    helpPanel.addEventListener('keydown', event => {
+      if (event.key === 'Escape') setHelpOpen(false);
+    });
+  }
+
   const progress = document.querySelector('.scroll-progress');
   let frame = 0;
   const draw = () => {
