@@ -26,6 +26,6 @@ export default function CasaBrowniePhotoSteps({shots,workflow}:{shots:PhotoShot[
    </div>
   </details>)}
   <p role="status" className="cb-photo-feedback">{message}</p>
-  <p className="cb-photo-caution">Las fotos de regalo ya están aprobadas. Estos prompts permiten enseñar el proceso sin modificar el demo oficial. Las seis fotos de sabores externas no son archivos originales nuestros.</p>
+  <p className="cb-photo-caution">Las fotos de regalo ya están aprobadas. Estos prompts permiten enseñar el proceso sin modificar el demo oficial. Las seis fotos de sabores originales ya están aprobadas y sus referencias aparecen en cada ficha.</p>
  </div>;
 }

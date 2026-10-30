@@ -20,7 +20,7 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Mi proyecto es Casa Brownie, una marca ficticia de brownies tradicionales. Quiero una web de presentación de una página, sin compras ni reservas activas. Público: personas que quieren conocer un producto artesanal. Acción: leer los detalles y contactar cuando exista información real. Crea una ficha de oferta y separa hechos, decisiones creativas y datos pendientes. No inventes ingredientes, disponibilidad, precios, reseñas ni permisos.'
  },
  '02':{
-  tabs:['Tres webs públicas de referencia (sin copiar)','ChatGPT','Documento 02_REFERENCIAS'],
+  tabs:['Tres referencias concretas guardadas en 02_REFERENCIAS: URL, captura y observación (comprobar antes de grabar)','ChatGPT','Documento 02_REFERENCIAS'],
   actions:['Abre tres ejemplos y compara únicamente hero, organización y versión móvil.','Escribe una observación y algo que NO vas a copiar de cada página.','Pide a ChatGPT una paleta y estilo propio para Casa Brownie y guárdalos.'],
   savedPoint:'Guarda URLs y capturas de las tres referencias antes de grabar; no dependen de que sigan abiertas.',
   finish:'Termina con paleta, composición y tres reglas visuales aprobadas.',
@@ -28,9 +28,9 @@ export const recordingStarts:Record<string,RecordingStart>={
  },
  '03':{
   tabs:['ChatGPT con generación de imágenes disponible','Paleta y referencias de 02_REFERENCIAS','Carpeta 02_FOTOS'],
-  actions:['Pega el prompt de imagen horizontal y genera el hero.','Revisa manos extrañas, etiquetas ficticias y letras dibujadas.','Usa el hero como referencia para dos fotografías coherentes y guarda cada archivo.'],
+  actions:['Pega el prompt de imagen horizontal y genera el hero.','Revisa manos extrañas, etiquetas ficticias y letras dibujadas.','Usa el hero como referencia para los seis sabores y dos regalos. Demuestra un archivo y explica cómo repetir el mismo método, una imagen por solicitud.'],
   savedPoint:'Guarda HERO_ORIGINAL.png antes de producir variaciones; podrás regresar a él.',
-  finish:'Termina con HERO, PRODUCTO y DETALLE guardados por separado.',
+  finish:'Termina con hero estático, seis sabores y dos regalos guardados por separado; muestra una generación completa y explica la repetición del método.',
   readyPrompt:'Crea una fotografía editorial realista para Casa Brownie, un proyecto ficticio de brownies tradicionales. Formato horizontal 16:9, luz natural lateral, mesa de madera clara, brownies simples de chocolate, fondo cálido con espacio libre para un título externo. Sin texto impreso, logos, personas, empaques con ingredientes inventados ni reseñas.'
  },
  '04':{
@@ -41,11 +41,11 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Para Casa Brownie, web informativa de un concepto ficticio de brownies tradicionales, escribe un título claro, subtítulo breve, galería de producto, sección de presentación, tres preguntas frecuentes y un botón «Conoce el proyecto». Usa lenguaje humano y cálido. No inventes precios, pedidos, entregas, ingredientes, licencias ni comentarios de clientes.'
  },
  '05':{
-  tabs:['Demo aprobada SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo oficial con VIDEO para el bono final (no sobrescribir)','ChatGPT con AppDeploy para el proyecto NUEVO del estudiante, si está disponible','02_FOTOS: HERO, PRODUCTO, DETALLE','03_TEXTOS_DE_WEB','Vista previa de AppDeploy'],
+  tabs:['Demo aprobada SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo oficial con VIDEO para el bono final (no sobrescribir)','ChatGPT con AppDeploy para el proyecto NUEVO del estudiante, si está disponible','02_FOTOS: hero estático, seis sabores y dos regalos aprobados','03_TEXTOS_DE_WEB','Vista previa de AppDeploy'],
   actions:['Muestra en Casa Brownie qué es frontend: fotos, textos, colores y botones. Explica por qué esta web no necesita backend propio.','En ChatGPT busca AppDeploy en Plugins, conéctalo y autoriza solo si tu plan lo permite.','Pega el prompt preparado y adjunta los textos y fotos guardados en su carpeta.','Publica la versión de práctica del estudiante con dirección HTTPS distinta de la demo oficial; guárdala en 05_WEB y comprueba botón y móvil. Nunca sobrescribas Casa Brownie del repo.'],
   savedPoint:'Guarda prompt completo, archivos y URL de la primera versión antes de pedir cambios. Usa historial/rollback de AppDeploy si está disponible.',
   finish:'Termina cuando tengas una URL pública comprobada y un botón informativo que funcione.',
-  readyPrompt:'Usa AppDeploy para crear y publicar una web responsiva de una página para Casa Brownie, concepto ficticio de brownies tradicionales. Usa exactamente mis textos revisados [PEGAR TEXTOS] y estas tres imágenes [ADJUNTAR HERO, PRODUCTO Y DETALLE]. Secciones: portada, presentación, galería, preguntas frecuentes y contacto informativo. Diseño editorial cálido, legible en móvil, fotografías reales y botón «Conoce el proyecto» que lleva a una sección interna. Muestra claramente DEMO · SIN COMPRAS. No crees checkout, base de datos, login ni formulario que guarde datos. Comprueba navegación y devuelve URL pública HTTPS. Antes de cada cambio importante conserva una versión.'
+  readyPrompt:'Usa AppDeploy para crear y publicar una web responsiva de una página para Casa Brownie, concepto ficticio de brownies tradicionales. Usa exactamente mis textos revisados [PEGAR TEXTOS] y las fotografías aprobadas [ADJUNTAR HERO, SEIS SABORES Y DOS REGALOS]. Secciones: header, hero estático, banner, seis sabores, regalos, historia, entrega ilustrativa en Miami y footer. Construye una sección por instrucción y conserva lo aprobado. Divide la captura en 05A (header/hero/banner/catálogo) y 05B (regalos/historia/entrega/footer). Diseño editorial cálido, legible en móvil, fotografías reales y botón «Conoce el proyecto» que lleva a una sección interna. Muestra claramente DEMO · SIN COMPRAS. No crees checkout, base de datos, login ni formulario que guarde datos. Comprueba navegación y devuelve URL pública HTTPS. Antes de cada cambio importante conserva una versión.'
  },
  '06':{
   tabs:['Demo oficial SIN VIDEO https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','URL de práctica del estudiante en AppDeploy','Vista móvil estrecha y escritorio','ChatGPT con capturas reales'],
@@ -63,7 +63,7 @@ export const recordingStarts:Record<string,RecordingStart>={
  },
  '08':{
   tabs:['Versión principal sin video, para terminar la clase','URL separada de la práctica del estudiante','Versión oficial animada, únicamente para presentar el bono','Checklist de publicación','Aula → Materiales → Footer y legales','Carpeta 06_PRUEBAS'],
-  actions:['Recorre la página de arriba abajo desde móvil.','Abre cada enlace y comprueba que no haya promesas ni ventas inexistentes.','Explica qué debe verificarse en footer: negocio, contacto, privacidad si hay datos, términos y devoluciones si se vende, cookies según tracking y accesibilidad.','Abre los cuatro prompts del aula; deja claro que son borradores condicionados a la ley aplicable.','Guarda captura de hero, footer, página completa, botón y URL; escribe una pregunta concreta.'],
+  actions:['Recorre la página de arriba abajo desde móvil.','Abre cada enlace y comprueba que no haya promesas ni ventas inexistentes.','Explica qué debe verificarse en footer: negocio, contacto, privacidad si hay datos, términos y devoluciones si se vende, cookies según tracking y accesibilidad.','Abre los cuatro prompts del aula; deja claro que son borradores condicionados a la ley aplicable.','Guarda captura de hero, footer, página completa, botón y URL; escribe una pregunta concreta. Verifica Proyectos del Club de Ideas y Ayuda con una cuenta de prueba antes de grabar cómo compartir; no prometer plazos ni revisiones ilimitadas.'],
   savedPoint:'Conserva las DOS vistas del mismo repo: ?etapa=sin-video para la clase y URL limpia con video únicamente como bono. Guarda aparte las versiones de práctica del estudiante.',
   finish:'Termina con la URL compartible y una lista honesta de lo que funciona y de lo que falta.',
   readyPrompt:'Evalúa la web informativa Casa Brownie [URL Y CAPTURAS]. Revisa claridad, fotos, móvil, enlaces, footer y accesibilidad. Señala qué páginas legales se deben revisar de acuerdo con los datos que REALMENTE se recogen y con el país o estado; no inventes políticas, ventas ni cumplimiento. Dame un checklist de pruebas concretas.'
