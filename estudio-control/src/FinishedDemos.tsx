@@ -2,8 +2,9 @@ import {useState} from 'react';
 import {ExternalLink, Film, Camera, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts};
 import './finished-demos.css';
+
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
