@@ -38,7 +38,7 @@
     const element = section.querySelector(selector);
     if (element) element.textContent = value;
   };
-  text('[data-ep-kicker]', `EPISODIO ${String(latest.number).padStart(2, '0')} · YA DISPONIBLE`);
+  text('[data-ep-kicker]', `EPISODIO ${String(latest.number).padStart(2, '0')}`);
   text('[data-ep-title]', latest.title);
   text('[data-ep-summary]', latest.summary);
   const art = section.querySelector('[data-ep-poster]');
@@ -77,7 +77,7 @@
       previousCard.hidden = true;
     } else {
       previousCard.hidden = false;
-      text('[data-ep-previous-number]', `EPISODIO ${String(previous.number).padStart(2, '0')} · YA DISPONIBLE`);
+      text('[data-ep-previous-number]', `EPISODIO ${String(previous.number).padStart(2, '0')}`);
       text('[data-ep-previous-title]', previous.title);
       text('[data-ep-previous-summary]', previous.summary);
       for (const previousLink of previousCard.querySelectorAll('a')) {
