@@ -2655,3 +2655,29 @@ body.class-page-v2:has(#privacy-notice:not([hidden])) .class-footer-bottom{
     grid-template-columns:1fr;
   }
 }
+
+/* Podcast home · override final para tablet/contacto y extra de IA (30-oct-2026). */
+body:not(.class-page-v2) .learning-section{
+  padding:clamp(43px,5.8vw,73px) 0;
+  background:linear-gradient(122deg,#e4eaf3 0%,#f4f2eb 60%,#dbe5f0 100%);
+}
+body:not(.class-page-v2) .learning-visual{min-height:0}
+body:not(.class-page-v2) .learning-section .learning-photo{
+  max-width:365px;
+  margin-inline:auto;
+}
+body:not(.class-page-v2) .help-section.section-pad{
+  padding:clamp(47px,5.9vw,72px) 0;
+}
+body:not(.class-page-v2) .help-section .help-grid{
+  display:block;
+  max-width:880px;
+}
+body:not(.class-page-v2) .help-section #help-panel[hidden]{
+  display:none!important;
+}
+@media(max-width:700px){
+  body:not(.class-page-v2) .learning-section{padding:44px 0}
+  body:not(.class-page-v2) .learning-visual{min-height:0}
+  body:not(.class-page-v2) .help-section.section-pad{padding:48px 0}
+}
