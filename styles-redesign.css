@@ -1758,3 +1758,28 @@ html{scroll-padding-top:96px}
 @media(prefers-reduced-motion:reduce){
   .help-section .help-toggle{transition:none}
 }
+
+
+/* 30 oct · cierre del podcast limpio, una sola llamada a la acción de soporte. */
+.help-section.paper.section-pad{
+  padding-block:clamp(36px,4.3vw,55px);
+  border-top:1px solid #d4dde5;
+}
+.help-section .help-intro{max-width:620px}
+.help-section .help-intro .eyebrow{margin-bottom:9px}
+.help-section .help-intro h2{
+  margin-bottom:11px;
+  font-size:clamp(2.2rem,3.8vw,3.6rem);
+  line-height:1.06;
+}
+.help-section .help-intro>p:not(.eyebrow){
+  font-size:clamp(.89rem,1.3vw,1rem);
+  line-height:1.55;
+  max-width:465px;
+}
+.help-section .help-toggle{margin:18px auto 0;min-height:49px}
+@media(max-width:650px){
+  .help-section.paper.section-pad{padding-block:39px 47px}
+  .help-section .help-intro h2{font-size:clamp(2.3rem,9vw,3rem)}
+  .help-section .help-toggle{width:auto;min-width:166px}
+}
