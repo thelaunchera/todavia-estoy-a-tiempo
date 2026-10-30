@@ -74,7 +74,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
    finally{setSaving(false);}
  }
  function togglePrep(i:number) {setChecked(prev=>prev.includes(i)?prev.filter(x=>x!==i):[...prev,i]);}
- const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; pantalla horizontal 16:9 y zoom legible; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade voz natural con ElevenLabs y revisa cada clic. El ejemplo de brownies tradicionales es ficticio y no tiene cobros.';
+ const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; captura desde el teléfono con texto legible; conserva el formato nativo y usa 16:9 solo para montaje cuando no reduzca la lectura; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade tu narración natural y revisa cada clic; valida primero una muestra de voz de 60–90 segundos. El ejemplo de brownies tradicionales es ficticio y no tiene cobros.';
  return <section className="class-room">
   <header className="class-intro">
     <div>
@@ -133,6 +133,13 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   <ConnectorsLesson/>
   </div>}
   {area==='grabar'&&<>
+   <section className="class-safety" aria-label="Recorrido definitivo de producción">
+    <BookOpen size={19}/><div><b>Recorrido definitivo · Casa Brownie sin video</b>
+    <p>Reconstruye en la práctica independiente el header, hero estático, banner, seis sabores, regalos, historia, entrega ilustrativa en Miami y footer. CRUMB queda como referencia adicional en Demos terminados. El video del hero se enseña solo en el bono.</p>
+    <p><b>Orden de grabación:</b> prueba de pantalla y voz de 60–90 segundos; lecciones 01–04; construcción 05A/05B; correcciones 06; prueba independiente Stripe + Make + Gmail 07; cierre 08; bienvenida 00 al final.</p>
+    <p><b>Antes de cada toma:</b> abre archivos y URLs reales, guarda el punto inicial y muestra un resultado al terminar. En 03 demuestra una foto y repite el método con los demás sabores; en 06 conserva dos errores auténticos con su antes/después. Registra el ensayo y su resultado en las notas de la ficha, sin marcarlo probado antes de hacerlo.</p>
+    <p><b>Cierre del alumno:</b> compartir URL, capturas y una pregunta en Proyectos del Club de Ideas; dudas técnicas en Ayuda. La revisión y la entrega del bono se comprueban antes de filmar el cierre, sin prometer plazos ni revisiones ilimitadas. Checkout y permisos siguen cerrados hasta QA.</p></div>
+   </section>
    <section className="class-start-here" aria-label="Punto de partida de grabación">
     <div className="class-start-here-copy"><span className="class-mini-heading">TU PUNTO DE PARTIDA · SOLO GRABACIÓN</span><h3>Casa Brownie · comienza desde cero.</h3><p>Esta es la app limpia para mostrar cada paso en pantalla. No abras el demo terminado para grabar la construcción; úsalo solo como referencia del resultado.</p></div>
     <div className="class-start-here-actions"><a className="class-primary-link" href="https://casa-brownie-taller-desde-cero-b37dq5.v2.appdeploy.ai/" target="_blank" rel="noopener noreferrer">Abrir AppDeploy desde cero <ExternalLink size={15}/></a><a href="https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video" target="_blank" rel="noopener noreferrer">Ver resultado sin video <ExternalLink size={14}/></a></div>
