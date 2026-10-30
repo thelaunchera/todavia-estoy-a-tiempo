@@ -47,6 +47,9 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const record=records.find(x=>x.subtitle===lesson.id);
  const done=records.filter(x=>x.status==='aprobado').length;
  const recorded=records.filter(x=>x.status==='grabado'||x.status==='editando'||x.status==='aprobado').length;
+ // El reel de la clase requiere material real, no la bienvenida (00), que se graba al final.
+ const classFootage=records.filter(x=>x.subtitle!=='00' && ['grabado','editando','aprobado'].includes(x.status||''));
+ const hasClassFootage=classFootage.length>0;
  const originalStatus=safeStatus(record?.status);
  const originalChecked=(record?.performance_notes||'').split(',').filter(Boolean).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length);
  const changed=status!==originalStatus || notes!==(record?.notes||'') || url!==(record?.link||'') || JSON.stringify([...checked].sort())!==JSON.stringify([...originalChecked].sort());
@@ -133,6 +136,21 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   <ConnectorsLesson/>
   </div>}
   {area==='grabar'&&<>
+   <section className="class-reel-gate" aria-label="Reel de la clase después de la grabación">
+    <div className="class-reel-gate-copy">
+     <span className="class-mini-heading"><Film size={15}/> REEL DE LA CLASE · MATERIAL REAL</span>
+     <h3>{hasClassFootage?'Ya puedes revisar fragmentos de la clase.':'Primero grabamos la clase. Después hacemos el reel.'}</h3>
+     <p>{hasClassFootage
+      ? 'Hay al menos una clase práctica marcada como grabada o en edición. Selecciona escenas auténticas de pantalla y del proceso de Casa Brownie; prepara el montaje sin dar por aprobado ni publicado el reel.'
+      : 'Todavía no hay una grabación práctica marcada como terminada. El reel se hará con cortes de tu primera clase real: no prepares tomas falsas, no uses mockups ni lo programes antes.'}</p>
+     <p className="class-reel-gate-steps"><b>Secuencia:</b> grabar la clase, elegir los momentos más claros, editar 15–25 segundos, revisar subtítulos y publicar solo después de tu aprobación.</p>
+    </div>
+    <div className="class-reel-gate-action">
+     <strong>{hasClassFootage?'Grabación de clase registrada':'Pendiente de grabación'}</strong>
+     <small>{hasClassFootage?classFootage.length+' módulo(s) con material registrado. El reel sigue pendiente de edición y aprobación.':'No hay material fuente confirmado en las fichas del Studio.'}</small>
+     <a href="https://app.notion.com/p/407a68f2ee6e8125b83ff36388d27335" target="_blank" rel="noopener noreferrer">Ver ficha del reel (borrador) <ExternalLink size={14}/></a>
+    </div>
+   </section>
    <section className="class-safety" aria-label="Recorrido definitivo de producción">
     <BookOpen size={19}/><div><b>Recorrido definitivo · Casa Brownie sin video</b>
     <p>Reconstruye en la práctica independiente el header, hero estático, banner, seis sabores, regalos, historia, entrega ilustrativa en Miami y footer. CRUMB queda como referencia adicional en Demos terminados. El video del hero se enseña solo en el bono.</p>
