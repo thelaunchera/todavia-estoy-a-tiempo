@@ -1,12 +1,15 @@
 import {useState} from 'react';
 import {ExternalLink, Film, Camera, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
+import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import './finished-demos.css';
+
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other';
- promptsFor?:'casa-brownie'|'crumb';
+ promptsFor?:'casa-brownie'|'crumb'|'aftr';
 };
 const finishedDemos:Demo[]=[
  {
@@ -43,6 +46,18 @@ const finishedDemos:Demo[]=[
   note:'Demo ficticio: no acepta pedidos ni pagos reales.',
   kind:'other',
   promptsFor:'crumb'
+ },
+ {
+  id:'aftr',
+  title:'AFTR. · Las Vegas',
+  category:'Nightclub de lujo · demo de branding y website',
+  description:'Chrome Afterglow: identidad futurista, ocho fotografías originales, eventos, lineup, guest list y experiencias VIP en una web responsive.',
+  image:'https://thelaunchera.com/demos/aftr/assets/hero.webp',
+  url:'https://thelaunchera.com/demos/aftr/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/aftr',
+  note:'Concepto ficticio 21+. Las reservas, entradas, ofertas y formularios solo se simulan; no hay cobros ni datos reales.',
+  kind:'other',
+  promptsFor:'aftr'
  }
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
@@ -56,7 +71,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Aquí encuentras Casa Brownie con foto estática, Casa Brownie con video y CRUMB. Ambas vistas de Casa Brownie comparten la misma web oficial: solo cambia el hero.</p>
+     <p>Aquí encuentras Casa Brownie (con foto y con video), CRUMB y AFTR. Las Vegas. Cada marca tiene su identidad y repositorio de referencia. Las dos vistas de Casa Brownie comparten la misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
@@ -71,7 +86,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
        </div>
        <small>{d.note}</small>
        {d.promptsFor&&<details className="finished-demo-prompts">
-         <summary>Prompts para reconstruir desde cero <span>{demoRebuildPrompts[d.promptsFor].length} pasos</span></summary>
+         <summary>Prompts para reconstruir desde cero <span>{studioDemoPrompts[d.promptsFor].length} pasos</span></summary>
          <div className="finished-demo-prompt-list">
            <p className="finished-demo-prompt-context">Guía privada de grabación: en cada sección tienes qué decir en voz alta, qué enseñar y el prompt exacto para copiar a ChatGPT. Trabaja en la app de práctica, no en el demo oficial. Aquí no se genera ni publica ninguna web.</p>
            <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
@@ -80,7 +95,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
              <p><b>Brand board:</b> ese es el único caso donde pedimos UNA imagen compuesta con 14 escenas. Es una referencia visual; después usamos 14 comandos separados para conseguir archivos individuales utilizables.</p>
              <p><b>Para que quede como el demo aprobado:</b> adjunta las fotografías originales de referencia. Un prompt de generación ayuda a mantener el estilo, pero por sí solo no reproduce píxel por píxel una foto anterior.</p>
            </div>
-           {demoRebuildPrompts[d.promptsFor].map((item,i)=>(
+           {studioDemoPrompts[d.promptsFor].map((item,i)=>(
              <article className="finished-demo-prompt" key={d.id+'-'+i}>
                <div className="finished-demo-prompt-heading">
                  <div><span>{item.step}</span><h4>{item.title}</h4></div>
