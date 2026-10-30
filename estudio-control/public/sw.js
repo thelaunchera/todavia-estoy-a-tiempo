@@ -1,5 +1,5 @@
 /* Podcast studio PWA — only static assets; never cache private Supabase traffic. */
-const CACHE = 'podcast-studio-static-v1';
+const CACHE = 'podcast-studio-static-v2';
 const PREFIX = new URL(self.registration.scope).pathname;
 self.addEventListener('install', event => {
   event.waitUntil(self.skipWaiting());
