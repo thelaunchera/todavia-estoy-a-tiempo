@@ -4,6 +4,7 @@ import FinishedDemos from './FinishedDemos';
 import ReelsProduction from './ReelsProduction';
 import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
+import WaitlistManager from './WaitlistManager';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -60,6 +61,7 @@ type Page =
   | 'clases'
   | 'demos'
   | 'alumnos'
+  | 'espera'
   | 'bonos'
   | 'club'
   | 'calendario'
@@ -137,6 +139,7 @@ const NAV = [
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'demos', label: 'Demos terminados', icon: Globe2 },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
+  { id: 'espera', label: 'Lista de espera', icon: Mail },
   { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
   { id: 'club', label: 'Club de Ideas', icon: Users },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
@@ -163,6 +166,7 @@ const LABELS: Record<Page, string> = {
   clases: 'Clases · grabación',
   demos: 'Demos terminados',
   alumnos: 'Centro de alumnos',
+  espera: 'Lista de espera',
   bonos: 'Biblioteca de bonos',
   club: 'Club de Ideas',
   calendario: 'Calendario editorial',
@@ -976,7 +980,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
-                  : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'bonos' || page === 'club')
+                  : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'espera' || page === 'bonos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
               </span>
@@ -1305,6 +1309,7 @@ function App() {
               <p className="studio-student-qa-note">La vista del aula se abre en pantalla completa, sin barras duplicadas ni ventanas dentro de ventanas. Regresas aquí desde «Volver a Mi Estudio».</p>
             </section>
           )}
+          {page === 'espera' && <WaitlistManager />}
           {page === 'club' && (
             <section className="studio-student-center">
               <div className="studio-student-center-intro">

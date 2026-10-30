@@ -335,6 +335,44 @@ export async function getClassLaunchStats(): Promise<ClassLaunchStats> {
   if(waitlist.error || access.error) throw new Error('No se pudo verificar la lista de espera o las compras.');
   return {waitlist:waitlist.count||0,buyers:access.count||0};
 }
+
+/** Registro de la lista de espera de la clase, visible solo a una administradora del Studio.
+ * No es la lista de suscriptores del podcast ni concede acceso al aula.
+ */
+export type StudioWaitlistEntry = {
+  email: string;
+  consented_at: string;
+  unsubscribed_at: string | null;
+  welcome_state: 'pending' | 'sent' | 'cancelled';
+  welcome_sent_at: string | null;
+};
+export async function getStudioWaitlist(): Promise<StudioWaitlistEntry[]> {
+  if (!client) throw new Error('El Estudio no está conectado con la base de datos.');
+  await owner();
+  const records: StudioWaitlistEntry[] = [];
+  const pageSize = 500;
+  for (let start = 0; ; start += pageSize) {
+    const { data, error } = await client.from('podcast_class_waitlist')
+      .select('email,consented_at,unsubscribed_at,welcome_state,welcome_sent_at')
+      .eq('course_id', 'primera-landing-ia-01')
+      .order('consented_at', { ascending: false })
+      .range(start, start + pageSize - 1);
+    if (error) throw new Error('No se pudieron consultar los inscritos. Comprueba tu sesión.');
+    for (const row of data || []) {
+      records.push({
+        email: String(row.email),
+        consented_at: String(row.consented_at),
+        unsubscribed_at: row.unsubscribed_at,
+        welcome_state: row.welcome_state === 'sent' ? 'sent'
+          : row.welcome_state === 'cancelled' ? 'cancelled' : 'pending',
+        welcome_sent_at: row.welcome_sent_at,
+      });
+    }
+    if (!data || data.length < pageSize) break;
+  }
+  return records;
+}
+
 /**
  * Owner-facing workshop bonus catalog. Only draft/private items are stored here
  * until the owner deliberately publishes student materials separately.
