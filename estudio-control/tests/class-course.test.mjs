@@ -161,3 +161,21 @@ test('los guiones del alumno parten del acceso comprado, no de la lista de esper
  assert.doesNotMatch(prompts,/\blanding\b/i);
  assert.doesNotMatch(spoken,/\blanding\b/i);
 });
+
+
+test('Studio muestra Casa Brownie sin video y con video como demos distintos',()=>{
+ const library=readFileSync('src/FinishedDemos.tsx','utf8');
+ const style=readFileSync('src/finished-demos.css','utf8');
+ assert.match(library,/id:'casa-brownie-static'/);
+ assert.match(library,/id:'casa-brownie'/);
+ assert.match(library,/id:'crumb'/);
+ assert.match(library,/url:'https:\/\/thelaunchera\.com\/demos\/casa-brownie\/\?etapa=sin-video'/);
+ assert.match(library,/url:'https:\/\/thelaunchera\.com\/demos\/casa-brownie\/'/);
+ assert.match(library,/kind:'static'/);
+ assert.match(library,/kind:'video'/);
+ assert.match(library,/promptsFor:'casa-brownie'/);
+ assert.match(library,/d\.promptsFor&&<details/);
+ assert.match(library,/Abrir versión con foto/);
+ assert.match(library,/Abrir versión con video/);
+ assert.match(style,/finished-demo-variant-static|finished-demo-variant/);
+});
