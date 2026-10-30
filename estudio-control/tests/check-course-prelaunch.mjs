@@ -247,7 +247,7 @@ assert.match(classPage,/data-transform-to="100"/);
 assert.match(classPage,/Ejemplo ilustrativo de lo que puedes crear en la clase/);
 assert.match(newExperience,/ideaProgress.addEventListener\('input'/);
 assert.match(newExperience,/reducedMotion.matches \|\| start === target/);
-assert.match(home,/No necesitas saber de coding ni dominar mucha tecnología/);
+assert.match(home,/desde el teléfono, paso a paso y sin saber programar/,'Mensaje claro del extra de IA sin jerga técnica');
 assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
 assert.doesNotMatch(home,/experta|experto/i);
 assert.doesNotMatch(clubPage,/reservado a alumnas|BIENVENIDA A TU COMUNIDAD/);
