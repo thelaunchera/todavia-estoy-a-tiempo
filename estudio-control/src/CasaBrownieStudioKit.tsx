@@ -64,7 +64,7 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
           <a href={photo.src} target="_blank" rel="noopener noreferrer">Abrir fotografía <ExternalLink size={12}/></a></div>
        </article>)}</div>
       </details>
-      <div className="cb-kit-note"><ShieldCheck size={18}/><p>Las seis fotografías de sabores del demo aún dependen de sitios externos. Para el curso deben crearse imágenes originales o verificarse sus permisos. No entregarlas como fotos nuestras.</p></div>
+      <div className="cb-kit-note"><ShieldCheck size={18}/><p>Las seis fotografías de sabores originales ya están aprobadas y guardadas con sus prompts. Úsalas como referencia para explicar el proceso; cada alumno crea las imágenes de su propio negocio.</p></div>
     </>}
     {tab==='prompts'&&<>
       <p className="cb-kit-small">Copia el prompt correspondiente a la sección que vas a grabar. Haz una sola parte cada vez, toma captura, aprueba y guarda la versión antes de seguir. El proyecto de AppDeploy es nuevo, nunca el demo oficial.</p>
