@@ -203,7 +203,11 @@ assert.match(heroCopy,/sin saber programar/);
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
 assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
 assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
-assert.match(home,/href="clases\/primera-landing.html">Explora la clase<\/a>/);
+assert.match(home,/href="clases\\/primera-landing.html">Conoce la clase<\\/a>/,'La masterclass aparece como extra independiente');
+assert.ok(home.indexOf('id="coleccion"') < home.indexOf('id="aprender"'),'Los productos del podcast preceden a la clase complementaria');
+assert.match(home,/id="help-toggle"[^>]*aria-expanded="false"/,'Ayuda se abre con un botón');
+assert.match(home,/id="help-panel" hidden/,'No mostrar la plantilla del formulario hasta solicitarla');
+assert.doesNotMatch(home,/EPISODIO 0[12] · YA DISPONIBLE/,'No repetir la disponibilidad de capítulos publicados');
 console.log('QA: copy latino, CTA explora, sin número público y texto móvil con margen');
 
 
