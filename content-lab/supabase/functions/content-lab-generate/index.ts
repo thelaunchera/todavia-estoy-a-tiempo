@@ -168,8 +168,16 @@ Deno.serve(async request=>{
   const {data:{user},error}=await supabase.auth.getUser(jwt);
   if(error||!user)return send({error:'Sesión inválida'},401);
   const {data:admin}=await supabase.from('content_lab_admins').select('user_id').eq('user_id',user.id).maybeSingle();
-  if(!admin)return send({error:'Cuenta no autorizada'},403);
+  let paid=false;
+  if(!admin&&user.email){
+   const {data:membership}=await supabase.from('content_lab_memberships')
+     .select('id').eq('buyer_email',user.email.trim().toLowerCase()).eq('status','active').maybeSingle();
+   paid=Boolean(membership);
+  }
+  if(!admin&&!paid)return send({error:'Esta cuenta todavía no tiene una compra verificada de Content Lab.'},403);
   const body=await request.json();const action=clean(body.action,45);
+  if(paid&&!admin&&['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action))
+   return send({error:'La generación con IA se habilitará para compradores después de establecer y probar los créditos individuales. Tu editor y biblioteca privados permanecen disponibles.'},403);
   const find=async(name:string,id:string)=>{
    const {data,error}=await supabase.from('content_lab_'+name).select('id,payload').eq('id',id).single();
    if(error||!data)throw Error('Recurso privado no encontrado.');

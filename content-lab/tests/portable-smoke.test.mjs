@@ -69,7 +69,7 @@ test('Grid planning uses schema JSON mode with nine independent concepts and saf
 test('in-app email OTP is present while access remains restricted to authorized accounts',()=>{
  const client=source('src/platform/client.ts'),app=source('src/App.tsx');
  assert.ok(client.includes("sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'})"));
- assert.ok(client.includes('shouldCreateUser:false'));
+ assert.ok(client.includes('shouldCreateUser:true'));
  assert.ok(app.includes('autoComplete="one-time-code"'));
  assert.ok(app.includes('await auth.verifyEmailOtp(pendingEmail'));
  assert.ok(app.includes('setAccount(user)'));
@@ -81,4 +81,25 @@ test('eight master prompts remain public as free launch offer, not a fake live c
  assert.ok(page.includes('Próximamente · Coming soon.'));
  assert.ok(page.includes('$10 USD'));
  assert.ok(!page.includes('stripe.com/checkout'));
+});
+
+test('paid buyer can access only the email-verified owned account and not seeded podcast brands',()=>{
+ const client=source('src/platform/client.ts');
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ assert.ok(client.includes("if(!owner)return [];"));
+ assert.ok(client.includes("sb.from('content_lab_memberships')"));
+ assert.ok(client.includes('shouldCreateUser:true'));
+ assert.ok(edge.includes("content_lab_memberships"));
+ assert.ok(edge.includes("if(!admin&&!paid)"));
+ assert.ok(edge.includes("if(paid&&!admin"));
+ assert.ok(edge.includes("['ai-image','grid-image','grid-plan','ideas','connection-test']"));
+});
+test('membership and storage RLS isolate by both authenticated owner UUID and paid email',()=>{
+ const sql=source('supabase/migrations/20261031_paid_membership_isolation.sql');
+ assert.ok(sql.includes('owner_id=(select auth.uid())'));
+ assert.ok(sql.includes("storage.foldername(name)"));
+ assert.ok(sql.includes("lower((select auth.jwt()->>'email'))"));
+ assert.ok(sql.includes("status='active'"));
+ assert.ok(sql.includes('revoke all on public.content_lab_memberships from anon, authenticated'));
+ assert.ok(sql.includes('grant select on public.content_lab_memberships to authenticated'));
 });
