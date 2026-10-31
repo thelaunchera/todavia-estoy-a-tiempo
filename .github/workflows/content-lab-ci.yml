@@ -23,6 +23,9 @@ jobs:
       - name: Run portable smoke tests
         run: npm test
         working-directory: content-lab
+      - name: Type-check React and editor
+        run: npx tsc --noEmit
+        working-directory: content-lab
       - name: Build React app
         run: npm run build
         working-directory: content-lab
