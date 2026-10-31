@@ -30,7 +30,11 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
  assert.ok(gallery.includes('<BackgroundThumbnail'));
  assert.ok(!gallery.includes('Your next'));
  assert.ok(!gallery.includes('THE CONTENT LAB · STUDIO'));
- assert.ok(palette.includes('isBowBackground'));
+ assert.ok(!palette.includes('isBowBackground'));
+ assert.ok(!gallery.includes('isBowBackground'));
+ assert.ok(!painter.includes('...BOW_BACKGROUNDS'));
+ assert.ok(palette.includes('BACKGROUND_CATEGORIES.map'));
+ assert.ok(gallery.includes('background-category-heading'));
 });
 test('Factory uses Cata design hacking sequence with IA as a short standalone section',()=>{
  const studio=read('src/CarouselFactory.tsx');
@@ -49,4 +53,21 @@ test('Factory uses Cata design hacking sequence with IA as a short standalone se
  assert.ok(studio.includes('factory-assistant-zone'));
  assert.ok(studio.includes('factory-canvas-exports'));
  assert.ok(studio.includes('Guardar carrusel'));
+});
+test('Public wallpapers have clear exclusive categories and retired bows remain only for older saves',()=>{
+ const categories=read('src/BackgroundCategories.ts');
+ const gallery=read('src/BackgroundLibrary.tsx');
+ const palette=read('src/FreeDecorControls.tsx');
+ const assets=read('src/FreeDesignAssets.ts');
+ for(const category of ['minimal','gradients','paper','editorial','retro','dark','scrapbook']) {
+  assert.ok(categories.includes("id:'"+category+"'"),category);
+ }
+ assert.ok(categories.includes("category==='all'?lookup.has(id)"));
+ assert.ok(gallery.includes("setFilter]=useState<BackgroundCategory>('all')"));
+ assert.ok(!gallery.includes("Coquette & bows"));
+ assert.ok(!palette.includes("Aesthetic · 20"));
+ assert.ok(!assets.includes("...BOW_BACKGROUNDS"));
+ assert.ok(assets.includes("if(isBowBackground(id)){paintBowBackground(ctx,w,h,id);return}"));
+ assert.ok(gallery.includes('Mis fondos guardados'));
+ assert.ok(gallery.includes('backgrounds.filter(item=>belongsToBackgroundCategory'));
 });
