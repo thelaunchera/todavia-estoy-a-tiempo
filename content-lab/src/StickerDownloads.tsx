@@ -103,7 +103,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   if(blobUrl)window.setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
  };
  return <section className="sticker-downloads" aria-label="Stickers PNG originales">
-  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Avatares, matcha, Pilates, ejercicios y wellness. Los archivos compartidos los publica el estudio; puedes utilizarlos y descargar sus PNG transparentes gratis.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
+  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Avatares, matcha, Pilates, ejercicios y wellness. Los archivos compartidos los publica el estudio; puedes utilizarlos y descargar sus PNG transparentes.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
   <div className={'sticker-import-bar'+(dragActive?' drag-active':'')}
    onDragOver={e=>{e.preventDefault();if(!running)setDragActive(true)}}
    onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setDragActive(false)}}
