@@ -80,7 +80,7 @@ test('in-app email OTP is present while access remains restricted to authorized 
 test('eight master prompts remain public as free launch offer, not a fake live checkout',()=>{
  const page=source('public/prompts/index.html');
  assert.ok(page.includes('id="copyAll"'));
- assert.ok(page.includes('Próximamente · Coming soon.'));
+ assert.ok(page.includes('Próximamente. Todavía no se aceptan pagos'));
  assert.ok(page.includes('$10 USD'));
  assert.ok(!page.includes('stripe.com/checkout'));
 });
