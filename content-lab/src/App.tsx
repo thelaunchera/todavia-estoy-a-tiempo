@@ -577,10 +577,17 @@ function App() {
               Inicia sesión en tu espacio privado. Tus marcas y publicaciones
               estarán separadas del Studio.
             </p>
+            {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
+              <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
+                El editor privado de GitHub aún necesita conectar su propio Supabase y el proveedor de IA.
+                La biblioteca de Master Prompts ya está disponible aquí, sin subir tus fotos.
+              </p>
+            )}
             <label htmlFor="lab-email">Correo privado</label>
             <input id="lab-email" type="email" placeholder="Tu correo autorizado" autoComplete="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
             <button
               className="btn dark wide"
+              disabled={!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL}
               onClick={() => auth.signInWithOtp(loginEmail).then(() => toast('Enlace privado enviado. Comprueba tu correo.')).catch(err)}
             >
               Enviar enlace de acceso <ArrowRight size={18} />
