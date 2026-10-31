@@ -19,24 +19,23 @@
  </div>
 </header>
 <main id="aula">
- <section class="hero">
-  <div class="wrap">
-   <p class="eyebrow">UN ESPACIO PARA APRENDER A TU RITMO</p>
-   <h1>Tu primera web, <em>a tu ritmo.</em></h1>
-   <p>Tu clase por partes: mira el video, aplica el ejercicio y sigue al próximo módulo cuando quieras.</p>
-  </div>
- </section>
- <div class="wrap">
-  <p id="room-message" class="message" role="status">Comprobando el acceso privado…</p>
+ <section class="aula-entry" aria-labelledby="entry-title">
+  <div class="wrap aula-entry-layout">
+   <div class="aula-entry-copy">
+    <a class="aula-entry-back" href="../clases/primera-landing.html">← Volver a la clase</a>
+    <p class="aula-entry-eyebrow">TU PRIMERA WEB CON IA · CENTRO DE ALUMNOS</p>
+    <h1 id="entry-title">Tu espacio para <em>seguir creando.</em></h1>
+    <p class="aula-entry-intro">Tus lecciones, tus materiales y tus ideas te esperan aquí. Continúa a tu ritmo, desde donde lo dejaste.</p>
+    <p id="room-message" class="message" role="status">Comprobando el acceso privado…</p>
   <section id="login-panel" class="panel" hidden>
-   <p class="eyebrow">ACCESO POR CORREO</p>
-   <h2>Entra a tu aula.</h2>
-   <p>Utiliza el mismo correo con el que compraste la clase. Te enviaremos un enlace para entrar sin contraseña.</p>
+   <p class="eyebrow">ACCESO PRIVADO</p>
+   <h2>Entra con tu correo.</h2>
+   <p>Escribe el correo que utilizaste al comprar la clase. Te enviaremos un enlace seguro para entrar sin contraseña.</p>
    <form id="login-form">
     <label for="login-email">Correo de la compra</label>
-    <div class="formline"><input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com" maxlength="254"><button type="submit">Enviar enlace</button></div>
+    <div class="formline"><input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com" maxlength="254"><button type="submit">Enviar mi enlace</button></div>
    </form>
-   <small>Si aún no compraste, aquí no se activará ningún video. La compra debe estar confirmada en nuestro sistema.</small><p><a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a></p>
+   <small>Solo las compras confirmadas tienen acceso a las lecciones y materiales.</small><p><a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a></p>
   </section>
   <section id="no-access" class="panel" hidden>
    <p class="eyebrow">AÚN NO HAY COMPRA VERIFICADA</p>
@@ -45,6 +44,14 @@
 
    <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">Solicitar ayuda aquí</a>
   </section>
+   </div>
+   <figure class="aula-entry-visual">
+    <img src="../assets/clase-retrato-laptop-real-2026.jpg" width="1122" height="1402" alt="La instructora trabajando con una laptop durante la preparación de su clase" fetchpriority="high" decoding="async">
+    <figcaption><span class="aula-visual-index">01 / TU AULA</span><span class="aula-visual-label">Aprende. Practica. Crea.</span></figcaption>
+   </figure>
+  </div>
+ </section>
+ <div class="wrap">
   <section id="class-content" hidden>
 <div class="room-grid" id="aula-layout">
   <aside class="aula-rail" id="aula-rail" aria-label="Menú de mi aula">
