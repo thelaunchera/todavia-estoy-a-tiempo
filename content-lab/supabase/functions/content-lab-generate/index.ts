@@ -16,6 +16,40 @@ const accountId=(Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'').replace(/\s+/g,'');
 const token=(Deno.env.get('CLOUDFLARE_API_TOKEN')||'').trim();
 const photoModel='@cf/black-forest-labs/flux-2-klein-4b';
 const textModel='@cf/meta/llama-3.1-8b-instruct-fp8-fast';
+const structuredTextModel='@cf/meta/llama-3.1-8b-instruct';
+const gridShots=[
+ '3/4 full product shot in clean seamless studio, softbox light, eye-level, spacious clean backdrop',
+ 'top-down editorial flat lay, layered colored paper and geometric props, object off-center, graphic daylight',
+ 'extreme micro texture closeup, razor-thin depth of field, natural material detail, directional sidelight',
+ 'wide environmental authentic lifestyle scene with contextual setting and window light',
+ 'playful conceptual sculptural or floating still life with clever props and diagonal visual energy',
+ 'candid real human hands using or holding item, tight documentary crop, lived-in realism',
+ 'overhead dramatic repeated pattern with multiple physical objects or ingredients, hard graphic shadows',
+ 'full product on minimal architectural pedestal with exceptionally broad negative space and tonal light',
+ 'cinematic low-angle campaign finale, spotlight, dramatic atmosphere and rich shadows'
+] as const;
+const gridLayouts=['Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props','Hands-on Editorial','High Contrast','Minimal Premium','Campaign Finale'] as const;
+const fallbackTexts={
+ English:{
+  titles:['A fresh perspective','The statement piece','Look closer','In its element','Something unexpected','The real moment','A new pattern','Less, more intention','One last look'],
+  subtexts:['A clean introduction','Details worth noticing','Texture tells the story','A place in everyday life','A different visual idea','An authentic interaction','A new visual rhythm','Space to appreciate the details','The campaign finale'],
+  captions:['A different point of view can change the whole story.','A simple setting puts the subject first.','Sometimes the smallest details hold your attention.','A little context makes the moment feel real.','One idea, a completely different composition.','An honest moment, without unnecessary extras.','Repetition makes familiar details feel new.','Give the subject room to stand out.','Nine perspectives, one recognizable subject.']
+ },
+ 'Español':{
+  titles:['Desde otro ángulo','Que sea protagonista','Míralo más de cerca','En su propio ambiente','Algo inesperado','Un momento real','Otra forma de verlo','Menos, con intención','Una última mirada'],
+  subtexts:['Una presentación diferente','El detalle es protagonista','Texturas que llaman la atención','Una escena cotidiana','Una idea visual distinta','Una interacción natural','Un nuevo ritmo visual','Espacio para apreciar el producto','El cierre de la campaña'],
+  captions:['A veces solo hace falta cambiar el ángulo.','Una composición sencilla deja que el producto hable.','Los detalles merecen su momento.','El contexto también cuenta una historia.','La misma referencia, una idea completamente diferente.','Una escena auténtica, sin adornos innecesarios.','Repetir formas cambia lo que vemos.','Dar espacio también es una decisión creativa.','Nueve maneras de mirar un mismo producto.']
+ }
+} as const;
+function fallbackGridPlan(lang:'English'|'Español',name:string,brief:string){
+ const t=fallbackTexts[lang];
+ return {
+  title:lang==='English'?'Nine distinct directions':'Nueve direcciones diferentes',
+  concept:lang==='English'?'A coherent nine-photo editorial series from one original reference.':'Una serie editorial de nueve fotos distintas a partir de la referencia original.',
+  posts:gridShots.map((scene,i)=>({headline:t.titles[i],subtext:t.subtexts[i],caption:t.captions[i],scene:'Shot '+(i+1)+': '+scene+'. Follow the original real subject and this creative brief without inventing product attributes: '+brief.slice(0,250)}))
+ };
+}
+
 const ensureFreeProvider=()=>{
  if(!accountId||!token)throw Error('Falta conectar la cuenta gratuita de Cloudflare. Revisa CLOUDFLARE_ACCOUNT_ID y CLOUDFLARE_API_TOKEN en los secretos de Supabase.');
  if(!/^[a-f0-9]{32}$/i.test(accountId))throw Error('El Account ID de Cloudflare es inválido: debe tener exactamente 32 caracteres hexadecimales, sin espacios. Copia el ID desde Cloudflare → Workers & Pages → Account Details y reemplaza CLOUDFLARE_ACCOUNT_ID en Supabase.');
@@ -43,7 +77,7 @@ async function verifyCloudflareToken(){
  }
  throw Error('Cloudflare no puede validar ese API Token. Comprueba que copiaste un token de Workers AI (no Global API Key), que está activo y que pertenece al Account ID seleccionado.');
 }
-async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false){
+async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false,jsonSchema?:Record<string,unknown>){
  ensureFreeProvider();
  const headers:Record<string,string>={'Authorization':'Bearer '+token};
  let response:Response;
@@ -60,9 +94,15 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
   }
   response=await fetch(endpoint(photoModel),{method:'POST',headers,body:form});
  }else{
-  response=await fetch(endpoint(textModel),{method:'POST',
-   headers:{...headers,'Content-Type':'application/json'},
-   body:JSON.stringify({messages:[{role:'system',content:'Return syntactically valid JSON only. Never include markdown code fences.'},{role:'user',content:prompt}],max_tokens:3300,temperature:0.55})});
+  const requestBody:any={
+   messages:[{role:'system',content:'Write ONE valid JSON object only, with no markdown or commentary. Follow the supplied JSON schema.'},{role:'user',content:prompt}],
+   max_tokens:jsonSchema?2500:3300,
+   temperature:jsonSchema?0.3:0.55
+  };
+  if(jsonSchema)requestBody.response_format={type:'json_schema',json_schema:jsonSchema};
+  response=await fetch(endpoint(jsonSchema?structuredTextModel:textModel),{
+   method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(requestBody)
+  });
  }
  let body:any;
  try{body=await response.json()}catch{throw Error('Cloudflare no devolvió una respuesta válida.');}
@@ -84,11 +124,17 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
   if(typeof base64!=='string'||!base64)throw Error('Cloudflare no devolvió la foto generada.');
   return {data:base64,mime:'image/jpeg'};
  }
- const output=String(body?.result?.response||body?.result?.text||'').trim();
- if(!output)throw Error('Cloudflare no devolvió el texto de la campaña.');
- const from=output.indexOf('{'),to=output.lastIndexOf('}');
- if(from<0||to<=from)throw Error('La IA no devolvió JSON; intenta nuevamente.');
- return JSON.parse(output.slice(from,to+1));
+ // In JSON Mode Cloudflare may provide the response as an object (not a string).
+ const output=body?.result?.response ?? body?.result?.text ?? body?.result?.output ?? '';
+ if(output&&typeof output==='object'&&!Array.isArray(output))return output;
+ if(Array.isArray(output))throw Error('JSON_FORMAT: La IA entregó una lista fuera de la estructura esperada.');
+ const raw=String(output).trim().replace(/^\x60\x60\x60(?:json)?\s*/i,'').replace(/\s*\x60\x60\x60$/,'').trim();
+ if(!raw)throw Error('JSON_FORMAT: La IA no devolvió el plan estructurado.');
+ try{return JSON.parse(raw)}catch{
+  const from=raw.indexOf('{'),to=raw.lastIndexOf('}');
+  if(from>=0&&to>from){try{return JSON.parse(raw.slice(from,to+1))}catch{/* incomplete response */}}
+  throw Error('JSON_FORMAT: El modelo no completó un JSON válido.');
+ }
 }
 
 Deno.serve(async request=>{
@@ -164,13 +210,53 @@ Deno.serve(async request=>{
     const ref=await find('assets',referenceId);
     if(ref.brandId!==brandId)throw Error('Esta referencia de estilo está guardada en otra marca. Vuelve a subirla en '+b.name+'.');
    }
-   const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
-   const prompt='Art direct NINE DIFFERENT BRAND PHOTOGRAPHS, nine independent Instagram posts, not slides or repeat recolors/crops. Image 1 is product identity, optional image 2 is style reference only. Brand '+b.name+' voice '+b.voice+' colors '+b.color+' '+b.background+'. PUBLIC copy title, concept, all headlines, subtitles and captions ONLY IN '+lang+'. Brief '+clean(body.brief,650)+'. Nine shots in order: (1) 3/4 studio hero (2) overhead geometric flat-lay (3) extreme macro texture (4) distant lifestyle environment (5) surreal conceptual floating props (6) authentic hands holding subject (7) repeated product flat-lay pattern (8) restrained minimalist podium (9) cinematic low-angle finale. Every scene uses DIFFERENT camera, scale, angle, lighting, props and setting. Return ONLY JSON with title,concept,posts array of EXACTLY NINE objects {headline,subtext,caption,scene}. Headlines and captions must be useful, human and different. No fake facts.';
-   const plan:any=await cloudflareRequest(prompt+' Source photo filename: '+source.name+'. If not specified, describe the source neutrally without inventing its details.');
-   if(!Array.isArray(plan.posts)||plan.posts.length!==9)throw Error('No se crearon los nueve conceptos.');
-   const formats=['Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props','Hands-on Editorial','High Contrast','Minimal Premium','Campaign Finale'];
-   const posts=plan.posts.map((p:any,i:number)=>({index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),scene:clean(p.scene,700),format:formats[i],assetId:''}));
-   return send(await save('grids',{brandId,sourceId,referenceId,kind:body.kind==='preserve'?'preserve':'product',brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),posts}));
+   const lang=language(b);
+   const prompt=[
+    'Create a campaign of exactly 9 independent Instagram posts from ONE product reference. Do not make a carousel or repeat the same photograph.',
+    'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Latin American Spanish')+'.',
+    'Brand: '+clean(b.name,100)+'. Voice: '+clean(b.voice,130)+'.',
+    'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
+    'Creative brief from owner: '+clean(body.brief,400)+'.',
+    'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
+    'Create only three short strings for each of the nine posts: headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
+    'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
+    'Return JSON with one key posts containing an array of exactly nine objects, each {headline,subtext,caption}. No explanations, no scene key.'
+   ].join('\n');
+   const schema={
+    type:'object',
+    properties:{
+     posts:{type:'array',items:{type:'object',
+      properties:{headline:{type:'string'},subtext:{type:'string'},caption:{type:'string'}},
+      required:['headline','subtext','caption']
+     }}
+    },
+    required:['posts']
+   };
+   let plan:any;let planningSource:'ai'|'template'='ai';
+   try{
+    const draft:any=await cloudflareRequest(prompt,[],false,schema);
+    if(!Array.isArray(draft.posts)||draft.posts.length!==9||
+       draft.posts.some((p:any)=>!p||typeof p.headline!=='string'||!p.headline.trim()||
+         typeof p.subtext!=='string'||typeof p.caption!=='string')){
+      throw Error('JSON_FORMAT: Faltan conceptos en la respuesta estructurada.');
+    }
+    plan={
+     title:lang==='English'?'Nine creative directions':'Nueve ideas para tu grid',
+     concept:lang==='English'?'Nine different photographs, one coherent campaign.':'Nueve fotografías distintas, una campaña coherente.',
+     posts:draft.posts
+    };
+   }catch(e){
+    // Keep authenticated/permission/quota errors visible. Only a genuinely
+    // unparseable/incomplete text response falls back to local prewritten concepts.
+    if(!(e instanceof Error)||!(/JSON_FORMAT:|JSON Mode couldn't be met|JSON Mode could not be met|JSON Mode couldn.t be met|output validation/i.test(e.message)))throw e;
+    planningSource='template';plan=fallbackGridPlan(lang,b.name,clean(body.brief,450));
+   }
+   const posts=plan.posts.map((p:any,i:number)=>({
+    index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
+    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Use real subject identity from reference photo. '+clean(body.brief,200),
+    format:gridLayouts[i],assetId:''
+   }));
+   return send(await save('grids',{brandId,sourceId,referenceId,kind:body.kind==='preserve'?'preserve':'product',brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,posts}));
   }
   if(action==='grid-image'){
    const grid=await find('grids',clean(body.gridId,100)),i=Number(body.index);

@@ -7,7 +7,7 @@ import './BrandGrid.css';
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number};
-type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;posts:Tile[]};
+type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';posts:Tile[]};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=[
 'Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props',
@@ -122,7 +122,9 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     setBusy('plan');
     try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief});
       const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
-      notify('Nueve ideas listas. Puedes generar una sola publicación primero y el resto cuando quieras.');
+      notify(g.planningSource==='template'
+       ? 'Preparé 9 conceptos editables con la plantilla local porque Cloudflare no devolvió texto estructurado. No se generaron fotos.'
+       : 'Nueve conceptos creados con IA. Puedes generar una foto primero y el resto cuando quieras.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const checkConnection=async()=>{
