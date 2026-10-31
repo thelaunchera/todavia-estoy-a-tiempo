@@ -94,6 +94,7 @@ jobs:
           npm run test:editorial-plan
           npm run test:classes
           node --test tests/link-center.test.mjs
+          node --test tests/product-center.test.mjs
           npm run build
       - name: Compilar Content Lab en GitHub
         env:
