@@ -334,6 +334,20 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Se aplicó un ritmo visual coherente; no cambié textos ni fotos.');
   };
   const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
+  const updateDecoration=(next:Partial<Slide>)=>{
+    const changedBackground=('backgroundImageId' in next)||(
+      typeof next.backgroundId==='string'&&next.backgroundId!==slide.backgroundId);
+    if(style.seamlessEnabled&&changedBackground){
+      const all=slides.map((part,index)=>({
+        ...part,backgroundId:next.backgroundId||'brand',
+        backgroundImageId:next.backgroundImageId||'',
+        ...(index===i?{stickerIds:next.stickerIds||part.stickerIds}:{})
+      }));
+      setAll(all,normalizeCarouselStyle({...style,
+        seamlessBackgroundId:next.backgroundId||'brand',seamlessAssetId:next.backgroundImageId||''
+      }));
+    }else replace(next);
+  };
   const enableTouch=()=>{
     if(!touchEdit&&slide.assetId&&!slide.photoPosition)replace({photoPosition:photoDefault(slide.layout)});
     setTouchEdit(v=>!v);
@@ -497,7 +511,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
         <div className="factory-panel factory-ai">
