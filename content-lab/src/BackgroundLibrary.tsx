@@ -209,7 +209,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
     </div>
   </details>
   {error&&<p role="alert">{error}</p>}
-  {(filter==='mine'||own.length>0&&filter==='all')&&<section className="background-own"><h2>Mis fondos guardados</h2>
+  {(filter==='mine'||own.length>0&&filter==='all')&&<section className="background-own"><h2>{isAdmin?'Fondos que subí':'Mis fondos privados'}</h2>
    <div className="background-library-grid own-backgrounds">{ownVisible.map(a=><article key={a.id}>
      <div className="background-preview uploaded-background" style={{backgroundImage:images[a.id]?'url('+images[a.id]+')':undefined}}>
        {!images[a.id]&&<button type="button" onClick={()=>loadImage(a.id)}>Cargar imagen</button>}
