@@ -90,12 +90,12 @@ export const auth={
       .select('id').eq('buyer_email',user.email.trim().toLowerCase()).eq('status','active').maybeSingle();
     return paid?{email:user.email}:null;
   },
-  signInWithOtp:async(email:string)=>{
+  signInWithOtp:async(email:string,preferredLanguage:'es'|'en'='es')=>{
     requireConfig();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Introduce tu correo electrónico.');
     // New buyers can sign in after a verified checkout. Unpaid accounts have
     // no membership and cannot read or write Content Lab rows or Storage.
-    out(await sb.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}}));
+    out(await sb.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,data:{content_lab_language:preferredLanguage},emailRedirectTo:window.location.origin+window.location.pathname}}));
   },
   verifyEmailOtp:async(email:string,code:string)=>{
     requireConfig();
@@ -103,6 +103,16 @@ export const auth={
     const result=out(await sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'}));
     if(!result?.session)throw Error('No se pudo completar el acceso. Solicita un código nuevo.');
     return result;
+  },
+  getPreferredLanguage:async():Promise<'es'|'en'|null>=>{
+    if(!configured)return null;
+    const {data:{user}}=await sb.auth.getUser();
+    const lang=user?.user_metadata?.content_lab_language;
+    return lang==='es'||lang==='en'?lang:null;
+  },
+  setPreferredLanguage:async(lang:'es'|'en')=>{
+    if(!configured)return;
+    out(await sb.auth.updateUser({data:{content_lab_language:lang}}));
   },
   signOut:async()=>{out(await sb.auth.signOut())}
 };
