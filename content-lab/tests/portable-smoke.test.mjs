@@ -38,7 +38,7 @@ test('Cross-brand source photos are not reused and server errors are readable',(
 
 test('Cloudflare account IDs are normalized and validated before API calls',()=>{
  const edge=source('supabase/functions/content-lab-generate/index.ts');
- assert.ok(edge.includes("replace(/\s+/g,'')"));
+ assert.ok(edge.includes(String.raw`replace(/\s+/g,'')`));
  assert.ok(edge.includes("/^[a-f0-9]{32}$/i.test(accountId)"));
  assert.ok(edge.includes('Account ID de Cloudflare es inválido'));
  assert.ok(edge.includes('object identifier is invalid'));
