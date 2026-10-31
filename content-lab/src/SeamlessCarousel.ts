@@ -94,6 +94,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
     grad.addColorStop(1,'rgba(250,248,243,0)');
     ctx.fillStyle=grad;ctx.fillRect(x,0,W,H*.65);
   }
+  if(!opts.editorMode){
   const label=(page.eyebrow||'').slice(0,45).toUpperCase();
   ctx.fillStyle=ink;ctx.textBaseline='top';ctx.font='700 25px Arial, sans-serif';
   ctx.fillText(label,x+82,95);
@@ -105,6 +106,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   if(!opts.freeCanvas){
     ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
     ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
+  }
   }
   ctx.save();ctx.translate(x,0);
   if(!opts.editorMode&&page.assetId&&images[page.assetId]){
