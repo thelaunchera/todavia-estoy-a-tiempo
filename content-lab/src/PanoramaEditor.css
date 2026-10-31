@@ -33,3 +33,12 @@
 .panorama-text-item span{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .panorama-text-item>button{display:flex;align-items:center;gap:5px;flex-shrink:0;border:1px solid #e7bdc1;background:#fff2f3;color:#a12d37;border-radius:7px;padding:9px;cursor:pointer}
 @media(max-width:650px){.panorama-text-items{grid-template-columns:1fr}}
+
+/* The blank canvas remains the focal point; tools are in a short horizontal rail. */
+.panorama-quicktools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0 15px}
+.panorama-quicktools button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 11px;background:#fff;border:1px solid #bdced4;border-radius:10px;color:#244957;font-weight:700;font-size:11px;cursor:pointer}
+.panorama-quicktools button:disabled{opacity:.42;cursor:not-allowed}
+.panorama-quicktools button:hover:not(:disabled){background:#e6f1f4}
+.panorama-body.panorama-library-collapsed{grid-template-columns:minmax(0,1fr)}
+.panorama-editor .panorama-workspace{background:#eff3f3}
+@media(max-width:760px){.panorama-quicktools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;overscroll-behavior-x:contain}.panorama-quicktools button{white-space:nowrap;flex:none}.panorama-body.panorama-library-collapsed{grid-template-columns:minmax(0,1fr)}}
