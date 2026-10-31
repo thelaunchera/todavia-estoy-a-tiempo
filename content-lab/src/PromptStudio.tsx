@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {BookOpen,Bookmark,Check,Copy,Search,SlidersHorizontal,ArrowRight,Trash2,Sparkles,FolderHeart} from 'lucide-react';
-import {PROMPT_TEMPLATES,PROMPT_CATEGORIES,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
+import {PROMPT_CATEGORIES,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
 import {DEFAULT_CONTROLS,composeCreativePrompt,type PromptControls} from './PromptEngine';
 import {api} from './platform/client';
 type Brand={id:string;name:string;language:string;background:string;rules:string};
@@ -15,6 +15,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  const [manual,setManual]=useState('');
  const [customTitle,setCustomTitle]=useState('');
  const [saved,setSaved]=useState<Saved[]>([]);
+ const [templates,setTemplates]=useState<PromptTemplate[]>([]);
  const [busy,setBusy]=useState(false),[loadError,setLoadError]=useState('');
  const [copied,setCopied]=useState(false);
  const update=<K extends keyof PromptControls,>(key:K,v:PromptControls[K])=>setSettings(s=>({...s,[key]:v}));
@@ -22,8 +23,9 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  const load=async()=>{
   try{
    setLoadError('');
-   const {data}=await api.get('/api/prompts');
-   setSaved((data||[]).filter((item:Saved)=>item.brandId===brand.id));
+   const [savedResult,templateResult]=await Promise.all([api.get('/api/prompts'),api.get('/api/prompt-templates')]);
+   setSaved((savedResult.data||[]).filter((item:Saved)=>item.brandId===brand.id));
+   setTemplates(templateResult.data||[]);
   }catch(e){setLoadError(getError(e))}
  };
  useEffect(()=>{void load()},[brand.id]);
@@ -32,7 +34,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
   setCustomTitle(p.title[language]);notify(en?'Prompt loaded — edit it before generating.':'Prompt cargado. Puedes editarlo antes de generar.');
  };
  const compiled=useMemo(()=>composeCreativePrompt({...settings,instruction:manual||settings.instruction},language),[settings,manual,language]);
- const shown=PROMPT_TEMPLATES.filter(p=>(category==='all'||p.category===category) &&
+ const shown=templates.filter(p=>(category==='all'||p.category===category) &&
   (p.title[language]+' '+p.body[language]+' '+p.category).toLocaleLowerCase().includes(query.toLocaleLowerCase()));
  const filteredSaved=saved.filter(p=>(p.title+' '+p.text).toLocaleLowerCase().includes(query.toLocaleLowerCase())).sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite));
  const copy=async(t:string)=>{
@@ -77,7 +79,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
     {mode==='library'?<><div className="ps-categories"><button className={category==='all'?'active':''} onClick={()=>setCategory('all')}>{en?'All':'Todos'} · 30</button>
      {Object.entries(PROMPT_CATEGORIES).map(([id,names])=><button key={id} className={category===id?'active':''} onClick={()=>setCategory(id)}>{names[language==='es'?0:1]}</button>)}
     </div>
-    <div className="ps-recipe-list">{shown.length?shown.map((p,i)=><article className="ps-recipe" key={p.id}>
+    <div className="ps-recipe-list">{shown.length?shown.map((p)=><article className="ps-recipe" key={p.id}>
       <span className="ps-recipe-index">{p.id}</span><div><strong>{p.title[language]}</strong><small>{PROMPT_CATEGORIES[p.category]?.[language==='es'?0:1]||p.category}</small>
         <p>{p.body[language]}</p></div>
       <button type="button" className="ps-recipe-use" onClick={()=>select(p)}>{en?'Use':'Usar'} <ArrowRight size={15}/></button>
