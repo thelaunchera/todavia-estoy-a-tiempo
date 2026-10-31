@@ -146,3 +146,16 @@ test('Catálogo de productos: acceso privado, PDF reales y Lab sin checkout púb
  assert.match(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No prometer compras de Lab activas');
  assert.match(service,/await owner\(\);[\s\S]*?client\.from\('podcast_sales'\)/,'Solo administradora lee las ventas');
 });
+
+test('Ventas: refrescar registros, moneda verdadera y resumen de accesos independiente',()=>{
+ const studio=readFileSync('estudio-control/src/Studio.tsx','utf8');
+ const api=readFileSync('estudio-control/src/supabase-client.ts','utf8');
+ assert.match(studio,/setSalesRefreshKey\(n=>n\+1\)/,'Ventas tiene su propio botón de actualización');
+ assert.match(studio,/page,account,salesRefreshKey/,'La actualización repite la lectura');
+ assert.match(studio,/formatSaleAmount\(s\)/,'No asume USD cuando la moneda es diferente');
+ assert.doesNotMatch(studio,/currency:s\.currency\?\.toUpperCase\(\)==='USD'\?'USD':'USD'/,'No se inventa la moneda');
+ assert.match(studio,/Accesos de Content Lab/,'El Lab se diferencia de los PDF');
+ assert.match(api,/from\('podcast_hub_entitlements'\)/,'El contador de accesos usa la fuente de verdad');
+ assert.match(api,/await owner\(\)/,'Las consultas requieren administradora');
+ assert.match(studio,/href="\.\.\/centro\/" target="_blank"/,'Enlace al Centro de productos');
+});
