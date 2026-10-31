@@ -61,7 +61,11 @@ test('Cloudflare supports actual guidance and reference images, no invented nega
  assert.ok(backend.includes("const userPrompt=clean(body.prompt,1900)"));
  assert.ok(backend.includes("const userDirection=clean(grid.brief,1900)"));
  assert.ok(backend.includes("creativeSettings:body.creativeSettings||null"));
- assert.ok(backend.includes("const guidance=settings.fidelity==='strict'?5.7:4.2"));
+ assert.ok(backend.includes("const guidance=grid.kind==='portrait'||settings.fidelity==='strict'?5.7:4.2"));
+ assert.ok(backend.includes("const guidance=subjectType==='portrait'||settings.fidelity==='strict'?5.7:4.2"));
+ assert.ok(backend.includes("MANDATORY REALISTIC PORTRAIT RULES"));
+ assert.ok(grid.includes("Persona / retrato"));
+ assert.ok(backend.includes("NO raised circular pedestal"));
  assert.ok(backend.includes("refId!==sourceId"));
  assert.ok(!backend.includes("form.set('negative_prompt'"));
 });
