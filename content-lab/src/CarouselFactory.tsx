@@ -10,6 +10,7 @@ import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarous
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
+import {isBackgroundVisible} from './BackgroundVisibility';
 import {isBowBackground} from './BowBackgrounds';
 import {isScrapbookBackground} from './ScrapbookBackgrounds';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
@@ -904,12 +905,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <section className="seamless-config">
       <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
       {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{([
- {title:'✂️ Scrapbook',items:FREE_BACKGROUNDS.filter(b=>isScrapbookBackground(b.id))},
- {title:'🎀 Coquette & bows',items:FREE_BACKGROUNDS.filter(b=>isBowBackground(b.id))},
- {title:'🌈 Gradientes',items:FREE_BACKGROUNDS.filter(b=>['soft-gradient','sunset-peach','lavender-haze'].includes(b.id))},
- {title:'📷 Retro & papel',items:FREE_BACKGROUNDS.filter(b=>['rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check'].includes(b.id))},
- {title:'🌙 Oscuros',items:FREE_BACKGROUNDS.filter(b=>['night-editorial','night-stars'].includes(b.id))},
- {title:'✦ Minimal & editorial',items:FREE_BACKGROUNDS.filter(b=>!isScrapbookBackground(b.id)&&!isBowBackground(b.id)&&!['soft-gradient','sunset-peach','lavender-haze','rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check','night-editorial','night-stars'].includes(b.id))}
+ {title:'✂️ Scrapbook',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&isScrapbookBackground(b.id))},
+ {title:'🎀 Coquette & bows',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&isBowBackground(b.id))},
+ {title:'🌈 Gradientes',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&['soft-gradient','sunset-peach','lavender-haze'].includes(b.id))},
+ {title:'📷 Retro & papel',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&['rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check'].includes(b.id))},
+ {title:'🌙 Oscuros',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&['night-editorial','night-stars'].includes(b.id))},
+ {title:'✦ Minimal & editorial',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&!isScrapbookBackground(b.id)&&!isBowBackground(b.id)&&!['soft-gradient','sunset-peach','lavender-haze','rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check','night-editorial','night-stars'].includes(b.id))}
  ]).map(group=><optgroup key={group.title} label={group.title}>{group.items.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>)}</select></label>
         <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
         <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
