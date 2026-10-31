@@ -554,16 +554,16 @@ function App() {
       setBusy('');
     }
   };
-  const imageLoad = async (id: string) => {
-    if (images[id]) return;
+  const imageLoad = async (id: string):Promise<string|undefined> => {
+    if (images[id]) return images[id];
     try {
       const { data } = await api.get('/api/assets/' + id);
-      setImages(old => ({
-        ...old,
-        [id]: 'data:' + data.mime + ';base64,' + data.content,
-      }));
+      const url='data:' + data.mime + ';base64,' + data.content;
+      setImages(old => ({...old,[id]:url}));
+      return url;
     } catch (e) {
       err(e);
+      return undefined;
     }
   };
   useEffect(() => {
