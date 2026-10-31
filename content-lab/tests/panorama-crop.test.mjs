@@ -91,6 +91,8 @@ test('dragging a page photo onto a different slide never snaps back when seamles
     pageLayers:[{id:'page-photo-one',page:0,assetId:'photo',name:'Photo'}],
     style:{seamlessEnabled:false,panoramaLayers:[]},slides,clampPanoramaRect,photoDefault,
     notify:message=>{throw Error(message)},setAll:(pages,style)=>{saved={pages,style}},
+    stripSource:editorAction('stripSource',{slides,photoDefault}),
+    promoteSource:editorAction('promoteSource',{clampPanoramaRect}),
   });
   move('photo','page-photo-one',rect);
   assert.equal(saved.pages[0].assetId,'');
@@ -107,7 +109,7 @@ test('adding several photos with seamless off keeps separate free layers and exi
     latestDraft:{current:{post:{brandId:'brand'},slides,style:{seamlessEnabled:false},ownedAssets:[asset]}},
     brand:{id:'brand'},assetCategory:()=> 'original',displayAssetName:()=> 'Added',
     crypto,clampPanoramaRect,initialPanoramaPhotoRect,encodeCarouselDesign,onChange:next=>{saved=next},
-    notify:message=>{throw Error(message)},setDownloads:()=>{},setOverview:()=>{},
+    notify:message=>{throw Error(message)},setDownloads:()=>{},setOverview:()=>{},recordHistory:()=>{},
   });
   add([{asset,point:{x:.1,y:.4}},{asset,point:{x:.8,y:.6}}]);
   const data=readCarouselDesign(saved.designData);
