@@ -1313,10 +1313,13 @@ function App() {
                     </button>
                   </section>
                 </div>
-                <aside className="visual">
-                  <div className="eyebrow">COVER PREVIEW</div>
-                  <h3>Your graphic direction</h3>
-                  <small>Instagram · 1080 × 1350 PNG</small>
+                <aside className="visual cover-studio">
+                  <div className="cover-studio-heading">
+                    <div className="eyebrow">COVER PREVIEW</div>
+                    <h3>Your graphic direction</h3>
+                    <small>Instagram · 1080 × 1350 PNG</small>
+                  </div>
+                  <div className="cover-studio-content">
                   <CreativeCover
                     post={editor}
                     brand={brand}
@@ -1325,7 +1328,7 @@ function App() {
                     onDecorChange={(decor:CoverDecor)=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,decor)}))}
                   />
                   <FreeDecorControls
-                    title="Stickers y backgrounds · sin créditos IA"
+                    title="Stickers y backgrounds"
                     backgroundId={readCoverDecor(editor.designData).backgroundId}
                     backgroundImageId={readCoverDecor(editor.designData).backgroundImageId}
                     stickerIds={readCoverDecor(editor.designData).stickerIds}
@@ -1334,6 +1337,7 @@ function App() {
                     onUploadBackground={async file=>upload(file,'background')}
                     onChange={next=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,{...readCoverDecor(old.designData),...next})}))}
                   />
+                  </div>
                   <div className="eyebrow design-label">CHOOSE A FORMAT</div>
                   <div className="template-grid">
                     {templates.map(t => (
