@@ -49,11 +49,11 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    if(!file)return;
    setError('');setBusy(true);setBulkProgress(null);
    try{
-     if(!/\\.zip$/i.test(file.name)||file.size>15_000_000)
+     if(!/\.zip$/i.test(file.name)||file.size>15_000_000)
        throw Error('El paquete debe ser ZIP y pesar menos de 15 MB.');
      const extracted=unzipSync(new Uint8Array(await file.arrayBuffer()));
      const entries=Object.entries(extracted).filter(([path])=>
-       !path.startsWith('__MACOSX/')&&!path.includes('..')&&/\\.(png|jpe?g|webp)$/i.test(path)
+       !path.startsWith('__MACOSX/')&&!path.includes('..')&&/\.(png|jpe?g|webp)$/i.test(path)
      );
      if(entries.length<1||entries.length>60)
        throw Error('El ZIP debe contener entre 1 y 60 fondos individuales.');
@@ -64,10 +64,10 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
      setBulkProgress({done,total:entries.length,failed});
      for(const [path,bytes] of entries){
        const name=path.split('/').pop()||'background.webp';
-       const clean=name.replace(/\\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ');
+       const clean=name.replace(/\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ');
        const key=clean.toLowerCase().replace(/[^a-z0-9]/g,'');
        if(existing.has(key)){done++;setBulkProgress({done,total:entries.length,failed});continue}
-       const mime=/\\.png$/i.test(name)?'image/png':/\\.webp$/i.test(name)?'image/webp':'image/jpeg';
+       const mime=/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg';
        const uploadFile=new File([new Uint8Array(bytes)],name,{type:mime});
        try{
          const item=await onUpload(uploadFile);
