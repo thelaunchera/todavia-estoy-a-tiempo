@@ -1,4 +1,5 @@
 import React,{useRef,useState,useEffect} from 'react';
+import {unzipSync,strFromU8} from 'fflate';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {isBowBackground} from './BowBackgrounds';
 import {isScrapbookBackground} from './ScrapbookBackgrounds';
@@ -32,7 +33,9 @@ const COLLECTIONS:{id:Filter;label:string}[]=[
  {id:'dark',label:'🌙 Oscuros'},
 ];
 export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload}:Props){
- const fileRef=useRef<HTMLInputElement>(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
+  [busy,setBusy]=useState(false),[error,setError]=useState(''),
+  [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<Filter>('scrapbook'),[search,setSearch]=useState('');
  const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
  useEffect(()=>{own.slice(0,12).forEach(a=>{if(!images[a.id])loadImage(a.id)})},[assets,images]);
@@ -41,6 +44,40 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    try{const item=await onUpload(file);if(item){loadImage(item.id);onDesign('brand',item.id)}}
    catch(e){setError(e instanceof Error?e.message:'No se pudo subir el fondo.')}
    finally{setBusy(false);if(fileRef.current)fileRef.current.value=''}
+ };
+ const importCollection=async(file?:File)=>{
+   if(!file)return;
+   setError('');setBusy(true);setBulkProgress(null);
+   try{
+     if(!/\\.zip$/i.test(file.name)||file.size>15_000_000)
+       throw Error('El paquete debe ser ZIP y pesar menos de 15 MB.');
+     const extracted=unzipSync(new Uint8Array(await file.arrayBuffer()));
+     const entries=Object.entries(extracted).filter(([path])=>
+       !path.startsWith('__MACOSX/')&&!path.includes('..')&&/\\.(png|jpe?g|webp)$/i.test(path)
+     );
+     if(entries.length<1||entries.length>60)
+       throw Error('El ZIP debe contener entre 1 y 60 fondos individuales.');
+     const totalBytes=entries.reduce((sum,[,bytes])=>sum+bytes.byteLength,0);
+     if(totalBytes>42_000_000)throw Error('Los fondos descomprimidos superan el límite de 42 MB.');
+     const existing=new Set(own.map(a=>displayAssetName(a).toLowerCase().replace(/[^a-z0-9]/g,'')));
+     let done=0,failed=0;
+     setBulkProgress({done,total:entries.length,failed});
+     for(const [path,bytes] of entries){
+       const name=path.split('/').pop()||'background.webp';
+       const clean=name.replace(/\\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ');
+       const key=clean.toLowerCase().replace(/[^a-z0-9]/g,'');
+       if(existing.has(key)){done++;setBulkProgress({done,total:entries.length,failed});continue}
+       const mime=/\\.png$/i.test(name)?'image/png':/\\.webp$/i.test(name)?'image/webp':'image/jpeg';
+       const uploadFile=new File([new Uint8Array(bytes)],name,{type:mime});
+       try{
+         const item=await onUpload(uploadFile);
+         if(item){existing.add(key);loadImage(item.id)}else failed++;
+       }catch{failed++}
+       done++;setBulkProgress({done,total:entries.length,failed});
+     }
+     if(failed) setError(failed+' fondos no se pudieron guardar. Los demás permanecen en tu biblioteca.');
+   }catch(e){setError(e instanceof Error?e.message:'No se pudo importar la colección ZIP.')}
+   finally{setBusy(false);if(bulkFileRef.current)bulkFileRef.current.value=''}
  };
  const backgrounds=FREE_BACKGROUNDS.filter(item=>{
   if(!inCollection(item.id,filter))return false;
@@ -75,6 +112,25 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    </div>
   </article>)}</div>
   {backgrounds.length===0&&<p className="background-empty">No hay fondos con ese nombre. Prueba otra búsqueda.</p>}
+  <details className="background-library-upload background-collection-import">
+   <summary>Importar colección completa · ZIP</summary>
+   <div>
+    <strong>Todos tus fondos individuales, en una sola importación</strong>
+    <p>Selecciona el ZIP de la colección. El Lab añadirá cada imagen a los fondos de tu marca,
+     evitando nombres duplicados. No se consumen créditos de IA.</p>
+    <button className="btn dark" type="button" disabled={busy} onClick={()=>bulkFileRef.current?.click()}>
+      <Upload size={16}/>{busy?'Importando colección…':'Elegir ZIP de fondos'}
+    </button>
+    <input ref={bulkFileRef} hidden type="file" accept=".zip,application/zip,application/x-zip-compressed"
+      onChange={e=>void importCollection(e.target.files?.[0])}/>
+    {bulkProgress&&<div className="background-import-progress" role="status" aria-live="polite">
+      <progress value={bulkProgress.done} max={bulkProgress.total}/>
+      <span>{bulkProgress.done} de {bulkProgress.total} fondos procesados
+       {bulkProgress.failed>0?' · '+bulkProgress.failed+' pendientes de revisar':''}</span>
+      {bulkProgress.done===bulkProgress.total&&!busy&&bulkProgress.failed===0&&<strong>Colección importada ✓</strong>}
+    </div>}
+   </div>
+  </details>
   <details className="background-library-upload">
     <summary>Subir mi propio fondo</summary>
     <div><strong>Tu propia fotografía o diseño</strong>
