@@ -108,14 +108,20 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Create content', icon: WandSparkles },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
-  { id: 'stickers', title: 'Stickers PNG · gratis', icon: ImagePlus },
-  { id: 'backgrounds', title: 'Backgrounds · gratis', icon: Palette },
+  { id: 'stickers', title: 'Stickers', icon: ImagePlus },
+  { id: 'backgrounds', title: 'Fondos', icon: Palette },
   { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
   { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
   { id: 'media', title: 'Media library', icon: Images },
   { id: 'formats', title: 'Creative formats', icon: Layers3 },
   { id: 'brands', title: 'Brand settings', icon: Settings2 },
+];
+const navGroups:{title:string;items:Tab[]}[]=[
+  {title:'CREAR',items:['home','factory','grid','create']},
+  {title:'TUS RECURSOS',items:['media','backgrounds','stickers','formats']},
+  {title:'INSPIRACIÓN',items:['prompt-studio','prompts']},
+  {title:'GUARDAR Y ORGANIZAR',items:['posts','brands']},
 ];
 const newPost = (brandId: string): Post => ({
   brandId,
@@ -815,19 +821,21 @@ function App() {
             </div>
           )}
         </div>
-        <div className="side-label">WORKSPACE</div>
-        <nav>
-          {nav.map(n => (
-            <button
-              key={n.id}
-              className={tab === n.id ? 'active' : ''}
-              onClick={() => navigate(n.id)}
-            >
-              <n.icon size={19} strokeWidth={1.8} />
-              {n.title}
-              {n.id === 'posts' && <b>{mine.length}</b>}
-            </button>
-          ))}
+        <nav aria-label="Herramientas del Content Lab">
+          {navGroups.map(group=><div className="lab-nav-group" key={group.title}>
+            <div className="side-label lab-nav-group-title">{group.title}</div>
+            {group.items.map(id=>{
+              const item=nav.find(entry=>entry.id===id);
+              if(!item)return null;
+              const Icon=item.icon;
+              return <button type="button" key={item.id}
+                className={tab===item.id?'active':''}
+                onClick={()=>navigate(item.id)}>
+                <Icon size={19} strokeWidth={1.8}/>{item.title}
+                {item.id==='posts'&&<b>{mine.length}</b>}
+              </button>;
+            })}
+          </div>)}
         </nav>
         {aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
           <strong>AI credits · Tu saldo</strong>
