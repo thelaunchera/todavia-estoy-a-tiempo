@@ -15,6 +15,19 @@ const tab=(name:string)=>sb.from('content_lab_'+name);
 const unwrap=(r:any)=>({...r.payload,id:r.id});
 const list=async(name:string):Promise<any[]>=>out(await tab(name).select('id,payload').order('created_at',{ascending:true})).map(unwrap);
 const read=async(name:string,id:string)=>{const x=out(await tab(name).select('id,payload').eq('id',id).maybeSingle());if(!x)throw Error('Registro no encontrado.');return unwrap(x);};
+const stickerRecord=(x:any)=>({
+ id:'shared-'+x.id,brandId:'shared',name:x.name,displayName:x.name,
+ mime:'image/png',category:'sticker',shared:true,stickerGroup:x.category,
+ sizeBytes:x.size_bytes,sha256:x.sha256
+});
+const sharedStickers=async()=>{
+ // RLS returns the curated shared catalogue only to the admin or paid members.
+ const {data,error}=await tab('sticker_catalog')
+  .select('id,name,category,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
+ if(error)throw Error(error.message);
+ return (data||[]).map(stickerRecord);
+};
+
 const add=async(name:string,payload:any)=>{const me=await current();return unwrap(out(await tab(name).insert({owner_id:me.id,payload}).select('id,payload').single()));};
 const update=async(name:string,id:string,payload:any)=>{
   const existing=await read(name,id);
@@ -98,8 +111,8 @@ export const api={
     requireConfig();
     if(path==='/api/data'){
       const brands=await seed();
-      const [posts,assets]=await Promise.all([list('posts'),list('assets')]);
-      return {data:{brands,posts,assets}};
+      const [posts,assets,catalogue]=await Promise.all([list('posts'),list('assets'),sharedStickers()]);
+      return {data:{brands,posts,assets:[...assets,...catalogue]}};
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
     if(path==='/api/prompts')return {data:await list('prompts')};
@@ -121,6 +134,15 @@ export const api={
     }
     if(path.startsWith('/api/assets/')){
       const id=decodeURIComponent(path.slice('/api/assets/'.length));
+      if(id.startsWith('shared-')){
+        const uid=id.slice(7);
+        if(!/^[a-f0-9-]{36}$/i.test(uid))throw Error('Sticker no válido.');
+        const {data:entry,error}=await tab('sticker_catalog').select('path').eq('id',uid).eq('published',true).maybeSingle();
+        if(error)throw Error(error.message);
+        if(!entry)throw Error('Sticker no disponible para esta cuenta.');
+        const file=out(await sb.storage.from(bucket).download(entry.path));
+        return {data:{mime:'image/png',content:await base64(file)}};
+      }
       const asset=await read('assets',id);
       const file=out(await sb.storage.from(bucket).download(asset.path));
       return {data:{mime:asset.mime,content:await base64(file)}};
@@ -139,6 +161,39 @@ export const api={
         brandId:String(payload?.brandId||''),title:String(payload?.title||'Mi prompt').slice(0,100),
         text,settings:payload?.settings||null,favorite:false
       })};
+    }
+    if(path==='/api/sticker-catalog'){
+      // The shared catalogue is a curated admin publication, NEVER a
+      // user-owned upload. Verify the role again; RLS enforces it server side.
+      const me=await current();
+      const {data:admin,error:roleError}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+      if(roleError)throw Error(roleError.message);
+      if(!admin)throw Error('Solo la administradora puede publicar stickers para todos los compradores.');
+      const name=String(payload.name||'').replace(/[<>\\x00-\\x1f]/g,'').trim().slice(0,120);
+      if(!name)throw Error('Sticker sin nombre.');
+      const allowed=['Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
+      const category=allowed.includes(payload.category)?payload.category:'Aesthetic';
+      if(typeof payload.content!=='string'||payload.content.length>7000000)throw Error('El archivo no es un PNG válido.');
+      const bytes=Uint8Array.from(atob(payload.content),c=>c.charCodeAt(0));
+      if(bytes.length<200||bytes.length>5000000||![137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n))
+        throw Error('Solo se admiten PNG originales de hasta 5 MB.');
+      const digest=await crypto.subtle.digest('SHA-256',bytes);
+      const sha256=Array.from(new Uint8Array(digest)).map(v=>v.toString(16).padStart(2,'0')).join('');
+      const {data:existing,error:lookupError}=await tab('sticker_catalog').select('id,name,category,size_bytes,sha256').eq('sha256',sha256).maybeSingle();
+      if(lookupError)throw Error(lookupError.message);
+      if(existing)return {data:{...stickerRecord(existing),duplicate:true}};
+      const storagePath='shared-stickers/'+crypto.randomUUID()+'.png';
+      out(await sb.storage.from(bucket).upload(storagePath,bytes,{contentType:'image/png',upsert:false,cacheControl:'31536000'}));
+      try{
+        const {data:record,error:dbError}=await tab('sticker_catalog')
+         .insert({created_by:me.id,path:storagePath,name,category,sha256,size_bytes:bytes.byteLength,published:true})
+         .select('id,name,category,size_bytes,sha256').single();
+        if(dbError)throw Error(dbError.message);
+        return {data:stickerRecord(record)};
+      }catch(e){
+        await sb.storage.from(bucket).remove([storagePath]);
+        throw e;
+      }
     }
     if(path==='/api/assets'){
       const me=await current();
