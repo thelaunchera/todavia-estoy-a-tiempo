@@ -387,6 +387,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slide.backgroundId,slide.backgroundImageId,slide.photoPosition,slide.stickerPositions,slide.stickerIds,touchEdit,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
+    if(!window.confirm('Usar la IA para escribir este carrusel consume 1 crédito de ideas. También puedes crearlo gratis con el botón de 6 slides. ¿Continuar?'))return;
     setBusy('copy');
     try{
       const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational',platform:socialDestination});
@@ -444,7 +445,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div><button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
         const next=Array.from({length:6},(_,n)=>({...makeSlide(n,n===0?'Tu próximo carrusel':n===5?'Tu llamada a la acción':'Escribe tu idea aquí'),eyebrow:n===0?'PORTADA':n===5?'SIGUIENTE PASO':'TU HISTORIA',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
         setAll(next);setCurrent(0);notify('Carrusel editable de 6 slides creado. Gratis y sin IA.');
-      }}><Plus size={17}/> Crear 6 slides gratis · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate full carousel</button></div>
+      }}><Plus size={17}/> Crear 6 slides gratis · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Usar IA para escribir · opcional (1 crédito)</button></div>
     </div>
     <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
       <div className="factory-style-title"><div><span className="eyebrow">02 / BRAND KIT LOCK</span><h2>Un solo estilo para todos los slides.</h2><p>Fondos, tipografías y colores conectados. Cambia aquí una vez y el carrusel completo sigue la misma dirección de arte.</p></div><span className="factory-style-lock"><Check size={15}/> Estilo maestro activo</span></div>
