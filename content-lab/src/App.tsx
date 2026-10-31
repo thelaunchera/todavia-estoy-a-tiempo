@@ -636,6 +636,16 @@ function App() {
     }).catch(err);
     return ()=>{cancelled=true};
   },[tab,account?.email]);
+  useEffect(()=>{
+    if(tab!=='backgrounds'||!account)return;
+    let cancelled=false;
+    void api.get('/api/background-catalog').then(({data})=>{
+      if(cancelled)return;
+      setAssets(prev=>[...prev.filter(asset=>!(asset.shared&&assetCategory(asset)==='background')),
+        ...(data as Asset[])]);
+    }).catch(err);
+    return ()=>{cancelled=true};
+  },[tab,account?.email]);
   const publishSharedSticker=async(file:File,stickerGroup:string):Promise<Asset|null>=>{
     if(!aiWallet?.admin)throw Error('Solo la administradora publica stickers para todos.');
     if(!/[.]png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
