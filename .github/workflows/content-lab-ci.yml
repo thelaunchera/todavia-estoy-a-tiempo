@@ -1,0 +1,30 @@
+name: Content Lab portable checks
+on:
+  pull_request:
+    paths:
+      - 'content-lab/**'
+      - '.github/workflows/content-lab-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: content-lab
+      - name: Run portable smoke tests
+        run: npm test
+        working-directory: content-lab
+      - name: Build React app
+        run: npm run build
+        working-directory: content-lab
+      - name: Verify build output
+        run: test -s content-lab/dist/index.html
