@@ -21,7 +21,7 @@ test('Style references are sampled locally and never pasted into carousel slides
  assert.ok(ui.includes('sampleReferencePalette(url)'));
  assert.ok(ui.includes('ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id)'));
  assert.ok(ui.includes('referenceAssetId'));
- assert.ok(ui.includes('La imagen no se copia'));
+ assert.ok(ui.includes('No se copia la fotografía'));
 });
 test('Portrait and product photo modes stay distinct with credits confirmed',()=>{
  const ui=src('src/CarouselFactory.tsx');
