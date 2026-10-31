@@ -70,6 +70,9 @@ export const STUDIO_LINKS:BaseLink[] = [
 export type PublicationState = 'publicado' | 'demo' | 'produccion' | 'revision' | 'interno';
 export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
+  'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
+  'tle-ai-booking':'revision','tle-bundle':'revision','tle-website-auto':'revision','tle-va':'revision',
+  'pod-studio':'interno','lab-brand-board-code':'interno',
   'tle-booking-demo':'demo','tle-experience':'demo','tle-cb-depot':'revision',
   'pod-home':'publicado','pod-spotify':'publicado','pod-ep1':'publicado','pod-ep2':'publicado',
   'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
@@ -126,8 +129,8 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     catch{setNotice('');setIssue('No se pudo copiar automáticamente. Mantén pulsado el enlace para copiarlo.');}
   }
   async function copyCategory(){
-    const allowed=shown.filter(x=>shareable(x.visibility));
-    if(!allowed.length){setNotice('No hay enlaces públicos o demos para copiar en esta selección.');return;}
+    const allowed=shown.filter(x=>shareable(x.visibility) && (LINK_PUBLICATION[x.key]==='publicado' || LINK_PUBLICATION[x.key]==='demo'));
+    if(!allowed.length){setNotice('No hay enlaces verificados para compartir en esta selección.');return;}
     await copy(allowed.map(x=>x.title+'\n'+x.url).join('\n\n'),'group');
   }
   async function save(){
@@ -172,7 +175,7 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     </div>
     <div className="lc-tools">
       <div className="lc-search"><Search size={19}/><input aria-label="Buscar enlaces" placeholder="Buscar por producto, demo o nombre…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button onClick={()=>setQuery('')} aria-label="Limpiar búsqueda"><X size={16}/></button>}</div>
-      <button className="lc-bulk" onClick={()=>void copyCategory()}><Copy size={15}/>{copied==='group'?'Copiado':'Copiar enlaces públicos'}</button>
+      <button className="lc-bulk" onClick={()=>void copyCategory()}><Copy size={15}/>{copied==='group'?'Copiado':'Copiar enlaces listos'}</button>
     </div>
     <div className="lc-tabs" role="group" aria-label="Filtrar por categoría">
       <button className={category==='todos'?'active':''} onClick={()=>setCategory('todos')}>Todos <span>{links.length}</span></button>
@@ -185,7 +188,7 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
       return <section className="lc-group" key={group.id}>
         <div className="lc-group-head"><div><h3>{group.title}</h3><p>{group.intro}</p></div><span>{groupLinks.length} enlaces</span></div>
         <div className="lc-list">{groupLinks.map(item=><article className="lc-item" key={item.key}>
-          <div className="lc-item-info"><div className="lc-item-top"><strong>{item.title}</strong><span className={'lc-status lc-phase-'+(LINK_PUBLICATION[item.key]||'interno')}>{PUBLICATION_LABELS[LINK_PUBLICATION[item.key]||'interno']}</span><span className={'lc-status lc-status-'+item.visibility}>{item.visibility==='interno'&&<LockKeyhole size={12}/>} {statusText[item.visibility]}</span></div><p>{item.description}</p><a href={item.url} target="_blank" rel="noopener noreferrer" title="Abrir enlace">{item.url}</a></div>
+          <div className="lc-item-info"><div className="lc-item-top"><strong>{item.title}</strong><span className={'lc-status lc-phase-'+(LINK_PUBLICATION[item.key]||(item.visibility==='publico'?'revision':item.visibility==='demo'?'demo':'interno'))}>{PUBLICATION_LABELS[LINK_PUBLICATION[item.key]||(item.visibility==='publico'?'revision':item.visibility==='demo'?'demo':'interno')]}</span><span className={'lc-status lc-status-'+item.visibility}>{item.visibility==='interno'&&<LockKeyhole size={12}/>} {statusText[item.visibility]}</span></div><p>{item.description}</p><a href={item.url} target="_blank" rel="noopener noreferrer" title="Abrir enlace">{item.url}</a></div>
           <div className="lc-actions">
             <button type="button" onClick={()=>void copy(item.url,item.key)} title={item.visibility==='interno'?'Copiar enlace privado: no compartir':'Copiar enlace'}><Copy size={16}/><span>{copied===item.key?'Copiado':'Copiar'}</span></button>
             <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={'Abrir '+item.title}><Globe2 size={18}/></a>
