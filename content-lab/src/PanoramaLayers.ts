@@ -1,4 +1,4 @@
-import { clampPanoramaRect, type TouchRect } from './TouchGeometry';
+import { clampPanoramaRect, layerCornerPixels, type TouchRect } from './TouchGeometry';
 import { coverPlacement } from './PhotoCrop';
 export type LayerMove = 'backward' | 'forward' | 'back' | 'front';
 export type LayerPlacement = 'behind-text' | 'front';
@@ -70,14 +70,22 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
 
 function shapePaint(ctx:CanvasRenderingContext2D,shape:PanoramaLayer,w:number,h:number){
  const c=shape.color||'#F2E3CD';
+ const radius=layerCornerPixels(shape.rect,w,h);
  ctx.save();ctx.fillStyle=c;ctx.strokeStyle=c;
  const kind=shape.shape||'paper';
- if(kind==='paper'){ctx.shadowColor='#12182035';ctx.shadowBlur=Math.max(5,w*.032);
-  ctx.fillRect(-w/2,-h/2,w,h);}
- else if(kind==='tape'){ctx.globalAlpha=.72;ctx.fillRect(-w/2,-h/2,w,h);
-  ctx.globalAlpha=.25;ctx.fillStyle='#FFFFFF';ctx.fillRect(-w/2,-h/2,w,h*.13);}
- else if(kind==='circle'){ctx.beginPath();ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);ctx.fill()}
- else {ctx.lineWidth=Math.max(6,Math.min(w,h)*.065);ctx.strokeRect(-w/2,-h/2,w,h)}
+ const rounded=()=>{ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,radius)};
+ if(kind==='paper'){
+  ctx.shadowColor='#12182035';ctx.shadowBlur=Math.max(5,w*.032);
+  rounded();ctx.fill();
+ } else if(kind==='tape'){
+  rounded();ctx.save();ctx.clip();ctx.globalAlpha=.72;ctx.fill();
+  ctx.globalAlpha=.25;ctx.fillStyle='#FFFFFF';ctx.fillRect(-w/2,-h/2,w,h*.13);ctx.restore();
+ } else if(kind==='circle'){
+  ctx.beginPath();ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);ctx.fill();
+ } else {
+  ctx.lineWidth=Math.max(6,Math.min(w,h)*.065);
+  rounded();ctx.stroke();
+ }
  ctx.restore();
 }
 export function panoramaFont(font?:string){
@@ -140,12 +148,15 @@ export async function paintPanoramaLayers(
    if(!src)throw Error('Una foto del lienzo todavía está cargando. Espera antes de descargar.');
    const img=new Image();img.src=src;await img.decode();
    if(layer.kind==='photo'){
-    ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,Math.min(w,h)*.06);ctx.clip();
+    ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h,6));ctx.clip();
     const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
     ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
    }else{
     const scale=Math.min(w/img.naturalWidth,h/img.naturalHeight);
     const iw=img.naturalWidth*scale,ih=img.naturalHeight*scale;
+    if((r.cornerRadius??0)>0){
+     ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h));ctx.clip();
+    }
     ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
    }
   }
