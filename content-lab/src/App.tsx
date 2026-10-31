@@ -584,7 +584,7 @@ function App() {
   }, [tab, current, assets, editor.assetId]);
   const publishSharedSticker=async(file:File,stickerGroup:string):Promise<Asset|null>=>{
     if(!aiWallet?.admin)throw Error('Solo la administradora publica stickers para todos.');
-    if(!/\\.png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
+    if(!/[.]png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
     const encoded=await new Promise<string>((resolve,reject)=>{
       const reader=new FileReader();
       reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
@@ -592,7 +592,7 @@ function App() {
       reader.readAsDataURL(file);
     });
     const {data}=await api.post('/api/sticker-catalog',{
-      content:encoded,name:file.name.replace(/\\.png$/i,'').replace(/[_-]+/g,' ').trim(),
+      content:encoded,name:file.name.replace(/[.]png$/i,'').replace(/[_-]+/g,' ').trim(),
       category:stickerGroup
     });
     const item=data as Asset;
