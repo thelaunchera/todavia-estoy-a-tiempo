@@ -35,8 +35,8 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
   if(!images[id])loadImage?.(id);
   onChange({backgroundId,backgroundImageId,stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
  };
- return <section className="free-decor-controls" aria-label="Decoración gratis">
-  <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Decora con PNG originales y fondos gratuitos. Sin créditos IA.</p></div><span>FREE</span></div>
+ return <section className="free-decor-controls" aria-label="Stickers y fondos">
+  <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Personaliza con tus stickers originales y fondos.</p></div></div>
   <div className="free-decor-main-tabs"><button type="button" aria-pressed={tab==='stickers'} className={tab==='stickers'?'active':''} onClick={()=>setTab('stickers')}>🎀 Stickers PNG</button><button type="button" aria-pressed={tab==='backgrounds'} className={tab==='backgrounds'?'active':''} onClick={()=>setTab('backgrounds')}>🎨 Backgrounds</button></div>
   {tab==='backgrounds'?<div>
     <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir mi background'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
