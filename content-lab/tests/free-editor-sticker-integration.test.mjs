@@ -13,14 +13,18 @@ test('Any paying member can view 138 shared original PNGs, but only admin may pu
  assert.ok(gallery.includes("await Promise.resolve(loadImage(asset.id))"));
 });
 test('All three graphic editors preserve original sticker layers and custom backgrounds',()=>{
- const app=read('src/App.tsx'),grid=read('src/BrandGrid.tsx'),car=read('src/CarouselFactory.tsx'),cover=read('src/CreativeCover.tsx'),assets=read('src/FreeDecorControls.tsx');
- assert.ok(app.includes('<FreeDecorControls'));
+ const app=read('src/App.tsx'),grid=read('src/BrandGrid.tsx'),car=read('src/CarouselFactory.tsx'),cover=read('src/FreePostStudio.tsx'),assets=read('src/FreeDecorControls.tsx');
+ assert.ok(app.includes('<FreePostStudio'));
+ assert.ok(cover.includes('<FreeDecorControls'));
+ assert.ok(cover.includes('backgroundImageId:post.assetId'));
  assert.ok(app.includes('writeCoverDecor'));
  assert.ok(grid.includes('onStickerChange='));
  assert.ok(grid.includes('onUploadBackground='));
  assert.ok(car.includes('onUploadBackground={onUploadBackground}'));
  assert.ok(car.includes('<TouchLayerCanvas'));
- assert.ok(cover.includes('stickerImages:images'));
+ assert.ok(cover.includes('legacyStickers(decor)'));
+ assert.ok(cover.includes('renderFreePost(post,brand,images'));
+ assert.ok(cover.includes('paintPanoramaLayers(ctx,1080,1350'));
  assert.ok(cover.includes('<TouchLayerCanvas'));
  assert.ok(assets.includes('onChange({backgroundId,backgroundImageId,stickerIds:'));
 });
