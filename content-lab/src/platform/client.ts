@@ -109,6 +109,7 @@ export const auth={
 export const api={
   get:async(path:string):Promise<{data:any}>=>{
     requireConfig();
+    if(path==='/api/sticker-catalog')return {data:await sharedStickers()};
     if(path==='/api/data'){
       const brands=await seed();
       const [posts,assets,catalogue]=await Promise.all([list('posts'),list('assets'),sharedStickers()]);
