@@ -80,7 +80,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const x=i*W,page=pages[i];
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
-  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn'||backgroundId==='rust-autumn',ink=dark?'#FFFFFF':'#191919';
+  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn',ink=dark?'#FFFFFF':'#191919';
   // Light local text halo: readable without breaking the continuous artwork.
   const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
   grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
