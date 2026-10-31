@@ -76,3 +76,20 @@
 .lab-save-panel{align-self:stretch}
 .cover-studio-heading small{display:inline-block;color:#6c8490;font-weight:650}
 @media(max-width:640px){.lab-save-panel{padding:15px!important}.lab-ai-message{font-size:11px}}
+
+
+/* Clearly separated creation formats; mobile popup stays inside the viewport. */
+.lab-create-menu{position:relative;z-index:80}
+.lab-create-menu>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.lab-create-menu>summary::-webkit-details-marker{display:none}
+.lab-create-choices{position:absolute;right:0;top:calc(100% + 8px);min-width:205px;max-width:calc(100vw - 24px);
+ padding:7px;border-radius:13px;border:1px solid #d6e4e5;background:white;
+ box-shadow:0 15px 40px #182d3530;display:grid;gap:4px}
+.lab-create-choices>button{width:100%;text-align:left;border:0;background:transparent;border-radius:8px;padding:12px;
+ font-size:12px;font-weight:750;color:#2b4652;cursor:pointer}
+.lab-create-choices>button:hover,.lab-create-choices>button:focus{background:#eaf2f3}
+.lab-greeting-actions{flex-wrap:wrap}
+@media(max-width:600px){.lab-create-choices{right:0;min-width:190px;z-index:50}
+ .lab-create-menu>summary{white-space:nowrap}
+ .lab-greeting-actions button{min-height:42px}
+}
