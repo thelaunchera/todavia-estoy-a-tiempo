@@ -46,15 +46,16 @@ revoke all on public.content_lab_ai_global_daily from anon, authenticated;
 
 -- Security definer is intentionally narrow: no user-specified price, owner, or
 -- credit counts; buyer authentication and entitlement verified inside transaction.
-create or replace function public.content_lab_reserve_ai(p_action text)
+drop function if exists public.content_lab_reserve_ai(text);
+create or replace function public.content_lab_reserve_ai(p_action text,p_user uuid,p_email text)
 returns jsonb
 language plpgsql
 security definer
 set search_path=public,pg_temp
 as $body$
 declare
- v_user uuid := auth.uid();
- v_email text := lower(coalesce(auth.jwt()->>'email',''));
+ v_user uuid := p_user;
+ v_email text := lower(btrim(coalesce(p_email,'')));
  v_day date := (now() at time zone 'utc')::date;
  v_admin boolean;
  v_buyer boolean;
@@ -64,7 +65,8 @@ declare
  v_id uuid;
  v_wallet public.content_lab_ai_wallets%rowtype;
 begin
- if v_user is null or v_email='' then raise exception 'Necesitas iniciar sesión.';end if;
+ if auth.role()<>'service_role' then raise exception 'Solo el servidor puede reservar créditos.';end if;
+ if v_user is null or v_email='' then raise exception 'Usuario verificado requerido.';end if;
  select exists(select 1 from public.content_lab_admins where user_id=v_user) into v_admin;
  select exists(select 1 from public.content_lab_memberships where buyer_email=v_email and status='active') into v_buyer;
  if not v_admin and not v_buyer then raise exception 'Tu compra de Content Lab aún no está verificada.';end if;
@@ -115,8 +117,8 @@ begin
    'remaining_creative',case when v_admin then null else v_wallet.creative_remaining end);
 end
 $body$;
-revoke all on function public.content_lab_reserve_ai(text) from public,anon;
-grant execute on function public.content_lab_reserve_ai(text) to authenticated;
+revoke all on function public.content_lab_reserve_ai(text,uuid,text) from public,anon,authenticated;
+grant execute on function public.content_lab_reserve_ai(text,uuid,text) to service_role;
 
 -- Only Supabase service_role (server-side Edge Function) can undo a failed AI
 -- reservation. Buyers cannot call this; repeated refunds are idempotent.
