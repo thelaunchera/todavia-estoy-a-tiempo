@@ -68,10 +68,10 @@ function setCourseActions(){
   if(owner){
    state.textContent='VISTA ADMINISTRATIVA';
    if(code==='web-class'){
-    el.disabled=false;el.textContent='Abrir mi Estudio para revisar ↗';
+    el.disabled=false;el.textContent='Abrir mi Estudio para revisar';
     el.onclick=()=>location.assign('../estudio/');
    }else{
-    el.disabled=false;el.textContent='Revisar Content Lab ↗';
+    el.disabled=false;el.textContent='Revisar Content Lab';
     el.onclick=()=>location.assign('../content-lab/');
    }
    continue;
@@ -82,7 +82,7 @@ function setCourseActions(){
    el.disabled=true;el.onclick=null;
   }else if(has){
    state.textContent='TU PRODUCTO';
-   el.textContent='Entrar ahora →';el.disabled=false;
+   el.textContent='Entrar ahora';el.disabled=false;
    el.onclick=()=>location.assign(releaseLinks[code]);
   }else{
    state.textContent='NO ADQUIRIDO';
@@ -105,12 +105,12 @@ function renderOwnerLibrary(){
  else if(titles.length){$('ownership-message').textContent='Estos productos tienen una compra verificada para tu correo. Los que están en preparación siguen cerrados.';}
  else{$('ownership-message').textContent='Todavía no hay compras verificadas con este correo. Si acabas de comprar, revisa tu confirmación.';}
  for(const title of titles){const chip=document.createElement('span');chip.textContent=title;list.append(chip);}
- if(!titles.length){const chip=document.createElement('span');chip.textContent='Explora el catálogo ↓';list.append(chip);}
+ if(!titles.length){const chip=document.createElement('span');chip.textContent='Explora el catálogo';list.append(chip);}
 }
 function updateNav(){
  $('account-name').hidden=!profile;$('account-name').textContent=profile?.email||'';
  $('open-access').hidden=!!profile;$('signout').hidden=!profile;
- $('hero-account').textContent=profile?'Ver mi biblioteca ↗':'Ver mis compras ↗';
+ $('hero-account').textContent=profile?'Ver mi biblioteca':'Ver mis compras';
 }
 function resetState(){
  profile=null;owner=false;ready=false;purchased=new Set();releases={'web-class':false,'content-lab':false};
