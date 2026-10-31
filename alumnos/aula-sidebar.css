@@ -137,3 +137,7 @@ button:focus-visible,.aula-rail a:focus-visible{outline:3px solid #87b5d0;outlin
 .aula-access-note{font:650 10px/1.4 'DM Sans',Arial,sans-serif;letter-spacing:.015em;color:#6c8799;white-space:nowrap}
 @media(max-width:600px){.aula-main-actions{gap:8px}.aula-access-note{font-size:9px;max-width:67px;white-space:normal;text-align:right;line-height:1.2}}
 @media(max-width:370px){.aula-access-note{max-width:55px}}
+
+/* Volver al centro general desde la clase, sin mostrar lecciones al público. */
+.aula-navigation .aula-hub-link{background:#e8f0f4;color:#214c66;border:1px solid #d2e2eb;text-decoration:none}
+.aula-navigation .aula-hub-link:hover{background:#dbe9ef}
