@@ -164,3 +164,10 @@
 .factory-optional-frames{margin:15px 0;background:#fafbfa;border:1px solid #e1e7e6;padding:13px;border-radius:10px}
 .factory-optional-frames summary{font-size:12px;font-weight:700;color:#46636b;cursor:pointer;user-select:none}
 .factory-optional-frames[open] summary{margin-bottom:10px}
+
+.factory-slide-colors{margin:14px 0;border:1px solid #dae6e7;border-radius:10px;padding:12px;background:#fafcfb}
+.factory-slide-colors summary{cursor:pointer;font-size:12px;font-weight:700;color:#41616d}
+.factory-slide-colors>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:12px}
+.factory-slide-colors label{display:flex;align-items:center;gap:6px;font-size:11px;color:#476b75}
+.factory-slide-colors input[type=color]{height:36px;width:44px;border:1px solid #d2e0e2;border-radius:7px}
+.factory-slide-colors button{padding:10px;border:1px solid #bbd1d5;border-radius:8px;color:#325a66;background:#fff;font-size:11px}
