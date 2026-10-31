@@ -283,6 +283,9 @@ Deno.serve(async request=>{
     if(ref.brandId!==brandId)throw Error('Esta referencia de estilo está guardada en otra marca. Vuelve a subirla en '+b.name+'.');
    }
    const lang=language(b);
+   const allowedReferenceFocus=['palette','composition','lighting','outfit','pose'];
+   const referenceFocus=Array.isArray(body.referenceFocus)?body.referenceFocus.filter((v:unknown)=>allowedReferenceFocus.includes(String(v))).slice(0,5):['palette','composition','lighting'];
+   const influence=referenceFocus.length?'Secondary reference image may inspire ONLY '+referenceFocus.join(', ')+'. Preserve the subject identity and do not reproduce the reference person, text or logo.':'Ignore the second image for style; preserve the original subject.';
    const photos:{data:string;mime:string}[]=[];
    let visualDescription='',analysisStatus:'vision'|'fallback'='fallback';
    if(source.aiReference)photos.push({data:String(source.aiReference),mime:'image/jpeg'});
@@ -291,7 +294,7 @@ Deno.serve(async request=>{
     if(style.aiReference)photos.push({data:String(style.aiReference),mime:'image/jpeg'});
    }
    if(photos.length){
-    try{visualDescription=await inspectReference(photos,clean(body.brief,400));analysisStatus='vision';}
+    try{visualDescription=await inspectReference(photos,clean(body.brief,400)+' '+influence);analysisStatus='vision';}
     catch(e){
      // The user still gets an editable plan; state plainly that visual analysis failed.
      console.warn('Image vision unavailable; grid planning falls back to text. ',e instanceof Error?e.message:'');
@@ -305,7 +308,7 @@ Deno.serve(async request=>{
     'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
     'Creative brief from owner — follow their specific instructions before general creative defaults: '+clean(body.brief,1900)+'.',
     'Visible subject/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
-    'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'.',
+    'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'. '+influence,
     'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
     'Each of the nine posts must have a short headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
     'For personal/editorial ABOUT ME designs add optional handwritten (2-5 words) and callouts (up to FOUR brief annotation texts, 4-15 words) ONLY when they are supported by owner brief or brand notes. Do not invent biography, identity, credentials, results or personal facts. If unsupported, return empty callouts.',
@@ -354,7 +357,7 @@ Deno.serve(async request=>{
    const sequence=[firstStyle,...accepted.filter(p=>p!==firstStyle)];
    const posts=plan.posts.map((p:any,i:number)=>({
     index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
-    scene:'Shot '+(i+1)+': '+(isPortrait?portraitShots:gridShots)[i]+'. Visual description: '+clean(visualDescription,370)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,900),
+    scene:'Shot '+(i+1)+': '+(isPortrait?portraitShots:gridShots)[i]+'. Visual description: '+clean(visualDescription,370)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,650)+'. '+influence,
     format:gridLayouts[i],assetId:'',
     ...(designMode==='editorial'?{design:{
       preset:sequence[i%sequence.length],
@@ -368,7 +371,7 @@ Deno.serve(async request=>{
       overlay:.12
     }}:{})
    }));
-   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='portrait'?'portrait':body.kind==='preserve'?'preserve':'product',designMode,creativeSettings:body.creativeSettings||null,brief:clean(body.brief,1900),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
+   const saved=await save('grids',{brandId,sourceId,referenceId,referenceFocus,kind:designMode==='editorial'?'preserve':body.kind==='portrait'?'portrait':body.kind==='preserve'?'preserve':'product',designMode,creativeSettings:body.creativeSettings||null,brief:clean(body.brief,1900),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
    if(planningSource==='template')await rollback();
    return send(saved);
   }
@@ -400,6 +403,7 @@ Deno.serve(async request=>{
     'CUSTOM USER REQUEST (creative direction): '+userDirection,
     grid.kind==='portrait'?'MANDATORY REALISTIC PORTRAIT RULES: preserve the recognizable real face, hair, skin, body proportions and facial features from image 1; normal two arms, two legs, natural shoulders and hands; if a hand is visible it must have exactly five naturally shaped digits including one thumb, never extra or fused fingers. Both feet contact a normal continuous real floor or pavement. NEVER draw a raised round platform, pedestal, floating stage, runway, sculptural block, mannequin, doll or surreal physical setting; no exaggerated face retouching.':'',
     'SHOT '+(i+1)+' of 9: '+shots[i]+'.',
+    Array.isArray(grid.referenceFocus)?'SECOND IMAGE STYLE LIMIT: borrow only '+grid.referenceFocus.filter((v:unknown)=>['palette','composition','lighting','outfit','pose'].includes(String(v))).join(', ')+'. Do not copy any second-image identity, wording, logos or people.':'',
     'Composition '+clean(grid.posts[i].scene,260)+'.',
     'BRAND '+clean(b.name,90)+', color scheme '+clean(b.color,20)+' '+clean(b.background,20)+'.',
     'REALISM: physical texture, correct scale, coherent window or studio light, realistic human proportions, plausible shadows and reflections.',
