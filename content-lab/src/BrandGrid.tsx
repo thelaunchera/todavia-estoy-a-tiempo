@@ -8,13 +8,14 @@ import GridVisualEditor from './GridVisualEditor';
 import type {PromptControls} from './PromptEngine';
 import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
 import {brandPalette} from './BrandIdentity';
+import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
-type Asset={id:string;brandId:string;name:string;mime:string};
+type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;onOpenPrompts?:()=>void;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -50,9 +51,18 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,onOpenPrompts,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
+  const [chosenFormat,setChosenFormat]=useState('');
+  const [referenceFocus,setReferenceFocus]=useState<string[]>(['palette','lighting','composition']);
+  useEffect(()=>{
+    if(!initialSelection?.version)return;
+    setSourceId(initialSelection.sourceId||'');
+    setReferenceId(initialSelection.referenceId||brand.referenceAssetId||'');
+    setChosenFormat(initialSelection.format||'');
+    setGrid(null);setSelected(0);setDownloads([]);
+  },[initialSelection?.version]);
   const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
   const [kind,setKind]=useState('portrait');const [brief,setBrief]=useState('');
   const [creativeSettings,setCreativeSettings]=useState<PromptControls|null>(null);
@@ -163,7 +173,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   };
   const upload=async(f:File|undefined,target:'source'|'reference')=>{
     if(!f)return;setUploading(target);
-    try{const asset=await onUploadFile(f);if(asset){if(target==='source')setSourceId(asset.id);else setReferenceId(asset.id)}}catch(e){showError(e)}finally{setUploading('')}
+    try{const asset=await onUploadFile(f,target==='source'?'original':'reference');if(asset){if(target==='source')setSourceId(asset.id);else setReferenceId(asset.id)}}catch(e){showError(e)}finally{setUploading('')}
   };
   const plan=async()=>{
     if(!sourceId)return notify('Sube una foto principal de la marca que tienes seleccionada.');
@@ -172,8 +182,13 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     if(referenceId&&!library.some(a=>a.id===referenceId))return notify('La referencia es de otra marca. Súbela en '+brand.name+'.');
     if(!await askCredits('creative',3,'Preparar 9 ideas con IA'))return;
     setBusy('plan');
-    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief,designMode,designPreset,creativeSettings});
-      const g=data as Grid;savedSignature.current[g.id]=signature(g);
+    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,referenceFocus,kind,brief,designMode,designPreset,creativeSettings});
+      let g=data as Grid;
+      if(chosenFormat&&g.posts.length){
+        const posts=g.posts.map((tile,i)=>i===0?{...tile,format:chosenFormat,design:undefined}:tile);
+        const response=await api.put('/api/grids/'+g.id,{posts});g=response.data as Grid;
+      }
+      savedSignature.current[g.id]=signature(g);
       setGrid(g);setSaveState('saved');setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
       notify(g.planningSource==='template'
        ? 'Preparé 9 conceptos editables con plantilla de respaldo. No se generaron fotos.'
@@ -200,7 +215,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     try{
       const {data}=await api.post('/api/ai-image',{
         brandId:brand.id,assetId:sourceId,referenceId,mode:'variation',subjectType:kind,creativeSettings,
-        prompt:(brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.')+(variation?' ADDITIONAL CHANGE FOR THIS NEW GENERATION: '+variation:'')
+        prompt:(brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.')+(referenceId?' Style reference may influence ONLY: '+referenceFocus.join(', ')+'. Never replace the subject.':'')+(variation?' ADDITIONAL CHANGE FOR THIS NEW GENERATION: '+variation:'')
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
       const src='data:'+data.mime+';base64,'+data.content;
@@ -339,13 +354,15 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     <div className="bg-layout"><div className="bg-column">
       <div className="bg-box"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
         <div className="bg-uploads">
-          <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'Foto original *'}</strong><small>Producto, foto o screenshot</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
-          <label className="bg-drop"><div>{images[referenceId]?<img src={images[referenceId]} alt="Referencia"/>:<Palette size={28}/>}</div><strong>{uploading==='reference'?'Preparando…':'Referencia de estilo'}</strong><small>Opcional</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'reference')}/></label>
+          <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'01 · Foto original *'}</strong><small>Persona o producto que debemos conservar</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
+          <label className="bg-drop"><div>{images[referenceId]?<img src={images[referenceId]} alt="Referencia"/>:<Palette size={28}/>}</div><strong>{uploading==='reference'?'Preparando…':'02 · Referencia de estilo'}</strong><small>Solo inspira el estilo, no sustituye al sujeto</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'reference')}/></label>
         </div>
-        <div className="bg-account-note">Fotos para <strong>{brand.name}</strong>. Cada cuenta tiene su biblioteca separada.</div>
+        <div className="bg-account-note">Fotos para <strong>{brand.name}</strong>. Biblioteca privada por marca.</div>
+         {referenceId&&<div className="bg-reference-focus"><strong>¿Qué quieres tomar de esta referencia?</strong><div>{[{id:'palette',label:'Colores'},{id:'composition',label:'Composición'},{id:'lighting',label:'Iluminación'},{id:'outfit',label:'Outfit'},{id:'pose',label:'Pose'}].map(item=><label key={item.id}><input type="checkbox" checked={referenceFocus.includes(item.id)} onChange={e=>setReferenceFocus(a=>e.target.checked?[...a,item.id]:a.filter(x=>x!==item.id))}/>{item.label}</label>)}</div><small>La IA recibe únicamente las instrucciones marcadas; no debe copiar rostros ni logos ajenos.</small></div>}
+         {chosenFormat&&<div className="bg-account-note">✓ Formato elegido: <strong>{chosenFormat}</strong>. Se aplicará al primer post.</div>
         {(wrongOriginal||wrongReference)&&<p role="alert" className="bg-connection-error">Una foto pertenece a otra marca. Cambia de cuenta o vuelve a subir la foto desde {brand.name}.</p>}
         <button className="bg-link" onClick={()=>setChooseExisting(v=>!v)}>{chooseExisting?'Ocultar biblioteca':'O usar fotos ya guardadas'} <ArrowRight size={15}/></button>
-        {chooseExisting&&<div className="bg-saved-select"><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Foto principal</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><select value={referenceId} onChange={e=>setReferenceId(e.target.value)}><option value="">Sin referencia</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>}
+        {chooseExisting&&<div className="bg-saved-select"><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Foto principal</option>{library.map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select><select value={referenceId} onChange={e=>setReferenceId(e.target.value)}><option value="">Sin referencia</option>{library.filter(a=>assetCategory(a)==='reference'||a.id===brand.referenceAssetId).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select></div>}
         <div className="editorial-mode">
           <strong>¿Qué quieres crear?</strong>
           <div className="bg-modes">
