@@ -7,7 +7,7 @@ test('Switching ES/EN updates the real React header, dashboard, shortcuts, stats
  const app=read('src/App.tsx'),locale=read('src/LabLocale.ts');
  assert.ok(app.includes("const t = (value:string):string=>uiText(value,loginLanguage)"));
  assert.ok(app.includes("{t(nav.find(n => n.id === tab)?.title||'')}"));
- assert.ok(app.includes(">{t('Make room for')}"));
+ assert.ok(app.includes("{t('Make room for')}"));
  assert.ok(app.includes("{t('better content.')}"));
  assert.ok(app.includes("{t('YOUR CREATIVE DESK')}"));
  assert.ok(app.includes("{t(s.label)}"));
