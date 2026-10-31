@@ -3489,3 +3489,84 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
  .class-page-v2 #de-idea-a-web .class-showcase-nav>span{display:none}
  .class-page-v2 #de-idea-a-web .class-showcase-hero{grid-template-columns:1fr 1fr}
 }
+
+
+/* Casa Brownie · Fotografías reales de brownies, no ilustraciones.
+   El comparador y las miniaturas se mantienen en su tamaño responsive actual. */
+.class-page-v2 #de-idea-a-web .class-showcase-art{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border-radius:80px 80px 12px 12px;
+  background:#74513c!important;
+  box-shadow:inset 0 0 0 1px #ffffff2b;
+}
+.class-page-v2 #de-idea-a-web img.class-showcase-brownie-photo{
+  display:block;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 55%;
+  border:0;
+  border-radius:inherit;
+  filter:saturate(1.06) contrast(1.03);
+}
+.class-page-v2 #de-idea-a-web .class-showcase-art:after{
+  content:"";
+  position:absolute;
+  inset:50% 0 0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(transparent,#2a170f6f);
+}
+.class-page-v2 #de-idea-a-web .class-showcase-art>span{
+  position:absolute;
+  z-index:2;
+  bottom:11px;
+  left:12px;
+  right:12px;
+  text-align:center;
+  font:700 .52rem/1.3 var(--sans,Arial,sans-serif);
+  letter-spacing:.11em;
+  color:#fff9ef;
+  text-shadow:0 2px 5px #2a170f99;
+}
+.class-page-v2 #recorrido .class-identity-art{
+  overflow:hidden;
+  background:#76503a!important;
+  border-radius:7px;
+}
+.class-page-v2 #recorrido .class-identity-art img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  filter:saturate(1.05);
+}
+.class-page-v2 #recorrido .class-mobile-site-hero{
+  overflow:hidden;
+  background:#74513c!important;
+}
+.class-page-v2 #recorrido .class-mobile-site-hero img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+@media(max-width:699px){
+  .class-page-v2 #de-idea-a-web .class-showcase-art{
+    border-radius:70px 70px 10px 10px;
+    min-height:158px;
+  }
+  .class-page-v2 #de-idea-a-web .class-showcase-art>span{
+    font-size:.43rem;
+    letter-spacing:.055em;
+    left:5px;
+    right:5px;
+    bottom:7px;
+  }
+}
