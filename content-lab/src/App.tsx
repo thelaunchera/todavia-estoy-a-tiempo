@@ -8,6 +8,7 @@ import type {PromptControls} from './PromptEngine';
 import {CreativeCover,exportCreativeCover} from './CreativeCover';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
+import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import {
   LayoutDashboard,
   WandSparkles,
@@ -53,6 +54,9 @@ type Brand = {
   color: string;
   background: string;
   secondaryColor?: string;
+  additionalColors?: string[];
+  socialAccounts?: SocialAccounts;
+  primaryPlatform?: SocialPlatform;
   headingFont?: string;
   bodyFont?: string;
   photoMood?: string;
@@ -129,6 +133,9 @@ const newBrand = (): Brand => ({
   color: '#BED8E9',
   background: '#FAF8F3',
   secondaryColor: '#E7D8C9',
+  additionalColors: [],
+  socialAccounts: {},
+  primaryPlatform: 'instagram',
   headingFont: 'Prompt',
   bodyFont: 'Futura',
   photoMood: 'Natural editorial, human, realistic',
@@ -507,11 +514,19 @@ function App() {
   const saveBrand = async () => {
     if (!brandForm?.name.trim())
       return toast('Escribe el nombre de la cuenta.');
+    const accounts=normalizeSocialAccounts(brandForm.socialAccounts,brandForm.handle);
+    const prepared:Brand={...brandForm,
+      color:brandForm.color.toUpperCase(),background:brandForm.background.toUpperCase(),
+      additionalColors:normalizeExtraColors(brandForm.additionalColors,[brandForm.color,brandForm.background,brandForm.secondaryColor||'']),
+      socialAccounts:accounts,
+      handle:accounts.instagram||'',
+      primaryPlatform:preferredPlatform(brandForm)
+    };
     setBusy('brand');
     try {
-      const { data } = brandForm.id
-        ? await api.put('/api/brands/' + brandForm.id, brandForm)
-        : await api.post('/api/brands', brandForm);
+      const { data } = prepared.id
+        ? await api.put('/api/brands/' + prepared.id, prepared)
+        : await api.post('/api/brands', prepared);
       setBrands(prev =>
         brandForm.id
           ? prev.map(x => (x.id === data.id ? data : x))
@@ -1556,14 +1571,10 @@ function App() {
                       />
                     </div>
                     <div>
-                      <label>Handle</label>
-                      <input
-                        placeholder="@account"
-                        value={brandForm.handle}
-                        onChange={e =>
-                          setBrandForm({ ...brandForm, handle: e.target.value })
-                        }
-                      />
+                      <label>¿Para qué red vas a crear contenido principalmente?</label>
+                      <select value={preferredPlatform(brandForm)} onChange={e=>setBrandForm({...brandForm,primaryPlatform:e.target.value as SocialPlatform})}>
+                        {SOCIAL_PLATFORMS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
+                      </select>
                     </div>
                   </div>
                   <label>Ideal audience</label>
@@ -1633,7 +1644,34 @@ function App() {
                     </div>
                   </div>
                   <div className="brandkit-extra">
-                    <div className="eyebrow">BRAND KIT · CADA CUENTA GUARDA SUS PROPIOS ESTILOS</div>
+                    <div className="eyebrow">BRAND KIT · PALETA PERSONAL PARA CADA MARCA</div>
+                    <div className="lab-brand-palette-editor">
+                      <div className="lab-brand-palette-head"><div><strong>Tu paleta de marca</strong><p>Los colores base siguen activos. Agrega hasta 6 tonos adicionales para los fondos y acentos de tus carruseles.</p></div>
+                        <button type="button" className="btn ghost" disabled={(brandForm.additionalColors||[]).length>=6} onClick={()=>setBrandForm({...brandForm,additionalColors:[...(brandForm.additionalColors||[]),'#C7DCE8']})}><Plus size={15}/> Añadir color</button>
+                      </div>
+                      <div className="lab-brand-palette-list">
+                        {[{label:'Principal',color:brandForm.color},{label:'Fondo',color:brandForm.background},{label:'Secundario',color:brandForm.secondaryColor||'#E7D8C9'},...(brandForm.additionalColors||[]).map((c,i)=>({label:'Extra '+(i+1),color:c}))].map((item,i)=><div key={'brand-color-'+i} className="lab-brand-palette-tile">
+                          <span className="lab-brand-palette-swatch" style={{background:item.color}}/>
+                          <span className="lab-brand-palette-name">{item.label}<small>{item.color.toUpperCase()}</small></span>
+                          {i>=3&&<><input aria-label={'Elegir color '+item.label} type="color" value={item.color} onChange={e=>setBrandForm({...brandForm,additionalColors:(brandForm.additionalColors||[]).map((v,n)=>n===i-3?e.target.value:v)})}/>
+                            <button aria-label={'Eliminar '+item.label} type="button" className="lab-brand-color-remove" onClick={()=>setBrandForm({...brandForm,additionalColors:(brandForm.additionalColors||[]).filter((_,n)=>n!==i-3)})}><X size={16}/></button></>}
+                        </div>)}
+                      </div>
+                      <small>Los tres primeros colores se editan en los campos de arriba y abajo. Los colores adicionales se guardan solo en esta marca.</small>
+                    </div>
+                    <div className="lab-social-accounts">
+                      <div className="lab-social-accounts-head"><strong>¿En qué redes sociales está tu marca?</strong><p>Escribe tu usuario o el enlace de cada página. Puedes dejar campos vacíos. Solo guardamos esta información para personalizar tu contenido; no conectamos cuentas ni pedimos contraseñas.</p></div>
+                      <div className="lab-social-accounts-grid">
+                        {SOCIAL_PLATFORMS.map(p=><label className="lab-social-field" key={p.id}>
+                          <span>{p.label}{preferredPlatform(brandForm)===p.id&&<small>Principal</small>}</span>
+                          <input maxLength={200} autoComplete="off" placeholder={p.placeholder}
+                            aria-label={'Cuenta de '+p.label}
+                            value={p.id==='instagram'?(brandForm.socialAccounts?.instagram??brandForm.handle):(brandForm.socialAccounts?.[p.id]||'')}
+                            onChange={e=>setBrandForm({...brandForm,socialAccounts:{...brandForm.socialAccounts,[p.id]:e.target.value},...(p.id==='instagram'?{handle:e.target.value}:{})})}
+                          />
+                        </label>)}
+                      </div>
+                    </div>
                     <div className="double">
                       <div><label>Color secundario</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
                       <div><label>Logo guardado en biblioteca</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">Sin logo</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
@@ -1671,11 +1709,10 @@ function App() {
                         {b.name[0]}
                       </div>
                       <h3>{b.name}</h3>
-                      <p>{b.handle || 'Personal account'}</p>
+                      <p>{socialAccount(b,preferredPlatform(b))||'Perfil de marca · redes opcionales'} · {platformName(preferredPlatform(b))}</p>
                       <div className="brandcolors">
-                        <i style={{ background: b.color }} />
-                        <i style={{ background: b.background }} />
-                        <i style={{ background: b.secondaryColor||'#191919' }} />
+                        {brandPalette(b).slice(0,9).map((c,n)=><i key={n} style={{background:c}} />)}
+                        <i style={{background:b.background}} />
                       </div>
                       <div className="brandfoot">
                         <span>
