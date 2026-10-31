@@ -137,3 +137,18 @@
 .factory-free-create{border:1px solid #8db5bd!important;background:#e8f4f5!important;color:#2f5964!important;font-weight:750!important;margin-bottom:11px}
 .factory-free-create:hover{background:#daeff1!important}
 @media(max-width:420px){.factory-frame-modes .factory-frame-mini{height:75px}.factory-frame-modes button{min-height:116px;padding:8px 3px}}
+
+/* Preview-first font gallery, without template-like selection cards. */
+.factory-type-gallery{margin:2px 0 19px;padding:13px 15px;background:#f8faf9;border:1px solid #dbe8e6;border-radius:12px}
+.factory-type-gallery>summary{cursor:pointer;color:#35535d;font-size:12px;font-weight:700;line-height:1.4}
+.factory-type-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:13px}
+.factory-type-options button{min-width:0;min-height:82px;display:flex;flex-direction:column;justify-content:center;gap:8px;align-items:center;padding:9px;border:1px solid #dde6e5;border-radius:11px;background:#fff;color:#334b4c;cursor:pointer}
+.factory-type-options button.selected{border:2px solid #397d96;background:#edf6f8;padding:8px}
+.factory-type-options button>span{font-size:clamp(15px,1.8vw,26px);line-height:1.1;white-space:normal;overflow-wrap:anywhere;text-align:center}
+.factory-type-options button>small{font-family:Arial,sans-serif;font-weight:600;color:#68858e;font-size:10px}
+.factory-title-font{display:grid;gap:8px;margin:10px 0 14px}
+.factory-title-font label{font-size:11px;font-weight:700;color:#597078}
+.factory-title-font select{min-height:41px}
+.factory-title-font-example{font-size:clamp(20px,3vw,33px);line-height:1.1;overflow-wrap:anywhere;padding:13px 15px;border-radius:10px;background:#f5f4f0;color:#263c45}
+@media(max-width:900px){.factory-type-options{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:520px){.factory-type-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
