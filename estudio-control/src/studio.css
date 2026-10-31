@@ -2265,3 +2265,16 @@ a:focus-visible {
   border-color: #abcddc;
 }
 .sidebar nav { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+
+/* Operaciones: acciones y totales calculados solo desde la fuente consultada. */
+.commerce-quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}
+.commerce-quick-actions button,.commerce-quick-actions a{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:43px;padding:10px 15px;border:1px solid #7da2b9;border-radius:11px;background:#eaf2f7;color:#214b64;text-decoration:none;font:750 12px/1.4 'DM Sans',Arial,sans-serif}
+.commerce-quick-actions button:hover,.commerce-quick-actions a:hover{background:white;color:#173a55}
+.commerce-quick-actions button:disabled{opacity:.64;cursor:wait}
+.commerce-hero .commerce-check-time{display:block;margin-top:12px;color:#c2d9e6;font:500 11px 'DM Sans',Arial,sans-serif}
+.commerce-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 24px}
+.commerce-summary>div{min-width:0;background:#fffefa;border:1px solid #dbe5e9;border-radius:14px;padding:18px 16px}
+.commerce-summary span,.commerce-summary small{display:block;color:#71899a;font-size:11px;line-height:1.5}
+.commerce-summary strong{display:block;margin:7px 0;font-size:clamp(20px,2.2vw,31px);font-weight:750;color:#234963;overflow-wrap:anywhere}
+@media(max-width:1150px){.commerce-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.commerce-summary{grid-template-columns:1fr 1fr;gap:9px}.commerce-summary>div{padding:15px 12px}.commerce-summary strong{font-size:20px}}
