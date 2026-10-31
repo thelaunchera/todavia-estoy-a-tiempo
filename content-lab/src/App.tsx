@@ -420,7 +420,7 @@ function App() {
   const setupSteps = [
     {title:'Define tu marca',subtitle:'Colores, idioma, audiencia y estilo.',ready:setupBrandReady,tab:'brands' as Tab,icon:Palette},
     {title:'Sube una foto',subtitle:'Usa la original o una referencia de estilo.',ready:library.length>0,tab:'media' as Tab,icon:ImagePlus},
-    {title:'Diseña tu primer post',subtitle:'Una foto → diseño editorial o 9 posts.',ready:mine.length>0,tab:'grid' as Tab,icon:WandSparkles},
+    {title:'Guarda tu primer post',subtitle:'Crea una publicación y guárdala en tu biblioteca.',ready:mine.length>0,tab:'create' as Tab,icon:WandSparkles},
   ];
   const change = (key: keyof Post, val: string) =>
     setEditor(p => ({ ...p, [key]: val }));
@@ -812,7 +812,7 @@ function App() {
                 </div>
                 <div className="lab-quick-steps">
                   {setupSteps.map((step,i)=><button key={step.title} type="button" className={'lab-quick-step '+(step.ready?'completed':'')}
-                    onClick={()=>{if(step.tab==='brands')setBrandForm(brand);navigate(step.tab)}}>
+                    onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
                     <span className="lab-step-num">{step.ready?<Check size={18}/>:String(i+1).padStart(2,'0')}</span>
                     <span className="lab-quick-text"><strong>{step.title}</strong><small>{step.subtitle}</small></span>
                     <ArrowRight size={17}/>
