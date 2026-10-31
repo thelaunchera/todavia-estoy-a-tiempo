@@ -1,11 +1,43 @@
 import { clampPanoramaRect, type TouchRect } from './TouchGeometry';
 import { coverPlacement } from './PhotoCrop';
+export type LayerMove = 'backward' | 'forward' | 'back' | 'front';
+export type LayerPlacement = 'behind-text' | 'front';
+
+/** Saved order is bottom-to-top, with behind-text layers rendered first. */
+export function reorderPanoramaLayers(layers: PanoramaLayer[], id: string, action: LayerMove): PanoramaLayer[] {
+  const sorted = [...layers.filter(layer => layer.placement === 'behind-text'),
+    ...layers.filter(layer => layer.placement !== 'behind-text')];
+  const from = sorted.findIndex(layer => layer.id === id);
+  if (from < 0) return sorted;
+  const current = sorted[from];
+  sorted.splice(from, 1);
+  const destination = action === 'back' ? 0 : action === 'front' ? sorted.length
+    : Math.max(0, Math.min(sorted.length, from + (action === 'forward' ? 1 : -1)));
+  const nextPlacement: LayerPlacement = action === 'back' ? 'behind-text' : action === 'front' ? 'front'
+    : action === 'forward'
+      ? (sorted[destination]?.placement === 'behind-text' ? 'behind-text' : 'front')
+      : (sorted[destination-1]?.placement === 'behind-text' || destination === 0 && current.placement === 'behind-text'
+        ? 'behind-text' : destination === 0 && current.placement === 'front' && sorted[0]?.placement === 'behind-text'
+          ? 'behind-text' : current.placement || 'front');
+  // Adjacent move: crossing the dividing line between text layers changes placement.
+  const behindCount = sorted.filter(layer => layer.placement === 'behind-text').length;
+  const placement: LayerPlacement = action === 'back' ? 'behind-text' : action === 'front' ? 'front'
+    : destination < behindCount ? 'behind-text'
+    : destination > behindCount ? 'front'
+    : action === 'backward' && current.placement !== 'behind-text' && behindCount > 0 ? 'behind-text'
+    : action === 'forward' && current.placement === 'behind-text' ? 'front'
+    : nextPlacement;
+  sorted.splice(destination, 0, {...current, placement});
+  return sorted;
+}
+
 
 export type PanoramaLayer = {
   id: string;
   assetId: string;
   name: string;
   kind: 'photo' | 'sticker';
+  placement?: LayerPlacement;
   rect: TouchRect;
 };
 
@@ -20,6 +52,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       id: item.id.slice(0, 160), assetId: item.assetId.slice(0, 150),
       name: String(item.name || 'Foto').slice(0, 100),
       kind: item.kind === 'sticker' ? 'sticker' as const : 'photo' as const,
+      ...(item.placement === 'behind-text' ? {placement: 'behind-text' as const} : {}),
       rect: clampPanoramaRect(item.rect),
     }];
   });
@@ -55,14 +88,21 @@ export async function paintPanoramaLayers(
 }
 
 /** Applies retained cross-slide layers even if the continuous background is turned off. */
-export async function overlayPanoramaPages(pages: HTMLCanvasElement[], layers: PanoramaLayer[], images: Record<string, string>) {
+export async function overlayPanoramaPages(
+  pages: HTMLCanvasElement[], layers: PanoramaLayer[], images: Record<string, string>,
+  paintTextOnTop?: (ctx:CanvasRenderingContext2D) => Promise<void>,
+) {
   if (!layers.length) return pages;
   const wide = document.createElement('canvas');
   wide.width = pages.length * 1080; wide.height = 1350;
   const ctx = wide.getContext('2d');
   if (!ctx) throw Error('No se pudo preparar la descarga.');
   pages.forEach((page, n) => ctx.drawImage(page, n * 1080, 0));
-  await paintPanoramaLayers(ctx, wide.width, wide.height, layers, images);
+  const behind = layers.filter(layer=>layer.placement==='behind-text');
+  const front = layers.filter(layer=>layer.placement!=='behind-text');
+  await paintPanoramaLayers(ctx, wide.width, wide.height, behind, images);
+  if (behind.length && paintTextOnTop) await paintTextOnTop(ctx);
+  await paintPanoramaLayers(ctx, wide.width, wide.height, front, images);
   return pages.map((_, n) => {
     const page = document.createElement('canvas'); page.width = 1080; page.height = 1350;
     const context = page.getContext('2d');
