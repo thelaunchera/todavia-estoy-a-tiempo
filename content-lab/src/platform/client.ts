@@ -171,7 +171,7 @@ export const api={
       // Never accept changes to storage paths, owner, AI source, brand ID or generated status from a rename.
       const patch:{displayName?:string;category?:string}={};
       if(typeof payload.displayName==='string')patch.displayName=payload.displayName.replace(/[<>\\x00-\\x1F]/g,'').trim().slice(0,85);
-      if(['original','reference','logo','generated','screenshot'].includes(payload.category))patch.category=payload.category;
+      if(['original','reference','logo','generated','screenshot','sticker'].includes(payload.category))patch.category=payload.category;
       if(!Object.keys(patch).length)throw Error('No hay cambios válidos para la imagen.');
       return {data:await update('assets',decodeURIComponent(m[2]),patch)};
     }
