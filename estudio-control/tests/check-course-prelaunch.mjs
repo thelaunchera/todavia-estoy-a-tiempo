@@ -429,3 +429,15 @@ assert.ok(centerStyles.includes('.help-strip-actions{display:flex;flex-wrap:wrap
 assert.ok(centerStyles.includes('@media(max-width:900px){.help-strip-actions{flex-direction:column}'),'Botones apilados en iPad');
 assert.ok(!centerStyles.includes('.help-strip a{border:1px solid #6a91a7'),'Sin estilo de botón aplicado a enlaces dentro del texto');
 assert.ok(centerPage.includes('./centro.css?v=20261031-support-responsive-v8'),'Cache de estilos actualizado');
+
+
+// Las portadas completas siguen siendo interactivas pero no repiten «Ver detalles».
+const catalogHtml=read('centro/index.html');
+const catalogCss=read('centro/centro.css');
+const coverControls=[...catalogHtml.matchAll(/<button type="button" class="cover-action" data-detail="[^"]+" aria-label="[^"]+"><\\/button>/g)];
+assert.equal(coverControls.length,10,'Las 10 portadas mantienen una acción accesible');
+assert.doesNotMatch(catalogHtml, /<span aria-hidden="true">Ver detalles<\\/span>/,'Las portadas no muestran etiquetas repetidas');
+assert.match(catalogHtml, /data-detail="web-class">Conocer la clase/,'La clase conserva su CTA principal');
+assert.match(catalogHtml, /data-detail="content-lab">Descubre qué incluye/,'El Lab conserva su CTA principal');
+assert.match(catalogCss,/\\.cover-action:focus-visible/,'Las portadas tienen foco para teclado');
+assert.match(catalogHtml,/centro\\.css\\?v=20261031-clean-covers-v9/,'El navegador recibe los estilos nuevos');
