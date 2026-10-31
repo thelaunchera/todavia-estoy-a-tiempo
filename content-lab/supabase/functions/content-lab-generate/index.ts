@@ -12,11 +12,14 @@ const language=(brand:any)=>{
 const key=Deno.env.get('GEMINI_API_KEY')||'';
 async function gemini(prompt:string,imgs:{data:string;mime:string}[]=[],photo=false){
  if(!key)throw Error('Falta GEMINI_API_KEY en los secretos del servidor.');
- const model=photo?(Deno.env.get('GEMINI_IMAGE_MODEL')||'gemini-2.5-flash-image'):(Deno.env.get('GEMINI_TEXT_MODEL')||'gemini-2.5-flash');
+ // Gemini 2.5 Flash Image shut down 2026-10-02. The Lite image model supports 4:5 at 1K.
+ const model=photo?(Deno.env.get('GEMINI_IMAGE_MODEL')||'gemini-3.1-flash-lite-image'):(Deno.env.get('GEMINI_TEXT_MODEL')||'gemini-2.5-flash');
  const parts:any[]=[{text:prompt},...imgs.map(x=>({inline_data:{mime_type:x.mime,data:x.data}}))];
  const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{
   method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
-  body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:photo?{responseModalities:['TEXT','IMAGE']}:{responseMimeType:'application/json'}})
+  body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:photo
+   ? {responseModalities:['TEXT','IMAGE'],imageConfig:{aspectRatio:'4:5',imageSize:'1K'}}
+   : {responseMimeType:'application/json'}})
  });
  const result=await response.json();
  if(!response.ok)throw Error('Error del proveedor de IA ('+response.status+'): '+clean(result.error?.message,240));
