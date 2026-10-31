@@ -1476,6 +1476,7 @@ function App() {
                     }
                   }}/>}
           {brand && tab === 'backgrounds' && <BackgroundLibrary
+  isAdmin={Boolean(aiWallet?.admin)}
   assets={library} images={images} loadImage={imageLoad}
   onUpload={async file=>upload(file,'background')}
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
