@@ -20,11 +20,15 @@ test('Seamless option survives old designs and is reused by preview and separate
  assert.ok(ui.includes('seamlessEnabled:e.target.checked'));
  assert.ok(ui.includes('PNG de 1080 × 1350'));
 });
-test('Downloadable free sticker categories are visible and produce transparent PNG without AI credits',()=>{
- const lib=source('src/StickerDownloads.tsx'),media=source('src/MediaLibrary.tsx'),draw=source('src/FreeDesignAssets.ts');
+test('Real transparent PNG stickers are imported from the curated ZIP and offered individually, no fake emojis',()=>{
+ const lib=source('src/StickerDownloads.tsx'),app=source('src/App.tsx'),media=source('src/MediaAsset.ts');
  for(const category of ['Avatares','Matcha','Ejercicios','Pilates'])assert.ok(lib.includes(category));
- assert.ok(lib.includes('downloadFreeStickerPNG(s.id)'));
- assert.ok(media.includes('<StickerDownloads/>'));
- assert.ok(draw.includes('canvas.toDataURL(\'image/png\')'));
- assert.ok(draw.includes('paintFreeStickers(ctx,640,640,[id]'));
+ assert.ok(lib.includes("unzip(blob"));
+ assert.ok(lib.includes("assetCategory(a)==='sticker'"));
+ assert.ok(lib.includes("download(asset)"));
+ assert.ok(lib.includes('<img src={images[asset.id]}'));
+ assert.ok(media.includes("'sticker'"));
+ assert.ok(app.includes("category==='sticker'?'image/png':'image/jpeg'"));
+ assert.ok(app.includes("id: 'stickers'"));
+ assert.ok(app.includes("id: 'backgrounds'"));
 });
