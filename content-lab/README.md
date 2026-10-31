@@ -107,3 +107,5 @@ Stripe cobra normalmente 2.9% + $0.30 por tarjeta doméstica de EE.UU.; de $10 r
 El pago único compra acceso permanente a las herramientas locales y una cuota **finita** inicial de IA. Los paquetes de créditos adicionales requerirán su propio pago Stripe y entrega verificada mediante Make. No existen todavía productos de recarga ni checkout activo.
 
 **QA antes de abrir ventas:** probar una compra real, Stripe→Make→Supabase→correo→OTP iPhone, dos compradores aislados, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago sigue desactivado. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado de 50/día NO garantiza que no se consuman las 10k neuronas diarias.
+
+**Privacidad adicional:** la reserva de créditos ahora también es una función interna *service_role*; ningún comprador puede invocarla directamente desde el navegador ni modificar su saldo. El backend obtiene el UID/email de una sesión verificada antes de reservar o reembolsar.
