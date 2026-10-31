@@ -2751,6 +2751,7 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
   color:#fff;background:#183c56;border:1px solid #183c56;border-radius:999px;
   font:600 .82rem/1.4 var(--sans,Arial,sans-serif);transition:background .2s ease,transform .2s ease;
 }
+.class-page-v2 .class-faq-offer-link svg{width:17px;height:17px;flex:none}
 .class-page-v2 .class-faq-offer-link:hover{background:#2c5b78;transform:translateY(-1px)}
 .class-page-v2 .class-faq-offer-link:focus-visible{outline:3px solid #4781a4;outline-offset:3px}
 .class-page-v2 .class-faq .class-faq-offer-disclaimer{
