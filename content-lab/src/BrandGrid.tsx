@@ -3,74 +3,30 @@ import React,{useEffect,useState} from 'react';
 import {api} from './platform/client';
 import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,ArrowRight,Palette,LayoutGrid,Camera} from 'lucide-react';
 import './BrandGrid.css';
+import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
+import GridVisualEditor from './GridVisualEditor';
 
-type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;audience:string;rules:string};
+type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number};
-type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';posts:Tile[]};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls};
+type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
-export const CREATIVE_FORMATS=[
-'Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props',
-'Hands-on Editorial','High Contrast','Minimal Premium','Campaign Finale','Color Block',
-'Magazine Cover','Arch Frame','Product Spotlight','Floating Product','Typography Poster',
-'Negative Space','Diagonal Composition','Soft Luxury','Graphic Cutout','Story Card'
-];
-const readable=(hex:string)=>{if(!/^#[0-9a-f]{6}$/i.test(hex))return '#191919';const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return r*.299+g*.587+b*.114>155?'#191919':'#fff'};
-async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>){
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
-  const c=canvas.getContext('2d');if(!c)throw Error('No se pudo exportar la imagen.');
-  const paper=brand.background,accent=brand.color,ink=readable(paper),onAccent=readable(accent);
-  const fill=(x:number,y:number,w:number,h:number,color:string)=>{c.fillStyle=color;c.fillRect(x,y,w,h)};
-  const label=(s:string,x:number,y:number,color:string,size=24)=>{c.font='700 '+size+'px Arial, sans-serif';c.fillStyle=color;c.fillText(String(s||'').slice(0,55),x,y)};
-  const title=(s:string,x:number,y:number,w:number,color:string,base=85,max=5)=>{
-    let size=base,lines:string[]=[];
-    for(let z=0;z<13;z++){c.font='bold '+size+'px Georgia, serif';let line='';lines=[];for(const word of String(s||'').split(/\s+/)){const next=line?line+' '+word:word;if(c.measureText(next).width>w&&line){lines.push(line);line=word}else line=next}if(line)lines.push(line);if(lines.length<=max&&lines.every(v=>c.measureText(v).width<=w))break;size=Math.max(28,size-6)}
-    c.font='bold '+size+'px Georgia, serif';c.fillStyle=color;
-    lines.slice(0,max).forEach((v,j)=>c.fillText(v,x,y+j*size*1.14));
-  };
-  const photo=async(id:string,x:number,y:number,w:number,h:number,contain=false)=>{
-    if(!images[id])return;
-    const im=new Image();im.src=images[id];await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('No se pudo abrir la foto'))});
-    const k=contain?Math.min(w/im.width,h/im.height):Math.max(w/im.width,h/im.height);
-    const sw=im.width*k,sh=im.height*k;
-    if(!contain){c.save();c.beginPath();c.rect(x,y,w,h);c.clip()}
-    c.drawImage(im,x+(w-sw)/2,y+(h-sh)/2,sw,sh);
-    if(!contain)c.restore();
-  };
-  const imageId=tile.assetId;
-  const fmt=CREATIVE_FORMATS.indexOf(tile.format||CREATIVE_FORMATS[i]);
-  fill(0,0,1080,1350,paper);
-  if([0,12,18].includes(fmt)){
-    fill(0,0,1080,880,accent);await photo(imageId,0,0,1080,880);
-    label(brand.name.toUpperCase(),65,972,ink);title(tile.headline,65,1080,950,ink,77,2);label(tile.subtext,65,1295,ink,20);
-  }else if([1,9,14].includes(fmt)){
-    fill(0,0,1080,1350,accent);c.strokeStyle=onAccent;c.lineWidth=4;c.strokeRect(65,65,950,1220);
-    label(brand.name.toUpperCase(),100,150,onAccent);
-    title(tile.headline,100,390,840,onAccent,111,6);await photo(imageId,590,815,380,340);
-    label(tile.subtext,105,1230,onAccent,22);
-  }else if([2,5,6,16].includes(fmt)){
-    fill(0,0,1080,1350,accent);await photo(imageId,0,0,1080,1350);
-    fill(0,943,1080,407,paper);label(brand.name.toUpperCase(),65,1010,ink,22);
-    title(tile.headline,65,1120,950,ink,72,2);label(tile.subtext,65,1295,ink,19);
-  }else if([3,7,11,17].includes(fmt)){
-    fill(75,110,930,815,accent);await photo(imageId,75,110,930,815);
-    label(brand.name.toUpperCase(),70,78,ink);title(tile.headline,70,1045,930,ink,76,3);
-    label(tile.subtext,70,1285,ink,20);
-  }else if([4,8,13,19].includes(fmt)){
-    fill(0,0,1080,1350,accent);fill(65,65,950,1220,paper);
-    label(brand.name.toUpperCase(),105,135,ink);title(tile.headline,105,260,850,ink,80,2);
-    await photo(imageId,170,345,740,730);label(tile.subtext,105,1200,ink,22);
-  }else{
-    fill(0,0,515,1350,accent);await photo(imageId,515,0,565,1350);
-    label(brand.name.toUpperCase(),55,130,onAccent,22);
-    title(tile.headline,55,350,400,onAccent,83,7);label(tile.subtext,55,1265,onAccent,19);
-  }
-  if(grid.kind==='preserve'){
-    // Exact source image is placed on top, never synthesized, stretched or changed.
-    fill(610,650,413,515,paper);await photo(grid.sourceId,626,665,380,485,true);
-  }
-  return canvas;
+export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
+async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
+  return (await composeGridPoster(tile,i,brand,{
+    photo:images[tile.assetId],original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'
+  },size)).canvas;
 }
+async function imageFingerprint(src:string):Promise<string>{
+ const im=new Image();im.src=src;await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('No se puede analizar imagen'))});
+ const c=document.createElement('canvas');c.width=9;c.height=8;const ctx=c.getContext('2d');if(!ctx)throw Error('Canvas no disponible');
+ ctx.drawImage(im,0,0,9,8);const pixels=ctx.getImageData(0,0,9,8).data;let bits='';
+ for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+  const a=(y*9+x)*4,b=(y*9+x+1)*4;
+  bits+=(pixels[a]*.3+pixels[a+1]*.59+pixels[a+2]*.11)>=(pixels[b]*.3+pixels[b+1]*.59+pixels[b+2]*.11)?'1':'0';
+ }return bits;
+}
+const hamming=(a:string,b:string)=>[...a].reduce((n,c,i)=>n+Number(c!==b[i]),0);
 function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;brand:Brand;images:Record<string,string>}){
   const [preview,setPreview]=useState('');
   useEffect(()=>{
@@ -96,6 +52,10 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
   const [chooseExisting,setChooseExisting]=useState(false);
+  const [exportSize,setExportSize]=useState<ExportSize>('portrait');
+  const [qaNotes,setQaNotes]=useState<string[]>([]);
+  const [sessionPhotos,setSessionPhotos]=useState(0);
+  const [reviewed,setReviewed]=useState(false);
   const [connection,setConnection]=useState<'unknown'|'ready'|'error'>('unknown');
   const [testPhoto,setTestPhoto]=useState('');
   const library=assets.filter(a=>a.brandId===brand.id),own=grids.filter(g=>g.brandId===brand.id);
@@ -103,13 +63,16 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   const wrongReference=!!referenceId&&!!assets.find(a=>a.id===referenceId&&a.brandId!==brand.id);
   // Switching Instagram accounts must never retain the old account's selected photos.
   useEffect(()=>{
-    setSourceId('');setReferenceId('');setGrid(null);setSelected(0);
-    setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);
+    setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null);setSelected(0);
+    setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
-  useEffect(()=>{for(const id of [sourceId,referenceId,grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
-  const update=(change:Partial<Tile>)=>{setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);setDownloads([])};
+  useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
+  const update=(change:Partial<Tile>)=>{
+    setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);
+    setDownloads([]);setReviewed(false);setQaNotes([]);
+  };
   const upload=async(f:File|undefined,target:'source'|'reference')=>{
     if(!f)return;setUploading(target);
     try{const asset=await onUploadFile(f);if(asset){if(target==='source')setSourceId(asset.id);else setReferenceId(asset.id)}}catch(e){showError(e)}finally{setUploading('')}
@@ -123,8 +86,10 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief});
       const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
       notify(g.planningSource==='template'
-       ? 'Preparé 9 conceptos editables con la plantilla local porque Cloudflare no devolvió texto estructurado. No se generaron fotos.'
-       : 'Nueve conceptos creados con IA. Puedes generar una foto primero y el resto cuando quieras.');
+       ? 'Preparé 9 conceptos editables con plantilla de respaldo. No se generaron fotos.'
+       : g.analysisStatus==='vision'
+        ? 'La IA analizó tu foto y preparó 9 conceptos diferentes. Puedes revisarlos antes de generar fotos.'
+        : 'Nueve conceptos listos. El análisis de foto no estuvo disponible; revisa los detalles manualmente.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const checkConnection=async()=>{
@@ -147,7 +112,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
       const src='data:'+data.mime+';base64,'+data.content;
-      setTestPhoto(src);onNewAsset({id:data.id,brandId:brand.id,name:data.name||'Cloudflare test',mime:data.mime},src);
+      setTestPhoto(src);setSessionPhotos(n=>n+1);onNewAsset({id:data.id,brandId:brand.id,name:data.name||'Cloudflare test',mime:data.mime},src);
       setConnection('ready');notify('¡Foto generada y guardada en tu biblioteca privada!');
     }catch(e){showError(e)}
     finally{setBusy('')}
@@ -173,6 +138,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     const next=data.grid as Grid;const a=data.asset as Asset;
     setGrid(next);setGrids(old=>old.map(x=>x.id===next.id?next:x));
     onNewAsset(a,'data:'+a.mime+';base64,'+data.content);
+    setSessionPhotos(n=>n+1);
     return next;
   };
   const generate=async(i:number)=>{
@@ -191,23 +157,49 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   };
   const generateAll=async()=>{
     if(!grid)return;setBusy('all');
-    try{const g=await save(grid);await generateRemaining(g);notify('Nueve fotografías diferentes creadas.')}
+    if(!window.confirm('La IA generará todas las fotos pendientes con tu cuota gratuita de Cloudflare. ¿Continuar?'))return;
+    try{const g=await save(grid);await generateRemaining(g);notify('Fotos pendientes generadas. Revísalas antes de publicar.')}
     catch(e){showError(e);notify('Las fotos terminadas se conservan. Puedes continuar generando las pendientes.')}
     finally{setBusy('')}
   };
   const download=async(i:number)=>{
     if(!grid)return;
     if(!grid.posts[i].assetId||!images[grid.posts[i].assetId])return notify('Genera primero una foto nueva para este post.');
-    try{const c=await poster(grid.posts[i],i,grid,brand,images);
-      const a=document.createElement('a');a.download='brand-grid-post-'+String(i+1).padStart(2,'0')+'-1080x1350.png';a.href=c.toDataURL('image/png');a.click();notify('PNG del post '+(i+1)+' descargado.');
+    try{const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);
+      const a=document.createElement('a');a.download='brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+EXPORT_SIZES[exportSize].w+'x'+EXPORT_SIZES[exportSize].h+'.png';a.href=c.toDataURL('image/png');a.click();notify('PNG del post '+(i+1)+' descargado.');
     }catch(e){showError(e)}
   };
   const prepare=async()=>{
     if(!grid)return;
     if(grid.posts.some(p=>!p.assetId||!images[p.assetId]))return notify('Termina de generar las nueve fotos antes de descargar.');
     setBusy('export');
-    try{const files=[];for(let i=0;i<9;i++){const c=await poster(grid.posts[i],i,grid,brand,images);files.push({name:'brand-grid-post-'+String(i+1).padStart(2,'0')+'.png',url:c.toDataURL('image/png')})}
+    try{const files=[];for(let i=0;i<9;i++){const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);files.push({name:'brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+exportSize+'.png',url:c.toDataURL('image/png')})}
       setDownloads(files);notify('Nueve archivos PNG preparados para descarga individual.');
+    }catch(e){showError(e)}finally{setBusy('')}
+  };
+  const checkQuality=async()=>{
+    if(!grid)return;
+    setBusy('quality');
+    try{
+     const found:string[]=[];
+     const used=new Map<string,number>();
+     const hashes:{n:number;value:string}[]=[];
+     for(let i=0;i<grid.posts.length;i++){
+      const p=grid.posts[i];const image=p.assetId?images[p.assetId]:null;
+      if(!p.assetId||!image){found.push('Post '+(i+1)+': imagen pendiente.');continue;}
+      if(used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo.');
+      used.set(p.assetId,i);
+      if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
+      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'},exportSize);
+      if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
+      if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
+      const hash=await imageFingerprint(image);
+      for(const prev of hashes)if(hamming(hash,prev.value)<=5){found.push('Posts '+(prev.n+1)+' y '+(i+1)+': fotos visualmente muy similares; revísalas.');break;}
+      hashes.push({n:i,value:hash});
+     }
+     found.push('Revisión humana necesaria: inspecciona etiquetas, texto inventado por IA, logos, manos y fidelidad del producto. El Lab no puede garantizar estos detalles automáticamente.');
+     setQaNotes(found);setReviewed(false);
+     notify('Revisión preparada. Comprueba los avisos antes de publicar.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const tile=grid?.posts[selected];
@@ -244,21 +236,34 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     </div><div className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Sube una foto para generar nueve ideas visuales originales, cada una como publicación independiente.</p></div>:<>
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p></div><button className="btn ghost" onClick={()=>save(grid).then(()=>notify('Grid guardado')).catch(showError)}><Save size={16}/> Guardar</button></div>
+        <div className="v2-vision-status" role="status">{grid.analysisStatus==='vision'
+         ? '✓ La IA observó la foto principal y la referencia de estilo al preparar los conceptos.'
+         : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
         <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>setSelected(i)} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
           <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.assetId?'GENERADO':'CONCEPTO'}</span>
         </button>)}</div>
-        <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!grid.posts.every(p=>Boolean(p.assetId&&images[p.assetId]))} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
+        <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
+        <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
+           {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
+          </select></div>
+        <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!reviewed||!grid.posts.every(p=>Boolean(p.assetId&&images[p.assetId]))} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
+        <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No genera más imágenes.</p></div>
+          <button className="btn ghost" disabled={!!busy} onClick={checkQuality}>Revisar grid</button>
+          {qaNotes.length>0&&<><div className="bg-qa-list">{qaNotes.map((note,i)=><p key={i}>• {note}</p>)}</div><label className="bg-qa-confirm"><input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)}/> Revisé los detalles de las fotografías y apruebo el contenido para publicar.</label></>}
+         </div>
         <div className="bg-editor"><div className="bg-title"><span>{String(selected+1).padStart(2,'0')}</span><div><h3>Editar post {selected+1}</h3><p>Esta publicación es independiente.</p></div></div>
-          <label>Formato visual</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
+          <label>Formato visual · 20 composiciones diferentes</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
           <label>Titular</label><input value={tile?.headline||''} onChange={e=>update({headline:e.target.value})}/>
           <label>Subtítulo</label><input value={tile?.subtext||''} onChange={e=>update({subtext:e.target.value})}/>
           <label>Caption</label><textarea rows={3} value={tile?.caption||''} onChange={e=>update({caption:e.target.value})}/>
           <label>Dirección de la foto</label><textarea rows={3} value={tile?.scene||''} onChange={e=>update({scene:e.target.value})}/>
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
+          <p className="bg-note">El texto se coloca como capa editable después de crear la foto. Nunca pidas a la IA que escriba títulos en el producto.</p>
           <div className="bg-post-actions"><button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar este post':'Generar este post'}</button><button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
           <p className="bg-note">Modo foto/App intacta: la imagen original se compone sin alterarla. En modo producto la IA crea fotografías nuevas; revisa el resultado antes de publicar.</p>
         </div>
-        {downloads.length>0&&<div className="bg-downloads"><h3><Check size={19}/> 9 PNG individuales</h3><p>Descarga cada archivo por separado. Sin ZIP ni collages.</p><div>{downloads.map((v,i)=><a key={i} href={v.url} download={v.name}><Download size={15}/> Post {String(i+1).padStart(2,'0')}.png</a>)}</div></div>}
+        {downloads.length>0&&<div className="bg-downloads"><h3><Check size={19}/> PNG individuales · {EXPORT_SIZES[exportSize].title}</h3><p>Descarga cada archivo por separado. Sin ZIP ni collages. Composiciones revisadas.</p><div>{downloads.map((v,i)=><a key={i} href={v.url} download={v.name}><Download size={15}/> Post {String(i+1).padStart(2,'0')}.png</a>)}</div></div>}
       </>}
     </div></div>
   </div>;

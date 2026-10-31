@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const source=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('Portable frontend has no AppDeploy client dependency',()=>{for(const p of ['src/App.tsx','src/BrandGrid.tsx','src/CarouselFactory.tsx'])assert.equal(source(p).includes('@appdeploy/client'),false)});
-test('Strict brand language and original photo non-repetition rules exist',()=>{assert.match(source('supabase/functions/content-lab-generate/index.ts'),/LATIN AMERICAN SPANISH/);assert.match(source('supabase/functions/content-lab-generate/index.ts'),/US ENGLISH/);assert.match(source('src/BrandGrid.tsx'),/const imageId=tile.assetId;/)});
+test('Strict brand language and original photo non-repetition rules exist',()=>{assert.match(source('supabase/functions/content-lab-generate/index.ts'),/LATIN AMERICAN SPANISH/);assert.match(source('supabase/functions/content-lab-generate/index.ts'),/US ENGLISH/);assert.match(source('src/BrandGrid.tsx'),/photo:images\[tile.assetId\]/);assert.match(source('src/GridComposer.ts'),/await drawPhoto/)});
 test('Private schema includes RLS',()=>{const s=source('supabase/schema.sql');assert.match(s,/enable row level security/);assert.match(s,/content_lab_admins/);assert.match(s,/content-lab-private/)});
 
 test('free provider is Cloudflare FLUX with image reference, not paid Gemini',()=>{
@@ -29,7 +29,7 @@ test('Cross-brand source photos are not reused and server errors are readable',(
  const grid=source('src/BrandGrid.tsx');
  const client=source('src/platform/client.ts');
  const backend=source('supabase/functions/content-lab-generate/index.ts');
- assert.ok(grid.includes("setSourceId('');setReferenceId('');setGrid(null)"));
+ assert.ok(grid.includes("setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null)"));
  assert.ok(grid.includes('library.some(a=>a.id===sourceId)'));
  assert.ok(grid.includes('Cada cuenta tiene su biblioteca separada'));
  assert.ok(client.includes('context.clone().json()'));
@@ -62,6 +62,6 @@ test('Grid planning uses schema JSON mode with nine independent concepts and saf
  assert.ok(edge.includes("typeof output==='object'"));
  assert.ok(edge.includes("const fallbackTexts="));
  assert.ok(edge.includes("planningSource='template'"));
- assert.ok(edge.includes("planningSource,posts"));
+ assert.ok(edge.includes("planningSource,analysisStatus,visualDescription,posts"));
  assert.ok(ui.includes("g.planningSource==='template'"));
 });

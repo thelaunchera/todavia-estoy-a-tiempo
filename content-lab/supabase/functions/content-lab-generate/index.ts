@@ -16,6 +16,26 @@ const accountId=(Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'').replace(/\s+/g,'');
 const token=(Deno.env.get('CLOUDFLARE_API_TOKEN')||'').trim();
 const photoModel='@cf/black-forest-labs/flux-2-klein-4b';
 const textModel='@cf/meta/llama-3.1-8b-instruct-fp8-fast';
+const visionModel='@cf/qwen/qwen3.8-27b';
+async function inspectReference(images:{data:string;mime:string}[],brief:string):Promise<string>{
+ ensureFreeProvider();
+ if(!images.length)return '';
+ // Deliberate one-shot multimodal analysis; no model-generated claims about contents
+ // are published without review. First image is the product, second optional image is style.
+ const content:any[]=[{type:'text',text:
+  'Describe ONLY visible facts from the attached images. First image is the exact product or person to preserve; optional second image is style inspiration, never a second product to copy. Identify object, colors, real material/packaging/labels only when legible, framing, lighting, background and 5 useful different photo angles. Never guess prices, ingredient lists, people identities or unseen features. Keep under 140 words. Creative brief: '+clean(brief,360)
+ }];
+ for(const p of images.slice(0,2))content.push({type:'image_url',image_url:{url:'data:'+p.mime+';base64,'+p.data}});
+ const response=await fetch(endpoint(visionModel),{
+  method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+  body:JSON.stringify({messages:[{role:'user',content}],temperature:.2,max_tokens:260})
+ });
+ let result:any=null;try{result=await response.json()}catch{}
+ if(!response.ok||result?.success===false)throw Error('El análisis visual de Cloudflare no está disponible.');
+ const raw=result?.result?.response||result?.result?.text||'';
+ if(typeof raw!=='string'||raw.trim().length<15)throw Error('La IA visual no pudo describir las fotos.');
+ return clean(raw,1050);
+}
 const structuredTextModel='@cf/meta/llama-3.1-8b-instruct';
 const gridShots=[
  '3/4 full product shot in clean seamless studio, softbox light, eye-level, spacious clean backdrop',
@@ -211,12 +231,28 @@ Deno.serve(async request=>{
     if(ref.brandId!==brandId)throw Error('Esta referencia de estilo está guardada en otra marca. Vuelve a subirla en '+b.name+'.');
    }
    const lang=language(b);
+   const photos:{data:string;mime:string}[]=[];
+   let visualDescription='',analysisStatus:'vision'|'fallback'='fallback';
+   if(source.aiReference)photos.push({data:String(source.aiReference),mime:'image/jpeg'});
+   if(referenceId&&referenceId!==sourceId){
+    const style=await find('assets',referenceId);
+    if(style.aiReference)photos.push({data:String(style.aiReference),mime:'image/jpeg'});
+   }
+   if(photos.length){
+    try{visualDescription=await inspectReference(photos,clean(body.brief,400));analysisStatus='vision';}
+    catch(e){
+     // The user still gets an editable plan; state plainly that visual analysis failed.
+     console.warn('Image vision unavailable; grid planning falls back to text. ',e instanceof Error?e.message:'');
+    }
+   }
    const prompt=[
     'Create a campaign of exactly 9 independent Instagram posts from ONE product reference. Do not make a carousel or repeat the same photograph.',
     'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Latin American Spanish')+'.',
     'Brand: '+clean(b.name,100)+'. Voice: '+clean(b.voice,130)+'.',
     'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
     'Creative brief from owner: '+clean(body.brief,400)+'.',
+    'Visible product/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
+    'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'.',
     'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
     'Create only three short strings for each of the nine posts: headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
     'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
@@ -253,10 +289,10 @@ Deno.serve(async request=>{
    }
    const posts=plan.posts.map((p:any,i:number)=>({
     index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
-    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Use real subject identity from reference photo. '+clean(body.brief,200),
+    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Visual description: '+clean(visualDescription,440)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,200),
     format:gridLayouts[i],assetId:''
    }));
-   return send(await save('grids',{brandId,sourceId,referenceId,kind:body.kind==='preserve'?'preserve':'product',brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,posts}));
+   return send(await save('grids',{brandId,sourceId,referenceId,kind:body.kind==='preserve'?'preserve':'product',brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts}));
   }
   if(action==='grid-image'){
    const grid=await find('grids',clean(body.gridId,100)),i=Number(body.index);
@@ -276,7 +312,7 @@ Deno.serve(async request=>{
    const references:{data:string;mime:string}[]=[];
    if(grid.kind!=='preserve'){const p=await aiReference(grid.sourceId);references.push({data:p.data,mime:p.mime});}
    if(grid.referenceId){const p=await aiReference(grid.referenceId);references.push({data:p.data,mime:p.mime});}
-   const prompt='Create ONE NEW PHOTOGRAPH in VERTICAL 4:5, not grid or collage. Shot '+(i+1)+' of nine, MANDATORY DIFFERENT shot: '+shots[i]+'. Scene '+grid.posts[i].scene+'. Brand '+b.name+' palette '+b.color+' '+b.background+'. Do not repeat/crop/recolor the source photo; truly new camera shot, light, props and environment. '+(grid.kind==='preserve'?'Create only aesthetic complementary background, no fake app UI, no subject, no screen; original image will be composited intact.':'First attached photo identifies real product: preserve its identity, shape, material and colors. Second photo optional style inspiration only. Do not reproduce someone else brand.')+' NO text, words, logos or watermarks.';
+   const prompt='Create ONE NEW PHOTOGRAPH in VERTICAL 4:5, not grid or collage. Shot '+(i+1)+' of nine, MANDATORY DIFFERENT shot: '+shots[i]+'. Scene '+grid.posts[i].scene+'. Brand '+b.name+' palette '+b.color+' '+b.background+'. Brand photo mood: '+clean(b.photoMood,210)+'. Absolutely avoid: '+clean(b.avoid,200)+'. Do not repeat/crop/recolor the source photo; truly new camera shot, light, props and environment. '+(grid.kind==='preserve'?'Create only aesthetic complementary background, no fake app UI, no subject, no screen; original image will be composited intact.':'First attached photo identifies real product: preserve its identity, shape, material and colors. Second photo optional style inspiration only. Do not reproduce someone else brand.')+' NO text, words, logos, watermarks, lettering or fictional interface. Marketing headlines will be overlaid later in a separate accurate typography layer.';
    const image:any=await cloudflareRequest(prompt,references,true);
    const asset=await store(grid.brandId,'Post '+(i+1)+' - '+grid.title,image.data,image.mime);
    const posts=grid.posts.map((p:any,j:number)=>j===i?{...p,assetId:asset.id}:p);
