@@ -5,9 +5,10 @@ import {clampRect,photoDefault,type TouchRect,type StickerPositions} from './Tou
 import {coverPlacement,normalizeCrop} from './PhotoCrop';
 import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 import {carouselFontFamily,readableColor,type CarouselFont} from './CarouselArtDirection';
+import {editorialPlan,type EditorialLayout} from './EditorialRhythm';
 export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;canvasColor?:string;canvasGradient?:string};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;editorialRhythm?:boolean;canvasColor?:string;canvasGradient?:string};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -37,18 +38,23 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
 
 /** Paints transparent typography over back-layer photos (matches the original layout). */
 export async function paintSeamlessTypography(
- ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId, fontId:CarouselFont='brand', freeCanvas=false, canvasColor='#FFFFFF',
+ ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId, fontId:CarouselFont='brand', freeCanvas=false, canvasColor='#FFFFFF', editorialRhythm=false,
 ) {
  for(const [i,page] of pages.entries()){
   const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */}
   const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':(freeCanvas&&backgroundId==='brand'?readableColor(canvasColor):'#191919');
+  const plan=editorialRhythm?editorialPlan((page.layout||'statement') as EditorialLayout,!!page.assetId,!!page.description.trim()):null;
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
-   ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
+   ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+(plan?.eyebrow.x??82),plan?.eyebrow.top??95);}
   // In a text-only slide, center the headline more intentionally.
   const headlineY=page.assetId?244:page.description.trim()?360:475;
-  words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
-  if(page.description)words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
+  if(plan)words(ctx,page.title,x+plan.title.x,plan.title.top,plan.title.width,plan.title.size,plan.title.lines,ink,font);
+  else words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
+  if(page.description){
+   if(plan)words(ctx,page.description,x+plan.body.x,plan.body.top,plan.body.width,plan.body.size,plan.body.lines,ink,'Arial, sans-serif');
+   else words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
+  }
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;ctx.textBaseline='top';
   if(!freeCanvas){
     ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
@@ -98,6 +104,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const x=i*W,page=pages[i];
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
+  const plan=opts.editorialRhythm?editorialPlan((page.layout||'statement') as EditorialLayout,!!page.assetId,!!page.description.trim()):null;
   const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn'||(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')&&readableColor(opts.canvasColor||'#FFFFFF')==='#FFFFFF'),ink=dark?'#FFFFFF':'#191919';
   if(!opts.freeCanvas){
     const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
@@ -108,12 +115,14 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   if(!opts.editorMode){
   const label=(page.eyebrow||'').slice(0,45).toUpperCase();
   ctx.fillStyle=ink;ctx.textBaseline='top';ctx.font='700 25px Arial, sans-serif';
-  ctx.fillText(label,x+82,95);
+  ctx.fillText(label,x+(plan?.eyebrow.x??82),plan?.eyebrow.top??95);
   // In a text-only slide, center the headline more intentionally.
   const headlineY=page.assetId?244:page.description.trim()?360:475;
-  words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
+  if(plan)words(ctx,page.title,x+plan.title.x,plan.title.top,plan.title.width,plan.title.size,plan.title.lines,ink,font);
+  else words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
   if(page.description){
-   words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
+   if(plan)words(ctx,page.description,x+plan.body.x,plan.body.top,plan.body.width,plan.body.size,plan.body.lines,ink,'Arial, sans-serif');
+   else words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
   }
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;
   if(!opts.freeCanvas){
@@ -139,7 +148,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
   await paintPanoramaLayers(ctx,wide.width,H,behind,images);
-  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor);
+  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor,opts.editorialRhythm);
   await paintPanoramaLayers(ctx,wide.width,H,front,images);
  }
  return wide;
