@@ -289,15 +289,19 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
       const p=grid.posts[i];
       const image=p.design&&grid.kind==='preserve'?images[grid.sourceId]:p.assetId?images[p.assetId]:null;
       if(!image){pending++;continue;}
-      if(used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo.');
-      used.set(p.assetId,i);
+      // Reusing the SAME genuine original is intentional in editorial design.
+      // Only duplicate generated assets are a QA problem, not the original photo.
+      if(p.assetId&&used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo generado.');
+      if(p.assetId)used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
       const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design},exportSize);
       if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
       if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
-      const hash=await imageFingerprint(image);
-      for(const prev of hashes)if(hamming(hash,prev.value)<=5){found.push('Posts '+(prev.n+1)+' y '+(i+1)+': fotos visualmente muy similares; revísalas.');break;}
-      hashes.push({n:i,value:hash});
+      if(!(p.design&&grid.kind==='preserve')){
+        const hash=await imageFingerprint(image);
+        for(const prev of hashes)if(hamming(hash,prev.value)<=5){found.push('Posts '+(prev.n+1)+' y '+(i+1)+': fotos generadas muy similares; revísalas.');break;}
+        hashes.push({n:i,value:hash});
+      }
      }
      if(pending>0)found.unshift(pending+' de 9 publicaciones sin diseño exportable. Si quieres conservar tu retrato, usa un diseño editorial con la foto original. Si quieres escenas nuevas, genera cada foto con IA.');
      else found.unshift('Las 9 publicaciones tienen una imagen final. Revisa las indicaciones antes de exportar.');
@@ -375,13 +379,16 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
          : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
         <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>setSelected(i)} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
-          <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.assetId?'GENERADO':'CONCEPTO'}</span>
+          <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.design&&grid.kind==='preserve'?'DISEÑO LISTO':t.assetId?'FOTO GENERADA':'CONCEPTO'}</span>
         </button>)}</div>
         <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
            {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
           </select></div>
-        <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!reviewed||gridPending>0} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
+        <div className="bg-grid-actions">{!(grid.kind==='preserve'&&grid.posts.every(p=>p.design))&&
+          <button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar fotos pendientes</button>}
+          {grid.kind==='preserve'&&grid.posts.every(p=>p.design)&&<p className="bg-free-design"><Check size={17}/> Tus nueve diseños usan la foto original. No necesitas generar imágenes con IA.</p>}
+          <button className="btn ghost" disabled={!!busy||!reviewed||gridPending>0} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
         <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No genera más imágenes.</p></div>
           <button className="btn ghost" disabled={!!busy} onClick={checkQuality}>Revisar grid</button>
           {qaNotes.length>0&&<><div className="bg-qa-list" role="status">{qaNotes.map((note,i)=><p key={i}>{i===0?'':'• '}{note}</p>)}</div>
@@ -433,7 +440,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
-          <div className="bg-post-actions"><button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar este post':'Generar este post'}</button><button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
+          <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
+            <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
+            <button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
           <p className="bg-note">Modo foto/App intacta: la imagen original se compone sin alterarla. En modo producto la IA crea fotografías nuevas; revisa el resultado antes de publicar.</p>
         </div>
         {downloads.length>0&&<div className="bg-downloads"><h3><Check size={19}/> PNG individuales · {EXPORT_SIZES[exportSize].title}</h3><p>Descarga cada archivo por separado. Sin ZIP ni collages. Composiciones revisadas.</p><div>{downloads.map((v,i)=><a key={i} href={v.url} download={v.name}><Download size={15}/> Post {String(i+1).padStart(2,'0')}.png</a>)}</div></div>}
