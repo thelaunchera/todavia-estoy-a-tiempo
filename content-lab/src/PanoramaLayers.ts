@@ -43,7 +43,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       id: item.id.slice(0, 160), assetId: item.assetId.slice(0, 150),
       name: String(item.name || 'Foto').slice(0, 100),
       kind: item.kind === 'sticker' ? 'sticker' as const : 'photo' as const,
-      ...(item.placement === 'behind-text' ? {placement: 'behind-text' as const} : {}),
+      ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       rect: clampPanoramaRect(item.rect),
     }];
   });
