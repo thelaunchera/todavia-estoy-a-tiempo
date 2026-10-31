@@ -43,8 +43,9 @@ const inkOn=(c:string)=>contrast(c,'#191919')>=contrast(c,'#ffffff')?'#191919':'
 const clamp=(v:number,min:number,max:number)=>Math.max(min,Math.min(max,v));
 function textFont(input:string|undefined,serif:boolean){
  const f=(input||'').toLowerCase();
- if(f==='futura'||f==='sans'||f==='inter'||f==='dm sans')return 'Arial, sans-serif';
- if(f==='prompt')return 'Arial, sans-serif';
+ if(f==='futura')return 'Futura, "Century Gothic", Arial, sans-serif';
+ if(f==='prompt')return '"Prompt", Arial, sans-serif';
+ if(f==='sans'||f==='inter'||f==='dm sans')return 'Arial, sans-serif';
  return serif?'Georgia, serif':'Arial, sans-serif';
 }
 function drawWrapped(ctx:CanvasRenderingContext2D,value:string,x:number,y:number,width:number,maxHeight:number,fontSize:number,font:string,color:string,align:CanvasTextAlign){
@@ -109,6 +110,7 @@ async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:numb
 export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean},size:ExportSize='portrait'){
  const fmt=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length],metrics=EXPORT_SIZES[size];
  const W=metrics.w,H=metrics.h,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+ try{if((brand.headingFont||'').toLowerCase()==='prompt'&&document.fonts)await document.fonts.load('700 82px Prompt');}catch{/* fall back without blocking export */}
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el canvas');
  const accent=validColor(brand.color,'#BED8E9'),paper=validColor(brand.background,'#FAF8F3'),second=validColor(brand.secondaryColor,'#E5D5C6');
  const dark=fmt.dark,base=fmt.shape==='solid'?accent:fmt.shape==='dark'?'#191919':paper;
