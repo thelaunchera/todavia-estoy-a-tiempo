@@ -153,7 +153,7 @@ export const api={
         // Keep the original resolution in private Storage and a separate tiny reference in owner-only RLS.
         const original=await (await fetch('data:'+mime+';base64,'+payload.content)).blob();
         const preview=await image.resizeIfNeeded(original,{maxDimension:480,maxPixels:230400,quality:0.68,mimeType:'image/jpeg'});
-        return {data:await add('assets',{brandId:payload.brandId,path,mime,name:payload.name,aiReference:preview.data})};
+        return {data:await add('assets',{brandId:payload.brandId,path,mime,name:payload.name,displayName:payload.displayName||'',category:payload.category||'original',aiReference:preview.data})};
       }
       catch(e){await sb.storage.from(bucket).remove([path]);throw e;}
     }
@@ -165,8 +165,16 @@ export const api={
     throw Error('Ruta no disponible: '+path);
   },
   put:async(path:string,payload:any):Promise<{data:any}>=>{
-    const m=path.match(/^\/api\/(brands|posts|grids|prompts)\/([^/]+)$/);
+    const m=path.match(/^\/api\/(brands|posts|grids|prompts|assets)\/([^/]+)$/);
     if(!m)throw Error('Ruta de edición inválida.');
+    if(m[1]==='assets'){
+      // Never accept changes to storage paths, owner, AI source, brand ID or generated status from a rename.
+      const patch:{displayName?:string;category?:string}={};
+      if(typeof payload.displayName==='string')patch.displayName=payload.displayName.replace(/[<>\\x00-\\x1F]/g,'').trim().slice(0,85);
+      if(['original','reference','logo','generated','screenshot'].includes(payload.category))patch.category=payload.category;
+      if(!Object.keys(patch).length)throw Error('No hay cambios válidos para la imagen.');
+      return {data:await update('assets',decodeURIComponent(m[2]),patch)};
+    }
     return {data:await update(m[1],decodeURIComponent(m[2]),payload)};
   },
   delete:async(path:string):Promise<{data:any}>=>{
