@@ -65,7 +65,14 @@ export const auth={
   signInWithOtp:async(email:string)=>{
     requireConfig();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Introduce tu correo electrónico.');
-    out(await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:window.location.origin+window.location.pathname}}));
+    out(await sb.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:false,emailRedirectTo:window.location.origin+window.location.pathname}}));
+  },
+  verifyEmailOtp:async(email:string,code:string)=>{
+    requireConfig();
+    if(!/^[0-9]{6,8}$/.test(code))throw Error('Introduce el código numérico que recibiste por correo.');
+    const result=out(await sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'}));
+    if(!result?.session)throw Error('No se pudo completar el acceso. Solicita un código nuevo.');
+    return result;
   },
   signOut:async()=>{out(await sb.auth.signOut())}
 };
