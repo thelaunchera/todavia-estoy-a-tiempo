@@ -18,7 +18,7 @@ import TouchLayerCanvas from './TouchLayerCanvas';
 import PanoramaEditor from './PanoramaEditor';
 import {coverPlacement,normalizeCrop,photoFrameMetrics,initialPanoramaPhotoRect} from './PhotoCrop';
 import {overlayPanoramaPages,paintPanoramaLayers,reorderPanoramaLayers,type LayerMove,type PanoramaLayer} from './PanoramaLayers';
-import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
+import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,layerCornerPixels,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 
 type Brand = {
@@ -144,7 +144,11 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     await img.decode();
     if(!img.naturalWidth||!img.naturalHeight)return false;
     const mode=slide.frameStyle||'none';
-    const {inset,bottom,radius:outerRadius,innerRadius:radius}=photoFrameMetrics(w,h,mode);
+    const metrics=photoFrameMetrics(w,h,mode);
+    const {inset,bottom}=metrics;
+    const customRadius=slide.photoPosition?.cornerRadius;
+    const outerRadius=customRadius===undefined?metrics.radius:layerCornerPixels(slide.photoPosition!,w,h);
+    const radius=customRadius===undefined?metrics.innerRadius:Math.max(0,outerRadius-inset*.38);
     if(mode!=='none'){
       ctx.save();
       if(mode==='soft-shadow'||mode==='polaroid'){
