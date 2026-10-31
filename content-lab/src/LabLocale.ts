@@ -112,7 +112,7 @@ const pairs:[string,string][]=[
  ['Private access · $10 one-time purchase coming soon','Acceso privado · $10 pago único próximamente'],
  ['Inspiration','Inspiración'],['Photo','Foto'],['Background','Fondo'],['Review','Revisar'],
  ['Download PNG','Descargar PNG'],['Add text','Añadir texto'],
- ['Add photos','Añadir fotos'],['Photos and stickers','Fotos y stickers']
+ ['Add photos','Añadir fotos'],['Photos and stickers','Fotos y stickers'],
  ['Make room for','Haz espacio para'],['One home for your ideas. A different voice for every brand.','Un espacio para tus ideas. Cada marca con su propia voz.'],
  ['What are we creating today?','¿Qué vamos a crear hoy?'],
  ['Start with one problem, one photo or one idea worth sharing.','Empieza por un problema, una foto o una idea para compartir.'],
