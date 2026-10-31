@@ -22,32 +22,48 @@
  <section class="aula-entry" aria-labelledby="entry-title">
   <div class="wrap aula-entry-layout">
    <div class="aula-entry-copy">
-    <a class="aula-entry-back" href="../index.html">← Volver al podcast</a>
-    <p class="aula-entry-eyebrow">TU PRIMERA WEB CON IA · CENTRO DE ALUMNOS</p>
-    <h1 id="entry-title">Tu espacio para <em>seguir creando.</em></h1>
-    <p class="aula-entry-intro">Tus lecciones, tus materiales y tus ideas te esperan aquí. Continúa a tu ritmo, desde donde lo dejaste.</p>
-    <p id="room-message" class="message" role="status">Comprobando el acceso privado…</p>
-  <section id="login-panel" class="panel" hidden>
-   <p class="eyebrow">ACCESO PRIVADO</p>
-   <h2>Entra con tu correo.</h2>
-   <p>Escribe el correo que utilizaste al comprar la clase. Te enviaremos un enlace seguro para entrar sin contraseña.</p>
-   <form id="login-form">
-    <label for="login-email">Correo de la compra</label>
-    <div class="formline"><input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com" maxlength="254"><button type="submit">Enviar mi enlace</button></div>
-   </form>
-   <small>Solo las compras confirmadas tienen acceso a las lecciones y materiales.</small><p><a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a></p>
-  </section>
-  <section id="no-access" class="panel" hidden>
-   <p class="eyebrow">AÚN NO HAY COMPRA VERIFICADA</p>
-   <h2>Tu aula todavía no está activada.</h2>
-   <p>No encontramos una compra confirmada vinculada a ese correo. Si ya compraste, comprueba que usaste el mismo email o utiliza el formulario de ayuda.</p>
-
-   <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">Solicitar ayuda aquí</a>
-  </section>
+    <div class="aula-entry-topline">
+      <a class="aula-entry-back" href="../index.html">← Volver al podcast</a>
+      <span class="aula-entry-edition" aria-hidden="true">EDICIÓN / 01</span>
+    </div>
+    <div class="aula-entry-heading">
+      <p class="aula-entry-eyebrow"><span class="aula-entry-marker" aria-hidden="true"></span> TU PRIMERA WEB CON IA</p>
+      <h1 id="entry-title">Tu espacio para <em>seguir creando.</em></h1>
+      <p class="aula-entry-intro">Aquí están tus lecciones, tus materiales y lo que has avanzado. Vuelve cuando quieras y continúa a tu ritmo.</p>
+    </div>
+    <section id="login-panel" class="panel" hidden aria-labelledby="aula-login-title">
+      <div class="aula-login-heading">
+        <span class="aula-login-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+        <span class="aula-login-label">ACCESO SOLO PARA ALUMNOS</span>
+      </div>
+      <h2 id="aula-login-title">Entra a tu aula.</h2>
+      <p>Usa el mismo correo con el que compraste la clase. Te enviaremos un enlace seguro, sin contraseña.</p>
+      <form id="login-form">
+        <label for="login-email">Tu correo de compra</label>
+        <input type="email" id="login-email" required autocomplete="email" inputmode="email" placeholder="nombre@correo.com" maxlength="254">
+        <button type="submit"><span>Enviarme enlace de acceso</span><span class="aula-login-arrow" aria-hidden="true">↗</span></button>
+      </form>
+      <div class="aula-login-footer">
+        <small>El acceso se habilita únicamente con una compra confirmada.</small>
+        <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a>
+      </div>
+    </section>
+    <section id="no-access" class="panel" hidden aria-labelledby="aula-no-access-title">
+      <p class="eyebrow">ACCESO PENDIENTE</p>
+      <h2 id="aula-no-access-title">Todavía no vemos tu compra.</h2>
+      <p>No encontramos una compra confirmada con este correo. Si ya compraste, revisa que sea el mismo correo o escríbenos desde aquí.</p>
+      <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">Necesito ayuda con mi acceso</a>
+    </section>
+    <p id="room-message" class="message" role="status" aria-live="polite">Comprobando el acceso privado…</p>
+    <p class="aula-entry-microcopy"><span class="aula-entry-microdot" aria-hidden="true"></span> Aprende a tu ritmo. Tu progreso se guarda en tu cuenta.</p>
    </div>
    <figure class="aula-entry-visual">
-    <img src="../assets/clase-retrato-laptop-real-2026.jpg" width="1122" height="1402" alt="La instructora trabajando con una laptop durante la preparación de su clase" fetchpriority="high" decoding="async">
-    <figcaption><span class="aula-visual-index">01 / TU AULA</span><span class="aula-visual-label">Aprende. Practica. Crea.</span></figcaption>
+     <img src="../assets/clase-retrato-laptop-real-2026.jpg" width="1122" height="1402" alt="La instructora preparando su clase frente a una laptop" fetchpriority="high" decoding="async">
+     <span class="aula-visual-topline" aria-hidden="true"><span>CLASE PRÁCTICA</span><span>01 — 09</span></span>
+     <figcaption>
+       <span class="aula-visual-caption">De tu primera idea<br><em>a tu primera web.</em></span>
+       <span class="aula-visual-label">TU PRIMERA WEB CON IA</span>
+     </figcaption>
    </figure>
   </div>
  </section>
