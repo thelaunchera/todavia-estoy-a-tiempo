@@ -591,8 +591,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         }
         const page=await drawSlide(slide,i,slides.length,brand,images,style,touchEdit);
         if(!touchEdit&&style.panoramaLayers?.length){
+          const behind=style.panoramaLayers.filter(layer=>layer.placement==='behind-text');
+          const front=style.panoramaLayers.filter(layer=>layer.placement!=='behind-text');
           const ctx=page.getContext('2d');if(ctx){ctx.save();ctx.translate(-i*1080,0);
-            await paintPanoramaLayers(ctx,slides.length*1080,1350,style.panoramaLayers,images);ctx.restore();}
+            await paintPanoramaLayers(ctx,slides.length*1080,1350,behind,images);
+            if(behind.length)await paintCarouselTypography(ctx,slides,brand,style);
+            await paintPanoramaLayers(ctx,slides.length*1080,1350,front,images);ctx.restore();}
         }
         return page;
       };
@@ -606,6 +610,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   useEffect(()=>{
     let active=true;
     setPanoramaError('');
+    if(!(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text'))setPanoramaTextPreview('');
     const render=async()=>{
       // Photo slots are removed from this base and represented as live DOM layers.
       const editable=slides.map(part=>({...part,photoPosition:part.assetId
@@ -622,11 +627,22 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       }
       return wide;
     };
-    const timer=window.setTimeout(()=>{void render().then(wide=>{
+    const timer=window.setTimeout(()=>{void render().then(async wide=>{
       if(!active){wide.width=1;return;}
       const small=document.createElement('canvas');small.width=slides.length*432;small.height=540;
       small.getContext('2d')?.drawImage(wide,0,0,small.width,small.height);
-      setPanoramaPreview(small.toDataURL('image/png'));
+      const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text');
+      if(hasBehind){
+        const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
+        const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId);
+        else await paintCarouselTypography(typeCtx,slides,brand,style);
+        const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
+        scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
+        if(active)setPanoramaTextPreview(scaled.toDataURL('image/png'));
+        typography.width=1;scaled.width=1;
+      }
+      if(active)setPanoramaPreview(small.toDataURL('image/png'));
       wide.width=1;small.width=1;
     }).catch(e=>{if(active)setPanoramaError(e instanceof Error?e.message:'No se pudo preparar la vista previa.');});},120);
     return()=>{active=false;window.clearTimeout(timer)};
@@ -739,9 +755,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
       </div>}
     </section>
-    <PanoramaEditor preview={panoramaPreview} count={slides.length} seamless={style.seamlessEnabled}
+    <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
       layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
       onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
+      onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
     <div className="factory-work">
