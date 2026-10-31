@@ -39,7 +39,7 @@ test('full Prompt Studio workflow is hooked into app and generates from user pro
  assert.ok(grid.includes("setBrief(promptSelection.text)"));
  assert.ok(grid.includes("setCreativeSettings(promptSelection.settings)"));
  assert.ok(grid.includes("prompt:(brief.trim()"));
- assert.ok(grid.includes("sourceId,referenceId,kind,brief,designMode,designPreset,creativeSettings"));
+ assert.ok(grid.includes("sourceId,referenceId,referenceFocus,kind,brief,designMode,designPreset,creativeSettings"));
  assert.ok(ui.includes("onUse(compiled,{...settings,instruction:manual})"));
 });
 test('saved prompts remain private to authenticated owner with no unprotected public editing',()=>{
