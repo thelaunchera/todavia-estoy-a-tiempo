@@ -655,7 +655,7 @@ function App() {
       const asset = data as Asset;
       setAssets(prev => [asset, ...prev]);
       setImages(prev => ({ ...prev, [asset.id]: 'data:' + prepared.mimeType + ';base64,' + prepared.data }));
-      if (tab === 'create') change('assetId', asset.id);
+      if (tab === 'create' && category === 'original') change('assetId', asset.id);
       toast((category==='sticker'?'Sticker PNG transparente':'Foto')+' guardado en '+brand.name+' ✓');
       return asset;
     } catch (e) {
@@ -1319,6 +1319,26 @@ function App() {
                     <h3>Your graphic direction</h3>
                     <small>Instagram · 1080 × 1350 PNG</small>
                   </div>
+                  <div className="cover-photo-upload" role="group" aria-label="Fotografía de la portada"
+                    onDragOver={e=>e.preventDefault()}
+                    onDrop={e=>{e.preventDefault();const file=Array.from(e.dataTransfer.files).find(f=>f.type.startsWith('image/')||/[.](heic|heif)$/i.test(f.name));if(file)void upload(file,'original')}}>
+                    <div className="cover-photo-swatch">
+                      {editor.assetId&&images[editor.assetId]
+                        ?<img src={images[editor.assetId]} alt="Foto seleccionada para tu post" draggable={false}/>
+                        :<ImagePlus size={27}/>}
+                    </div>
+                    <div className="cover-photo-info">
+                      <strong>{editor.assetId?'Tu foto está en el diseño':'Empieza con tu propia foto'}</strong>
+                      <span>{editor.assetId?'Puedes cambiarla cuando quieras.':'Elige una foto de tu tablet, móvil o computadora.'}</span>
+                    </div>
+                    <div className="cover-photo-buttons">
+                      <button className="btn dark" type="button" disabled={busy==='upload'} onClick={()=>uploadRef.current?.click()}>
+                        {busy==='upload'?<LoaderCircle size={16} className="spin"/>:<ImagePlus size={16}/>}
+                        {busy==='upload'?'Subiendo foto…':editor.assetId?'Cambiar foto':'Subir mi foto'}
+                      </button>
+                      {editor.assetId&&<button className="cover-photo-clear" type="button" onClick={()=>change('assetId','')}>Quitar</button>}
+                    </div>
+                  </div>
                   <div className="cover-studio-content">
                   <CreativeCover
                     post={editor}
@@ -1351,24 +1371,6 @@ function App() {
                       </button>
                     ))}
                   </div>
-                  <label>Choose an original image</label>
-                  <select
-                    value={editor.assetId}
-                    onChange={e => change('assetId', e.target.value)}
-                  >
-                    <option value="">No image selected</option>
-                    {library.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    className="btn ghost wide"
-                    onClick={() => uploadRef.current?.click()}
-                  >
-                    <ImagePlus size={16} /> Upload photo / screenshot
-                  </button>
                   <button
                     className="btn blue wide"
                     onClick={() =>
