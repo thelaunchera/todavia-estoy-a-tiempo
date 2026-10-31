@@ -45,7 +45,9 @@ export async function paintSeamlessTypography(
   const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':(freeCanvas&&backgroundId==='brand'?readableColor(canvasColor):'#191919');
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
    ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
-  words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
+  // In a text-only slide, center the headline more intentionally.
+  const headlineY=page.assetId?244:page.description.trim()?360:475;
+  words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
   if(page.description)words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;ctx.textBaseline='top';
   if(!freeCanvas){
@@ -107,7 +109,9 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const label=(page.eyebrow||'').slice(0,45).toUpperCase();
   ctx.fillStyle=ink;ctx.textBaseline='top';ctx.font='700 25px Arial, sans-serif';
   ctx.fillText(label,x+82,95);
-  words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
+  // In a text-only slide, center the headline more intentionally.
+  const headlineY=page.assetId?244:page.description.trim()?360:475;
+  words(ctx,page.title,x+82,headlineY,W-164,page.assetId?92:112,5,ink,font);
   if(page.description){
    words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
   }
