@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
-import { clampRect } from './TouchGeometry';
+import { clampRect, clampPanoramaRect } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics } from './PhotoCrop';
 import './TouchLayerCanvas.css';
 
@@ -20,6 +20,7 @@ type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
   width: number; height: number; resize: boolean; crop: boolean;
   overflowX: number; overflowY: number;
+  scrollLeft: number;
   pinchDistance?: number; pinchCenter?: [number, number];
 };
 export default function TouchLayerCanvas({
@@ -32,18 +33,42 @@ export default function TouchLayerCanvas({
   const [guides, setGuides] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
+  const scrollArea = useRef<HTMLDivElement>(null);
+  const autoPanFrame = useRef(0);
   const pointers = useRef(new Map<number, {x: number; y: number}>());
   const gesture = useRef<Gesture | null>(null);
   const draftRef = useRef(draft);
   draftRef.current = draft;
-  const clamp = (rect: TouchRect) => clampRect(rect, .055 / pageCount);
+  const clamp = (rect: TouchRect) => pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false); }, [selected]);
+  useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const update = (id: string, next: TouchRect) => {
     const rect = clamp(next);
     draftRef.current = {...draftRef.current, [id]: rect};
     setDraft(draftRef.current);
+  };
+  const startAutoPan=()=>{
+    window.cancelAnimationFrame(autoPanFrame.current);
+    const tick=()=>{
+      const g=gesture.current,viewport=scrollArea.current;
+      if(!g||!viewport)return;
+      const point=[...pointers.current.values()][0];
+      if(pageCount>1&&point&&pointers.current.size===1&&!g.crop&&!g.resize&&Math.hypot(point.x-g.startX,point.y-g.startY)>4){
+        const bounds=viewport.getBoundingClientRect();
+        if(point.y>=bounds.top&&point.y<=bounds.bottom){
+          const direction=point.x<bounds.left+36?-1:point.x>bounds.right-36?1:0;
+          const before=viewport.scrollLeft;
+          viewport.scrollLeft=Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,before+direction*9));
+          if(viewport.scrollLeft!==before)update(g.id,{...g.start,
+            x:g.start.x+(point.x-g.startX+viewport.scrollLeft-g.scrollLeft)/g.width,
+            y:g.start.y+(point.y-g.startY)/g.height});
+        }
+      }
+      autoPanFrame.current=window.requestAnimationFrame(tick);
+    };
+    autoPanFrame.current=window.requestAnimationFrame(tick);
   };
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     e.preventDefault(); e.stopPropagation();
@@ -75,7 +100,9 @@ export default function TouchLayerCanvas({
       crop: cropping && selected === layer.id && layer.kind === 'photo',
       overflowX: Math.max(0, placement.width - frameW),
       overflowY: Math.max(0, placement.height - frameH),
+      scrollLeft: scrollArea.current?.scrollLeft||0,
     };
+    startAutoPan();
   };
   const move = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     const g = gesture.current;
@@ -102,7 +129,7 @@ export default function TouchLayerCanvas({
         x: crop.x - (g.overflowX > .5 ? (dx * Math.cos(angle) + dy * Math.sin(angle)) / g.overflowX : 0),
         y: crop.y - (g.overflowY > .5 ? (dy * Math.cos(angle) - dx * Math.sin(angle)) / g.overflowY : 0)})});
     } else {
-      const dx = (e.clientX - g.startX) / g.width, dy = (e.clientY - g.startY) / g.height;
+      const dx = (e.clientX - g.startX+(scrollArea.current?.scrollLeft||0)-g.scrollLeft) / g.width, dy = (e.clientY - g.startY) / g.height;
       if (g.resize) {
         const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
         update(g.id, {...g.start, w: g.start.w * factor, h: g.start.h * factor});
@@ -118,10 +145,11 @@ export default function TouchLayerCanvas({
     if (pointers.current.size > 0 && g) {
       const remaining = [...pointers.current.values()][0];
       gesture.current = {...g, start: getRect(layer), startX: remaining.x, startY: remaining.y,
-        pinchDistance: undefined, pinchCenter: undefined, resize: false};
+        scrollLeft:scrollArea.current?.scrollLeft||0,pinchDistance: undefined, pinchCenter: undefined, resize: false};
       return;
     }
     gesture.current = null;
+    window.cancelAnimationFrame(autoPanFrame.current);
     if (g?.id === layer.id && draftRef.current[layer.id]) {
       onCommit(layer.kind, layer.id, draftRef.current[layer.id]);
     }
@@ -136,8 +164,8 @@ export default function TouchLayerCanvas({
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <label className="panorama-guide-toggle"><input type="checkbox"
-      checked={guides} onChange={e => setGuides(e.target.checked)}/> Mostrar líneas de corte · no se descargan</label>}
-    <div className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
+      checked={guides} onChange={e => setGuides(e.target.checked)}/><span>Mostrar líneas de corte · no se descargan</span></label>}
+    <div ref={scrollArea} className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
         onClick={e => { if (e.target === e.currentTarget) { setSelected(''); onEmpty?.(); } }}

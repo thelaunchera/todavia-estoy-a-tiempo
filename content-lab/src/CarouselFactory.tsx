@@ -16,7 +16,7 @@ import TouchLayerCanvas from './TouchLayerCanvas';
 import PanoramaEditor from './PanoramaEditor';
 import {coverPlacement,normalizeCrop,photoFrameMetrics} from './PhotoCrop';
 import {overlayPanoramaPages,paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
-import {photoDefault,stickerDefault,clampRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
+import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 
 type Brand = {
@@ -400,25 +400,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const movePanoramaLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
-      if(style.seamlessEnabled){
-        if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
-        const next=slides.map((part,n)=>n!==source.page?part:kind==='photo'
-          ?{...part,assetId:'',photoPosition:undefined}
-          :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
-        setAll(next,{...style,panoramaLayers:[...(style.panoramaLayers||[]),
-          {id,assetId:source.assetId,name:source.name,kind,rect}]});
-      }else{
-        const local=clampRect({...rect,x:rect.x*slides.length-source.page,w:rect.w*slides.length});
-        setAll(slides.map((part,n)=>n!==source.page?part:kind==='photo'
-          ?{...part,photoPosition:local}
-          :{...part,stickerPositions:{...part.stickerPositions,[source.assetId]:local}}));
-      }
+      if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
+      const next=slides.map((part,n)=>n!==source.page?part:kind==='photo'
+        ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
+        :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
+      setAll(next,{...style,panoramaLayers:[...(style.panoramaLayers||[]),
+        {id,assetId:source.assetId,name:kind==='photo'?'Foto libre':'Sticker libre',kind,rect:clampPanoramaRect(rect)}]});
     }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect}:layer)});
   };
   const removePanoramaLayer=(id:string)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source)setAll(slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
-      ?{...part,assetId:'',photoPosition:undefined}
+      ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
       :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)}));
     else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
   };
@@ -427,20 +420,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   latestDraft.current={post,slides,style,ownedAssets};
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number}}[])=>{
     const latest=latestDraft.current;
-    let nextSlides=[...latest.slides],nextStyle={...latest.style};
+    const nextSlides=[...latest.slides];
+    let nextStyle={...latest.style};
     for(const {asset,point} of items){
       if(!latest.ownedAssets.some(a=>a.id===asset.id)&&asset.brandId!==brand.id&&!asset.shared)continue;
       const kind=assetCategory(asset)==='sticker'?'sticker' as const:'photo' as const;
-      const count=nextSlides.length,n=Math.min(count-1,Math.floor(point.x*count));
-      if(nextStyle.seamlessEnabled){
-        if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
-        const w=(kind==='photo'?.65:.2)/count,h=kind==='photo'?.48:.18;
-        const layer:PanoramaLayer={id:'panorama-'+crypto.randomUUID(),assetId:asset.id,
-          name:displayAssetName(asset),kind,rect:clampRect({x:point.x-w/2,y:point.y-h/2,w,h},.055/count)};
-        nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
-      }else nextSlides=nextSlides.map((part,j)=>j!==n?part:kind==='photo'
-        ?{...part,assetId:asset.id,photoPosition:clampRect({...photoDefault(part.layout),crop:normalizeCrop()})}
-        :{...part,stickerIds:[...(part.stickerIds||[]).filter(id=>id!==asset.id),asset.id].slice(-3)});
+      const count=nextSlides.length;
+      if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
+      const w=(kind==='photo'?.65:.2)/count,h=kind==='photo'?.48:.18;
+      const layer:PanoramaLayer={id:'panorama-'+crypto.randomUUID(),assetId:asset.id,
+        name:displayAssetName(asset),kind,rect:clampPanoramaRect({x:point.x-w/2,y:point.y-h/2,w,h},.055/count)};
+      nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
     }
     onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
       designData:encodeCarouselDesign(nextSlides,nextStyle)});

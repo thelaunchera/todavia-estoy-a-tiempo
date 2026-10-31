@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
+import vm from 'node:vm';
 
 const temp = mkdtempSync(join(tmpdir(), 'content-lab-panorama-'));
 const compiled = new Map();
@@ -22,7 +23,7 @@ function compile(name) {
 const load = name => import(pathToFileURL(compile(name)).href);
 process.on('exit', () => rmSync(temp, {recursive: true, force: true}));
 const { coverPlacement, normalizeCrop } = await load('PhotoCrop');
-const { clampRect } = await load('TouchGeometry');
+const { clampRect, clampPanoramaRect, photoDefault } = await load('TouchGeometry');
 const { encodeCarouselDesign, readCarouselDesign } = await load('CarouselArtDirection');
 const { normalizePanoramaLayers } = await load('PanoramaLayers');
 
@@ -56,7 +57,61 @@ test('invalid saved crop values and duplicate or excessive layers cannot corrupt
   const layers = normalizePanoramaLayers([null, {}, valid, valid]);
   assert.equal(layers.length, 1);
   assert.deepEqual(layers[0].rect.crop, {x: 0, y: .5, zoom: 4});
-  assert.equal(layers[0].rect.x, 0);
-  assert.equal(layers[0].rect.y, .5);
+  assert.equal(layers[0].rect.x, -.2);
+  assert.equal(layers[0].rect.y, .975);
   assert.equal(normalizePanoramaLayers(Array.from({length: 30}, (_, n) => ({...valid, id: String(n)}))).length, 24);
+});
+
+test('photo bleed survives saving with seamless background disabled',()=>{
+  const layer={id:'bleed',assetId:'photo',kind:'photo',name:'Photo',
+    rect:{x:-.15,y:-.2,w:.6,h:1.4,crop:{x:.2,y:.8,zoom:1.5},angle:4}};
+  const stored=encodeCarouselDesign([{title:'One'},{title:'Two'}],{seamlessEnabled:false,panoramaLayers:[layer]});
+  assert.deepEqual(readCarouselDesign(stored).style.panoramaLayers[0].rect,layer.rect);
+});
+
+// Execute the real editor actions without a browser or any backend calls.
+function editorAction(name,context){
+  const source=readFileSync(new URL('../src/CarouselFactory.tsx',import.meta.url),'utf8');
+  const tree=ts.createSourceFile('CarouselFactory.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  let declaration;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(tree)===name)declaration=node;
+    ts.forEachChild(node,visit);};
+  visit(tree);assert.ok(declaration,'Editor action must exist');
+  const code=ts.transpileModule('const invoke='+declaration.initializer.getText(tree)+';',
+    {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+  return vm.runInNewContext('(()=>{'+code+';return invoke;})()',context);
+}
+
+test('dragging a page photo onto a different slide never snaps back when seamless is off',()=>{
+  const rect={x:.65,y:.2,w:.25,h:.5};
+  const slides=[{key:'one',title:'One',assetId:'photo',layout:'cover'},
+    {key:'two',title:'Two',assetId:'',layout:'statement'}];
+  let saved;
+  const move=editorAction('movePanoramaLayer',{
+    pageLayers:[{id:'page-photo-one',page:0,assetId:'photo',name:'Photo'}],
+    style:{seamlessEnabled:false,panoramaLayers:[]},slides,clampPanoramaRect,photoDefault,
+    notify:message=>{throw Error(message)},setAll:(pages,style)=>{saved={pages,style}},
+  });
+  move('photo','page-photo-one',rect);
+  assert.equal(saved.pages[0].assetId,'');
+  assert.equal(saved.style.seamlessEnabled,false);
+  assert.equal(saved.style.panoramaLayers[0].rect.x,.65);
+  assert.equal(saved.style.panoramaLayers[0].assetId,'photo');
+});
+
+test('adding several photos with seamless off keeps separate free layers and existing page photos',()=>{
+  const asset={id:'added',brandId:'brand',name:'Added.jpg',category:'original'};
+  const slides=[{title:'One',assetId:'existing'},{title:'Two',assetId:''}];
+  let saved;
+  const add=editorAction('addPanoramaAssets',{
+    latestDraft:{current:{post:{brandId:'brand'},slides,style:{seamlessEnabled:false},ownedAssets:[asset]}},
+    brand:{id:'brand'},assetCategory:()=> 'original',displayAssetName:()=> 'Added',
+    crypto,clampPanoramaRect,encodeCarouselDesign,onChange:next=>{saved=next},
+    notify:message=>{throw Error(message)},setDownloads:()=>{},setOverview:()=>{},
+  });
+  add([{asset,point:{x:.1,y:.4}},{asset,point:{x:.8,y:.6}}]);
+  const data=readCarouselDesign(saved.designData);
+  assert.equal(data.style.panoramaLayers.length,2);
+  assert.equal(data.slides[0].assetId,'existing');
+  assert.notEqual(data.style.panoramaLayers[0].id,data.style.panoramaLayers[1].id);
 });
