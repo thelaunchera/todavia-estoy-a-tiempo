@@ -186,7 +186,7 @@ function Graphic({
     <img src={photo} alt="Imagen de la publicación" />
   ) : (
     <div className="photo-placeholder">
-      <ImagePlus size={30} /> Your image here
+      <ImagePlus size={30} /> {t("Your image here")}
     </div>
   );
   if (post.template === 'Spotlight')
@@ -720,7 +720,7 @@ function App() {
       <div className="loading">
         <div className="monogram">c.</div>
         <LoaderCircle className="spin" />
-        <p>Opening your Content Lab…</p>
+        <p>{t("Opening your Content Lab…")}</p>
       </div>
     );
   if (!account)
@@ -733,9 +733,9 @@ function App() {
           <div>
             <div className="eyebrow">YOUR PRIVATE CREATIVE SPACE</div>
             <h1>
-              Less scrolling.
+              {t("Less scrolling.")}
               <br />
-              <em>More creating.</em>
+              <em>{t("More creating.")}</em>
             </h1>
             <p>A thoughtful home for your ideas, brands and content.</p>
           </div>
@@ -848,7 +848,7 @@ function App() {
                   navigate('brands');
                 }}
               >
-                <Plus size={15} /> Add another account
+                <Plus size={15} /> {t("Add another account")}
               </button>
             </div>
           )}
@@ -914,14 +914,14 @@ function App() {
               <LockKeyhole size={13} /> {loginLanguage==='es'?'PRIVADO':'PRIVATE'}
             </span>
             <button className="btn dark compact" onClick={() => start()}>
-              <Plus size={16} /> Create content
+              <Plus size={16} /> {t("Create content")}
             </button>
           </div>
         </header>
         <div className="content" data-lab-tab={tab} key={tab}>
           {brand && tab === 'home' && (
             <>
-              <section className="lab-quickstart" aria-label="Guía para empezar">
+              <section className="lab-quickstart" aria-label={t('Guía para empezar')}>
                 <div className="lab-quickstart-heading">
                   <div><span className="eyebrow">{t('CONTENT LAB · FIRST STEPS')}</span>
                     <h2>{t(setupStepsDone===3?'Tu estudio está en marcha. ✨':'Empieza a crear en 3 pasos.')}</h2>
@@ -929,7 +929,7 @@ function App() {
                   </div>
                   <span className="lab-start-count" aria-label={loginLanguage==='es'?setupStepsDone+' de 3 pasos':setupStepsDone+' of 3 steps'}>{setupStepsDone}/3</span>
                 </div>
-                <div className="lab-quick-progress" role="progressbar" aria-valuenow={setupStepsDone} aria-valuemin={0} aria-valuemax={3} aria-label="Progreso de configuración">
+                <div className="lab-quick-progress" role="progressbar" aria-valuenow={setupStepsDone} aria-valuemin={0} aria-valuemax={3} aria-label={t('Progreso de configuración')}>
                   <span style={{width:(setupStepsDone/3*100)+'%'}}/>
                 </div>
                 <div className="lab-quick-steps">
@@ -941,10 +941,10 @@ function App() {
                   </button>)}
                 </div>
                 <div className="lab-quick-shortcuts">
-                  <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> 1 Photo → 9 Posts</button>
-                  <button type="button" onClick={()=>navigate('prompt-studio')}><BookOpen size={17}/> Prompt Studio · 30 recetas</button>
-                  <button type="button" onClick={()=>start()}><Plus size={17}/> Crear publicación</button>
-                  <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> Mis diseños</button>
+                  <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> {t("1 Photo → 9 Posts")}</button>
+                  <button type="button" onClick={()=>navigate('prompt-studio')}><BookOpen size={17}/> {t("Prompt Studio · 30 recetas")}</button>
+                  <button type="button" onClick={()=>start()}><Plus size={17}/> {t("Crear publicación")}</button>
+                  <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> {t("Mis diseños")}</button>
                 </div>
               </section>
               <section className="intro">
@@ -1012,7 +1012,7 @@ function App() {
                     <Sparkles size={25} />
                   </div>
                   <p>
-                    Start with one problem, one photo or one idea worth sharing.
+                    {t("Start with one problem, one photo or one idea worth sharing.")}
                   </p>
                   <div className="angles">
                     {[
@@ -1076,7 +1076,7 @@ function App() {
                       navigate('brands');
                     }}
                   >
-                    Edit brand profile <ArrowRight size={16} />
+                    {t("Edit brand profile")} <ArrowRight size={16} />
                   </button>
                 </section>
               </div>
@@ -1086,7 +1086,7 @@ function App() {
                   <h2>{t('Recent creations')}</h2>
                 </div>
                 <button className="textlink" onClick={() => navigate('posts')}>
-                  View all <ArrowRight size={16} />
+                  {t("View all")} <ArrowRight size={16} />
                 </button>
               </div>
               {mine.length ? (
@@ -1112,10 +1112,10 @@ function App() {
               ) : (
                 <div className="empty">
                   <Sparkles size={30} />
-                  <h3>Your best ideas begin here.</h3>
-                  <p>No content saved yet. Create your first piece.</p>
+                  <h3>{t("Your best ideas begin here.")}</h3>
+                  <p>{t("No content saved yet. Create your first piece.")}</p>
                   <button className="btn dark" onClick={() => start()}>
-                    Create my first post <ArrowRight size={16} />
+                    {t("Create my first post")} <ArrowRight size={16} />
                   </button>
                 </div>
               )}
@@ -1124,9 +1124,9 @@ function App() {
           {brand && tab === 'prompts' && (
             <section className="panel">
               <div className="eyebrow">SAVED MASTER PROMPTS</div>
-              <h2>One Product → 8 Compositions</h2>
-              <p>Ocho composiciones publicitarias del mismo producto, una imagen por resultado.</p>
-              <a className="btn dark" href="./prompts/" target="_blank" rel="noreferrer">Abrir biblioteca de prompts</a>
+              <h2>{t("One Product → 8 Compositions")}</h2>
+              <p>{t("Ocho composiciones publicitarias del mismo producto, una imagen por resultado.")}</p>
+              <a className="btn dark" href="./prompts/" target="_blank" rel="noreferrer">{t("Abrir biblioteca de prompts")}</a>
             </section>
           )}
           {brand && tab === 'prompt-studio' && (
@@ -1190,13 +1190,13 @@ function App() {
                     CONTENT WORKSPACE / {brand.name.toUpperCase()}
                   </div>
                   <h1>
-                    Content <em>composer.</em>
+                    {t("Content")} <em>composer.</em>
                   </h1>
                   <p>{t('Give it a purpose. Give it your voice. Make it yours.')}</p>
-                  <button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> Design full carousel <ArrowRight size={16} /></button>
+                  <button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> {t("Design full carousel")} <ArrowRight size={16} /></button>
                 </div>
                 <button className="btn ghost" onClick={() => start()}>
-                  <RotateCcw size={16} /> Start fresh
+                  <RotateCcw size={16} /> {t("Start fresh")}
                 </button>
               </div>
               <div className="composer">
@@ -1274,14 +1274,14 @@ function App() {
                     <input
                       value={editor.title}
                       onChange={e => change('title', e.target.value)}
-                      placeholder="Name this idea"
+                      placeholder={t('Name this idea')}
                     />
                     <label>{t('Cover hook')}</label>
                     <textarea
                       rows={2}
                       value={editor.hook}
                       onChange={e => change('hook', e.target.value)}
-                      placeholder="A clear, specific opening…"
+                      placeholder={t('A clear, specific opening…')}
                     />
                     {alternatives.length > 0 && (
                       <div className="alternatives">
@@ -1298,30 +1298,30 @@ function App() {
                       rows={5}
                       value={editor.slides}
                       onChange={e => change('slides', e.target.value)}
-                      placeholder="One slide or talking point per line…"
+                      placeholder={t('One slide or talking point per line…')}
                     />
                     <label>{t('Caption')}</label>
                     <textarea
                       rows={5}
                       value={editor.caption}
                       onChange={e => change('caption', e.target.value)}
-                      placeholder="Write like a human, not a template…"
+                      placeholder={t('Write like a human, not a template…')}
                     />
                     <label>{t('CTA')}</label>
                     <input
                       value={editor.cta}
                       onChange={e => change('cta', e.target.value)}
-                      placeholder="What should they do next?"
+                      placeholder={t('What should they do next?')}
                     />
                     <label>{t('Visual direction')}</label>
                     <textarea
                       rows={2}
                       value={editor.visual}
                       onChange={e => change('visual', e.target.value)}
-                      placeholder="Which photo or screenshot makes the story clearer?"
+                      placeholder={t('Which photo or screenshot makes the story clearer?')}
                     />
                     <button className="btn ghost" onClick={copy}>
-                      <Copy size={16} /> Copy content
+                      <Copy size={16} /> {t("Copy content")}
                     </button>
                   </section>
                   <section className="panel">
@@ -1364,7 +1364,7 @@ function App() {
                   <div className="cover-studio-heading">
                     <div className="eyebrow">{t('COVER PREVIEW')}</div>
                     <h3>{t('Your graphic direction')}</h3>
-                    <small>Instagram · 1080 × 1350 PNG</small>
+                    <small>{t("Instagram · 1080 × 1350 PNG")}</small>
                   </div>
                   <FreePostStudio post={editor} brand={brand}
                     assets={library} images={images} locale={loginLanguage}
@@ -1386,18 +1386,18 @@ function App() {
                 <div>
                   <div className="eyebrow">{t('YOUR CONTENT COLLECTION')}</div>
                   <h1>
-                    Everything you've <em>{t('made.')}</em>
+                    {t("Everything you've")} <em>{t('made.')}</em>
                   </h1>
                   <p>Only publications belonging to {brand.name}.</p>
                 </div>
                 <button className="btn dark" onClick={() => start()}>
-                  <Plus size={16} /> New content
+                  <Plus size={16} /> {t("New content")}
                 </button>
               </div>
               <div className="search">
                 <Search size={18} />
                 <input
-                  placeholder="Search posts…"
+                  placeholder={t('Search posts…')}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                 />
@@ -1454,7 +1454,7 @@ function App() {
                   <h3>{t('Nothing here yet.')}</h3>
                   <p>{t('Start with one meaningful idea.')}</p>
                   <button className="btn dark" onClick={() => start()}>
-                    Create content
+                    {t("Create content")}
                   </button>
                 </div>
               )}
@@ -1499,19 +1499,19 @@ function App() {
                 <div>
                   <div className="eyebrow">SEPARATE BRANDS. CLEAR VOICES.</div>
                   <h1>
-                    Your brands,
+                    {t("Your brands,")}
                     <br />
                     <em>your rules.</em>
                   </h1>
                   <p>
-                    Every account gets its own language, audience and visuals.
+                    {t("Every account gets its own language, audience and visuals.")}
                   </p>
                 </div>
                 <button
                   className="btn dark"
                   onClick={() => setBrandForm(newBrand())}
                 >
-                  <Plus size={16} /> Add a brand
+                  <Plus size={16} /> {t("Add a brand")}
                 </button>
               </div>
               {brandForm ? (
@@ -1543,7 +1543,7 @@ function App() {
                       />
                     </div>
                     <div>
-                      <label>¿Para qué red vas a crear contenido principalmente?</label>
+                      <label>{t("¿Para qué red vas a crear contenido principalmente?")}</label>
                       <select value={preferredPlatform(brandForm)} onChange={e=>setBrandForm({...brandForm,primaryPlatform:e.target.value as SocialPlatform})}>
                         {SOCIAL_PLATFORMS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
                       </select>
@@ -1618,7 +1618,7 @@ function App() {
                   <div className="brandkit-extra">
                     <div className="eyebrow">BRAND KIT · PALETA PERSONAL PARA CADA MARCA</div>
                     <div className="lab-brand-palette-editor">
-                      <div className="lab-brand-palette-head"><div><strong>Tu paleta de marca</strong><p>Los colores base siguen activos. Agrega hasta 6 tonos adicionales para los fondos y acentos de tus carruseles.</p></div>
+                      <div className="lab-brand-palette-head"><div><strong>Tu paleta de marca</strong><p>{t("Los colores base siguen activos. Agrega hasta 6 tonos adicionales para los fondos y acentos de tus carruseles.")}</p></div>
                         <button type="button" className="btn ghost" disabled={(brandForm.additionalColors||[]).length>=6} onClick={()=>setBrandForm({...brandForm,additionalColors:[...(brandForm.additionalColors||[]),['#C7DCE8','#F2D85B','#BFD5CC','#C4A7D8','#DBAE9E','#9BAEC7'][(brandForm.additionalColors||[]).length]]})}><Plus size={15}/> Añadir color</button>
                       </div>
                       <div className="lab-brand-palette-list">
@@ -1635,7 +1635,7 @@ function App() {
                       <div className="lab-social-accounts-head"><strong>¿En qué redes sociales está tu marca?</strong><p>Escribe tu usuario o el enlace de cada página. Puedes dejar campos vacíos. Solo guardamos esta información para personalizar tu contenido; no conectamos cuentas ni pedimos contraseñas.</p></div>
                       <div className="lab-social-accounts-grid">
                         {SOCIAL_PLATFORMS.map(p=><label className="lab-social-field" key={p.id}>
-                          <span>{p.label}{preferredPlatform(brandForm)===p.id&&<small>Principal</small>}</span>
+                          <span>{p.label}{preferredPlatform(brandForm)===p.id&&<small>{t("Principal")}</small>}</span>
                           <input maxLength={200} autoComplete="off" placeholder={p.placeholder}
                             aria-label={'Cuenta de '+p.label}
                             value={p.id==='instagram'?(brandForm.socialAccounts?.instagram??brandForm.handle):(brandForm.socialAccounts?.[p.id]||'')}
@@ -1645,16 +1645,16 @@ function App() {
                       </div>
                     </div>
                     <div className="double">
-                      <div><label>Color secundario</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
-                      <div><label>Logo guardado en biblioteca</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">Sin logo</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select></div>
+                      <div><label>{t("Color secundario")}</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
+                      <div><label>{t("Logo guardado en biblioteca")}</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">{t("Sin logo")}</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select></div>
                     </div>
                     <div className="double">
-                      <div><label>Fuente para títulos</label><select value={brandForm.headingFont||'Prompt'} onChange={e=>setBrandForm({...brandForm,headingFont:e.target.value})}>{['Prompt','Georgia','Sans','Futura'].map(f=><option key={f}>{f}</option>)}</select></div>
-                      <div><label>Fuente de texto</label><select value={brandForm.bodyFont||'Futura'} onChange={e=>setBrandForm({...brandForm,bodyFont:e.target.value})}>{['Futura','Arial','Georgia','Prompt'].map(f=><option key={f}>{f}</option>)}</select></div>
+                      <div><label>{t("Fuente para títulos")}</label><select value={brandForm.headingFont||'Prompt'} onChange={e=>setBrandForm({...brandForm,headingFont:e.target.value})}>{['Prompt','Georgia','Sans','Futura'].map(f=><option key={f}>{f}</option>)}</select></div>
+                      <div><label>{t("Fuente de texto")}</label><select value={brandForm.bodyFont||'Futura'} onChange={e=>setBrandForm({...brandForm,bodyFont:e.target.value})}>{['Futura','Arial','Georgia','Prompt'].map(f=><option key={f}>{f}</option>)}</select></div>
                     </div>
-                    <label>Estilo de fotografía</label><textarea rows={2} value={brandForm.photoMood||''} onChange={e=>setBrandForm({...brandForm,photoMood:e.target.value})} placeholder="Ej. Fotografías reales, sombras naturales, editorial de producto."/>
-                    <label>Nunca generar / modificar</label><textarea rows={3} value={brandForm.avoid||''} onChange={e=>setBrandForm({...brandForm,avoid:e.target.value})} placeholder="Ej. No inventar logos, etiquetas, capturas de la App, rostros o precios."/>
-                    <label>Referencia de estilo por defecto</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">Sin referencia fija</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select>
+                    <label>{t("Estilo de fotografía")}</label><textarea rows={2} value={brandForm.photoMood||''} onChange={e=>setBrandForm({...brandForm,photoMood:e.target.value})} placeholder="Ej. Fotografías reales, sombras naturales, editorial de producto."/>
+                    <label>{t("Nunca generar / modificar")}</label><textarea rows={3} value={brandForm.avoid||''} onChange={e=>setBrandForm({...brandForm,avoid:e.target.value})} placeholder="Ej. No inventar logos, etiquetas, capturas de la App, rostros o precios."/>
+                    <label>{t("Referencia de estilo por defecto")}</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">{t("Sin referencia fija")}</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select>
                     <small>Sube primero el logo y tus referencias en Media library con esta cuenta activa. Solo se mostrarán archivos de la misma marca.</small>
                   </div>
                   <div className="formend">
@@ -1662,14 +1662,14 @@ function App() {
                       className="btn ghost"
                       onClick={() => setBrandForm(null)}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </button>
                     <button
                       className="btn dark"
                       onClick={saveBrand}
                       disabled={busy === 'brand'}
                     >
-                      <Save size={16} /> Save profile
+                      <Save size={16} /> {t("Save profile")}
                     </button>
                   </div>
                 </div>
@@ -1692,7 +1692,7 @@ function App() {
                           {b.id === current ? ' · ACTIVE' : ''}
                         </span>
                         <button onClick={() => setBrandForm({ ...b })}>
-                          <Pencil size={16} /> Edit
+                          <Pencil size={16} /> {t("Edit")}
                         </button>
                       </div>
                     </article>
