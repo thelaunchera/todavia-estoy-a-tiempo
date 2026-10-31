@@ -8,6 +8,9 @@ import type {PromptControls} from './PromptEngine';
 import {CreativeCover,exportCreativeCover} from './CreativeCover';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
+import MediaLibrary from './MediaLibrary';
+import FormatGallery from './FormatGallery';
+import {displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import {
   LayoutDashboard,
@@ -82,7 +85,7 @@ type Post = {
   updatedAt?: string;
   designData?: string;
 };
-type Asset = { id: string; brandId: string; name: string; mime: string };
+type Asset = LibraryAsset;
 type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands';
 const angles = [
   'Pain point',
@@ -349,6 +352,7 @@ function App() {
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
+  const [gridPref,setGridPref]=useState<{version:number;sourceId?:string;referenceId?:string;format?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
   const toast = (s: string) => {
     setNotice(s);
@@ -562,7 +566,7 @@ function App() {
     if (tab === 'create' && editor.assetId && !images[editor.assetId])
       void imageLoad(editor.assetId);
   }, [tab, current, assets, editor.assetId]);
-  const upload = async (file?: File): Promise<Asset | null> => {
+  const upload = async (file?: File, category:MediaCategory='original'): Promise<Asset | null> => {
     if (!file) return null;
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
@@ -595,6 +599,7 @@ function App() {
       const { data } = await api.post('/api/assets', {
         brandId: brand.id,
         name: file.name.replace(/\.(heic|heif)$/i,'.jpg'),
+        category,displayName:file.name.replace(/\.(heic|heif|jpe?g|png|webp)$/i,'').replace(/[_-]+/g,' ').slice(0,85),
         mime: prepared.mimeType,
         content: prepared.data,
       });
@@ -1040,6 +1045,7 @@ function App() {
             <BrandGrid
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
+              initialSelection={gridPref}
               isAdmin={Boolean(aiWallet?.admin)}
               wallet={aiWallet}
               brand={brand}
@@ -1390,139 +1396,20 @@ function App() {
             </>
           )}
           {brand && tab === 'media' && (
-            <>
-              <div className="pageheading">
-                <div>
-                  <div className="eyebrow">YOUR PRIVATE MEDIA BANK</div>
-                  <h1>
-                    The good <em>stuff.</em>
-                  </h1>
-                  <p>Real photos and screenshots, sorted by account.</p>
-                </div>
-                <button
-                  className="btn dark"
-                  onClick={() => uploadRef.current?.click()}
-                >
-                  <Upload size={16} />
-                  {busy === 'upload' ? 'Uploading…' : 'Upload images'}
-                </button>
-              </div>
-              <div className="mediahelp">
-                <ImagePlus size={27} />
-                <div>
-                  <strong>One photo can tell so many stories.</strong>
-                  <p>
-                    Original visuals stay intact. Upload once and reuse them in
-                    different covers.
-                  </p>
-                </div>
-              </div>
-              {library.length ? (
-                <div className="mediagrid">
-                  {library.map(a => (
-                    <article className="mediacard" key={a.id}>
-                      <div className="mediaphoto">
-                        {images[a.id] ? (
-                          <img src={images[a.id]} alt={a.name} />
-                        ) : (
-                          <LoaderCircle className="spin" />
-                        )}
-                      </div>
-                      <div className="medialabel">
-                        <span title={a.name}>{a.name}</span>
-                        <button
-                          aria-label="Delete image"
-                          onClick={async () => {
-                            if (!window.confirm('¿Eliminar esta imagen?'))
-                              return;
-                            try {
-                              await api.delete('/api/assets/' + a.id);
-                              setAssets(p => p.filter(x => x.id !== a.id));
-                              toast('Imagen eliminada.');
-                            } catch (e) {
-                              err(e);
-                            }
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="empty">
-                  <Images size={32} />
-                  <h3>Your media bank begins here.</h3>
-                  <p>Add your first real photo or product screenshot.</p>
-                  <button
-                    className="btn dark"
-                    onClick={() => uploadRef.current?.click()}
-                  >
-                    Upload a photo
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-          {brand && tab === 'formats' && (
-            <>
-              <div className="pageheading">
-                <div>
-                  <div className="eyebrow">THE CREATIVE PLAYBOOK</div>
-                  <h1>
-                    20 creative <em>formats.</em>
-                  </h1>
-                  <p>Una foto puede convertirse en veinte estilos visuales diferentes, y nueve posts independientes en tu Brand Grid.</p>
-                  <button className="btn dark" onClick={() => navigate('grid')}><Images size={16}/> Crear grid de 9 posts <ArrowRight size={17}/></button>
-                </div>
-              </div>
-              <div className="format-banner">
-                <span>THE CONTENT LAB METHOD</span>
-                <h2>
-                  One real screenshot.
-                  <br />A whole week of ideas.
-                </h2>
-                <p>Different stories, different goals, one consistent brand.</p>
-              </div>
-              <div className="eyebrow">20 FORMATS FOR BRAND GRID</div>
-              <div className="format-catalog">
-                {CREATIVE_FORMATS.map((f,i)=>(
-                  <button key={f} onClick={()=>navigate('grid')}>
-                    <span className="format-swatch"/>
-                    <small>{String(i+1).padStart(2,'0')} / 20</small>
-                    <strong>{f}</strong>
-                    <small>Use in Brand Grid</small>
-                  </button>
-                ))}
-              </div>
-              <div className="eyebrow">STORYTELLING ANGLES</div>
-              <div className="formats">
-                {angles.map((a, i) => (
-                  <button key={a} onClick={() => start(a)}>
-                    <span>{String(i + 1).padStart(2, '0')}</span>
-                    <div>
-                      <h3>{a}</h3>
-                      <p>
-                        {
-                          [
-                            'Name a problem your audience knows too well.',
-                            'Teach one thing they can use immediately.',
-                            'Show the difference without made-up results.',
-                            'Explain the value of one real product feature.',
-                            'Share an everyday, human moment.',
-                            'Build a short story with a genuine payoff.',
-                          ][i]
-                        }
-                      </p>
-                    </div>
-                    <ArrowUpRight size={19} />
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          {tab === 'brands' && (
+             <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
+               onUpload={async(file,category)=>upload(file,category)}
+               onUpdate={updated=>setAssets(prev=>prev.map(a=>a.id===updated.id?updated:a))}
+               onDelete={async a=>{try{await api.delete('/api/assets/'+a.id);setAssets(prev=>prev.filter(x=>x.id!==a.id));toast('Imagen eliminada de esta marca.')}catch(e){err(e)}}}
+               onSaveDefaultReference={async id=>{const {data}=await api.put('/api/brands/'+brand.id,{referenceAssetId:id});setBrands(prev=>prev.map(x=>x.id===data.id?data:x))}}
+               onCreateWithPhotos={(sourceId,referenceId)=>{setGridPref(p=>({version:p.version+1,sourceId,referenceId}));navigate('grid')}}
+               notify={toast} showError={err}/>
+           )}
+           {brand && tab === 'formats' && (
+             <FormatGallery brand={brand} assets={library} images={images}
+               onUpload={()=>navigate('media')}
+               onChoose={format=>{setGridPref(p=>({version:p.version+1,format}));navigate('grid')}}/>
+           )}
+           {tab === 'brands' && (
             <>
               <div className="pageheading">
                 <div>
@@ -1675,7 +1562,7 @@ function App() {
                     </div>
                     <div className="double">
                       <div><label>Color secundario</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
-                      <div><label>Logo guardado en biblioteca</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">Sin logo</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+                      <div><label>Logo guardado en biblioteca</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">Sin logo</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select></div>
                     </div>
                     <div className="double">
                       <div><label>Fuente para títulos</label><select value={brandForm.headingFont||'Prompt'} onChange={e=>setBrandForm({...brandForm,headingFont:e.target.value})}>{['Prompt','Georgia','Sans','Futura'].map(f=><option key={f}>{f}</option>)}</select></div>
@@ -1683,7 +1570,7 @@ function App() {
                     </div>
                     <label>Estilo de fotografía</label><textarea rows={2} value={brandForm.photoMood||''} onChange={e=>setBrandForm({...brandForm,photoMood:e.target.value})} placeholder="Ej. Fotografías reales, sombras naturales, editorial de producto."/>
                     <label>Nunca generar / modificar</label><textarea rows={3} value={brandForm.avoid||''} onChange={e=>setBrandForm({...brandForm,avoid:e.target.value})} placeholder="Ej. No inventar logos, etiquetas, capturas de la App, rostros o precios."/>
-                    <label>Referencia de estilo por defecto</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">Sin referencia fija</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+                    <label>Referencia de estilo por defecto</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">Sin referencia fija</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select>
                     <small>Sube primero el logo y tus referencias en Media library con esta cuenta activa. Solo se mostrarán archivos de la misma marca.</small>
                   </div>
                   <div className="formend">
