@@ -2251,3 +2251,18 @@ a:focus-visible {
 .commerce-privacy-note{margin-top:18px!important;font-size:11px!important}
 @media(max-width:1080px){.commerce-cards{grid-template-columns:1fr}}
 @media(max-width:500px){.commerce-product{grid-template-columns:130px minmax(0,1fr)}.commerce-product-copy{padding:14px}.commerce-product>img,.commerce-lab-art{min-height:200px}.commerce-sale{grid-template-columns:1fr auto}.commerce-sale>span{grid-column:1/-1;grid-row:2}.commerce-hero-mark{display:none}}
+
+/* Acceso rápido al centro de ventas: visible en la primera pantalla del sidebar. */
+.sidebar nav > div:has(> .nav-item:nth-child(1)) { min-width:0; }
+.sidebar nav > div:nth-child(2) > .nav-item {
+  border: 1px solid #d1e3eb;
+  background: #eaf3f6;
+  color: #224e68;
+  font-weight: 750;
+}
+.sidebar nav > div:nth-child(2) > .nav-item:hover,
+.sidebar nav > div:nth-child(2) > .nav-item.active {
+  background: #dcecf3;
+  border-color: #abcddc;
+}
+.sidebar nav { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
