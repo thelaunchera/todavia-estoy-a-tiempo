@@ -10,14 +10,15 @@ import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './Edi
 import {brandPalette} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
 import type {FreeBackgroundId} from './FreeDesignAssets';
+import type {StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;stickerIds?:string[]};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onOpenStickers?:()=>void;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -53,7 +54,7 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenStickers,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [chosenFormat,setChosenFormat]=useState('');
@@ -170,7 +171,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
-  useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[]),...(grid?.posts.flatMap(p=>[...(p.stickerIds||[]),...(p.design?.stickerIds||[])])||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
+  useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[]),...(grid?.posts.flatMap(p=>[...(p.stickerIds||[]),...(p.design?.stickerIds||[]),...(p.backgroundImageId?[p.backgroundImageId]:[])])||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
   const update=(change:Partial<Tile>)=>{
     setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);
     setDownloads([]);setReviewed(false);setQaNotes([]);
@@ -494,11 +495,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           {tile&&<div className="bg-editor-preview-note">{!tile.assetId
               ? tile.design?'Vista previa editorial usando tu foto original: este diseño ya se puede exportar sin generar otra foto.':'Vista previa de diseño: todavía no se ha generado la foto final. Conservamos la original para planificar.'
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
-          {tile&&<FreeDecorControls backgroundId={tile.design?tile.design.backgroundPattern||'brand':tile.backgroundId||'brand'} stickerIds={tile.design?tile.design.stickerIds||[]:tile.stickerIds||[]}
+          {tile&&<FreeDecorControls backgroundId={tile.design?tile.design.backgroundPattern||'brand':tile.backgroundId||'brand'} backgroundImageId={tile.backgroundImageId||''} stickerIds={tile.design?tile.design.stickerIds||[]:tile.stickerIds||[]}
               title="Stickers aesthetics & backgrounds · GRATIS"
-              assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
-              onChange={next=>tile.design?update({design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...(next.backgroundId&&next.backgroundId!=='brand'?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,stickerIds:next.stickerIds})}/>}
-          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})}/>}
+              assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
+              onChange={next=>tile.design?update({backgroundImageId:next.backgroundImageId,design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...((next.backgroundImageId||next.backgroundId&&next.backgroundId!=='brand')?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,backgroundImageId:next.backgroundImageId,stickerIds:next.stickerIds})}/>}
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
