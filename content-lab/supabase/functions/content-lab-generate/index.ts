@@ -128,7 +128,7 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
  try{body=await response.json()}catch{throw Error('Cloudflare no devolvió una respuesta válida.');}
  if(!response.ok||body.success===false){
   if(response.status===429||response.status===402||/quota|neurons|limit|billing/i.test(extractError(body)))
-    throw Error('Se terminó la cuota gratuita de Cloudflare. No se generó ningún cargo; vuelve a intentarlo cuando se reinicie.');
+    throw Error('Se agotó la cuota disponible de Cloudflare. Esta generación no se completó y se devolverá el crédito del Lab; inténtalo más tarde.');
   const cloudflareError=extractError(body);
   // Never return a raw request URL with an Account ID to the browser.
   if(body?.errors?.some?.((e:any)=>e.code===7003)||/could not route|object identifier is invalid/i.test(cloudflareError))
@@ -192,6 +192,7 @@ Deno.serve(async request=>{
   // The RPC authenticates membership and atomically decrements real server-side
   // credits, per-user daily allowance, and the shared platform safety ceiling.
   if(['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action)){
+   if(!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'La devolución segura de créditos está en mantenimiento. No se consumió ninguno.'},503);
    const {data:reservation,error:quotaError}=await supabase.rpc('content_lab_reserve_ai',{p_action:action});
    if(quotaError)return send({error:quotaError.message},429);
    reservationId=String(reservation?.reservation_id||'');
