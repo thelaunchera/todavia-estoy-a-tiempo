@@ -16,3 +16,15 @@
 .free-decor-upload strong{color:#395965;font-size:12px}
 .free-decor-upload button{padding:10px 12px;border-radius:10px;background:#2b535f;color:white;border:0;font-size:11px;font-weight:700}
 .free-decor-swatch.custom{background-position:center;background-size:cover;background-repeat:no-repeat}
+
+/* Preview patterns mirror painted canvas art rather than flat color chips. */
+.swatch-rust-autumn{background:radial-gradient(circle at 80% 13%,#f1b17b66,transparent 46%),linear-gradient(125deg,#a34b2b,#c2693d 55%,#743c2d)!important}
+.swatch-terracotta-check{background-color:#e4b18e!important;background-image:conic-gradient(#bc654a66 25%,transparent 0 50%,#bc654a66 0 75%,transparent 0)!important;background-size:22px 22px!important}
+.swatch-vintage-paper{background:repeating-linear-gradient(14deg,#eee1cb 0px,#faf0df 7px,#f0e5d2 9px)!important}
+.swatch-sunset-peach{background:radial-gradient(circle at 78% 18%,#fff2b7 2%,transparent 44%),linear-gradient(130deg,#ffe5cd,#f5b5a7 52%,#df91ad)!important}
+.swatch-lavender-haze{background:radial-gradient(circle at 80% 25%,#fff9fcaa,transparent 40%),linear-gradient(140deg,#fae9ed,#dcd5f4 53%,#d1dbfa)!important}
+.swatch-blueprint-lines{background-color:#b5d9e9!important;background-image:linear-gradient(#2a5e841f 1px,transparent 1px),linear-gradient(90deg,#2a5e841f 1px,transparent 1px)!important;background-size:14px 14px!important}
+.swatch-botanical-sage{background:radial-gradient(ellipse at 0% 80%,#8dae9999,transparent 37%),radial-gradient(ellipse at 100% 0%,#73968377,transparent 30%),#e4e9d8!important}
+.swatch-journal-tape{background:linear-gradient(8deg,transparent 82%,#d7b8a0 82% 92%,transparent 92%),repeating-linear-gradient(180deg,#fcf7ed 0 14px,#e7dfcc 15px,#fcf7ed 16px)!important}
+.swatch-coffee-check{background-color:#e5d2bb!important;background-image:conic-gradient(#92664c66 25%,transparent 0 50%,#92664c66 0 75%,transparent 0)!important;background-size:22px 22px!important}
+.swatch-night-stars{background:radial-gradient(circle at 30% 22%,#eed5ae 1px,transparent 2px),radial-gradient(circle at 78% 63%,#eed5ae 1px,transparent 2px),linear-gradient(135deg,#192936,#453a56)!important;background-size:15px 19px,27px 25px,auto!important}
