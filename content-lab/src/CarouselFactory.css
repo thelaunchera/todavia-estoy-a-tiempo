@@ -268,3 +268,27 @@
  .factory-step-footer>.btn{flex:1;max-width:none}
  .factory-review-check,.factory-review-layout .factory-destination{padding:13px}
 }
+
+/* Short first step: AI does the writing when requested, then choose a real background. */
+.factory-simple-ai{display:grid;gap:10px;background:#f4f8f7;border:1px solid #d4e2e4;
+ border-radius:14px;padding:16px;margin:12px 0}
+.factory-simple-ai label{font-size:12px;font-weight:750;color:#315263}
+.factory-simple-ai textarea{width:100%;min-height:100px;box-sizing:border-box;resize:vertical;
+ border:1px solid #ccdfe2;border-radius:10px;background:#fff;padding:12px;font:inherit;font-size:13px;line-height:1.5;color:#234550}
+.factory-simple-ai .btn{min-height:46px;justify-self:start;padding:11px 17px}
+.factory-simple-ai small{font-size:11px;line-height:1.5;color:#68808a}
+.factory-reference-fold{border:1px solid #e1e8e7;border-radius:12px;margin:12px 0;padding:12px}
+.factory-reference-fold>summary{cursor:pointer;font-size:12px;font-weight:700;color:#3e6570}
+.factory-reference-fold .factory-reference{margin-top:12px}
+.factory-background-main{min-width:0;margin:16px 0;background:#f9fbfa;border:1px solid #d4e3e4;
+ border-radius:15px;padding:12px}
+.factory-background-main-head strong{font-size:15px;color:#263f48}
+.factory-background-main-head p{font-size:12px;line-height:1.5;color:#617b86;margin:6px 0 9px}
+.factory-background-main .free-decor-controls{margin:9px 0}
+.factory-background-apply{min-height:43px;width:100%;margin-top:8px;justify-content:center}
+@media(max-width:600px){
+ .factory-simple-ai{padding:12px}
+ .factory-simple-ai .btn{width:100%;justify-self:stretch}
+ .factory-background-main{padding:8px}
+ .factory-background-main .free-decor-expanded{max-height:48vh}
+}
