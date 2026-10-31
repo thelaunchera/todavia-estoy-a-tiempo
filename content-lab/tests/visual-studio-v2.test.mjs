@@ -75,13 +75,15 @@ test('fixed Content Lab sidebar scrolls independently on mobile Safari',()=>{
  assert.ok(app.includes('aria-expanded={menu}'));
 });
 
-test('home dashboard gives three-step guided flow plus iPhone dock',()=>{
+test('home gives a personalized greeting and compact expandable onboarding plus iPhone dock',()=>{
  const app=src('src/App.tsx'),css=src('src/index.css');
- assert.ok(app.includes('setupStepsDone'));
- assert.ok(app.includes('lab-quick-steps'));
+ assert.ok(app.includes('lab-home-greeting'));
+ assert.ok(app.includes('setupStepsDone<3&&<details'));
+ assert.ok(app.includes('lab-greeting-checklist'));
+ assert.ok(!app.includes('lab-quick-steps'));
  assert.ok(app.includes('lab-mobile-dock'));
  assert.ok(css.includes('env(safe-area-inset-bottom)'));
- assert.ok(app.includes("onClick={()=>navigate('grid')}"));
+ assert.ok(app.includes('onClick={startFactory}'));
 });
 test('grid edits autosave without exposing data in local browser storage',()=>{
  const grid=src('src/BrandGrid.tsx');
