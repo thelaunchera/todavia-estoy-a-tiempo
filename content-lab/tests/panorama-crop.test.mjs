@@ -88,7 +88,7 @@ test('dragging a page photo onto a different slide never snaps back when seamles
     {key:'two',title:'Two',assetId:'',layout:'statement'}];
   let saved;
   const move=editorAction('movePanoramaLayer',{
-    pageLayers:[{id:'page-photo-one',page:0,assetId:'photo',name:'Photo'}],
+    pageLayers:[{id:'page-photo-one',kind:'photo',page:0,assetId:'photo',name:'Photo'}],
     style:{seamlessEnabled:false,panoramaLayers:[]},slides,clampPanoramaRect,photoDefault,
     notify:message=>{throw Error(message)},setAll:(pages,style)=>{saved={pages,style}},
     stripSource:editorAction('stripSource',{slides,photoDefault}),
