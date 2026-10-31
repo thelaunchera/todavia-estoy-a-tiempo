@@ -360,6 +360,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
+  const [studioTab,setStudioTab]=useState<'canvas'|'slides'|'style'|'ai'>('canvas');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
@@ -787,14 +788,131 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
       <button className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
     </div>
-    <div className="factory-idea">
-      <div><div className="eyebrow">01 / CAROUSEL STUDIO · SIN IA</div><h2>Haz tu carrusel a tu manera.</h2><p>Crea, edita, diseña, usa stickers, mueve las fotos y descarga todos los PNG. La IA es opcional, solo si quieres que escriba o genere imágenes.</p></div>
-      <div><button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
+
+    <nav className="factory-studio-tabs" role="tablist" aria-label="Secciones de Carousel Factory">
+      <button type="button" role="tab" aria-selected={studioTab==='canvas'} className={studioTab==='canvas'?'active':''} onClick={()=>setStudioTab('canvas')}>✦ Lienzo</button>
+      <button type="button" role="tab" aria-selected={studioTab==='slides'} className={studioTab==='slides'?'active':''} onClick={()=>setStudioTab('slides')}>Slides y textos</button>
+      <button type="button" role="tab" aria-selected={studioTab==='style'} className={studioTab==='style'?'active':''} onClick={()=>setStudioTab('style')}>Fondos y estilo</button>
+      <button type="button" role="tab" aria-selected={studioTab==='ai'} className={studioTab==='ai'?'active':''} onClick={()=>setStudioTab('ai')}>IA opcional</button>
+    </nav>
+    {studioTab==='canvas'&&<>
+      <div className="factory-canvas-intro">
+        <div><span className="eyebrow">01 / TU ESPACIO DE DISEÑO</span>
+          <h2>Un lienzo. Todo en su lugar.</h2>
+          <p>Arrastra fotografías, añade textos libres, lazos y recortes. El grid muestra dónde se dividirá cada slide.</p>
+        </div>
+        <div className="factory-canvas-shortcuts">
+          <button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
         const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
         setAll(next);setCurrent(0);notify('Carrusel de 6 slides listo para editar.');
-      }}><Plus size={17}/> Crear 6 slides · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Usar IA para escribir · opcional (1 crédito)</button></div>
+      }}><Plus size={17}/> Crear 6 slides · sin IA</button>
+          <button type="button" className="btn ghost" onClick={()=>setStudioTab('style')}>Cambiar fondo</button>
+          <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Editar textos</button>
+        </div>
+      </div>
+          <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+      onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
+      onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
+      canUndo={historyVersion>=0&&pastHistory.current.length>0}
+      canRedo={historyVersion>=0&&futureHistory.current.length>0}
+      layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
+      onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
+      onReorder={reorderPanoramaLayer}
+       textElements={panoramaTextElements} onRemoveText={removePanoramaText}
+      onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
+
+      <div className="factory-canvas-exports">
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales de 1080 × 1350. Sin líneas de edición.</span></div>
+        <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
+      </div>
+      {overview.length>0&&<div className="factory-overview-grid factory-canvas-overview">
+        {overview.map((src,n)=><button type="button" key={n} onClick={()=>{setCurrent(n);setStudioTab('slides')}}><img src={src} alt={'Slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}
+      </div>}
+      {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
+        <strong><Check size={15}/> {downloads.length} PNG listos</strong>
+        <p>Descárgalos individualmente, sin ZIP.</p>
+        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
+      </div>}
+    </>}
+    {studioTab==='slides'&&<>
+          <div className="factory-work">
+      <div className="factory-edit">
+        <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
+        <div className="factory-slide-strip">
+          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
+          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
+        </div>
+        <div className="factory-panel">
+          <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Edit this slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
+          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
+          <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
+          <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
+          <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
+            <select id="slide-font-choice" aria-label="Tipografía del título de este slide"
+              value={slide.titleFont||'inherit'} onChange={e=>replace({titleFont:e.target.value==='inherit'?undefined:e.target.value as CarouselFont})}>
+              <option value="inherit">Igual que el estilo maestro</option>
+              {CAROUSEL_FONTS.filter(font=>font.id!=='brand').map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
+            </select>
+            <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
+          </div>
+          <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+           <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
+             <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
+             {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
+           </select>
+           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
+             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
+             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
+           </details>
+           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
+             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
+           </select>
+          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
+          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
+            <div><label>Color <input type="color" value={slide.backgroundColor||style.canvasColor}
+              onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:e.target.value})}/></label>
+              <label>Degradado <input type="checkbox" checked={!!slide.backgroundGradient}
+                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',
+                  backgroundGradient:e.target.checked?'#EAD9F0':undefined})}/></label>
+              {slide.backgroundGradient&&<label>Segundo color <input type="color" value={slide.backgroundGradient}
+                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundGradient:e.target.value})}/></label>}
+              <button type="button" onClick={()=>replace({backgroundId:'brand',backgroundImageId:'',
+                backgroundColor:undefined,backgroundGradient:undefined})}>Volver al fondo general</button>
+            </div>
+          </details>}
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
+          <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
+        </div>
+
+      </div>
+      <aside className="factory-right">
+        <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
+         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={()=>{
+           if(style.seamlessEnabled||style.panoramaLayers?.length){document.querySelector('.panorama-editor')?.scrollIntoView({behavior:'smooth',block:'start'});setTouchEdit(false)}else enableTouch();
+         }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Editar en el lienzo panorámico':touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
+        {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
+        <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
+         onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
+         onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
+         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>}
+        <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
+        <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
+        <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo</button>
+        {overview.length>0&&<div className={'factory-overview'+(style.seamlessEnabled?' seamless':'')} aria-label="Vista previa de todos los slides"><strong>{style.seamlessEnabled?'Vista seamless · desliza para comprobar las uniones':'Tu carrusel, como una colección'}</strong><div className="factory-overview-grid">{overview.map((src,n)=><button type="button" key={n} onClick={()=>setCurrent(n)} title={'Ir al slide '+(n+1)}><img src={src} alt={'Vista previa slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}</div></div>}
+        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Preparar PNG individuales</button>
+        {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
+        <div className="factory-hint"><ImagePlus size={16}/> El estilo maestro afecta todo el carrusel; el texto, las fotografías y la composición de cada slide siguen siendo editables.</div>
+         <div className="factory-quality"><strong>Revisión antes de publicar</strong><p>Comprobamos longitud del texto y si faltan fotografías. Revisa manualmente ortografía, identidad facial y manos.</p>
+           {warnings.length?warnings.map((note,n)=><small key={n}>• {note}</small>):<span><Check size={15}/> Sin avisos de texto o fotografías pendientes.</span>}
+         </div>
+      </aside>
     </div>
-    <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
+
+    </>}
+    {studioTab==='style'&&<>
+          <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
       <div className="factory-style-title"><div><span className="eyebrow">02 / LIENZO LIBRE</span><h2>Empieza en blanco. Diseña a tu gusto.</h2><p>Sin plantillas, recuadros ni líneas decorativas. Selecciona colores, degradados, fondos y tipografías libremente.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
       <div className="factory-canvas-colors">
         <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
@@ -857,73 +975,31 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
     </section>
-    <section className="seamless-config">
+
+          <section className="seamless-config">
       <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
       {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{FREE_BACKGROUNDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
         <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
         <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
       </div>}
     </section>
-    <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
-      onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
-      onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
-      canUndo={historyVersion>=0&&pastHistory.current.length>0}
-      canRedo={historyVersion>=0&&futureHistory.current.length>0}
-      layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
-      onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
-      onReorder={reorderPanoramaLayer}
-       textElements={panoramaTextElements} onRemoveText={removePanoramaText}
-      onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
-    <div className="factory-work">
-      <div className="factory-edit">
-        <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
-        <div className="factory-slide-strip">
-          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
-          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
-        </div>
-        <div className="factory-panel">
-          <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Edit this slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
-          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
-          <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
-          <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
-          <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
-            <select id="slide-font-choice" aria-label="Tipografía del título de este slide"
-              value={slide.titleFont||'inherit'} onChange={e=>replace({titleFont:e.target.value==='inherit'?undefined:e.target.value as CarouselFont})}>
-              <option value="inherit">Igual que el estilo maestro</option>
-              {CAROUSEL_FONTS.filter(font=>font.id!=='brand').map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
-            </select>
-            <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
-          </div>
-          <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
-           <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
-             <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
-             {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
-           </select>
-           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
-             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
-             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
-           </details>
-           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
-             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
-           </select>
-          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
-          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-          {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
-            <div><label>Color <input type="color" value={slide.backgroundColor||style.canvasColor}
-              onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:e.target.value})}/></label>
-              <label>Degradado <input type="checkbox" checked={!!slide.backgroundGradient}
-                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',
-                  backgroundGradient:e.target.checked?'#EAD9F0':undefined})}/></label>
-              {slide.backgroundGradient&&<label>Segundo color <input type="color" value={slide.backgroundGradient}
-                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundGradient:e.target.value})}/></label>}
-              <button type="button" onClick={()=>replace({backgroundId:'brand',backgroundImageId:'',
-                backgroundColor:undefined,backgroundGradient:undefined})}>Volver al fondo general</button>
-            </div>
-          </details>}
-          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
-          <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
-        </div>
-        <div className="factory-panel factory-ai">
+
+      <div className="factory-return-canvas"><button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button></div>
+    </>}
+    {studioTab==='ai'&&<section className="factory-assistant-zone">
+      <div className="factory-assistant-head"><span className="eyebrow">SOLO SI LA NECESITAS</span>
+        <h2>Ayuda con IA, separada del diseño.</h2>
+        <p>Diseñar, usar fondos, crear textos y descargar no consume créditos IA. Estas herramientas son opcionales y muestran el costo antes de continuar.</p>
+      </div>
+      <div className="factory-idea factory-assistant-copy">
+        <div><div className="eyebrow">REDACCIÓN OPCIONAL</div><h3>¿Quieres ayuda para escribir?</h3><p>Describe tu tema y genera una propuesta de carrusel. También puedes escribirlo todo manualmente en Slides y textos.</p></div>
+        <div><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)}
+          placeholder="Describe el tema o problema sobre el que quieres publicar..."/>
+          <button type="button" className="btn dark" onClick={makeCopy} disabled={!!busy}>
+            {busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>}
+            Generar texto · 1 crédito</button></div>
+      </div>
+              <div className="factory-panel factory-ai">
           <div className="factory-panel-title"><div><div className="eyebrow">03 / IMAGE MAKER</div><h3><Sparkles size={18}/> AI Image Lab</h3></div></div>
           <p>Crea imágenes nuevas para una publicación o variaciones creativas de una fotografía. No modifica el original.</p>
           <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Create new</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Photo variation</button></div>
@@ -938,28 +1014,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generar foto · 1 crédito IA</button>
           <small>Las generaciones pueden consumir créditos. No uses variaciones IA de screenshots de la App ni de fotos donde necesites fidelidad exacta de rostros o detalles.</small>
         </div>
-      </div>
-      <aside className="factory-right">
-        <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
-         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={()=>{
-           if(style.seamlessEnabled||style.panoramaLayers?.length){document.querySelector('.panorama-editor')?.scrollIntoView({behavior:'smooth',block:'start'});setTouchEdit(false)}else enableTouch();
-         }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Editar en el lienzo panorámico':touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
-        {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
-        <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
-         onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
-         onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
-         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>}
-        <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
-        <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
-        <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo</button>
-        {overview.length>0&&<div className={'factory-overview'+(style.seamlessEnabled?' seamless':'')} aria-label="Vista previa de todos los slides"><strong>{style.seamlessEnabled?'Vista seamless · desliza para comprobar las uniones':'Tu carrusel, como una colección'}</strong><div className="factory-overview-grid">{overview.map((src,n)=><button type="button" key={n} onClick={()=>setCurrent(n)} title={'Ir al slide '+(n+1)}><img src={src} alt={'Vista previa slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}</div></div>}
-        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Preparar PNG individuales</button>
-        {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
-        <div className="factory-hint"><ImagePlus size={16}/> El estilo maestro afecta todo el carrusel; el texto, las fotografías y la composición de cada slide siguen siendo editables.</div>
-         <div className="factory-quality"><strong>Revisión antes de publicar</strong><p>Comprobamos longitud del texto y si faltan fotografías. Revisa manualmente ortografía, identidad facial y manos.</p>
-           {warnings.length?warnings.map((note,n)=><small key={n}>• {note}</small>):<span><Check size={15}/> Sin avisos de texto o fotografías pendientes.</span>}
-         </div>
-      </aside>
-    </div>
+      <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver a diseñar sin IA</button>
+    </section>}
   </div>;
 }
