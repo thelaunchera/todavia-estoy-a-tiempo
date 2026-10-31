@@ -1570,3 +1570,37 @@ input::placeholder {
 .lab-language-question{font-size:12px;color:#526b77;margin:4px 0 10px}
 .app-shell .top>div:last-child{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 @media(max-width:620px){.lab-site-locale button{min-width:30px;min-height:30px}.app-shell .top>div:last-child{gap:6px}.lab-site-locale{padding:2px}}
+
+/* Mobile masthead: one row, one creation action. Prevents the language picker
+   and the page title from displacing the Create button on narrow iPhones. */
+.lab-page-short,.lab-create-label-short{display:none}
+.lab-empty-hint{display:block;color:#647a81;font-size:12px;line-height:1.5;max-width:360px}
+.app-shell .top>div:first-child,.app-shell .top>div:last-child{min-width:0}
+.app-shell .top>div:last-child{flex-wrap:nowrap}
+.app-shell .top .lab-primary-create{white-space:nowrap;flex-shrink:0}
+@media(max-width:850px){
+ .app-shell .top{display:flex;align-items:center;flex-wrap:nowrap;gap:9px;padding:0 14px;overflow:hidden}
+ .app-shell .top>div:first-child{display:flex;align-items:center;flex:1 1 auto;gap:8px;overflow:hidden;min-width:0}
+ .app-shell .top>div:last-child{display:flex;align-items:center;flex:0 0 auto;gap:7px;flex-wrap:nowrap}
+ .app-shell .top .lab-current-page{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.25}
+ .app-shell .top .lab-site-locale{flex-shrink:0}
+ .app-shell .top .lab-primary-create{padding:0 11px;min-height:40px;gap:5px}
+}
+@media(max-width:600px){
+ .app-shell .top{min-height:65px;height:65px;padding:0 12px;gap:7px}
+ .app-shell .top>div:first-child{gap:6px}
+ .app-shell .top>div:last-child{gap:6px}
+ .app-shell .top .hamburger{width:34px;height:40px;flex:0 0 34px;display:grid;place-items:center;padding:0}
+ .app-shell .top .lab-page-long,.app-shell .top .lab-create-label-long{display:none}
+ .app-shell .top .lab-page-short,.app-shell .top .lab-create-label-short{display:inline}
+ .app-shell .top .lab-current-page{font-size:12px;flex-shrink:1}
+ .app-shell .top .lab-site-locale{gap:0;padding:2px}
+ .app-shell .top .lab-site-locale button{min-width:29px;min-height:32px;font-size:11px}
+ .app-shell .top .lab-primary-create{min-width:0;min-height:38px;padding:0 10px;font-size:12px;border-radius:11px}
+}
+@media(max-width:355px){
+ .app-shell .top{padding:0 8px;gap:4px}
+ .app-shell .top>div:last-child{gap:4px}
+ .app-shell .top .lab-primary-create{padding:0 7px}
+ .app-shell .top .lab-site-locale button{min-width:26px}
+}
