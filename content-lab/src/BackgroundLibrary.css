@@ -113,3 +113,11 @@
 .background-shared-loading{display:block;width:43%;height:30%;background:#e5e9e8;border-radius:12px}
 .background-publish-category{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#3b606a;font-size:12px;font-weight:700}
 .background-publish-category select{border:1px solid #c9dee0;background:#fff;min-height:38px;padding:8px;border-radius:10px;color:#315766}
+
+/* Prominent, touch-friendly removal for admin resources and private uploads. */
+.background-library .background-delete-button{display:inline-flex;gap:7px;align-items:center;justify-content:center;
+ border:1px solid #e5b9b7;background:#fff8f7;color:#a73d43;padding:10px 12px;
+ min-height:40px;border-radius:11px;font-size:12px;font-weight:750;cursor:pointer;margin-top:7px;width:100%}
+.background-library .background-delete-button:hover{background:#ffebe9;border-color:#cf8d91}
+.background-library .background-delete-button:focus-visible{outline:3px solid #db7d82;outline-offset:2px}
+@media(max-width:650px){.background-library .background-delete-button{font-size:11px;min-height:42px}}
