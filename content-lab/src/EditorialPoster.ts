@@ -3,7 +3,8 @@
  * separate, exact, editable Canvas layers. No AI renders text in the photo.
  * Designed for personal-brand intro, magazine, luxury campaign, and products.
  */
-import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 export type EditorialPreset='portrait'|'annotated'|'magazine'|'split'|'typographic';
 export const EDITORIAL_PRESETS:{id:EditorialPreset;name:string;description:string}[]=[
  {id:'portrait',name:'Portrait Campaign',description:'Foto protagonista + título editorial grande'},
@@ -177,7 +178,7 @@ export async function renderEditorial(input:{
    ctx.drawImage(im,X(.84),Y(topSafe+.01),im.naturalWidth*k,im.naturalHeight*k);
   }catch{/* Logo optional; private library may be loading. */}
  }
- paintFreeStickers(ctx,W,H,design.stickerIds,accent);
+ await paintOriginalStickerImages(ctx,W,H,design.stickerIds,input.stickerImages);
  // Contrast estimate applies to typography panel rather than raw photograph.
  return {fit,contrast:4.6};
 }
