@@ -58,8 +58,8 @@ test('Cloudflare supports actual guidance and reference images, no invented nega
  assert.ok(backend.includes("form.set('guidance'"));
  assert.ok(backend.includes("form.set('seed'"));
  assert.ok(backend.includes("form.append('input_image_'+i"));
- assert.ok(backend.includes("const userPrompt=clean(body.prompt,1480)"));
- assert.ok(backend.includes("const userDirection=clean(grid.brief,1100)"));
+ assert.ok(backend.includes("const userPrompt=clean(body.prompt,1900)"));
+ assert.ok(backend.includes("const userDirection=clean(grid.brief,1900)"));
  assert.ok(backend.includes("creativeSettings:body.creativeSettings||null"));
  assert.ok(backend.includes("const guidance=settings.fidelity==='strict'?5.7:4.2"));
  assert.ok(backend.includes("refId!==sourceId"));
@@ -70,4 +70,11 @@ test('quick variations are from original reference and cost one photo credit',()
  assert.ok(grid.includes("testOnePhoto('Change ONLY the environmental"));
  assert.ok(grid.includes("askCredits('photo',1"));
  assert.ok(grid.includes('no retocan píxeles de la foto generada'));
+});
+
+test('free-form custom prompt is not silently truncated at 700-1100 characters',()=>{
+ assert.ok(backend.includes("form.set('prompt',prompt.slice(0,3300))"));
+ assert.ok(backend.includes("clean(body.brief,1900)"));
+ assert.ok(backend.includes("brief:clean(body.brief,1900)"));
+ assert.ok(backend.includes("clean(body.prompt,1900)"));
 });
