@@ -95,3 +95,8 @@
 .seamless-controls select{min-width:0;width:100%;background:#f9fbfb;border:1px solid #dce7e9;border-radius:8px;padding:10px}
 .seamless-controls p{grid-column:1/-1}
 @media(max-width:650px){.seamless-config{padding:15px}.seamless-header{flex-direction:column}.seamless-controls{grid-template-columns:1fr}.seamless-controls p{grid-column:auto}}
+
+.factory-overview.seamless .factory-overview-grid{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x proximity;border-radius:6px;background:#f1f3f3}
+.factory-overview.seamless .factory-overview-grid button{flex:0 0 135px;border:0;border-radius:0;padding:0;background:transparent;scroll-snap-align:start;overflow:visible}
+.factory-overview.seamless .factory-overview-grid img{aspect-ratio:4/5;border-radius:0;display:block;width:100%}
+.factory-overview.seamless .factory-overview-grid span{background:#fff;border-top:1px solid #e3ebeb}
