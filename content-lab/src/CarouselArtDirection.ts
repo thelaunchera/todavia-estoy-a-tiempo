@@ -4,10 +4,37 @@
  * This deliberately consumes zero Workers AI credits.
  */
 import {brandPalette,type BrandIdentity,type SocialPlatform} from './BrandIdentity';
-import type {FreeBackgroundId} from './FreeDesignAssets';
+import {FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {normalizePanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 export type CarouselMood='editorial'|'soft'|'bold'|'dark';
-export type CarouselFont='brand'|'serif'|'sans';
+export const CAROUSEL_FONTS=[
+ {id:'brand',label:'Mi Brand Kit',family:'',category:'Marca'},
+ {id:'serif',label:'Editorial clásica',family:'Georgia, serif',category:'Editorial'},
+ {id:'sans',label:'Minimal moderna',family:'Arial, sans-serif',category:'Moderna'},
+ {id:'cormorant',label:'Cormorant Garamond',family:'"Cormorant Garamond", Georgia, serif',category:'Editorial'},
+ {id:'playfair',label:'Playfair Display',family:'"Playfair Display", Georgia, serif',category:'Editorial'},
+ {id:'fraunces',label:'Fraunces',family:'"Fraunces", Georgia, serif',category:'Editorial'},
+ {id:'bodoni',label:'Bodoni Moda',family:'"Bodoni Moda", Georgia, serif',category:'Editorial'},
+ {id:'libre',label:'Libre Baskerville',family:'"Libre Baskerville", Georgia, serif',category:'Editorial'},
+ {id:'outfit',label:'Outfit',family:'Outfit, Arial, sans-serif',category:'Moderna'},
+ {id:'manrope',label:'Manrope',family:'Manrope, Arial, sans-serif',category:'Moderna'},
+ {id:'syne',label:'Syne',family:'Syne, Arial, sans-serif',category:'Moderna'},
+ {id:'space',label:'Space Grotesk',family:'"Space Grotesk", Arial, sans-serif',category:'Moderna'},
+ {id:'caveat',label:'Caveat · a mano',family:'Caveat, cursive',category:'A mano'},
+] as const;
+export type CarouselFont=typeof CAROUSEL_FONTS[number]['id'];
+export function isCarouselFont(value:unknown):value is CarouselFont{
+ return CAROUSEL_FONTS.some(font=>font.id===value);
+}
+export function carouselFontFamily(value:CarouselFont,brandHeadingFont?:string):string{
+ if(value!=='brand')return CAROUSEL_FONTS.find(font=>font.id===value)?.family||'Georgia, serif';
+ const key=(brandHeadingFont||'').toLowerCase();
+ return key==='prompt'?'Prompt, Arial, sans-serif':
+  key==='futura'?'Futura, Arial, sans-serif':
+  key==='dm serif display'?'"DM Serif Display", Georgia, serif':
+  key==='cormorant garamond'?'"Cormorant Garamond", Georgia, serif':
+  key==='space grotesk'?'"Space Grotesk", Arial, sans-serif':'Georgia, serif';
+}
 export type CarouselStyle={
   mood:CarouselMood;
   font:CarouselFont;
@@ -28,13 +55,13 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
   return {
     mood:['editorial','soft','bold','dark'].includes(String(v.mood))?v.mood as CarouselMood:'editorial',
-    font:['brand','serif','sans'].includes(String(v.font))?v.font as CarouselFont:'brand',
+    font:isCarouselFont(v.font)?v.font:'brand',
     referenceAssetId:typeof v.referenceAssetId==='string'?v.referenceAssetId.slice(0,110):'',
     accentSource:v.accentSource==='reference'?'reference':'brand',
     referenceColor:typeof v.referenceColor==='string'&&/^#[0-9A-F]{6}$/i.test(v.referenceColor)?v.referenceColor:'',
     targetPlatform:['brand','instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'].includes(String(v.targetPlatform))?v.targetPlatform as CarouselStyle['targetPlatform']:'brand',
     seamlessEnabled:v.seamlessEnabled===true,
-    seamlessBackgroundId:['brand','warm-paper','soft-blue','sage','butter-cream','pink-paper','editorial-grid','soft-gradient','grain-ivory','night-editorial','dotted-paper'].includes(String(v.seamlessBackgroundId))?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
+    seamlessBackgroundId:FREE_BACKGROUNDS.some(b=>b.id===v.seamlessBackgroundId)?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
     seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):'',
     panoramaLayers:normalizePanoramaLayers(v.panoramaLayers)
   };
