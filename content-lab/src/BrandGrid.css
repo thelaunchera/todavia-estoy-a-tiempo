@@ -125,3 +125,15 @@
  .brand-grid-tool .v2-editor-top .btn{flex:0 0 auto}
  .brand-grid-tool .v2-preview-wrap{width:100%;max-width:100%}
 }
+
+/* Reference-led art direction */
+.editorial-mode,.editorial-settings{background:#f5f8f8;border:1px solid #d4e4e5;border-radius:14px;padding:16px;margin:17px 0}
+.editorial-mode strong{font-size:14px}.editorial-mode .bg-modes{margin:12px 0}.editorial-mode .bg-modes button{text-align:left;min-width:0;padding:14px}
+.editorial-mode select,.editorial-settings select{width:100%;max-width:100%;min-width:0;background:#fff;border:1px solid #d9e4e5;border-radius:9px;padding:12px;margin:8px 0}
+.editorial-settings h3{font-size:18px}.editorial-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.editorial-fields label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:#516f78;line-height:1.4}
+.editorial-fields input,.editorial-fields textarea{min-width:0;width:100%;max-width:100%;border:1px solid #d6e3e6;border-radius:9px;background:#fff;padding:10px;color:#283a40}
+.editorial-fields input[type=color]{height:48px;cursor:pointer;padding:5px}
+.editorial-fields input[type=range]{padding:5px}
+.editorial-settings .bg-title{margin-bottom:16px}
+@media(max-width:600px){.editorial-fields{grid-template-columns:1fr}.editorial-mode,.editorial-settings{padding:12px}.editorial-mode .bg-modes{grid-template-columns:1fr 1fr}}
