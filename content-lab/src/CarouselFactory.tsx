@@ -505,32 +505,76 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         crop:part.photoPosition?.crop||normalizeCrop({y:part.photoFocus==='top'?.12:part.photoFocus==='bottom'?.9:.5})},
       frameStyle:style.seamlessEnabled?'panorama':part.frameStyle||'none',
       paper:getCarouselPalette(brand,style,part.accentIndex||0).paper,accent:getCarouselPalette(brand,style,part.accentIndex||0).accent,
-      page:n,assetId:part.assetId
+      page:n,assetId:part.assetId,
     }]:[]),
     ...(part.stickerIds||[]).filter(id=>images[id]).map((id,index)=>{
       const r=clampRect(part.stickerPositions?.[id]||stickerDefault(index));
       return {id:'page-sticker-'+part.key+'-'+id,kind:'sticker' as const,
         name:'Sticker · slide '+(n+1),src:images[id],rect:{...r,x:(n+r.x)/slides.length,w:r.w/slides.length},page:n,assetId:id};
-    })
+    }),
+    ...(style.freeCanvas?([
+      {field:'eyebrow' as const,value:part.eyebrow,name:'Etiqueta',rect:{x:.068,y:.061,w:.86,h:.08},fontSize:25},
+      {field:'title' as const,value:part.title,name:'Título',rect:{x:.068,y:.18,w:.86,h:.38},fontSize:92},
+      {field:'description' as const,value:part.description,name:'Descripción',rect:{x:.068,y:.58,w:.86,h:.28},fontSize:38},
+    ].filter(item=>item.value.trim()).map(item=>({
+      id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
+      name:item.name+' · slide '+(n+1),src:'',text:item.value,
+      font:item.field==='title'?(part.titleFont||style.font):'sans',
+      fontSize:item.fontSize,color:'#191919',lineHeight:1.12,spacing:0,
+      rect:{...item.rect,x:(n+item.rect.x)/slides.length,w:item.rect.w/slides.length},
+      page:n,sourceField:item.field,placement:'front' as const,
+    }))):[]),
   ]);
   const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
-    .filter(layer=>images[layer.assetId]).map(layer=>({...layer,src:images[layer.assetId]}))];
+    .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
+    .map(layer=>({...layer,src:images[layer.assetId]||''}))];
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
     {field:'description' as const,name:'Descripción',value:part.description},
   ].filter(item=>item.value.trim()).map(item=>({id:part.key+':'+item.field,
     name:item.name+' · slide '+(n+1),preview:item.value.slice(0,90)})));
-  const movePanoramaLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
+  const stripSource=(source:(typeof pageLayers)[number])=>slides.map((part,n)=>{
+    if(n!==source.page)return part;
+    if(source.kind==='photo')return {...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)};
+    if(source.kind==='sticker')return {...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)};
+    if(source.kind==='text'&&source.sourceField)return {...part,[source.sourceField]:''};
+    return part;
+  });
+  const promoteSource=(source:(typeof pageLayers)[number],rect:TouchRect):PanoramaLayer=>({
+    id:source.id,assetId:source.assetId||'',name:source.name,kind:source.kind,
+    rect:clampPanoramaRect(rect),placement:'front',
+    ...(source.kind==='text'?{text:source.text,font:source.font,fontSize:source.fontSize,
+      lineHeight:source.lineHeight,spacing:source.spacing,color:source.color}:{}),
+  });
+  const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
-      const next=slides.map((part,n)=>n!==source.page?part:kind==='photo'
-        ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
-        :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
-      setAll(next,{...style,panoramaLayers:[...(style.panoramaLayers||[]),
-        {id,assetId:source.assetId,name:kind==='photo'?'Foto libre':'Sticker libre',kind,rect:clampPanoramaRect(rect)}]});
-    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect}:layer)});
+      setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),promoteSource(source,rect)]});
+    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect:clampPanoramaRect(rect)}:layer)});
+  };
+  const updatePanoramaLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
+    const source=pageLayers.find(layer=>layer.id===id);
+    if(source){
+      if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
+      setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),
+        {...promoteSource(source,source.rect),...patch}]});
+    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,...patch}:layer)});
+  };
+  const addCanvasLayer=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
+    if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 elementos en el lienzo.');
+    const currentId='panorama-'+crypto.randomUUID();
+    const n=Math.min(i,slides.length-1),count=slides.length;
+    const newLayer:PanoramaLayer=kind==='text'
+      ?{id:currentId,kind,assetId:'',name:'Texto libre',placement:'front',
+         text:'Escribe tu título',font:style.font,fontSize:86,lineHeight:1.12,spacing:0,color:'#191919',
+         rect:{x:(n+.12)/count,y:.35,w:.76/count,h:.24}}
+      :{id:currentId,kind,assetId:'',name:'Collage · '+(shape||'paper'),shape:shape||'paper',
+         placement:'front',color:shape==='tape'?'#E5C9AA':'#F1E5D2',
+         rect:{x:(n+.2)/count,y:.35,w:.60/count,h:shape==='tape'?.10:.35}};
+    setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),newLayer]});
+    notify(kind==='text'?'Texto añadido: tócalo en el lienzo para editarlo y moverlo.':'Elemento de collage añadido. Arrástralo para colocarlo.');
   };
   const reorderPanoramaLayer=(id:string,action:LayerMove)=>{
     const source=pageLayers.find(layer=>layer.id===id);
@@ -538,19 +582,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     let layers=style.panoramaLayers||[];
     if(source){
       if(layers.length>=24)return notify('Máximo 24 capas en el panorama.');
-      nextSlides=slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
-        ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
-        :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
-      layers=[...layers,{id,assetId:source.assetId,name:source.name,kind:source.kind,
-        rect:clampPanoramaRect(source.rect),placement:'front'}];
+      nextSlides=stripSource(source);
+      layers=[...layers,promoteSource(source,source.rect)];
     }
     setAll(nextSlides,{...style,panoramaLayers:reorderPanoramaLayers(layers,id,action)});
   };
   const removePanoramaLayer=(id:string)=>{
     const source=pageLayers.find(layer=>layer.id===id);
-    if(source)setAll(slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
-      ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
-      :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)}));
+    if(source)setAll(stripSource(source));
     else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
   };
   const removePanoramaText=(id:string)=>{
