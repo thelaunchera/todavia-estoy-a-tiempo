@@ -15,6 +15,7 @@ import {isBowBackground} from './BowBackgrounds';
 import {isScrapbookBackground} from './ScrapbookBackgrounds';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {drawSeamlessPages,drawSeamlessCanvas,paintSeamlessTypography} from './SeamlessCarousel';
+import {editorialPlan,editorialRhythmForSlides} from './EditorialRhythm';
 import TouchLayerCanvas from './TouchLayerCanvas';
 import PanoramaEditor from './PanoramaEditor';
 import {coverPlacement,normalizeCrop,photoFrameMetrics,initialPanoramaPhotoRect} from './PhotoCrop';
@@ -52,6 +53,24 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+/** Reflow only default-position photos; never overwrite a placement moved by a person. */
+const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
+ if(!slide.assetId)return {...slide,layout};
+ const old=photoDefault(slide.layout),existing=slide.photoPosition;
+ const isAutomatic=!existing||(['x','y','w','h'] as const).every(key=>Math.abs(existing[key]-old[key])<.01);
+ if(!isAutomatic)return {...slide,layout};
+ const target=photoDefault(layout);
+ return {...slide,layout,photoPosition:{...target,
+  ...(existing?.crop?{crop:existing.crop}:{}),
+  ...(existing?.cornerRadius!==undefined?{cornerRadius:existing.cornerRadius}:{})}};
+};
+const editorialTextGeometry=(slide:Slide,field:'eyebrow'|'title'|'description')=>{
+ const plan=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim());
+ const p=field==='title'?plan.title:field==='description'?plan.body:
+  {x:plan.eyebrow.x,top:plan.eyebrow.top,width:840,size:25,lines:1};
+ return {rect:{x:p.x/1080,y:p.top/1350,w:p.width/1080,
+  h:Math.min(.75,Math.max(.07,(p.size*p.lines*1.12)/1350))},fontSize:p.size};
+};
 const layoutNames: Record<Layout,string> = {
   cover: 'Editorial cover', statement: 'Statement', photo: 'Photo story',
   steps: 'Useful points', split: 'Split editorial', closing: 'Final CTA'
@@ -205,6 +224,14 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   // The free canvas begins without decorative shapes, lines, borders or prebuilt cards.
   if(style.freeCanvas){
     if(!editorMode){
+      if(style.editorialRhythm){
+        const p=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim());
+        if(slide.eyebrow.trim())label(slide.eyebrow,p.eyebrow.x,p.eyebrow.top+26,ink,24);
+        if(slide.title.trim())title(p.title.x,p.title.top+p.title.size,p.title.width,p.title.size,p.title.lines);
+        if(slide.description.trim())fillLines(ctx,slide.description,p.body.x,p.body.top+p.body.size,
+          p.body.width,p.body.size,p.body.lines,ink,bodyFont);
+        if(!slide.assetId&&slide.title.trim())label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),p.folio.x,p.folio.top+20,ink,19);
+      } else {
       // A minimalist editorial composition should use typography and whitespace
       // intentionally rather than fixing every headline near the top.
       const hasPhoto=Boolean(slide.assetId);
@@ -222,6 +249,8 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
         // automatic lines, stickers, blocks or fake decorative elements.
         label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),82,1270,ink,19);
       }
+      }
+      // A photo belongs to the editable slide regardless of its typography rhythm.
       if(slide.assetId&&slide.photoPosition){
         const p=clampRect(slide.photoPosition),pw=p.w*1080,ph=p.h*1350;
         ctx.save();ctx.translate((p.x+p.w/2)*1080,(p.y+p.h/2)*1350);
@@ -324,12 +353,20 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
    label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),885,1284,color,21);
   };
   if(style.freeCanvas){
+   if(style.editorialRhythm){
+    const p=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim());
+    label(slide.eyebrow,p.eyebrow.x,p.eyebrow.top+26,ink);
+    if(slide.title.trim())title(p.title.x,p.title.top+p.title.size,p.title.width,p.title.size,p.title.lines);
+    if(slide.description.trim())fillLines(ctx,slide.description,p.body.x,p.body.top+p.body.size,p.body.width,p.body.size,p.body.lines,ink,bodyFont);
+    if(!slide.assetId&&slide.title.trim())label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),p.folio.x,p.folio.top+20,ink,19);
+   }else{
    const hasPhoto=Boolean(slide.assetId),hasBody=Boolean(slide.description.trim());
    if(slide.eyebrow.trim())label(slide.eyebrow,82,154,ink);
    if(slide.title.trim())title(82,hasPhoto?344:hasBody?464:608,916,hasPhoto?104:hasBody?112:124,5);
    if(hasBody)body(82,hasPhoto?820:850,908,ink,5);
    if(!hasPhoto&&slide.title.trim()){
      label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),82,1270,ink,19);
+   }
    }
   }else if(slide.layout==='cover'){
    label(slide.eyebrow,74,138,ink);title(74,348,920,106,5);
@@ -443,7 +480,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     required.push(...(style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
-    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
     return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
@@ -510,11 +547,19 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }catch(e){showError(e)}
   };
   const applyRhythm=()=>{
-    const rhythm:Layout[]=['cover','statement','photo','steps','statement','split','photo','closing'];
-    setAll(slides.map((item,n)=>({...item,layout:n===slides.length-1?'closing':rhythm[n],photoFocus:item.photoFocus||'top'})));
-    notify('Se aplicó un ritmo visual coherente; no cambié textos ni fotos.');
+    const rhythm=editorialRhythmForSlides(slides);
+    setAll(slides.map((item,n)=>({...reflowDefaultPhoto(item,rhythm[n]),photoFocus:item.photoFocus||'top'})),normalizeCarouselStyle({...style,editorialRhythm:true}));
+    notify('Ritmo editorial aplicado: slides fotográficos, tipográficos y mixtos. Tus fotos y textos siguen editables.');
   };
-  const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
+  const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>{
+    if(j!==i)return s;
+    // A newly chosen photo should not land over the headline by default.
+    if(style.editorialRhythm&&typeof patch.assetId==='string'&&patch.assetId&&!s.assetId&&!s.photoPosition){
+      const layout=s.layout==='statement'?'cover':s.layout;
+      return {...reflowDefaultPhoto({...s,assetId:patch.assetId},layout),...patch};
+    }
+    return {...s,...patch};
+  }));
   const updateDecoration=(next:Partial<Slide>)=>{
     const hasBg=('backgroundImageId' in next)||('backgroundId' in next);
     const changedBackground=hasBg&&(
@@ -573,14 +618,16 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       {field:'eyebrow' as const,value:part.eyebrow,name:'Etiqueta',rect:{x:.068,y:.061,w:.86,h:.08},fontSize:25},
       {field:'title' as const,value:part.title,name:'Título',rect:{x:.068,y:.18,w:.86,h:.38},fontSize:92},
       {field:'description' as const,value:part.description,name:'Descripción',rect:{x:.068,y:.58,w:.86,h:.28},fontSize:38},
-    ].filter(item=>item.value.trim()).map(item=>({
+    ].filter(item=>item.value.trim()).map(item=>{
+      const geometry=style.editorialRhythm?editorialTextGeometry(part,item.field):{rect:item.rect,fontSize:item.fontSize};
+      return ({
       id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
       font:item.field==='title'?(part.titleFont||style.font)==='brand'?(brand.headingFont||'serif').toLowerCase():(part.titleFont||style.font):'sans',
-      fontSize:item.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
-      rect:{...item.rect,x:(n+item.rect.x)/slides.length,w:item.rect.w/slides.length},
+      fontSize:geometry.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
+      rect:{...geometry.rect,x:(n+geometry.rect.x)/slides.length,w:geometry.rect.w/slides.length},
       page:n,sourceField:item.field,placement:'front' as const,
-    }))):[]),
+    });})):[]),
   ]);
   const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
     .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
@@ -732,7 +779,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         if(style.seamlessEnabled){
           const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
             assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
-            layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+            layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
           const page=document.createElement('canvas');
           page.width=previewPageWidth;page.height=previewPageHeight;
           const previewCtx=page.getContext('2d');
@@ -768,7 +815,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         ?part.photoPosition||photoDefault(part.layout):part.photoPosition}));
       if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
         backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
-        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
       const wide=document.createElement('canvas');wide.width=previewPageWidth*slides.length;wide.height=previewPageHeight;
       const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
       for(let n=0;n<editable.length;n++){
@@ -787,7 +834,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(hasBehind){
         const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
         const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
-        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor);
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor,style.editorialRhythm);
         else await paintCarouselTypography(typeCtx,slides,brand,style);
         const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
         scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
@@ -811,7 +858,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       const generated=parseSlides(updated,brand).map(item=>({...item,
         backgroundId,backgroundImageId,backgroundColor:slide.backgroundColor,
         backgroundGradient:slide.backgroundGradient}));
-      onChange({...updated,designData:encodeCarouselDesign(generated,style)});
+      onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
       setCurrent(0);setDownloads([]);
       setStudioTab('style');
       notify('Tu carrusel está preparado. Elige un fondo o cambia cualquier texto.');
@@ -928,9 +975,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
             }
-            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
+            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:(['cover','statement','photo','steps','split','closing'] as Layout[])[n],eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
               backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||''}));
-            setAll(next);setCurrent(0);notify('Nuevo carrusel de 6 slides preparado.');
+            setAll(next,normalizeCarouselStyle({...style,editorialRhythm:true}));setCurrent(0);notify('Nuevo carrusel de 6 slides preparado.');
           }}><Plus size={16}/> Nuevo carrusel</button>
         </div>
       </div>
@@ -1047,6 +1094,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </button>)}</div>
       </details>
 
+        <div className="factory-rhythm-controls">
+          <div><strong>Ritmo visual editorial</strong><p>Alterna fotografía protagonista, titulares grandes y composiciones mixtas. No agrega textos ni fotos inventadas.</p></div>
+          <button type="button" className="btn dark" onClick={applyRhythm}>✨ Crear variedad editorial</button>
+          {style.editorialRhythm&&<button type="button" className="btn ghost" onClick={()=>setArtStyle({editorialRhythm:false})}>Volver a posiciones originales</button>}
+        </div>
         <div className="factory-section"><strong>Texto por slide</strong><span>{slides.length} slides · Editables</span></div>
         <div className="factory-slide-strip">
           {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
@@ -1058,7 +1110,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </select></label>
 
           <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Escribe el mensaje de este slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
-          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
+          <p className="factory-blank-hint">Lienzo libre: textos, fotos y elementos editables en el editor superior.</p>
+          <label>Composición de este slide
+            <select aria-label="Composición de este slide" value={slide.layout} onChange={e=>setAll(slides.map((part,n)=>n===i?reflowDefaultPhoto(part,e.target.value as Layout):part),normalizeCarouselStyle({...style,editorialRhythm:true}))}>
+              <option value="statement">Tipográfico · titular protagonista</option>
+              <option value="cover">Editorial · foto y titular</option>
+              <option value="photo">Fotográfico · imagen protagonista</option>
+              <option value="split">Mixto · foto a un lado y texto al otro</option>
+              <option value="steps">Educativo · título y puntos clave</option>
+              <option value="closing">Cierre · mensaje final</option>
+            </select>
+          </label>
+          {style.editorialRhythm&&<p className="factory-rhythm-note">El diseño se aplica al PNG, a la vista panorámica y a cada slide. Si has movido una foto a mano, conservamos su posición.</p>}
           <label>Etiqueta</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
           <label>Título principal</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
           <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
