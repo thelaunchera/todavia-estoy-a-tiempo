@@ -117,13 +117,17 @@ export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
 export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:StudioEntry[];onChanged:()=>Promise<unknown>;readOnly?:boolean}) {
   const [category,setCategory]=useState<Category|'todos'>('todos');
   const [query,setQuery]=useState('');
+  const [expanded,setExpanded]=useState(false);
   const [editor,setEditor]=useState<(Partial<DisplayLink> & {isNew?:boolean})|null>(null);
   const [busy,setBusy]=useState(false);
   const [copied,setCopied]=useState('');
   const [notice,setNotice]=useState('');
   const [issue,setIssue]=useState('');
   const links=useMemo(()=>resolveStudioLinks(entries),[entries]);
+  const searching=query.trim().length>0;
+  const browsing=searching||category!=='todos';
   const shown=links.filter(x=>(!readOnly || shareable(x.visibility)) && (category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
+  const openCategory=(id:Category|'todos')=>{setCategory(id);setExpanded(false);setNotice('');};
   async function copy(text:string,key:string){
     try{await navigator.clipboard.writeText(text);setCopied(key);setIssue('');setNotice('Enlace copiado al portapapeles.');}
     catch{setNotice('');setIssue('No se pudo copiar automáticamente. Mantén pulsado el enlace para copiarlo.');}
@@ -175,19 +179,26 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     </div>
     <div className="lc-tools">
       <div className="lc-search"><Search size={19}/><input aria-label="Buscar enlaces" placeholder="Buscar por producto, demo o nombre…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button onClick={()=>setQuery('')} aria-label="Limpiar búsqueda"><X size={16}/></button>}</div>
-      <button className="lc-bulk" onClick={()=>void copyCategory()}><Copy size={15}/>{copied==='group'?'Copiado':'Copiar enlaces listos'}</button>
+      {browsing&&<button className="lc-bulk" onClick={()=>void copyCategory()}><Copy size={15}/>{copied==='group'?'Copiado':'Copiar enlaces listos'}</button>}
     </div>
     <div className="lc-tabs" role="group" aria-label="Filtrar por categoría">
-      <button className={category==='todos'?'active':''} onClick={()=>setCategory('todos')}>Todos <span>{links.length}</span></button>
-      {GROUPS.map(group=><button key={group.id} className={category===group.id?'active':''} onClick={()=>setCategory(group.id)}>{group.title}<span>{links.filter(x=>x.category===group.id).length}</span></button>)}
+      <button className={category==='todos'?'active':''} onClick={()=>openCategory('todos')}>Inicio</button>
+      {GROUPS.map(group=><button key={group.id} className={category===group.id?'active':''} onClick={()=>openCategory(group.id)}>{group.title}<span>{links.filter(x=>x.category===group.id).length}</span></button>)}
     </div>
     {(issue||notice)&&<div className={'lc-message '+(issue?'lc-error':'')} role="status">{issue||notice}<button aria-label="Cerrar aviso" onClick={()=>{setIssue('');setNotice('');}}><X size={15}/></button></div>}
-    {GROUPS.filter(g=>category==='todos'||g.id===category).map(group=>{
+    {!browsing&&<div className="lc-category-grid" aria-label="Elegir una categoría de enlaces">
+      {GROUPS.map(g=><button key={g.id} className="lc-category-tile" onClick={()=>openCategory(g.id)}>
+        <span className="lc-category-tile-icon"><Link2 size={20}/></span>
+        <strong>{g.title}</strong><span>{g.intro}</span><small>{links.filter(x=>x.category===g.id&&(!readOnly||shareable(x.visibility))).length} enlaces · Ver categoría</small>
+      </button>)}
+    </div>}
+    {browsing&&GROUPS.filter(g=>category==='todos'||g.id===category).map(group=>{
       const groupLinks=shown.filter(x=>x.category===group.id);
+      const displayLinks=(expanded||searching)?groupLinks:groupLinks.slice(0,6);
       if(!groupLinks.length)return null;
       return <section className="lc-group" key={group.id}>
         <div className="lc-group-head"><div><h3>{group.title}</h3><p>{group.intro}</p></div><span>{groupLinks.length} enlaces</span></div>
-        <div className="lc-list">{groupLinks.map(item=><article className="lc-item" key={item.key}>
+        <div className="lc-list">{displayLinks.map(item=><article className="lc-item" key={item.key}>
           <div className="lc-item-info"><div className="lc-item-top"><strong>{item.title}</strong><span className={'lc-status lc-phase-'+(LINK_PUBLICATION[item.key]||(item.visibility==='publico'?'revision':item.visibility==='demo'?'demo':'interno'))}>{PUBLICATION_LABELS[LINK_PUBLICATION[item.key]||(item.visibility==='publico'?'revision':item.visibility==='demo'?'demo':'interno')]}</span><span className={'lc-status lc-status-'+item.visibility}>{item.visibility==='interno'&&<LockKeyhole size={12}/>} {statusText[item.visibility]}</span></div><p>{item.description}</p><a href={item.url} target="_blank" rel="noopener noreferrer" title="Abrir enlace">{item.url}</a></div>
           <div className="lc-actions">
             <button type="button" onClick={()=>void copy(item.url,item.key)} title={item.visibility==='interno'?'Copiar enlace privado: no compartir':'Copiar enlace'}><Copy size={16}/><span>{copied===item.key?'Copiado':'Copiar'}</span></button>
@@ -198,9 +209,10 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
             </>}
           </div>
         </article>)}</div>
+        {!searching&&!expanded&&groupLinks.length>6&&<button className="lc-load-more" onClick={()=>setExpanded(true)}>Ver los {groupLinks.length-6} enlaces restantes</button>}
       </section>;
     })}
-    {!shown.length&&<p className="lc-empty">No encontré enlaces con esa búsqueda. Puedes añadir uno nuevo o probar otra palabra.</p>}
+    {browsing&&!shown.length&&<p className="lc-empty">No encontré enlaces con esa búsqueda. Puedes añadir uno nuevo o probar otra palabra.</p>}
     <p className="lc-note"><LockKeyhole size={15}/> El Studio guarda tus cambios con tu acceso protegido. Los enlaces internos, los de clientes reales y los pendientes de revisar nunca se incluyen al copiar por categoría. Copiar no publica ni habilita ninguna compra.</p>
     {editor&&!readOnly&&<div className="lc-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget&&!busy)setEditor(null);}}>
       <div className="lc-modal" role="dialog" aria-modal="true" aria-label="Editar enlace"><div className="lc-modal-top"><div><span>MI ESTUDIO</span><h3>{editor.isNew?'Nuevo enlace':'Editar enlace'}</h3></div><button onClick={()=>setEditor(null)} aria-label="Cerrar"><X size={20}/></button></div>
