@@ -5,7 +5,8 @@ import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import PromptStudio from './PromptStudio';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
-import {CreativeCover,exportCreativeCover} from './CreativeCover';
+import FreePostStudio from './FreePostStudio';
+import {installLabLocale} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import FreeDecorControls from './FreeDecorControls';
@@ -102,7 +103,6 @@ const angles = [
   'Storytelling',
 ];
 const formats = ['Carousel', 'Single post', 'Reel', 'Story'];
-const templates = ['Editorial', 'Spotlight', 'Split', 'Bold', ...CREATIVE_FORMATS];
 const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'home', title: 'Overview', icon: LayoutDashboard },
   { id: 'create', title: 'Create content', icon: WandSparkles },
@@ -342,7 +342,26 @@ function App() {
   const [loginCode, setLoginCode] = useState('');
   const [loginStage, setLoginStage] = useState<'email'|'code'>('email');
   const [loginBusy, setLoginBusy] = useState(false);
-  const [loginLanguage, setLoginLanguage] = useState<'es'|'en'>('es');
+  const [loginLanguage, setLoginLanguage] = useState<'es'|'en'>(()=>{
+    try{return localStorage.getItem('content-lab:language')==='en'?'en':'es'}catch{return 'es'}
+  });
+  const chooseLanguage=(next:'es'|'en')=>{
+    setLoginLanguage(next);
+    try{
+      localStorage.setItem('content-lab:language',next);
+      const mail=(account?.email||pendingEmail||loginEmail).trim().toLowerCase();
+      if(mail)localStorage.setItem('content-lab:language:'+mail,next);
+    }catch{/* Storage can be disabled in private tabs. */}
+  };
+  useEffect(()=>{
+    const mail=account?.email?.trim().toLowerCase();
+    if(!mail)return;
+    try{
+      const preferred=localStorage.getItem('content-lab:language:'+mail);
+      if(preferred==='en'||preferred==='es')setLoginLanguage(preferred);
+    }catch{/* Keep current selection. */}
+  },[account?.email]);
+  useEffect(()=>installLabLocale(loginLanguage),[loginLanguage,account,tab]);
   const [waiting, setWaiting] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -590,7 +609,7 @@ function App() {
         .slice(0,3).forEach(a=>{if(!images[a.id])void imageLoad(a.id)});
     if(tab==='create'){
       const decor=readCoverDecor(editor.designData);
-      [editor.assetId,decor.backgroundImageId,...decor.stickerIds].filter(Boolean).forEach(id=>{
+      [editor.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(layer=>layer.assetId)].filter(Boolean).forEach(id=>{
         if(!images[id])void imageLoad(id);
       });
     }
@@ -621,7 +640,7 @@ function App() {
     setAssets(prev=>prev.some(a=>a.id===item.id)?prev:[...prev,item]);
     return item;
   };
-  const upload = async (file?: File, category:MediaCategory='original'): Promise<Asset | null> => {
+  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true): Promise<Asset | null> => {
     if (!file) return null;
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
@@ -661,7 +680,7 @@ function App() {
       const asset = data as Asset;
       setAssets(prev => [asset, ...prev]);
       setImages(prev => ({ ...prev, [asset.id]: 'data:' + prepared.mimeType + ';base64,' + prepared.data }));
-      if (tab === 'create' && category === 'original') change('assetId', asset.id);
+      if (tab === 'create' && category === 'original' && autoSelect) change('assetId', asset.id);
       toast((category==='sticker'?'Sticker PNG transparente':'Foto')+' guardado en '+brand.name+' ✓');
       return asset;
     } catch (e) {
@@ -719,9 +738,10 @@ function App() {
             <div className="lockcircle">
               <LockKeyhole size={23} />
             </div>
+            <p className="lab-language-question">Selecciona tu idioma · Choose your language</p>
             <div className="lab-login-language" role="group" aria-label="Idioma / Language">
-              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>setLoginLanguage('es')} aria-pressed={loginLanguage==='es'}>ES</button>
-              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>setLoginLanguage('en')} aria-pressed={loginLanguage==='en'}>EN</button>
+              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')} aria-pressed={loginLanguage==='es'}>ES</button>
+              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')} aria-pressed={loginLanguage==='en'}>EN</button>
             </div>
             <div className="eyebrow">{loginLanguage==='es'?'TU ESPACIO CREATIVO PRIVADO':'YOUR PRIVATE CREATIVE SPACE'}</div>
             <h2>{loginLanguage==='es'?'Tu Content Lab.':'Your Content Lab.'}</h2>
@@ -767,7 +787,7 @@ function App() {
       </div>
     );
   return (
-    <div className="app-shell">
+    <div className="app-shell" lang={loginLanguage==='es'?'es-419':'en'}>
       {menu && <div className="overlay" onClick={() => setMenu(false)} />}
       <aside className={'sidebar ' + (menu ? 'open' : '')} aria-label="Menú de Content Lab">
         <div className="identity">
@@ -872,8 +892,14 @@ function App() {
             <strong>{nav.find(n => n.id === tab)?.title}</strong>
           </div>
           <div>
+            <div className="lab-site-locale" role="group" aria-label="Idioma del sitio / Site language">
+              <button type="button" aria-pressed={loginLanguage==='es'}
+                className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')}>ES</button>
+              <button type="button" aria-pressed={loginLanguage==='en'}
+                className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')}>EN</button>
+            </div>
             <span className="private">
-              <LockKeyhole size={13} /> PRIVATE
+              <LockKeyhole size={13} /> {loginLanguage==='es'?'PRIVADO':'PRIVATE'}
             </span>
             <button className="btn dark compact" onClick={() => start()}>
               <Plus size={16} /> Create content
@@ -1328,73 +1354,16 @@ function App() {
                     <h3>Your graphic direction</h3>
                     <small>Instagram · 1080 × 1350 PNG</small>
                   </div>
-                  <div className="cover-photo-upload" role="group" aria-label="Fotografía de la portada"
-                    onDragOver={e=>e.preventDefault()}
-                    onDrop={e=>{e.preventDefault();const file=Array.from(e.dataTransfer.files).find(f=>f.type.startsWith('image/')||/[.](heic|heif)$/i.test(f.name));if(file)void upload(file,'original')}}>
-                    <div className="cover-photo-swatch">
-                      {editor.assetId&&images[editor.assetId]
-                        ?<img src={images[editor.assetId]} alt="Foto seleccionada para tu post" draggable={false}/>
-                        :<ImagePlus size={27}/>}
-                    </div>
-                    <div className="cover-photo-info">
-                      <strong>{editor.assetId?'Tu foto está en el diseño':'Empieza con tu propia foto'}</strong>
-                      <span>{editor.assetId?'Puedes cambiarla cuando quieras.':'Elige una foto de tu tablet, móvil o computadora.'}</span>
-                    </div>
-                    <div className="cover-photo-buttons">
-                      <button className="btn dark" type="button" disabled={busy==='upload'} onClick={()=>uploadRef.current?.click()}>
-                        {busy==='upload'?<LoaderCircle size={16} className="spin"/>:<ImagePlus size={16}/>}
-                        {busy==='upload'?'Subiendo foto…':editor.assetId?'Cambiar foto':'Subir mi foto'}
-                      </button>
-                      {editor.assetId&&<button className="cover-photo-clear" type="button" onClick={()=>change('assetId','')}>Quitar</button>}
-                    </div>
-                  </div>
-                  <div className="cover-studio-content">
-                  <CreativeCover
-                    post={editor}
-                    brand={brand}
-                    photo={images[editor.assetId]}
-                    images={images}
-                    onDecorChange={(decor:CoverDecor)=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,decor)}))}
-                  />
-                  <FreeDecorControls
-                    title="Stickers y backgrounds"
-                    backgroundId={readCoverDecor(editor.designData).backgroundId}
-                    backgroundImageId={readCoverDecor(editor.designData).backgroundImageId}
-                    stickerIds={readCoverDecor(editor.designData).stickerIds}
-                    assets={library} images={images} loadImage={imageLoad}
-                    onOpenLibrary={()=>navigate('stickers')}
-                    onUploadBackground={async file=>upload(file,'background')}
-                    onChange={next=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,{...readCoverDecor(old.designData),...next})}))}
-                  />
-                  </div>
-                  <details className="cover-layout-chooser">
-                    <summary><span><strong>Estilo del post</strong><small>Actual: {editor.template}</small></span><span className="cover-layout-change">Cambiar estilo</span></summary>
-                  <div className="template-grid">
-                    {templates.map(t => (
-                      <button
-                        key={t}
-                        className={editor.template === t ? 'chosen' : ''}
-                        onClick={() => change('template', t)}
-                      >
-                        <span className={'template-icon ' + t.toLowerCase()} />
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                  </details>
-                  <button
-                    className="btn blue wide"
-                    onClick={() =>
-                      exportCreativeCover(editor, brand, images[editor.assetId],images)
-                        .then(() => toast('PNG exportado.'))
-                        .catch(err)
-                    }
-                  >
-                    <Download size={17} /> Descargar mi post PNG
-                  </button>
-                  <small className="note">
-                    El diseño mantiene tus fotos, colores, fondos y stickers. Puedes elegir otro estilo sin perder la imagen que subiste.
-                  </small>
+                  <FreePostStudio post={editor} brand={brand}
+                    assets={library} images={images} locale={loginLanguage}
+                    onChange={next=>setEditor(old=>({...old,
+                      designData:writeCoverDecor(old.designData,next)}))}
+                    onTitle={value=>change('hook',value)}
+                    onUpload={async file=>upload(file,'original',false)}
+                    loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
+                    onUploadBackground={async file=>upload(file,'background',false)}
+                    notify={toast}/>
+
                 </aside>
               </div>
             </>
