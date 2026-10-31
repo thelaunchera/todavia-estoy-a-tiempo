@@ -6,10 +6,12 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3
 } from 'lucide-react';
 import './CarouselFactory.css';
+import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
   rules: string; language: 'English' | 'Español'; color: string; background: string;
+  headingFont?:string;bodyFont?:string;referenceAssetId?:string;
 };
 type Post = {
   id?: string; brandId: string; title: string; format: string; angle: string;
@@ -21,7 +23,7 @@ type Asset = { id: string; brandId: string; name: string; mime: string };
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string;
+  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -43,20 +45,20 @@ const makeSlide = (i: number, headline: string, assetId = ''): Slide => ({
   assetId
 });
 function parseSlides(post: Post, brand: Brand): Slide[] {
-  if (post.designData) {
-    try {
-      const data: unknown = JSON.parse(post.designData);
-      if (Array.isArray(data) && data.length >= 2 && data.length <= 8) {
-        return data.map((s, i) => ({
+  const saved=readCarouselDesign(post.designData||'');
+  if(saved.slides){
+    const data=saved.slides;
+    if(data.length>=2&&data.length<=8){
+      return data.map((s:any, i) => ({
           key: String(s.key || 'slide-' + i),
           eyebrow: String(s.eyebrow || ''),
           title: String(s.title || ''),
           description: String(s.description || ''),
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
-          assetId: String(s.assetId || '')
+          assetId: String(s.assetId || ''),
+          photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center'
         }));
-      }
-    } catch { /* fall back to the legacy text draft */ }
+    }
   }
   const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
   const title = post.hook || (brand.language === 'English' ? 'One idea worth sharing' : 'Una idea que merece contarse');
@@ -77,11 +79,11 @@ const textColor = (color: string) => {
   const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
   return r*.299+g*.587+b*.114>148?'#191919':'#fff';
 };
-function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: number,maxW: number,size: number,lines: number,color: string,font='Georgia') {
+function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: number,maxW: number,size: number,lines: number,color: string,font='Georgia, serif') {
   const words=text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
   let built:string[]=[];
   for(let fontSize=size;fontSize>=32;fontSize-=4) {
-    ctx.font='bold '+fontSize+'px '+font+', serif';
+    ctx.font='bold '+fontSize+'px '+font;
     built=[];let next='';
     words.forEach(word=>{
       const trial=next?next+' '+word:word;
@@ -92,16 +94,22 @@ function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: numbe
     size=fontSize;
   }
   const spacing=Math.round(size*1.17);
-  ctx.font='bold '+size+'px '+font+', serif';ctx.fillStyle=color;
+  ctx.font='bold '+size+'px '+font;ctx.fillStyle=color;
   built.slice(0,lines).forEach((line,i)=>ctx.fillText(line,x,y+i*spacing));
 }
-async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>) {
+async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle) {
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
-  const paper=brand.background,accent=brand.color,ink=textColor(paper),onAccent=textColor(accent);
+  const {paper,accent,ink,onAccent,muted,outline}=getCarouselPalette(brand,style);
+  const bh=(brand.headingFont||'').toLowerCase();
+  const heading=style.font==='serif'?'Georgia, serif':style.font==='sans'?'Arial, sans-serif':
+    bh==='prompt'?'Prompt, Arial, sans-serif':bh==='futura'?'Futura, Arial, sans-serif':
+    bh==='dm serif display'?'DM Serif Display, Georgia, serif':'Georgia, serif';
+  const bodyFont=(brand.bodyFont||'').toLowerCase()==='futura'?'Futura, Arial, sans-serif':'Arial, sans-serif';
+  try{if(document.fonts)await Promise.all([document.fonts.load('700 80px '+heading),document.fonts.load('500 32px '+bodyFont)]);}catch{/* Offline fallbacks */}
   const rect=(x:number,y:number,w:number,h:number,color:string)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
   const label=(text:string,x:number,y:number,color:string,size=24)=>{
-    ctx.fillStyle=color;ctx.font='700 '+size+'px Arial, sans-serif';
+    ctx.fillStyle=color;ctx.font='700 '+size+'px '+bodyFont;
     ctx.fillText(text.slice(0,50),x,y);
   };
   const photo=async(x:number,y:number,w:number,h:number)=>{
@@ -109,12 +117,14 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     const img=new Image();img.src=images[slide.assetId];
     await new Promise<void>((resolve,reject)=>{img.onload=()=>resolve();img.onerror=()=>reject(new Error('No se pudo cargar esta fotografía.'));});
     const z=Math.max(w/img.width,h/img.height),sw=w/z,sh=h/z;
-    ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,x,y,w,h);
+    const f=slide.photoFocus||'center';
+    const cy=f==='top'?Math.max(0,(img.height-sh)*.12):f==='bottom'?Math.max(0,(img.height-sh)*.9):Math.max(0,(img.height-sh)/2);
+    ctx.drawImage(img,Math.max(0,(img.width-sw)/2),cy,sw,sh,x,y,w,h);
     return true;
   };
-  const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title||'Your idea here',x,y,w,size,maxLines,color);
+  const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title||'Your idea here',x,y,w,size,maxLines,color,heading);
   const body=(x:number,y:number,w:number,color=ink,maxLines=3)=>{
-    if(slide.description)fillLines(ctx,slide.description,x,y,w,41,maxLines,color,'Arial');
+    if(slide.description)fillLines(ctx,slide.description,x,y,w,41,maxLines,color,bodyFont);
   };
   const footer=(color=ink)=>{
     label(brand.name.toUpperCase(),72,1284,color,21);
@@ -126,7 +136,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     title(74,348,920,106,5);
     rect(635,735,398,445,accent);
     const shown=await photo(635,735,398,445);
-    if(!shown){ctx.fillStyle=ink;ctx.beginPath();ctx.arc(835,940,100,0,Math.PI*2);ctx.fill();}
+    if(!shown){rect(650,751,368,415,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.beginPath();ctx.arc(835,958,129,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.moveTo(706,957);ctx.lineTo(706,1114);ctx.stroke();}
     body(74,1060,490,ink,3);footer();
   } else if(slide.layout==='statement') {
     rect(0,0,1080,1350,accent);
@@ -136,7 +146,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     body(116,1040,825,onAccent,3);footer(onAccent);
   } else if(slide.layout==='photo') {
     rect(0,0,1080,730,accent);const shown=await photo(0,0,1080,730);
-    if(!shown){rect(95,98,890,540,paper);rect(165,168,750,400,accent);}
+    if(!shown){rect(0,0,1080,730,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.strokeRect(90,95,900,550);}
     label(slide.eyebrow||defaultLabel(brand),75,832,ink);
     title(75,952,925,80,3);
     body(75,1155,900,ink,2);footer();
