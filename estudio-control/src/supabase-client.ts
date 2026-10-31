@@ -406,10 +406,18 @@ export async function getVerifiedOwnership():Promise<VerifiedOwnership[]>{
   if(!client)throw new Error('Esta vista necesita Supabase.');
   await owner();
   // La misma tabla que alimenta los estados de "comprado" del centro.
-  const {data,error}=await client.from('podcast_hub_entitlements')
-    .select('product_code,status').eq('status','active').limit(500);
-  if(error)throw error;
-  return (data||[]) as VerifiedOwnership[];
+  const all:VerifiedOwnership[]=[];
+  const pageSize=400;
+  for(let start=0;start<4000;start+=pageSize){
+    const {data,error}=await client.from('podcast_hub_entitlements')
+      .select('product_code,status,id').eq('status','active')
+      .order('id',{ascending:true}).range(start,start+pageSize-1);
+    if(error)throw error;
+    const page=(data||[]) as VerifiedOwnership[];
+    all.push(...page);
+    if(page.length<pageSize)return all;
+  }
+  throw new Error('Demasiados registros de acceso: resumen incompleto.');
 }
 export async function getVerifiedSales(): Promise<VerifiedSale[]> {
   if(!client)throw new Error('Esta vista necesita Supabase.');
