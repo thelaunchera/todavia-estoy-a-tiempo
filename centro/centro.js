@@ -36,11 +36,37 @@ function storeMarker(userId,remember){
  }catch{return false;}
 }
 function message(text){$('auth-message').textContent=text||'';}
+let authReturnFocus=null;
 function showModal(on=true){
- $('access-overlay').hidden=!on;
+ const overlay=$('access-overlay');
+ if(on&&overlay.hidden)authReturnFocus=document.activeElement;
+ overlay.hidden=!on;
  document.body.classList.toggle('modal-open',on);
- if(on)window.setTimeout(()=>$('login-email').focus(),0);
+ // Mantener la navegación de teclado dentro del acceso y no detrás del fondo.
+ for(const selector of ['.center-nav','main','.footer']){
+  const background=document.querySelector(selector);
+  if(background)background.inert=on;
+ }
+ if(on){
+  window.setTimeout(()=>{
+   const visible=overlay.querySelector('.auth-form:not([hidden]) input:not([disabled])');
+   (visible||$('close-access')).focus({preventScroll:true});
+  },0);
+ }else if(authReturnFocus?.isConnected&&!authReturnFocus.hidden){
+  const target=authReturnFocus;
+  authReturnFocus=null;
+  window.setTimeout(()=>{if(target.offsetParent!==null)target.focus({preventScroll:true});},0);
+ }
 }
+$('access-overlay').addEventListener('keydown',event=>{
+ if(event.key!=='Tab')return;
+ const focusables=[...$('access-overlay').querySelectorAll('button:not([disabled]),input:not([disabled]),a[href]')]
+  .filter(node=>!node.closest('[hidden]')&&node.getClientRects().length);
+ if(!focusables.length)return;
+ const first=focusables[0],last=focusables[focusables.length-1];
+ if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+ else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
 function mode(m){
  for(const type of ['login','register','recover','update'])$('form-'+type).hidden=m!==type;
  $('auth-tabs').hidden=m==='update'||m==='recover';
@@ -48,6 +74,12 @@ function mode(m){
  const copy={login:['Bienvenida de nuevo.','Usa el correo de tu compra y tu contraseña.'],register:['Tu cuenta comienza aquí.','Crea una contraseña con el mismo correo que usaste al comprar.'],recover:['Recupera tu acceso.','Enviaremos un correo con el enlace de recuperación.'],update:['Elige una contraseña nueva.','Tu cuenta estará lista cuando la guardes.']};
  $('auth-title').textContent=copy[m][0];$('auth-copy').textContent=copy[m][1];
  message('');
+ if(!$('access-overlay').hidden){
+  requestAnimationFrame(()=>{
+   const field=$('access-overlay').querySelector('.auth-form:not([hidden]) input:not([disabled])');
+   field?.focus({preventScroll:true});
+  });
+ }
 }
 async function runForm(form,action){
  if(pending)return;
