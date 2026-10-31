@@ -201,3 +201,70 @@
 .factory-return-canvas{display:flex;justify-content:flex-end;padding-bottom:17px}
 @media(max-width:850px){.factory-canvas-intro{flex-direction:column;align-items:stretch}.factory-canvas-shortcuts{justify-content:flex-start;max-width:none}}
 @media(max-width:620px){.factory-studio-tabs>button{min-width:120px;font-size:11px;min-height:44px;padding:10px}.factory-canvas-intro{padding:13px}.factory-canvas-shortcuts{flex-wrap:wrap}.factory-canvas-shortcuts .btn{flex:1 1 46%;max-width:none;white-space:normal}.factory-canvas-exports>div{flex:1 1 100%}.factory-canvas-exports button{flex:1}.factory-assistant-head{padding:17px}.factory-assistant-copy{padding:15px}}
+
+
+/* Design Hacking workflow: inspiration → hero image → background → message → polish.
+   A single visible stage at a time, with IA kept as its own short tab. */
+.factory-cata-nav{display:flex;gap:10px;align-items:center;margin:10px 0 8px;padding:6px 0 12px;min-width:0}
+.factory-step-rail{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.factory-step-rail>button{min-height:46px;border:1px solid #e1e6e4;background:#fff;color:#53676c;
+ padding:8px 12px;flex:1 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ font-size:12px;font-weight:700;border-radius:11px;white-space:nowrap;cursor:pointer;transition:background .14s}
+.factory-step-rail>button.active{color:#fff;background:#243e48;border-color:#243e48}
+.factory-step-number{display:grid;place-items:center;flex:none;width:22px;height:22px;
+ border:1px solid #bfcacc;border-radius:50%;font-variant-numeric:tabular-nums;font-size:11px}
+.factory-step-rail>button.active .factory-step-number{border-color:#ffffff9c}
+.factory-ia-entry{min-height:46px;min-width:55px;flex:none;border:1px solid #c7d9de;border-radius:11px;
+ background:#eff5f6;color:#315565;font-size:13px;font-weight:800;cursor:pointer}
+.factory-ia-entry.active{background:#243e48;color:#fff;border-color:#243e48}
+.factory-design-flow{display:flex;align-items:center;gap:9px;margin:4px 0 17px;color:#91a0a2}
+.factory-design-flow span{font-size:9px;font-weight:650;letter-spacing:.08em}
+.factory-design-flow span:not(:last-child):after{content:"›";padding-left:9px;color:#b1bbbe}
+.factory-step-intro{background:#f9faf9;border:1px solid #e7eae8;padding:19px 21px;border-radius:15px;margin-bottom:15px}
+.factory-step-eyebrow{display:block;font-size:10px;font-weight:750;letter-spacing:.12em;color:#66838a}
+.factory-step-intro h2{font:400 clamp(24px,3.5vw,34px) 'DM Serif Display',Georgia,serif;color:#263e46;line-height:1.15;margin:8px 0}
+.factory-step-intro p{font-size:12px;line-height:1.6;color:#637b81;margin:0;max-width:730px}
+.factory-step-mini-actions{margin-top:12px;display:flex;gap:8px}
+.factory-step-mini-actions .btn{font-size:12px;width:auto}
+.factory-step-footer{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin-top:15px;
+ border-top:1px solid #e3eaeb;padding:15px 0 9px}
+.factory-step-footer>span{flex:1;color:#6d8589;font-size:11px;line-height:1.5;min-width:180px}
+.factory-step-footer>.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:12px;min-height:43px}
+.factory-inspiration{max-width:1100px;margin:0 auto}
+.factory-inspiration-hint{background:#fff;border:1px solid #e2e9e7;border-radius:11px;padding:14px 17px;margin:12px 0}
+.factory-inspiration-hint strong,.factory-review-check strong{font-size:13px;color:#284b57}
+.factory-inspiration-hint p{font-size:12px;line-height:1.55;color:#647e85;margin:5px 0 0}
+.factory-review{max-width:1120px;margin:auto}
+.factory-review-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.75fr);align-items:start;gap:16px;margin-bottom:15px}
+.factory-review-check,.factory-review-layout .factory-destination{padding:17px;border-radius:13px;border:1px solid #e0e8e7;background:#fff;min-width:0}
+.factory-review-check ul{list-style:none;display:grid;gap:11px;padding:0;margin:15px 0}
+.factory-review-check li{display:flex;align-items:center;gap:9px;font-size:12px;color:#3f626b;line-height:1.4}
+.factory-review-check li svg{color:#77a5a1;flex:none}
+.factory-review-check p{font-size:11px;color:#688088;margin:0}
+.factory-review .factory-canvas-exports{margin:15px 0}
+.factory-review .factory-canvas-overview{max-width:900px}
+.factory-review .factory-canvas-download-list{max-width:850px}
+.factory-style-advanced{background:#f9fbfa;border:1px solid #e0e9e7;border-radius:12px;padding:13px;margin:17px 0}
+.factory-style-advanced>summary,.factory-typography-more>summary{font-size:12px;color:#3d6069;font-weight:750;cursor:pointer}
+.factory-style-advanced .factory-slide-colors{margin:10px 0}
+.factory-style-advanced .free-decor-controls{margin-top:12px}
+.factory-edit .factory-step-intro{margin-bottom:14px}
+.factory-edit .factory-type-gallery{margin-top:0;margin-bottom:12px}
+.factory-typography-more{border:1px solid #dee8e8;background:#fcfdfd;border-radius:11px;margin:10px 0;padding:12px}
+.factory-typography-more[open]{padding-bottom:17px}
+.factory-typography-more>summary{margin-bottom:4px}
+.factory-step-footer .btn:focus-visible,.factory-step-rail button:focus-visible,.factory-ia-entry:focus-visible{outline:3px solid #7cadc7;outline-offset:3px}
+@media(max-width:860px){.factory-review-layout{grid-template-columns:1fr}.factory-cata-nav{position:relative}}
+@media(max-width:600px){
+ .factory-step-rail>button{min-height:43px;padding:7px 10px;font-size:11px}
+ .factory-step-number{width:19px;height:19px;font-size:10px}
+ .factory-ia-entry{min-height:43px;min-width:45px}
+ .factory-design-flow{overflow:hidden;gap:4px}
+ .factory-design-flow span{font-size:8px;white-space:nowrap;letter-spacing:0}
+ .factory-design-flow span:not(:last-child):after{padding-left:4px}
+ .factory-step-intro{padding:15px}
+ .factory-step-footer{align-items:stretch}
+ .factory-step-footer>span{flex-basis:100%}
+ .factory-step-footer>.btn{flex:1;max-width:none}
+ .factory-review-check,.factory-review-layout .factory-destination{padding:13px}
+}
