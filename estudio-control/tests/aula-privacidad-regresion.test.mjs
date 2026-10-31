@@ -129,3 +129,20 @@ test('Centro de productos independiente, seguro y incluido en la publicación',(
  assert.match(workflow,/test -s _podcast_pages\/centro\/index.html/);
  assert.ok(centerCss.length>1000);
 });
+
+
+test('Catálogo de productos: acceso privado, PDF reales y Lab sin checkout público',()=>{
+ assert.match(room,/id="learning-shelf-title"/,'Existe catálogo integrado en el aula');
+ assert.match(room,/id="learning-lab-status"/,'El Lab refleja su estado');
+ assert.match(room,/href="\.\.\/content-lab\/prompts\/"/,'El Lab sin acceso solo enlaza a prompts públicos');
+ assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/,'Diario apunta a su landing real');
+ assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/,'Cuaderno apunta a su landing real');
+ assert.match(course,/from\('content_lab_memberships'\)/,'Lab consulta la membresía real');
+ assert.match(course,/member\?\.status==='active'/,'Solo membresía activa habilita acceso');
+ const studio=read('estudio-control/src/Studio.tsx');
+ const service=read('estudio-control/src/supabase-client.ts');
+ assert.match(studio,/Centro de ventas y productos/);
+ assert.match(studio,/getVerifiedSales\(\)/,'Ventas se leen al abrir panel');
+ assert.match(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No prometer compras de Lab activas');
+ assert.match(service,/await owner\(\);[\s\S]*?client\.from\('podcast_sales'\)/,'Solo administradora lee las ventas');
+});
