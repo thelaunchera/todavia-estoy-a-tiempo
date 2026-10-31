@@ -10,7 +10,7 @@ import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import {readCoverDecor,type CoverDecor} from './CoverDecor';
 import './FreePostStudio.css';
 
-type Post={title:string;hook:string;cta:string;template:string;assetId:string;designData?:string};
+type Post={title:string;hook:string;cta:string;template:string;assetId:string;format?:string;designData?:string};
 type Brand={id?:string;name:string;color:string;background:string;headingFont?:string};
 type Point={x:number;y:number};
 type Props={
@@ -41,34 +41,37 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
  return [...layers,...legacyStickers(decor),...decor.layers];
 }
-async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>){
+export const freePostDimensions=(format?:string)=>format==='Reel'||format==='Story'?{width:1080,height:1920}:{width:1080,height:1350};
+async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>,width:number,height:number){
  const {backgroundImageId,backgroundId,color,gradient}=decor;
  if(backgroundImageId){
   const img=images[backgroundImageId];
   if(!img)throw Error('La foto de fondo aún se está cargando. Intenta descargar de nuevo.');
-  await paintCoverImage(ctx,img,1080,1350);return;
+  await paintCoverImage(ctx,img,width,height);return;
  }
- if(backgroundId&&backgroundId!=='brand'){paintFreeBackground(ctx,1080,1350,backgroundId);return}
+ if(backgroundId&&backgroundId!=='brand'){paintFreeBackground(ctx,width,height,backgroundId);return}
  if(gradient){
-  const g=ctx.createLinearGradient(0,0,1080,1350);
+  const g=ctx.createLinearGradient(0,0,width,height);
   g.addColorStop(0,color||'#FFFFFF');g.addColorStop(1,gradient);
   ctx.fillStyle=g;
  }else ctx.fillStyle=color||'#FFFFFF';
- ctx.fillRect(0,0,1080,1350);
+ ctx.fillRect(0,0,width,height);
 }
 export async function renderFreePost(post:Post,brand:Brand,images:Record<string,string>,
  omitLayers=false):Promise<HTMLCanvasElement>{
  const decor=readCoverDecor(post.designData);
- const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
+ const {width,height}=freePostDimensions(post.format);
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el lienzo.');
- await backdrop(ctx,decor,images);
- if(!omitLayers)await paintPanoramaLayers(ctx,1080,1350,coverLayers(post,brand,decor),images);
+ await backdrop(ctx,decor,images,width,height);
+ if(!omitLayers)await paintPanoramaLayers(ctx,width,height,coverLayers(post,brand,decor),images);
  return canvas;
 }
 export async function exportFreePost(post:Post,brand:Brand,images:Record<string,string>){
  const canvas=await renderFreePost(post,brand,images);
  const a=document.createElement('a');
- a.download=(post.title||'mi-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,50)+'-1080x1350.png';
+ const {width,height}=freePostDimensions(post.format);
+ a.download=(post.title||'mi-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,50)+'-'+width+'x'+height+'.png';
  a.href=canvas.toDataURL('image/png');a.click();
 }
 export default function FreePostStudio({post,brand,assets,images,onChange,onTitle,onUpload,loadImage,
@@ -92,7 +95,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    catch(e){if(alive){setError(e instanceof Error?e.message:'No se pudo preparar el fondo.');setPreview('')}}
   };
   void run();return()=>{alive=false};
- },[post.designData,post.assetId,images,brand.color,brand.background]);
+ },[post.designData,post.assetId,post.format,images,brand.color,brand.background]);
  const update=(next:CoverDecor)=>{
   setHistory(p=>[...p.slice(-24),decor]);setFuture([]);onChange(next);
  };
@@ -242,11 +245,10 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    </div>}
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
-   <TouchLayerCanvas preview={preview} layers={touchLayers} onCommit={commit} onUpdate={updateLayer}
+   <TouchLayerCanvas preview={preview} layers={touchLayers} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
      onRemove={remove} onReorder={reorder} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
-  <div className="free-post-under"><span>{plain('Editable 1080 × 1350 canvas · no template or watermark',
-    'Lienzo editable 1080 × 1350 · sin plantilla ni marcas',locale)}</span>
+  <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
     <button type="button" disabled={busy} onClick={()=>void exportFreePost(post,brand,images)
       .then(()=>notify(plain('PNG ready','PNG descargado',locale)))
       .catch(e=>notify(e instanceof Error?e.message:'No se pudo descargar'))}>
