@@ -317,7 +317,7 @@ body:not(.aula-member){background:#f8f6f1}
 body:not(.aula-member) .top{background:#fbfaf6;border-bottom:1px solid #e0e4e4}
 body:not(.aula-member) .top-inner{min-height:72px}
 .aula-entry{min-height:calc(100dvh - 72px);background:#f8f6f1}
-.aula-entry-layout{width:min(1200px,calc(100% - 58px));display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.86fr);gap:clamp(28px,4vw,68px);align-items:stretch;min-height:750px}
+.aula-entry-layout{width:min(1180px,calc(100% - 60px));display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.83fr);gap:clamp(36px,5vw,78px);align-items:center;min-height:calc(100dvh - 128px);padding:clamp(36px,4vw,66px) 0}
 .aula-entry-copy{min-width:0;padding:25px 0 42px;display:flex;justify-content:center;flex-direction:column}
 .aula-entry-topline{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e0e4e4;padding-bottom:12px;margin-bottom:30px;gap:12px}
 .aula-entry-back{color:#426781;font-size:12px;text-decoration:none}
@@ -389,3 +389,40 @@ body.aula-member .aula-entry{display:none!important}
  .aula-visual-caption{font-size:27px}
 }
 @media(prefers-reduced-motion:reduce){.aula-entry *{transition:none!important;animation:none!important}}
+
+
+/* Aula login · edición sin fotografías (preservar formularios y lógica de acceso).
+   Un póster editorial de tipografía propia, sin imágenes de la instructora. */
+.aula-entry .aula-entry-copy{padding:0;justify-content:center}
+.aula-entry .aula-entry-topline{margin:0 0 30px}
+.aula-entry .aula-entry-heading{max-width:600px}
+.aula-entry .aula-entry-heading h1{max-width:620px;font-size:clamp(39px,4.05vw,60px);line-height:1.08}
+.aula-entry .aula-entry-intro{max-width:450px}
+.aula-entry .aula-auth-card{margin-top:30px;max-width:525px;box-shadow:0 12px 40px #18394c12;border:1px solid #dce4e6}
+.aula-entry-art{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:clamp(640px,74dvh,790px);overflow:hidden;isolation:isolate;padding:32px clamp(25px,3vw,40px) 30px;border:1px solid #cfdae1;border-radius:23px;background:linear-gradient(150deg,#e8f0f2 0%,#d8e5ec 53%,#cddfea 100%);color:#233e53}
+.aula-entry-art::before{position:absolute;z-index:-1;content:"";width:520px;height:520px;border:1px solid #fafaf8a6;border-radius:50%;top:17%;left:34%;pointer-events:none}
+.aula-entry-art::after{position:absolute;z-index:-1;content:"";width:420px;height:420px;border:1px solid #ffffffa0;border-radius:50%;top:27%;left:54%;pointer-events:none}
+.aula-art-head,.aula-art-foot{display:flex;justify-content:space-between;align-items:center;gap:15px;font:700 10px/1.5 'DM Sans',Arial,sans-serif;letter-spacing:.15em;color:#4b6677}
+.aula-art-head{border-bottom:1px solid #94b3c3a8;padding-bottom:17px}
+.aula-art-composition{position:relative;z-index:1;margin:auto 0;padding:50px 0 48px}
+.aula-art-index{display:block;font:400 clamp(135px,15vw,223px)/.82 'DM Serif Display',Georgia,serif;letter-spacing:-.08em;color:#f9f9f4;filter:drop-shadow(0 9px 20px #7694a62b)}
+.aula-art-index-dot{color:#658ba6}
+.aula-art-rule{width:clamp(110px,25%,160px);height:2px;background:#638aa3;margin:47px 0 26px}
+.aula-art-title{margin:0;max-width:390px;font:400 clamp(29px,3vw,43px)/1.2 'DM Serif Display',Georgia,serif;letter-spacing:-.02em;color:#22445c}
+.aula-art-title em{font-style:italic;color:#5c829b}
+.aula-art-foot{border-top:1px solid #94b3c3a8;padding-top:19px;letter-spacing:.11em;font-size:9px;flex-wrap:wrap}
+.aula-art-foot-mark{font-size:25px;line-height:1;color:#688da4;margin-right:1px}
+.aula-art-foot-end{margin-left:auto;white-space:nowrap}
+@media(max-width:1080px){
+  .aula-entry-layout{grid-template-columns:minmax(0,1fr);width:min(720px,calc(100% - 42px));min-height:0;gap:0;padding:27px 0 45px}
+  .aula-entry .aula-entry-topline{margin-bottom:24px}
+  .aula-entry-art{display:none}
+  .aula-entry .aula-auth-card{max-width:none;margin-top:25px}
+  .aula-entry .aula-entry-copy{padding:0}
+}
+@media(max-width:550px){
+  .aula-entry-layout{width:calc(100% - 32px);padding:21px 0 38px}
+  .aula-entry .aula-entry-heading h1{font-size:clamp(36px,9.5vw,48px)}
+  .aula-entry .aula-auth-card{margin-top:23px}
+}
+@media(prefers-reduced-motion:reduce){.aula-entry-art *{animation:none!important;transition:none!important}}
