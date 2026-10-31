@@ -84,3 +84,33 @@ for(const customerRight of ['procesamiento de pagos','alojamiento','entrega de a
 assert.ok(read('centro/terminos.html').includes('derechos irrenunciables'),'Respetar derechos aplicables del cliente');
 assert.ok(read('centro/contacto.html').includes('mailto:hello@thelaunchera.com'),'Conservar contacto comercial oficial');
 console.log('QA OK: política pública de mínimos datos sin detalles internos.');
+
+
+// Centro de Productos: efectos accesibles y búsqueda sin interferir con permisos.
+// Las tarjetas se exploran aunque la clase continúe cerrada al público.
+const smoothCatalog=read('centro/index.html');
+const smoothJs=read('centro/interacciones.js');
+const smoothCss=read('centro/centro.css');
+const authJs=read('centro/centro.js');
+for(const id of ['product-search','catalog-feedback','catalog-empty','reset-catalog','clear-catalog']){
+ assert.ok(smoothCatalog.includes('id="'+id+'"'),'Control de catálogo presente: '+id);
+}
+for(const group of ['programas','servicios','recursos']){
+ assert.ok(smoothCatalog.includes('data-catalog-group="'+group+'"'),'Grupo filtrable '+group);
+ assert.ok(smoothCatalog.includes('data-catalog-filter="'+group+'"'),'Filtro visible '+group);
+}
+assert.equal((smoothCatalog.match(/data-catalog-item>/g)||[]).length,10,'Diez tarjetas independientes');
+assert.equal((smoothCatalog.match(/class="cover-action"/g)||[]).length,10,'Las diez portadas tienen botón táctil accesible');
+assert.ok(smoothCatalog.includes('interacciones.js?v='),'Carga de efectos funcionales');
+assert.ok(smoothJs.includes('input.addEventListener(\'input\',update)'),'La búsqueda responde al escribir');
+assert.ok(smoothJs.includes('event.key===\'Escape\''),'La búsqueda puede limpiarse con teclado');
+assert.ok(smoothJs.includes("window.matchMedia('(prefers-reduced-motion: reduce)')"),'Respeta preferencias de movimiento');
+assert.ok(!smoothJs.includes('podcast_hub_entitlements'),'La animación no concede derechos');
+assert.ok(!smoothJs.includes('service-checkout/?offer='),'La animación no puede modificar destinos de pago');
+assert.ok(smoothCss.includes('.catalog-explore'),'Diseño de búsqueda presente');
+assert.ok(smoothCss.includes('focus-visible'),'Accesos visuales por teclado');
+assert.ok(smoothCss.includes('prefers-reduced-motion:reduce'),'Modo accesible sin movimiento');
+assert.ok(authJs.includes('background.inert=on'),'La ventana de acceso bloquea foco en el fondo');
+assert.ok(authJs.includes("event.key!=='Tab'"),'El foco no escapa del formulario');
+assert.ok(authJs.includes('validMarker(user.id)'),'Sesiones recordadas verificadas');
+console.log('QA OK: centro interactivo, accesible y separado de cobros/permisos.');
