@@ -99,6 +99,13 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   const [connection,setConnection]=useState<'unknown'|'ready'|'error'>('unknown');
   const [testPhoto,setTestPhoto]=useState('');
   const library=assets.filter(a=>a.brandId===brand.id),own=grids.filter(g=>g.brandId===brand.id);
+  const wrongOriginal=!!sourceId&&!!assets.find(a=>a.id===sourceId&&a.brandId!==brand.id);
+  const wrongReference=!!referenceId&&!!assets.find(a=>a.id===referenceId&&a.brandId!==brand.id);
+  // Switching Instagram accounts must never retain the old account's selected photos.
+  useEffect(()=>{
+    setSourceId('');setReferenceId('');setGrid(null);setSelected(0);
+    setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);
+  },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
   useEffect(()=>{for(const id of [sourceId,referenceId,grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
@@ -108,7 +115,10 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     try{const asset=await onUploadFile(f);if(asset){if(target==='source')setSourceId(asset.id);else setReferenceId(asset.id)}}catch(e){showError(e)}finally{setUploading('')}
   };
   const plan=async()=>{
-    if(!sourceId)return notify('Sube la foto principal primero.');
+    if(!sourceId)return notify('Sube una foto principal de la marca que tienes seleccionada.');
+    if(wrongOriginal||wrongReference)return notify('La foto pertenece a otra marca. Cambia a su marca o vuelve a subirla en '+brand.name+'.');
+    if(!library.some(a=>a.id===sourceId))return notify('Selecciona una foto guardada en '+brand.name+'.');
+    if(referenceId&&!library.some(a=>a.id===referenceId))return notify('La referencia es de otra marca. Súbela en '+brand.name+'.');
     setBusy('plan');
     try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief});
       const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
@@ -126,6 +136,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   };
   const testOnePhoto=async()=>{
     if(!sourceId)return notify('Primero selecciona una foto original.');
+    if(!library.some(a=>a.id===sourceId))return notify('Esta foto está guardada en otra marca. Vuelve a subirla desde '+brand.name+'.');
     setBusy('test-photo');setTestPhoto('');
     try{
       const {data}=await api.post('/api/ai-image',{
@@ -206,6 +217,8 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
           <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'Foto original *'}</strong><small>Producto, foto o screenshot</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
           <label className="bg-drop"><div>{images[referenceId]?<img src={images[referenceId]} alt="Referencia"/>:<Palette size={28}/>}</div><strong>{uploading==='reference'?'Preparando…':'Referencia de estilo'}</strong><small>Opcional</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'reference')}/></label>
         </div>
+        <div className="bg-account-note">Fotos para <strong>{brand.name}</strong>. Cada cuenta tiene su biblioteca separada.</div>
+        {(wrongOriginal||wrongReference)&&<p role="alert" className="bg-connection-error">Una foto pertenece a otra marca. Cambia de cuenta o vuelve a subir la foto desde {brand.name}.</p>}
         <button className="bg-link" onClick={()=>setChooseExisting(v=>!v)}>{chooseExisting?'Ocultar biblioteca':'O usar fotos ya guardadas'} <ArrowRight size={15}/></button>
         {chooseExisting&&<div className="bg-saved-select"><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Foto principal</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><select value={referenceId} onChange={e=>setReferenceId(e.target.value)}><option value="">Sin referencia</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>}
         <label>Modo de imagen</label><div className="bg-modes"><button className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div>
