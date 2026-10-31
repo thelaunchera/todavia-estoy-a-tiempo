@@ -37,13 +37,16 @@ const statusColor:Record<PublicationState,string>={publicado:'live',demo:'demo',
 export default function ProductCenter({entries,readOnly=false}:{entries:StudioEntry[];readOnly?:boolean}){
  const [category,setCategory]=useState<Category|'todos'>('todos');
  const [query,setQuery]=useState('');
+ const [expanded,setExpanded]=useState(false);
  const [copied,setCopied]=useState('');
  const [feedback,setFeedback]=useState('');
  const links=useMemo(()=>resolveStudioLinks(entries),[entries]);
  const linkByKey=useMemo(()=>Object.fromEntries(links.map(x=>[x.key,x])),[links]);
  const visible=PRODUCTS_CATALOG.filter(x=>(category==='todos'||x.category===category)&&(!readOnly||x.shareable)&&
    [x.title,x.description,x.note].join(' ').toLowerCase().includes(query.trim().toLowerCase()));
- const byState=(state:PublicationState)=>PRODUCTS_CATALOG.filter(x=>x.state===state).length;
+ const searching=query.trim().length>0;
+ const browsing=searching||category!=='todos';
+ const openCategory=(id:Category|'todos')=>{setCategory(id);setExpanded(false);};
  async function copy(url:string,id:string){
    try{await navigator.clipboard.writeText(url);setCopied(id);setFeedback('Enlace público copiado.');}
    catch{setFeedback('No se pudo copiar automáticamente; mantén pulsado el enlace.');}
@@ -54,22 +57,25 @@ export default function ProductCenter({entries,readOnly=false}:{entries:StudioEn
    <h2>Productos y proyectos, <em>con su estado real.</em></h2>
    <p>Una página para ver qué puedes compartir, qué está en producción y qué necesita pruebas. Los checkouts no se abren ni se activan desde aquí.</p></div>
   </header>
-  <div className="pc-stats">
-   <div><strong>{byState('publicado')}</strong><span>Publicado</span></div>
-   <div><strong>{byState('demo')}</strong><span>Demos</span></div>
-   <div><strong>{byState('produccion')}</strong><span>En producción</span></div>
-   <div><strong>{byState('revision')}</strong><span>Por revisar</span></div>
-  </div>
   <div className="pc-controls">
-   <nav aria-label="Filtrar productos">{[{id:'todos',name:'Todos'},...CATEGORIES].map(x=><button key={x.id} className={category===x.id?'active':''} onClick={()=>setCategory(x.id as Category|'todos')}>{x.name}</button>)}</nav>
-   <label className="pc-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar producto o proyecto…" aria-label="Buscar productos"/></label>
+   <label className="pc-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar producto, demo o proyecto…" aria-label="Buscar productos"/></label>
+   <nav aria-label="Filtrar productos">{[{id:'todos',name:'Inicio'},...CATEGORIES].map(x=><button key={x.id} className={category===x.id?'active':''} onClick={()=>openCategory(x.id as Category|'todos')}>{x.name}</button>)}</nav>
   </div>
+  {!browsing&&<div className="pc-category-grid" aria-label="Elegir una categoría de productos">
+    {CATEGORIES.map(g=><button className="pc-category-tile" key={g.id} onClick={()=>openCategory(g.id)}>
+     <span className="pc-category-tile-icon"><ShoppingBag size={19}/></span>
+     <strong>{g.name}</strong><span>{g.description}</span>
+     <small>{PRODUCTS_CATALOG.filter(p=>p.category===g.id&&(!readOnly||p.shareable)).length} proyectos · Explorar</small>
+    </button>)}
+   </div>}
   {feedback&&<p role="status" className="pc-feedback">{feedback}</p>}
-  {CATEGORIES.filter(g=>category==='todos'||g.id===category).map(group=>{
-   const shown=visible.filter(p=>p.category===group.id);if(!shown.length)return null;
+  {browsing&&CATEGORIES.filter(g=>category==='todos'||g.id===category).map(group=>{
+   const shown=visible.filter(p=>p.category===group.id);
+   const display=expanded||searching?shown:shown.slice(0,6);
+   if(!shown.length)return null;
    return <div key={group.id} className="pc-category">
      <header><h3>{group.name}</h3><p>{group.description}</p></header>
-     <div className="pc-items">{shown.map(p=>{
+     <div className="pc-items">{display.map(p=>{
        const page=linkByKey[p.linkKey],source=linkByKey[p.sourceKey];
        const canCopy=!!page&&p.shareable&&['publico','demo'].includes(page.visibility);
        return <article key={p.id} className="pc-product">
@@ -86,9 +92,10 @@ export default function ProductCenter({entries,readOnly=false}:{entries:StudioEn
           </div>
        </article>;
      })}</div>
+     {!searching&&!expanded&&shown.length>6&&<button className="pc-load-more" onClick={()=>setExpanded(true)}>Ver {shown.length-6} proyectos más</button>}
    </div>;
   })}
-  {!visible.length&&<div className="pc-empty">No se encontraron productos para esta búsqueda.</div>}
+  {browsing&&!visible.length&&<div className="pc-empty">No se encontraron productos para esta búsqueda.</div>}
   <div className="pc-footer"><AlertCircle size={17}/><p><b>Importante:</b> «Publicado» significa que existen página o despliegue de GitHub con pruebas técnicas; no certifica una compra real. «En producción» significa que todavía no se permite vender o conceder acceso. Los enlaces privados siguen protegidos por sus propias autorizaciones.</p></div>
  </section>;
 }
