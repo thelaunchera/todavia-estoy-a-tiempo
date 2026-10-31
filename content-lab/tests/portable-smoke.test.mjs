@@ -31,7 +31,7 @@ test('Cross-brand source photos are not reused and server errors are readable',(
  const backend=source('supabase/functions/content-lab-generate/index.ts');
  assert.ok(grid.includes("setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null)"));
  assert.ok(grid.includes('library.some(a=>a.id===sourceId)'));
- assert.ok(grid.includes('Cada cuenta tiene su biblioteca separada'));
+ assert.ok(grid.includes('Biblioteca privada por marca'));
  assert.ok(client.includes('context.clone().json()'));
  assert.ok(backend.includes('Esta foto está guardada en otra marca'));
 });
