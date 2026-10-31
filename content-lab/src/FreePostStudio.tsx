@@ -204,8 +204,20 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     <div className="free-post-media-grid">{allowed.map(item=><button type="button" key={item.id}
       onClick={()=>addAsset(item.id)} aria-label={plain('Add','Añadir',locale)+' '+displayAssetName(item)}>
        {images[item.id]?<img loading="lazy" src={images[item.id]} alt=""/>:<span>{displayAssetName(item)}</span>}
-       <small>{displayAssetName(item)}</small></button>)}</div>
+       <small>{displayAssetName(item)}</small>
+       <span className="free-post-add-label">{plain('Add on top','Poner encima',locale)}</span></button>)}</div>
     {allowed.length===0&&<p>{plain('Upload a photo to start','Sube una foto para empezar',locale)}</p>}
+    <details className="free-post-background-from-library">
+       <summary>{plain('Use an existing photo as a full background','Poner una foto de mi biblioteca como fondo',locale)}</summary>
+       <div className="free-post-media-grid">{allowed.filter(asset=>assetCategory(asset)!=='sticker').map(asset=>
+         <button type="button" key={'background-'+asset.id}
+           onClick={()=>{if(!images[asset.id])loadImage(asset.id);
+             update({...decor,backgroundImageId:asset.id,backgroundId:'brand'});setMediaOpen(false)}}>
+           {images[asset.id]?<img loading="lazy" src={images[asset.id]} alt=""/>:<span>{displayAssetName(asset)}</span>}
+           <small>{displayAssetName(asset)}</small></button>)}
+       </div>
+     </details>
+
     <div className="free-post-extra">
      {(['paper','tape','frame','circle'] as const).map(shape=><button type="button" key={shape} onClick={()=>addElement('shape',shape)}>
        {({paper:'Papel',tape:'Cinta',frame:'Marco',circle:'Círculo'})[shape]}</button>)}
