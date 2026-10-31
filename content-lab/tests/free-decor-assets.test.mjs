@@ -12,7 +12,7 @@ test('Free sticker/background set is purely local and does not consume AI credit
  assert.ok(a.includes("id:'editorial-grid'"));assert.ok(a.includes("id:'grain-ivory'"));
  assert.ok(ui.includes('FREE_BACKGROUNDS.map'));assert.ok(ui.includes('originals.filter'));
  assert.ok(ui.includes('assets.filter(a=>assetCategory(a)'));
- assert.ok(ui.includes('sin créditos IA'));
+ assert.ok(ui.includes('Sin créditos IA'));
 });
 test('Decorated carousel is saved, previewed and exported without raster AI generation',()=>{
  const app=src('src/CarouselFactory.tsx');
