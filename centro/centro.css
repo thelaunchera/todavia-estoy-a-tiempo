@@ -14,10 +14,6 @@ a{color:inherit}
 .center-nav{position:sticky;top:0;z-index:45;background:#0f141bf7;border-bottom:1px solid #27313d;backdrop-filter:blur(18px)}
 .center-nav-inner{width:min(1350px,calc(100% - 56px));min-height:82px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{display:flex;gap:13px;text-decoration:none;align-items:center;min-width:0}
-.brand-mark{display:grid;place-items:center;width:41px;height:41px;border-radius:12px;background:#d4e3eb;color:#162e44;font:800 23px/1 'DM Sans',Arial,sans-serif}
-.brand-mark span{color:#688aa6}
-.brand-name{display:grid;color:#f7f8f6;font-size:13px;font-weight:800;letter-spacing:.1em;line-height:1.55}
-.brand-name small{font-size:9px;letter-spacing:.15em;color:#8ca6b9}
 .center-nav nav{display:flex;gap:27px;margin-left:auto}
 .center-nav nav a{text-decoration:none;font-weight:650;font-size:12px;color:#c6d3dc}
 .center-nav nav a:hover{color:#fff}
@@ -28,7 +24,6 @@ a{color:inherit}
 .portal-hero{margin:38px 0 48px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.75fr);min-height:390px;background:linear-gradient(122deg,#19283a,#1a3047);overflow:hidden;border-radius:22px;border:1px solid #344555}
 .hero-copy{padding:clamp(35px,5vw,68px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
 .eyebrow,.section-kicker{color:#a8c4d5;letter-spacing:.17em;font-size:10px;font-weight:800;text-transform:uppercase}
-.eyebrow span{font-size:16px;color:#c4d8e8}
 .portal-hero h1{font:400 clamp(44px,5.1vw,72px)/1.06 'DM Serif Display',Georgia,serif;letter-spacing:-.028em;margin:20px 0;color:#fff}
 .portal-hero h1 em{color:#b5d2e3;font-style:italic}
 .portal-hero .hero-copy>p{max-width:515px;margin:0;color:#c6d5df;font-size:14px;line-height:1.78}
@@ -79,7 +74,6 @@ a{color:inherit}
 .tile-cover::after{position:absolute;z-index:-1;content:"";width:260px;height:260px;border-radius:50%;border:1px solid #fff3;right:-100px;top:-75px;box-shadow:0 0 0 28px #ffffff0c,0 0 0 56px #ffffff06}
 .tile-cover span{font-size:10px;font-weight:750;letter-spacing:.13em;color:#e0eaf2}
 .tile-cover strong{font:800 clamp(20px,2.3vw,29px)/1.09 'DM Sans',Arial,sans-serif;letter-spacing:-.04em;overflow-wrap:anywhere}
-.tile-cover>span:last-child{align-self:flex-end;font-size:21px}
 .tc-indigo{background:linear-gradient(145deg,#2d3e68,#5275ba)}
 .tc-blue{background:linear-gradient(145deg,#224f83,#4493bb)}
 .tc-teal{background:linear-gradient(145deg,#1a5260,#3c9492)}
@@ -124,7 +118,7 @@ body.modal-open{overflow:hidden}
 .auth-message:empty{display:none}
 .auth-foot{border-top:1px solid #e3e9eb;padding-top:14px;margin-bottom:0;color:#738791;font-size:11px}
 @media(max-width:900px){.center-nav nav{display:none}.portal-hero{grid-template-columns:1fr 300px}.hero-art{padding:25px}.art-type{font-size:55px}.tile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.program-cover{height:280px}.cover-title{font-size:53px}}
-@media(max-width:690px){.container{width:calc(100% - 28px)}.center-nav-inner{width:calc(100% - 30px);min-height:68px}.brand-mark{width:35px;height:35px;font-size:19px}.brand-name{font-size:11px}.brand-name small{font-size:8px}.center-account{gap:6px}.center-account button{font-size:11px;padding:8px 10px;min-height:38px}.portal-hero{grid-template-columns:1fr;margin:18px 0 35px}.hero-copy{padding:30px 26px}.portal-hero h1{font-size:clamp(39px,10vw,57px)}.hero-art{min-height:150px;display:none}.program-grid{gap:10px}.program{padding:7px;border-radius:14px}.program-cover{height:210px;padding:15px;border-radius:9px}.cover-title{font-size:clamp(31px,7.3vw,50px)}.cover-index,.cover-foot{font-size:8px}.program-info{padding:12px 3px;flex-direction:column;align-items:start;gap:8px}.program h3{font-size:13px}.program-info p{font-size:10px}.product-status{font-size:8px}.program-actions{padding:0 3px 6px}.program-actions button{font-size:10px;padding:9px;min-height:43px}.catalog-section{margin:34px 0}.catalog-head h2{font-size:31px}.tile-grid{gap:11px}.tile-cover{height:165px;padding:15px}.tile-cover strong{font-size:20px}.product-tile h3{font-size:13px}.product-tile p{font-size:11px}.help-strip,.ownership{align-items:start;flex-direction:column}.footer{padding:20px 15px}.auth-dialog{padding:25px 18px}}
+@media(max-width:690px){.container{width:calc(100% - 28px)}.center-nav-inner{width:calc(100% - 30px);min-height:68px}.center-account{gap:6px}.center-account button{font-size:11px;padding:8px 10px;min-height:38px}.portal-hero{grid-template-columns:1fr;margin:18px 0 35px}.hero-copy{padding:30px 26px}.portal-hero h1{font-size:clamp(39px,10vw,57px)}.hero-art{min-height:150px;display:none}.program-grid{gap:10px}.program{padding:7px;border-radius:14px}.program-cover{height:210px;padding:15px;border-radius:9px}.cover-title{font-size:clamp(31px,7.3vw,50px)}.cover-index,.cover-foot{font-size:8px}.program-info{padding:12px 3px;flex-direction:column;align-items:start;gap:8px}.program h3{font-size:13px}.program-info p{font-size:10px}.product-status{font-size:8px}.program-actions{padding:0 3px 6px}.program-actions button{font-size:10px;padding:9px;min-height:43px}.catalog-section{margin:34px 0}.catalog-head h2{font-size:31px}.tile-grid{gap:11px}.tile-cover{height:165px;padding:15px}.tile-cover strong{font-size:20px}.product-tile h3{font-size:13px}.product-tile p{font-size:11px}.help-strip,.ownership{align-items:start;flex-direction:column}.footer{padding:20px 15px}.auth-dialog{padding:25px 18px}}
 @media(max-width:380px){.program-grid{grid-template-columns:1fr}.program-cover{height:220px}.cover-title{font-size:52px}.tile-grid{grid-template-columns:1fr}.tile-cover{height:170px}.center-account #account-name{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
@@ -168,3 +162,24 @@ body.modal-open{overflow:hidden}
  .product-details-actions button,.product-details-actions a{width:100%}
  .product-details-unavailable{max-width:none;text-align:center;min-height:27px}
 }
+
+
+/* Identidad aprobada The Launch Era: wordmark original; sin monograma inventado. */
+.center-nav .brand{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:0;flex-shrink:0;max-width:min(230px,42vw)}
+.center-nav .brand-logo{display:block;width:clamp(152px,17vw,206px);max-width:100%;height:auto;aspect-ratio:1719 / 341;object-fit:contain;object-position:left center}
+.center-nav .brand-subtitle{display:block;padding-top:0;color:#a7bfce;font:750 9px/1.35 'DM Sans',Arial,sans-serif;letter-spacing:.18em;white-space:nowrap}
+.center-nav .brand:hover .brand-logo{opacity:.94}
+.tile-cover{justify-content:space-between}
+.tile-cover strong{margin:auto 0;max-width:100%}
+.hero-actions button,.product-tile button.tile-details,.program-actions .product-learn{justify-content:center;text-align:center}
+.hero-actions button,.program-actions button{gap:0}
+.product-tile button.tile-details{padding:12px 10px;border:1px solid #506c81;border-radius:10px;background:#172533;min-height:44px;color:#d2e6ef;text-align:center}
+.product-tile button.tile-details:hover{background:#24384a;border-color:#87a5b8;color:#fff}
+.program-actions button:disabled{justify-content:center;text-align:center}
+@media(max-width:690px){
+ .center-nav .brand{max-width:min(175px,51vw)}
+ .center-nav .brand-logo{width:clamp(128px,37vw,174px)}
+ .center-nav .brand-subtitle{font-size:7.5px;letter-spacing:.14em}
+ .product-tile button.tile-details{font-size:11px;min-height:46px;padding:10px 8px}
+}
+@media(max-width:380px){.center-nav .brand-logo{width:130px}.center-nav .brand-subtitle{font-size:7px}}

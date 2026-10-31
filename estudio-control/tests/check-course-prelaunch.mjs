@@ -399,3 +399,20 @@ assert.match(centerScript,/const accessControlled=code==='web-class'\|\|code==='
 assert.doesNotMatch(centerPage,/Ver checkout/,'No enviar clientes directamente del catálogo al checkout');
 assert.match(centerStyles,/\.product-details::backdrop/,'Panel accesible para comprar informado');
 console.log('QA: fichas de productos y acceso de preventa protegido OK');
+
+
+// El centro utiliza la identidad visual aprobada, sin monogramas inventados,
+// flechas decorativas ni emojis en tarjetas y llamadas a la acción.
+const brandCenterHtml=read('centro/index.html');
+const brandCenterJs=read('centro/centro.js');
+const brandCenterCss=read('centro/centro.css');
+const officialWordmark=read('assets/tle-wordmark-light.svg');
+const officialMark=read('assets/tle-mark-light.svg');
+assert.match(brandCenterHtml,/class="brand-logo" src="\.\.\/assets\/tle-wordmark-light\.svg"/,'Wordmark real aprobado');
+assert.match(brandCenterHtml,/href="\.\.\/assets\/tle-mark-light\.svg"/,'Favicon oficial TLE');
+assert.match(officialWordmark,/viewBox="0 0 1719 341"/,'Logo vectorial original');
+assert.match(officialMark,/viewBox="0 0 405 169"/,'Icono vectorial original');
+assert.doesNotMatch(brandCenterHtml,/class="brand-mark"|monograma-podcast-04\.svg|↗|→|🔒|✳|✦/,'Sin falso monograma ni iconos de emoji/flechas');
+assert.doesNotMatch(brandCenterJs,/↗|→|🔒/,'El estado de sesión no añade flechas');
+assert.match(brandCenterCss,/\.center-nav \.brand-logo/,'El logotipo adapta su tamaño en móvil');
+console.log('QA: logo oficial, tarjetas sin emojis y botones sin flechas OK');
