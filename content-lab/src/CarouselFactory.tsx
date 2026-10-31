@@ -668,7 +668,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
-    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout};
+    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout,
+      backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||'',
+      backgroundColor:slide.backgroundColor,backgroundGradient:slide.backgroundGradient};
     setAll([...slides.slice(0,-1),next,...slides.slice(-1)]);
     setCurrent(slides.length-1);
   };
