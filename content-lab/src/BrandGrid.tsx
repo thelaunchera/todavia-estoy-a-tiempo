@@ -15,7 +15,7 @@ type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCate
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -57,7 +57,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [chosenFormat,setChosenFormat]=useState('');
   const [referenceFocus,setReferenceFocus]=useState<string[]>(['palette','lighting','composition']);
   useEffect(()=>{
-    if(!initialSelection?.version)return;
+    if(!initialSelection?.version||initialSelection.brandId!==brand.id)return;
     setSourceId(initialSelection.sourceId||'');
     setReferenceId(initialSelection.referenceId||brand.referenceAssetId||'');
     setChosenFormat(initialSelection.format||'');
@@ -161,7 +161,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   // Switching Instagram accounts must never retain the old account's selected photos.
   useEffect(()=>{
     flushDraft();
-    setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null);setSelected(0);
+    const ownChoice=initialSelection?.brandId===brand.id?initialSelection:null;
+    setSourceId(ownChoice?.sourceId||'');setReferenceId(ownChoice?.referenceId||brand.referenceAssetId||'');setChosenFormat(ownChoice?.format||'');
+    setGrid(null);setSelected(0);
     setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
