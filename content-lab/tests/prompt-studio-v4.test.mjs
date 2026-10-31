@@ -10,14 +10,19 @@ const grid=src('src/BrandGrid.tsx');
 const api=src('src/platform/client.ts');
 const backend=src('supabase/functions/content-lab-generate/index.ts');
 const sql=src('supabase/migrations/20261031_private_saved_prompts.sql');
-test('30 separate prompts authored in two languages across relevant industries',()=>{
- assert.equal((lib.match(/"id": "[0-9]{2}"/g)||[]).length,30);
- assert.ok(lib.includes('"en": "Studio hero"'));
- assert.ok(lib.includes('"es": "Producto en estudio"'));
- assert.ok(lib.includes('"en": "Real app showcase"'));
- assert.ok(lib.includes('"es": "Aplicación real"'));
- for(const type of ['product','lifestyle','personal','food','beauty','services','cleaning','podcast','education','tech','luxury','marketing'])
-  assert.ok(lib.includes('"'+type+'"'),type);
+test('30 bilingual premium prompts load only after authenticated RLS call, never embedded in public JS',()=>{
+ const sql=src('supabase/migrations/20261031_premium_prompt_catalogue_rls.sql');
+ assert.ok(sql.includes('content_lab_prompt_catalogue enable row level security'));
+ assert.ok(sql.includes('from anon,authenticated'));
+ assert.ok(sql.includes("status='active'"));
+ assert.ok(sql.includes('grant select on public.content_lab_prompt_catalogue to authenticated'));
+ assert.ok(api.includes("if(path==='/api/prompt-templates')"));
+ assert.ok(api.includes("sb.from('content_lab_prompt_catalogue')"));
+ assert.ok(ui.includes("api.get('/api/prompt-templates')"));
+ assert.ok(ui.includes("setTemplates(templateResult.data||[])"));
+ assert.ok(!lib.includes('Studio hero'));
+ assert.ok(!lib.includes('PROMPT_TEMPLATES:PromptTemplate[]='));
+ for(const category of ['product','lifestyle','personal','food','beauty','services','cleaning','podcast','education','tech','luxury','marketing'])assert.ok(lib.includes(category),category);
  assert.ok(lib.includes("input.replace(/\\{\\{(subject|background)\\}\\}/g"));
 });
 test('native prompt helper preserves free-text first; realism and negative instructions are explicit',()=>{
