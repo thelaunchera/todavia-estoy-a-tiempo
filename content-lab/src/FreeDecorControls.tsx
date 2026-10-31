@@ -1,5 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
+import {isBowBackground} from './BowBackgrounds';
+import BackgroundThumbnail from './BackgroundThumbnail';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './FreeDecorControls.css';
 type Props={
@@ -23,6 +25,7 @@ function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;
 }
 export default function FreeDecorControls({backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground}:Props){
  const [tab,setTab]=useState<'stickers'|'backgrounds'>('stickers');
+ const [backgroundKind,setBackgroundKind]=useState<'bows'|'classic'>('bows');
  const [expanded,setExpanded]=useState(false);
  const [group,setGroup]=useState('Todos');
  const uploadRef=useRef<HTMLInputElement>(null),[uploading,setUploading]=useState(false);
@@ -46,7 +49,11 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
     <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir mi background'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
     {ownBackgrounds.length>0&&<div className="free-decor-backgrounds">{ownBackgrounds.map(a=><button type="button" key={a.id} aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''} onClick={()=>{if(!images[a.id])loadImage?.(a.id);onChange({backgroundId:'brand',backgroundImageId:a.id,stickerIds:selected})}}><i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/><span>{displayAssetName(a)}</span></button>)}</div>}
     <p className="free-decor-label">Fondos incluidos</p>
-    <div className="free-decor-backgrounds">{FREE_BACKGROUNDS.map(b=><button type="button" aria-pressed={!backgroundImageId&&backgroundId===b.id} className={!backgroundImageId&&backgroundId===b.id?'selected':''} key={b.id} onClick={()=>onChange({backgroundId:b.id,backgroundImageId:'',stickerIds:selected})}><i className={'free-decor-swatch swatch-'+b.id} style={{background:b.color}}/><span>{b.name}</span></button>)}</div></div>:
+    <div className="free-decor-background-filters">
+      <button type="button" className={backgroundKind==='bows'?'active':''} onClick={()=>setBackgroundKind('bows')}>🎀 Aesthetic · 20</button>
+      <button type="button" className={backgroundKind==='classic'?'active':''} onClick={()=>setBackgroundKind('classic')}>Clásicos</button>
+    </div>
+    <div className="free-decor-backgrounds">{FREE_BACKGROUNDS.filter(b=>backgroundKind==='bows'?isBowBackground(b.id):!isBowBackground(b.id)).map(b=><button type="button" aria-pressed={!backgroundImageId&&backgroundId===b.id} className={!backgroundImageId&&backgroundId===b.id?'selected':''} key={b.id} onClick={()=>onChange({backgroundId:b.id,backgroundImageId:'',stickerIds:selected})}><BackgroundThumbnail id={b.id} alt={'Vista previa: '+b.name}/><span>{b.name}</span></button>)}</div></div>:
    <>
     <div className="free-decor-groups">{['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'].map(g=><button type="button" key={g} className={group===g?'active':''} onClick={()=>setGroup(g)}>{g}</button>)}</div>
     {visible.length?<div className="free-decor-stickers">{visible.map(a=><div key={a.id} className="free-decor-sticker-cell"><button type="button" aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''} onClick={()=>toggle(a.id)}><StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/><small>{displayAssetName(a)}</small></button></div>)}</div>:
