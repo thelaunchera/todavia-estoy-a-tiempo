@@ -60,7 +60,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    try{
      const name=file.name||'archivo';
      const sizeMB=(file.size/1_000_000).toFixed(1);
-     if(!/\.zip$/i.test(name)&&!/(application\\/zip|x-zip-compressed)/i.test(file.type))
+     if(!/\.zip$/i.test(name)&&!/(application\/zip|x-zip-compressed)/i.test(file.type))
        throw Error('El archivo seleccionado no es ZIP. Usa el paquete “Content_Lab_Importar_36_Fondos.zip”.');
      if(file.size>15_000_000)
        throw Error('Elegiste “'+name+'” ('+sizeMB+' MB). Esa es la versión pesada. Descarga el ZIP ligero de 3.2 MB desde el enlace de arriba.');
