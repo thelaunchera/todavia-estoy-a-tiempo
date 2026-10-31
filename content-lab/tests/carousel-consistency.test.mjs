@@ -19,7 +19,7 @@ test('Style references are sampled locally and never pasted into carousel slides
  assert.ok(helper.includes('canvas.getContext'));
  assert.ok(helper.includes('getImageData'));
  assert.ok(ui.includes('sampleReferencePalette(url)'));
- assert.ok(ui.includes('ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id)'));
+ assert.ok(ui.includes('ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared)'));
  assert.ok(ui.includes('referenceAssetId'));
  assert.ok(ui.includes('No se copia la fotografía'));
 });
