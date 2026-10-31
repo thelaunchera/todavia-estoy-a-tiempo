@@ -10,7 +10,7 @@ import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import MediaLibrary from './MediaLibrary';
 import FormatGallery from './FormatGallery';
-import {displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
+import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import {
   LayoutDashboard,
@@ -563,6 +563,9 @@ function App() {
       library.forEach(a => {
         if (!images[a.id]) void imageLoad(a.id);
       });
+    if (tab === 'formats')
+      library.filter(a=>['original','screenshot','generated'].includes(assetCategory(a)))
+        .slice(0,3).forEach(a=>{if(!images[a.id])void imageLoad(a.id)});
     if (tab === 'create' && editor.assetId && !images[editor.assetId])
       void imageLoad(editor.assetId);
   }, [tab, current, assets, editor.assetId]);
