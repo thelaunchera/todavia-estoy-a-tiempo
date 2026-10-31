@@ -2,7 +2,7 @@
 // Each brief describes photography; exact titles/prices are composed later as text layers.
 export type LabLanguage='es'|'en';
 export type PromptTemplate={id:string;category:string;title:{es:string;en:string};body:{es:string;en:string}};
-export const PROMPT_CATEGORIES={"product":["Productos","Products"],"lifestyle":["Lifestyle","Lifestyle"],"personal":["Marca personal","Personal brand"],"food":["Food","Food"],"beauty":["Beauty","Beauty"],"services":["Servicios","Services"],"cleaning":["Cleaning","Cleaning"],"podcast":["Podcast","Podcast"],"education":["Cursos","Courses"],"tech":["Apps / Tech","Apps / Tech"],"luxury":["Premium","Premium"],"marketing":["Marketing","Marketing"]};
+export const PROMPT_CATEGORIES:Record<string,[string,string]>={"product":["Productos","Products"],"lifestyle":["Lifestyle","Lifestyle"],"personal":["Marca personal","Personal brand"],"food":["Food","Food"],"beauty":["Beauty","Beauty"],"services":["Servicios","Services"],"cleaning":["Cleaning","Cleaning"],"podcast":["Podcast","Podcast"],"education":["Cursos","Courses"],"tech":["Apps / Tech","Apps / Tech"],"luxury":["Premium","Premium"],"marketing":["Marketing","Marketing"]};
 export const PROMPT_TEMPLATES:PromptTemplate[]=[
   {
     "id": "01",
