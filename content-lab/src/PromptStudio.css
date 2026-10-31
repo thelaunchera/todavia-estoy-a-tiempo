@@ -1,0 +1,46 @@
+/* Prompt Studio: private bilingual recipe library and guided prompt composition */
+.ps-wrap{width:100%;max-width:1480px;margin:auto}
+.ps-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:#f0f5f5;border:1px solid #d9e6e8;border-radius:22px;padding:26px 28px;margin-bottom:20px}
+.ps-hero h1{font:400 clamp(26px,3vw,38px)/1.15 'DM Serif Display',Georgia,serif;color:#213942;margin:8px 0 10px}
+.ps-hero p{font-size:13px;line-height:1.65;color:#5b7580;max-width:670px;margin:0}
+.ps-count{flex-shrink:0;display:grid;text-align:center;gap:2px;padding:15px;border:1px solid #d2e2e5;border-radius:15px;background:#fff}
+.ps-count strong{font-size:30px;font-weight:700;line-height:1;color:#244952}
+.ps-count span{font-size:10px;color:#69838b}
+.ps-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 16px}
+.ps-tabs button{display:flex;align-items:center;gap:8px;background:#fff;color:#607a84;border:1px solid #d9e6e8;border-radius:11px;padding:11px 15px;font-size:12px;font-weight:700}
+.ps-tabs button.active{background:#20353d;border-color:#20353d;color:#fff}
+.ps-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,420px);gap:20px;align-items:start}
+.ps-main,.ps-builder{min-width:0;background:#fff;border:1px solid #e0e8e8;border-radius:17px;padding:17px}
+.ps-search{display:flex;align-items:center;gap:10px;border:1px solid #d9e5e8;padding:0 12px;border-radius:11px;margin-bottom:14px}
+.ps-search svg{flex:none;color:#64818b}.ps-search input{min-width:0;width:100%;border:0;outline:0;background:transparent;padding:13px 0;font-size:12px;color:#23414b}
+.ps-categories{display:flex;gap:7px;overflow-x:auto;padding:0 1px 12px;margin-bottom:8px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.ps-categories button{flex-shrink:0;white-space:nowrap;padding:8px 11px;border:1px solid #d8e6e9;background:#f8fafa;border-radius:100px;color:#587681;font-size:11px}
+.ps-categories button.active{background:#244b59;color:#fff;border-color:#244b59}
+.ps-recipe-list{display:flex;flex-direction:column;gap:10px}
+.ps-recipe{display:flex;gap:12px;align-items:flex-start;min-width:0;background:#f9fbfb;border:1px solid #e4ecee;border-radius:14px;padding:14px}
+.ps-recipe-index{font-size:11px;color:#6c8a94;font-weight:700;padding:5px 7px;background:#e9f2f4;border-radius:6px}
+.ps-recipe>div{min-width:0;flex:1}
+.ps-recipe strong{display:block;font-size:13px;line-height:1.4;color:#223d47}
+.ps-recipe small{display:block;font-size:10px;color:#79909a;margin-top:3px}
+.ps-recipe p{font-size:11px;color:#687f86;line-height:1.65;margin:10px 0 0;overflow-wrap:anywhere}
+.ps-recipe-use,.ps-saved-actions button{border:1px solid #d5e4e6;background:#fff;color:#325f6e;border-radius:8px;padding:9px 11px;font-size:11px;display:inline-flex;gap:5px;align-items:center;font-weight:700;cursor:pointer}
+.ps-recipe-use{flex-shrink:0}
+.ps-saved-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+.ps-fave{border:0;background:transparent;color:#96a3a5;cursor:pointer;padding:5px}.ps-fave.active{color:#3e7b88}
+.ps-builder{position:sticky;top:16px;max-height:calc(100dvh - 35px);overflow-y:auto;overscroll-behavior:contain}
+.ps-builder-header{display:flex;align-items:center;gap:10px;background:#eaf3f5;border-radius:11px;padding:13px;margin-bottom:16px}
+.ps-builder-header strong{font-size:15px}.ps-builder-header small{display:block;color:#73929a;font-size:10px;margin-top:3px}
+.ps-builder label{display:block;font-size:12px;color:#4b6974;font-weight:600;margin:0 0 13px;min-width:0}
+.ps-builder input,.ps-builder select,.ps-builder textarea{display:block;width:100%;min-width:0;max-width:100%;margin:6px 0 0;padding:11px;border:1px solid #d4e2e6;border-radius:9px;background:#fff;color:#243b45;font-size:12px;line-height:1.55;font-weight:400;box-sizing:border-box}
+.ps-builder textarea{resize:vertical}
+.ps-control-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.ps-advanced-toggle{display:flex;align-items:center;gap:8px;margin:5px 0 14px;padding:8px 0;background:transparent;border:0;color:#3a7083;font-size:12px;font-weight:700}
+.ps-output{padding:12px;border:1px solid #c9e1e6;border-radius:11px;background:#f4f9fa;margin:3px 0 15px}
+.ps-output>div{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ps-output strong{font-size:12px;color:#355761}.ps-output span{font-size:10px;color:#7b949a}
+.ps-output textarea{font-size:11px;line-height:1.6;min-height:146px;background:#fff}
+.ps-output small{font-size:10px;color:#66838c;line-height:1.6;display:block;margin:8px 0 0}
+.ps-actions{display:flex;gap:7px;flex-wrap:wrap}.ps-actions .btn{font-size:11px;display:flex;gap:6px;align-items:center;justify-content:center}
+.ps-actions .btn.dark{flex:1}
+@media(max-width:1100px){.ps-layout{grid-template-columns:minmax(0,1fr)}.ps-builder{position:static;max-height:none;overflow:visible;order:-1}}
+@media(max-width:600px){.ps-hero{padding:18px;border-radius:15px}.ps-count{padding:11px}.ps-hero h1{font-size:27px}.ps-main,.ps-builder{padding:13px}.ps-control-grid{grid-template-columns:1fr 1fr}.ps-recipe{flex-wrap:wrap}.ps-recipe-use{margin-left:auto}.ps-saved-actions{width:100%;justify-content:flex-end}.ps-tabs button{flex:1;justify-content:center;min-width:120px}}

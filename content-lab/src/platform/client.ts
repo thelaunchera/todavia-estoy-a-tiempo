@@ -102,6 +102,13 @@ export const api={
       return {data:{brands,posts,assets}};
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
+    if(path==='/api/prompts')return {data:await list('prompts')};
+    if(path==='/api/prompt-templates'){
+      // Supabase RLS checks active paid membership or admin and never serves anon.
+      const {data,error}=await sb.from('content_lab_prompt_catalogue').select('id,category,title,body').order('id',{ascending:true});
+      if(error)throw Error(error.message);
+      return {data:data||[]};
+    }
     if(path==='/api/ai-wallet'){
       const me=await current();
       const {data:owner}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
@@ -124,6 +131,15 @@ export const api={
     requireConfig();
     if(path==='/api/brands')return {data:await add('brands',payload)};
     if(path==='/api/posts')return {data:await add('posts',payload)};
+    if(path==='/api/prompts'){
+      const text=String(payload?.text||'').slice(0,4800);
+      if(!text.trim())throw Error('El prompt no puede estar vacío.');
+      if((await list('prompts')).length>=100)throw Error('Ya guardaste 100 prompts. Elimina uno antes de guardar otro.');
+      return {data:await add('prompts',{
+        brandId:String(payload?.brandId||''),title:String(payload?.title||'Mi prompt').slice(0,100),
+        text,settings:payload?.settings||null,favorite:false
+      })};
+    }
     if(path==='/api/assets'){
       const me=await current();
       const bytes=Uint8Array.from(atob(payload.content),c=>c.charCodeAt(0));
@@ -149,19 +165,19 @@ export const api={
     throw Error('Ruta no disponible: '+path);
   },
   put:async(path:string,payload:any):Promise<{data:any}>=>{
-    const m=path.match(/^\/api\/(brands|posts|grids)\/([^/]+)$/);
+    const m=path.match(/^\/api\/(brands|posts|grids|prompts)\/([^/]+)$/);
     if(!m)throw Error('Ruta de edición inválida.');
     return {data:await update(m[1],decodeURIComponent(m[2]),payload)};
   },
   delete:async(path:string):Promise<{data:any}>=>{
-    const m=path.match(/^\/api\/(posts|assets)\/([^/]+)$/);
+    const m=path.match(/^\/api\/(posts|assets|prompts)\/([^/]+)$/);
     if(!m)throw Error('Ruta de borrado inválida.');
     const id=decodeURIComponent(m[2]);
     if(m[1]==='assets'){
       const asset=await read('assets',id);
       await remove('assets',id);
       out(await sb.storage.from(bucket).remove([asset.path]));
-    }else await remove('posts',id);
+    }else await remove(m[1]==='prompts'?'prompts':'posts',id);
     return {data:{deleted:true}};
   }
 };

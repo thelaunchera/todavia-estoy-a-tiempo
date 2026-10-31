@@ -97,7 +97,7 @@ async function verifyCloudflareToken(){
  }
  throw Error('Cloudflare no puede validar ese API Token. Comprueba que copiaste un token de Workers AI (no Global API Key), que está activo y que pertenece al Account ID seleccionado.');
 }
-async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false,jsonSchema?:Record<string,unknown>){
+async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false,jsonSchema?:Record<string,unknown>,imageOptions?:{guidance?:number;seed?:number}){
  ensureFreeProvider();
  const headers:Record<string,string>={'Authorization':'Bearer '+token};
  let response:Response;
@@ -106,6 +106,8 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
   form.set('prompt',prompt.slice(0,2000));
   form.set('width','1024');
   form.set('height','1280');
+  if(Number.isFinite(imageOptions?.guidance))form.set('guidance',String(Math.min(6.5,Math.max(2,Number(imageOptions?.guidance)))));
+  if(Number.isInteger(imageOptions?.seed)&&Number(imageOptions?.seed)>=0)form.set('seed',String(imageOptions?.seed));
   for(let i=0;i<Math.min(inputs.length,4);i++){
    const reference=inputs[i];
    const bytes=Uint8Array.from(atob(reference.data),c=>c.charCodeAt(0));
@@ -284,7 +286,7 @@ Deno.serve(async request=>{
     'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Latin American Spanish')+'.',
     'Brand: '+clean(b.name,100)+'. Voice: '+clean(b.voice,130)+'.',
     'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
-    'Creative brief from owner: '+clean(body.brief,400)+'.',
+    'Creative brief from owner — follow their specific instructions before general creative defaults: '+clean(body.brief,1250)+'.',
     'Visible product/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
     'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'.',
     'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
@@ -335,7 +337,7 @@ Deno.serve(async request=>{
    const sequence=[firstStyle,...accepted.filter(p=>p!==firstStyle)];
    const posts=plan.posts.map((p:any,i:number)=>({
     index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
-    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Visual description: '+clean(visualDescription,440)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,200),
+    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Visual description: '+clean(visualDescription,370)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,470),
     format:gridLayouts[i],assetId:'',
     ...(designMode==='editorial'?{design:{
       preset:sequence[i%sequence.length],
@@ -349,7 +351,7 @@ Deno.serve(async request=>{
       overlay:.12
     }}:{})
    }));
-   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
+   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,creativeSettings:body.creativeSettings||null,brief:clean(body.brief,1850),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
    if(planningSource==='template')await rollback();
    return send(saved);
   }
@@ -371,8 +373,22 @@ Deno.serve(async request=>{
    const references:{data:string;mime:string}[]=[];
    if(grid.kind!=='preserve'){const p=await aiReference(grid.sourceId);references.push({data:p.data,mime:p.mime});}
    if(grid.referenceId){const p=await aiReference(grid.referenceId);references.push({data:p.data,mime:p.mime});}
-   const prompt='Create ONE NEW PHOTOGRAPH in VERTICAL 4:5, not grid or collage. Shot '+(i+1)+' of nine, MANDATORY DIFFERENT shot: '+shots[i]+'. Scene '+grid.posts[i].scene+'. Brand '+b.name+' palette '+b.color+' '+b.background+'. Brand photo mood: '+clean(b.photoMood,210)+'. Absolutely avoid: '+clean(b.avoid,200)+'. Do not repeat/crop/recolor the source photo; truly new camera shot, light, props and environment. '+(grid.kind==='preserve'?'Create only aesthetic complementary background, no fake app UI, no subject, no screen; original image will be composited intact.':'First attached photo identifies real product: preserve its identity, shape, material and colors. Second photo optional style inspiration only. Do not reproduce someone else brand.')+' NO text, words, logos, watermarks, lettering or fictional interface. Marketing headlines will be overlaid later in a separate accurate typography layer.';
-   const image:any=await cloudflareRequest(prompt,references,true);
+   const settings=grid.creativeSettings||{};
+   const guidance=settings.fidelity==='strict'?5.7:4.2;
+   const userDirection=clean(grid.brief,1100);
+   const finalNegative=clean(settings.avoid,210);
+   const prompt=[
+    'Photograph ONE coherent VERTICAL 4:5 realistic image, not a collage.',
+    'CUSTOM USER REQUEST (highest priority for creative direction): '+userDirection,
+    'SHOT '+(i+1)+' of 9: '+shots[i]+'.',
+    'Composition '+clean(grid.posts[i].scene,260)+'.',
+    'BRAND '+clean(b.name,90)+', color scheme '+clean(b.color,20)+' '+clean(b.background,20)+'.',
+    'REALISM: physical texture, correct scale, coherent window or studio light, realistic human proportions, plausible shadows and reflections.',
+    grid.kind==='preserve'?'Make only a tasteful background with NO product or simulated screenshot; the genuine source photo will be composited unchanged.':'First image is the real product or face reference. Maintain recognizability, avoid invented packaging or physical attributes. Second reference is style only.',
+    'AVOID: '+clean(b.avoid,180)+'; '+finalNegative+'. No fabricated words, logos, watermarks, letters or UI.',
+    'The exact text and graphic design will be added later as editable layers.'
+   ].join(' ').slice(0,1960);
+   const image:any=await cloudflareRequest(prompt,references,true,undefined,{guidance});
    const asset=await store(grid.brandId,'Post '+(i+1)+' - '+grid.title,image.data,image.mime);
    const posts=grid.posts.map((p:any,j:number)=>j===i?{...p,assetId:asset.id}:p);
    const updated=await edit('grids',grid.id,{...grid,posts});
@@ -381,12 +397,29 @@ Deno.serve(async request=>{
   if(action==='ai-image'){
    const b=await find('brands',clean(body.brandId,100));
    const sources:{data:string;mime:string}[]=[];
-   if(body.mode==='variation'&&body.assetId){
-    const p=await aiReference(clean(body.assetId,100));
-    if(p.record.brandId!==b.id)throw Error('Esa foto pertenece a otra marca. Selecciona la cuenta original o vuelve a subir la foto desde '+b.name+'.');
+   const sourceId=clean(body.assetId,100),refId=clean(body.referenceId,100);
+   if(body.mode==='variation'&&sourceId){
+    const p=await aiReference(sourceId);
+    if(p.record.brandId!==b.id)throw Error('Esa foto pertenece a otra marca. Vuelve a subirla en la marca correcta.');
     sources.push({data:p.data,mime:p.mime});
    }
-   const image:any=await cloudflareRequest('Make ONE vertical 4:5 original premium photography image for '+b.name+'. '+clean(body.prompt,700)+'. No logos, words, watermarks or invented app screens. Preserve subject identity when provided.',sources,true);
+   if(refId&&refId!==sourceId){
+    const style=await aiReference(refId);
+    if(style.record.brandId!==b.id)throw Error('La referencia de estilo pertenece a otra marca.');
+    sources.push({data:style.data,mime:style.mime});
+   }
+   const settings=body.creativeSettings||{};
+   const guidance=settings.fidelity==='strict'?5.7:4.2;
+   const userPrompt=clean(body.prompt,1480);
+   if(!userPrompt)throw Error('Escribe la escena o el prompt que quieres generar.');
+   const final=[
+    'Make ONE real photographic image, 4:5 portrait. Brand: '+clean(b.name,100)+'.',
+    'USER PROMPT: '+userPrompt,
+    'Photo realism: real materials and textures, realistic light, accurate anatomy, physically plausible reflections and honest shadows.',
+    'Fidelity: '+(settings.fidelity==='strict'?'Preserve exact reference identity as closely as the generative model allows.':'Allow art-directed changes but keep the recognizable subject.') ,
+    'Avoid: '+clean(b.avoid,140)+' '+clean(settings.avoid,180)+'. No fabricated logos, watermarks, lettering, prices or fake app screens. Exact captions belong in a separate text layer.'
+   ].join(' ').slice(0,1990);
+   const image:any=await cloudflareRequest(final,sources,true,undefined,{guidance});
    const asset=await store(b.id,'AI Photo - '+b.name,image.data,image.mime);
    return send({...asset,content:image.data});
   }
