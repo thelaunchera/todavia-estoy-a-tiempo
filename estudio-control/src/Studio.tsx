@@ -5,6 +5,7 @@ import ReelsProduction from './ReelsProduction';
 import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
+import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -14,6 +15,7 @@ import {
   Mic2,
   CalendarDays,
   ShoppingBag,
+  Link2,
   ListChecks,
   Lightbulb,
   CreditCard,
@@ -67,6 +69,7 @@ type Page =
   | 'calendario'
   | 'tareas'
   | 'productos'
+  | 'links'
   | 'ideas'
   | 'ventas'
   | 'audiencia'
@@ -150,6 +153,7 @@ const NAV = [
     group: 'VENTAS Y PRODUCTOS',
   },
   { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
+  { id: 'links', label: 'Centro de links', icon: Link2 },
   { id: 'episodios', label: 'Episodios', icon: Mic2, group: 'CREACIÓN Y CONTENIDO' },
   { id: 'reels', label: 'Reels · producción', icon: Film },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
@@ -181,6 +185,7 @@ const LABELS: Record<Page, string> = {
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
   productos: 'Colección digital',
+  links: 'Centro de links',
   ideas: 'Banco de ideas',
   ventas: 'Ventas e ingresos',
   audiencia: 'Nuestra audiencia',
@@ -542,7 +547,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales');
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION);
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -1369,6 +1374,7 @@ function App() {
             </section>
           )}
           {page === 'bonos' && <BonusLibrary />}
+          {page === 'links' && <LinkCenter entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} />}
           {page === 'clases' && (
             <ClassProduction entries={items.ideas} tasks={items.tareas} launchStats={classStats} onTaskToggle={async (task,next) => {
