@@ -132,9 +132,16 @@ const NAV = [
     id: 'inicio',
     label: 'Mi estudio',
     icon: LayoutDashboard,
-    group: 'ESPACIO DE CREACIÓN',
+    group: 'MI ESPACIO',
   },
-  { id: 'episodios', label: 'Episodios', icon: Mic2 },
+  {
+    id: 'ventas',
+    label: 'Ventas e ingresos',
+    icon: CreditCard,
+    group: 'VENTAS Y PRODUCTOS',
+  },
+  { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
+  { id: 'episodios', label: 'Episodios', icon: Mic2, group: 'CREACIÓN Y CONTENIDO' },
   { id: 'reels', label: 'Reels · producción', icon: Film },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'demos', label: 'Demos terminados', icon: Globe2 },
@@ -144,15 +151,8 @@ const NAV = [
   { id: 'club', label: 'Club de Ideas', icon: Users },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Tareas', icon: ListChecks },
-  { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
   { id: 'ideas', label: 'Banco de ideas', icon: Lightbulb },
-  {
-    id: 'ventas',
-    label: 'Ventas e ingresos',
-    icon: CreditCard,
-    group: 'OPERACIONES',
-  },
-  { id: 'audiencia', label: 'Audiencia', icon: Users },
+  { id: 'audiencia', label: 'Audiencia', icon: Users, group: 'OPERACIONES' },
   { id: 'cancion', label: 'Escuchas de la canción', icon: AudioLines },
   { id: 'soporte', label: 'Mensajes', icon: Mail },
   { id: 'flujos', label: 'Automatizaciones', icon: Workflow },
@@ -268,7 +268,7 @@ function App() {
   const [data, setData] = useState<Data | null>(null),
     [denied, setDenied] = useState(false),
     [error, setError] = useState('');
-  const [page, setPage] = useState<Page>('inicio'),
+  const [page, setPage] = useState<Page>(() => new URLSearchParams(window.location.search).get('seccion')==='ventas' ? 'ventas' : 'inicio'),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
@@ -550,6 +550,11 @@ function App() {
     setPage(p);
     setSearch('');
     setMobileNav(false);
+    // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
+    const nextUrl = new URL(window.location.href);
+    if (p==='ventas') nextUrl.searchParams.set('seccion','ventas');
+    else nextUrl.searchParams.delete('seccion');
+    window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const newRow = (kind: Kind) => {
