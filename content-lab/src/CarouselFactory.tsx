@@ -229,6 +229,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const destinationAccount=socialAccount(brand,socialDestination);
   const palette=brandPalette(brand);
   const [current,setCurrent]=useState(0);
+  const swipeStart=useRef<{x:number;y:number}|null>(null);
   const [preview,setPreview]=useState('');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const [idea,setIdea]=useState('');
@@ -472,7 +473,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <aside className="factory-right">
         <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
-        <div className="factory-preview">{preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>
+        <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
+         onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
+         onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
+         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>
         <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
         <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
         <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo · gratis</button>
