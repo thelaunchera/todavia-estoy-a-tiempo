@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {Download,Search,Images,Upload,Check,LoaderCircle} from 'lucide-react';
+import {Download,Search,Images,Upload,Check,LoaderCircle,Trash2} from 'lucide-react';
 import {unzip} from 'fflate';
 import {displayAssetName,assetCategory,type LibraryAsset} from './MediaAsset';
 import './StickerDownloads.css';
@@ -7,6 +7,7 @@ import './StickerDownloads.css';
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onUpload:(file:File)=>Promise<LibraryAsset|null>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
+ onDelete:(asset:LibraryAsset)=>Promise<void>;
  isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
 const groups=['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
@@ -35,7 +36,7 @@ function StickerPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;lo
  },[asset.id,Boolean(src)]);
  return <div ref={ref} className="sticker-downloads-preview">{src?<img src={src} alt={displayAssetName(asset)} loading="lazy"/>:<span className="sticker-thumb-loading" aria-label="Cargando ilustración"><LoaderCircle size={18} className="spin"/></span>}</div>;
 }
-export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,isAdmin,loadImage,onUse}:Props){
+export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,onDelete,isAdmin,loadImage,onUse}:Props){
  const fileRef=useRef<HTMLInputElement>(null);
  const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
  const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
@@ -112,7 +113,11 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-destination"><label htmlFor="sticker-use-where">Añadir sticker a</label><select id="sticker-use-where" value={destination} onChange={e=>setDestination(e.target.value as 'carousel'|'cover')}><option value="carousel">Carrusel (slide actual)</option><option value="cover">Post individual / cover</option></select><small>También puedes añadirlos directamente desde Brand Grid, Carousel Factory y el editor de posts.</small></div>
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" disabled={!images[asset.id]} onClick={()=>void download(asset)}><Download size={14}/> {images[asset.id]?'Descargar PNG':'Preparando PNG…'}</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
+  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" disabled={!images[asset.id]} onClick={()=>void download(asset)}><Download size={14}/> {images[asset.id]?'Descargar PNG':'Preparando PNG…'}</button>
+    {(!asset.shared||isAdmin)&&<button type="button" className="sticker-delete-button"
+      aria-label={'Eliminar sticker '+displayAssetName(asset)}
+      onClick={()=>void onDelete(asset)}><Trash2 size={15}/> Eliminar</button>}
+    </article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
   <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
  </section>;
 }
