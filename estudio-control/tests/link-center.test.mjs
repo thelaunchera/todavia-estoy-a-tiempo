@@ -28,8 +28,8 @@ test('Private buyer, owner and checkout links cannot be copied in public batches
   assert.match(source,/v==='publico' \|\| v==='demo'/);
 });
 test('Recording mode hides all private and review-only links',()=>{
-  assert.match(source,/!readOnly \\|\\| shareable\\(x\\.visibility\\)/);
-  assert.match(source,/readOnly \\? 'Modo grabación: solo se muestran enlaces públicos y demos/);
+  assert.match(source,/!readOnly \|\| shareable\(x\.visibility\)/);
+  assert.match(source,/readOnly \? 'Modo grabación: solo se muestran enlaces públicos y demos/);
 });
 test('New Studio links point to GitHub-hosted versions, not old AppDeploy prototypes',()=>{
   assert.equal(records.some(x=>x.url.includes('appdeploy.ai')),false);
