@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampPanoramaRect } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics } from './PhotoCrop';
+import { Trash2 } from 'lucide-react';
 import './TouchLayerCanvas.css';
 
 export type TouchLayer = {
@@ -30,7 +31,6 @@ export default function TouchLayerCanvas({
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
   const [cropping, setCropping] = useState(false);
-  const [guides, setGuides] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
@@ -42,6 +42,7 @@ export default function TouchLayerCanvas({
   const clamp = (rect: TouchRect) => pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false); }, [selected]);
+  useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const update = (id: string, next: TouchRect) => {
@@ -161,10 +162,18 @@ export default function TouchLayerCanvas({
     const next = clamp({...selectedRect, ...patch});
     update(chosen.id, next); onCommit(chosen.kind, chosen.id, next);
   };
+  const deleteLayer = (id: string) => {
+    if (!onRemove || !window.confirm('¿Borrar este elemento del carrusel? El archivo original seguirá en tu biblioteca.')) return;
+    onRemove(id);
+    if (selected === id) setSelected('');
+  };
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
     aria-label="Editor visual de fotos y stickers">
-    {pageCount > 1 && <label className="panorama-guide-toggle"><input type="checkbox"
-      checked={guides} onChange={e => setGuides(e.target.checked)}/><span>Mostrar líneas de corte · no se descargan</span></label>}
+    {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
+      Grid de {pageCount} slides siempre visible · la división ocurre al descargar</div>}
+    {onRemove && <div className="touch-editor-actionbar"><span>{chosen ? 'Seleccionado: ' + chosen.name : 'Toca una foto o sticker para seleccionarlo'}</span>
+      <button type="button" className="touch-editor-delete-primary" disabled={!chosen}
+        onClick={() => { if (chosen) deleteLayer(chosen.id); }}><Trash2 size={16}/> Borrar elemento</button></div>}
     <div ref={scrollArea} className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
@@ -224,7 +233,7 @@ export default function TouchLayerCanvas({
               {!cropping && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
           </div>;
         })}
-        {pageCount > 1 && guides && <div className="panorama-cut-guides" aria-hidden="true">
+        {pageCount > 1 && <div className="panorama-cut-guides" aria-hidden="true">
           {Array.from({length: pageCount}, (_, n) => <div key={n} style={{left: n / pageCount * 100 + '%', width: 100 / pageCount + '%'}}>
             <span>SLIDE {n + 1}</span></div>)}
         </div>}
@@ -244,11 +253,17 @@ export default function TouchLayerCanvas({
       {!cropping && <><label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="1"
         value={selectedRect.angle || 0} onChange={e => commit({angle: Number(e.target.value)})}/></label>
         <button type="button" onClick={() => commit({angle: 0})}>Enderezar</button></>}
-      {onRemove && <button type="button" onClick={() => {
-        if (window.confirm('¿Quitar esta capa del diseño? Tu archivo original se conserva.')) {
-          onRemove(chosen.id); setSelected('');
-        }
-      }}>Quitar del diseño</button>}
+    </div>}
+    {pageCount > 1 && onRemove && <div className="touch-editor-layer-list" aria-label="Elementos del carrusel">
+      <strong>Fotos y stickers ({layers.length})</strong>
+      <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
+        <button type="button" className={selected === layer.id ? 'selected' : ''}
+          onClick={() => setSelected(layer.id)} aria-pressed={selected === layer.id}
+          title={'Seleccionar ' + layer.name}><img src={layer.src} alt=""/><span>{layer.name}</span></button>
+        <button type="button" className="touch-editor-layer-trash" title={'Borrar ' + layer.name}
+          aria-label={'Borrar ' + layer.name} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
+      </div>)}</div>
+      {!layers.length && <p>Añade fotos o stickers al lienzo para editarlos aquí.</p>}
     </div>}
   </div>;
 }
