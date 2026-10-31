@@ -13,7 +13,7 @@ import type {FreeBackgroundId} from './FreeDesignAssets';
 import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
-type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean};
+type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;stickerIds?:string[]};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
