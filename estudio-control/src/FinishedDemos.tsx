@@ -71,14 +71,14 @@ const finishedDemos:Demo[]=[
   kind:'live'
  },
  {
-  id:'sample-cleaning',
-  title:'Sample Cleaning · Booking',
-  category:'Limpieza residencial · demo interactivo',
-  description:'Ejemplo público de una página de reservas para limpieza: servicios, elección de opciones y recorrido de cotización para explorar cómo se organiza la experiencia.',
-  image:'https://images.pexels.com/photos/37184168/pexels-photo-37184168.jpeg?auto=compress&cs=tinysrgb&w=1800&q=85',
-  url:'https://thelaunchera.com/sample-cleaning/',
-  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/sample-cleaning',
-  note:'Simulación pública de The Launch Era: no crea citas, no cobra y no envía datos a clientes. Es distinta de los demos personalizados que requieren verificación.',
+  id:'experience-cleaning',
+  title:'Experience Cleaning · Booking Journey',
+  category:'Limpieza residencial y comercial · demo interactivo actualizado',
+  description:'El demo más reciente de limpieza: servicios con fotografías, reserva residencial de muestra, solicitud de estimado comercial y recorrido conectado al Command Center de la dueña.',
+  image:'https://thelaunchera.com/assets/cleaning-demo/hero-cleaner-original.jpg',
+  url:'https://thelaunchera.com/experience-cleaning/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/experience-cleaning',
+  note:'Demo pública y segura, con información ilustrativa. No crea reservas, no cobra ni modifica datos reales. El Command Center mostrado pertenece a la simulación, no a una cuenta privada.',
   kind:'other'
  }
 ];
@@ -93,7 +93,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, CB Depot y Sample Cleaning. Distingue los conceptos de práctica del proyecto real de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, CB Depot y Experience Cleaning. Distingue los conceptos de práctica del proyecto real de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
