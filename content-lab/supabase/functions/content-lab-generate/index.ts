@@ -128,7 +128,7 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
  try{body=await response.json()}catch{throw Error('Cloudflare no devolvió una respuesta válida.');}
  if(!response.ok||body.success===false){
   if(response.status===429||response.status===402||/quota|neurons|limit|billing/i.test(extractError(body)))
-    throw Error('Se terminó la cuota gratuita de Cloudflare. No se generó ningún cargo; vuelve a intentarlo cuando se reinicie.');
+    throw Error('Se agotó la cuota disponible de Cloudflare. Esta generación no se completó y se devolverá el crédito del Lab; inténtalo más tarde.');
   const cloudflareError=extractError(body);
   // Never return a raw request URL with an Account ID to the browser.
   if(body?.errors?.some?.((e:any)=>e.code===7003)||/could not route|object identifier is invalid/i.test(cloudflareError))
@@ -163,6 +163,18 @@ Deno.serve(async request=>{
  if(allowed!=='*'&&request.headers.get('origin')!==allowed)return send({error:'Origen no autorizado'},403);
  const jwt=(request.headers.get('authorization')||'').replace(/^Bearer /,'');
  if(!jwt)return send({error:'Sesión requerida'},401);
+ let reservationId:string|null=null;
+ let reservationUserId:string|null=null;
+ // Rollbacks require the server-only service role key; never expose it.
+ const rollback=async()=>{
+  if(!reservationId||!reservationUserId)return;
+  const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if(!key){console.error('AI refund needs server service key');return;}
+  const service=createClient(Deno.env.get('SUPABASE_URL')||'',key,{auth:{autoRefreshToken:false,persistSession:false}});
+  const result=await service.rpc('content_lab_refund_ai',{p_reservation:reservationId,p_user:reservationUserId});
+  if(result.error)console.error('AI reservation refund error',result.error.message);
+  else reservationId=null;
+ };
  try{
   const supabase=createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE_KEY')||'',{global:{headers:{Authorization:'Bearer '+jwt}}});
   const {data:{user},error}=await supabase.auth.getUser(jwt);
@@ -176,8 +188,22 @@ Deno.serve(async request=>{
   }
   if(!admin&&!paid)return send({error:'Esta cuenta todavía no tiene una compra verificada de Content Lab.'},403);
   const body=await request.json();const action=clean(body.action,45);
-  if(paid&&!admin&&['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action))
-   return send({error:'La generación con IA se habilitará para compradores después de establecer y probar los créditos individuales. Tu editor y biblioteca privados permanecen disponibles.'},403);
+  if(paid&&!admin&&action==='connection-test')return send({error:'El diagnóstico técnico es exclusivo de la propietaria.'},403);
+  // The RPC authenticates membership and atomically decrements real server-side
+  // credits, per-user daily allowance, and the shared platform safety ceiling.
+  if(['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action)){
+   if(!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'La devolución segura de créditos está en mantenimiento. No se consumió ninguno.'},503);
+   // The buyer's identity comes from getUser(jwt), never from the request body.
+   // Only the service role can invoke the signed, quota-reserving function.
+   const service=createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',
+     {auth:{autoRefreshToken:false,persistSession:false}});
+   const {data:reservation,error:quotaError}=await service.rpc('content_lab_reserve_ai',
+     {p_action:action,p_user:user.id,p_email:user.email||''});
+   if(quotaError)return send({error:quotaError.message},429);
+   reservationId=String(reservation?.reservation_id||'');
+   reservationUserId=user.id;
+   if(!reservationId)return send({error:'No se pudo reservar un crédito de IA.'},503);
+  }
   const find=async(name:string,id:string)=>{
    const {data,error}=await supabase.from('content_lab_'+name).select('id,payload').eq('id',id).single();
    if(error||!data)throw Error('Recurso privado no encontrado.');
@@ -323,7 +349,9 @@ Deno.serve(async request=>{
       overlay:.12
     }}:{})
    }));
-   return send(await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts}));
+   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
+   if(planningSource==='template')await rollback();
+   return send(saved);
   }
   if(action==='grid-image'){
    const grid=await find('grids',clean(body.gridId,100)),i=Number(body.index);
@@ -364,6 +392,7 @@ Deno.serve(async request=>{
   }
   return send({error:'Acción desconocida'},404);
  }catch(e){
+  await rollback().catch(err=>console.error('Refund attempt failed',err));
   console.error('Private Content Lab AI error',e);
   return send({error:e instanceof Error?e.message:'Error en el servicio de IA'},503);
  }

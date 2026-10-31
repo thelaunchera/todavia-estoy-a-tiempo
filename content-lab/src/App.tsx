@@ -303,6 +303,10 @@ async function downloadPng(post: Post, brand: Brand, photo?: string) {
 }
 function App() {
   const [account, setAccount] = useState<{ email?: string } | null>(null);
+  const [aiWallet, setAiWallet] = useState<{
+    admin?:boolean;photo_remaining?:number;creative_remaining?:number;
+    photo_today?:number;creative_today?:number;quota_day?:string;
+  }|null>(null);
   const [loginEmail, setLoginEmail] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
   const [loginCode, setLoginCode] = useState('');
@@ -377,6 +381,8 @@ function App() {
   };
   const reload = async () => {
     const { data } = await api.get('/api/data');
+    const wallet=await api.get('/api/ai-wallet').catch(()=>({data:null}));
+    setAiWallet(wallet.data);
     setBrands(data.brands || []);
     setPosts(data.posts || []);
     setAssets(data.assets || []);
@@ -386,6 +392,11 @@ function App() {
         : data.brands[0]?.id || ''
     );
   };
+  useEffect(()=>{
+    const refresh=()=>{void api.get('/api/ai-wallet').then(r=>setAiWallet(r.data)).catch(()=>{});};
+    window.addEventListener('content-lab-credit-change',refresh);
+    return()=>window.removeEventListener('content-lab-credit-change',refresh);
+  },[]);
   useEffect(() => {
     auth
       .getUser()
@@ -735,6 +746,11 @@ function App() {
             </button>
           ))}
         </nav>
+        {aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
+          <strong>AI credits · Tu saldo</strong>
+          <p>{aiWallet.photo_remaining??60} photos/fotos · {aiWallet.creative_remaining??30} ideas/créditos creativos</p>
+          <small>10 fotos por día, máximo 10 créditos de ideas/día. Editar y exportar tus PNG sin IA no gasta créditos.</small>
+        </div>}
         <div className="side-footer">
           <div className="side-inspo">
             <Sparkles size={21} />
@@ -960,6 +976,7 @@ function App() {
           )}
           {brand && tab === 'grid' && (
             <BrandGrid
+              isAdmin={Boolean(aiWallet?.admin)}
               brand={brand}
               assets={library}
               images={images}

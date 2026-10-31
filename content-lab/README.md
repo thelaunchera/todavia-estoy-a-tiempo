@@ -82,3 +82,30 @@ El Lab presenta un campo donde introducir el código numérico del correo. `supa
 Referencia: documentación oficial [Supabase Passwordless email sign-in](https://supabase.com/docs/guides/auth/auth-email-passwordless).
 
 **Separación futura:** antes de vender acceso a clientes, considera un proyecto Auth independiente del podcast y revisa sus costes. No crear un proyecto nuevo ni cambiar los correos del Studio sin revisión.
+
+
+## IA, créditos y sostenibilidad — política PRE-LANZAMIENTO (31 oct 2026)
+
+**Precio previsto:** $10 USD pago único. No prometer generaciones de IA ilimitadas.
+
+**Cuotas por comprador implementadas en servidor (no en JavaScript):**
+- 60 generaciones de fotos IA iniciales (1 foto = 1 crédito).
+- 30 créditos creativos: idea = 1; preparar grid con IA = 3, incluye análisis de referencias.
+- Límite por día y comprador: 10 fotos, 10 créditos creativos. Reinicio UTC.
+- Techo compartido de seguridad = 50 unidades ponderadas/día (foto 1, idea 2, grid plan 4). Son unidades internas, NO neuronas reales de Cloudflare.
+- Diagnóstico técnico Cloudflare solo para la propietaria.
+- Errores de inferencia devuelven crédito por RPC de servicio; un grid preparado por plantilla local no debe cobrar IA.
+- Editor editorial, movimiento de capas, cambios de fondo y fuentes, biblioteca y exportación de PNG local NO consumen créditos IA.
+- El saldo se consulta desde Supabase y aparece en el sidebar.
+
+**Costos verificados:** Cloudflare Workers AI tiene 10.000 neuronas/día incluidas y cobra $0.011/1000 neuronas adicionales en Workers Paid; FLUX.2 Klein 4B cuesta $0.000287 por tile de salida 512×512 y $0.000059 por tile de entrada 512×512, según https://developers.cloudflare.com/workers-ai/platform/pricing/ . Texto y visión se cobran por tokens. No atribuir a cada imagen un costo fijo sin medir resolución real y entradas.
+
+Stripe cobra normalmente 2.9% + $0.30 por tarjeta doméstica de EE.UU.; de $10 restan aproximadamente $9.41 antes de otros gastos. Fuente https://stripe.com/pricing .
+
+**Stripe no transfiere el dinero automáticamente a Cloudflare.** Para seguir usando IA después de agotar la cuota gratuita compartida será necesario configurar una forma de pago en Workers Paid (la cuenta Workers tiene mínimo de $5/mes, sujeto a condiciones), o utilizar créditos prepagados AI Gateway con Unified Billing. No activar gasto abierto antes de verificar límites.
+
+El pago único compra acceso permanente a las herramientas locales y una cuota **finita** inicial de IA. Los paquetes de créditos adicionales requerirán su propio pago Stripe y entrega verificada mediante Make. No existen todavía productos de recarga ni checkout activo.
+
+**QA antes de abrir ventas:** probar una compra real, Stripe→Make→Supabase→correo→OTP iPhone, dos compradores aislados, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago sigue desactivado. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado de 50/día NO garantiza que no se consuman las 10k neuronas diarias.
+
+**Privacidad adicional:** la reserva de créditos ahora también es una función interna *service_role*; ningún comprador puede invocarla directamente desde el navegador ni modificar su saldo. El backend obtiene el UID/email de una sesión verificada antes de reservar o reembolsar.

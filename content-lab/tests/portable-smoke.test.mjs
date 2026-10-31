@@ -21,7 +21,7 @@ test('No-cost diagnostic and one-photo test are protected and visible',()=>{
  assert.ok(edge.indexOf("action==='connection-test'")>edge.indexOf('Cuenta no autorizada'));
  assert.ok(client.includes('/api/connection-test'));
  assert.ok(grid.includes('Comprobar conexión gratuita'));
- assert.ok(grid.includes('Probar 1 foto gratis'));
+ assert.ok(grid.includes('Generar 1 foto · 1 crédito IA'));
  assert.ok(!grid.includes("await generateRemaining(g);\n      notify('Tus nueve publicaciones están listas.')"));
 });
 
@@ -86,13 +86,13 @@ test('eight master prompts remain public as free launch offer, not a fake live c
 test('paid buyer can access only the email-verified owned account and not seeded podcast brands',()=>{
  const client=source('src/platform/client.ts');
  const edge=source('supabase/functions/content-lab-generate/index.ts');
- assert.ok(client.includes("if(!owner)return [];"));
+ assert.ok(client.includes("if(!owner){"));
  assert.ok(client.includes("sb.from('content_lab_memberships')"));
  assert.ok(client.includes('shouldCreateUser:true'));
  assert.ok(edge.includes("content_lab_memberships"));
  assert.ok(edge.includes("if(!admin&&!paid)"));
  assert.ok(edge.includes("if(paid&&!admin"));
- assert.ok(edge.includes("['ai-image','grid-image','grid-plan','ideas','connection-test']"));
+ assert.ok(edge.includes("service.rpc('content_lab_reserve_ai'"));
 });
 test('membership and storage RLS isolate by both authenticated owner UUID and paid email',()=>{
  const sql=source('supabase/migrations/20261031_paid_membership_isolation.sql');
@@ -102,4 +102,24 @@ test('membership and storage RLS isolate by both authenticated owner UUID and pa
  assert.ok(sql.includes("status='active'"));
  assert.ok(sql.includes('revoke all on public.content_lab_memberships from anon, authenticated'));
  assert.ok(sql.includes('grant select on public.content_lab_memberships to authenticated'));
+});
+
+test('AI credits are atomic and charged before all provider calls, with server-only refund',()=>{
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ const sql=source('supabase/migrations/20261031_ai_credit_budget.sql');
+ assert.ok(edge.includes("service.rpc('content_lab_reserve_ai'"));
+ assert.ok(edge.includes("service.rpc('content_lab_refund_ai'"));
+ assert.ok(edge.includes("if(planningSource==='template')await rollback()"));
+ for(const s of ['pg_advisory_xact_lock','photo_remaining integer not null default 60','creative_remaining integer not null default 30','units_used+v_global<=50','auth.role()'])assert.ok(sql.includes(s),s);
+ assert.ok(sql.includes("grant execute on function public.content_lab_refund_ai(uuid,uuid) to service_role"));
+ assert.ok(sql.includes("grant execute on function public.content_lab_reserve_ai(text,uuid,text) to service_role"));
+ assert.ok(sql.includes("if auth.role()<>'service_role' then"));
+ assert.ok(sql.includes("photo_today else 0 end)+v_photo <= 10"));
+});
+test('new buyers get an isolated neutral brand, never admin seed brands',()=>{
+ const c=source('src/platform/client.ts');
+ assert.ok(c.includes("name:'My Brand'"));
+ assert.ok(c.includes("if(!owner){"));
+ assert.ok(c.includes("path==='/api/ai-wallet'"));
+ assert.ok(c.includes("content-lab-credit-change"));
 });
