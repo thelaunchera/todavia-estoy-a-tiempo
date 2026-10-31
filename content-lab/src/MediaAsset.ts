@@ -1,12 +1,13 @@
 /** Image library metadata lives in the existing per-owner Supabase asset payload. */
-export type MediaCategory='original'|'reference'|'logo'|'generated'|'screenshot'|'sticker';
+export type MediaCategory='original'|'reference'|'logo'|'generated'|'screenshot'|'sticker'|'background';
 export const MEDIA_CATEGORIES:{id:MediaCategory;label:string;detail:string}[]=[
  {id:'original',label:'Fotos originales',detail:'Retratos y fotografías reales'},
  {id:'reference',label:'Referencias de estilo',detail:'Inspiración, nunca sustituyen al sujeto'},
  {id:'logo',label:'Logos',detail:'Recursos oficiales de marca'},
  {id:'generated',label:'Fotos IA',detail:'Resultados de generaciones previas'},
  {id:'screenshot',label:'Screenshots',detail:'Capturas y pantallas reales'},
- {id:'sticker',label:'Stickers PNG',detail:'Ilustraciones reales recortadas con transparencia'}
+ {id:'sticker',label:'Stickers PNG',detail:'Ilustraciones reales recortadas con transparencia'},
+ {id:'background',label:'Mis fondos',detail:'Fondos propios para posts y carruseles'}
 ];
 export type LibraryAsset={
  id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;
