@@ -1304,15 +1304,11 @@ function App() {
           )}
           {page === 'productos' && (
             <>
-              <ProductCenter entries={items.ideas} readOnly={recording}/>
-              <details className="product-admin-records"><summary>Gestionar las fichas del podcast</summary><div>
-              {head(
-                'Cuadernos y recursos',
-                'Todos los productos digitales del podcast, en un mismo lugar.',
-                'productos'
-                  </div></details>
-            </>
-          )}
+              <ProductCenter entries={items.ideas} readOnly={recording} />
+              {!recording && <details className="product-admin-records">
+                <summary>Gestionar fichas del podcast</summary>
+                <div>
+                  {head('Cuadernos y recursos', 'Registros internos del podcast; no modifican automáticamente las páginas de compra.', 'productos')}
               <div className="products">
                 {products.map((x, i) => (
                   <article className="product" key={x.id}>
@@ -1353,6 +1349,8 @@ function App() {
                 estudio, pero no modifica las páginas de compra hasta
                 conectarlas.
               </div>
+                </div>
+              </details>}
             </>
           )}
           {page === 'alumnos' && (
