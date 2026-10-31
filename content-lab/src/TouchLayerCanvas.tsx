@@ -17,7 +17,7 @@ type Props = {
   preview: string; textOverlay?: string; layers: TouchLayer[];
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
-  ratio?: number; pageCount?: number; onEmpty?: () => void;
+  ratio?: number; pageCount?: number; canvasHeight?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
@@ -31,7 +31,7 @@ type Gesture = {
   pinchDistance?: number; pinchCenter?: [number, number];
 };
 export default function TouchLayerCanvas({
-  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, onEmpty,
+  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
   onRemove, onReorder, onUpdate, onDropAsset, onDropFiles,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -112,8 +112,8 @@ export default function TouchLayerCanvas({
     }
     const rect = getRect(layer);
     const img = e.currentTarget.querySelector('img');
-    const metrics=photoFrameMetrics(rect.w*1080*pageCount,rect.h*1350,layer.frameStyle||'panorama');
-    const pixelScale=bounds.height/1350;
+    const metrics=photoFrameMetrics(rect.w*1080*pageCount,rect.h*canvasHeight,layer.frameStyle||'panorama');
+    const pixelScale=bounds.height/canvasHeight;
     const frameW = rect.w * bounds.width-2*metrics.inset*pixelScale;
     const frameH = rect.h * bounds.height-(metrics.inset+metrics.bottom)*pixelScale;
     const placement = coverPlacement(img?.naturalWidth || 1, img?.naturalHeight || 1,
@@ -183,8 +183,8 @@ export default function TouchLayerCanvas({
   const chosen = layers.find(layer => layer.id === selected);
   const selectedRect = chosen ? getRect(chosen) : undefined;
   const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
-    ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*1350,
-      chosen.frameStyle||'panorama').radius/Math.max(1,Math.min(selectedRect.w*1080*pageCount,selectedRect.h*1350)))
+    ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight,
+      chosen.frameStyle||'panorama').radius/Math.max(1,Math.min(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight)))
     : 0);
   const commit = (patch: Partial<TouchRect>) => {
     if (!chosen || !selectedRect) return;
@@ -240,7 +240,7 @@ export default function TouchLayerCanvas({
           const rect = getRect(layer), active = selected === layer.id;
           const z = pageCount > 1 ? (layer.placement === 'behind-text' ? 2 : 5) : 5;
           const crop = normalizeCrop(rect.crop);
-          const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*1350;
+          const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
           const radius=(r:number,w:number,h:number)=>`${100*r/Math.max(1,w)}% / ${100*r/Math.max(1,h)}%`;
           const outerRadius=layerCornerPixels(rect,fw,fh,100*metrics.radius/Math.max(1,Math.min(fw,fh)));
@@ -279,9 +279,9 @@ export default function TouchLayerCanvas({
             </div>}
             {layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
-              fontSize:(layer.fontSize||76)*stageHeight/1350+'px',
+              fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
               lineHeight:layer.lineHeight||1.12,
-              letterSpacing:(layer.spacing||0)*stageHeight/1350+'px',
+              letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
               color:layer.color||'#191919',
               textShadow:layer.shadow?'0 2px 7px #19191966':undefined,
               WebkitTextStroke:layer.outline?'1px #FFFFFF':undefined,
