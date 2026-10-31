@@ -438,7 +438,7 @@ function App() {
   }, []);
   const brand = brands.find(b => b.id === current) || brands[0];
   const mine = posts.filter(p => p.brandId === brand?.id);
-  const library = assets.filter(a => a.brandId === brand?.id);
+  const library = assets.filter(a => a.brandId === brand?.id || a.shared === true);
   const setupBrandReady = Boolean(brand && brand.name.trim() && brand.name!=='My Brand' && brand.audience?.trim());
   const setupStepsDone = Number(setupBrandReady)+Number(library.length>0)+Number(mine.length>0);
   const setupSteps = [
@@ -582,6 +582,23 @@ function App() {
     if (tab === 'create' && editor.assetId && !images[editor.assetId])
       void imageLoad(editor.assetId);
   }, [tab, current, assets, editor.assetId]);
+  const publishSharedSticker=async(file:File,stickerGroup:string):Promise<Asset|null>=>{
+    if(!aiWallet?.admin)throw Error('Solo la administradora publica stickers para todos.');
+    if(!/\\.png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
+    const encoded=await new Promise<string>((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');
+      reader.onerror=()=>reject(Error('No se pudo leer el PNG original.'));
+      reader.readAsDataURL(file);
+    });
+    const {data}=await api.post('/api/sticker-catalog',{
+      content:encoded,name:file.name.replace(/\\.png$/i,'').replace(/[_-]+/g,' ').trim(),
+      category:stickerGroup
+    });
+    const item=data as Asset;
+    setAssets(prev=>prev.some(a=>a.id===item.id)?prev:[...prev,item]);
+    return item;
+  };
   const upload = async (file?: File, category:MediaCategory='original'): Promise<Asset | null> => {
     if (!file) return null;
     if (file.size > 25000000) {
@@ -1414,7 +1431,7 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad}/>}
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad}/>}
           {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={(id)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
