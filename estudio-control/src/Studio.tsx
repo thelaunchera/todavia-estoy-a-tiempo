@@ -6,6 +6,7 @@ import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
 import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
+import ProductCenter from './ProductCenter';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -152,7 +153,7 @@ const NAV = [
     icon: CreditCard,
     group: 'VENTAS Y PRODUCTOS',
   },
-  { id: 'productos', label: 'Colección digital', icon: ShoppingBag },
+  { id: 'productos', label: 'Centro de productos', icon: ShoppingBag },
   { id: 'links', label: 'Centro de links', icon: Link2 },
   { id: 'episodios', label: 'Episodios', icon: Mic2, group: 'CREACIÓN Y CONTENIDO' },
   { id: 'reels', label: 'Reels · producción', icon: Film },
@@ -184,7 +185,7 @@ const LABELS: Record<Page, string> = {
   club: 'Club de Ideas',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
-  productos: 'Colección digital',
+  productos: 'Centro de productos',
   links: 'Centro de links',
   ideas: 'Banco de ideas',
   ventas: 'Ventas e ingresos',
@@ -284,7 +285,7 @@ function App() {
     [error, setError] = useState('');
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -589,7 +590,7 @@ function App() {
     setMobileNav(false);
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links') nextUrl.searchParams.set('seccion',p);
+    if (p==='ventas' || p==='links' || p==='productos') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1303,11 +1304,15 @@ function App() {
           )}
           {page === 'productos' && (
             <>
+              <ProductCenter entries={items.ideas} readOnly={recording}/>
+              <details className="product-admin-records"><summary>Gestionar las fichas del podcast</summary><div>
               {head(
                 'Cuadernos y recursos',
                 'Todos los productos digitales del podcast, en un mismo lugar.',
                 'productos'
-              )}
+                  </div></details>
+            </>
+          )}
               <div className="products">
                 {products.map((x, i) => (
                   <article className="product" key={x.id}>
@@ -1334,7 +1339,7 @@ function App() {
                             rel="noreferrer"
                             aria-label={'Abrir ' + x.title}
                           >
-                            
+                            <ExternalLink size={19}/>
                           </a>
                         )}
                         {buttons('productos', x)}
