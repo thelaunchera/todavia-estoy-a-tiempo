@@ -22,7 +22,7 @@ test('reference analysis includes actual style and not unrelated guessed claims'
  assert.ok(edge.includes('Describe visible subject truthfully'));
  assert.ok(edge.includes('designMode==='));
  assert.ok(edge.includes('const firstStyle='));
- assert.ok(edge.includes('callouts:[]'));
+ assert.ok(edge.includes('callouts:Array.isArray(p.callouts)'));
 });
 test('editable art direction and fonts are available in the iPhone UI',()=>{
  const g=source('src/BrandGrid.tsx'),css=source('src/index.css');
