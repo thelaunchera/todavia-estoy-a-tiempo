@@ -7,8 +7,9 @@ import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualContro
 import GridVisualEditor from './GridVisualEditor';
 import type {PromptControls} from './PromptEngine';
 import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
+import {brandPalette} from './BrandIdentity';
 
-type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
+type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
@@ -448,6 +449,10 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
                 <label>Color del fondo<input type="color" value={tile.design.backgroundColor||brand.background} onChange={e=>update({design:{...tile.design!,backgroundColor:e.target.value}})}/></label>
                 <label>Color del texto<input type="color" value={tile.design.textColor||'#24231f'} onChange={e=>update({design:{...tile.design!,textColor:e.target.value}})}/></label>
                 <label>Color de acento<input type="color" value={tile.design.accentColor||brand.color} onChange={e=>update({design:{...tile.design!,accentColor:e.target.value}})}/></label>
+                 <label>Usar un tono de mi Brand Kit<select value={brandPalette(brand).includes((tile.design.accentColor||brand.color).toUpperCase())?(tile.design.accentColor||brand.color).toUpperCase():'custom'} onChange={e=>{if(e.target.value!=='custom')update({design:{...tile.design!,accentColor:e.target.value}})}}>
+                   {brandPalette(brand).map((c,n)=><option key={c} value={c}>{n===0?'Principal':n===1?'Secundario':'Extra '+(n-1)} · {c}</option>)}
+                   <option value="custom" disabled>Color personalizado</option>
+                 </select></label>
                 <label>Texto de revista / manuscrito<input value={tile.design.handwritten||''} placeholder="Ej. hi, I'm Dailin" onChange={e=>update({design:{...tile.design!,handwritten:e.target.value}})}/></label>
                 <label>Etiqueta editorial<input value={tile.design.kicker||''} placeholder="Ej. ABOUT ME" onChange={e=>update({design:{...tile.design!,kicker:e.target.value}})}/></label>
                 {(tile.design.preset==='annotated'||tile.design.preset==='magazine')&&[0,1,2,3].map(i=><label key={i}>Anotación {i+1}
