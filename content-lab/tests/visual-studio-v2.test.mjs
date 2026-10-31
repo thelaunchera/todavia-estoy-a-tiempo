@@ -61,3 +61,16 @@ test('grid QA reports aggregate pending count, not nine repetitive warnings',()=
  assert.ok(grid.includes("pending+' de 9 publicaciones sin imagen final"));
  assert.ok(!grid.includes("found.push('Post '+(i+1)+': imagen pendiente.')"));
 });
+
+test('fixed Content Lab sidebar scrolls independently on mobile Safari',()=>{
+ const css=src('src/index.css'),app=src('src/App.tsx');
+ const sidebar=css.slice(css.indexOf('.sidebar {'),css.indexOf('.identity {'));
+ for(const declaration of ['height: 100dvh','max-height: 100dvh','overflow-y: auto','overscroll-behavior-y: contain','-webkit-overflow-scrolling: touch','touch-action: pan-y','safe-area-inset-bottom']) {
+  assert.ok(sidebar.includes(declaration),declaration);
+ }
+ assert.ok(css.includes('.sidebar-close {'));
+ assert.ok(css.includes('flex-shrink: 0;'));
+ assert.ok(app.includes('className="sidebar-close"'));
+ assert.ok(app.includes('document.body.style.overflow'));
+ assert.ok(app.includes('aria-expanded={menu}'));
+});
