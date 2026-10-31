@@ -190,7 +190,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     }catch(e){setConnection('error');showError(e)}
     finally{setBusy('')}
   };
-  const testOnePhoto=async()=>{
+  const testOnePhoto=async(variation='')=>{
     if(!sourceId)return notify('Primero selecciona una foto original.');
     if(!library.some(a=>a.id===sourceId))return notify('Esta foto está guardada en otra marca. Vuelve a subirla desde '+brand.name+'.');
     if(!await askCredits('photo',1,'Generar una foto de prueba'))return;
@@ -198,7 +198,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     try{
       const {data}=await api.post('/api/ai-image',{
         brandId:brand.id,assetId:sourceId,referenceId,mode:'variation',creativeSettings,
-        prompt:brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.'
+        prompt:(brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.')+(variation?' ADDITIONAL CHANGE FOR THIS NEW GENERATION: '+variation:'')
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
       const src='data:'+data.mime+';base64,'+data.content;
@@ -372,11 +372,23 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           </button>
           {connection==='ready'&&<p className="bg-connection-ok">✓ Cuenta y token de Cloudflare conectados. Puedes probar una foto.</p>}
           {connection==='error'&&<p className="bg-connection-error">Cloudflare no respondió. Revisa los permisos del token en Supabase.</p>}</>}
-          <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading} onClick={testOnePhoto}>
+          <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading} onClick={()=>testOnePhoto()}>
             {busy==='test-photo'?<LoaderCircle size={17} className="spin"/>:<ImagePlus size={17}/>}
             {busy==='test-photo'?'Generando una foto…':'Generar 1 foto · 1 crédito IA'}
           </button>
-          {testPhoto&&<div className="bg-test-result"><img src={testPhoto} alt="Foto real generada por Cloudflare"/><button className="btn ghost" onClick={downloadTest}><Download size={16}/> Descargar PNG</button><small>También guardada en tu biblioteca privada.</small></div>}
+          {testPhoto&&<div className="bg-test-result">
+           <img src={testPhoto} alt="Foto generada con Cloudflare"/>
+           <div className="bg-photo-variations"><strong>Otra versión desde la foto original · 1 crédito por resultado</strong>
+             <div>
+               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('More candid natural light, less staged, authentic textures and subtle imperfections.')}>Más natural</button>
+               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Premium editorial art direction, refined lighting and tactile materials without plastic shine.')}>Más editorial</button>
+               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Different camera viewpoint, credible wide composition, no duplicate objects.')}>Otro ángulo</button>
+               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Change ONLY the environmental setting and lighting, keep recognizable product identity.')}>Otro fondo</button>
+             </div><small>Estas acciones crean otra imagen usando tu fotografía de referencia; no retocan píxeles de la foto generada.</small>
+           </div>
+           <button className="btn ghost" onClick={downloadTest}><Download size={16}/> Descargar PNG</button>
+           <small>También guardada en tu biblioteca privada.</small>
+          </div>}
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div>
