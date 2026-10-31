@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
-import { clampRect, clampPanoramaRect } from './TouchGeometry';
+import { clampRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2 } from 'lucide-react';
 import { panoramaFont,type PanoramaLayer } from './PanoramaLayers';
@@ -238,12 +238,16 @@ export default function TouchLayerCanvas({
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*1350;
           const metrics=photoFrameMetrics(fw,fh,mode);
-          const radius=(r:number,w:number,h:number)=>`${100*r/w}% / ${100*r/h}%`;
+          const radius=(r:number,w:number,h:number)=>`${100*r/Math.max(1,w)}% / ${100*r/Math.max(1,h)}%`;
+          const outerRadius=layerCornerPixels(rect,fw,fh,100*metrics.radius/Math.max(1,Math.min(fw,fh)));
+          const innerRadius=rect.cornerRadius===undefined?metrics.innerRadius:Math.max(0,outerRadius-metrics.inset*.38);
           const photoWindow:React.CSSProperties=layer.kind==='photo'?{
             left:100*metrics.inset/fw+'%',right:100*metrics.inset/fw+'%',
             top:100*metrics.inset/fh+'%',bottom:100*metrics.bottom/fh+'%',
-            borderRadius:radius(metrics.innerRadius,fw-2*metrics.inset,fh-metrics.inset-metrics.bottom),
-          }:{};
+            borderRadius:radius(innerRadius,fw-2*metrics.inset,fh-metrics.inset-metrics.bottom),
+          }:{
+            borderRadius:radius(layerCornerPixels(rect,fw,fh),fw,fh),
+          };
           return <div key={layer.id} data-layer={layer.id}
             className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
@@ -261,7 +265,7 @@ export default function TouchLayerCanvas({
               update(layer.id, rect); onCommit(layer.kind, layer.id, rect);
             }}>
             {layer.kind==='photo'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
-              style={{borderRadius:radius(metrics.radius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
+              style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={photoWindow}>
               <img src={layer.src} alt="" draggable={false} style={layer.kind === 'photo' ? {
@@ -280,9 +284,10 @@ export default function TouchLayerCanvas({
             }}>{layer.text||''}</div>}
             {layer.kind==='shape'&&<div className={'touch-editor-collage-shape shape-'+(layer.shape||'paper')}
               style={{background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
-                borderColor:layer.color||'#F1E5D2'}}/>}
+                borderColor:layer.color||'#F1E5D2',
+                borderRadius:layer.shape==='circle'?'50%':radius(layerCornerPixels(rect,fw,fh),fw,fh)}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
-              style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(metrics.radius,fw,fh)}}/>}
+              style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
             {active && <><span className="touch-editor-outline"/>
               {!cropping && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
           </div>;
@@ -303,6 +308,25 @@ export default function TouchLayerCanvas({
       : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
+      {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
+        <div className="touch-editor-corner-controls">
+          <label htmlFor="corner-radius-control">Redondear esquinas <output>{Math.round(selectedRect.cornerRadius??(
+             chosen.kind==='photo' ? (chosen.frameStyle==='none'?0:
+               chosen.frameStyle==='panorama'||!chosen.frameStyle?6:5) : 0
+          ))}%</output></label>
+          <input id="corner-radius-control" type="range" min="0" max="50" step="1"
+            aria-label="Redondear esquinas del elemento" value={selectedRect.cornerRadius??(
+             chosen.kind==='photo' ? (chosen.frameStyle==='none'?0:
+               chosen.frameStyle==='panorama'||!chosen.frameStyle?6:5) : 0
+            )}
+            onChange={e=>commit({cornerRadius:Number(e.target.value)})}/>
+          <div className="touch-editor-corner-presets">
+            <button type="button" onClick={()=>commit({cornerRadius:0})}>Rectas</button>
+            <button type="button" onClick={()=>commit({cornerRadius:12})}>Suaves</button>
+            <button type="button" onClick={()=>commit({cornerRadius:28})}>Redondas</button>
+            <button type="button" onClick={()=>commit({cornerRadius:50})}>Máximo</button>
+          </div>
+        </div>}
       {chosen.kind==='text'&&onUpdate&&<div className="touch-editor-type-settings">
         <label>Texto<textarea rows={2} aria-label="Editar texto libre" value={chosen.text||''}
           onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
