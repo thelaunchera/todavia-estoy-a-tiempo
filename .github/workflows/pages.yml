@@ -128,6 +128,13 @@ jobs:
           test -s _podcast_pages/centro/index.html
           test -s _podcast_pages/centro/centro.js
           test -s _podcast_pages/centro/centro.css
+          test -s _podcast_pages/centro/terminos.html
+          test -s _podcast_pages/centro/privacidad.html
+          test -s _podcast_pages/centro/reembolsos.html
+          test -s _podcast_pages/centro/cancelaciones.html
+          test -s _podcast_pages/centro/cookies.html
+          test -s _podcast_pages/centro/contacto.html
+          test -s _podcast_pages/centro/legales.css
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
           test -s _podcast_pages/alumnos/comunidad.html
