@@ -3,11 +3,12 @@ import {unzipSync} from 'fflate';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {BACKGROUND_CATEGORIES,belongsToBackgroundCategory,type BackgroundCategory} from './BackgroundCategories';
 import BackgroundThumbnail from './BackgroundThumbnail';
+import {isBackgroundVisible} from './BackgroundVisibility';
 import {ArrowRight,Download,Search,Upload,Trash2} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
-type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;isAdmin?:boolean};
+type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;onDeletePreset:(id:FreeBackgroundId,name:string)=>Promise<void>;isAdmin?:boolean};
 type GalleryFilter=BackgroundCategory|'mine'|'shared';
 function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
  const target=useRef<HTMLSpanElement>(null);
@@ -24,7 +25,7 @@ function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;load
    {src?<img loading="lazy" src={src} alt={'Fondo '+displayAssetName(asset)}/>:<span className="background-shared-loading"/>}
  </span>;
 }
-export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,onDelete,isAdmin=false}:Props){
+export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,onDelete,onDeletePreset,isAdmin=false}:Props){
  const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[zipError,setZipError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
@@ -90,7 +91,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    }finally{setBusy(false);if(bulkFileRef.current)bulkFileRef.current.value=''}
  };
  const backgrounds=FREE_BACKGROUNDS.filter(item=>
-  filter!=='mine'&&filter!=='shared'&&belongsToBackgroundCategory(item.id,filter)&&
+  isBackgroundVisible(item.id)&&filter!=='mine'&&filter!=='shared'&&belongsToBackgroundCategory(item.id,filter)&&
   (item.name+' '+item.description).toLowerCase().includes(search.toLowerCase().trim()));
  const sections=BACKGROUND_CATEGORIES.map(group=>({
    ...group,
@@ -120,7 +121,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   <div className="background-library-filters" role="group" aria-label="Colecciones de fondos">
    <div className="background-collection-chips">
     {categoryButtons.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{group.id==='mine'?own.length:group.id==='shared'?shared.length:
-       FREE_BACKGROUNDS.filter(item=>belongsToBackgroundCategory(item.id,group.id as BackgroundCategory)).length+
+       FREE_BACKGROUNDS.filter(item=>isBackgroundVisible(item.id)&&belongsToBackgroundCategory(item.id,group.id as BackgroundCategory)).length+
        shared.filter(item=>group.id==='all'||item.backgroundGroup===group.label).length}</span></button>)}
    </div>
    <label><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fondo…" aria-label="Buscar fondos"/></label>
@@ -138,6 +139,9 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
        <div className="background-card-actions">
         <button className="background-use-button" type="button" onClick={()=>onDesign(b.id)}>Usar fondo <ArrowRight size={14}/></button>
         <button className="background-download-button" type="button" aria-label={'Descargar '+b.name+' en PNG'} onClick={()=>download(b.id)} title="Descargar PNG individual"><Download size={16}/></button>
+        {isAdmin&&<button className="background-delete-button" type="button"
+          aria-label={'Eliminar fondo '+b.name} onClick={()=>void onDeletePreset(b.id,b.name)}>
+          <Trash2 size={15}/> Eliminar</button>}
        </div>
       </article>)}
       {group.sharedItems.map(asset=><article key={asset.id}>
