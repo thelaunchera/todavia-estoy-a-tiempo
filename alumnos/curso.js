@@ -271,6 +271,7 @@ function choose(i){
  $('lesson-done').checked=done.has(item.lesson_code);
  $('lesson-done').closest('label').hidden=adminPreview;
  $('lesson-info').hidden=false;
+ $('lesson-prev').disabled=i<=0;
  $('lesson-next').disabled=i>=lessons.length-1;
  document.querySelectorAll('.lesson-index button[data-index]').forEach(button=>{
   button.classList.toggle('current',Number(button.dataset.index)===i);
@@ -287,7 +288,10 @@ function lessonsUI(){
   escapedText(button,'span',item.title,'index-title');
   button.addEventListener('click',()=>choose(i));group.appendChild(button);
  });
- setProgress();choose(0);
+ setProgress();
+ // Continuar en la primera lección pendiente; si terminó todo, mostrar la última.
+ const nextIndex=adminPreview?0:lessons.findIndex(item=>!done.has(item.lesson_code));
+ choose(nextIndex<0?lessons.length-1:nextIndex);
 }
 async function showCourse(email,asAdmin=false){
  adminPreview=asAdmin;
@@ -438,6 +442,7 @@ $('lesson-done').addEventListener('change',async e=>{
  }catch{box.checked=!box.checked;status('No pudimos guardar tu avance. Vuelve a intentarlo.');}
  finally{box.disabled=false;}
 });
+$('lesson-prev').addEventListener('click',()=>choose(Math.max(0,selected-1)));
 $('lesson-next').addEventListener('click',()=>choose(Math.min(selected+1,lessons.length-1)));
 $('lesson-celebration-close').addEventListener('click',()=>$('lesson-celebration').hidden=true);
 document.addEventListener('visibilitychange',()=>{

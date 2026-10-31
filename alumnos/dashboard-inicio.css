@@ -84,3 +84,22 @@ body.aula-member .admin-preview-banner a{padding:10px 14px;font-size:11px}
 .dashboard-setup-details li+li{margin-top:7px}
 .dashboard-setup-details a{color:#224f70;text-decoration:underline;text-underline-offset:2px}
 @media(max-width:760px){.aula-home-dashboard .dashboard-setup{grid-template-columns:1fr}}
+
+
+/* La acción siguiente aparece antes de la preparación técnica; esta se abre si hace falta. */
+.aula-home-dashboard .dashboard-setup{margin:17px 0 0;align-items:center;background:#f8f7f3;box-shadow:none}
+.aula-home-dashboard .dashboard-setup-heading>p:last-child{max-width:390px}
+.aula-home-dashboard .dashboard-setup-details{display:block;min-width:0;border:1px solid #d5e1e4;background:#fffefa;border-radius:13px;padding:0;overflow:hidden}
+.aula-home-dashboard .dashboard-setup-details summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:64px;list-style:none;cursor:pointer;padding:17px 19px;font-size:13px;font-weight:750;line-height:1.4;color:#234b65}
+.aula-home-dashboard .dashboard-setup-details summary::-webkit-details-marker{display:none}
+.aula-home-dashboard .dashboard-setup-details summary:focus-visible{outline:3px solid #89b2cc;outline-offset:-3px}
+.aula-home-dashboard .dashboard-setup-expand{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;font-size:20px;font-weight:400;line-height:1;border:1px solid #d9e3e8;border-radius:50%;color:#3a6882}
+.aula-home-dashboard .dashboard-setup-details[open] .dashboard-setup-expand{transform:rotate(45deg)}
+.aula-home-dashboard .dashboard-setup-expanded{padding:19px;border-top:1px solid #e0e8e9}
+.aula-home-dashboard .dashboard-setup-expanded strong{display:block;font-size:14px;margin-bottom:9px;color:#274960}
+.aula-home-dashboard .dashboard-setup-expanded p,.aula-home-dashboard .dashboard-setup-expanded ol{font-size:12px;line-height:1.7;color:#536d7d}
+.aula-home-dashboard .dashboard-setup-expanded p{margin:0}
+.aula-home-dashboard .dashboard-setup-expanded ol{margin:13px 0 0;padding-left:19px}
+.aula-home-dashboard .dashboard-setup-expanded li+li{margin-top:8px}
+.aula-home-dashboard .dashboard-setup-expanded a{color:#265b7b;text-underline-offset:3px}
+@media(max-width:760px){.aula-home-dashboard .dashboard-setup{gap:13px;padding:20px 18px}.aula-home-dashboard .dashboard-setup-heading .dashboard-overline{margin-bottom:7px}}

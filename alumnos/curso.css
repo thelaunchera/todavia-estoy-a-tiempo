@@ -426,3 +426,15 @@ body.aula-member .aula-entry{display:none!important}
   .aula-entry .aula-auth-card{margin-top:23px}
 }
 @media(prefers-reduced-motion:reduce){.aula-entry-art *{animation:none!important;transition:none!important}}
+
+
+/* Aula de alumnos · paso a paso, sin perder el contexto de la lección. */
+.lesson-stage .lesson-guidance{margin:18px 0 12px;padding:12px 15px;border-left:3px solid #87a9bb;border-radius:7px;background:#edf3f5;color:#3e6175;font:500 13px/1.65 'DM Sans',Arial,sans-serif}
+.lesson-navigation{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:13px}
+.lesson-navigation #lesson-prev,.lesson-navigation #lesson-next{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin:0;padding:11px 19px;border-radius:12px;font:750 12px 'DM Sans',Arial,sans-serif}
+.lesson-navigation #lesson-prev{background:#fff;border:1px solid #cbdbe3;color:#244f68}
+.lesson-navigation #lesson-next{background:#1d415f;border:1px solid #1d415f;color:white}
+.lesson-navigation #lesson-prev:disabled,.lesson-navigation #lesson-next:disabled{opacity:.45;cursor:not-allowed}
+.lesson-stage .lesson-resources{margin:12px 0 0;background:transparent;border:0;border-bottom:1px solid #8eafc3;border-radius:0;color:#315b74;font:750 12px 'DM Sans',Arial,sans-serif;padding:7px 0;cursor:pointer}
+.lesson-stage .lesson-resources:hover{color:#183d59}
+@media(max-width:540px){.lesson-navigation{display:grid;grid-template-columns:1fr 1.25fr}.lesson-navigation #lesson-prev,.lesson-navigation #lesson-next{min-width:0;padding:12px 9px}.lesson-stage .lesson-guidance{font-size:12px}}
