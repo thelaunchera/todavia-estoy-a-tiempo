@@ -65,3 +65,14 @@
 .cover-layout-chooser .template-grid{padding:0 13px 14px;border-top:1px solid #e5efef;padding-top:14px}
 .cover-studio>.btn.blue.wide{min-height:48px;display:flex;justify-content:center;gap:9px;border-radius:13px}
 @media(prefers-reduced-motion:reduce){.cover-layout-change{transition:none}}
+
+
+/* Compact content creation: one natural AI request, manual fields only on demand. */
+.lab-manual-panel[hidden]{display:none!important}
+.lab-angle-advanced{min-width:0;padding:7px 0;font-size:12px}
+.lab-angle-advanced summary{cursor:pointer;color:#3c6171;font-weight:650;line-height:1.5}
+.lab-angle-advanced label{margin-top:10px}
+.lab-ai-message{font-size:12px;line-height:1.5;color:#637b82;margin:8px 0 14px}
+.lab-save-panel{align-self:stretch}
+.cover-studio-heading small{display:inline-block;color:#6c8490;font-weight:650}
+@media(max-width:640px){.lab-save-panel{padding:15px!important}.lab-ai-message{font-size:11px}}
