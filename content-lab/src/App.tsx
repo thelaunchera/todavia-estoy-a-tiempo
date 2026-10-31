@@ -15,6 +15,7 @@ import MediaLibrary from './MediaLibrary';
 import StickerDownloads from './StickerDownloads';
 import BackgroundLibrary from './BackgroundLibrary';
 import type {FreeBackgroundId} from './FreeDesignAssets';
+import {updateHiddenBackgrounds} from './BackgroundVisibility';
 import './ContentLabMotion.css';
 import FormatGallery from './FormatGallery';
 import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
@@ -449,6 +450,7 @@ function App() {
     setBrands(data.brands || []);
     setPosts(data.posts || []);
     setAssets(data.assets || []);
+    updateHiddenBackgrounds(data.hiddenBackgroundIds||[]);
     setCurrent(old =>
       data.brands.some((b: Brand) => b.id === old)
         ? old
@@ -661,8 +663,22 @@ function App() {
       await api.delete(endpoint);
       const {data}=await api.get('/api/data');
       setAssets(data.assets||[]);
+      updateHiddenBackgrounds(data.hiddenBackgroundIds||[]);
       setImages(old=>{const next={...old};delete next[asset.id];return next});
       toast((category==='sticker'?'Sticker':'Fondo')+' eliminado ✓');
+    }catch(e){err(e)}
+    finally{setBusy('')}
+  };
+  const deleteIncludedBackground=async(id:FreeBackgroundId,name:string)=>{
+    if(!aiWallet?.admin)return err(Error('Solo la administradora puede eliminar fondos incluidos.'));
+    if(!window.confirm('¿Quitar el fondo «'+name+'» del catálogo de todos los alumnos?\n\nLos diseños que ya lo usan no se borrarán.'))return;
+    try{
+      setBusy('delete-preset');
+      await api.post('/api/hidden-backgrounds',{id});
+      const {data}=await api.get('/api/data');
+      updateHiddenBackgrounds(data.hiddenBackgroundIds||[]);
+      setAssets(data.assets||[]);
+      toast('Fondo quitado del catálogo ✓');
     }catch(e){err(e)}
     finally{setBusy('')}
   };
@@ -1533,6 +1549,7 @@ function App() {
   assets={library} images={images} loadImage={imageLoad}
   onUpload={async(file,category)=>aiWallet?.admin?publishSharedBackground(file,category):upload(file,'background')}
   onDelete={deleteLibraryAsset}
+  onDeletePreset={deleteIncludedBackground}
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
