@@ -68,7 +68,7 @@ type Post = {
   designData?: string;
 };
 type Asset = { id: string; brandId: string; name: string; mime: string };
-type Tab = 'home' | 'create' | 'factory' | 'grid' | 'posts' | 'media' | 'formats' | 'brands';
+type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands';
 const angles = [
   'Pain point',
   'Educational',
@@ -84,6 +84,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Create content', icon: WandSparkles },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
+  { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
   { id: 'media', title: 'Media library', icon: Images },
   { id: 'formats', title: 'Creative formats', icon: Layers3 },
@@ -584,6 +585,7 @@ function App() {
             >
               Enviar enlace de acceso <ArrowRight size={18} />
             </button>
+            <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>Abrir los 8 Master Prompts</a>
             <small>
               <ShieldCheck size={16} /> Protected personal access
             </small>
@@ -871,6 +873,14 @@ function App() {
                 </div>
               )}
             </>
+          )}
+          {brand && tab === 'prompts' && (
+            <section className="panel">
+              <div className="eyebrow">SAVED MASTER PROMPTS</div>
+              <h2>One Product → 8 Compositions</h2>
+              <p>Ocho composiciones publicitarias del mismo producto, una imagen por resultado.</p>
+              <a className="btn dark" href="./prompts/" target="_blank" rel="noreferrer">Abrir biblioteca de prompts</a>
+            </section>
           )}
           {brand && tab === 'grid' && (
             <BrandGrid

@@ -92,6 +92,16 @@ jobs:
           npm run test:editorial-plan
           npm run test:classes
           npm run build
+      - name: Compilar Content Lab en GitHub
+        env:
+          VITE_CONTENT_LAB_SUPABASE_URL: ${{ vars.VITE_CONTENT_LAB_SUPABASE_URL }}
+          VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          cd content-lab
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+          test -s dist/prompts/index.html
       - name: Verificar iconos propios del Studio para iPhone y Android
         run: |
           test -s estudio-control/dist/icons/studio-blue-192.png
@@ -104,9 +114,13 @@ jobs:
           cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
+          mkdir -p _podcast_pages/content-lab
+          cp -R content-lab/dist/. _podcast_pages/content-lab/
       - name: Verificar que se publican landing y Estudio
         run: |
           test -s _podcast_pages/index.html
+          test -s _podcast_pages/content-lab/index.html
+          test -s _podcast_pages/content-lab/prompts/index.html
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
           test -s _podcast_pages/clases/primera-landing.html
