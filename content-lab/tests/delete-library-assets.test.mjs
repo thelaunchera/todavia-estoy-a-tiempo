@@ -32,3 +32,20 @@ test('Backend deletion validates administrator in DB and cleans actual Storage o
  assert.ok(api.includes("tab('assets')"));
  assert.ok(api.includes("if(admin&&asset.category==='background')"));
 });
+
+test('Admin can delete included backgrounds with server-persisted curation and editors hide choices',()=>{
+ const app=read('src/App.tsx'),lib=read('src/BackgroundLibrary.tsx'),
+  editor=read('src/FreeDecorControls.tsx'),factory=read('src/CarouselFactory.tsx'),
+  api=read('src/platform/client.ts'),sql=read('supabase/migrations/20261031_admin_hidden_builtin_backgrounds.sql');
+ assert.ok(lib.includes('onDeletePreset(b.id,b.name)'));
+ assert.ok(lib.includes('isBackgroundVisible(item.id)'));
+ assert.ok(app.includes("await api.post('/api/hidden-backgrounds',{id})"));
+ assert.ok(app.includes('updateHiddenBackgrounds(data.hiddenBackgroundIds||[])'));
+ assert.ok(api.includes("const {data:admin,error:authError}=await tab('admins')"));
+ assert.ok(api.includes("hidden_backgrounds"));
+ assert.ok(api.includes("FREE_BACKGROUNDS.some(x=>x.id===id)"));
+ assert.ok(editor.includes("isBackgroundVisible(b.id)"));
+ assert.ok(factory.includes("isBackgroundVisible(b.id)"));
+ assert.ok(sql.includes("lab admin hide built in backgrounds"));
+ assert.ok(sql.includes("content_lab_memberships"));
+});
