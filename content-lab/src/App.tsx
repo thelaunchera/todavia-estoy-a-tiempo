@@ -11,6 +11,7 @@ import CarouselFactory from './CarouselFactory';
 import MediaLibrary from './MediaLibrary';
 import StickerDownloads from './StickerDownloads';
 import BackgroundLibrary from './BackgroundLibrary';
+import type {FreeBackgroundId} from './FreeDesignAssets';
 import './ContentLabMotion.css';
 import FormatGallery from './FormatGallery';
 import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
@@ -358,6 +359,7 @@ function App() {
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
   const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string}>({version:0});
+  const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
   const toast = (s: string) => {
     setNotice(s);
@@ -1072,6 +1074,7 @@ function App() {
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
+              initialBackground={backgroundPref.brandId===brand.id?backgroundPref:undefined}
               brand={brand}
               post={editor}
               assets={library}
@@ -1406,7 +1409,7 @@ function App() {
             </>
           )}
           {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad}/>}
-          {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={()=>navigate('factory')}/>}
+          {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={(id)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
                onUpload={async(file,category)=>upload(file,category)}
