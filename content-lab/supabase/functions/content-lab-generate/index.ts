@@ -22,6 +22,27 @@ const ensureFreeProvider=()=>{
 };
 const endpoint=(model:string)=>'https://api.cloudflare.com/client/v4/accounts/'+encodeURIComponent(accountId)+'/ai/run/'+model;
 const extractError=(body:any)=>String(body?.errors?.[0]?.message||body?.error||'Respuesta no disponible').slice(0,270);
+async function verifyCloudflareToken(){
+ ensureFreeProvider();
+ // Cloudflare supports both account-owned and user-owned tokens; try both.
+ // This check never returns the token, Account ID or token UUID to the browser.
+ const auth={'Authorization':'Bearer '+token};
+ const urls=[
+  'https://api.cloudflare.com/client/v4/accounts/'+encodeURIComponent(accountId)+'/tokens/verify',
+  'https://api.cloudflare.com/client/v4/user/tokens/verify'
+ ];
+ for(const url of urls){
+  let response:Response;
+  try{response=await fetch(url,{method:'GET',headers:auth});}
+  catch{throw Error('No se puede conectar con Cloudflare para verificar el token.');}
+  let data:any=null;
+  try{data=await response.json();}catch{/* Continue to the next verification endpoint. */}
+  if(response.ok&&data?.success&&data?.result?.status==='active')return;
+  if(response.ok&&data?.success&&['expired','disabled'].includes(data?.result?.status))
+   throw Error('El API Token de Cloudflare está vencido o desactivado. Crea uno nuevo en Workers AI → Use REST API y guárdalo en Supabase.');
+ }
+ throw Error('Cloudflare no puede validar ese API Token. Comprueba que copiaste un token de Workers AI (no Global API Key), que está activo y que pertenece al Account ID seleccionado.');
+}
 async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false){
  ensureFreeProvider();
  const headers:Record<string,string>={'Authorization':'Bearer '+token};
@@ -52,8 +73,10 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
   // Never return a raw request URL with an Account ID to the browser.
   if(body?.errors?.some?.((e:any)=>e.code===7003)||/could not route|object identifier is invalid/i.test(cloudflareError))
     throw Error('Cloudflare no reconoce el Account ID o el token no pertenece a esa cuenta. Copia el Account ID completo en Cloudflare → Workers & Pages → Account Details y revisa el secreto CLOUDFLARE_ACCOUNT_ID en Supabase.');
-  if(response.status===401||response.status===403)
-    throw Error('Cloudflare rechazó el API Token. Verifica que sea un token de Workers AI con acceso a la misma cuenta del Account ID.');
+  if(response.status===401)
+    throw Error('Cloudflare devolvió 401: el API Token es inválido o no está activo para esta cuenta. Crea uno en Workers AI → Use REST API y guárdalo en Supabase con el nombre CLOUDFLARE_API_TOKEN.');
+  if(response.status===403)
+    throw Error('Cloudflare devolvió 403: el token no puede ejecutar Workers AI para esta cuenta. Asegúrate de seleccionar Account → Workers AI → Read y Edit en el token y la misma cuenta del Account ID.');
   throw Error('Cloudflare Workers AI: '+cloudflareError.replace(/\/client\/v4\/accounts\/[^/\s]+/g,'/client/v4/accounts/[oculto]'));
  }
  if(photo){
@@ -121,7 +144,7 @@ Deno.serve(async request=>{
   };
   if(action==='connection-test'){
    // Owner-only, minimal free-text inference confirms token and account without generating an image.
-   ensureFreeProvider();
+   await verifyCloudflareToken();
    const proof=await cloudflareRequest('Return ONLY JSON {"ready":true}.',[],false);
    if(!proof||proof.ready!==true)throw Error('Cloudflare respondió, pero no devolvió el diagnóstico esperado. Comprueba los permisos del token.');
    return send({ok:true,provider:'Cloudflare Workers AI',message:'Texto verificado; prueba una foto para confirmar el modelo de imágenes.'});
