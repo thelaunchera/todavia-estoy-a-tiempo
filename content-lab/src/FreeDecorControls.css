@@ -11,3 +11,8 @@
 .free-decor-loading{display:block;width:58px;height:57px;border-radius:13px;background:linear-gradient(110deg,#edf4f5 8%,#f9fbfb 20%,#edf4f5 34%);background-size:210% 100%;animation:free-sticker-skeleton 1.8s ease-in-out infinite}
 @keyframes free-sticker-skeleton{to{background-position-x:-190%}}
 @media(prefers-reduced-motion:reduce){.free-decor-loading{animation:none}}
+
+.free-decor-upload{display:flex;gap:12px;align-items:center;justify-content:space-between;background:#edf6f6;border-radius:13px;padding:10px 12px;margin-bottom:12px}
+.free-decor-upload strong{color:#395965;font-size:12px}
+.free-decor-upload button{padding:10px 12px;border-radius:10px;background:#2b535f;color:white;border:0;font-size:11px;font-weight:700}
+.free-decor-swatch.custom{background-position:center;background-size:cover;background-repeat:no-repeat}
