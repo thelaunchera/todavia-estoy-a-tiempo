@@ -84,10 +84,10 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     }));
     return [...basics,...extras].filter(x=>!x.hidden);
   },[entries]);
-  const shown=links.filter(x=>(category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
+  const shown=links.filter(x=>(!readOnly || shareable(x.visibility)) && (category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
   async function copy(text:string,key:string){
-    try{await navigator.clipboard.writeText(text);setCopied(key);setNotice('Enlace copiado al portapapeles.');}
-    catch{setIssue('No se pudo copiar automáticamente. Mantén pulsado el enlace para copiarlo.');}
+    try{await navigator.clipboard.writeText(text);setCopied(key);setIssue('');setNotice('Enlace copiado al portapapeles.');}
+    catch{setNotice('');setIssue('No se pudo copiar automáticamente. Mantén pulsado el enlace para copiarlo.');}
   }
   async function copyCategory(){
     const allowed=shown.filter(x=>shareable(x.visibility));
@@ -130,7 +130,7 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     <div className="lc-hero">
       <div><span className="lc-kicker"><Link2 size={15}/> TU BIBLIOTECA DE ENLACES</span>
         <h2>Todo en un lugar. <em>Listo para compartir.</em></h2>
-        <p>Encuentra el enlace correcto sin buscar entre mensajes. Los enlaces privados y pendientes de revisión no se incluyen al copiar una categoría.</p>
+        <p>{readOnly ? 'Modo grabación: solo se muestran enlaces públicos y demos. Los accesos privados están ocultos.' : 'Encuentra el enlace correcto sin buscar entre mensajes. Los enlaces privados y pendientes de revisión no se incluyen al copiar una categoría.'}</p>
       </div>
       {!readOnly&&<button className="lc-primary" onClick={()=>{setEditor({...blank,isNew:true});setIssue('');}}><Plus size={17}/> Añadir enlace</button>}
     </div>
