@@ -9,7 +9,8 @@ import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
-import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintFreeBackground,paintFreeStickers,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
+import {drawSeamlessPages} from './SeamlessCarousel';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -222,6 +223,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(part.description.length>260)result.push('Slide '+(n+1)+': texto secundario demasiado largo.');
     return result;
   });
+  const renderAllSlides=async()=>style.seamlessEnabled
+    ?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color})
+    :Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);setOverview([]);
@@ -230,8 +234,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setOverviewBusy(true);setOverview([]);
     try{
       const previews:string[]=[];
-      for(let n=0;n<slides.length;n++){
-        const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
+      const all=await renderAllSlides();
+      for(let n=0;n<all.length;n++){
+        const canvas=all[n];
         const small=document.createElement('canvas');small.width=270;small.height=338;
         const context=small.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
         context.drawImage(canvas,0,0,270,338);
@@ -271,10 +276,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   useEffect(()=>{
     slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);});
     if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
-  },[post.designData,brand.id,style.referenceAssetId]);
+    if(style.seamlessAssetId&&!images[style.seamlessAssetId])loadImage(style.seamlessAssetId);
+  },[post.designData,brand.id,style.referenceAssetId,style.seamlessAssetId]);
   useEffect(()=>{
     let active=true;
-    drawSlide(slide,i,slides.length,brand,images,style).then(c=>{
+    (style.seamlessEnabled?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:brand.color}).then(all=>all[i]):drawSlide(slide,i,slides.length,brand,images,style)).then(c=>{
       if(active)setPreview(c.toDataURL('image/png'));
     }).catch(showError);
     return()=>{active=false;};
@@ -310,7 +316,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const exportOne=async(n=i)=>{
     setBusy('export');
     try{
-      const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
+      const canvas=style.seamlessEnabled?(await renderAllSlides())[n]:await drawSlide(slides[n],n,slides.length,brand,images,style);
       const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=filename(post,n);a.click();
       notify('Slide '+(n+1)+' descargado como PNG individual.');
     }catch(e){showError(e)}finally{setBusy('');}
@@ -319,8 +325,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setBusy('all');
     try{
       const result:{name:string,url:string}[]=[];
-      for(let n=0;n<slides.length;n++){
-        const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
+      const all=await renderAllSlides();
+      for(let n=0;n<all.length;n++){
+        const canvas=all[n];
         result.push({name:filename(post,n),url:canvas.toDataURL('image/png')});
       }
       setDownloads(result);
@@ -374,6 +381,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" className="btn ghost" onClick={applyRhythm}><Layers3 size={15}/> Aplicar composición coordinada</button>
       </div>
       {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
+    </section>
+    <section className="seamless-config">
+      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL · GRATIS</span><h2>Un diseño continuo, cortado en slides.</h2><p>Se crea una composición panorámica completa y se divide exactamente en PNG de 1080 × 1350, sin espacios entre uno y otro.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
+      {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{FREE_BACKGROUNDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
+        <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+        <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
+      </div>}
     </section>
     <div className="factory-work">
       <div className="factory-edit">
