@@ -169,7 +169,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     }
     return true;
   };
-  const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title||'Your idea here',x,y,w,size,maxLines,color,heading);
+  const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title,x,y,w,size,maxLines,color,heading);
   const body=(x:number,y:number,w:number,color=ink,maxLines=3)=>{
     if(slide.description)fillLines(ctx,slide.description,x,y,w,41,maxLines,color,bodyFont);
   };
@@ -183,27 +183,27 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   }else if(slide.backgroundId&&slide.backgroundId!=='brand')paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
   else rect(0,0,1080,1350,paper);
   if(slide.layout==='cover') {
-    label(slide.eyebrow||defaultLabel(brand),74,138,ink);rect(74,170,126,8,accent);
+    slide.eyebrow&&label(slide.eyebrow,74,138,ink);rect(74,170,126,8,accent);
     title(74,348,920,106,5);
-    if(!slide.photoPosition)rect(635,735,398,445,accent);
+    if(slide.assetId&&!slide.photoPosition)rect(635,735,398,445,accent);
     const shown=await photo(635,735,398,445);
-    if(!shown){rect(650,751,368,415,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.beginPath();ctx.arc(835,958,129,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.moveTo(706,957);ctx.lineTo(706,1114);ctx.stroke();}
+    if(!shown&&slide.assetId){rect(650,751,368,415,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.beginPath();ctx.arc(835,958,129,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.moveTo(706,957);ctx.lineTo(706,1114);ctx.stroke();}
     body(74,1060,490,ink,3);footer();
   } else if(slide.layout==='statement') {
     if(!decorated)rect(0,0,1080,1350,accent);
     const statementInk=decorated?(slide.backgroundId==='night-editorial'?'#FFFFFF':'#191919'):onAccent;
     ctx.strokeStyle=statementInk;ctx.lineWidth=3;ctx.strokeRect(68,69,944,1212);
-    label(slide.eyebrow||defaultLabel(brand),116,150,statementInk);
+    slide.eyebrow&&label(slide.eyebrow,116,150,statementInk);
     title(116,428,850,108,6,statementInk);
     body(116,1040,825,statementInk,3);footer(statementInk);
   } else if(slide.layout==='photo') {
     if(!decorated)rect(0,0,1080,730,accent);const shown=await photo(0,0,1080,730);
-    if(!shown){rect(0,0,1080,730,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.strokeRect(90,95,900,550);}
-    label(slide.eyebrow||defaultLabel(brand),75,832,ink);
+    if(!shown&&slide.assetId){rect(0,0,1080,730,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.strokeRect(90,95,900,550);}
+    slide.eyebrow&&label(slide.eyebrow,75,832,ink);
     title(75,952,925,80,3);
     body(75,1155,900,ink,2);footer();
   } else if(slide.layout==='steps') {
-    label(slide.eyebrow||defaultLabel(brand),74,135,ink);
+    slide.eyebrow&&label(slide.eyebrow,74,135,ink);
     title(74,275,930,78,3);
     rect(74,535,932,4,accent);
     const points=slide.description.split(/\n|•/).map(s=>s.trim()).filter(Boolean).slice(0,3);
@@ -219,13 +219,13 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     footer();
   } else if(slide.layout==='split') {
     rect(0,0,530,1350,accent);const shown=await photo(530,0,550,1350);
-    if(!shown)rect(590,240,410,865,paper);
-    label(slide.eyebrow||defaultLabel(brand),60,147,onAccent);
+    if(!shown&&slide.assetId)rect(590,240,410,865,paper);
+    slide.eyebrow&&label(slide.eyebrow,60,147,onAccent);
     title(60,340,430,78,8,onAccent);
     body(60,1110,430,onAccent,3);footer(onAccent);
   } else {
     if(!decorated){rect(0,0,1080,1350,accent);rect(73,75,934,1200,paper);}
-    label(slide.eyebrow||'ONE LAST THING',116,174,ink);
+    slide.eyebrow&&label(slide.eyebrow,116,174,ink);
     title(116,450,843,99,6);
     body(116,1040,840,ink,3);rect(116,1151,175,10,accent);
     label(footerName,116,1225,ink,22);
@@ -397,6 +397,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   ]);
   const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
     .filter(layer=>images[layer.assetId]).map(layer=>({...layer,src:images[layer.assetId]}))];
+  const panoramaTextElements=slides.flatMap((part,n)=>[
+    {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
+    {field:'title' as const,name:'Título',value:part.title},
+    {field:'description' as const,name:'Descripción',value:part.description},
+  ].filter(item=>item.value.trim()).map(item=>({id:part.key+':'+item.field,
+    name:item.name+' · slide '+(n+1),preview:item.value.slice(0,90)})));
   const movePanoramaLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
@@ -414,6 +420,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
       :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)}));
     else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
+  };
+  const removePanoramaText=(id:string)=>{
+    const separator=id.lastIndexOf(':');if(separator<0)return;
+    const key=id.slice(0,separator),field=id.slice(separator+1);
+    if(field!=='eyebrow'&&field!=='title'&&field!=='description')return;
+    setAll(slides.map(part=>part.key===key?{...part,[field]:''}:part));
   };
   // Uploads may finish after several renders; always merge into the latest draft.
   const latestDraft=useRef({post,slides,style,ownedAssets});
@@ -636,6 +648,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <PanoramaEditor preview={panoramaPreview} count={slides.length} seamless={style.seamlessEnabled}
       layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
       onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
+       textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
     <div className="factory-work">
       <div className="factory-edit">
