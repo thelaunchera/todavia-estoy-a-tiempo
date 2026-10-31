@@ -13,7 +13,7 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(ui.includes('encodeCarouselDesign(parseSlides(updated,brand),style)'));
  assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
  assert.ok(ui.includes('const canvas=(await renderAllSlides())[n]'));
- assert.ok(ui.includes('overlayPanoramaPages(all,style.panoramaLayers||[],images)'));
+ assert.ok(ui.includes('overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style))'));
 });
 test('Style references are sampled locally and never pasted into carousel slides',()=>{
  const helper=src('src/CarouselArtDirection.ts'),ui=src('src/CarouselFactory.tsx');
