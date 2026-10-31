@@ -50,7 +50,7 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
   <div className="free-decor-main-tabs"><button type="button" aria-pressed={tab==='stickers'} className={tab==='stickers'?'active':''} onClick={()=>setTab('stickers')}>🎀 Stickers PNG</button><button type="button" aria-pressed={tab==='backgrounds'} className={tab==='backgrounds'?'active':''} onClick={()=>setTab('backgrounds')}>🎨 Fondos</button></div>
   {tab==='backgrounds'?<div>
     <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir fondo'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
-    <p className="free-decor-label">Mis fondos privados · solo yo</p>
+    <p className="free-decor-label">Mis archivos guardados</p>
     {ownBackgrounds.length>0&&<div className="free-decor-backgrounds">{ownBackgrounds.map(a=><button type="button" key={a.id} aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''} onClick={()=>{if(!images[a.id])loadImage?.(a.id);onChange({backgroundId:'brand',backgroundImageId:a.id,stickerIds:selected})}}><i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/><span>{displayAssetName(a)}</span></button>)}</div>}
     <p className="free-decor-label">Fondos del estudio · para todos</p>
     {studioBackgrounds.length>0&&<div className="free-decor-backgrounds">
