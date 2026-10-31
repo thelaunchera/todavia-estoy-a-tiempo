@@ -12,6 +12,7 @@ import FreeDecorControls from './FreeDecorControls';
 import type {FreeBackgroundId} from './FreeDesignAssets';
 import type {StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
+import {ONE_PHOTO_NINE,onePhotoNinePrompt} from './OnePhotoNinePrompts';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
@@ -22,7 +23,7 @@ type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boo
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
-    photo:(tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId],
+    photo:(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId]),
     original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design,stickerImages:images
   },size)).canvas;
 }
@@ -57,6 +58,10 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
 export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
+  const [quickProduct,setQuickProduct]=useState('');
+  const [quickMessage,setQuickMessage]=useState('');
+  const [quickNotes,setQuickNotes]=useState('');
+  const [copiedPrompt,setCopiedPrompt]=useState(false);
   const [chosenFormat,setChosenFormat]=useState('');
   const [referenceFocus,setReferenceFocus]=useState<string[]>(['palette','lighting','composition']);
   useEffect(()=>{
@@ -166,7 +171,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     flushDraft();
     const ownChoice=initialSelection?.brandId===brand.id?initialSelection:null;
     setSourceId(ownChoice?.sourceId||'');setReferenceId(ownChoice?.referenceId||brand.referenceAssetId||'');setChosenFormat(ownChoice?.format||'');
-    setGrid(null);setSelected(0);
+    setGrid(null);setSelected(0);setQuickProduct('');setQuickMessage('');setQuickNotes('');
     setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
@@ -201,6 +206,51 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         ? 'La IA analizó tu foto y preparó 9 conceptos diferentes. Puedes revisarlos antes de generar fotos.'
         : 'Nueve conceptos listos. El análisis de foto no estuvo disponible; revisa los detalles manualmente.');
     }catch(e){showError(e)}finally{setBusy('')}
+  };
+  /** Instant nine-post editor, without AI charge and without altering the master image. */
+  const createQuickNine=async()=>{
+    if(!sourceId||!library.some(a=>a.id===sourceId&&a.brandId===brand.id))
+      return notify('Primero sube una foto de producto a tu marca.');
+    if(wrongOriginal)return notify('La foto pertenece a otra marca. Vuelve a subirla.');
+    if(!quickProduct.trim())return notify('Escribe qué producto quieres mostrar.');
+    if(busy||uploading)return;
+    setBusy('quick-nine');
+    try{
+      const presets:EditorialPreset[]=['portrait','split','typographic','portrait','split','annotated','magazine','magazine','portrait'];
+      const backgrounds:EditorialDesign['background'][]=['photo','ivory','gradient','photo','ivory','photo','ivory','gradient','photo'];
+      const posts:Tile[]=ONE_PHOTO_NINE.map((item,index)=>({
+        index,headline:quickMessage.trim().slice(0,120),subtext:'',caption:'',
+        scene:item.name+' — '+item.short,assetId:'',
+        format:CREATIVE_FORMATS[index%CREATIVE_FORMATS.length],
+        design:{preset:presets[index],background:backgrounds[index],
+          font:index%3===0?'bold':index%3===1?'elegant':'modern',
+          backgroundColor:brand.background,accentColor:brand.color,
+          kicker:'',handwritten:'',callouts:[],overlay:index%3===0?.12:.08}
+      }));
+      const {data}=await api.post('/api/grids',{
+        brandId:brand.id,sourceId,referenceId:'',
+        kind:'preserve',title:quickProduct.trim()+' · 9 posts',
+        concept:'1 Photo → 9 Posts · 8 prompts del freebie + 1 escena editorial',
+        brief:quickProduct.trim(),planningSource:'template',
+        analysisStatus:'fallback',posts
+      });
+      const draft=data as Grid;
+      savedSignature.current[draft.id]=signature(draft);
+      setGrid(draft);setGrids(prev=>[...prev,draft]);setSelected(0);
+      setKind('preserve');setDesignMode('editorial');setSaveState('saved');
+      setDownloads([]);setQaNotes([]);setReviewed(false);
+      notify('Nueve diseños editables y nueve prompts de ChatGPT preparados, sin gastar créditos.');
+    }catch(e){showError(e)}finally{setBusy('')}
+  };
+  const uploadChatGptResult=async(file:File|undefined)=>{
+    if(!file||!grid)return;
+    setUploading('result');
+    try{
+      const asset=await onUploadFile(file,'original');
+      if(!asset)return;
+      update({assetId:asset.id});
+      notify('Foto de ChatGPT añadida al post '+(selected+1)+'. La foto original sigue guardada.');
+    }catch(e){showError(e)}finally{setUploading('')}
   };
   const checkConnection=async()=>{
     setBusy('connection');setConnection('unknown');
@@ -316,14 +366,14 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
      const hashes:{n:number;value:string}[]=[];
      for(let i=0;i<grid.posts.length;i++){
       const p=grid.posts[i];
-      const image=p.design&&grid.kind==='preserve'?images[grid.sourceId]:p.assetId?images[p.assetId]:null;
+      const image=(p.assetId&&images[p.assetId])||(p.design&&grid.kind==='preserve'?images[grid.sourceId]:null);
       if(!image){pending++;continue;}
       // Reusing the SAME genuine original is intentional in editorial design.
       // Only duplicate generated assets are a QA problem, not the original photo.
       if(p.assetId&&used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo generado.');
       if(p.assetId)used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
-      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design},exportSize);
+      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design,stickerImages:images},exportSize);
       if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
       if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
       if(!(p.design&&grid.kind==='preserve')){
@@ -341,6 +391,22 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   };
   const gridPending=grid?.posts.filter(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])).length||0;
   const tile=grid?.posts[selected];
+  const isExpress=Boolean(grid?.kind==='preserve'&&grid?.concept?.startsWith('1 Photo → 9 Posts'));
+  const currentPrompt=grid?onePhotoNinePrompt(selected,{
+    product:quickProduct.trim()||grid.brief||grid.title,
+    brandName:brand.name,headline:tile?.headline,support:tile?.subtext,
+    palette:[brand.background,brand.color,brand.secondaryColor,...(brand.additionalColors||[])].filter(Boolean).join(', '),
+    language:outputLanguage,notes:quickNotes||brand.rules
+  }):'';
+  const copyCurrentPrompt=async()=>{
+    if(!currentPrompt)return;
+    try{
+      await navigator.clipboard.writeText(currentPrompt);
+      setCopiedPrompt(true);notify('Prompt copiado. Pégalo en ChatGPT y adjunta tu foto original.');
+    }catch{
+      setCopiedPrompt(false);notify('Selecciona el prompt de abajo y cópialo manualmente.');
+    }
+  };
   return <div className="brand-grid-tool">
     {creditPrompt&&<div className="bg-credit-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)respondCredits(false)}}>
       <div className="bg-credit-dialog" role="dialog" aria-modal="true" aria-labelledby="bg-credit-title">
@@ -432,7 +498,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
          : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
         <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>setSelected(i)} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
-          <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.design&&grid.kind==='preserve'?'DISEÑO LISTO':t.assetId?'FOTO GENERADA':'CONCEPTO'}</span>
+          <span className="bg-status">{i+1}/9 · {t.assetId?'FOTO LISTA':t.design&&grid.kind==='preserve'?'DISEÑO EDITABLE':'CONCEPTO'}</span>
         </button>)}</div>
         <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
@@ -499,7 +565,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               title="Stickers aesthetics & backgrounds"
               assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
               onChange={next=>tile.design?update({backgroundImageId:next.backgroundImageId,design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...((next.backgroundImageId||next.backgroundId&&next.backgroundId!=='brand')?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,backgroundImageId:next.backgroundImageId,stickerIds:next.stickerIds})}/>}
-          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId])} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
