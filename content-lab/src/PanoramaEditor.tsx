@@ -30,6 +30,8 @@ export default function PanoramaEditor({
   const [libraryOpen,setLibraryOpen]=useState(false);
   const [filter, setFilter] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadError,setUploadError]=useState('');
+  const [moreTools,setMoreTools]=useState(false);
   useEffect(()=>{
     const onKey=(event:KeyboardEvent)=>{
       if(!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='z')return;
@@ -56,32 +58,44 @@ export default function PanoramaEditor({
     return () => { document.body.style.overflow = previous; document.removeEventListener('keydown', close); };
   }, [expanded]);
   const upload = async (files: File[], point: Point) => {
-    setUploading(true);
-    try { await onUpload(files, point); } finally { setUploading(false); }
+    if(!files.length)return;
+    setUploadError('');setUploading(true);
+    try { await onUpload(files, point); }
+    catch(e){setUploadError(e instanceof Error?e.message:'No se pudo subir la foto.');}
+    finally { setUploading(false); }
   };
   return <section className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
-    <header className="panorama-heading"><div><span className="eyebrow">LIVE CANVAS</span>
-      <h2>Diseña viendo el carrusel completo.</h2>
-      <p>Mueve fotos y stickers donde quieras, incluso entre diapositivas. {seamless
-        ?'El fondo continuo también cruza los cortes.'
-        :'Seamless cambia el fondo; tus fotos siempre se mueven libremente.'}</p>
+    <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
+      <h2>Sube tus fotos y colócalas.</h2>
+      <p>Arrastra cada imagen, amplíala o muévela entre slides. Las líneas solo indican dónde se separará al descargar.</p>
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
-    <div className="panorama-quicktools" aria-label="Herramientas del lienzo">
-      <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Añadir texto</button>
+    <div className="panorama-primary-actions">
+      <button type="button" className="panorama-add-photo" disabled={uploading} onClick={()=>input.current?.click()}>
+        <Upload size={19}/>{uploading?'Subiendo fotos…':'Subir foto'}
+      </button>
+      <button type="button" onClick={()=>setLibraryOpen(v=>!v)}><ImagePlus size={17}/>{libraryOpen?'Ocultar biblioteca':'Mis fotos'}</button>
+      <button type="button" onClick={()=>onAddLayer('text')}><Type size={17}/> Añadir texto</button>
+      <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(v=>!v)} aria-expanded={moreTools}>
+        {moreTools?'Menos opciones':'Más opciones'}
+      </button>
+    </div>
+    <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple onChange={e => {
+      const files=[...(e.target.files||[])];e.target.value='';
+      if(files.length)void upload(files,{x:.5/count,y:.5});
+    }}/>
+    {uploadError&&<p className="panorama-error" role="alert">{uploadError}</p>}
+    {moreTools&&<div className="panorama-quicktools" aria-label="Herramientas adicionales">
+      <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Texto libre</button>
       <button type="button" onClick={()=>onAddLayer('shape','paper')}><Shapes size={16}/> Papel</button>
       <button type="button" onClick={()=>onAddLayer('shape','tape')}>Cinta washi</button>
       <button type="button" onClick={()=>onAddLayer('shape','frame')}>Marco</button>
       <button type="button" onClick={()=>onAddLayer('shape','circle')}>Círculo</button>
-      <button type="button" onClick={()=>setLibraryOpen(v=>!v)}>
-        {libraryOpen?<PanelLeftClose size={16}/>:<PanelLeftOpen size={16}/>}
-        {libraryOpen?'Recoger fotos y stickers':'Abrir fotos y stickers'}
-      </button>
       <button type="button" disabled={!canUndo} onClick={onUndo}><Undo2 size={16}/> Deshacer</button>
       <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
-    </div>
+    </div>}
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&<aside className="panorama-library">
       <strong><ImagePlus size={16}/> Tus fotos y stickers</strong>
@@ -91,10 +105,7 @@ export default function PanoramaEditor({
       <button className="btn ghost" type="button" disabled={uploading} onClick={() => input.current?.click()}>
         <Upload size={15}/> {uploading ? 'Subiendo…' : 'Subir fotos'}
       </button></div>
-      <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple onChange={e => {
-        const files = [...(e.target.files || [])]; e.target.value = '';
-        if (files.length) void upload(files, {x: .5 / count, y: .5});
-      }}/>
+
       <div className="panorama-assets">{available.map(asset => <button type="button" key={asset.id}
         draggable={!!images[asset.id]} className="panorama-asset" title={'Añadir ' + displayAssetName(asset)}
         onFocus={() => { if (!images[asset.id]) loadImage(asset.id); }}
