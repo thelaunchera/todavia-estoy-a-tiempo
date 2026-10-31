@@ -501,6 +501,7 @@ function App() {
         topic,
         format: editor.format,
         angle: editor.angle,
+        platform: preferredPlatform(brand),
       });
       setEditor(p => ({ ...p, ...data, brandId: brand.id, designData: '' }));
       setAlternatives(data.alternatives || []);
