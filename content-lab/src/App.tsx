@@ -1052,6 +1052,7 @@ function App() {
             <BrandGrid
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
+              onOpenStickers={()=>navigate('stickers')}
               initialSelection={gridPref}
               isAdmin={Boolean(aiWallet?.admin)}
               wallet={aiWallet}
@@ -1082,6 +1083,7 @@ function App() {
               }}
               loadImage={imageLoad}
               uploadImage={() => uploadRef.current?.click()}
+              onOpenStickers={()=>navigate('stickers')}
               notify={toast}
               showError={err}
               saving={busy === 'save'}
