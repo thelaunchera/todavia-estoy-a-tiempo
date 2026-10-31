@@ -103,6 +103,12 @@ export const api={
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
     if(path==='/api/prompts')return {data:await list('prompts')};
+    if(path==='/api/prompt-templates'){
+      // Supabase RLS checks active paid membership or admin and never serves anon.
+      const {data,error}=await sb.from('content_lab_prompt_catalogue').select('id,category,title,body').order('id',{ascending:true});
+      if(error)throw Error(error.message);
+      return {data:data||[]};
+    }
     if(path==='/api/ai-wallet'){
       const me=await current();
       const {data:owner}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
