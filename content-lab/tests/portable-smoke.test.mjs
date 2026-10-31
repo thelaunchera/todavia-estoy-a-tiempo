@@ -13,3 +13,14 @@ test('free provider is Cloudflare FLUX with image reference, not paid Gemini',()
  assert.ok(edge.includes('input_image_'));
  assert.equal(edge.includes('GEMINI_API_KEY'),false);
 });
+
+test('No-cost diagnostic and one-photo test are protected and visible',()=>{
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ const grid=source('src/BrandGrid.tsx'),client=source('src/platform/client.ts');
+ assert.ok(edge.includes("action==='connection-test'"));
+ assert.ok(edge.indexOf("action==='connection-test'")>edge.indexOf('Cuenta no autorizada'));
+ assert.ok(client.includes('/api/connection-test'));
+ assert.ok(grid.includes('Comprobar conexión gratuita'));
+ assert.ok(grid.includes('Probar 1 foto gratis'));
+ assert.ok(!grid.includes("await generateRemaining(g);\n      notify('Tus nueve publicaciones están listas.')"));
+});

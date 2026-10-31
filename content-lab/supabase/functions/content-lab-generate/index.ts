@@ -110,6 +110,13 @@ Deno.serve(async request=>{
    if(error)throw Error(error.message);
    return save('assets',{brandId,path,name,mime,generated:true});
   };
+  if(action==='connection-test'){
+   // Owner-only, minimal free-text inference confirms token and account without generating an image.
+   ensureFreeProvider();
+   const proof=await cloudflareRequest('Return ONLY JSON {"ready":true}.',[],false);
+   if(!proof||proof.ready!==true)throw Error('Cloudflare respondió, pero no devolvió el diagnóstico esperado. Comprueba los permisos del token.');
+   return send({ok:true,provider:'Cloudflare Workers AI',message:'Texto verificado; prueba una foto para confirmar el modelo de imágenes.'});
+  }
   if(action==='ideas'){
    const b=await find('brands',clean(body.brandId,100));
    const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
