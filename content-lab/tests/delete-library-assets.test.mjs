@@ -37,7 +37,7 @@ test('Admin can delete included backgrounds with server-persisted curation and e
  const app=read('src/App.tsx'),lib=read('src/BackgroundLibrary.tsx'),
   editor=read('src/FreeDecorControls.tsx'),factory=read('src/CarouselFactory.tsx'),
   api=read('src/platform/client.ts'),sql=read('supabase/migrations/20261031_admin_hidden_builtin_backgrounds.sql');
- assert.ok(lib.includes('onDeletePreset(b.id,b.name)'));
+ assert.ok(lib.includes('onDeletePreset(entry.item.id,entry.item.name)'));
  assert.ok(lib.includes('isBackgroundVisible(item.id)'));
  assert.ok(app.includes("await api.post('/api/hidden-backgrounds',{id})"));
  assert.ok(app.includes('updateHiddenBackgrounds(data.hiddenBackgroundIds||[])'));
