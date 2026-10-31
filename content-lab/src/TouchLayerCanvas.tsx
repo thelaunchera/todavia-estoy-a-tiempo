@@ -36,6 +36,7 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
+  const [adjustOpen,setAdjustOpen]=useState(false);
   const [cropping, setCropping] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [snapEnabled,setSnapEnabled]=useState(true);
@@ -50,7 +51,7 @@ export default function TouchLayerCanvas({
   draftRef.current = draft;
   const clamp = (rect: TouchRect) => pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
-  useEffect(() => { setCropping(false); }, [selected]);
+  useEffect(() => { setCropping(false);setAdjustOpen(false); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   useEffect(()=>{
@@ -213,12 +214,10 @@ export default function TouchLayerCanvas({
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
-      Grid de {pageCount} slides siempre visible · la división ocurre al descargar
+      {pageCount} slides · desliza para verlos · cortes solo de guía
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
-    {onRemove && <div className="touch-editor-actionbar"><span>{chosen ? 'Seleccionado: ' + chosen.name : 'Toca una foto o sticker para seleccionarlo'}</span>
-      <button type="button" className="touch-editor-delete-primary" disabled={!chosen}
-        onClick={() => { if (chosen) deleteLayer(chosen.id); }}><Trash2 size={16}/> Borrar elemento</button></div>}
+
     <div ref={scrollArea} className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
@@ -310,8 +309,13 @@ export default function TouchLayerCanvas({
     </div>
     <p className="touch-editor-help">{cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
       : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
-    {chosen && selectedRect && <div className="touch-editor-options">
-      <strong>{chosen.name}</strong>
+    {chosen && selectedRect && <div className="touch-editor-selected">
+      <div className="touch-editor-compact-actions">
+        <span>{chosen.name}</span>
+        <button type="button" onClick={()=>setAdjustOpen(v=>!v)} aria-expanded={adjustOpen}>{adjustOpen?'Cerrar ajustes':'Ajustar'}</button>
+        {onRemove&&<button type="button" className="touch-editor-delete-compact" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={15}/> Borrar</button>}
+      </div>
+      {adjustOpen&&<div className="touch-editor-options"><strong>Editar elemento</strong>
       {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
         <div className="touch-editor-corner-controls">
           <label htmlFor="corner-radius-control">Redondear esquinas <output>{selectedCornerRadius}%</output></label>
@@ -370,10 +374,9 @@ export default function TouchLayerCanvas({
         <button type="button" onClick={()=>onReorder(chosen.id,'forward')}>Un nivel delante</button>
         <button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar al fondo</button>
         <button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer al frente</button>
-      </div>}
-    </div>}
-    {pageCount > 1 && onRemove && <div className="touch-editor-layer-list" aria-label="Elementos del carrusel">
-      <strong>Fotos y stickers ({layers.length})</strong>
+      </div>}</div>}
+    {pageCount > 1 && onRemove && <details className="touch-editor-layer-list" aria-label="Elementos del carrusel">
+      <summary>Administrar elementos ({layers.length})</summary>
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
         <button type="button" className={selected === layer.id ? 'selected' : ''}
           onClick={() => setSelected(layer.id)} aria-pressed={selected === layer.id}
@@ -384,6 +387,6 @@ export default function TouchLayerCanvas({
           aria-label={'Borrar ' + layer.name} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
       </div>)}</div>
       {!layers.length && <p>Añade fotos o stickers al lienzo para editarlos aquí.</p>}
-    </div>}
+    </details>}
   </div>;
 }
