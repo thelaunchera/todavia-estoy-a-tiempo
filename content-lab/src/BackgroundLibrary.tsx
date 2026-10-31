@@ -127,41 +127,54 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    <label><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fondo…" aria-label="Buscar fondos"/></label>
   </div>
   <p className="background-results" aria-live="polite">{filter==='mine'?ownVisible.length:filter==='shared'?sharedVisible.length:backgrounds.length+sharedVisible.filter(a=>filter==='all'||a.backgroundGroup===BACKGROUND_CATEGORIES.find(c=>c.id===filter)?.label).length} fondos disponibles{filter==='all'?' · Ordenados por categoría':' en esta categoría'}</p>
+  {/* One continuous grid on "Todos": deleting an item immediately shifts the next one
+      into its place, even when its category is different. */}
   <div className="background-sections">
-    {sections.map(group=><section className="background-category" key={group.id} aria-label={group.label}>
+    {filter!=='all'&&sections.length===1&&
       <div className="background-category-heading"><div>
-        <h2>{group.label}</h2><p>{group.description}</p></div>
-        <span>{group.items.length+group.sharedItems.length} {group.items.length+group.sharedItems.length===1?'fondo':'fondos'}</span>
-      </div>
-      <div className="background-library-grid">{group.items.map(b=><article key={b.id}>
-       <BackgroundThumbnail id={b.id} alt={'Vista previa sin texto: '+b.name}/>
-       <div className="background-library-card-bottom"><div><strong>{b.name}</strong><small>{b.description}</small></div></div>
-       <div className="background-card-actions">
-        <button className="background-use-button" type="button" onClick={()=>onDesign(b.id)}>Usar fondo <ArrowRight size={14}/></button>
-        <button className="background-download-button" type="button" aria-label={'Descargar '+b.name+' en PNG'} onClick={()=>download(b.id)} title="Descargar PNG individual"><Download size={16}/></button>
-        {isAdmin&&<button className="background-delete-button" type="button"
-          aria-label={'Eliminar fondo '+b.name} onClick={()=>void onDeletePreset(b.id,b.name)}>
-          <Trash2 size={15}/> Eliminar</button>}
-       </div>
-      </article>)}
-      {group.sharedItems.map(asset=><article key={asset.id}>
-        <AssetPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/>
-        <div className="background-library-card-bottom"><div><strong>{displayAssetName(asset)}</strong>
-          <small>Incluido para todos los alumnos</small></div></div>
-        <div className="background-card-actions">
-          <button className="background-use-button" type="button"
-            onClick={()=>onDesign('brand',asset.id)}>Usar fondo <ArrowRight size={14}/></button>
-          <button className="background-download-button" type="button"
-            aria-label={'Descargar '+displayAssetName(asset)} onClick={()=>{
-              const url=images[asset.id];if(!url)return loadImage(asset.id);
-              const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset)||'fondo')+'.png';a.click();
-            }}><Download size={16}/></button>
-          {isAdmin&&<button className="background-delete-button" type="button"
-            aria-label={'Eliminar fondo '+displayAssetName(asset)}
-            onClick={()=>void onDelete(asset)}><Trash2 size={15}/> Eliminar</button>}
-        </div>
-      </article>)}</div>
-    </section>)}
+        <h2>{sections[0].label}</h2><p>{sections[0].description}</p>
+      </div><span>{sections[0].items.length+sections[0].sharedItems.length} fondos</span></div>}
+    <div className="background-library-grid background-continuous-grid">
+      {sections.flatMap(group=>[
+        ...group.items.map(item=>({kind:'included' as const,id:item.id,item,category:group.label})),
+        ...group.sharedItems.map(item=>({kind:'shared' as const,id:item.id,item,category:group.label}))
+      ]).map(entry=>entry.kind==='included'
+        ?<article key={'included-'+entry.id}>
+          <BackgroundThumbnail id={entry.item.id} alt={'Vista previa sin texto: '+entry.item.name}/>
+          <div className="background-library-card-bottom"><div>
+            <strong>{entry.item.name}</strong><small>{entry.category}</small></div></div>
+          <div className="background-card-actions">
+            <button className="background-use-button" type="button" onClick={()=>onDesign(entry.item.id)}>
+              Usar fondo <ArrowRight size={14}/></button>
+            <button className="background-download-button" type="button"
+              aria-label={'Descargar '+entry.item.name+' en PNG'} onClick={()=>download(entry.item.id)}
+              title="Descargar PNG individual"><Download size={16}/></button>
+            {isAdmin&&<button className="background-delete-button" type="button"
+              aria-label={'Eliminar fondo '+entry.item.name} title="Eliminar fondo"
+              onClick={()=>void onDeletePreset(entry.item.id,entry.item.name)}>
+              <Trash2 size={15}/><span>Eliminar</span></button>}
+          </div>
+        </article>
+        :<article key={'shared-'+entry.id}>
+          <AssetPreview asset={entry.item} src={images[entry.id]} loadImage={loadImage}/>
+          <div className="background-library-card-bottom"><div>
+            <strong>{displayAssetName(entry.item)}</strong>
+            <small>{entry.category} · Incluido para todos</small></div></div>
+          <div className="background-card-actions">
+            <button className="background-use-button" type="button"
+              onClick={()=>onDesign('brand',entry.id)}>Usar fondo <ArrowRight size={14}/></button>
+            <button className="background-download-button" type="button"
+              aria-label={'Descargar '+displayAssetName(entry.item)} onClick={()=>{
+                const url=images[entry.id];if(!url)return loadImage(entry.id);
+                const a=document.createElement('a');a.href=url;
+                a.download=(displayAssetName(entry.item)||'fondo')+'.png';a.click();
+              }}><Download size={16}/></button>
+            {isAdmin&&<button className="background-delete-button" type="button"
+              aria-label={'Eliminar fondo '+displayAssetName(entry.item)} title="Eliminar fondo"
+              onClick={()=>void onDelete(entry.item)}><Trash2 size={15}/><span>Eliminar</span></button>}
+          </div>
+        </article>)}
+    </div>
   </div>
   {filter==='shared'&&<section className="background-category" aria-label="Fondos compartidos del estudio">
     <div className="background-category-heading"><div><h2>Fondos del estudio</h2>
