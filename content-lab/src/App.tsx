@@ -359,7 +359,7 @@ function App() {
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
   const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string}>({version:0});
-  const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId}>({version:0});
+  const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}>({version:0});
   const [stickerPref,setStickerPref]=useState<{version:number;brandId?:string;id?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
   const toast = (s: string) => {
@@ -631,7 +631,7 @@ function App() {
       let prepared;
       try {
         prepared = await image.resizeIfNeeded(input, {
-          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: category==='sticker'?'image/png':'image/jpeg'
+          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: (category==='sticker'||category==='background')&&file.type==='image/png'?'image/png':'image/jpeg'
         });
       } catch {
         throw new Error('No se pudo convertir esta foto. Prueba la opción de foto compatible de tu iPhone.');
@@ -1086,6 +1086,7 @@ function App() {
           )}
           {brand && tab === 'grid' && (
             <BrandGrid
+              onUploadBackground={async file=>upload(file,'background')}
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
               onOpenStickers={()=>navigate('stickers')}
@@ -1107,6 +1108,7 @@ function App() {
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
+              onUploadBackground={async file=>upload(file,'background')}
               initialBackground={backgroundPref.brandId===brand.id?backgroundPref:undefined}
               initialSticker={stickerPref.brandId===brand.id?stickerPref:undefined}
               brand={brand}
@@ -1443,7 +1445,10 @@ function App() {
             </>
           )}
           {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad} onUse={id=>{setStickerPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
-          {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={(id)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
+          {brand && tab === 'backgrounds' && <BackgroundLibrary
+  assets={library} images={images} loadImage={imageLoad}
+  onUpload={async file=>upload(file,'background')}
+  onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
                onUpload={async(file,category)=>upload(file,category)}
