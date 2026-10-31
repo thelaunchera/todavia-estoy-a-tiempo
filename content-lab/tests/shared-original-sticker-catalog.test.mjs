@@ -16,7 +16,9 @@ test('Shared original sticker catalog is admin-published, paid-only and isolated
 test('Catalog is fetched once as authenticated shared read-only assets, never as buyer-owned uploads',()=>{
  const api=source('src/platform/client.ts');
  assert.ok(api.includes('sharedStickers()'));
- assert.ok(api.includes('assets:[...assets,...catalogue]'));
+ assert.ok(api.includes('assets:[...assets,...stickers,...backgrounds]'));
+ assert.ok(api.includes('sharedBackgrounds()'));
+ assert.ok(api.includes("if(id.startsWith('shared-background-'))"));
  assert.ok(api.includes("id:'shared-'+x.id"));
  assert.ok(api.includes("if(id.startsWith('shared-'))"));
  assert.ok(api.includes("if(path==='/api/sticker-catalog')"));
