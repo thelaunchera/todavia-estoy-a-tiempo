@@ -157,7 +157,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     },1400);
     return()=>{if(autoTimer.current)clearTimeout(autoTimer.current)};
   },[grid?.id,grid?.title,grid?.posts]);
-  const library=assets.filter(a=>a.brandId===brand.id),own=grids.filter(g=>g.brandId===brand.id);
+  const library=assets.filter(a=>a.brandId===brand.id||a.shared),own=grids.filter(g=>g.brandId===brand.id);
   const wrongOriginal=!!sourceId&&!!assets.find(a=>a.id===sourceId&&a.brandId!==brand.id);
   const wrongReference=!!referenceId&&!!assets.find(a=>a.id===referenceId&&a.brandId!==brand.id);
   // Switching Instagram accounts must never retain the old account's selected photos.
@@ -496,7 +496,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
           {tile&&<FreeDecorControls backgroundId={tile.design?tile.design.backgroundPattern||'brand':tile.backgroundId||'brand'} stickerIds={tile.design?tile.design.stickerIds||[]:tile.stickerIds||[]}
               title="Stickers aesthetics & backgrounds · GRATIS"
-              assets={assets.filter(a=>a.brandId===brand.id)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
+              assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
               onChange={next=>tile.design?update({design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...(next.backgroundId&&next.backgroundId!=='brand'?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,stickerIds:next.stickerIds})}/>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
