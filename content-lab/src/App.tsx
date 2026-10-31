@@ -11,6 +11,7 @@ import CarouselFactory from './CarouselFactory';
 import MediaLibrary from './MediaLibrary';
 import StickerDownloads from './StickerDownloads';
 import BackgroundLibrary from './BackgroundLibrary';
+import './ContentLabMotion.css';
 import FormatGallery from './FormatGallery';
 import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
@@ -830,7 +831,7 @@ function App() {
             </button>
           </div>
         </header>
-        <div className="content">
+        <div className="content" data-lab-tab={tab} key={tab}>
           {brand && tab === 'home' && (
             <>
               <section className="lab-quickstart" aria-label="Guía para empezar">
