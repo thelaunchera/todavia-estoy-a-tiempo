@@ -43,19 +43,20 @@ export default function PanoramaEditor({
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">LIVE CANVAS</span>
       <h2>Diseña viendo el carrusel completo.</h2>
-      <p>{seamless ? 'Mueve fotos y stickers entre los cortes. Cada PNG conserva la parte exacta de este lienzo.'
-        : 'Arrastra una foto al slide que quieras. Activa seamless para cruzar fotos entre diapositivas.'}</p>
+      <p>Mueve fotos y stickers donde quieras, incluso entre diapositivas. {seamless
+        ?'El fondo continuo también cruza los cortes.'
+        :'Seamless cambia el fondo; tus fotos siempre se mueven libremente.'}</p>
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
     <div className="panorama-body"><aside className="panorama-library">
       <strong><ImagePlus size={16}/> Tus fotos y stickers</strong>
       <p>Arrastra al lienzo o toca + para añadir. En el móvil, desliza el lienzo por el fondo.</p>
-      <input aria-label="Buscar fotos del lienzo" placeholder="Buscar en tu biblioteca…" value={filter}
+      <div className="panorama-library-controls"><input aria-label="Buscar fotos del lienzo" placeholder="Buscar en tu biblioteca…" value={filter}
         onChange={e => setFilter(e.target.value)}/>
       <button className="btn ghost" type="button" disabled={uploading} onClick={() => input.current?.click()}>
         <Upload size={15}/> {uploading ? 'Subiendo…' : 'Subir fotos'}
-      </button>
+      </button></div>
       <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple onChange={e => {
         const files = [...(e.target.files || [])]; e.target.value = '';
         if (files.length) void upload(files, {x: .5 / count, y: .5});

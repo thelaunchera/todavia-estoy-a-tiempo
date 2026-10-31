@@ -1,4 +1,4 @@
-import { clampRect, type TouchRect } from './TouchGeometry';
+import { clampPanoramaRect, type TouchRect } from './TouchGeometry';
 import { coverPlacement } from './PhotoCrop';
 
 export type PanoramaLayer = {
@@ -20,7 +20,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       id: item.id.slice(0, 160), assetId: item.assetId.slice(0, 150),
       name: String(item.name || 'Foto').slice(0, 100),
       kind: item.kind === 'sticker' ? 'sticker' as const : 'photo' as const,
-      rect: clampRect(item.rect, .055 / 8),
+      rect: clampPanoramaRect(item.rect),
     }];
   });
 }
@@ -35,7 +35,7 @@ export async function paintPanoramaLayers(
     const img = new Image();
     img.src = src;
     await img.decode();
-    const r = clampRect(layer.rect, .055 / 8), w = r.w * width, h = r.h * height;
+    const r = clampPanoramaRect(layer.rect), w = r.w * width, h = r.h * height;
     ctx.save();
     ctx.translate((r.x + r.w / 2) * width, (r.y + r.h / 2) * height);
     ctx.rotate((r.angle || 0) * Math.PI / 180);

@@ -10,6 +10,14 @@ export const clampRect=(r:TouchRect,minWidth=.055):TouchRect=>{
  const h=Math.max(.055,Math.min(1,safeNumber(r.h,.15)));
  return {x:Math.max(0,Math.min(1-w,safeNumber(r.x,.4))),y:Math.max(0,Math.min(1-h,safeNumber(r.y,.4))),w,h,angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0))),...(r.crop?{crop:normalizeCrop(r.crop)}:{})};
 };
+/** Panorama layers may bleed beyond an edge; keep a small grab area reachable. */
+export const clampPanoramaRect=(r:TouchRect,minWidth=.055/8):TouchRect=>{
+ const w=Math.max(minWidth,Math.min(2,safeNumber(r.w,.15)));
+ const h=Math.max(.055,Math.min(3,safeNumber(r.h,.15)));
+ return {x:Math.max(-w+minWidth,Math.min(1-minWidth,safeNumber(r.x,.4))),
+  y:Math.max(-h+.025,Math.min(.975,safeNumber(r.y,.4))),w,h,
+  angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0))),...(r.crop?{crop:normalizeCrop(r.crop)}:{})};
+};
 export const stickerDefault=(index:number):TouchRect=>[
  {x:.76,y:.13,w:.19,h:.17,angle:-9},{x:.08,y:.71,w:.18,h:.17,angle:8},{x:.72,y:.72,w:.17,h:.16,angle:12}
 ][index%3];

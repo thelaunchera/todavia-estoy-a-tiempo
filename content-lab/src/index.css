@@ -721,7 +721,7 @@ label {
   color: #657175;
   margin: 17px 0 8px;
 }
-input:not([type='color']),
+input:where(:not([type='color'], [type='checkbox'], [type='radio'], [type='range'])),
 select,
 textarea {
   width: 100%;
