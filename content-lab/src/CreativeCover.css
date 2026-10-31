@@ -5,3 +5,50 @@
 .template-grid .template-icon{background:linear-gradient(135deg,#b7d3df 0 48%,#f0e9dd 48% 75%,#9aa6ac 75%)}
 .template-grid button:nth-child(3n) .template-icon{background:linear-gradient(90deg,#c5e0e8 45%,#1b272d 45%)}
 .template-grid button:nth-child(5n) .template-icon{background:linear-gradient(#d5b9ae 0 58%,#f6f0e9 58%)}
+
+
+/* Responsive, visually useful Content Composer cover preview. */
+.cover-studio{min-width:0;max-width:none;overflow:visible}
+.cover-studio-heading{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.cover-studio-heading h3{margin:2px 0 0}
+.cover-studio-heading>small{color:#819398;font-size:11px}
+.cover-studio-content{min-width:0;display:block}
+.cover-touch-workspace{width:100%;min-width:0}
+.cover-artwork{width:100%;height:auto;aspect-ratio:4/5;object-fit:contain;display:block;border:1px solid #e1e8e7;border-radius:22px;background:#faf8f3;box-shadow:0 10px 28px #1c404b0a}
+.cover-loading,.cover-failure{width:100%;aspect-ratio:4/5;border-radius:22px;border:1px solid #e2eaeb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(130deg,#faf8f3,#eaf4f5);font-size:12px;color:#627d87}
+.cover-demo-label{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:12px;font-size:10px;font-weight:750;letter-spacing:.08em;color:#416572}
+.cover-demo-label span{letter-spacing:0;font-size:11px;font-weight:450;color:#8b9a9b;text-align:right}
+.cover-touch-toggle{width:100%;min-height:44px;margin:0 0 14px;border:1px solid #c6dfe2;border-radius:12px;background:#edf6f6;color:#315f6d;padding:11px;font-size:12px;font-weight:700}
+.cover-touch-toggle[aria-pressed=true]{background:#2b5561;color:#fff}
+.cover-photo-upload{display:flex;gap:15px;align-items:center;border:1px solid #d4e4e6;background:linear-gradient(115deg,#f4f9f9,#fcfaf6);padding:13px 15px;border-radius:18px;margin:4px 0 20px;min-width:0;flex-wrap:wrap}
+.cover-photo-swatch{height:74px;width:70px;border:1px solid #cee0e2;border-radius:14px;display:grid;place-items:center;overflow:hidden;flex:none;color:#4a7e8e;background:#e4eff1}
+.cover-photo-swatch img{display:block;width:100%;height:100%;object-fit:cover}
+.cover-photo-info{flex:1;min-width:160px;display:flex;flex-direction:column;gap:5px}
+.cover-photo-info strong{font-size:14px;line-height:1.3;color:#264650}
+.cover-photo-info span{font-size:11px;line-height:1.5;color:#728a91}
+.cover-photo-buttons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cover-photo-buttons .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:12px;min-height:43px;border-radius:12px;white-space:nowrap}
+.cover-photo-clear{border:0;background:transparent;color:#66818b;text-decoration:underline;padding:12px;font-size:11px}
+.cover-studio .free-decor-controls{margin:0;min-width:0}
+.cover-studio>.design-label{margin-top:21px}
+@media(min-width:601px) and (max-width:1280px){
+ .app-shell .composer{grid-template-columns:minmax(0,1fr)!important;gap:20px}
+ .app-shell .composer>.visual{order:-1;width:100%;max-width:none;position:static;padding:22px}
+ .app-shell .composer>.forms{min-width:0}
+ .app-shell .composer .cover-studio-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+ .app-shell .composer .cover-studio-content>.cover-touch-workspace{min-width:0}
+ .app-shell .composer .cover-studio-content>.free-decor-controls{min-width:0;margin:0}
+ .app-shell .composer .cover-studio-content>.free-decor-controls .free-decor-stickers{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .app-shell .composer .cover-studio-content>.free-decor-controls .free-decor-backgrounds{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .app-shell .composer .cover-studio-content>.free-decor-controls .free-decor-real-preview{min-height:55px}
+ .app-shell .composer .cover-studio-content>.free-decor-controls .free-decor-real-preview img{height:54px}
+}
+@media(max-width:600px){
+ .app-shell .composer>.visual{width:100%;max-width:none;min-width:0}
+ .app-shell .composer .cover-studio-content{display:block}
+ .cover-photo-upload{padding:12px;gap:12px}
+ .cover-photo-buttons{width:100%}
+ .cover-photo-buttons .btn{flex:1}
+ .cover-demo-label{align-items:flex-start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){.cover-artwork,.cover-photo-upload,.cover-touch-toggle{animation:none;transition:none}}
