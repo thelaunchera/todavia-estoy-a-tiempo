@@ -10,7 +10,7 @@ test('Free sticker/background set is purely local and does not consume AI credit
  assert.ok(a.includes("id:'peony'"));assert.ok(a.includes("id:'star-washi'"));
  assert.ok(a.includes("id:'soft-blue'"));assert.ok(a.includes("id:'warm-paper'"));
  assert.ok(a.includes("id:'editorial-grid'"));assert.ok(a.includes("id:'grain-ivory'"));
- assert.ok(ui.includes('FREE_BACKGROUNDS.map'));assert.ok(ui.includes('originals.filter'));
+ assert.ok(ui.includes('FREE_BACKGROUNDS.filter') && ui.includes('<BackgroundThumbnail'));assert.ok(ui.includes('originals.filter'));
  assert.ok(ui.includes('assets.filter(a=>assetCategory(a)'));
  assert.ok(ui.includes('Stickers y fondos a tu gusto, sin ocupar toda la pantalla.'));
 });
