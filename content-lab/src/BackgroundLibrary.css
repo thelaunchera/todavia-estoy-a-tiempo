@@ -21,3 +21,5 @@
 .background-preview.swatch-journal-tape{background:linear-gradient(8deg,transparent 82%,#d7b8a0 82% 92%,transparent 92%),repeating-linear-gradient(180deg,#fcf7ed 0 14px,#e7dfcc 15px,#fcf7ed 16px)!important}
 .background-preview.swatch-coffee-check{background-color:#e5d2bb!important;background-image:conic-gradient(#92664c66 25%,transparent 0 50%,#92664c66 0 75%,transparent 0)!important;background-size:22px 22px!important}
 .background-preview.swatch-night-stars{background:radial-gradient(circle at 30% 22%,#eed5ae 1px,transparent 2px),radial-gradient(circle at 78% 63%,#eed5ae 1px,transparent 2px),linear-gradient(135deg,#192936,#453a56)!important;background-size:15px 19px,27px 25px,auto!important}
+
+.background-preview.swatch-night-stars .background-sample-title,.background-preview.swatch-night-stars .background-sample-caption{color:#fff}
