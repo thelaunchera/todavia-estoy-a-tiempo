@@ -324,8 +324,13 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
    label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),885,1284,color,21);
   };
   if(style.freeCanvas){
-   label(slide.eyebrow,74,138,ink);title(74,350,920,106,5);
-   body(74,780,920,ink,5);
+   const hasPhoto=Boolean(slide.assetId),hasBody=Boolean(slide.description.trim());
+   if(slide.eyebrow.trim())label(slide.eyebrow,82,154,ink);
+   if(slide.title.trim())title(82,hasPhoto?344:hasBody?464:608,916,hasPhoto?104:hasBody?112:124,5);
+   if(hasBody)body(82,hasPhoto?820:850,908,ink,5);
+   if(!hasPhoto&&slide.title.trim()){
+     label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),82,1270,ink,19);
+   }
   }else if(slide.layout==='cover'){
    label(slide.eyebrow,74,138,ink);title(74,348,920,106,5);
    body(74,1060,490,ink,3);footer();
