@@ -37,7 +37,7 @@ type Props = {
   onChange: (next: Post) => void; onSave: () => void;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
-  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId};
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId}; initialSticker?:{version:number;brandId?:string;id?:string};
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const layoutNames: Record<Layout,string> = {
@@ -220,7 +220,7 @@ const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,initialBackground}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
@@ -274,6 +274,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }catch(e){showError(e)}finally{setOverviewBusy(false)}
   };
   const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
+  const appliedStickerVersion=useRef(0);
+  useEffect(()=>{
+    if(!initialSticker?.version||initialSticker.brandId!==brand.id||!initialSticker.id||appliedStickerVersion.current===initialSticker.version)return;
+    appliedStickerVersion.current=initialSticker.version;
+    const id=initialSticker.id;
+    const next=slides.map((slide,i)=>i===0?{
+      ...slide,stickerIds:[...(slide.stickerIds||[]).filter(x=>x!==id),id].slice(-3)
+    }:slide);
+    setAll(next);
+    if(!images[id])loadImage(id);
+    notify('Sticker original añadido a la portada. Se incluirá en el PNG exportado.');
+  },[initialSticker?.version,brand.id]);
   const appliedBackgroundVersion=useRef(0);
   useEffect(()=>{
     if(!initialBackground?.version||initialBackground.brandId!==brand.id||!initialBackground.id||appliedBackgroundVersion.current===initialBackground.version)return;
