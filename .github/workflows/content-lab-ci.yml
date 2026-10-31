@@ -1,5 +1,10 @@
 name: Content Lab portable checks
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'content-lab/**'
+      - '.github/workflows/content-lab-ci.yml'
   pull_request:
     paths:
       - 'content-lab/**'
