@@ -43,3 +43,13 @@ test('Cloudflare account IDs are normalized and validated before API calls',()=>
  assert.ok(edge.includes('Account ID de Cloudflare es inválido'));
  assert.ok(edge.includes('object identifier is invalid'));
 });
+
+test('Token diagnostic uses Cloudflare verification before making an AI call',()=>{
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ assert.ok(edge.includes('async function verifyCloudflareToken()'));
+ assert.ok(edge.includes('/tokens/verify'));
+ assert.ok(edge.includes('await verifyCloudflareToken()'));
+ assert.ok(edge.includes('Cloudflare devolvió 401'));
+ assert.ok(edge.includes('Cloudflare devolvió 403'));
+ assert.equal(edge.includes("throw Error('Cloudflare rechazó el API Token."),false);
+});
