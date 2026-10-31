@@ -127,10 +127,10 @@ Deno.serve(async request=>{
    const brandId=clean(body.brandId,100),sourceId=clean(body.sourceId,100),referenceId=clean(body.referenceId,100);
    const b=await find('brands',brandId);
    const source=await find('assets',sourceId);
-   if(source.brandId!==brandId)throw Error('Foto de otra marca.');
+   if(source.brandId!==brandId)throw Error('Esta foto está guardada en otra marca. Selecciona esa marca o vuelve a subir la imagen en '+b.name+'.');
    if(referenceId&&referenceId!==sourceId){
     const ref=await find('assets',referenceId);
-    if(ref.brandId!==brandId)throw Error('Referencia de otra marca.');
+    if(ref.brandId!==brandId)throw Error('Esta referencia de estilo está guardada en otra marca. Vuelve a subirla en '+b.name+'.');
    }
    const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
    const prompt='Art direct NINE DIFFERENT BRAND PHOTOGRAPHS, nine independent Instagram posts, not slides or repeat recolors/crops. Image 1 is product identity, optional image 2 is style reference only. Brand '+b.name+' voice '+b.voice+' colors '+b.color+' '+b.background+'. PUBLIC copy title, concept, all headlines, subtitles and captions ONLY IN '+lang+'. Brief '+clean(body.brief,650)+'. Nine shots in order: (1) 3/4 studio hero (2) overhead geometric flat-lay (3) extreme macro texture (4) distant lifestyle environment (5) surreal conceptual floating props (6) authentic hands holding subject (7) repeated product flat-lay pattern (8) restrained minimalist podium (9) cinematic low-angle finale. Every scene uses DIFFERENT camera, scale, angle, lighting, props and setting. Return ONLY JSON with title,concept,posts array of EXACTLY NINE objects {headline,subtext,caption,scene}. Headlines and captions must be useful, human and different. No fake facts.';
@@ -170,7 +170,7 @@ Deno.serve(async request=>{
    const sources:{data:string;mime:string}[]=[];
    if(body.mode==='variation'&&body.assetId){
     const p=await aiReference(clean(body.assetId,100));
-    if(p.record.brandId!==b.id)throw Error('Foto de otra marca.');
+    if(p.record.brandId!==b.id)throw Error('Esa foto pertenece a otra marca. Selecciona la cuenta original o vuelve a subir la foto desde '+b.name+'.');
     sources.push({data:p.data,mime:p.mime});
    }
    const image:any=await cloudflareRequest('Make ONE vertical 4:5 original premium photography image for '+b.name+'. '+clean(body.prompt,700)+'. No logos, words, watermarks or invented app screens. Preserve subject identity when provided.',sources,true);
