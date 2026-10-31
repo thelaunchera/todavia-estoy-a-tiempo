@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2 } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
+import type { PanoramaLayer } from './PanoramaLayers';
 import { assetCategory, displayAssetName, type LibraryAsset } from './MediaAsset';
 import './PanoramaEditor.css';
 
@@ -9,7 +10,10 @@ type Point = {x: number; y: number};
 type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void;
-  onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
+  onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
+  onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
+  onAddLayer: (kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>void;
+  onUndo:()=>void;onRedo:()=>void;canUndo:boolean;canRedo:boolean;
   onAdd: (assetId: string, point: Point) => void;
   onRemove: (id: string) => void;
   onReorder: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
@@ -19,10 +23,11 @@ type Props = {
   error: string; onRetry: () => void;
 };
 export default function PanoramaEditor({
-  preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onAdd,
+  preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [libraryOpen,setLibraryOpen]=useState(false);
   const [filter, setFilter] = useState('');
   const [uploading, setUploading] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -52,7 +57,21 @@ export default function PanoramaEditor({
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
-    <div className="panorama-body"><aside className="panorama-library">
+    <div className="panorama-quicktools" aria-label="Herramientas del lienzo">
+      <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Añadir texto</button>
+      <button type="button" onClick={()=>onAddLayer('shape','paper')}><Shapes size={16}/> Papel</button>
+      <button type="button" onClick={()=>onAddLayer('shape','tape')}>Cinta washi</button>
+      <button type="button" onClick={()=>onAddLayer('shape','frame')}>Marco</button>
+      <button type="button" onClick={()=>onAddLayer('shape','circle')}>Círculo</button>
+      <button type="button" onClick={()=>setLibraryOpen(v=>!v)}>
+        {libraryOpen?<PanelLeftClose size={16}/>:<PanelLeftOpen size={16}/>}
+        {libraryOpen?'Recoger fotos y stickers':'Abrir fotos y stickers'}
+      </button>
+      <button type="button" disabled={!canUndo} onClick={onUndo}><Undo2 size={16}/> Deshacer</button>
+      <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
+    </div>
+    <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
+      {libraryOpen&&<aside className="panorama-library">
       <strong><ImagePlus size={16}/> Tus fotos y stickers</strong>
       <p>Arrastra al lienzo o toca + para añadir. En el móvil, desliza el lienzo por el fondo.</p>
       <div className="panorama-library-controls"><input aria-label="Buscar fotos del lienzo" placeholder="Buscar en tu biblioteca…" value={filter}
@@ -77,10 +96,10 @@ export default function PanoramaEditor({
         <small>{displayAssetName(asset)}</small><b aria-hidden="true">+</b>
       </button>)}</div>
       {!available.length && <p>Sube tus fotos para empezar.</p>}
-    </aside><div className="panorama-workspace">
+    </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} ratio={count * 1080 / 1350}
-        pageCount={count} onCommit={onCommit} onRemove={onRemove} onReorder={onReorder}
+        pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
       <details className="panorama-text-manager"><summary>Textos del carrusel ({textElements.length}) · borrar</summary>
         <p>Los textos se eliminan aquí; las fotos y stickers se borran desde el lienzo o su lista.</p>
