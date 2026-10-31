@@ -11,7 +11,7 @@ export const MEDIA_CATEGORIES:{id:MediaCategory;label:string;detail:string}[]=[
 ];
 export type LibraryAsset={
  id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;
- generated?:boolean;path?:string;aiReference?:string;shared?:boolean;stickerGroup?:string;sizeBytes?:number;sha256?:string
+ generated?:boolean;path?:string;aiReference?:string;shared?:boolean;stickerGroup?:string;backgroundGroup?:string;sizeBytes?:number;sha256?:string
 };
 export function assetCategory(asset:LibraryAsset):MediaCategory{
  if(MEDIA_CATEGORIES.some(x=>x.id===asset.category))return asset.category!;
