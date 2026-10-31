@@ -5,6 +5,7 @@
  */
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
+import {paintCoverImage,type StickerPositions} from './TouchGeometry';
 export type EditorialPreset='portrait'|'annotated'|'magazine'|'split'|'typographic';
 export const EDITORIAL_PRESETS:{id:EditorialPreset;name:string;description:string}[]=[
  {id:'portrait',name:'Portrait Campaign',description:'Foto protagonista + título editorial grande'},
@@ -59,7 +60,7 @@ function line(ctx:CanvasRenderingContext2D,x1:number,y1:number,x2:number,y2:numb
  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
 }
 export async function renderEditorial(input:{
- canvas:HTMLCanvasElement; photo:string; original?:string; logo?:string; stickerImages?:Record<string,string>;
+ canvas:HTMLCanvasElement; photo:string; original?:string; logo?:string; stickerImages?:Record<string,string>;stickerPositions?:StickerPositions;omitStickers?:boolean;backgroundImageSrc?:string;
  headline:string;subtext:string;brandName:string;design:EditorialDesign;
  brandColor:string;paperColor:string;
  safeTop:number;safeBottom:number;
@@ -83,6 +84,7 @@ export async function renderEditorial(input:{
  if(design.backgroundPattern&&design.backgroundPattern!=='brand'&&background!=='photo'){
   paintFreeBackground(ctx,W,H,design.backgroundPattern,accent,paper);
  }
+ if(input.backgroundImageSrc){try{await paintCoverImage(ctx,input.backgroundImageSrc,W,H)}catch{}}
  const left=q(input.move?.imageX||0,-.55,.55),top=q(input.move?.imageY||0,-.55,.55),zoom=q(input.move?.imageZoom||1,1,3);
  const fullBleed=background==='photo'&&['portrait','annotated','magazine','typographic'].includes(mode);
  const framing=mode==='split'?[.40,.07,.56,.86]:mode==='magazine'?[.23,.05,.54,.92]:mode==='typographic'?[.30,.18,.66,.77]:[.04,.08,.92,.86];
@@ -178,7 +180,7 @@ export async function renderEditorial(input:{
    ctx.drawImage(im,X(.84),Y(topSafe+.01),im.naturalWidth*k,im.naturalHeight*k);
   }catch{/* Logo optional; private library may be loading. */}
  }
- await paintOriginalStickerImages(ctx,W,H,design.stickerIds,input.stickerImages);
+ if(!input.omitStickers)await paintOriginalStickerImages(ctx,W,H,design.stickerIds,input.stickerImages,input.stickerPositions);
  // Contrast estimate applies to typography panel rather than raw photograph.
  return {fit,contrast:4.6};
 }
