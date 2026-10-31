@@ -8,6 +8,8 @@ import type {PromptControls} from './PromptEngine';
 import {CreativeCover,exportCreativeCover} from './CreativeCover';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
+import FreeDecorControls from './FreeDecorControls';
+import {readCoverDecor,writeCoverDecor,type CoverDecor} from './CoverDecor';
 import MediaLibrary from './MediaLibrary';
 import StickerDownloads from './StickerDownloads';
 import BackgroundLibrary from './BackgroundLibrary';
@@ -580,9 +582,13 @@ function App() {
     if (tab === 'formats')
       library.filter(a=>['original','screenshot','generated'].includes(assetCategory(a)))
         .slice(0,3).forEach(a=>{if(!images[a.id])void imageLoad(a.id)});
-    if (tab === 'create' && editor.assetId && !images[editor.assetId])
-      void imageLoad(editor.assetId);
-  }, [tab, current, assets, editor.assetId]);
+    if(tab==='create'){
+      const decor=readCoverDecor(editor.designData);
+      [editor.assetId,decor.backgroundImageId,...decor.stickerIds].filter(Boolean).forEach(id=>{
+        if(!images[id])void imageLoad(id);
+      });
+    }
+  }, [tab, current, assets, editor.assetId, editor.designData]);
   useEffect(()=>{
     if(tab!=='stickers'||!account)return;
     let cancelled=false;
@@ -1315,6 +1321,18 @@ function App() {
                     post={editor}
                     brand={brand}
                     photo={images[editor.assetId]}
+                    images={images}
+                    onDecorChange={(decor:CoverDecor)=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,decor)}))}
+                  />
+                  <FreeDecorControls
+                    title="Stickers y backgrounds · sin créditos IA"
+                    backgroundId={readCoverDecor(editor.designData).backgroundId}
+                    backgroundImageId={readCoverDecor(editor.designData).backgroundImageId}
+                    stickerIds={readCoverDecor(editor.designData).stickerIds}
+                    assets={library} images={images} loadImage={imageLoad}
+                    onOpenLibrary={()=>navigate('stickers')}
+                    onUploadBackground={async file=>upload(file,'background')}
+                    onChange={next=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,{...readCoverDecor(old.designData),...next})}))}
                   />
                   <div className="eyebrow design-label">CHOOSE A FORMAT</div>
                   <div className="template-grid">
@@ -1350,7 +1368,7 @@ function App() {
                   <button
                     className="btn blue wide"
                     onClick={() =>
-                      exportCreativeCover(editor, brand, images[editor.assetId])
+                      exportCreativeCover(editor, brand, images[editor.assetId],images)
                         .then(() => toast('PNG exportado.'))
                         .catch(err)
                     }
@@ -1444,7 +1462,21 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad} onUse={id=>{setStickerPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad} onUse={(id,destination)=>{
+                    if(destination==='cover'){
+                      setEditor(old=>{
+                        const decor=readCoverDecor(old.designData);
+                        return {...old,designData:writeCoverDecor(old.designData,{
+                          ...decor,stickerIds:[...decor.stickerIds.filter(x=>x!==id),id].slice(-3)
+                        })};
+                      });
+                      if(!images[id])void imageLoad(id);
+                      navigate('create');
+                    }else{
+                      setStickerPref(p=>({version:p.version+1,brandId:brand.id,id}));
+                      navigate('factory');
+                    }
+                  }}/>}
           {brand && tab === 'backgrounds' && <BackgroundLibrary
   assets={library} images={images} loadImage={imageLoad}
   onUpload={async file=>upload(file,'background')}
