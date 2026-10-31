@@ -35,8 +35,9 @@ test('Private brand media and shared stickers are both present in editors, with 
  assert.ok(gallery.includes('SHA')===false); // checksum is enforced by server, not fake UI.
  assert.ok(gallery.includes('✓ Incluido'));
  assert.ok(gallery.includes("download(asset)"));
- assert.ok(gallery.includes('onUse(asset.id)'));
+ assert.ok(gallery.includes('onUse(asset.id,destination)'));
  assert.ok(app.includes('setStickerPref(p=>('));
+ assert.ok(app.includes("writeCoverDecor(old.designData"));
 });
 test('ZIP import recognizes the five original sticker folders without requiring buyers to import anything',()=>{
  const gallery=source('src/StickerDownloads.tsx');
