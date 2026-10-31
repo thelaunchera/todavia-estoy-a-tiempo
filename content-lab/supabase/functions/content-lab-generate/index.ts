@@ -10,12 +10,15 @@ const language=(brand:any)=>{
  return name==='todavia estoy a tiempo'?'Español':name==='the launch era'?'English':brand.language==='English'?'English':'Español';
 };
 
-const accountId=(Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'').trim();
+// The Cloudflare Account ID is exactly 32 hexadecimal characters. Some copy/pastes
+// insert a space/newline in the middle: normalize without exposing it to logs or users.
+const accountId=(Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'').replace(/\s+/g,'');
 const token=(Deno.env.get('CLOUDFLARE_API_TOKEN')||'').trim();
 const photoModel='@cf/black-forest-labs/flux-2-klein-4b';
 const textModel='@cf/meta/llama-3.1-8b-instruct-fp8-fast';
 const ensureFreeProvider=()=>{
- if(!accountId||!token)throw Error('Para generar imágenes gratis conecta una cuenta Cloudflare Workers AI Free. Configura CLOUDFLARE_ACCOUNT_ID y CLOUDFLARE_API_TOKEN como secretos de Supabase. Gemini de pago está desactivado.');
+ if(!accountId||!token)throw Error('Falta conectar la cuenta gratuita de Cloudflare. Revisa CLOUDFLARE_ACCOUNT_ID y CLOUDFLARE_API_TOKEN en los secretos de Supabase.');
+ if(!/^[a-f0-9]{32}$/i.test(accountId))throw Error('El Account ID de Cloudflare es inválido: debe tener exactamente 32 caracteres hexadecimales, sin espacios. Copia el ID desde Cloudflare → Workers & Pages → Account Details y reemplaza CLOUDFLARE_ACCOUNT_ID en Supabase.');
 };
 const endpoint=(model:string)=>'https://api.cloudflare.com/client/v4/accounts/'+encodeURIComponent(accountId)+'/ai/run/'+model;
 const extractError=(body:any)=>String(body?.errors?.[0]?.message||body?.error||'Respuesta no disponible').slice(0,270);
@@ -45,7 +48,13 @@ async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[
  if(!response.ok||body.success===false){
   if(response.status===429||response.status===402||/quota|neurons|limit|billing/i.test(extractError(body)))
     throw Error('Se terminó la cuota gratuita de Cloudflare. No se generó ningún cargo; vuelve a intentarlo cuando se reinicie.');
-  throw Error('Cloudflare Workers AI: '+extractError(body));
+  const cloudflareError=extractError(body);
+  // Never return a raw request URL with an Account ID to the browser.
+  if(body?.errors?.some?.((e:any)=>e.code===7003)||/could not route|object identifier is invalid/i.test(cloudflareError))
+    throw Error('Cloudflare no reconoce el Account ID o el token no pertenece a esa cuenta. Copia el Account ID completo en Cloudflare → Workers & Pages → Account Details y revisa el secreto CLOUDFLARE_ACCOUNT_ID en Supabase.');
+  if(response.status===401||response.status===403)
+    throw Error('Cloudflare rechazó el API Token. Verifica que sea un token de Workers AI con acceso a la misma cuenta del Account ID.');
+  throw Error('Cloudflare Workers AI: '+cloudflareError.replace(/\/client\/v4\/accounts\/[^/\s]+/g,'/client/v4/accounts/[oculto]'));
  }
  if(photo){
   const base64=body?.result?.image;
