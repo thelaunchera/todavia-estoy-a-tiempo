@@ -1,14 +1,16 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Bookmark,Check,Copy,Search,SlidersHorizontal,ArrowRight,Trash2,Sparkles,FolderHeart} from 'lucide-react';
 import {PROMPT_CATEGORIES,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
 import {DEFAULT_CONTROLS,composeCreativePrompt,type PromptControls} from './PromptEngine';
 import {api} from './platform/client';
 type Brand={id:string;name:string;language:string;background:string;rules:string};
 type Saved={id:string;brandId:string;title:string;text:string;rawInstruction?:string;settings?:PromptControls;favorite?:boolean;updatedAt?:string};
-type Props={brand:Brand;onUse:(draft:string,settings:PromptControls)=>void;notify:(s:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;locale:'es'|'en';onUse:(draft:string,settings:PromptControls)=>void;notify:(s:string)=>void;showError:(e:unknown)=>void};
 const getError=(e:unknown)=>e instanceof Error?e.message:'No se pudo completar la acción.';
-export default function PromptStudio({brand,onUse,notify,showError}:Props){
- const language=promptLang(brand.language),en=language==='en';
+export default function PromptStudio({brand,locale,onUse,notify,showError}:Props){
+ const language=locale,contentLanguage=promptLang(brand.language),en=language==='en';
+ const editorRef=useRef<HTMLElement|null>(null),manualRef=useRef<HTMLTextAreaElement|null>(null);
+ const moveToEditor=()=>{requestAnimationFrame(()=>{editorRef.current?.scrollIntoView({behavior:'smooth',block:'start'});manualRef.current?.focus({preventScroll:true})})};
  const [query,setQuery]=useState(''),[category,setCategory]=useState('all');
  const [mode,setMode]=useState<'library'|'saved'>('library'),[expanded,setExpanded]=useState(false);
  const [settings,setSettings]=useState<PromptControls>(DEFAULT_CONTROLS);
@@ -30,10 +32,10 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  };
  useEffect(()=>{void load()},[brand.id]);
  const select=(p:PromptTemplate)=>{
-  setManual(fillTemplate(p.body[language],{subject:settings.subject,background:settings.environment}));
-  setCustomTitle(p.title[language]);notify(en?'Prompt loaded — edit it before generating.':'Prompt cargado. Puedes editarlo antes de generar.');
+  setManual(fillTemplate(p.body[contentLanguage],{subject:settings.subject,background:settings.environment}));
+  setCustomTitle(p.title[language]);setMode('library');moveToEditor();
  };
- const compiled=useMemo(()=>composeCreativePrompt({...settings,instruction:manual||settings.instruction},language),[settings,manual,language]);
+ const compiled=useMemo(()=>composeCreativePrompt({...settings,instruction:manual||settings.instruction},contentLanguage),[settings,manual,contentLanguage]);
  const shown=templates.filter(p=>(category==='all'||p.category===category) &&
   (p.title[language]+' '+p.body[language]+' '+p.category).toLocaleLowerCase().includes(query.toLocaleLowerCase()));
  const filteredSaved=saved.filter(p=>(p.title+' '+p.text).toLocaleLowerCase().includes(query.toLocaleLowerCase())).sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite));
@@ -60,14 +62,14 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  };
  const useSaved=(item:Saved)=>{
   if(item.settings)setSettings(item.settings);
-  setManual(item.rawInstruction??item.text);setCustomTitle(item.title);setMode('library');notify(en?'Saved prompt ready to edit.':'Prompt guardado listo para editar.');
+  setManual(item.rawInstruction??item.text);setCustomTitle(item.title);setMode('library');moveToEditor();
  };
  return <section className="ps-wrap" aria-label="Prompt Studio">
   <header className="ps-hero">
-   <div><span className="eyebrow">CONTENT LAB · PROMPT STUDIO</span>
-    <h1>{en?'The creative brief, made easy.':'Tu idea, convertida en un buen prompt.'}</h1>
-    <p>{en?'Describe what you want, choose a creative recipe and refine the details. Every brand keeps its own private saved prompts.':'Describe lo que quieres, elige una receta y ajusta sus detalles. Cada marca tiene su propia biblioteca de prompts guardados.'}</p>
-   </div><div className="ps-count"><strong>30</strong><span>{en?'bilingual recipes':'recetas bilingües'}</span></div>
+   <div><span className="eyebrow">{en?'PROMPT STUDIO':'ESTUDIO DE PROMPTS'}</span>
+    <h1>{en?'Create your image prompt':'Crea tu prompt para una foto'}</h1>
+    <p>{en?'Write your idea or choose a recipe below. Everything stays editable.':'Escribe tu idea o elige una receta abajo. Siempre podrás editarla.'}</p>
+   </div><div className="ps-count"><strong>30</strong><span>{en?'ideas':'ideas'}</span></div>
   </header>
   <div className="ps-tabs" role="group" aria-label="Prompt tabs">
    <button className={mode==='library'?'active':''} onClick={()=>setMode('library')}><BookOpen size={17}/>{en?'Prompt library':'Biblioteca de prompts'}</button>
@@ -81,8 +83,8 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
     </div>
     <div className="ps-recipe-list">{shown.length?shown.map((p)=><article className="ps-recipe" key={p.id}>
       <span className="ps-recipe-index">{p.id}</span><div><strong>{p.title[language]}</strong><small>{PROMPT_CATEGORIES[p.category]?.[language==='es'?0:1]||p.category}</small>
-        <p>{p.body[language]}</p></div>
-      <button type="button" className="ps-recipe-use" onClick={()=>select(p)}>{en?'Use':'Usar'} <ArrowRight size={15}/></button>
+        <details className="ps-recipe-example"><summary>{en?'Read example':'Ver ejemplo'}</summary><p>{p.body[language]}</p></details></div>
+      <button type="button" className="ps-recipe-use" onClick={()=>select(p)}>{en?'Use this idea':'Usar idea'}</button>
     </article>):<p>{en?'No matching prompts.':'No hay prompts que coincidan.'}</p>}</div>
     </>:<div className="ps-recipe-list">
      {loadError&&<p role="alert">{loadError}<button onClick={load}>↻</button></p>}
@@ -93,13 +95,13 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
      </article>):<p>{en?'No saved prompts for this brand yet. Create and save your first recipe.':'Todavía no hay prompts guardados para esta marca. Crea y guarda tu primera receta.'}</p>}
     </div>}
    </div>
-   <aside className="ps-builder" aria-label={en?'Prompt Helper':'Asistente de prompts'}>
-    <div className="ps-builder-header"><Sparkles size={19}/><div><strong>Prompt Helper</strong><small>{en?'No AI credits to build a prompt':'Preparar un prompt no gasta créditos IA'}</small></div></div>
+   <aside className="ps-builder" ref={editorRef} id="prompt-editor" aria-label={en?'Edit prompt':'Editar prompt'}>
+    <div className="ps-builder-header"><Sparkles size={19}/><div><strong>{en?'Edit your idea':'Edita tu idea'}</strong><small>{en?'Choose a recipe below or write your own':'Elige una receta abajo o escribe la tuya'}</small></div></div>
     <label>{en?'What are we photographing?':'¿Qué vamos a fotografiar?'}<input value={settings.subject} onChange={e=>update('subject',e.target.value)} placeholder={en?'Your real product, portrait or service':'Tu producto, retrato o servicio real'}/></label>
     <label>{en?'Where should it be?':'¿Dónde quieres la escena?'}<input value={settings.environment} onChange={e=>update('environment',e.target.value)} placeholder={en?'Warm ivory studio, daylight cafe…':'Estudio ivory, cafetería con luz natural…'}/></label>
     <label>{en?'Describe what you want (your own prompt)':'Escribe lo que tú quieras (prompt libre)'}
-     <textarea rows={4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
-    <div className="ps-control-grid">
+     <textarea ref={manualRef} rows={4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
+    <details className="ps-optional-controls"><summary>{en?'More creative settings':'Ajustes de estilo'}</summary><div className="ps-control-grid">
       <label>{en?'Visual mood':'Estilo visual'}<select value={settings.style} onChange={e=>update('style',e.target.value as PromptControls['style'])}>
        {Object.entries({'real-life':en?'Natural':'Natural realista',studio:en?'Studio':'Estudio',editorial:'Editorial',luxury:en?'Luxury':'Lujo',bold:'Bold',minimal:'Minimal'}).map(([v,l])=><option key={v} value={v}>{l}</option>)}
       </select></label>
@@ -112,19 +114,19 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
       <label>{en?'Reference consistency':'Fidelidad a referencia'}<select value={settings.fidelity} onChange={e=>update('fidelity',e.target.value as PromptControls['fidelity'])}>
        <option value="strict">{en?'Prioritize fidelity':'Priorizar fidelidad'}</option><option value="balanced">{en?'Creative balance':'Balance creativo'}</option>
       </select></label>
-    </div>
+    </div></details>
     <button className="ps-advanced-toggle" type="button" aria-expanded={expanded} onClick={()=>setExpanded(!expanded)}><SlidersHorizontal size={16}/> {expanded?(en?'Hide advanced':'Ocultar avanzado'):(en?'Advanced / avoid':'Avanzado / evitar')}</button>
     {expanded&&<label>{en?'Avoid (negative instructions)':'Evitar (instrucciones negativas)'}
      <textarea rows={3} value={settings.avoid} onChange={e=>update('avoid',e.target.value)} placeholder={en?'No fake labels, no waxy skin, no distorted hands…':'Sin etiquetas falsas, piel plástica ni manos deformadas…'}/></label>}
-    <div className="ps-output"><div><strong>{en?'Your composed prompt':'Tu prompt listo'}</strong><span>{compiled.length} chars</span></div>
+    <details className="ps-output"><summary>{en?'Preview full prompt':'Ver prompt completo'} · {compiled.length} {en?'characters':'caracteres'}</summary><div><strong>{en?'Full prompt':'Prompt completo'}</strong></div>
      <textarea aria-label="Prompt final" rows={7} value={compiled} readOnly onFocus={e=>e.currentTarget.select()}/>
      <small>{en?'We preserve your instructions first. Realism is guidance, not a guarantee; exact logos and faces are best kept as original image layers.':'Tus instrucciones van primero. El realismo es una guía, no una garantía; logos y rostros exactos se conservan mejor como capas originales.'}</small>
-    </div>
+    </details>
     <label>{en?'Save as':'Nombre para guardar'}<input value={customTitle} onChange={e=>setCustomTitle(e.target.value)} placeholder={en?'My favorite prompt':'Mi prompt favorito'} maxLength={100}/></label>
     <div className="ps-actions">
      <button type="button" className="btn ghost" onClick={()=>copy(compiled)}><Copy size={16}/>{copied?'✓':en?'Copy':'Copiar'}</button>
      <button type="button" className="btn ghost" disabled={busy} onClick={save}><Bookmark size={16}/>{en?'Save':'Guardar'}</button>
-     <button type="button" className="btn dark" onClick={()=>onUse(compiled,{...settings,instruction:manual})}><ArrowRight size={16}/>{en?'Use in Studio':'Usar en Studio'}</button>
+     <button type="button" className="btn dark" onClick={()=>onUse(compiled,{...settings,instruction:manual})}>{en?'Continue to create':'Continuar a crear'}</button>
     </div>
    </aside>
   </div>
