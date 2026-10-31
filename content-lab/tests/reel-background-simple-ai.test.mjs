@@ -32,7 +32,7 @@ test('AI prepares a draft from a natural idea while retaining chosen backgrounds
  assert.ok(app.includes('hidden={!manualOpen}'));
  assert.ok(app.includes('Crear con IA · 1 crédito'));
  assert.ok(car.includes('Crear carrusel con IA · 1 crédito'));
- assert.ok(car.includes('encodeCarouselDesign(generated,style)'));
+ assert.ok(car.includes('encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))'));
  assert.ok(car.includes('backgroundId,backgroundImageId,backgroundColor:slide.backgroundColor'));
  assert.ok(car.includes('backgroundId:slide.backgroundId'));
 });
