@@ -52,7 +52,7 @@ const finishedDemos:Demo[]=[
   title:'AFTR. · Las Vegas',
   category:'Nightclub de lujo · demo de branding y website',
   description:'Chrome Afterglow: identidad futurista, ocho fotografías originales, eventos, lineup, guest list y experiencias VIP en una web responsive.',
-  image:'https://thelaunchera.com/demos/aftr/assets/hero.webp',
+  image:'https://thelaunchera.com/demos/aftr/assets/hero-20261031.webp',
   url:'https://thelaunchera.com/demos/aftr/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/aftr',
   note:'Concepto ficticio 21+. Las reservas, entradas, ofertas y formularios solo se simulan; no hay cobros ni datos reales.',
