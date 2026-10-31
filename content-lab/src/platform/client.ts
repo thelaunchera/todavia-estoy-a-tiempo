@@ -94,7 +94,7 @@ export const api={
       }
       catch(e){await sb.storage.from(bucket).remove([path]);throw e;}
     }
-    if(['/api/ideas','/api/ai-image','/api/grid-plan','/api/grid-image'].includes(path))
+    if(['/api/ideas','/api/ai-image','/api/grid-plan','/api/grid-image','/api/connection-test'].includes(path))
       return {data:await useEdge(path.slice(5),payload)};
     throw Error('Ruta no disponible: '+path);
   },
