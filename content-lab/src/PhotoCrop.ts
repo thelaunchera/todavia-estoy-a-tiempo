@@ -29,3 +29,19 @@ export function photoFrameMetrics(w: number, h: number, mode: string) {
     : mode === 'none' ? 0 : mode === 'panorama' ? Math.min(w, h) * .06 : Math.min(w, h) * .048;
   return {inset, bottom, radius, innerRadius: Math.max(0, radius - inset * .38)};
 }
+
+/** Place an image at its real aspect ratio, so portrait heads aren't cropped on insertion.
+ * Coordinates cover the entire multi-page panorama rather than one slide. */
+export function initialPanoramaPhotoRect(
+  imageRatio: number, pageCount: number, point: {x:number;y:number},
+) {
+  const aspect = Number.isFinite(imageRatio) && imageRatio > 0
+    ? Math.max(.2, Math.min(5, imageRatio)) : .75;
+  const count = Math.max(1, Math.min(8, pageCount));
+  const maxPhotoWidth = .88 / count;
+  const preferredHeight = aspect <= 1 ? .66 : .52;
+  const height = Math.min(preferredHeight, maxPhotoWidth * count * (1080 / 1350) / aspect);
+  const width = height * (1350 / 1080) * aspect / count;
+  return {x:point.x-width/2,y:point.y-height/2,w:width,h:height,
+    crop:{x:.5,y:.12,zoom:1}};
+}
