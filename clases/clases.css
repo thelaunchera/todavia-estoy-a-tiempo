@@ -3570,3 +3570,14 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
     bottom:7px;
   }
 }
+
+/* Regreso al aula para quienes ya compraron. No altera la lista de espera. */
+.class-page-v2 .class-hero-actions .class-student-access-link{
+  display:inline-flex;align-items:center;justify-content:center;min-height:47px;
+  padding:10px 17px;border:1px solid #9eafbf;border-radius:999px;
+  color:#14263e;background:transparent;text-decoration:none;
+  font:650 .76rem/1.4 'DM Sans',Arial,sans-serif;
+  transition:background .2s,border-color .2s;
+}
+.class-page-v2 .class-hero-actions .class-student-access-link:hover{background:#e4ebef;border-color:#758fa5}
+@media(max-width:650px){.class-page-v2 .class-hero-actions .class-student-access-link{width:100%;min-height:47px}}
