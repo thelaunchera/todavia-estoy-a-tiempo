@@ -180,7 +180,27 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   if(slide.backgroundImageId&&images[slide.backgroundImageId]){
     try{await paintCoverImage(ctx,images[slide.backgroundImageId],1080,1350)}catch{rect(0,0,1080,1350,paper)}
   }else if(slide.backgroundId&&slide.backgroundId!=='brand')paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
-  else rect(0,0,1080,1350,paper);
+  else {
+    const start=style.canvasColor||'#FFFFFF',end=style.canvasGradient;
+    if(end){const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,start);g.addColorStop(1,end);
+      ctx.fillStyle=g;ctx.fillRect(0,0,1080,1350);}
+    else rect(0,0,1080,1350,start);
+  }
+  // The free canvas begins without decorative shapes, lines, borders or prebuilt cards.
+  if(style.freeCanvas){
+    if(!editorMode){
+      label(slide.eyebrow,74,138,ink);
+      title(74,350,920,106,5);
+      body(74,780,920,ink,5);
+      if(slide.assetId&&slide.photoPosition){
+        const p=clampRect(slide.photoPosition),pw=p.w*1080,ph=p.h*1350;
+        ctx.save();ctx.translate((p.x+p.w/2)*1080,(p.y+p.h/2)*1350);
+        ctx.rotate((p.angle||0)*Math.PI/180);await photo(-pw/2,-ph/2,pw,ph,true);ctx.restore();
+      }
+      await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images,slide.stickerPositions);
+    }
+    return canvas;
+  }
   if(slide.layout==='cover') {
     slide.eyebrow&&label(slide.eyebrow,74,138,ink);rect(74,170,126,8,accent);
     title(74,348,920,106,5);
@@ -273,7 +293,10 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
    label(footerName,72,1284,color,21);
    label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),885,1284,color,21);
   };
-  if(slide.layout==='cover'){
+  if(style.freeCanvas){
+   label(slide.eyebrow,74,138,ink);title(74,350,920,106,5);
+   body(74,780,920,ink,5);
+  }else if(slide.layout==='cover'){
    label(slide.eyebrow,74,138,ink);title(74,348,920,106,5);
    body(74,1060,490,ink,3);footer();
   }else if(slide.layout==='statement'){
@@ -336,6 +359,26 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const pastHistory=useRef<string[]>([]);
+  const futureHistory=useRef<string[]>([]);
+  const [historyVersion,setHistoryVersion]=useState(0);
+  const recordHistory=(snapshot:string)=>{
+    if(snapshot&&pastHistory.current.at(-1)!==snapshot){
+      pastHistory.current=[...pastHistory.current.slice(-39),snapshot];
+      futureHistory.current=[];
+      setHistoryVersion(n=>n+1);
+    }
+  };
+  const restoreHistory=(direction:'undo'|'redo')=>{
+    const from=direction==='undo'?pastHistory:futureHistory;
+    const to=direction==='undo'?futureHistory:pastHistory;
+    const snapshot=from.current.pop();if(!snapshot)return;
+    if(post.designData)to.current.push(post.designData);
+    const decoded=readCarouselDesign(snapshot);
+    const first=decoded.slides?.[0] as {title?:string}|undefined;
+    onChange({...post,designData:snapshot,hook:first?.title||''});
+    setDownloads([]);setOverview([]);setHistoryVersion(n=>n+1);
+  };
   const [idea,setIdea]=useState('');
   const [imagePrompt,setImagePrompt]=useState('');
   const [imageMode,setImageMode]=useState<'new'|'variation'>('new');
@@ -345,7 +388,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overview,setOverview]=useState<string[]>([]);
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
@@ -365,6 +408,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
+    recordHistory(post.designData||encodeCarouselDesign(slides,style));
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);setOverview([]);
   };
@@ -534,6 +578,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         name:displayAssetName(asset),kind,rect:clampPanoramaRect(rect,.055/count)};
       nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
     }
+    recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
     onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
       designData:encodeCarouselDesign(nextSlides,nextStyle)});
     setDownloads([]);setOverview([]);
@@ -561,7 +606,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
-    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:defaultLabel(brand)};
+    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout};
     setAll([...slides.slice(0,-1),next,...slides.slice(-1)]);
     setCurrent(slides.length-1);
   };
@@ -704,7 +749,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <div className="factory-idea">
       <div><div className="eyebrow">01 / CAROUSEL STUDIO · SIN IA</div><h2>Haz tu carrusel a tu manera.</h2><p>Crea, edita, diseña, usa stickers, mueve las fotos y descarga todos los PNG. La IA es opcional, solo si quieres que escriba o genere imágenes.</p></div>
       <div><button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
-        const next=Array.from({length:6},(_,n)=>({...makeSlide(n,n===0?'Tu próximo carrusel':n===5?'Tu llamada a la acción':'Escribe tu idea aquí'),eyebrow:n===0?'PORTADA':n===5?'SIGUIENTE PASO':'TU HISTORIA',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
+        const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
         setAll(next);setCurrent(0);notify('Carrusel de 6 slides listo para editar.');
       }}><Plus size={17}/> Crear 6 slides · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Usar IA para escribir · opcional (1 crédito)</button></div>
     </div>
