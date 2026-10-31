@@ -79,6 +79,7 @@ jobs:
           node --check clases/countdown.js
           node --check clases/waitlist.js
           node --check alumnos/comunidad.js
+          node --check centro/centro.js
           node estudio-control/tests/check-course-prelaunch.mjs
           node --test estudio-control/tests/aula-privacidad-regresion.test.mjs alumnos/dashboard-inicio.test.mjs
       - name: Compilar el estudio desde el repositorio
@@ -110,7 +111,7 @@ jobs:
       - name: Empaquetar el podcast y su estudio
         run: |
           mkdir -p _podcast_pages/estudio
-          cp -R assets productos clases alumnos _podcast_pages/
+          cp -R assets productos clases alumnos centro _podcast_pages/
           cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
@@ -124,6 +125,9 @@ jobs:
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
           test -s _podcast_pages/clases/primera-landing.html
+          test -s _podcast_pages/centro/index.html
+          test -s _podcast_pages/centro/centro.js
+          test -s _podcast_pages/centro/centro.css
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
           test -s _podcast_pages/alumnos/comunidad.html
