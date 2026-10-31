@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="Booking Automation">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#16253D"/><stop offset="1" stop-color="#3D5D98"/></linearGradient><radialGradient id="glow" cx="75%" cy="45%" r="65%"><stop stop-color="#BDD0FF" stop-opacity=".3"/><stop offset="1" stop-color="#BDD0FF" stop-opacity="0"/></radialGradient><filter id="drop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".23"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#bg)"/><rect width="720" height="480" fill="url(#glow)"/>
+<path d="M-80 470 C 130 385 191 562 396 443 S 620 327 832 405" fill="none" stroke="#F4F8FF" stroke-opacity=".095" stroke-width="2"/>
+<g fill="none" stroke="#FFFFFF" stroke-opacity=".12" stroke-width="1.6"><circle cx="610" cy="201" r="208"/><circle cx="610" cy="201" r="252"/></g>
+<rect x="48" y="42" width="24" height="3" rx="1.5" fill="#BDD0FF"/>
+<text x="84" y="49" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2" font-size="15" fill="#BDD0FF">THE LAUNCH ERA</text>
+<text x="50" y="115" font-family="Arial,Helvetica,sans-serif" letter-spacing="2.4" font-size="15" font-weight="700" fill="#E2EBF4" fill-opacity=".88">01 / SERVICE STUDIO</text>
+<g font-family="Arial,Helvetica,sans-serif" letter-spacing="-1.8" font-weight="800" fill="#FFFFFF">
+<text x="48" y="211" font-size="55">Booking</text>
+<text x="48" y="279" font-size="55">Automation</text>
+</g>
+<rect x="49" y="303" width="44" height="3" rx="1.5" fill="#BDD0FF"/>
+<text x="50" y="345" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="1" font-size="16" fill="#BDD0FF">+ COMMAND CENTER</text>
+
+ <g filter="url(#drop)"><rect x="421" y="136" width="264" height="245" rx="18" fill="#11283A" fill-opacity=".89" stroke="#FFFFFF" stroke-opacity=".42"/><rect x="422" y="137" width="262" height="38" rx="17" fill="#E5F1F5" fill-opacity=".13"/><circle cx="443" cy="154" r="4" fill="#D2EAF1" fill-opacity=".75"/><circle cx="458" cy="154" r="4" fill="#D2EAF1" fill-opacity=".45"/><circle cx="473" cy="154" r="4" fill="#D2EAF1" fill-opacity=".3"/><rect x="437" y="188" width="232" height="176" rx="10" fill="#EDF5F5" fill-opacity=".07" stroke="#F8FFFF" stroke-opacity=".1"/></g>
+ <text x="443" y="222" fill="#F2F8FF" font-size="14" font-weight="700" font-family="Arial">This week</text>
+ <g fill="#BFD6F4" fill-opacity=".12"><rect x="441" y="237" width="37" height="40" rx="7"/><rect x="485" y="237" width="37" height="40" rx="7"/><rect x="529" y="237" width="37" height="40" rx="7"/><rect x="573" y="237" width="37" height="40" rx="7"/><rect x="617" y="237" width="37" height="40" rx="7"/></g>
+ <g fill="#EDF8FF" font-family="Arial" font-size="13" font-weight="700"><text x="455" y="263">M</text><text x="498" y="263">T</text><text x="543" y="263">W</text><text x="584" y="263">T</text><text x="630" y="263">F</text></g>
+ <rect x="529" y="236" width="37" height="42" rx="7" fill="#C4D9FF" fill-opacity=".73"/>
+ <text x="542" y="263" fill="#243C5B" font-family="Arial" font-size="13" font-weight="800">W</text>
+ <rect x="443" y="299" width="219" height="56" rx="9" fill="#EDF6FF" fill-opacity=".15"/>
+ <circle cx="462" cy="322" r="7" fill="#B9DFEF"/><path d="M459 321l2.8 3 5-6" fill="none" stroke="#173048" stroke-width="2"/>
+ <text x="479" y="324" fill="#F5FBFF" font-family="Arial" font-size="13" font-weight="700">Booking confirmed</text><text x="480" y="342" fill="#CADBEC" font-family="Arial" font-size="10">Follow-up scheduled</text>
+ <rect x="590" y="108" width="99" height="33" rx="16" fill="#D3E8F8"/><text x="608" y="129" font-size="10" font-family="Arial" font-weight="800" fill="#19334D">IN CONTROL</text>
+<path d="M48 403 H672" stroke="#FFFFFF" stroke-opacity=".22"/>
+<text x="49" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2" fill="#EBF5FA" fill-opacity=".9">BOOKINGS / CLIENTS / FOLLOW-UP</text>
+<text x="670" y="438" text-anchor="end" font-family="Arial" font-size="14" font-weight="700" fill="#BDD0FF">TLE / 26</text>
+</svg>
