@@ -4,9 +4,12 @@ import {readFileSync} from 'node:fs';
 const src=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('buyers upload their own background and preserve transparent files in private brand library',()=>{
  const lib=src('src/BackgroundLibrary.tsx'),app=src('src/App.tsx'),types=src('src/MediaAsset.ts'),decor=src('src/FreeDecorControls.tsx');
- assert.ok(lib.includes('Subir mi propio fondo') && lib.includes('Elegir archivo'));
+ assert.ok(lib.includes('Subir mi fondo privado') && lib.includes('Elegir archivo'));
  assert.ok(app.includes("upload(file,'background')"));
  assert.ok(app.includes("category==='background'"));
+ assert.ok(app.includes("aiWallet?.admin&&category==='background'"));
+ assert.ok(app.includes('publishSharedBackground'));
+ assert.ok(lib.includes("isAdmin?'Publicar fondo para todos':'Subir mi fondo privado'"));
  assert.ok(types.includes("'background'"));
  assert.ok(decor.includes("backgroundImageId"));
  assert.ok(decor.includes('onUploadBackground'));
