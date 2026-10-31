@@ -123,6 +123,6 @@ test('draft flushes on app backgrounding, brand switch and project switch',()=>{
  const grid=src('src/BrandGrid.tsx');
  assert.ok(grid.includes("document.visibilityState==='hidden'"));
  assert.ok(grid.includes("document.addEventListener('visibilitychange'"));
- assert.ok(grid.includes("flushDraft();\n    setSourceId('')"));
+ assert.ok(grid.includes("flushDraft();\n    const ownChoice=initialSelection?.brandId===brand.id"));
  assert.ok(grid.includes("onClick={()=>{flushDraft();setGrid(g);"));
 });
