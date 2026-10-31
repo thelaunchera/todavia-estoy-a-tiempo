@@ -100,3 +100,17 @@
 .factory-overview.seamless .factory-overview-grid button{flex:0 0 135px;border:0;border-radius:0;padding:0;background:transparent;scroll-snap-align:start;overflow:visible}
 .factory-overview.seamless .factory-overview-grid img{aspect-ratio:4/5;border-radius:0;display:block;width:100%}
 .factory-overview.seamless .factory-overview-grid span{background:#fff;border-top:1px solid #e3ebeb}
+
+/* Functional photo-frame picker; visuals match Canvas PNG renderer. */
+.factory-frame-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0 16px}
+.factory-frame-modes button{display:flex;align-items:center;flex-direction:column;gap:7px;background:#fbfcfc;border:1px solid #e0eaeb;border-radius:13px;padding:11px 5px;color:#607c84;transition:border-color .2s,box-shadow .25s,transform .25s}
+.factory-frame-modes button.selected{border-color:#75a8b7;background:#eaf5f6;box-shadow:0 3px 12px #3d707e19;color:#28515d}
+.factory-frame-modes small{font-size:10px;line-height:1.25;font-weight:700}
+.factory-frame-mini{width:39px;height:43px;background:linear-gradient(135deg,#bfdce7 15%,#e9d6dc 80%);display:block;border:1px solid #c1d3d9}
+.factory-frame-mini.rounded{border-radius:12px}
+.factory-frame-mini.super-rounded{border-radius:19px}
+.factory-frame-mini.polaroid{border:6px solid #fff;border-bottom-width:11px;box-shadow:0 4px 13px #33414b1b;border-radius:3px}
+.factory-frame-mini.soft-shadow{border:5px solid #fff;border-radius:9px;box-shadow:0 8px 12px #29384130}
+.factory-frame-mini.double-border{border:4px double #77a8b6;border-radius:7px}
+.factory-preview img{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+@media(max-width:530px){.factory-frame-modes{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.factory-frame-modes button{padding:8px 3px}}
