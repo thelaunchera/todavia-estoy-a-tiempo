@@ -352,7 +352,7 @@ function App() {
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
-  const [gridPref,setGridPref]=useState<{version:number;sourceId?:string;referenceId?:string;format?:string}>({version:0});
+  const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
   const toast = (s: string) => {
     setNotice(s);
@@ -1401,13 +1401,13 @@ function App() {
                onUpdate={updated=>setAssets(prev=>prev.map(a=>a.id===updated.id?updated:a))}
                onDelete={async a=>{try{await api.delete('/api/assets/'+a.id);setAssets(prev=>prev.filter(x=>x.id!==a.id));toast('Imagen eliminada de esta marca.')}catch(e){err(e)}}}
                onSaveDefaultReference={async id=>{const {data}=await api.put('/api/brands/'+brand.id,{referenceAssetId:id});setBrands(prev=>prev.map(x=>x.id===data.id?data:x))}}
-               onCreateWithPhotos={(sourceId,referenceId)=>{setGridPref(p=>({version:p.version+1,sourceId,referenceId}));navigate('grid')}}
+               onCreateWithPhotos={(sourceId,referenceId)=>{setGridPref(p=>({version:p.version+1,brandId:brand.id,sourceId,referenceId}));navigate('grid')}}
                notify={toast} showError={err}/>
            )}
            {brand && tab === 'formats' && (
              <FormatGallery brand={brand} assets={library} images={images}
                onUpload={()=>navigate('media')}
-               onChoose={format=>{setGridPref(p=>({version:p.version+1,format}));navigate('grid')}}/>
+               onChoose={format=>{setGridPref(p=>({version:p.version+1,brandId:brand.id,format}));navigate('grid')}}/>
            )}
            {tab === 'brands' && (
             <>
