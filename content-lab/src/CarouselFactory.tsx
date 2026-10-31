@@ -58,7 +58,7 @@ const layoutNames: Record<Layout,string> = {
 };
 const defaultLabel = (brand: Brand) => brand.language === 'English' ? 'A CLOSER LOOK' : 'OTRA MANERA DE VERLO';
 const makeSlide = (i: number, headline: string, assetId = ''): Slide => ({
-  key: 'slide-' + i, eyebrow: i === 0 ? 'THE BIG IDEA' : 'THE STORY',
+  key: 'slide-' + i, eyebrow: '',
   title: headline.slice(0,420), description: '',
   layout: i === 0 ? 'cover' : i % 3 === 0 ? 'photo' : i % 2 === 0 ? 'steps' : 'statement',
   assetId,frameStyle:i===0?'rounded':'none'
@@ -93,16 +93,18 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
       layout:'statement' as Layout,frameStyle:'none' as const,assetId:''}));
   }
   const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
-  const title = post.hook || (brand.language === 'English' ? 'One idea worth sharing' : 'Una idea que merece contarse');
-  const result: Slide[] = [{...makeSlide(0,title,post.assetId),eyebrow:brand.language==='Español'?'LA GRAN IDEA':'THE BIG IDEA',photoFocus:'top'}];
-  entries.forEach((entry,n)=>result.push({...makeSlide(n+1,entry),eyebrow:brand.language==='Español'?'LA HISTORIA':'THE STORY'}));
+  // A genuinely blank draft has no fabricated marketing hook. The editor guides
+  // people to write their own instead of shipping generic template copy.
+  const title = post.hook.trim();
+  const result: Slide[] = [{...makeSlide(0,title,post.assetId),photoFocus:'top'}];
+  entries.forEach((entry,n)=>result.push(makeSlide(n+1,entry)));
   if(result.length < 3) {
-    result.push(makeSlide(result.length,brand.language === 'English' ? 'What needs to change?' : '¿Qué podemos cambiar?'));
-    result.push(makeSlide(result.length,brand.language === 'English' ? 'A simpler way forward' : 'Una forma más sencilla'));
+    result.push(makeSlide(result.length,''));
+    result.push(makeSlide(result.length,''));
   }
   result.push({
-    ...makeSlide(result.length,post.cta || (brand.language === 'English' ? 'Your next step starts here.' : 'Empieza con un paso.')),
-    eyebrow:brand.language === 'English' ? 'THE NEXT STEP' : 'TU SIGUIENTE PASO',layout:'closing'
+    ...makeSlide(result.length,post.cta.trim()),
+    layout:'closing'
   });
   return result;
 }
@@ -120,8 +122,9 @@ function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: numbe
     if(built.length<=lines&&built.every(line=>ctx.measureText(line).width<=maxW)){size=fontSize;break;}
     size=fontSize;
   }
-  const spacing=Math.round(size*1.17);
+  const spacing=Math.round(size*1.12);
   ctx.font='bold '+size+'px '+font;ctx.fillStyle=color;
+  ctx.textBaseline='alphabetic';
   built.slice(0,lines).forEach((line,i)=>ctx.fillText(line,x,y+i*spacing));
 }
 async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle,editorMode=false) {
@@ -202,9 +205,23 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   // The free canvas begins without decorative shapes, lines, borders or prebuilt cards.
   if(style.freeCanvas){
     if(!editorMode){
-      label(slide.eyebrow,74,138,ink);
-      title(74,350,920,106,5);
-      body(74,780,920,ink,5);
+      // A minimalist editorial composition should use typography and whitespace
+      // intentionally rather than fixing every headline near the top.
+      const hasPhoto=Boolean(slide.assetId);
+      const hasBody=Boolean(slide.description.trim());
+      const hasEyebrow=Boolean(slide.eyebrow.trim());
+      if(hasEyebrow)label(slide.eyebrow,82,154,ink,24);
+      if(slide.title.trim()){
+        const textY=hasPhoto?344:hasBody?464:608;
+        const textSize=hasPhoto?104:hasBody?112:124;
+        title(82,textY,916,textSize,5);
+      }
+      if(hasBody)body(82,hasPhoto?820:850,908,ink,5);
+      if(!hasPhoto&&slide.title.trim()){
+        // Small editorial folio anchors a text-only slide without adding
+        // automatic lines, stickers, blocks or fake decorative elements.
+        label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),82,1270,ink,19);
+      }
       if(slide.assetId&&slide.photoPosition){
         const p=clampRect(slide.photoPosition),pw=p.w*1080,ph=p.h*1350;
         ctx.save();ctx.translate((p.x+p.w/2)*1080,(p.y+p.h/2)*1350);
@@ -404,6 +421,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [busy,setBusy]=useState('');
   useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  // A wide, sharp preview, capped to stay below mobile canvas texture limits.
+  // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
+  const previewPageWidth=Math.min(900,Math.floor(6800/slides.length));
+  const previewPageHeight=Math.round(previewPageWidth*1.25);
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
     if(!part.title.trim())result.push('Slide '+(n+1)+': falta el titular.');
@@ -433,10 +454,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       const all=await renderAllSlides();
       for(let n=0;n<all.length;n++){
         const canvas=all[n];
-        const small=document.createElement('canvas');small.width=270;small.height=338;
-        const context=small.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
-        context.drawImage(canvas,0,0,270,338);
-        previews.push(small.toDataURL('image/jpeg',.72));
+        const thumb=document.createElement('canvas');thumb.width=540;thumb.height=675;
+        const context=thumb.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
+        context.imageSmoothingEnabled=true;
+        context.imageSmoothingQuality='high';
+        context.drawImage(canvas,0,0,thumb.width,thumb.height);
+        // Lossless PNG keeps letter edges crisp, especially on iPhone.
+        previews.push(thumb.toDataURL('image/png'));
+        thumb.width=1;
       }
       setOverview(previews);notify('Vista previa completa preparada sin consumir créditos.');
     }catch(e){showError(e)}finally{setOverviewBusy(false)}
@@ -703,8 +728,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
             assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
             layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
-          const page=document.createElement('canvas');page.width=432;page.height=540;
-          page.getContext('2d')?.drawImage(wide,i*1080,0,1080,1350,0,0,432,540);
+          const page=document.createElement('canvas');
+          page.width=previewPageWidth;page.height=previewPageHeight;
+          const previewCtx=page.getContext('2d');
+          if(previewCtx){previewCtx.imageSmoothingQuality='high';
+            previewCtx.drawImage(wide,i*1080,0,1080,1350,0,0,page.width,page.height);}
           wide.width=1;return page;
         }
         const page=await drawSlide(slide,i,slides.length,brand,images,style,touchEdit);
@@ -736,18 +764,19 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
         backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
         accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
-      const wide=document.createElement('canvas');wide.width=432*slides.length;wide.height=540;
+      const wide=document.createElement('canvas');wide.width=previewPageWidth*slides.length;wide.height=previewPageHeight;
       const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
       for(let n=0;n<editable.length;n++){
         if(!active)return wide;
         const canvas=await drawSlide(editable[n],n,slides.length,brand,images,style,true);
-        ctx.drawImage(canvas,n*432,0,432,540);canvas.width=1;
+        ctx.imageSmoothingQuality='high';
+        ctx.drawImage(canvas,n*previewPageWidth,0,previewPageWidth,previewPageHeight);canvas.width=1;
       }
       return wide;
     };
     const timer=window.setTimeout(()=>{void render().then(async wide=>{
       if(!active){wide.width=1;return;}
-      const small=document.createElement('canvas');small.width=slides.length*432;small.height=540;
+      const small=document.createElement('canvas');small.width=slides.length*previewPageWidth;small.height=previewPageHeight;
       small.getContext('2d')?.drawImage(wide,0,0,small.width,small.height);
       const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text');
       if(hasBehind){
