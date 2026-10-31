@@ -20,9 +20,9 @@
       transformation.style.setProperty('--formed-opacity', String(Math.max(0, (progress - 15) / 85)));
       ideaProgress.style.setProperty('--fill', progress + '%');
       ideaProgress.value = String(progress);
-      const description = progress === 0 ? 'Antes: tu idea en tus notas' : progress === 100 ? 'Tu primera web: lista para mostrar lo que ofreces' : 'Tu idea está tomando forma: ' + Math.round(progress) + '%';
+      const description = progress === 0 ? 'Boceto inicial de Casa Brownie' : progress === 100 ? 'Resultado: muestra visual de Casa Brownie' : 'Transformación visual: ' + Math.round(progress) + '%';
       ideaProgress.setAttribute('aria-valuetext', description);
-      scene?.setAttribute('aria-label', complete ? 'Ejemplo de tu primera web: un titular, tu servicio y cómo contactarte.' : 'Tu idea en tres notas: qué ofreces, para quién y cómo contactarte.');
+      scene?.setAttribute('aria-label', complete ? 'Resultado: muestra visual de la landing Casa Brownie.' : 'Boceto de Casa Brownie con bloques de texto, imagen y botón sin diseñar.');
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(Number(choice.dataset.transformTo) === (complete ? 100 : 0))));
       if (before) before.hidden = complete;
       if (after) after.hidden = !complete;
