@@ -5,6 +5,7 @@
  * All coordinates are relative to target canvas so every export is composed (not stretched).
  */
 import {renderEditorial,type EditorialDesign} from './EditorialPoster';
+import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
 export type ExportSize='portrait'|'square'|'story';
 export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safeTop:number;safeBottom:number}>={
   portrait:{w:1080,h:1350,title:'Post · 4:5',safeTop:0.055,safeBottom:0.065},
@@ -35,7 +36,7 @@ export const LAYOUTS:Layout[]=[
  {name:'Graphic Cutout',image:[.11,.27,.54,.65],type:[.58,.12,.36,.44],accent:'cutout',shape:'split'},
  {name:'Story Card',image:[.12,.17,.76,.52],type:[.12,.74,.76,.14],accent:'pill',shape:'paper',align:'center'}
 ];
-type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls;design?:EditorialDesign};
+type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;stickerIds?:string[]};
 type Brand={name:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string};
 const validColor=(s:string|undefined,fallback:string)=>/^#[a-fA-F0-9]{6}$/.test(s||'')?s!:fallback;
 const luminance=(color:string)=>{const cs=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*cs[0]+.7152*cs[1]+.0722*cs[2]};
@@ -130,6 +131,7 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  const dark=fmt.dark,base=fmt.shape==='solid'?accent:fmt.shape==='dark'?'#191919':paper;
  const ink=inkOn(base),secondaryInk=inkOn(paper);
  geometry(ctx,fmt,W,H,paper,accent,ink);
+ if(tile.backgroundId&&tile.backgroundId!=='brand')paintFreeBackground(ctx,W,H,tile.backgroundId,accent,paper);
  const control=tile.layout||{};
  const dx=clamp(Number(control.imageX||0),-.55,.55)*W,dy=clamp(Number(control.imageY||0),-.55,.55)*H;
  const tx=clamp(Number(control.textX||0),-.35,.35)*W,ty=clamp(Number(control.textY||0),-.35,.35)*H;
@@ -175,5 +177,6 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
    ctx.drawImage(im,W*.81+(lw-im.naturalWidth*k)/2,H*(metrics.safeTop+.01),im.naturalWidth*k,im.naturalHeight*k);
   }catch{/* An inaccessible logo cannot prevent an otherwise safe export. */}
  }
+ paintFreeStickers(ctx,W,H,tile.stickerIds,accent);
  return {canvas,fit:didFit,contrast:contrast(headlineColor,fmt.shape==='dark'?'#191919':base),format:fmt.name};
 }
