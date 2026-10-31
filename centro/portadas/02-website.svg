@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="Website Automation">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#173353"/><stop offset="1" stop-color="#397B9C"/></linearGradient><radialGradient id="glow" cx="75%" cy="45%" r="65%"><stop stop-color="#D4E9F7" stop-opacity=".3"/><stop offset="1" stop-color="#D4E9F7" stop-opacity="0"/></radialGradient><filter id="drop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".23"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#bg)"/><rect width="720" height="480" fill="url(#glow)"/>
+<path d="M-80 470 C 130 385 191 562 396 443 S 620 327 832 405" fill="none" stroke="#F4F8FF" stroke-opacity=".095" stroke-width="2"/>
+<g fill="none" stroke="#FFFFFF" stroke-opacity=".12" stroke-width="1.6"><circle cx="610" cy="201" r="208"/><circle cx="610" cy="201" r="252"/></g>
+<rect x="48" y="42" width="24" height="3" rx="1.5" fill="#D4E9F7"/>
+<text x="84" y="49" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2" font-size="15" fill="#D4E9F7">THE LAUNCH ERA</text>
+<text x="50" y="115" font-family="Arial,Helvetica,sans-serif" letter-spacing="2.4" font-size="15" font-weight="700" fill="#E2EBF4" fill-opacity=".88">02 / SERVICE STUDIO</text>
+<g font-family="Arial,Helvetica,sans-serif" letter-spacing="-1.8" font-weight="800" fill="#FFFFFF">
+<text x="48" y="211" font-size="55">Website</text>
+<text x="48" y="279" font-size="55">Automation</text>
+</g>
+<rect x="49" y="303" width="44" height="3" rx="1.5" fill="#D4E9F7"/>
+<text x="50" y="345" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="1" font-size="16" fill="#D4E9F7">SMART LEAD WORKFLOWS</text>
+
+ <g filter="url(#drop)"><rect x="406" y="131" width="279" height="245" rx="18" fill="#11283A" fill-opacity=".89" stroke="#FFFFFF" stroke-opacity=".42"/><rect x="407" y="132" width="277" height="38" rx="17" fill="#E5F1F5" fill-opacity=".13"/><circle cx="428" cy="149" r="4" fill="#D2EAF1" fill-opacity=".75"/><circle cx="443" cy="149" r="4" fill="#D2EAF1" fill-opacity=".45"/><circle cx="458" cy="149" r="4" fill="#D2EAF1" fill-opacity=".3"/><rect x="422" y="183" width="247" height="176" rx="10" fill="#EDF5F5" fill-opacity=".07" stroke="#F8FFFF" stroke-opacity=".1"/></g>
+ <rect x="423" y="199" width="102" height="158" rx="9" fill="#D9EBF5" fill-opacity=".2"/>
+ <rect x="440" y="216" width="70" height="9" rx="4.5" fill="#EAF7FD"/><rect x="440" y="235" width="58" height="6" rx="3" fill="#C1D8E7" fill-opacity=".8"/>
+ <rect x="441" y="256" width="67" height="35" rx="7" fill="#9AD5F2" fill-opacity=".48"/>
+ <rect x="441" y="303" width="67" height="11" rx="5" fill="#E0F0F5" fill-opacity=".35"/><rect x="441" y="326" width="43" height="7" rx="3" fill="#E0F0F5" fill-opacity=".35"/>
+ <path d="M522 264 C552 264 545 227 566 227" stroke="#DCF6FF" stroke-width="3" fill="none" stroke-dasharray="6 7"/>
+ <path d="M560 221l8 6-8 6" fill="none" stroke="#DCF6FF" stroke-width="3"/>
+ <rect x="560" y="198" width="107" height="60" rx="10" fill="#C3E4F5" fill-opacity=".25" stroke="#E1FAFF" stroke-opacity=".7"/>
+ <text x="571" y="222" font-size="11" fill="#F7FFFF" font-weight="700" font-family="Arial">New inquiry</text><text x="572" y="242" font-size="9" fill="#C9E8F8" font-family="Arial">Captured / saved</text>
+ <rect x="559" y="280" width="109" height="58" rx="10" fill="#D7F0FA" fill-opacity=".12" stroke="#E9FAFF" stroke-opacity=".45"/>
+ <circle cx="577" cy="300" r="6" fill="#B7E9E3"/><text x="591" y="302" font-size="11" fill="#F7FFFF" font-weight="700" font-family="Arial">Next step</text><text x="571" y="321" font-size="9" fill="#C7E1F0" font-family="Arial">Workflow ready</text>
+<path d="M48 403 H672" stroke="#FFFFFF" stroke-opacity=".22"/>
+<text x="49" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2" fill="#EBF5FA" fill-opacity=".9">WEBSITE / REQUESTS / ORGANIZE</text>
+<text x="670" y="438" text-anchor="end" font-family="Arial" font-size="14" font-weight="700" fill="#D4E9F7">TLE / 26</text>
+</svg>

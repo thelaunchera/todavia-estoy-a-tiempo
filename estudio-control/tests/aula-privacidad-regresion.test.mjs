@@ -159,3 +159,31 @@ test('Ventas: refrescar registros, moneda verdadera y resumen de accesos indepen
  assert.match(api,/await owner\(\)/,'Las consultas requieren administradora');
  assert.match(studio,/href="\.\.\/centro\/" target="_blank"/,'Enlace al Centro de productos');
 });
+
+test('Centro de Productos: las seis portadas originales se cargan sin modificar los checkouts',()=>{
+ const center=readFileSync('centro/index.html','utf8');
+ const script=readFileSync('centro/centro.js','utf8');
+ const expected=[
+  ['01-booking.svg','booking-flow'],
+  ['02-website.svg','website-automation'],
+  ['03-ai-booking.svg','ai-booking'],
+  ['04-ai-followup.svg','ai-followup'],
+  ['05-ai-business.svg','ai-business'],
+  ['06-va-essential.svg','va']
+ ];
+ for(const [art,code] of expected){
+  assert.match(center,new RegExp('src="\\./portadas/'+art.replaceAll('.','\\.')+'"'),'Portada cargada: '+art);
+  const file=readFileSync('centro/portadas/'+art,'utf8');
+  assert.match(file,/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg"/,'Imagen vectorial original '+art);
+  assert.match(file,/<\/svg>\s*$/,'SVG cerrado '+art);
+  assert.match(center,new RegExp('data-detail="'+code+'"'),'Ficha disponible: '+code);
+ }
+ assert.equal((center.match(/class="tile-cover tile-cover-image"/g)||[]).length,6);
+ assert.match(script,/service-checkout\/\?offer=booking-flow/);
+ assert.match(script,/service-checkout\/\?offer=website-automation/);
+ assert.match(script,/service-checkout\/\?offer=ai-booking/);
+ assert.match(script,/service-checkout\/\?offer=ai-followup/);
+ assert.match(script,/service-checkout\/\?offer=ai-business/);
+ assert.match(script,/service-checkout\/\?offer=va/);
+ assert.doesNotMatch(center,/src="\.\/portadas\/(?:0[1-6].*\.png)"/,'No prometer PNG que no existen');
+});

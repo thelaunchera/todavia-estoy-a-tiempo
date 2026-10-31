@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="AI Follow-Up Assistant">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#393556"/><stop offset="1" stop-color="#6B6998"/></linearGradient><radialGradient id="glow" cx="75%" cy="45%" r="65%"><stop stop-color="#E0DCFF" stop-opacity=".3"/><stop offset="1" stop-color="#E0DCFF" stop-opacity="0"/></radialGradient><filter id="drop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".23"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#bg)"/><rect width="720" height="480" fill="url(#glow)"/>
+<path d="M-80 470 C 130 385 191 562 396 443 S 620 327 832 405" fill="none" stroke="#F4F8FF" stroke-opacity=".095" stroke-width="2"/>
+<g fill="none" stroke="#FFFFFF" stroke-opacity=".12" stroke-width="1.6"><circle cx="610" cy="201" r="208"/><circle cx="610" cy="201" r="252"/></g>
+<rect x="48" y="42" width="24" height="3" rx="1.5" fill="#E0DCFF"/>
+<text x="84" y="49" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2" font-size="15" fill="#E0DCFF">THE LAUNCH ERA</text>
+<text x="50" y="115" font-family="Arial,Helvetica,sans-serif" letter-spacing="2.4" font-size="15" font-weight="700" fill="#E2EBF4" fill-opacity=".88">04 / SERVICE STUDIO</text>
+<g font-family="Arial,Helvetica,sans-serif" letter-spacing="-1.8" font-weight="800" fill="#FFFFFF">
+<text x="48" y="211" font-size="51">AI Follow-Up</text>
+<text x="48" y="279" font-size="55">Assistant</text>
+</g>
+<rect x="49" y="303" width="44" height="3" rx="1.5" fill="#E0DCFF"/>
+<text x="50" y="345" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="1" font-size="16" fill="#E0DCFF">STAY IN TOUCH</text>
+
+ <g filter="url(#drop)"><rect x="421" y="126" width="265" height="256" rx="18" fill="#11283A" fill-opacity=".89" stroke="#FFFFFF" stroke-opacity=".42"/><rect x="422" y="127" width="263" height="38" rx="17" fill="#E5F1F5" fill-opacity=".13"/><circle cx="443" cy="144" r="4" fill="#D2EAF1" fill-opacity=".75"/><circle cx="458" cy="144" r="4" fill="#D2EAF1" fill-opacity=".45"/><circle cx="473" cy="144" r="4" fill="#D2EAF1" fill-opacity=".3"/><rect x="437" y="178" width="233" height="187" rx="10" fill="#EDF5F5" fill-opacity=".07" stroke="#F8FFFF" stroke-opacity=".1"/></g>
+ <path d="M461 218v112" stroke="#E9DEFC" stroke-opacity=".6" stroke-width="2.2"/>
+ <circle cx="461" cy="219" r="12" fill="#E4DFFC" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="2"/><path d="M456 219l4 4 7-8" stroke="#454476" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="461" cy="273" r="12" fill="#E4DFFC" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="2"/><path d="M456 273l4 4 7-8" stroke="#454476" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="461" cy="327" r="12" fill="#CFC6FF" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="2"/><path d="M456 327l4 4 7-8" stroke="#454476" stroke-width="2" fill="none" stroke-linecap="round"/>
+ <text x="488" y="215" font-size="13" font-weight="700" fill="#FFFFFF" font-family="Arial">Inquiry received</text><text x="488" y="231" font-size="10" fill="#DAD5F5" font-family="Arial">Lead opted in</text>
+ <text x="488" y="270" font-size="13" font-weight="700" fill="#FFFFFF" font-family="Arial">Friendly follow-up</text><text x="488" y="286" font-size="10" fill="#DAD5F5" font-family="Arial">Sent when appropriate</text>
+ <text x="488" y="322" font-size="13" font-weight="700" fill="#FFFFFF" font-family="Arial">Next step ready</text><text x="488" y="337" font-size="10" fill="#DAD5F5" font-family="Arial">Conversation organized</text>
+ <rect x="580" y="99" width="100" height="34" rx="17" fill="#DDD9FF"/><text x="599" y="120" font-size="10" fill="#373250" font-weight="800" font-family="Arial">ON TRACK</text>
+<path d="M48 403 H672" stroke="#FFFFFF" stroke-opacity=".22"/>
+<text x="49" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2" fill="#EBF5FA" fill-opacity=".9">LEADS / CONSENT / FOLLOW-UP</text>
+<text x="670" y="438" text-anchor="end" font-family="Arial" font-size="14" font-weight="700" fill="#E0DCFF">TLE / 26</text>
+</svg>

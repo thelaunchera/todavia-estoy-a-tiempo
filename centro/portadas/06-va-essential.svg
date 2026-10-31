@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="VA Essential Support">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#3A5263"/><stop offset="1" stop-color="#849AA7"/></linearGradient><radialGradient id="glow" cx="75%" cy="45%" r="65%"><stop stop-color="#EFF3EB" stop-opacity=".3"/><stop offset="1" stop-color="#EFF3EB" stop-opacity="0"/></radialGradient><filter id="drop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".23"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#bg)"/><rect width="720" height="480" fill="url(#glow)"/>
+<path d="M-80 470 C 130 385 191 562 396 443 S 620 327 832 405" fill="none" stroke="#F4F8FF" stroke-opacity=".095" stroke-width="2"/>
+<g fill="none" stroke="#FFFFFF" stroke-opacity=".12" stroke-width="1.6"><circle cx="610" cy="201" r="208"/><circle cx="610" cy="201" r="252"/></g>
+<rect x="48" y="42" width="24" height="3" rx="1.5" fill="#EFF3EB"/>
+<text x="84" y="49" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2" font-size="15" fill="#EFF3EB">THE LAUNCH ERA</text>
+<text x="50" y="115" font-family="Arial,Helvetica,sans-serif" letter-spacing="2.4" font-size="15" font-weight="700" fill="#E2EBF4" fill-opacity=".88">06 / SERVICE STUDIO</text>
+<g font-family="Arial,Helvetica,sans-serif" letter-spacing="-1.8" font-weight="800" fill="#FFFFFF">
+<text x="48" y="211" font-size="51">VA Essential</text>
+<text x="48" y="279" font-size="55">Support</text>
+</g>
+<rect x="49" y="303" width="44" height="3" rx="1.5" fill="#EFF3EB"/>
+<text x="50" y="345" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="1" font-size="16" fill="#EFF3EB">HUMAN BUSINESS SUPPORT</text>
+
+ <g transform="rotate(7 568 244)" filter="url(#drop)">
+ <rect x="454" y="140" width="213" height="254" rx="16" fill="#2F4B5C" stroke="#EDF4EF" stroke-opacity=".35"/>
+ <rect x="434" y="122" width="216" height="254" rx="16" fill="#F4F7F2"/>
+ <rect x="457" y="154" width="150" height="10" rx="5" fill="#A4B9C6"/>
+ <text x="457" y="195" font-size="22" fill="#29485C" font-weight="800" font-family="Arial">Today’s tasks</text>
+ <rect x="457" y="215" width="23" height="23" rx="6" fill="#CBDDE0" stroke="#94AFBA"/><path d="M463 226l5 5 8-10" fill="none" stroke="#416F7C" stroke-width="2.8"/><rect x="491" y="219" width="115" height="8" rx="4" fill="#9EB7C3" fill-opacity=".8"/><rect x="491" y="232" width="69" height="6" rx="3" fill="#C6D8DD"/><rect x="457" y="257" width="23" height="23" rx="6" fill="#CBDDE0" stroke="#94AFBA"/><path d="M463 268l5 5 8-10" fill="none" stroke="#416F7C" stroke-width="2.8"/><rect x="491" y="261" width="92" height="8" rx="4" fill="#9EB7C3" fill-opacity=".8"/><rect x="491" y="274" width="69" height="6" rx="3" fill="#C6D8DD"/><rect x="457" y="299" width="23" height="23" rx="6" fill="#E9EEF0" stroke="#94AFBA"/><path d="M463 310l5 5 8-10" fill="none" stroke="#416F7C" stroke-width="2.8"/><rect x="491" y="303" width="115" height="8" rx="4" fill="#9EB7C3" fill-opacity=".8"/><rect x="491" y="316" width="69" height="6" rx="3" fill="#C6D8DD"/>
+ </g>
+ <rect x="575" y="116" width="111" height="34" rx="17" fill="#DDEAE7"/><text x="591" y="137" font-size="10" fill="#254757" font-weight="800" font-family="Arial">YOU'RE SET</text>
+<path d="M48 403 H672" stroke="#FFFFFF" stroke-opacity=".22"/>
+<text x="49" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2" fill="#EBF5FA" fill-opacity=".9">TASKS / SUPPORT / CLARITY</text>
+<text x="670" y="438" text-anchor="end" font-family="Arial" font-size="14" font-weight="700" fill="#EFF3EB">TLE / 26</text>
+</svg>
