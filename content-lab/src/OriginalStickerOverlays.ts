@@ -1,7 +1,7 @@
 /** Renders real uploaded PNGs at the exact same normalized positions that
  * the finger editor displays. Transparent pixels stay transparent.
  */
-import {stickerDefault,clampRect,type StickerPositions} from './TouchGeometry';
+import {stickerDefault,clampRect,layerCornerPixels,type StickerPositions} from './TouchGeometry';
 export async function paintOriginalStickerImages(
  ctx:CanvasRenderingContext2D,w:number,h:number,ids:string[]|undefined,
  images:Record<string,string>={},positions:StickerPositions={}
@@ -19,6 +19,9 @@ export async function paintOriginalStickerImages(
    ctx.save();
    ctx.translate(w*(rect.x+rect.w/2),h*(rect.y+rect.h/2));
    ctx.rotate((rect.angle||0)*Math.PI/180);
+   if((rect.cornerRadius??0)>0){
+    ctx.beginPath();ctx.roundRect(-sw/2,-sh/2,sw,sh,layerCornerPixels(rect,sw,sh));ctx.clip();
+   }
    ctx.shadowColor='rgba(24,29,30,.12)';ctx.shadowBlur=Math.min(w,h)*.014;
    ctx.drawImage(img,-width/2,-height/2,width,height);
    ctx.restore();
