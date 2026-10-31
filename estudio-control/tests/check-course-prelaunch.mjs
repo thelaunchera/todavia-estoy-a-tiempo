@@ -416,3 +416,17 @@ assert.doesNotMatch(brandCenterHtml,/class="brand-mark"|monograma-podcast-04\.sv
 assert.doesNotMatch(brandCenterJs,/↗|→|🔒/,'El estado de sesión no añade flechas');
 assert.match(brandCenterCss,/\.center-nav \.brand-logo/,'El logotipo adapta su tamaño en móvil');
 console.log('QA: logo oficial, tarjetas sin emojis y botones sin flechas OK');
+
+
+// Regression: los botones de soporte del Centro no se superponen al texto en iPad.
+const centerPage=read('centro/index.html');
+const centerStyles=read('centro/centro.css');
+const centerHelp=centerPage.slice(centerPage.indexOf('<section class="help-strip"'),centerPage.indexOf('</section>',centerPage.indexOf('<section class="help-strip"'))+10);
+assert.ok(centerHelp.includes('<div class="help-strip-actions"'),'CTAs fuera del párrafo');
+assert.ok(centerHelp.includes('class="help-strip-secondary" href="./contacto.html"'),'Contacto conserva su destino');
+assert.ok(centerHelp.includes('class="help-strip-primary" href="mailto:hello@thelaunchera.com'),'El correo conserva su destino');
+assert.ok(centerHelp.indexOf('</p>')<centerHelp.indexOf('class="help-strip-actions"'),'Primero el texto, después los botones');
+assert.ok(centerStyles.includes('.help-strip-actions{display:flex;flex-wrap:wrap'),'Sin anchos rígidos');
+assert.ok(centerStyles.includes('@media(max-width:900px){.help-strip-actions{flex-direction:column}'),'Botones apilados en iPad');
+assert.ok(!centerStyles.includes('.help-strip a{border:1px solid #6a91a7'),'Sin estilo de botón aplicado a enlaces dentro del texto');
+assert.ok(centerPage.includes('./centro.css?v=20261031-support-responsive-v8'),'Cache de estilos actualizado');
