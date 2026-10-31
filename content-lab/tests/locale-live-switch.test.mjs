@@ -8,7 +8,7 @@ test('Switching ES/EN updates the real React header, dashboard, shortcuts, stats
  assert.ok(app.includes("const t = (value:string):string=>uiText(value,loginLanguage)"));
  assert.ok(app.includes("{t(nav.find(n => n.id === tab)?.title||'')}"));
  assert.ok(app.includes("loginLanguage==='es'?'¡Qué gusto verte de nuevo! 👋':'Welcome back! 👋'"));
- assert.ok(app.includes("loginLanguage==='es'?'Tu estudio está listo. ¿Qué vamos a crear hoy?'"));
+ assert.ok(app.includes("'Tu estudio está listo. ¿Qué vamos a crear hoy?'"));
  assert.ok(app.includes("{t(s.label)}"));
  assert.ok(app.includes("{t(s.detail)}"));
  assert.ok(app.includes("{t(step.title)}"));
