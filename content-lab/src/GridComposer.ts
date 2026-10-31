@@ -106,7 +106,7 @@ async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:numb
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(im,px,py,im.naturalWidth*k,im.naturalHeight*k);ctx.restore();
  return true;
 }
-export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;preserve?:boolean},size:ExportSize='portrait'){
+export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean},size:ExportSize='portrait'){
  const fmt=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length],metrics=EXPORT_SIZES[size];
  const W=metrics.w,H=metrics.h,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el canvas');
@@ -141,5 +141,13 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  ctx.textAlign='left';ctx.fillStyle=fmt.dark?'#ffffff':inkOn(paper);
  ctx.fillText((brand.name||'').toUpperCase().slice(0,35),W*.065,footerY);
  ctx.textAlign='right';ctx.fillText((tile.subtext||'').slice(0,54),W*.935,footerY);
+ if(photos.logo){
+  const im=new Image();im.src=photos.logo;
+  try{
+   await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('Logo no disponible'))});
+   const lw=W*.15,lh=H*.065,k=Math.min(lw/im.naturalWidth,lh/im.naturalHeight);
+   ctx.drawImage(im,W*.81+(lw-im.naturalWidth*k)/2,H*(metrics.safeTop+.01),im.naturalWidth*k,im.naturalHeight*k);
+  }catch{/* An inaccessible logo cannot prevent an otherwise safe export. */}
+ }
  return {canvas,fit:didFit,contrast:contrast(headlineColor,fmt.shape==='dark'?'#191919':base),format:fmt.name};
 }
