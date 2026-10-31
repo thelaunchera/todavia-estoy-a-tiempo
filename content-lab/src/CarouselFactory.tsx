@@ -400,10 +400,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   });
   const renderAllSlides=async()=>{
     const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
-    required.push(...(style.panoramaLayers||[]).map(layer=>layer.assetId));
+    required.push(...(style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
-    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font});
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
     return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
@@ -658,7 +658,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);if(s.backgroundImageId&&!images[s.backgroundImageId])loadImage(s.backgroundImageId);(s.stickerIds||[]).forEach(id=>{if(!images[id])loadImage(id)});});
     if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
     if(style.seamlessAssetId&&!images[style.seamlessAssetId])loadImage(style.seamlessAssetId);
-    (style.panoramaLayers||[]).forEach(layer=>{if(!images[layer.assetId])loadImage(layer.assetId)});
+    (style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'||layer.kind==='sticker').forEach(layer=>{if(!images[layer.assetId])loadImage(layer.assetId)});
   },[post.designData,brand.id,style.referenceAssetId,style.seamlessAssetId]);
   useEffect(()=>{
     let active=true;
@@ -667,7 +667,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         if(style.seamlessEnabled){
           const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
             assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
-            layers:style.panoramaLayers,font:style.font});
+            layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
           const page=document.createElement('canvas');page.width=432;page.height=540;
           page.getContext('2d')?.drawImage(wide,i*1080,0,1080,1350,0,0,432,540);
           wide.width=1;return page;
@@ -700,7 +700,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         ?part.photoPosition||photoDefault(part.layout):part.photoPosition}));
       if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
         backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
-        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font});
+        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
       const wide=document.createElement('canvas');wide.width=432*slides.length;wide.height=540;
       const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
       for(let n=0;n<editable.length;n++){
@@ -718,7 +718,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(hasBehind){
         const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
         const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
-        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font);
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas);
         else await paintCarouselTypography(typeCtx,slides,brand,style);
         const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
         scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
@@ -793,7 +793,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       }}><Plus size={17}/> Crear 6 slides · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Usar IA para escribir · opcional (1 crédito)</button></div>
     </div>
     <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
-      <div className="factory-style-title"><div><span className="eyebrow">02 / BRAND KIT LOCK</span><h2>Un solo estilo para todos los slides.</h2><p>Fondos, tipografías y colores conectados. Cambia aquí una vez y el carrusel completo sigue la misma dirección de arte.</p></div><span className="factory-style-lock"><Check size={15}/> Estilo maestro activo</span></div>
+      <div className="factory-style-title"><div><span className="eyebrow">02 / LIENZO LIBRE</span><h2>Empieza en blanco. Diseña a tu gusto.</h2><p>Sin plantillas, recuadros ni líneas decorativas. Selecciona colores, degradados, fondos y tipografías libremente.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
+      <div className="factory-canvas-colors">
+        <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
+          onChange={e=>setArtStyle({canvasColor:e.target.value,seamlessBackgroundId:'brand'})}/></label>
+        <label><input type="checkbox" checked={!!style.canvasGradient}
+          onChange={e=>setArtStyle({canvasGradient:e.target.checked?'#F3DBD5':''})}/>
+          Fondo degradado</label>
+        {style.canvasGradient&&<label>Segundo color <input type="color" aria-label="Segundo color del degradado"
+          value={style.canvasGradient} onChange={e=>setArtStyle({canvasGradient:e.target.value,seamlessBackgroundId:'brand'})}/></label>}
+        <button type="button" onClick={()=>setArtStyle({canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand'})}>Fondo blanco</button>
+      </div>
       <div className="factory-destination">
         <label>¿Dónde vas a publicar este carrusel?
           <select value={style.targetPlatform} onChange={e=>setArtStyle({targetPlatform:e.target.value as CarouselStyle['targetPlatform']})}>
@@ -837,18 +847,22 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <div className="factory-style-footer">
         <div className="factory-style-swatches">{palette.map((c,n)=><span key={n} title={c} style={{background:c}}/>)}<span title="Fondo" style={{background:brand.background}}/><small>Paleta guardada · usa otros tonos por slide cuando quieras</small></div>
-        <button type="button" className="btn ghost" onClick={applyRhythm}><Layers3 size={15}/> Aplicar composición coordinada</button>
+        <button type="button" className="btn ghost" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),{...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Usar fondo blanco</button>
       </div>
       {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
     </section>
     <section className="seamless-config">
-      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un diseño continuo, cortado en slides.</h2><p>Se crea una composición panorámica completa y se divide exactamente en PNG de 1080 × 1350, sin espacios entre uno y otro.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
+      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
       {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{FREE_BACKGROUNDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
         <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
         <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
       </div>}
     </section>
     <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+      onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
+      onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
+      canUndo={historyVersion>=0&&pastHistory.current.length>0}
+      canRedo={historyVersion>=0&&futureHistory.current.length>0}
       layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
       onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
       onReorder={reorderPanoramaLayer}
@@ -863,7 +877,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
         <div className="factory-panel">
           <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Edit this slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
-          <label>Layout</label><select value={slide.layout} onChange={e=>replace({layout:e.target.value as Layout})}>{layouts.map(v=><option key={v} value={v}>{layoutNames[v]}</option>)}</select>
+          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
           <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
           <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
           <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
