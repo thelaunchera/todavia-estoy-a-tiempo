@@ -7,15 +7,16 @@ test('Switching ES/EN updates the real React header, dashboard, shortcuts, stats
  const app=read('src/App.tsx'),locale=read('src/LabLocale.ts');
  assert.ok(app.includes("const t = (value:string):string=>uiText(value,loginLanguage)"));
  assert.ok(app.includes("{t(nav.find(n => n.id === tab)?.title||'')}"));
- assert.ok(app.includes("{t('Make room for')}"));
- assert.ok(app.includes("{t('better content.')}"));
- assert.ok(app.includes("{t('YOUR CREATIVE DESK')}"));
+ assert.ok(app.includes("loginLanguage==='es'?'¡Qué gusto verte de nuevo! 👋':'Welcome back! 👋'"));
+ assert.ok(app.includes("loginLanguage==='es'?'Tu estudio está listo. ¿Qué vamos a crear hoy?'"));
  assert.ok(app.includes("{t(s.label)}"));
  assert.ok(app.includes("{t(s.detail)}"));
  assert.ok(app.includes("{t(step.title)}"));
- assert.ok(app.includes("{t(step.subtitle)}"));
- assert.ok(app.includes("{t(item.label)}"));
- assert.ok(app.includes(">{t('CONTENT LAB · FIRST STEPS')}"));
+  assert.ok(app.includes("{t(item.label)}"));
+ assert.ok(app.includes('lab-home-greeting'));
+ assert.ok(!app.includes('<section className="lab-quickstart"'));
+ assert.ok(app.includes('<details className="lab-greeting-progress">'));
+ assert.ok(app.includes('lab-greeting-actions'));
  assert.ok(app.includes("loginLanguage==='es'?'Elige el idioma de tu cuenta':'Choose your account language'"));
  assert.ok(app.includes("onClick={()=>chooseLanguage('es')}"));
  assert.ok(app.includes("onClick={()=>chooseLanguage('en')}"));
@@ -30,4 +31,15 @@ test('UI language and creative brand language remain independent',()=>{
  assert.ok(app.includes('brand.language'));
  assert.ok(platform.includes('content_lab_language'));
  assert.ok(app.includes('auth.setPreferredLanguage(next)'));
+});
+
+test('Home greeting is compact, actionable, and keeps incomplete onboarding tucked away',()=>{
+ const app=read('src/App.tsx'),styles=read('src/index.css');
+ assert.ok(app.includes("setupStepsDone<3&&<details"));
+ assert.ok(app.includes("onClick={()=>start()}"));
+ assert.ok(app.includes("onClick={startFactory}"));
+ assert.ok(app.includes("brand.name&&brand.name!=='My Brand'"));
+ assert.ok(!app.includes('<section className="intro">'));
+ assert.ok(styles.includes('.lab-home-greeting'));
+ assert.ok(styles.includes('@media(max-width:640px)'));
 });
