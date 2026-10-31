@@ -31,6 +31,8 @@ type Asset = LibraryAsset;
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type PhotoFrame = 'none'|'rounded'|'super-rounded'|'polaroid'|'soft-shadow'|'double-border';
 const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'rounded',name:'Rounded'},{id:'super-rounded',name:'Super soft'},{id:'polaroid',name:'Polaroid'},{id:'soft-shadow',name:'Floating'},{id:'double-border',name:'Double line'}];
+// Licensed Unsplash residential photographs for non-exported frame previews only.
+const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
   layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
@@ -438,8 +440,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <button className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
     </div>
     <div className="factory-idea">
-      <div><div className="eyebrow">01 / CONTENT ENGINE</div><h2>Start with one good idea.</h2><p>La IA escribe el carrusel en {brand.language}, siguiendo las reglas de {brand.name}.</p></div>
-      <div><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate full carousel</button></div>
+      <div><div className="eyebrow">01 / CAROUSEL STUDIO · SIN IA</div><h2>Haz tu carrusel a tu manera.</h2><p>Crea, edita, diseña, usa stickers, mueve las fotos y descarga todos los PNG gratis. La IA es opcional, solo si quieres que escriba o genere imágenes.</p></div>
+      <div><button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
+        const next=Array.from({length:6},(_,n)=>({...makeSlide(n,n===0?'Tu próximo carrusel':n===5?'Tu llamada a la acción':'Escribe tu idea aquí'),eyebrow:n===0?'PORTADA':n===5?'SIGUIENTE PASO':'TU HISTORIA',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
+        setAll(next);setCurrent(0);notify('Carrusel editable de 6 slides creado. Gratis y sin IA.');
+      }}><Plus size={17}/> Crear 6 slides gratis · sin IA</button><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate full carousel</button></div>
     </div>
     <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
       <div className="factory-style-title"><div><span className="eyebrow">02 / BRAND KIT LOCK</span><h2>Un solo estilo para todos los slides.</h2><p>Fondos, tipografías y colores conectados. Cambia aquí una vez y el carrusel completo sigue la misma dirección de arte.</p></div><span className="factory-style-lock"><Check size={15}/> Estilo maestro activo</span></div>
@@ -504,8 +509,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
            </select>
-           <label>Photo frames · redondeados y editoriales</label>
-           <div className="factory-frame-modes" role="group" aria-label="Elegir marco fotográfico">{photoFrames.map(f=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}/><small>{f.name}</small></button>)}</div>
+           <label>Photo frames · conoce cada estilo con casas reales</label>
+           <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Elige un marco y aplícalo a tu propia fotografía.</p>
+           <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos con fotografías de casas">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
            <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
              <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
            </select>
