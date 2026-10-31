@@ -29,7 +29,7 @@ test('Real transparent PNG stickers are imported from the curated ZIP and offere
  assert.ok(lib.includes('<StickerPreview asset={asset} src={images[asset.id]}'));
  assert.ok(lib.includes('<img src={src} alt={displayAssetName(asset)}'));
  assert.ok(media.includes("'sticker'"));
- assert.ok(app.includes("category==='sticker'?'image/png':'image/jpeg'"));
+ assert.ok(app.includes("category==='sticker'||category==='background'"));
  assert.ok(app.includes("id: 'stickers'"));
  assert.ok(app.includes("id: 'backgrounds'"));
 });
