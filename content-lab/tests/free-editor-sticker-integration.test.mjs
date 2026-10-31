@@ -26,9 +26,11 @@ test('All three graphic editors preserve original sticker layers and custom back
 });
 test('Carousel generation and editing work without invoking AI and exports keep stickers',()=>{
  const car=read('src/CarouselFactory.tsx'),overlay=read('src/OriginalStickerOverlays.ts');
- assert.ok(car.includes('Crear 6 slides · sin IA'));
+ assert.ok(car.includes('Nuevo carrusel'));
  assert.ok(car.includes('setAll(next);setCurrent(0)'));
- assert.ok(car.includes('IA opcional'));
+ assert.ok(car.includes("studioTab==='ai'"));
+ assert.ok(!car.includes('IA opcional'));
+ assert.ok(car.includes('onUploadBackground={onUploadBackground}'));
  assert.ok(car.includes("if(!window.confirm('Esta foto utilizará 1 crédito de IA."));
  assert.ok(car.includes('await paintOriginalStickerImages'));
  assert.ok(overlay.includes('positions:StickerPositions'));
@@ -39,4 +41,13 @@ test('House photo previews are actual licensed demonstration images and not expo
  assert.ok(car.includes('https://images.unsplash.com/photo-'));
  assert.ok(car.includes('Estas fotos son de demostración, no se añaden a tus posts'));
  assert.ok(car.includes('src={sampleHomes[n%sampleHomes.length]}'));
+});
+
+test('Content Lab navigation presents grouped creative actions rather than a flat menu',()=>{
+ const app=read('src/App.tsx');
+ assert.ok(app.includes('const navGroups:'));
+ for(const group of ['CREAR','TUS RECURSOS','INSPIRACIÓN','GUARDAR Y ORGANIZAR']){
+  assert.ok(app.includes("title:'"+group+"'"));
+ }
+ assert.ok(app.includes('navGroups.map(group=>'));
 });
