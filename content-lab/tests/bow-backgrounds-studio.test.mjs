@@ -38,7 +38,7 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
 });
 test('Factory uses Cata design hacking sequence with IA as a short standalone section',()=>{
  const studio=read('src/CarouselFactory.tsx');
- assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('inspiration')"));
+ assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas')"));
  assert.ok(studio.includes('CREA A TU MANERA'));
  assert.ok(studio.includes('Crear carrusel con IA · 1 crédito'));
  assert.ok(studio.includes('PASO 2 DE 5 · FOTO PROTAGONISTA'));
