@@ -3,7 +3,6 @@ import {Upload,ImagePlus,Images,Check,Trash2,Pencil,Save,Search,ArrowRight,Loade
 import {api} from './platform/client';
 import {MEDIA_CATEGORIES,assetCategory,displayAssetName,cleanAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import './MediaLibrary.css';
-import StickerDownloads from './StickerDownloads';
 
 type Props={
  brand:{id:string;name:string;referenceAssetId?:string};assets:LibraryAsset[];images:Record<string,string>;
@@ -68,7 +67,6 @@ export default function MediaLibrary({brand,assets,images,busy,notify,showError,
    </div>
    <div className="ml-reference-footer"><small><Check size={14}/> Subir y organizar fotos no consume créditos de IA.</small><button className="btn dark" disabled={!chosenSource} onClick={()=>onCreateWithPhotos(chosenSource!.id,selectedReferenceId)}>Diseñar con estas fotos <ArrowRight size={16}/></button></div>
   </section>
-  <StickerDownloads/>
   <section className="ml-library" aria-label="Biblioteca de imágenes">
     <div className="ml-library-head"><div><h2>Biblioteca visual</h2><p>{own.length} archivos privados en esta marca · selecciona para cambiar nombre o categoría</p></div><div className="ml-search"><Search size={16}/><input aria-label="Buscar imágenes" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar por nombre…"/></div></div>
     <div className="ml-filters" aria-label="Filtrar imágenes">{filters.map(f=><button key={f.id} type="button" aria-pressed={filter===f.id} className={filter===f.id?'active':''} onClick={()=>setFilter(f.id)}>{f.label}<span>{f.id==='all'?own.length:own.filter(a=>assetCategory(a)===f.id).length}</span></button>)}</div>
