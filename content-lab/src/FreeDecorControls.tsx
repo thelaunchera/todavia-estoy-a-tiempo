@@ -3,10 +3,10 @@ import {FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './FreeDecorControls.css';
 type Props={
- backgroundId?:FreeBackgroundId;stickerIds?:string[];
- onChange:(next:{backgroundId?:FreeBackgroundId;stickerIds?:string[]})=>void;
+ backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];
+ onChange:(next:{backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[]})=>void;
  title?:string;assets?:LibraryAsset[];images?:Record<string,string>;loadImage?:(id:string)=>void;
- onOpenLibrary?:()=>void
+ onOpenLibrary?:()=>void;onUploadBackground?:(file:File)=>Promise<LibraryAsset|null>
 };
 function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage?:(id:string)=>void}){
  const ref=useRef<HTMLSpanElement>(null);
@@ -21,9 +21,12 @@ function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;
  },[asset.id,Boolean(src),loadImage]);
  return <span ref={ref} className="free-decor-real-preview">{src?<img alt={displayAssetName(asset)} src={src} loading="lazy"/>:<span aria-label="Cargando sticker" className="free-decor-loading"/>}</span>;
 }
-export default function FreeDecorControls({backgroundId='brand',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary}:Props){
+export default function FreeDecorControls({backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground}:Props){
  const [tab,setTab]=useState<'stickers'|'backgrounds'>('stickers');
  const [group,setGroup]=useState('Todos');
+ const uploadRef=useRef<HTMLInputElement>(null),[uploading,setUploading]=useState(false);
+ const ownBackgrounds=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
+ const upload=async(file?:File)=>{if(!file||!onUploadBackground)return;setUploading(true);try{const item=await onUploadBackground(file);if(item){loadImage?.(item.id);onChange({backgroundId:'brand',backgroundImageId:item.id,stickerIds:selected})}}finally{setUploading(false);if(uploadRef.current)uploadRef.current.value=''}};
  const originals=assets.filter(a=>assetCategory(a)==='sticker');
  const selected=stickerIds.filter(id=>originals.some(a=>a.id===id)).slice(0,3);
  const groupFor=(name:string)=>/avatar/i.test(name)?'Avatares':/matcha|coffee|tea|cup/i.test(name)?'Matcha':/pilates|reformer|barre|yoga|stretch/i.test(name)?'Pilates':/squat|fitness|gym|dumbbell|workout|exercise|lunge|treadmill|plank/i.test(name)?'Fitness':'Aesthetic';
@@ -35,7 +38,11 @@ export default function FreeDecorControls({backgroundId='brand',stickerIds=[],on
  return <section className="free-decor-controls" aria-label="Decoración gratis">
   <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Decora con PNG originales y fondos gratuitos. Sin créditos IA.</p></div><span>FREE</span></div>
   <div className="free-decor-main-tabs"><button type="button" aria-pressed={tab==='stickers'} className={tab==='stickers'?'active':''} onClick={()=>setTab('stickers')}>🎀 Stickers PNG</button><button type="button" aria-pressed={tab==='backgrounds'} className={tab==='backgrounds'?'active':''} onClick={()=>setTab('backgrounds')}>🎨 Backgrounds</button></div>
-  {tab==='backgrounds'?<div className="free-decor-backgrounds">{FREE_BACKGROUNDS.map(b=><button type="button" aria-pressed={backgroundId===b.id} className={backgroundId===b.id?'selected':''} key={b.id} onClick={()=>onChange({backgroundId:b.id,stickerIds:selected})}><i className={'free-decor-swatch swatch-'+b.id} style={{background:b.color}}/><span>{b.name}</span></button>)}</div>:
+  {tab==='backgrounds'?<div>
+    <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir mi background'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
+    {ownBackgrounds.length>0&&<div className="free-decor-backgrounds">{ownBackgrounds.map(a=><button type="button" key={a.id} aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''} onClick={()=>{if(!images[a.id])loadImage?.(a.id);onChange({backgroundId:'brand',backgroundImageId:a.id,stickerIds:selected})}}><i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/><span>{displayAssetName(a)}</span></button>)}</div>}
+    <p className="free-decor-label">Fondos incluidos</p>
+    <div className="free-decor-backgrounds">{FREE_BACKGROUNDS.map(b=><button type="button" aria-pressed={!backgroundImageId&&backgroundId===b.id} className={!backgroundImageId&&backgroundId===b.id?'selected':''} key={b.id} onClick={()=>onChange({backgroundId:b.id,backgroundImageId:'',stickerIds:selected})}><i className={'free-decor-swatch swatch-'+b.id} style={{background:b.color}}/><span>{b.name}</span></button>)}</div></div>:
    <>
     <div className="free-decor-groups">{['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'].map(g=><button type="button" key={g} className={group===g?'active':''} onClick={()=>setGroup(g)}>{g}</button>)}</div>
     {visible.length?<div className="free-decor-stickers">{visible.map(a=><div key={a.id} className="free-decor-sticker-cell"><button type="button" aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''} onClick={()=>toggle(a.id)}><StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/><small>{displayAssetName(a)}</small></button></div>)}</div>:
