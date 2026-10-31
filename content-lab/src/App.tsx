@@ -1647,7 +1647,7 @@ function App() {
                     <div className="eyebrow">BRAND KIT · PALETA PERSONAL PARA CADA MARCA</div>
                     <div className="lab-brand-palette-editor">
                       <div className="lab-brand-palette-head"><div><strong>Tu paleta de marca</strong><p>Los colores base siguen activos. Agrega hasta 6 tonos adicionales para los fondos y acentos de tus carruseles.</p></div>
-                        <button type="button" className="btn ghost" disabled={(brandForm.additionalColors||[]).length>=6} onClick={()=>setBrandForm({...brandForm,additionalColors:[...(brandForm.additionalColors||[]),'#C7DCE8']})}><Plus size={15}/> Añadir color</button>
+                        <button type="button" className="btn ghost" disabled={(brandForm.additionalColors||[]).length>=6} onClick={()=>setBrandForm({...brandForm,additionalColors:[...(brandForm.additionalColors||[]),['#C7DCE8','#F2D85B','#BFD5CC','#C4A7D8','#DBAE9E','#9BAEC7'][(brandForm.additionalColors||[]).length]]})}><Plus size={15}/> Añadir color</button>
                       </div>
                       <div className="lab-brand-palette-list">
                         {[{label:'Principal',color:brandForm.color},{label:'Fondo',color:brandForm.background},{label:'Secundario',color:brandForm.secondaryColor||'#E7D8C9'},...(brandForm.additionalColors||[]).map((c,i)=>({label:'Extra '+(i+1),color:c}))].map((item,i)=><div key={'brand-color-'+i} className="lab-brand-palette-tile">
