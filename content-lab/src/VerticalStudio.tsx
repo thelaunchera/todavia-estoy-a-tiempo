@@ -75,7 +75,8 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
    try{
      const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;
      const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo abrir el fotograma.');
-     const scale=Math.max(1080/v.videoWidth,1920/v.videoHeight);
+     ctx.fillStyle='#FAF8F3';ctx.fillRect(0,0,1080,1920);
+     const scale=Math.min(1080/v.videoWidth,1920/v.videoHeight);
      ctx.drawImage(v,(1080-v.videoWidth*scale)/2,(1920-v.videoHeight*scale)/2,v.videoWidth*scale,v.videoHeight*scale);
      const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/jpeg',.85));
      if(!blob)throw Error('No se pudo preparar la portada.');
@@ -109,7 +110,10 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
    </div>
    {videoUrl&&<section className="vertical-video-panel">
      <strong>{t.videoOnly}</strong><small>{videoName}</small>
-     <video ref={player} controls playsInline preload="metadata" src={videoUrl}/>
+     <div className="vertical-video-frame">
+       <video ref={player} controls playsInline preload="metadata" src={videoUrl}/>
+       {post.hook.trim()&&<div className="vertical-video-overlay" aria-hidden="true">{post.hook}</div>}
+     </div>
      <button type="button" disabled={busy} onClick={()=>void useFrame()}>
        <Download size={16}/>{busy?t.frameBusy:t.frame}</button>
      <p>{t.videoHelp}</p>
