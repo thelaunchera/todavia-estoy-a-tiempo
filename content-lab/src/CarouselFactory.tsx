@@ -796,13 +796,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div className="factory-style-title"><div><span className="eyebrow">02 / LIENZO LIBRE</span><h2>Empieza en blanco. Diseña a tu gusto.</h2><p>Sin plantillas, recuadros ni líneas decorativas. Selecciona colores, degradados, fondos y tipografías libremente.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
       <div className="factory-canvas-colors">
         <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
-          onChange={e=>setArtStyle({canvasColor:e.target.value,seamlessBackgroundId:'brand'})}/></label>
+          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasColor:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>
         <label><input type="checkbox" checked={!!style.canvasGradient}
-          onChange={e=>setArtStyle({canvasGradient:e.target.checked?'#F3DBD5':''})}/>
+          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasGradient:e.target.checked?'#F3DBD5':'',seamlessBackgroundId:'brand',seamlessAssetId:''})}/>
           Fondo degradado</label>
         {style.canvasGradient&&<label>Segundo color <input type="color" aria-label="Segundo color del degradado"
-          value={style.canvasGradient} onChange={e=>setArtStyle({canvasGradient:e.target.value,seamlessBackgroundId:'brand'})}/></label>}
-        <button type="button" onClick={()=>setArtStyle({canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand'})}>Fondo blanco</button>
+          value={style.canvasGradient} onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasGradient:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>}
+        <button type="button" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Fondo blanco</button>
       </div>
       <div className="factory-destination">
         <label>¿Dónde vas a publicar este carrusel?
@@ -872,7 +876,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div className="factory-edit">
         <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
         <div className="factory-slide-strip">
-          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>{layoutNames[s.layout]}</span></button>)}
+          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
           {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
         </div>
         <div className="factory-panel">
@@ -893,9 +897,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
            </select>
-           <label>Photo frames · conoce cada estilo con casas reales</label>
-           <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Elige un marco y aplícalo a tu propia fotografía.</p>
-           <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos con fotografías de casas">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
+           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
+             <p className="factory-frame-explain">Opcional: las fotos se pueden usar sin marco. No se añaden diseños predeterminados.</p>
+             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
+           </details>
            <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
              <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
            </select>
