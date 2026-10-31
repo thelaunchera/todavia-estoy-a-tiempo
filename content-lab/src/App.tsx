@@ -751,8 +751,8 @@ function App() {
             </div>
             <p className="lab-language-question">Selecciona tu idioma · Choose your language</p>
             <div className="lab-login-language" role="group" aria-label="Idioma / Language">
-              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')} aria-pressed={loginLanguage==='es'}>ES</button>
-              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')} aria-pressed={loginLanguage==='en'}>EN</button>
+              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')} aria-pressed={loginLanguage==='es'}>Español latino</button>
+              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')} aria-pressed={loginLanguage==='en'}>English</button>
             </div>
             <div className="eyebrow">{loginLanguage==='es'?'TU ESPACIO CREATIVO PRIVADO':'YOUR PRIVATE CREATIVE SPACE'}</div>
             <h2>{loginLanguage==='es'?'Tu Content Lab.':'Your Content Lab.'}</h2>
