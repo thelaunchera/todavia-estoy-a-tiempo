@@ -1552,3 +1552,5 @@ input::placeholder {
 .brandcolors{display:flex;gap:5px;flex-wrap:wrap}.brandcolors i{flex:none;display:inline-block;width:19px;height:19px;border-radius:50%;border:1px solid #0000001b}
 @media(max-width:700px){.lab-brand-palette-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-brand-palette-head{flex-direction:column}.lab-social-accounts-grid{grid-template-columns:1fr}.lab-brand-palette-editor,.lab-social-accounts{padding:15px}}
 @media(max-width:370px){.lab-brand-palette-list{grid-template-columns:1fr}}
+
+@media(max-width:850px){.lab-mobile-dock{grid-template-columns:repeat(5,minmax(0,1fr));padding-left:4px;padding-right:4px}.lab-mobile-dock button{font-size:9px;min-width:0}.sidebar nav button{min-height:46px}.sidebar{z-index:18}.sidebar.open{box-shadow:12px 0 35px #172e3844}}
