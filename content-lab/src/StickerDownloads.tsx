@@ -89,7 +89,18 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
  const download=async(asset:LibraryAsset)=>{
   const url=images[asset.id]||await Promise.resolve(loadImage(asset.id));
   if(!url){setProgress('No se pudo cargar este PNG. Revisa tu conexión y vuelve a probar.');return}
-  const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset).replace(/[^a-z0-9áéíóú_-]+/gi,'-')||'sticker')+'.png';document.body.appendChild(a);a.click();a.remove();
+  const filename=(displayAssetName(asset).replace(/[^a-z0-9áéíóú_-]+/gi,'-')||'sticker')+'.png';
+  const a=document.createElement('a');
+  let blobUrl='';
+  try{
+    // Use a real PNG Blob for Safari/iPad downloads, not a transient data URI.
+    const body=url.split(',')[1],raw=atob(body||''),bytes=new Uint8Array(raw.length);
+    for(let n=0;n<raw.length;n++)bytes[n]=raw.charCodeAt(n);
+    blobUrl=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));
+    a.href=blobUrl;
+  }catch{a.href=url}
+  a.download=filename;document.body.appendChild(a);a.click();a.remove();
+  if(blobUrl)window.setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
  };
  return <section className="sticker-downloads" aria-label="Stickers PNG originales">
   <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Avatares, matcha, Pilates, ejercicios y wellness. Los archivos compartidos los publica el estudio; puedes utilizarlos y descargar sus PNG transparentes gratis.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
@@ -101,7 +112,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-destination"><label htmlFor="sticker-use-where">Añadir sticker a</label><select id="sticker-use-where" value={destination} onChange={e=>setDestination(e.target.value as 'carousel'|'cover')}><option value="carousel">Carrusel (slide actual)</option><option value="cover">Post individual / cover</option></select><small>También puedes añadirlos directamente desde Brand Grid, Carousel Factory y el editor de posts.</small></div>
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" onClick={()=>void download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
+  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" disabled={!images[asset.id]} onClick={()=>void download(asset)}><Download size={14}/> {images[asset.id]?'Descargar PNG':'Preparando PNG…'}</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
   <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
  </section>;
 }
