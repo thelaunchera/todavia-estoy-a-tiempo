@@ -86,3 +86,23 @@
 .touch-editor-corner-presets button{flex:1 1 auto;min-height:32px;padding:6px 9px;border:1px solid #cbdde4;border-radius:9px;font-size:11px;color:#335969;background:#f6fafb;cursor:pointer}
 .touch-editor-corner-presets button:focus-visible{outline:3px solid #85b5ce;outline-offset:2px}
 @media(max-width:620px){.touch-editor-corner-controls{flex-basis:100%;min-width:0}.touch-editor-corner-presets button{font-size:11px;min-height:38px}}
+
+
+/* Keep the canvas in focus instead of a large always-visible delete card. */
+.touch-editor-compact-actions{display:flex;gap:8px;align-items:center;min-width:0;flex-wrap:wrap;
+ padding:8px 0}
+.touch-editor-compact-actions>span{flex:1;min-width:80px;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;font-size:12px;font-weight:700;color:#375663}
+.touch-editor-compact-actions button{border-radius:9px;background:white;border:1px solid #bdd3d8;
+ color:#2d5363;font-size:12px;font-weight:700;padding:8px 12px;min-height:38px}
+.touch-editor-compact-actions .touch-editor-delete-compact{display:inline-flex;align-items:center;gap:5px;
+ border-color:#e4c3c5;color:#9b3b47;background:#fff7f7}
+.touch-editor-selected{margin:7px 0;background:#f6f9f9;border:1px solid #dde9ea;padding:7px 10px;border-radius:11px}
+.touch-editor-selected .touch-editor-options{margin-top:5px;padding:10px}
+.touch-editor-layer-list>summary{cursor:pointer;font-size:12px;font-weight:700;color:#375c6c;padding:7px 0}
+.panorama-guide-legend{font-size:11px!important;line-height:1.4!important}
+@media(max-width:600px){
+ .touch-editor-compact-actions button{min-height:35px;padding:7px 10px;font-size:11px}
+ .touch-editor-selected{padding:4px 7px}
+ .panorama-guide-legend{gap:5px}
+}
