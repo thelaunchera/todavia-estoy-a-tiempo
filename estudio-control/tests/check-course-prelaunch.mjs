@@ -382,3 +382,20 @@ assert.match(clubJs,/requested\.get\('accion'\)==='publicar'/,'Publicar enfoca l
 assert.match(studioShell,/Ver aula completa/,'Botón único de vista completa');
 assert.doesNotMatch(studioShell,/iframe title="Centro de alumnos · vista privada/,'No anidar la aplicación del aula');
 console.log('QA: club compacto e interactivo, vista de administradora sin iframe duplicado OK');
+
+
+// El centro muestra la información de los productos antes de enviar a un checkout.
+const centerPage=read('centro/index.html');
+const centerScript=read('centro/centro.js');
+const centerStyles=read('centro/centro.css');
+const offers=['booking-flow','website-automation','ai-booking','ai-followup','ai-business','va','web-class','content-lab','no-voy-tarde','empezar-de-nuevo'];
+for(const offer of offers){
+ assert.match(centerPage,new RegExp('data-detail="'+offer+'"'),'Producto con ficha informativa: '+offer);
+ assert.ok(centerScript.includes("'"+offer+"':{"),'Datos completos de producto: '+offer);
+}
+assert.match(centerPage,/id="product-details"/,'Diálogo de información con título y precio');
+assert.match(centerScript,/function openProductDetails/,'Detalle antes del checkout');
+assert.match(centerScript,/const accessControlled=code==='web-class'\|\|code==='content-lab'/,'Checkout de clase y Lab permanece bloqueado');
+assert.doesNotMatch(centerPage,/Ver checkout/,'No enviar clientes directamente del catálogo al checkout');
+assert.match(centerStyles,/\.product-details::backdrop/,'Panel accesible para comprar informado');
+console.log('QA: fichas de productos y acceso de preventa protegido OK');
