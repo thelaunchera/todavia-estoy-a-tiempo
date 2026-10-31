@@ -19,7 +19,8 @@ test('Single-post composer uploads original photos and sets arbitrary images as 
  assert.ok(studio.includes('Añadir fotos'));
  assert.ok(studio.includes('onUpload(files, point)')||studio.includes('uploadPhotos(files,point)'));
  assert.ok(studio.includes('coverLayers(post,brand,decor)'));
- assert.ok(studio.includes('paintPanoramaLayers(ctx,1080,1350'));
+ assert.ok(studio.includes('paintPanoramaLayers(ctx,width,height'));
+ assert.ok(studio.includes('canvasHeight={freePostDimensions(post.format).height}'));
  assert.ok(!app.includes('cover-layout-chooser'));
  assert.ok(!app.includes('template-grid'));
 });
