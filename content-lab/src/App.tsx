@@ -948,7 +948,6 @@ function App() {
                 <div className="lab-quick-shortcuts">
                   <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> {t("1 Photo → 9 Posts")}</button>
                   <button type="button" onClick={()=>navigate('prompt-studio')}><BookOpen size={17}/> {t("Prompt Studio · 30 recetas")}</button>
-                  <button type="button" onClick={()=>start()}><Plus size={17}/> {t("Crear publicación")}</button>
                   <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> {t("Mis diseños")}</button>
                 </div>
               </section>
@@ -1119,9 +1118,7 @@ function App() {
                   <Sparkles size={30} />
                   <h3>{t("Your best ideas begin here.")}</h3>
                   <p>{t("No content saved yet. Create your first piece.")}</p>
-                  <button className="btn dark" onClick={() => start()}>
-                    {t("Create my first post")} <ArrowRight size={16} />
-                  </button>
+                  <small className="lab-empty-hint">{loginLanguage==='es'?'Para empezar, toca «+ Crear» en la barra superior.':'To begin, tap “+ Create” in the top bar.'}</small>
                 </div>
               )}
             </>
