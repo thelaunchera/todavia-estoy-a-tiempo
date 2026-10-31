@@ -1,16 +1,18 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {composeGridPoster,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
 import type {EditorialDesign} from './EditorialPoster';
-type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls;design?:EditorialDesign};
+import TouchLayerCanvas from './TouchLayerCanvas';
+import {stickerDefault,clampRect,type StickerPositions} from './TouchGeometry';
+type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls;design?:EditorialDesign;stickerIds?:string[];stickerPositions?:StickerPositions};
 type Brand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string;secondaryColor?:string};
 type Props={
  tile:Tile;index:number;brand:Brand;photo?:string;original?:string;logo?:string;preserve:boolean;
- exportSize:ExportSize;onChange:(next:VisualControls)=>void;stickerImages?:Record<string,string>;
+ exportSize:ExportSize;onChange:(next:VisualControls)=>void;stickerImages?:Record<string,string>;onStickerChange?:(positions:StickerPositions)=>void;
 };
 const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,textX:0,textY:0,textScale:1};
-export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages}:Props){
+export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages,onStickerChange}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
- const [layer,setLayer]=useState<'photo'|'text'>('photo');
+ const [layer,setLayer]=useState<'photo'|'text'|'sticker'>('photo');
  const [advanced,setAdvanced]=useState(false);
  const drag=useRef<{x:number;y:number;from:VisualControls;size:{width:number;height:number}}|null>(null);
  const current={...defaults,...(tile.layout||{})};
@@ -19,12 +21,12 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   // Rendering each 1080px Canvas on every pointer movement locks up iOS.
   // A short debounce keeps the result exact while maintaining responsive drag.
   const handle=setTimeout(()=>{
-   composeGridPoster(tile,index,brand,{photo,original,logo,preserve,stickerImages},exportSize)
+   composeGridPoster(tile,index,brand,{photo,original,logo,preserve,stickerImages,omitStickers:layer==='sticker'},exportSize)
     .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.72));setFit(fit)}})
     .catch(()=>{if(active)setPreview('')});
   },120);
   return()=>{active=false;clearTimeout(handle)};
- },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize,stickerImages]);
+ },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize,stickerImages,layer]);
  const set=(key:keyof typeof defaults,value:number)=>onChange({...current,[key]:value});
  const start=(e:React.PointerEvent<HTMLDivElement>)=>{
   if(!preview)return;
@@ -51,10 +53,14 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   <div className="v2-layer-pick" role="group" aria-label="Mover capa">
    <button className={layer==='photo'?'active':''} onClick={()=>setLayer('photo')} type="button">Mover foto</button>
    <button className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">Mover titular</button>
+   <button className={layer==='sticker'?'active':''} onClick={()=>setLayer('sticker')} type="button">🎀 Mover stickers</button>
   </div>
+  {layer==='sticker'?<TouchLayerCanvas preview={preview} ratio={EXPORT_SIZES[exportSize].w/EXPORT_SIZES[exportSize].h}
+     layers={(tile.design?.stickerIds||tile.stickerIds||[]).filter(id=>stickerImages?.[id]).map((id,i)=>({id,kind:'sticker' as const,name:'Sticker',src:stickerImages![id],rect:clampRect(tile.stickerPositions?.[id]||stickerDefault(i))}))}
+     onCommit={(_kind,id,rect)=>onStickerChange?.({...tile.stickerPositions,[id]:clampRect(rect)})}/>:
   <div className="v2-preview-wrap" onPointerDown={start} onPointerMove={move} onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}} style={{aspectRatio:EXPORT_SIZES[exportSize].w+'/'+EXPORT_SIZES[exportSize].h}}>
    {preview?<img src={preview} alt="Vista previa exacta de la publicación"/>:<div className="v2-preview-placeholder">Selecciona una imagen generada para ver el diseño completo.</div>}
-  </div>
+  </div>}
   <p className="v2-hint">Arrastra la foto para mover su recuadro o toca «Mover titular» para colocarlo. Los controles permiten agrandar el recuadro y encuadrar la imagen por separado.</p>
   <div className="v2-simple-controls">
    <strong>Controles esenciales</strong>
