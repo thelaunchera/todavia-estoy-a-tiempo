@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
@@ -35,7 +35,7 @@ type Props = {
   onChange: (next: Post) => void; onSave: () => void;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
-  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void;
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId};
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const layoutNames: Record<Layout,string> = {
@@ -194,7 +194,7 @@ const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,initialBackground}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
@@ -247,6 +247,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }catch(e){showError(e)}finally{setOverviewBusy(false)}
   };
   const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
+  const appliedBackgroundVersion=useRef(0);
+  useEffect(()=>{
+    if(!initialBackground?.version||initialBackground.brandId!==brand.id||!initialBackground.id||appliedBackgroundVersion.current===initialBackground.version)return;
+    appliedBackgroundVersion.current=initialBackground.version;
+    // Keep one unified collection: the chosen background applies to every slide
+    // and is also used as the seamless panoramic background when enabled.
+    const nextSlides=slides.map(s=>({...s,backgroundId:initialBackground.id}));
+    setAll(nextSlides,normalizeCarouselStyle({...style,seamlessBackgroundId:initialBackground.id}));
+    notify('Fondo aplicado a todo el carrusel. Puedes cambiarlo slide por slide.');
+  },[initialBackground?.version,brand.id]);
+
   const applyReference=async()=>{
     if(!style.referenceAssetId)return notify('Elige una referencia de esta marca.');
     const url=images[style.referenceAssetId];if(!url)return notify('La imagen todavía está cargando.');
