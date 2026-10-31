@@ -44,3 +44,24 @@ GitHub Pages currently serves the podcast and its Studio. Nothing in this direct
 ## Migration note
 
 **Do not delete AppDeploy** or remove its data until verified exports/imports of existing Content Lab projects and assets have completed and the replacement has passed owner login, image generation and private-access QA.
+
+## AI photo generation + private media storage (implementation status)
+
+The GitHub Pages frontend already has the media library, iPhone photo conversion/compression, nine-photo grid generation, and individual PNG exports. The backend is **Supabase Auth + RLS-protected private Storage + an authenticated Supabase Edge Function**. GitHub Pages by itself cannot run the AI endpoint or hold private photographs.
+
+Backend source lives at `supabase/functions/content-lab-generate/index.ts`; the schema and private `content-lab-private` bucket are defined in `supabase/schema.sql`. The browser has only the **Supabase publishable key** and never an AI provider key. Each stored asset belongs to the signed-in owner and has a brand ID; the user cannot access private images of another owner.
+
+For image generation the default model is now `gemini-3.1-flash-lite-image`, which supports image-to-image edits and native 4:5 output at **1K**. The prior `gemini-2.5-flash-image` model was shut down in October 2026. Generated images are subsequently composed to standalone 1080×1350 PNGs in the browser; this is export sizing, not native provider resolution. To use higher native source resolution, explicitly select and pay for a higher-resolution supported model server-side.
+
+**Nothing is activated until a separate Supabase project and paid Gemini image quota are configured**. Do not use the podcast or Cleaning App project's storage, nor claim there is a free image-generation API quota. Each generation/retry uses billable image output and may use billable input tokens. For a nine-post grid, nine separate image calls are made sequentially and completed posts persist if one fails.
+
+Deployment checklist:
+1. Choose or create an isolated **Content Lab** Supabase project only after reviewing any additional project price.
+2. Apply `supabase/schema.sql` to that dedicated project and privately allowlist only the owner's actual authenticated UUID.
+3. Deploy `content-lab-generate`, set its server-only `GEMINI_API_KEY`, and set `CONTENT_LAB_ALLOWED_ORIGIN=https://podcast.thelaunchera.com`.
+4. Configure GitHub Actions **repository variables** `VITE_CONTENT_LAB_SUPABASE_URL` and `VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY`; they are public frontend identifiers, not provider secrets. Do not place any secret keys in GitHub code or VITE variables.
+5. Configure the Supabase Auth Site URL and redirect URLs to match GitHub Pages `https://podcast.thelaunchera.com/content-lab/`.
+6. Verify: private login, owner-only RLS, HEIC/iPhone upload, source/reference retrieval, single-image generation, nine distinct photos, re-generation, storage read/delete, and PNG exports on phone.
+7. Export/migrate old AppDeploy media and content only after completing a careful privacy/data mapping; copying the frontend does not copy user data.
+
+**Cost guardrail:** Start with **one** generated image and check actual Gemini usage before creating nine. Credits, quotas and rates vary by provider and plan. Never automatically call the paid API from a background page load.
