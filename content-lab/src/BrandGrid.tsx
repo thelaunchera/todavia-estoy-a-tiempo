@@ -8,11 +8,13 @@ import GridVisualEditor from './GridVisualEditor';
 import type {PromptControls} from './PromptEngine';
 import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
 import {brandPalette} from './BrandIdentity';
+import FreeDecorControls from './FreeDecorControls';
+import type {FreeBackgroundId} from './FreeDesignAssets';
 import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;stickerIds?:string[]};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
@@ -43,7 +45,7 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     poster(tile,idx,grid,brand,images).then(canvas=>{if(on)setPreview(canvas.toDataURL('image/jpeg',0.7))})
       .catch(()=>{if(on)setPreview('')});
     return()=>{on=false};
-  },[tile.assetId,tile.headline,tile.subtext,tile.format,tile.design,tile.layout,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
+  },[tile.assetId,tile.headline,tile.subtext,tile.format,tile.design,tile.layout,tile.backgroundId,tile.stickerIds,tile.design?.backgroundPattern,tile.design?.stickerIds,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
   if(preview)return <img src={preview} alt={'Post '+(idx+1)+' diseñado'}/>;
   return <div className={'bg-concept bg-concept-'+idx}>
     <span>{tile.format||CREATIVE_FORMATS[idx]}</span><i/>
@@ -492,6 +494,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           {tile&&<div className="bg-editor-preview-note">{!tile.assetId
               ? tile.design?'Vista previa editorial usando tu foto original: este diseño ya se puede exportar sin generar otra foto.':'Vista previa de diseño: todavía no se ha generado la foto final. Conservamos la original para planificar.'
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
+          {tile&&<FreeDecorControls backgroundId={tile.design?tile.design.backgroundPattern||'brand':tile.backgroundId||'brand'} stickerIds={tile.design?tile.design.stickerIds||[]:tile.stickerIds||[]}
+              title="Stickers aesthetics & backgrounds · GRATIS"
+              onChange={next=>tile.design?update({design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...(next.backgroundId&&next.backgroundId!=='brand'?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,stickerIds:next.stickerIds})}/>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
