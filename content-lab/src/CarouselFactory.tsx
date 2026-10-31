@@ -248,6 +248,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [current,setCurrent]=useState(0);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const [preview,setPreview]=useState('');
+  const [touchEdit,setTouchEdit]=useState(false);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const [idea,setIdea]=useState('');
   const [imagePrompt,setImagePrompt]=useState('');
@@ -258,7 +259,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overview,setOverview]=useState<string[]>([]);
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
@@ -309,8 +310,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     appliedBackgroundVersion.current=initialBackground.version;
     // Keep one unified collection: the chosen background applies to every slide
     // and is also used as the seamless panoramic background when enabled.
-    const nextSlides=slides.map(s=>({...s,backgroundId:initialBackground.id}));
-    setAll(nextSlides,normalizeCarouselStyle({...style,seamlessBackgroundId:initialBackground.id}));
+    const nextSlides=slides.map(s=>({...s,backgroundId:initialBackground.id,
+      backgroundImageId:initialBackground.imageAssetId||''}));
+    setAll(nextSlides,normalizeCarouselStyle({...style,seamlessBackgroundId:initialBackground.id,
+     seamlessAssetId:initialBackground.imageAssetId||''}));
+    if(initialBackground.imageAssetId&&!images[initialBackground.imageAssetId])loadImage(initialBackground.imageAssetId);
     notify('Fondo aplicado a todo el carrusel. Puedes cambiarlo slide por slide.');
   },[initialBackground?.version,brand.id]);
 
@@ -330,6 +334,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Se aplicó un ritmo visual coherente; no cambié textos ni fotos.');
   };
   const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
+  const enableTouch=()=>{
+    if(!touchEdit&&slide.assetId&&!slide.photoPosition)replace({photoPosition:photoDefault(slide.layout)});
+    setTouchEdit(v=>!v);
+  };
+  const touchLayers=[
+    ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:clampRect(slide.photoPosition)}]:[]),
+    ...(slide.stickerIds||[]).filter(id=>images[id]).map((id,index)=>({id,kind:'sticker' as const,name:ownedAssets.find(a=>a.id===id)?.displayName||'Sticker',src:images[id],rect:clampRect(slide.stickerPositions?.[id]||stickerDefault(index))}))
+  ];
+  const moveTouchLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
+    if(kind==='photo')replace({photoPosition:clampRect(rect)});
+    else replace({stickerPositions:{...slide.stickerPositions,[id]:clampRect(rect)}});
+  };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
     const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:defaultLabel(brand)};
@@ -342,17 +358,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(slides.filter((_,j)=>j!==i));setCurrent(Math.max(0,i-1));
   };
   useEffect(()=>{
-    slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);(s.stickerIds||[]).forEach(id=>{if(!images[id])loadImage(id)});});
+    slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);if(s.backgroundImageId&&!images[s.backgroundImageId])loadImage(s.backgroundImageId);(s.stickerIds||[]).forEach(id=>{if(!images[id])loadImage(id)});});
     if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
     if(style.seamlessAssetId&&!images[style.seamlessAssetId])loadImage(style.seamlessAssetId);
   },[post.designData,brand.id,style.referenceAssetId,style.seamlessAssetId]);
   useEffect(()=>{
     let active=true;
-    (style.seamlessEnabled?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:brand.color}).then(all=>all[i]):drawSlide(slide,i,slides.length,brand,images,style)).then(c=>{
+    (style.seamlessEnabled?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:brand.color,editorMode:touchEdit}).then(all=>all[i]):drawSlide(slide,i,slides.length,brand,images,style,touchEdit)).then(c=>{
       if(active)setPreview(c.toDataURL('image/png'));
     }).catch(showError);
     return()=>{active=false;};
-  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slide.backgroundId,slide.stickerIds,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
+  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slide.backgroundId,slide.backgroundImageId,slide.photoPosition,slide.stickerPositions,slide.stickerIds,touchEdit,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
     setBusy('copy');
@@ -481,7 +497,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}/>
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
         <div className="factory-panel factory-ai">
@@ -502,10 +518,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <aside className="factory-right">
         <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
+         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={enableTouch}>{touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
+        {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
         <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
          onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
          onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
-         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>
+         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>}
         <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
         <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
         <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo · gratis</button>
