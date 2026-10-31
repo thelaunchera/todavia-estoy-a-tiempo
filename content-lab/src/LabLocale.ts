@@ -180,8 +180,56 @@ const pairs:[string,string][]=[
  ['Selecciona tu idioma · Choose your language','Elige el idioma de tu cuenta'],
  ['Idioma / Language','Idioma'],
  ['Idioma del sitio / Site language','Idioma del sitio'],
+
+ ['TOTAL PIECES','PUBLICACIONES'],['In this account','En esta cuenta'],
+ ['IN PROGRESS','EN PROCESO'],['Ideas in motion','Ideas en desarrollo'],
+ ['READY TO POST','LISTAS PARA PUBLICAR'],['Ready when you are','Listas cuando tú quieras'],
+ ['YOUR MEDIA','TUS ARCHIVOS'],['Photos and screenshots','Fotos y capturas'],
+ ['Teach something','Enseña algo'],['A useful little lesson','Una pequeña lección útil'],
+ ['Solve a pain point','Resuelve un problema'],['Make them feel seen','Haz que se sientan identificados'],
+ ['Show the difference','Muestra el cambio'],['Before / after','Antes y después'],
+ ['Keep it relatable','Hazlo cercano'],['A real everyday moment','Una situación cotidiana'],
+ ['Define your audience in settings.','Define tu público en la configuración.'],
+ ['Select a brand','Selecciona una marca'],['Personal workspace','Espacio personal'],
+ ['THE CONTENT ENGINE','CENTRO DE CONTENIDO'],
+ ['ONE IDEA','UNA IDEA'],['My private workspace','Mi espacio privado'],
+ ['TOTAL PHOTOS','TOTAL DE FOTOS'],
+ ['YOUR ACCOUNTS','TUS CUENTAS'],
+ ['YOUR CREATIVE HQ','TU ESTUDIO CREATIVO'],
+ ['MY WORKSPACE','MI ESTUDIO'],['My content','Mis publicaciones'],
+ ['Your creative space','Tu espacio creativo'],
+ ['the','el'],['creative','proceso'],['process.','creativo.'],
+ ['Total posts','Total de posts'],
+ ['Photos and screenshots','Fotos y capturas'],
+ ['Empieza a crear en 3 pasos.','Start creating in 3 steps.'],
+ ['Tu estudio está en marcha. ✨','Your studio is up and running. ✨'],
+ ['No necesitas saber diseñar ni programar. Elige una acción y continúa desde donde quedaste.',
+   'You don\'t need to know design or coding. Pick an action and continue where you left off.'],
+ ['Define tu marca','Set up your brand'],
+ ['Colores, idioma, audiencia y estilo.','Colors, language, audience and style.'],
+ ['Sube una foto','Upload a photo'],
+ ['Usa la original o una referencia de estilo.','Use your original or a style reference.'],
+ ['Guarda tu primer post','Save your first post'],
+ ['Crea una publicación y guárdala en tu biblioteca.','Create a post and save it to your library.'],
+ ['Mis diseños','My designs'],
+ ['Crear publicación','Create a post'],
+ ['Prompt Studio · 30 recetas','Prompt Studio · 30 recipes'],
+ ['Estudio de prompts · 30 recetas','Prompt Studio · 30 recipes'],
+ ['Guía para empezar','Getting started'],
+ ['Progreso de configuración','Setup progress'],
+ ['Mi foto como fondo','Use my photo as background'],
+ ['Edit profile','Editar perfil'],
+ ['Follows','Sigue'],
 ];
 const enToEs=new Map(pairs),esToEn=new Map(pairs.map(([en,es])=>[es,en]));
+/**
+ * Render-time UI strings. React owns the DOM; don't rely on a MutationObserver
+ * to translate React-owned nodes (React may replace them during hydration/updates).
+ */
+export function uiText(source:string,language:LabLanguage):string{
+ if(language==='es')return enToEs.get(source)||source;
+ return esToEn.get(source)||source;
+}
 const originals=new WeakMap<Text,{source:string,last:string}>();
 const attrs=new WeakMap<Element,Map<string,{source:string,last:string}>>();
 let stop:(()=>void)|null=null;
