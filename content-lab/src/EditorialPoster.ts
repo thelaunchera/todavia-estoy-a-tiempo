@@ -59,7 +59,7 @@ function line(ctx:CanvasRenderingContext2D,x1:number,y1:number,x2:number,y2:numb
  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
 }
 export async function renderEditorial(input:{
- canvas:HTMLCanvasElement; photo:string; original?:string; logo?:string;
+ canvas:HTMLCanvasElement; photo:string; original?:string; logo?:string; stickerImages?:Record<string,string>;
  headline:string;subtext:string;brandName:string;design:EditorialDesign;
  brandColor:string;paperColor:string;
  safeTop:number;safeBottom:number;
