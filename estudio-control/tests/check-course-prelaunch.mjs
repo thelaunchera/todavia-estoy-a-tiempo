@@ -419,7 +419,7 @@ console.log('QA: logo oficial, tarjetas sin emojis y botones sin flechas OK');
 
 
 // Regression: los botones de soporte del Centro no se superponen al texto en iPad.
-const centerPage=read('centro/index.html');
+// Reuse centerPage loaded above to avoid redeclaring the same const.
 const centerStyles=read('centro/centro.css');
 const centerHelp=centerPage.slice(centerPage.indexOf('<section class="help-strip"'),centerPage.indexOf('</section>',centerPage.indexOf('<section class="help-strip"'))+10);
 assert.ok(centerHelp.includes('<div class="help-strip-actions"'),'CTAs fuera del párrafo');
