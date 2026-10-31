@@ -32,9 +32,16 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
  assert.ok(!gallery.includes('THE CONTENT LAB · STUDIO'));
  assert.ok(palette.includes('isBowBackground'));
 });
-test('Factory defaults to canvas-first tabs, with AI tools secluded',()=>{
+test('Factory uses Cata design hacking sequence with IA as a short standalone section',()=>{
  const studio=read('src/CarouselFactory.tsx');
- assert.ok(studio.includes("useState<'canvas'|'slides'|'style'|'ai'>('canvas')"));
+ assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('inspiration')"));
+ assert.ok(studio.includes('PASO 1 DE 5 · INSPIRACIÓN'));
+ assert.ok(studio.includes('PASO 2 DE 5 · FOTO PROTAGONISTA'));
+ assert.ok(studio.includes('PASO 3 DE 5 · FONDO'));
+ assert.ok(studio.includes('PASO 4 DE 5 · TEXTOS'));
+ assert.ok(studio.includes('PASO 5 DE 5 · DETALLES'));
+ assert.ok(!studio.includes('IA opcional'));
+ assert.ok(studio.includes("}>IA</button>"));
  assert.ok(studio.includes("studioTab==='canvas'"));
  assert.ok(studio.includes("studioTab==='slides'"));
  assert.ok(studio.includes("studioTab==='style'"));
