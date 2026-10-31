@@ -24,7 +24,7 @@ test('Private buyer, owner and checkout links cannot be copied in public batches
   assert.equal(lookup['tle-checkout']?.visibility,'revision');
   assert.equal(lookup['school-wait']?.visibility,'publico');
   assert.equal(lookup['lab-prompts']?.visibility,'publico');
-  assert.match(source,/const allowed=shown\.filter\(x=>shareable\(x\.visibility\)\)/);
+  assert.match(source,/const allowed=shown\.filter\(x=>shareable\(x\.visibility\) && \(LINK_PUBLICATION\[x\.key\]/);
   assert.match(source,/v==='publico' \|\| v==='demo'/);
 });
 test('Recording mode hides all private and review-only links',()=>{
