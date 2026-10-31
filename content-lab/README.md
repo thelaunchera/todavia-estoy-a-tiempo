@@ -73,18 +73,12 @@ El Lab presenta un campo donde introducir el código numérico del correo. `supa
 
 **Paso de configuración aún necesario en Supabase (sin conectores para editar plantillas Auth):**
 1. Ve a `https://supabase.com/dashboard/project/fhrvuhikrybobidxpvnh/auth/templates`.
-2. Abre el template **Magic Link** del proyecto del podcast y conserva las variables de seguridad de Supabase. Haz que el correo contenga también `{{ .Token }}` visible para el usuario, por ejemplo:
-
-```html
-<h2>Tu código de acceso a Content Lab</h2>
-<p>Introdúcelo en la misma ventana donde solicitaste iniciar sesión:</p>
-<p style="font-size:32px;letter-spacing:5px;font-weight:bold">{{ .Token }}</p>
-<p>Este código es privado, no lo compartas.</p>
-<p>O abre el enlace si prefieres iniciar sesión en el navegador: <a href="{{ .ConfirmationURL }}">Entrar en el navegador</a></p>
-```
+2. Abre **Magic Link** en las plantillas de Auth. Como el podcast usa este mismo Supabase, **conserva intactos el enlace y el diseño del correo actual**. Añade únicamente un párrafo que muestre el código numérico mediante la variable {{ .Token }}. No sustituyas el correo entero ni elimines el Magic Link.
 
 3. Asegura el redirect `https://podcast.thelaunchera.com/content-lab/` en Auth → URL Configuration.
 4. Prueba con **la cuenta propietaria autorizada**. Si el correo no muestra el código, la UI no puede fabricarlo; revisa la plantilla y no reportes que OTP funcionó.
 5. Cuando exista el proveedor de pagos, implementar comprador autenticado + entitlement validado por webhook + RLS por `auth.uid()` + cuota por cuenta. No abrir el esquema ni quitar el requisito admin previamente.
 
 Referencia: documentación oficial [Supabase Passwordless email sign-in](https://supabase.com/docs/guides/auth/auth-email-passwordless).
+
+**Separación futura:** antes de vender acceso a clientes, considera un proyecto Auth independiente del podcast y revisa sus costes. No crear un proyecto nuevo ni cambiar los correos del Studio sin revisión.
