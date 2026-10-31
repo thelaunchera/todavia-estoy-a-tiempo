@@ -82,3 +82,16 @@
 .factory-overview-grid img{width:100%;aspect-ratio:4/5;object-fit:contain;border-radius:5px}
 .factory-overview-grid span{font-size:9px;color:#5d777f;display:block;padding:4px}
 @media(max-width:650px){.factory-destination{flex-direction:column;align-items:stretch;gap:8px}.factory-destination label{flex:auto;min-width:0}}
+
+/* Seamless panoramic carousel controls */
+.seamless-config{margin:20px 0;border:1px solid #d4e3e5;border-radius:16px;padding:20px;background:linear-gradient(115deg,#f5faf9,#fcfaf6)}
+.seamless-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.seamless-header h2{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(24px,2.8vw,32px);margin:6px 0;font-weight:400;color:#263f42}
+.seamless-header p,.seamless-controls p{font-size:12px;line-height:1.6;color:#72888c;max-width:680px;margin:5px 0}
+.seamless-toggle{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;background:#fff;border:1px solid #d5e3e4;padding:12px;border-radius:12px;white-space:nowrap;color:#3d646c}
+.seamless-toggle input{accent-color:#4b8d96;width:18px;height:18px}
+.seamless-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px;background:#fff;border-radius:12px;padding:14px}
+.seamless-controls label{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:700;color:#547079}
+.seamless-controls select{min-width:0;width:100%;background:#f9fbfb;border:1px solid #dce7e9;border-radius:8px;padding:10px}
+.seamless-controls p{grid-column:1/-1}
+@media(max-width:650px){.seamless-config{padding:15px}.seamless-header{flex-direction:column}.seamless-controls{grid-template-columns:1fr}.seamless-controls p{grid-column:auto}}
