@@ -28,6 +28,17 @@ const sharedStickers=async()=>{
  return (data||[]).map(stickerRecord);
 };
 
+const backgroundRecord=(x:any)=>({
+ id:'shared-background-'+x.id,brandId:'shared',name:x.name,displayName:x.name,
+ mime:x.mime,category:'background',shared:true,
+ backgroundGroup:x.category,sizeBytes:x.size_bytes,sha256:x.sha256
+});
+const sharedBackgrounds=async()=>{
+ const {data,error}=await tab('background_catalog')
+  .select('id,name,category,mime,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
+ if(error)throw Error(error.message);
+ return (data||[]).map(backgroundRecord);
+};
 const add=async(name:string,payload:any)=>{const me=await current();return unwrap(out(await tab(name).insert({owner_id:me.id,payload}).select('id,payload').single()));};
 const update=async(name:string,id:string,payload:any)=>{
   const existing=await read(name,id);
@@ -120,10 +131,13 @@ export const api={
   get:async(path:string):Promise<{data:any}>=>{
     requireConfig();
     if(path==='/api/sticker-catalog')return {data:await sharedStickers()};
+    if(path==='/api/background-catalog')return {data:await sharedBackgrounds()};
     if(path==='/api/data'){
       const brands=await seed();
-      const [posts,assets,catalogue]=await Promise.all([list('posts'),list('assets'),sharedStickers()]);
-      return {data:{brands,posts,assets:[...assets,...catalogue]}};
+      const [posts,assets,stickers,backgrounds]=await Promise.all([
+        list('posts'),list('assets'),sharedStickers(),sharedBackgrounds()
+      ]);
+      return {data:{brands,posts,assets:[...assets,...stickers,...backgrounds]}};
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
     if(path==='/api/prompts')return {data:await list('prompts')};
@@ -145,6 +159,16 @@ export const api={
     }
     if(path.startsWith('/api/assets/')){
       const id=decodeURIComponent(path.slice('/api/assets/'.length));
+      if(id.startsWith('shared-background-')){
+        const uid=id.slice('shared-background-'.length);
+        if(!/^[a-f0-9-]{36}$/i.test(uid))throw Error('Fondo compartido no válido.');
+        const {data:entry,error}=await tab('background_catalog').select('path,mime')
+          .eq('id',uid).eq('published',true).maybeSingle();
+        if(error)throw Error(error.message);
+        if(!entry)throw Error('Fondo no disponible para esta cuenta.');
+        const file=out(await sb.storage.from(bucket).download(entry.path));
+        return {data:{mime:entry.mime,content:await base64(file)}};
+      }
       if(id.startsWith('shared-')){
         const uid=id.slice(7);
         if(!/^[a-f0-9-]{36}$/i.test(uid))throw Error('Sticker no válido.');
@@ -172,6 +196,48 @@ export const api={
         brandId:String(payload?.brandId||''),title:String(payload?.title||'Mi prompt').slice(0,100),
         text,settings:payload?.settings||null,favorite:false
       })};
+    }
+    if(path==='/api/background-catalog'){
+      const me=await current();
+      const {data:admin,error:roleError}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+      if(roleError)throw Error(roleError.message);
+      if(!admin)throw Error('Solo la administradora puede publicar fondos para todos.');
+      const name=String(payload?.name||'').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,120);
+      if(!name)throw Error('El fondo necesita un nombre.');
+      const categories=['Minimalistas','Gradientes','Papel y texturas','Editoriales','Retro y otoño','Oscuros','Scrapbook'];
+      const category=categories.includes(payload?.category)?payload.category:'Editoriales';
+      const mime=String(payload?.mime||'');
+      if(!['image/png','image/jpeg','image/webp'].includes(mime))
+        throw Error('El fondo debe ser PNG, JPG o WebP.');
+      if(typeof payload?.content!=='string'||payload.content.length>7000000)
+        throw Error('El archivo del fondo no es válido.');
+      const bytes=Uint8Array.from(atob(payload.content),c=>c.charCodeAt(0));
+      if(bytes.length<200||bytes.length>5000000)throw Error('El fondo debe medir menos de 5 MB.');
+      const valid=mime==='image/png'?[137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n):
+        mime==='image/jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:
+        bytes[0]===82&&bytes[1]===73&&bytes[2]===70&&bytes[3]===70&&
+          bytes[8]===87&&bytes[9]===69&&bytes[10]===66&&bytes[11]===80;
+      if(!valid)throw Error('El formato del archivo no coincide con la imagen.');
+      const digest=await crypto.subtle.digest('SHA-256',bytes);
+      const sha256=Array.from(new Uint8Array(digest)).map(n=>n.toString(16).padStart(2,'0')).join('');
+      const {data:existing,error:lookupError}=await tab('background_catalog')
+       .select('id,name,category,mime,size_bytes,sha256').eq('sha256',sha256).maybeSingle();
+      if(lookupError)throw Error(lookupError.message);
+      if(existing)return {data:{...backgroundRecord(existing),duplicate:true}};
+      const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
+      const storagePath='shared-backgrounds/'+crypto.randomUUID()+'.'+ext;
+      out(await sb.storage.from(bucket).upload(storagePath,bytes,{contentType:mime,upsert:false,cacheControl:'31536000'}));
+      try{
+        const {data:record,error:dbError}=await tab('background_catalog')
+          .insert({created_by:me.id,path:storagePath,name,category,mime,sha256,
+             size_bytes:bytes.length,published:true})
+          .select('id,name,category,mime,size_bytes,sha256').single();
+        if(dbError)throw Error(dbError.message);
+        return {data:backgroundRecord(record)};
+      }catch(e){
+        await sb.storage.from(bucket).remove([storagePath]);
+        throw e;
+      }
     }
     if(path==='/api/sticker-catalog'){
       // The shared catalogue is a curated admin publication, NEVER a
