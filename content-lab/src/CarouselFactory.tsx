@@ -360,7 +360,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'canvas'|'slides'|'style'|'ai'>('canvas');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
@@ -789,28 +789,67 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <button className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
     </div>
 
-    <nav className="factory-studio-tabs" role="tablist" aria-label="Secciones de Carousel Factory">
-      <button type="button" role="tab" aria-selected={studioTab==='canvas'} className={studioTab==='canvas'?'active':''} onClick={()=>setStudioTab('canvas')}>✦ Lienzo</button>
-      <button type="button" role="tab" aria-selected={studioTab==='slides'} className={studioTab==='slides'?'active':''} onClick={()=>setStudioTab('slides')}>Slides y textos</button>
-      <button type="button" role="tab" aria-selected={studioTab==='style'} className={studioTab==='style'?'active':''} onClick={()=>setStudioTab('style')}>Fondos y estilo</button>
-      <button type="button" role="tab" aria-selected={studioTab==='ai'} className={studioTab==='ai'?'active':''} onClick={()=>setStudioTab('ai')}>IA opcional</button>
+    <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
+      <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
+        {([
+          {id:'inspiration',name:'Inspírate'},
+          {id:'canvas',name:'Foto'},
+          {id:'style',name:'Fondo'},
+          {id:'slides',name:'Texto'},
+          {id:'review',name:'Revisar'},
+        ] as const).map((item,n)=><button key={item.id} type="button" role="tab"
+          aria-selected={studioTab===item.id} className={studioTab===item.id?'active':''}
+          onClick={()=>setStudioTab(item.id)}>
+            <span className="factory-step-number">{n+1}</span><span>{item.name}</span>
+          </button>)}
+      </div>
+      <button type="button" className={'factory-ia-entry'+(studioTab==='ai'?' active':'')}
+        aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>IA</button>
     </nav>
-    {studioTab==='canvas'&&<>
-      <div className="factory-canvas-intro">
-        <div><span className="eyebrow">01 / TU ESPACIO DE DISEÑO</span>
-          <h2>Un lienzo. Todo en su lugar.</h2>
-          <p>Arrastra fotografías, añade textos libres, lazos y recortes. El grid muestra dónde se dividirá cada slide.</p>
+    <div className="factory-design-flow"><span>INSPIRACIÓN</span><span>FOTO</span><span>FONDO</span><span>TEXTO</span><span>DETALLES</span></div>
+    {studioTab==='inspiration'&&<section className="factory-inspiration">
+      <div className="factory-step-intro">
+        <span className="factory-step-eyebrow">PASO 1 DE 5 · INSPIRACIÓN</span>
+        <h2>Antes de diseñar, decide qué quieres mostrar.</h2>
+        <p>Observa una referencia, identifica su jerarquía y elige una foto protagonista. Inspirarse no es copiar.</p>
+      </div>
+            <div className="factory-reference">
+        <div className="factory-reference-copy"><strong>¿Te dieron una referencia visual?</strong><p>Úsala como inspiración de paleta y contraste, sin copiar su fotografía ni sus textos. El análisis de color es gratuito.</p></div>
+        <div className="factory-reference-actions">
+          <select aria-label="Referencia de estilo" value={style.referenceAssetId} onChange={e=>{setArtStyle({referenceAssetId:e.target.value});setReferenceReport('')}}>
+            <option value="">Sin referencia de estilo</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+          <button type="button" className="btn ghost" onClick={uploadImage}><Upload size={15}/> Subir referencia</button>
+          <button type="button" className="btn dark" onClick={applyReference} disabled={!style.referenceAssetId||!images[style.referenceAssetId]}>Tomar colores</button>
         </div>
-        <div className="factory-canvas-shortcuts">
-          <button type="button" className="btn ghost wide factory-free-create" onClick={()=>{
-        const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
-        setAll(next);setCurrent(0);notify('Carrusel de 6 slides listo para editar.');
-      }}><Plus size={17}/> Crear 6 slides · sin IA</button>
-          <button type="button" className="btn ghost" onClick={()=>setStudioTab('style')}>Cambiar fondo</button>
-          <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Editar textos</button>
+        {style.referenceAssetId&&images[style.referenceAssetId]&&<img className="factory-reference-thumb" src={images[style.referenceAssetId]} alt="Referencia usada solo como inspiración"/>}
+      </div>
+
+      {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
+      <div className="factory-inspiration-hint"><strong>Tu punto de partida</strong>
+        <p>Una imagen principal · dos o tres colores · un mensaje que se entienda de un vistazo.</p>
+      </div>
+      <div className="factory-step-footer"><span>Si ya tienes clara la idea, puedes empezar sin subir referencia.</span>
+        <button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Siguiente: foto <ArrowRight size={16}/></button>
+      </div>
+    </section>}
+    {studioTab==='canvas'&&<>
+
+      <div className="factory-step-intro">
+        <span className="factory-step-eyebrow">PASO 2 DE 5 · FOTO PROTAGONISTA</span>
+        <h2>Empieza por la foto. El diseño viene después.</h2>
+        <p>Sube o arrastra la imagen principal. Colócala donde quieras; los cortes se ven, pero se hacen al descargar.</p>
+        <div className="factory-step-mini-actions">
+          <button type="button" className="btn ghost factory-free-create" onClick={()=>{
+            if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
+              if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
+            }
+            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
+            setAll(next);setCurrent(0);notify('Nuevo carrusel de 6 slides preparado.');
+          }}><Plus size={16}/> Nuevo carrusel</button>
         </div>
       </div>
-          <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+      <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
       onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
       onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
       canUndo={historyVersion>=0&&pastHistory.current.length>0}
@@ -821,56 +860,50 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
 
-      <div className="factory-canvas-exports">
-        <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales de 1080 × 1350. Sin líneas de edición.</span></div>
-        <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
-        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
-      </div>
-      {overview.length>0&&<div className="factory-overview-grid factory-canvas-overview">
-        {overview.map((src,n)=><button type="button" key={n} onClick={()=>{setCurrent(n);setStudioTab('slides')}}><img src={src} alt={'Slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}
-      </div>}
-      {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
-        <strong><Check size={15}/> {downloads.length} PNG listos</strong>
-        <p>Descárgalos individualmente, sin ZIP.</p>
-        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
-      </div>}
+      <div className="factory-step-footer"><span>La foto debe ser la protagonista, no quedar perdida entre elementos.</span><button type="button" className="btn dark" onClick={()=>setStudioTab('style')}>Siguiente: fondo <ArrowRight size={16}/></button></div>
     </>}
-    {studioTab==='slides'&&<>
-          <div className="factory-work">
-      <div className="factory-edit">
-        <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
-        <div className="factory-slide-strip">
-          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
-          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
-        </div>
-        <div className="factory-panel">
-          <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Edit this slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
-          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
-          <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
-          <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
-          <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
-            <select id="slide-font-choice" aria-label="Tipografía del título de este slide"
-              value={slide.titleFont||'inherit'} onChange={e=>replace({titleFont:e.target.value==='inherit'?undefined:e.target.value as CarouselFont})}>
-              <option value="inherit">Igual que el estilo maestro</option>
-              {CAROUSEL_FONTS.filter(font=>font.id!=='brand').map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
-            </select>
-            <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
-          </div>
-          <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
-           <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
-             <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
-             {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
-           </select>
-           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
-             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
-             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
-           </details>
-           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
-             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
-           </select>
-          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
-          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-          {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
+    {studioTab==='style'&&<>
+          <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
+      <div className="factory-style-title"><div><span className="factory-step-eyebrow">PASO 3 DE 5 · FONDO</span><h2>Elige el fondo que acompañe a tu foto.</h2><p>Usa dos o tres colores que combinen. Blanco, un degradado o cualquiera de los fondos guardados.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
+      <div className="factory-canvas-colors">
+        <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
+          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasColor:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>
+        <label><input type="checkbox" checked={!!style.canvasGradient}
+          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasGradient:e.target.checked?'#F3DBD5':'',seamlessBackgroundId:'brand',seamlessAssetId:''})}/>
+          Fondo degradado</label>
+        {style.canvasGradient&&<label>Segundo color <input type="color" aria-label="Segundo color del degradado"
+          value={style.canvasGradient} onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasGradient:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>}
+        <button type="button" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
+            {...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Fondo blanco</button>
+      </div>
+      <div className="factory-style-controls">
+        <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
+          <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
+        </select></label>
+        <label>Paleta<select aria-label="Paleta del carrusel" value={style.accentSource} onChange={e=>setArtStyle({accentSource:e.target.value as CarouselStyle['accentSource']})}>
+          <option value="brand">Colores de mi marca</option><option value="reference" disabled={!style.referenceColor}>Colores de la referencia</option>
+        </select></label>
+      </div>
+      <div className="factory-style-footer">
+        <div className="factory-style-swatches">{palette.map((c,n)=><span key={n} title={c} style={{background:c}}/>)}<span title="Fondo" style={{background:brand.background}}/><small>Paleta guardada · usa otros tonos por slide cuando quieras</small></div>
+
+      </div>
+      {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
+    </section>
+
+          <section className="seamless-config">
+      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
+      {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{FREE_BACKGROUNDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
+        <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+        <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
+      </div>}
+    </section>
+
+      <details className="factory-style-advanced"><summary>Personalizar un slide, elegir stickers o un fondo guardado</summary>
+                  {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
             <div><label>Color <input type="color" value={slide.backgroundColor||style.canvasColor}
               onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:e.target.value})}/></label>
               <label>Degradado <input type="checkbox" checked={!!slide.backgroundGradient}
@@ -882,7 +915,66 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
                 backgroundColor:undefined,backgroundGradient:undefined})}>Volver al fondo general</button>
             </div>
           </details>}
-          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
+
+      </details>
+      <div className="factory-step-footer"><span>El fondo acompaña a la foto, no le roba protagonismo.</span>
+        <button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: textos <ArrowRight size={16}/></button></div>
+    </>}
+    {studioTab==='slides'&&<>
+          <div className="factory-work">
+      <div className="factory-edit">
+        <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 4 DE 5 · TEXTOS</span>
+          <h2>Una idea clara por slide.</h2><p>Empieza por un título que se entienda al instante. Después añade solo el texto que hace falta.</p></div>
+      <details className="factory-type-gallery factory-typography-more">
+        <summary>Ver las tipografías antes de elegir · {CAROUSEL_FONTS.length} estilos</summary>
+        <div className="factory-type-options">{CAROUSEL_FONTS.map(font=><button key={font.id}
+          type="button" aria-pressed={style.font===font.id}
+          className={style.font===font.id?'selected':''}
+          onClick={()=>setArtStyle({font:font.id})}>
+          <span style={{fontFamily:carouselFontFamily(font.id,brand.headingFont)}}>Your story.</span>
+          <small>{font.label}</small>
+        </button>)}</div>
+      </details>
+
+        <div className="factory-section"><strong>Texto por slide</strong><span>{slides.length} slides · Editables</span></div>
+        <div className="factory-slide-strip">
+          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
+          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
+        </div>
+        <div className="factory-panel">
+                  <label>Tipografía principal<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
+          {CAROUSEL_FONTS.map(font=><option key={font.id} value={font.id}>{font.label} · {font.category}</option>)}
+        </select></label>
+
+          <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Escribe el mensaje de este slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
+          <p className="factory-blank-hint">Lienzo libre: los textos, fotos y elementos se pueden colocar directamente en el editor superior.</p>
+          <label>Etiqueta</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
+          <label>Título principal</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
+          <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
+            <select id="slide-font-choice" aria-label="Tipografía del título de este slide"
+              value={slide.titleFont||'inherit'} onChange={e=>replace({titleFont:e.target.value==='inherit'?undefined:e.target.value as CarouselFont})}>
+              <option value="inherit">Igual que el estilo maestro</option>
+              {CAROUSEL_FONTS.filter(font=>font.id!=='brand').map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
+            </select>
+            <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
+          </div>
+          <label>Texto de apoyo</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+           <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
+             <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
+             {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
+           </select>
+          <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
+           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
+             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
+             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
+           </details>
+           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
+             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
+           </select>
+          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
+          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+
+          </details>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
 
@@ -898,37 +990,33 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
          onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
          {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>}
         <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
-        <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
-        <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo</button>
-        {overview.length>0&&<div className={'factory-overview'+(style.seamlessEnabled?' seamless':'')} aria-label="Vista previa de todos los slides"><strong>{style.seamlessEnabled?'Vista seamless · desliza para comprobar las uniones':'Tu carrusel, como una colección'}</strong><div className="factory-overview-grid">{overview.map((src,n)=><button type="button" key={n} onClick={()=>setCurrent(n)} title={'Ir al slide '+(n+1)}><img src={src} alt={'Vista previa slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}</div></div>}
-        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Preparar PNG individuales</button>
-        {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
-        <div className="factory-hint"><ImagePlus size={16}/> El estilo maestro afecta todo el carrusel; el texto, las fotografías y la composición de cada slide siguen siendo editables.</div>
-         <div className="factory-quality"><strong>Revisión antes de publicar</strong><p>Comprobamos longitud del texto y si faltan fotografías. Revisa manualmente ortografía, identidad facial y manos.</p>
-           {warnings.length?warnings.map((note,n)=><small key={n}>• {note}</small>):<span><Check size={15}/> Sin avisos de texto o fotografías pendientes.</span>}
-         </div>
+
+        <div className="factory-step-mini-actions">
+          <button type="button" className="btn ghost wide" onClick={()=>setStudioTab('canvas')}>Mover elementos en el lienzo</button>
+        </div>
       </aside>
     </div>
 
+      <div className="factory-step-footer"><span>Revisa el gancho, la secuencia y el cierre antes de descargar.</span><button type="button" className="btn dark" onClick={()=>setStudioTab('review')}>Siguiente: revisar <ArrowRight size={16}/></button></div>
     </>}
-    {studioTab==='style'&&<>
-          <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
-      <div className="factory-style-title"><div><span className="eyebrow">02 / LIENZO LIBRE</span><h2>Empieza en blanco. Diseña a tu gusto.</h2><p>Sin plantillas, recuadros ni líneas decorativas. Selecciona colores, degradados, fondos y tipografías libremente.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
-      <div className="factory-canvas-colors">
-        <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
-          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
-            {...style,canvasColor:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>
-        <label><input type="checkbox" checked={!!style.canvasGradient}
-          onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
-            {...style,canvasGradient:e.target.checked?'#F3DBD5':'',seamlessBackgroundId:'brand',seamlessAssetId:''})}/>
-          Fondo degradado</label>
-        {style.canvasGradient&&<label>Segundo color <input type="color" aria-label="Segundo color del degradado"
-          value={style.canvasGradient} onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
-            {...style,canvasGradient:e.target.value,seamlessBackgroundId:'brand',seamlessAssetId:''})}/></label>}
-        <button type="button" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
-            {...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Fondo blanco</button>
+    {studioTab==='review'&&<section className="factory-review">
+      <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DETALLES</span>
+        <h2>Comprueba el resultado antes de compartirlo.</h2>
+        <p>Revisa la portada, el ritmo entre slides, la legibilidad y el último mensaje. Después descarga los PNG.</p>
       </div>
-      <div className="factory-destination">
+      <div className="factory-review-layout">
+        <div className="factory-review-check">
+          <strong>Revisión final</strong>
+          <ul>
+            <li><Check size={15}/> La primera portada se entiende en segundos</li>
+            <li><Check size={15}/> El texto no queda cortado entre slides</li>
+            <li><Check size={15}/> Hay una acción clara al final</li>
+          </ul>
+          <p>Revisa también las fotografías y los nombres antes de publicar.</p>
+          {warnings.length>0&&<div className="factory-quality"><strong>Revisar</strong>
+            {warnings.map((note,n)=><small key={n}>{note}</small>)}</div>}
+        </div>
+              <div className="factory-destination">
         <label>¿Dónde vas a publicar este carrusel?
           <select value={style.targetPlatform} onChange={e=>setArtStyle({targetPlatform:e.target.value as CarouselStyle['targetPlatform']})}>
             <option value="brand">Mi red principal ({platformName(preferredPlatform(brand))})</option>
@@ -937,62 +1025,34 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </label>
         <p><strong>{socialLabel}</strong> · {destinationAccount||'Cuenta aún no configurada'} · Descargas manuales, sin publicación automática.</p>
       </div>
-      <div className="factory-style-controls">
-        <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
-          <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
-        </select></label>
-        <label>Tipografía principal<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
-          {CAROUSEL_FONTS.map(font=><option key={font.id} value={font.id}>{font.label} · {font.category}</option>)}
-        </select></label>
-        <label>Paleta<select aria-label="Paleta del carrusel" value={style.accentSource} onChange={e=>setArtStyle({accentSource:e.target.value as CarouselStyle['accentSource']})}>
-          <option value="brand">Colores de mi marca</option><option value="reference" disabled={!style.referenceColor}>Colores de la referencia</option>
-        </select></label>
-      </div>
-      <details className="factory-type-gallery">
-        <summary>Ver las tipografías antes de elegir · {CAROUSEL_FONTS.length} estilos</summary>
-        <div className="factory-type-options">{CAROUSEL_FONTS.map(font=><button key={font.id}
-          type="button" aria-pressed={style.font===font.id}
-          className={style.font===font.id?'selected':''}
-          onClick={()=>setArtStyle({font:font.id})}>
-          <span style={{fontFamily:carouselFontFamily(font.id,brand.headingFont)}}>Your story.</span>
-          <small>{font.label}</small>
-        </button>)}</div>
-      </details>
-      <div className="factory-reference">
-        <div className="factory-reference-copy"><strong>¿Te dieron una referencia visual?</strong><p>Úsala como inspiración de paleta y contraste, sin copiar su fotografía ni sus textos. El análisis de color es gratuito.</p></div>
-        <div className="factory-reference-actions">
-          <select aria-label="Referencia de estilo" value={style.referenceAssetId} onChange={e=>{setArtStyle({referenceAssetId:e.target.value});setReferenceReport('')}}>
-            <option value="">Sin referencia de estilo</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
-          <button type="button" className="btn ghost" onClick={uploadImage}><Upload size={15}/> Subir referencia</button>
-          <button type="button" className="btn dark" onClick={applyReference} disabled={!style.referenceAssetId||!images[style.referenceAssetId]}>Tomar colores</button>
-        </div>
-        {style.referenceAssetId&&images[style.referenceAssetId]&&<img className="factory-reference-thumb" src={images[style.referenceAssetId]} alt="Referencia usada solo como inspiración"/>}
-      </div>
-      <div className="factory-style-footer">
-        <div className="factory-style-swatches">{palette.map((c,n)=><span key={n} title={c} style={{background:c}}/>)}<span title="Fondo" style={{background:brand.background}}/><small>Paleta guardada · usa otros tonos por slide cuando quieras</small></div>
-        <button type="button" className="btn ghost" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),{...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Usar fondo blanco</button>
-      </div>
-      {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
-    </section>
 
-          <section className="seamless-config">
-      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
-      {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{FREE_BACKGROUNDS.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label>
-        <label>Fotografía panorámica opcional<select value={style.seamlessAssetId} onChange={e=>setArtStyle({seamlessAssetId:e.target.value})}><option value="">Sin foto · diseño gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
-        <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
+      </div>
+            <div className="factory-canvas-exports">
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales de 1080 × 1350. Sin líneas de edición.</span></div>
+        <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
+      </div>
+      {overview.length>0&&<div className="factory-overview-grid factory-canvas-overview">
+        {overview.map((src,n)=><button type="button" key={n} onClick={()=>{setCurrent(n);setStudioTab('slides')}}><img src={src} alt={'Slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}
       </div>}
-    </section>
+      {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
+        <strong><Check size={15}/> {downloads.length} PNG listos</strong>
+        <p>Descárgalos individualmente, sin ZIP.</p>
+        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
+      </div>}
 
-      <div className="factory-return-canvas"><button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button></div>
-    </>}
+      <div className="factory-step-footer">
+        <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a textos</button>
+        <button type="button" className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+      </div>
+    </section>}
     {studioTab==='ai'&&<section className="factory-assistant-zone">
-      <div className="factory-assistant-head"><span className="eyebrow">SOLO SI LA NECESITAS</span>
-        <h2>Ayuda con IA, separada del diseño.</h2>
-        <p>Diseñar, usar fondos, crear textos y descargar no consume créditos IA. Estas herramientas son opcionales y muestran el costo antes de continuar.</p>
+      <div className="factory-assistant-head"><span className="eyebrow">HERRAMIENTAS IA</span>
+        <h2>IA</h2>
+        <p>Crea textos o imágenes con IA. Cada acción indica los créditos antes de generar; editar y descargar el carrusel no consume créditos.</p>
       </div>
       <div className="factory-idea factory-assistant-copy">
-        <div><div className="eyebrow">REDACCIÓN OPCIONAL</div><h3>¿Quieres ayuda para escribir?</h3><p>Describe tu tema y genera una propuesta de carrusel. También puedes escribirlo todo manualmente en Slides y textos.</p></div>
+        <div><div className="eyebrow">CREAR TEXTOS</div><h3>Escribe un carrusel a partir de tu idea.</h3><p>Describe tu tema y genera una propuesta de carrusel. Después podrás editarlo en Textos.</p></div>
         <div><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)}
           placeholder="Describe el tema o problema sobre el que quieres publicar..."/>
           <button type="button" className="btn dark" onClick={makeCopy} disabled={!!busy}>
@@ -1000,9 +1060,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             Generar texto · 1 crédito</button></div>
       </div>
               <div className="factory-panel factory-ai">
-          <div className="factory-panel-title"><div><div className="eyebrow">03 / IMAGE MAKER</div><h3><Sparkles size={18}/> AI Image Lab</h3></div></div>
+          <div className="factory-panel-title"><div><div className="eyebrow">CREAR IMÁGENES</div><h3><Sparkles size={18}/> Imágenes con IA</h3></div></div>
           <p>Crea imágenes nuevas para una publicación o variaciones creativas de una fotografía. No modifica el original.</p>
-          <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Create new</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Photo variation</button></div>
+          <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Imagen nueva</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Variación de foto</button></div>
           <label>¿Qué estás fotografiando?</label><div className="factory-mode">
              <button type="button" className={imageSubjectType==='portrait'?'selected':''} onClick={()=>setImageSubjectType('portrait')}>Persona / retrato</button>
              <button type="button" className={imageSubjectType==='product'?'selected':''} onClick={()=>setImageSubjectType('product')}>Producto / objeto</button>
@@ -1010,11 +1070,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            {imageMode==='variation'&&<><label>Foto original · sujeto principal</label><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Selecciona foto original…</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
              {style.referenceAssetId&&<small>La segunda referencia guía solamente el estilo. Tu foto original mantiene el papel de sujeto principal.</small>}
            </>}
-          <label>Visual prompt</label><textarea rows={3} value={imagePrompt} onChange={e=>setImagePrompt(e.target.value)} placeholder="Editorial photo of cookies on a blue table, beautiful morning light, no text or logos…"/>
+          <label>Descripción de la imagen</label><textarea rows={3} value={imagePrompt} onChange={e=>setImagePrompt(e.target.value)} placeholder="Editorial photo of cookies on a blue table, beautiful morning light, no text or logos…"/>
           <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generar foto · 1 crédito IA</button>
           <small>Las generaciones pueden consumir créditos. No uses variaciones IA de screenshots de la App ni de fotos donde necesites fidelidad exacta de rostros o detalles.</small>
         </div>
-      <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver a diseñar sin IA</button>
+      <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button>
     </section>}
   </div>;
 }
