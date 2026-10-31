@@ -1,21 +1,21 @@
 import { useMemo, useState } from 'react';
-import { Copy, Check, Pencil, Trash2, Plus, Search, Link2, Globe2, LockKeyhole, X, Save } from 'lucide-react';
+import { Copy, Pencil, Trash2, Plus, Search, Link2, Globe2, LockKeyhole, X, Save } from 'lucide-react';
 import { api } from './supabase-client';
 import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
-type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
-type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
+export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
+export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
-type StudioEntry = { id:string; title:string; section?:string; notes?:string };
-type DisplayLink = BaseLink & { rowId?:string; hidden?:boolean };
+export type StudioEntry = { id:string; title:string; section?:string; notes?:string };
+export type DisplayLink = BaseLink & { rowId?:string; hidden?:boolean };
 const GROUPS: {id:Category; title:string; intro:string}[] = [
   {id:'thelaunchera',title:'The Launch Era',intro:'Productos, páginas de venta y demos de servicios'},
   {id:'podcast',title:'Podcast',intro:'Episodios, recursos y páginas de la colección digital'},
   {id:'escuela',title:'Escuela',intro:'Clases, lista de espera, aula y proyectos de práctica'},
   {id:'lab',title:'Content Lab',intro:'Editor creativo, prompts, herramientas y archivos'}
 ];
-const INITIAL:BaseLink[] = [
+export const STUDIO_LINKS:BaseLink[] = [
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
   {key:'tle-app-info',title:'Cleaning App · Información',url:'https://thelaunchera.com/cleaning-web-app/',category:'thelaunchera',visibility:'publico',description:'Página del producto principal'},
   {key:'tle-app',title:'Cleaning App · Entrar',url:'https://app.thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Acceso a la aplicación para clientes'},
@@ -48,7 +48,40 @@ const INITIAL:BaseLink[] = [
   {key:'lab-brand-board-code',title:'Brand Board Studio · Código GitHub',url:'https://github.com/thelaunchera/demo-booking-landing-/tree/brand-board-studio',category:'lab',visibility:'interno',description:'Repositorio de desarrollo y editor de marca'},
   {key:'lab-repo',title:'Content Lab · Código GitHub',url:'https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/content-lab',category:'lab',visibility:'interno',description:'Fuente del editor en GitHub'},
   {key:'lab-notion',title:'Inventario general · Notion',url:'https://app.notion.com/p/40aa68f2ee6e817bbccbc3c56095cbf8?pvs=204',category:'lab',visibility:'interno',description:'Registro maestro de enlaces y cambios del 31 de octubre'}
+  {key:"tle-home-code",title:"TLE · Website en GitHub",url:"https://github.com/thelaunchera/the-launch-era-new-website-",category:"thelaunchera" as Category,visibility:"interno" as Visibility,description:"Repositorio del website oficial y demos"},
+  {key:"tle-app-code",title:"Cleaning App · Código GitHub",url:"https://github.com/thelaunchera/launch-Era-App-",category:"thelaunchera" as Category,visibility:"interno" as Visibility,description:"Repositorio de la aplicación operativa"},
+  {key:"tle-command",title:"Command Center TLE · Acceso privado",url:"https://command.thelaunchera.com/",category:"thelaunchera" as Category,visibility:"interno" as Visibility,description:"Panel privado, autorización necesaria"},
+  {key:"tle-command-code",title:"Command Center · GitHub",url:"https://github.com/thelaunchera/the-launch-era-command-center",category:"thelaunchera" as Category,visibility:"interno" as Visibility,description:"Repositorio del panel privado independiente"},
+  {key:"tle-cb-code",title:"CB Depot · GitHub",url:"https://github.com/thelaunchera/cb-depot-booking",category:"thelaunchera" as Category,visibility:"interno" as Visibility,description:"Código del cliente, no datos de clientes"},
+  {key:"tle-ai-booking",title:"AI Booking Assistant · Información",url:"https://thelaunchera.com/ai-booking-assistant/",category:"thelaunchera" as Category,visibility:"revision" as Visibility,description:"Oferta TLE: revisar pago y activación antes de compartir"},
+  {key:"tle-bundle",title:"Booking + AI · Bundle",url:"https://thelaunchera.com/booking-bundle/",category:"thelaunchera" as Category,visibility:"revision" as Visibility,description:"Página del paquete: confirmar condiciones de compra"},
+  {key:"tle-website-auto",title:"Website Automation · Landing",url:"https://thelaunchera.com/website-automation/",category:"thelaunchera" as Category,visibility:"revision" as Visibility,description:"Revisar ruta y condiciones actuales antes de compartir"},
+  {key:"tle-va",title:"VA Support · Landing",url:"https://thelaunchera.com/virtual-assistant/",category:"thelaunchera" as Category,visibility:"revision" as Visibility,description:"Revisar servicio y condiciones antes de publicar"},
+  {key:"tle-cleaning-app-new",title:"Cleaning App · Landing del repositorio",url:"https://thelaunchera.com/cleaning-app/",category:"thelaunchera" as Category,visibility:"publico" as Visibility,description:"Landing documentada en el repositorio web"},
+  {key:"pod-free",title:"5 preguntas · Guía gratuita",url:"https://podcast.thelaunchera.com/#regalo",category:"podcast" as Category,visibility:"publico" as Visibility,description:"Público: solicitar por formulario para entrega por correo"},
+  {key:"pod-code",title:"Podcast · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo",category:"podcast" as Category,visibility:"interno" as Visibility,description:"Repositorio del podcast, Studio, Escuela y Lab"},
+  {key:"school-code",title:"Escuela · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/clases",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Landing de la clase y recursos públicos del sitio"},
+  {key:"school-class-code",title:"Studio de clases · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/estudio-control",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Producción de lecciones y administración"},
+  {key:"school-portal-code",title:"Aula · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/alumnos",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Repositorio del aula aún en producción comercial"},
+  {key:"school-demos-code",title:"Demos · Código GitHub",url:"https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Casa Brownie, CRUMB, AFTR y otros demos"},
+  {key:"lab-studio-code",title:"Studio · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/estudio-control",category:"lab" as Category,visibility:"interno" as Visibility,description:"Control privado y productos"},
+  {key:"lab-qa",title:"Content Lab · Pruebas GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/actions/workflows/content-lab-ci.yml",category:"lab" as Category,visibility:"interno" as Visibility,description:"Pruebas técnicas; no equivalen a acceso comercial"},
 ];
+export type PublicationState = 'publicado' | 'demo' | 'produccion' | 'revision' | 'interno';
+export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
+  'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
+  'tle-booking-demo':'demo','tle-experience':'demo','tle-cb-depot':'revision',
+  'pod-home':'publicado','pod-spotify':'publicado','pod-ep1':'publicado','pod-ep2':'publicado',
+  'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
+  'school-class':'produccion','school-wait':'publicado',
+  'school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo','school-aftr':'demo',
+  'school-aula':'produccion','school-club':'produccion','school-pdf':'produccion',
+  'lab-editor':'produccion','lab-prompts':'publicado','lab-brand-board':'publicado'
+};
+export const PUBLICATION_LABELS:Record<PublicationState,string> = {
+  publicado:'Publicado en GitHub', demo:'Demo publicada', produccion:'En producción', revision:'Revisar antes de vender', interno:'Acceso interno'
+};
+
 const shareable = (v:Visibility) => v==='publico' || v==='demo';
 const statusText:Record<Visibility,string> = {publico:'Público',demo:'Demo',interno:'Privado',revision:'Revisar'};
 function safeUrl(raw:string) {
@@ -65,18 +98,10 @@ function decode(entry:StudioEntry) {
   } catch {return null;}
 }
 const blank:Omit<BaseLink,'key'>={title:'',url:'',category:'thelaunchera',visibility:'publico',description:''};
-export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:StudioEntry[];onChanged:()=>Promise<unknown>;readOnly?:boolean}) {
-  const [category,setCategory]=useState<Category|'todos'>('todos');
-  const [query,setQuery]=useState('');
-  const [editor,setEditor]=useState<(Partial<DisplayLink> & {isNew?:boolean})|null>(null);
-  const [busy,setBusy]=useState(false);
-  const [copied,setCopied]=useState('');
-  const [notice,setNotice]=useState('');
-  const [issue,setIssue]=useState('');
-  const links=useMemo(()=>{
+export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
     const records=entries.filter(x=>x.section===LINK_CENTER_SECTION).map(row=>({row,config:decode(row)})).filter((x):x is {row:StudioEntry;config:NonNullable<ReturnType<typeof decode>>}=>!!x.config);
-    const original=new Set(INITIAL.map(x=>x.key));
-    const basics:DisplayLink[]=INITIAL.map(base=>{
+    const original=new Set(STUDIO_LINKS.map(x=>x.key));
+    const basics:DisplayLink[]=STUDIO_LINKS.map(base=>{
       const changed=records.find(x=>x.config.key===base.key);
       return changed ? {...base,title:changed.row.title,url:changed.config.url,category:changed.config.category,visibility:changed.config.visibility,description:changed.config.description||'',rowId:changed.row.id,hidden:changed.config.hidden} : base;
     });
@@ -85,7 +110,16 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
       visibility:x.config.visibility,description:x.config.description||'',rowId:x.row.id,hidden:x.config.hidden
     }));
     return [...basics,...extras].filter(x=>!x.hidden);
-  },[entries]);
+}
+export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:StudioEntry[];onChanged:()=>Promise<unknown>;readOnly?:boolean}) {
+  const [category,setCategory]=useState<Category|'todos'>('todos');
+  const [query,setQuery]=useState('');
+  const [editor,setEditor]=useState<(Partial<DisplayLink> & {isNew?:boolean})|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [copied,setCopied]=useState('');
+  const [notice,setNotice]=useState('');
+  const [issue,setIssue]=useState('');
+  const links=useMemo(()=>resolveStudioLinks(entries),[entries]);
   const shown=links.filter(x=>(!readOnly || shareable(x.visibility)) && (category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
   async function copy(text:string,key:string){
     try{await navigator.clipboard.writeText(text);setCopied(key);setIssue('');setNotice('Enlace copiado al portapapeles.');}
@@ -119,7 +153,7 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     if(!window.confirm('¿Quitar «'+link.title+'» del centro de enlaces?'))return;
     setBusy(true);setIssue('');
     try{
-      if(INITIAL.some(x=>x.key===link.key)){
+      if(STUDIO_LINKS.some(x=>x.key===link.key)){
         const data={title:link.title,section:LINK_CENTER_SECTION,status:'archivada',notes:JSON.stringify({key:link.key,url:link.url,category:link.category,visibility:link.visibility,description:link.description,hidden:true})};
         if(link.rowId)await api.put('/api/items/ideas/'+link.rowId,data);
         else await api.post('/api/items/ideas',data);
@@ -151,7 +185,7 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
       return <section className="lc-group" key={group.id}>
         <div className="lc-group-head"><div><h3>{group.title}</h3><p>{group.intro}</p></div><span>{groupLinks.length} enlaces</span></div>
         <div className="lc-list">{groupLinks.map(item=><article className="lc-item" key={item.key}>
-          <div className="lc-item-info"><div className="lc-item-top"><strong>{item.title}</strong><span className={'lc-status lc-status-'+item.visibility}>{item.visibility==='interno'&&<LockKeyhole size={12}/>} {statusText[item.visibility]}</span></div><p>{item.description}</p><a href={item.url} target="_blank" rel="noopener noreferrer" title="Abrir enlace">{item.url}</a></div>
+          <div className="lc-item-info"><div className="lc-item-top"><strong>{item.title}</strong><span className={'lc-status lc-phase-'+(LINK_PUBLICATION[item.key]||'interno')}>{PUBLICATION_LABELS[LINK_PUBLICATION[item.key]||'interno']}</span><span className={'lc-status lc-status-'+item.visibility}>{item.visibility==='interno'&&<LockKeyhole size={12}/>} {statusText[item.visibility]}</span></div><p>{item.description}</p><a href={item.url} target="_blank" rel="noopener noreferrer" title="Abrir enlace">{item.url}</a></div>
           <div className="lc-actions">
             <button type="button" onClick={()=>void copy(item.url,item.key)} title={item.visibility==='interno'?'Copiar enlace privado: no compartir':'Copiar enlace'}><Copy size={16}/><span>{copied===item.key?'Copiado':'Copiar'}</span></button>
             <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={'Abrir '+item.title}><Globe2 size={18}/></a>
