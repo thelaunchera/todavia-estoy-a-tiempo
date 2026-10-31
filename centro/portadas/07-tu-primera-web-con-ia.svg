@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="Tu primera web con IA: portada editorial con vista de una web en una computadora"><defs>
+<linearGradient id="a" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#FAF8F3"/><stop offset="1" stop-color="#B7D5E2"/></linearGradient>
+<linearGradient id="screen" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#FAF8F3"/><stop offset="1" stop-color="#DFEAF1"/></linearGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#a)"/>
+<path d="M0 392C117 356 254 455 390 373S620 285 764 336" stroke="#8EB3C3" opacity=".3" stroke-width="2" fill="none"/>
+<circle cx="634" cy="137" r="192" stroke="#FFFFFF" stroke-width="2" opacity=".6" fill="none"/>
+<circle cx="634" cy="137" r="159" stroke="#FFFFFF" stroke-width="2" opacity=".47" fill="none"/>
+<text x="43" y="48" font-family="Arial,Helvetica,sans-serif" font-size="14" letter-spacing="2.6" font-weight="700" fill="#527A91">THE LAUNCH ERA  /  MASTERCLASS 01</text>
+<path d="M43 71h76" stroke="#7298AD" stroke-width="3"/>
+<text x="43" y="153" font-family="Georgia,serif" font-size="55" letter-spacing="-2.8" fill="#152D43">Tu primera</text>
+<text x="43" y="215" font-family="Georgia,serif" font-size="58" font-style="italic" letter-spacing="-2.8" fill="#345F7B">web con IA.</text>
+<text x="45" y="257" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#345266">De tu idea a una web real.</text>
+<path d="M43 400h352" stroke="#91AEBB" opacity=".7"/>
+<text x="43" y="428" font-family="Arial,sans-serif" font-size="13" letter-spacing="1.5" font-weight="700" fill="#3E6177">APRENDE  ·  CREA  ·  PUBLICA</text>
+<g filter="url(#shadow)">
+<rect x="392" y="144" width="296" height="221" rx="14" fill="#213E53"/>
+<rect x="400" y="153" width="280" height="193" rx="8" fill="url(#screen)"/>
+<rect x="400" y="153" width="280" height="29" rx="8" fill="#F3F2ED"/>
+<circle cx="418" cy="167" r="3.4" fill="#86A6B8"/><circle cx="429" cy="167" r="3.4" fill="#B0C3CD"/><circle cx="440" cy="167" r="3.4" fill="#D2DDE2"/>
+<rect x="413" y="191" width="254" height="143" rx="5" fill="#E0EAF0"/>
+<rect x="413" y="191" width="111" height="143" rx="5" fill="#DBE5DC"/>
+<circle cx="469" cy="243" r="31" fill="#B6C8AF"/><path d="M438 262q31-39 62-4" fill="#E1E7D6"/>
+<rect x="422" y="295" width="89" height="7" rx="3" fill="#91AB9F"/><rect x="422" y="308" width="69" height="5" rx="2.5" fill="#B3C6B9"/>
+<rect x="540" y="216" width="111" height="10" rx="5" fill="#203C54"/>
+<rect x="540" y="236" width="92" height="6" rx="3" fill="#9EB6C3"/><rect x="540" y="248" width="107" height="6" rx="3" fill="#B5C8D2"/>
+<rect x="540" y="267" width="88" height="27" rx="9" fill="#315F79"/><text x="553" y="285" fill="#FFFFFF" font-family="Arial" font-size="10" font-weight="700">VER MI WEB</text>
+<path d="M504 365h72l21 19H483z" fill="#2E495A"/><rect x="471" y="383" width="141" height="9" rx="4" fill="#557284"/>
+</g>
+<g filter="url(#shadow)"><rect x="373" y="285" width="105" height="58" rx="12" fill="#FDFBF5" stroke="#C5D7DB"/><circle cx="397" cy="308" r="10" fill="#D5EAE7"/><path d="M392 308l4 4 7-9" stroke="#447B74" stroke-width="2.5" fill="none"/><text x="412" y="307" font-family="Arial" font-size="10" font-weight="700" fill="#24435A">Listo</text><text x="412" y="321" font-family="Arial" font-size="8.6" fill="#6D8795">Tu proyecto</text></g>
+<text x="684" y="441" text-anchor="end" font-family="Arial" font-size="12" letter-spacing="1.7" fill="#547487">CLASS  /  01</text></svg>

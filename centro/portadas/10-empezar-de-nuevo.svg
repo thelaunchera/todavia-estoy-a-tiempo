@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="Empezar de nuevo: cuaderno de 14 días con páginas, pequeños pasos y un amanecer ilustrado"><defs>
+<linearGradient id="a" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#E9DFE5"/><stop offset=".58" stop-color="#C8C4D6"/><stop offset="1" stop-color="#9899B5"/></linearGradient>
+<linearGradient id="sun" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#FCEDCF"/><stop offset="1" stop-color="#E8AFB8"/></linearGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#a)"/>
+<circle cx="572" cy="191" r="152" fill="url(#sun)" opacity=".9"/>
+<circle cx="572" cy="191" r="188" stroke="#FFF8F3" opacity=".5" stroke-width="2" fill="none"/>
+<text x="43" y="49" font-family="Arial,sans-serif" font-size="14" letter-spacing="2.8" font-weight="700" fill="#4C526D">TODAVÍA ESTOY A TIEMPO</text>
+<path d="M44 76h60" stroke="#807E96" stroke-width="2.5"/>
+<text x="41" y="166" font-family="Georgia,serif" font-size="69" letter-spacing="-2.7" fill="#2D3552">Empezar</text>
+<text x="41" y="231" font-family="Georgia,serif" font-style="italic" font-size="68" letter-spacing="-2.7" fill="#5C5B7D">de nuevo.</text>
+<text x="45" y="275" font-family="Arial,sans-serif" font-size="17" fill="#525B70">Sin tener todo resuelto.</text>
+<rect x="43" y="309" width="153" height="39" rx="19.5" fill="#2E3D56"/>
+<text x="64" y="334" font-family="Arial,sans-serif" font-size="14" font-weight="800" fill="#FCF4EB">14 DÍAS  ·  A TU RITMO</text>
+<text x="43" y="430" font-family="Georgia,serif" font-style="italic" font-size="19" fill="#444D66">Un paso pequeño también cuenta.</text>
+<g transform="rotate(-8 574 257)" filter="url(#shadow)">
+<rect x="458" y="135" width="204" height="273" rx="15" fill="#8E8EA9"/>
+<rect x="449" y="125" width="204" height="273" rx="15" fill="#FBF8F1"/>
+<rect x="469" y="153" width="164" height="43" rx="8" fill="#E2DFEC"/>
+<text x="485" y="182" font-family="Arial,sans-serif" font-size="18" font-weight="800" fill="#545776">MI CAMINO</text>
+<path d="M479 225h143" stroke="#D5CCD7" stroke-width="2"/>
+<circle cx="492" cy="250" r="10" fill="#99A6B5"/><path d="M487 250l3 3 6-7" stroke="#FFFFFF" stroke-width="2.3" fill="none"/>
+<path d="M516 248h102M516 259h81" stroke="#A5A5B7" stroke-width="5" stroke-linecap="round" opacity=".66"/>
+<circle cx="492" cy="294" r="10" fill="#A6ACC0"/><path d="M487 293l3 3 6-7" stroke="#FFFFFF" stroke-width="2.3" fill="none"/>
+<path d="M516 292h87M516 303h61" stroke="#B7B5C4" stroke-width="5" stroke-linecap="round" opacity=".73"/>
+<circle cx="492" cy="340" r="10" fill="#FAF8F4" stroke="#A6A4BC" stroke-width="2"/>
+<path d="M516 338h107M516 349h85" stroke="#B8B3C2" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+<path d="M472 376h154" stroke="#DFDAE2"/>
+</g>
+<path d="M409 106l5 13 13 5-13 5-5 13-5-13-13-5 13-5z" fill="#FBF3E8"/>
+<text x="678" y="432" text-anchor="end" font-family="Arial" font-size="13" letter-spacing="1.5" fill="#4D5470">CUADERNO  /  02</text></svg>

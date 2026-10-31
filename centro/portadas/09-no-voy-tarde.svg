@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="No voy tarde: diario de reflexión con cuaderno abierto, portada azul noche y detalles en papel"><defs>
+<linearGradient id="a" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#1E334B"/><stop offset="1" stop-color="#536D82"/></linearGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#a)"/>
+<circle cx="596" cy="187" r="191" fill="#D3DCE1" opacity=".055"/><circle cx="596" cy="187" r="155" fill="none" stroke="#DFE8EC" stroke-opacity=".24"/>
+<path d="M28 376c105-31 172 21 280-8s240-7 393-46" fill="none" stroke="#D2E1E9" stroke-opacity=".3" stroke-width="1.4"/>
+<text x="43" y="48" font-family="Arial,sans-serif" font-size="14" letter-spacing="3" font-weight="700" fill="#DAE5ED">TODAVÍA ESTOY A TIEMPO</text>
+<path d="M44 75h63" stroke="#C7D8E1" stroke-width="2.5"/>
+<text x="40" y="168" font-family="Georgia,serif" font-size="75" letter-spacing="-3" fill="#FFFDF4">No voy</text>
+<text x="41" y="243" font-family="Georgia,serif" font-style="italic" font-size="78" letter-spacing="-3" fill="#FFFDF4">tarde.</text>
+<text x="44" y="287" font-family="Arial,sans-serif" font-size="18" fill="#E3EDF0">Un diario para volver a mí.</text>
+<text x="44" y="428" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#E6EFF0">Sin prisa. A mi ritmo.</text>
+<g filter="url(#shadow)" transform="rotate(10 546 259)">
+<path d="M429 129Q488 114 545 147V389Q492 362 430 384Z" fill="#FBF5E9" stroke="#CFDCE0" stroke-width="3"/>
+<path d="M545 147Q608 114 673 132V384Q611 364 545 389Z" fill="#EFEDE4" stroke="#CFDCE0" stroke-width="3"/>
+<path d="M545 147v242" stroke="#B6B6B3" stroke-width="2"/>
+<text x="445" y="164" font-family="Georgia,serif" font-style="italic" font-size="21" fill="#536A7E">Querida yo,</text>
+<path d="M446 192h82M446 211h76M446 230h80M446 249h67M446 268h79" stroke="#B1C4CC" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+<path d="M564 169h88M564 188h75M564 207h89M564 226h82M564 245h64M564 265h82" stroke="#B1C4CC" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+<path d="M593 318c-15-14-8-29 5-28 9 0 12 12 12 12s9-15 19-8c13 8 2 23-19 39z" fill="none" stroke="#819EAA" stroke-width="2.6"/>
+<path d="M479 327c11 8 20 8 31-2" fill="none" stroke="#8CA5AF" stroke-width="2.4" stroke-linecap="round"/>
+</g>
+<circle cx="394" cy="116" r="4" fill="#E6F1F0"/><path d="M404 77l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#E8F1EF" opacity=".7"/>
+<text x="677" y="435" text-anchor="end" font-family="Arial" font-size="13" letter-spacing="1.4" fill="#DAE5EB">DIARIO  /  01</text></svg>

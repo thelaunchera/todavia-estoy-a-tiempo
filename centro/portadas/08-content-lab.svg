@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="Content Lab: portada creativa con tableros, diseños editables y elementos gráficos"><defs>
+<linearGradient id="a" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#101A33"/><stop offset="1" stop-color="#3B447D"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#B3A7F0" stop-opacity=".4"/><stop offset="1" stop-color="#B3A7F0" stop-opacity="0"/></radialGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#a)"/><ellipse cx="554" cy="212" rx="273" ry="246" fill="url(#halo)"/>
+<path d="M36 394H680" stroke="#D3D1F0" opacity=".25"/>
+<text x="41" y="49" font-family="Arial,sans-serif" font-size="14" letter-spacing="2.5" font-weight="700" fill="#C6D6F6">THE LAUNCH ERA / CREATIVE TOOLS</text>
+<text x="40" y="152" font-family="Arial,sans-serif" font-size="65" letter-spacing="-3.5" font-weight="800" fill="#F8FAFF">Content</text>
+<text x="40" y="221" font-family="Georgia,serif" font-size="73" font-style="italic" letter-spacing="-3.6" fill="#CAD1FF">Lab.</text>
+<text x="42" y="268" font-family="Arial,sans-serif" font-size="17" fill="#E0E5FA">Tus ideas, con más estilo.</text>
+<rect x="42" y="302" width="176" height="31" rx="15.5" fill="#F2D85B"/>
+<text x="58" y="323" font-size="12" font-family="Arial,sans-serif" font-weight="800" fill="#232C4B">CREATE SOMETHING GOOD</text>
+<text x="42" y="428" font-size="13" font-family="Arial,sans-serif" letter-spacing="1.7" font-weight="700" fill="#CED9F0">DISEÑA / EDITA / PUBLICA</text>
+<g filter="url(#shadow)">
+<rect x="410" y="105" width="257" height="265" rx="16" fill="#121F3D" stroke="#8699C2" stroke-opacity=".8"/>
+<rect x="410" y="105" width="257" height="38" rx="16" fill="#233658"/>
+<circle cx="427" cy="123" r="4.2" fill="#C0B6F3"/><circle cx="441" cy="123" r="4.2" fill="#F2D85B"/><circle cx="455" cy="123" r="4.2" fill="#A3CBDC"/>
+<rect x="421" y="155" width="47" height="204" rx="8" fill="#25355A"/>
+<rect x="431" y="168" width="27" height="28" rx="5" fill="#D0C8F1"/><rect x="431" y="206" width="27" height="28" rx="5" fill="#A3C9DF"/><rect x="431" y="244" width="27" height="28" rx="5" fill="#F2D85B"/>
+<rect x="481" y="154" width="173" height="202" rx="9" fill="#EFEAF0"/>
+<rect x="496" y="171" width="143" height="172" rx="4" fill="#BDCCD9"/>
+<rect x="496" y="171" width="143" height="79" rx="4" fill="#A5B7C9"/>
+<circle cx="599" cy="207" r="32" fill="#E5D4D8"/>
+<path d="M496 240C529 201 558 236 586 219s45-23 53-20v51H496" fill="#7A91A9" opacity=".85"/>
+<text x="507" y="277" font-family="Georgia,serif" font-size="23" font-style="italic" fill="#203550">your</text><text x="507" y="303" font-family="Arial" font-size="24" font-weight="800" fill="#203550">next idea.</text>
+<rect x="507" y="319" width="111" height="6" rx="3" fill="#67869D"/>
+</g>
+<g transform="rotate(-8 397 287)" filter="url(#shadow)">
+<rect x="352" y="242" width="86" height="123" rx="8" fill="#FFF9ED"/>
+<rect x="360" y="251" width="70" height="79" rx="4" fill="#E2BFB3"/>
+<path d="M364 315L393 275L424 314" fill="none" stroke="#FFF4E5" stroke-width="4"/>
+<text x="364" y="348" font-family="Arial" font-size="10" font-weight="700" fill="#35415F">idea  /  01</text>
+</g>
+<path d="M664 75l7 19 20 7-20 7-7 19-7-19-20-7 20-7z" fill="#F2D85B" stroke="#F5E9A6" stroke-width="1"/>
+<circle cx="383" cy="165" r="8" fill="#F2D85B"/><circle cx="385" cy="199" r="4" fill="#C8BDF7"/>
+<text x="683" y="429" text-anchor="end" font-size="12" font-family="Arial" letter-spacing="1.6" fill="#D6E0F3">LAB / 02</text></svg>
