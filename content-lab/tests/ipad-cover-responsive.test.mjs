@@ -10,22 +10,26 @@ test('iPad cover composer uses full width and photo/stickers side-by-side instea
  assert.ok(css.includes('@media(max-width:600px)'));
  assert.ok(css.includes('.app-shell .composer>.visual{width:100%;max-width:none'));
 });
-test('Photo upload is the primary cover action and works on tablet without choosing a saved image',()=>{
- const app=read('src/App.tsx'),cover=read('src/CreativeCover.tsx');
- assert.ok(app.includes('Empieza con tu propia foto'));
- assert.ok(app.includes("'Subir mi foto'"));
- assert.ok(app.includes("uploadRef.current?.click()"));
- assert.ok(!app.includes('Choose an original image'));
- assert.ok(app.includes("if (tab === 'create' && category === 'original') change('assetId', asset.id)"));
- assert.ok(app.includes("type=\"file\""));
- assert.ok(cover.includes("Your next big idea."));
- assert.ok(cover.includes('VISTA DE EJEMPLO'));
+test('Single-post composer uploads original photos and sets arbitrary images as background',()=>{
+ const app=read('src/App.tsx'),studio=read('src/FreePostStudio.tsx');
+ assert.ok(app.includes('<FreePostStudio'));
+ assert.ok(app.includes("upload(file,'original',false)"));
+ assert.ok(studio.includes('Subir fondo'));
+ assert.ok(studio.includes('Mi foto como fondo'));
+ assert.ok(studio.includes('Añadir fotos'));
+ assert.ok(studio.includes('onUpload(files, point)')||studio.includes('uploadPhotos(files,point)'));
+ assert.ok(studio.includes('coverLayers(post,brand,decor)'));
+ assert.ok(studio.includes('paintPanoramaLayers(ctx,1080,1350'));
+ assert.ok(!app.includes('cover-layout-chooser'));
+ assert.ok(!app.includes('template-grid'));
 });
-test('Included touch editor does not label basic finger movements or decorative controls as free',()=>{
- const cover=read('src/CreativeCover.tsx'),controls=read('src/FreeDecorControls.tsx'),app=read('src/App.tsx');
- assert.ok(cover.includes('Mover y ajustar stickers'));
- assert.ok(!cover.includes('dedo · gratis'));
+test('Free post studio keeps the draggable layer editor, stickers and backgrounds accessible',()=>{
+ const app=read('src/App.tsx'),studio=read('src/FreePostStudio.tsx'),controls=read('src/FreeDecorControls.tsx');
+ assert.ok(studio.includes('<TouchLayerCanvas'));
+ assert.ok(studio.includes('<FreeDecorControls'));
+ assert.ok(studio.includes('onReorder={reorder}'));
+ assert.ok(studio.includes('onCommit={commit}'));
+ assert.ok(studio.includes('onDropFiles='));
  assert.ok(!controls.includes('<span>FREE</span>'));
- assert.ok(app.includes('title="Stickers y backgrounds"'));
- assert.ok(app.includes('cover-layout-chooser'));
+ assert.ok(app.includes('writeCoverDecor'));
 });
