@@ -57,3 +57,30 @@ assert.ok(read('reembolsos.html').includes('/centro/reembolsos.html'),'Reembolso
 assert.ok(read('tus-datos.html').includes('/centro/privacidad.html'),'Derechos de datos consistentes');
 assert.ok(read('centro/legales.css').includes('prefers-reduced-motion'),'Políticas accesibles en móvil');
 console.log('QA OK: legales y contacto comercial del Centro presentes; compras intactas.');
+
+
+// La documentación visible al público explica los derechos sin exponer la
+// infraestructura privada, herramientas internas, tablas ni procesos operativos.
+const publicLegalDocuments=[
+ 'centro/terminos.html',
+ 'centro/privacidad.html',
+ 'centro/reembolsos.html',
+ 'centro/cancelaciones.html',
+ 'centro/cookies.html',
+ 'centro/contacto.html',
+ 'privacidad.html',
+ 'cookies.html'
+];
+const internalDetailPattern=/\b(?:supabase|github\s+pages|make|resend|google\s+drive|service[_-]role|podcast_hub_|studio[_-]key|webhook|cloudflare)\b/i;
+for(const page of publicLegalDocuments){
+ const document=read(page);
+ assert.ok(!internalDetailPattern.test(document),'No mostrar proveedores o detalles internos en '+page);
+ assert.ok(!document.includes('Como actividad gestionada desde Florida'),'No publicar ubicaciones de operación sin autorización');
+}
+const businessPrivacy=read('centro/privacidad.html');
+for(const customerRight of ['procesamiento de pagos','alojamiento','entrega de archivos','rectificación','eliminación']){
+ assert.ok(businessPrivacy.includes(customerRight),'Transparencia de privacidad para '+customerRight);
+}
+assert.ok(read('centro/terminos.html').includes('derechos irrenunciables'),'Respetar derechos aplicables del cliente');
+assert.ok(read('centro/contacto.html').includes('mailto:hello@thelaunchera.com'),'Conservar contacto comercial oficial');
+console.log('QA OK: política pública de mínimos datos sin detalles internos.');
