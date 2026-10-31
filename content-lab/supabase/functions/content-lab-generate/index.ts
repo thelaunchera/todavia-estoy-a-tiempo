@@ -221,7 +221,7 @@ Deno.serve(async request=>{
     'Create only three short strings for each of the nine posts: headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
     'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
     'Return JSON with one key posts containing an array of exactly nine objects, each {headline,subtext,caption}. No explanations, no scene key.'
-   ].join('\\n');
+   ].join('\n');
    const schema={
     type:'object',
     properties:{
