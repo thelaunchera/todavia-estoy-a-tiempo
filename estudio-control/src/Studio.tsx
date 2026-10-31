@@ -8,7 +8,7 @@ import WaitlistManager from './WaitlistManager';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -124,6 +124,15 @@ function validEmailArtUrl(value?:string){
       /\.(?:png|jpe?g|webp)$/i.test(url.pathname);
   } catch { return false; }
 }
+/** Formatea solo la moneda que realmente consta en el registro, sin asumir USD. */
+function formatSaleAmount(s: VerifiedSale):string{
+  if(typeof s.amount_cents!=='number'||!Number.isFinite(s.amount_cents))return 'Importe por revisar';
+  const currency=(s.currency||'').trim().toUpperCase();
+  if(!/^[A-Z]{3}$/.test(currency))return 'Moneda sin verificar';
+  try{return new Intl.NumberFormat('es-US',{style:'currency',currency}).format(s.amount_cents/100);}
+  catch{return 'Moneda desconocida';}
+}
+
 const SITE = 'https://podcast.thelaunchera.com/';
 const LOGO = SITE + 'assets/logo-podcast-04.svg';
 const COVER = SITE + 'assets/podcast-episodio-01-azul-v3.webp';
@@ -277,15 +286,28 @@ function App() {
   const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
   const [classStats,setClassStats] = useState<ClassLaunchStats|null>(null);
   const [verifiedSales,setVerifiedSales]=useState<VerifiedSale[]|null>(null);
+  const [verifiedOwnership,setVerifiedOwnership]=useState<VerifiedOwnership[]|null>(null);
   const [salesError,setSalesError]=useState('');
+  const [salesRefreshing,setSalesRefreshing]=useState(false);
+  const [salesRefreshKey,setSalesRefreshKey]=useState(0);
+  const [salesCheckedAt,setSalesCheckedAt]=useState<Date|null>(null);
   useEffect(()=>{
     if(page!=='ventas'||!account||!SUPABASE_ENABLED)return;
     let cancelled=false;
+    setSalesRefreshing(true);
     setSalesError('');
-    getVerifiedSales().then(rows=>{if(!cancelled)setVerifiedSales(rows);})
-      .catch(()=>{if(!cancelled){setVerifiedSales(null);setSalesError('No se pudieron consultar los registros verificados.');}});
+    Promise.all([getVerifiedSales(),getVerifiedOwnership()]).then(([rows,owned])=>{
+      if(cancelled)return;
+      setVerifiedSales(rows);
+      setVerifiedOwnership(owned);
+      setSalesCheckedAt(new Date());
+    }).catch(()=>{
+      if(cancelled)return;
+      setVerifiedSales(null);setVerifiedOwnership(null);
+      setSalesError('No pudimos consultar las ventas verificadas. Revisa la conexión y vuelve a actualizar.');
+    }).finally(()=>{if(!cancelled)setSalesRefreshing(false);});
     return()=>{cancelled=true;};
-  },[page,account]);
+  },[page,account,salesRefreshKey]);
 
   useEffect(() => {
     if(page !== 'clases' || !account || !SUPABASE_ENABLED) return;
@@ -534,6 +556,13 @@ function App() {
     products = items.productos;
   // Una sola lista de la clase en Clases · grabación; no repetir en Tareas.
   const generalTasks=tasks.filter(x=>x.section!==CLASS_TASK_SECTION);
+  const paidPdfSales=verifiedSales?.filter(s=>s.status?.toLowerCase()==='paid')||[];
+  const paidUsdSales=paidPdfSales.filter(s=>s.currency?.toLowerCase()==='usd' && typeof s.amount_cents==='number');
+  const pdfRevenueUsdCents=paidUsdSales.reduce((sum,s)=>sum+(s.amount_cents||0),0);
+  const activeProductAccess=verifiedOwnership?.filter(x=>x.status==='active')||[];
+  const activeClassCount=activeProductAccess.filter(x=>x.product_code==='web-class').length;
+  const activeLabCount=activeProductAccess.filter(x=>x.product_code==='content-lab').length;
+
   const plan = editorialPlan(episodes);
   const libraryEpisodes = episodeScope === 'month' ? plan.month : episodeScope === 'published' ? plan.published : plan.active;
   const allSeries = groupEpisodes(libraryEpisodes);
@@ -1383,13 +1412,26 @@ function App() {
             <>
               {head('Centro de ventas y productos','Todos los checkouts existentes, sus entregas y sus estados. Stripe se conecta por Make; aquí no se crean cobros nuevos.')}
               <div className="commerce-hero">
-                <div><span className="eyebrow">REGISTRO PRIVADO DE VENTAS</span>
-                  <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' registros sincronizados'}</h2>
-                  <p>{verifiedSales===null?'Consulta pendiente. No equivale a cero ventas en Stripe.':'Registros guardados en Supabase después de las automatizaciones de compra. No representan necesariamente todo Stripe.'}</p>
+                <div><span className="eyebrow">REGISTRO PRIVADO · STRIPE A TRAVÉS DE MAKE</span>
+                  <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' movimientos PDF registrados'}</h2>
+                  <p>Los importes vienen de los pagos PDF que Make registró en Supabase; no son el saldo completo de Stripe. El Lab, la clase y los servicios llevan controles de acceso o cobro separados.</p>
+                  <div className="commerce-quick-actions">
+                    <button type="button" onClick={()=>setSalesRefreshKey(n=>n+1)} disabled={salesRefreshing||!SUPABASE_ENABLED}>
+                      <RotateCcw size={16} className={salesRefreshing?'spinning':''}/> {salesRefreshing?'Comprobando…':'Actualizar ventas'}
+                    </button>
+                    <a href="../centro/" target="_blank" rel="noopener noreferrer"><ShoppingBag size={16}/> Ver Centro de productos ↗</a>
+                  </div>
+                  {salesCheckedAt&&<small className="commerce-check-time">Última consulta: {salesCheckedAt.toLocaleString('es-US',{dateStyle:'medium',timeStyle:'short'})}</small>}
                 </div>
                 <div className="commerce-hero-mark" aria-hidden="true"><ReceiptText size={49}/></div>
               </div>
               {salesError && <p className="commerce-error" role="status">{salesError}</p>}
+              <div className="commerce-summary" aria-label="Resumen de compras registradas">
+                <div><span>Pagos PDF confirmados</span><strong>{verifiedSales===null?'—':paidPdfSales.length}</strong><small>En el registro de Make/Supabase</small></div>
+                <div><span>Importe PDF registrado · USD</span><strong>{verifiedSales===null||paidUsdSales.length===0?'—':formatSaleAmount({amount_cents:pdfRevenueUsdCents,currency:'usd'} as VerifiedSale)}</strong><small>No es la facturación total de Stripe</small></div>
+                <div><span>Accesos de clase</span><strong>{verifiedOwnership===null?'—':activeClassCount}</strong><small>Independientes de las ventas PDF</small></div>
+                <div><span>Accesos de Content Lab</span><strong>{verifiedOwnership===null?'—':activeLabCount}</strong><small>Las ventas siguen pausadas por QA</small></div>
+              </div>
               <section className="commerce-catalog" aria-labelledby="commerce-catalog-title">
                 <div className="commerce-section-heading"><span className="eyebrow">CATÁLOGO COMERCIAL</span><h2 id="commerce-catalog-title">Productos y checkouts</h2>
                   <p>Solo los enlaces de pago ya disponibles y comprobados aparecen como compra abierta. Los productos en preparación no cobran todavía.</p></div>
@@ -1401,17 +1443,18 @@ function App() {
                 </div>
               </section>
               <section className="commerce-operations" aria-labelledby="commerce-oper-title">
-                <h2 id="commerce-oper-title">Compras registradas</h2>
+                <h2 id="commerce-oper-title">Últimos pagos PDF registrados</h2>
                 {verifiedSales===null?<p>No se muestra ningún importe porque todavía no se pudo consultar la fuente.</p>
                 :verifiedSales.length===0?<p>Por ahora no hay compras registradas en Supabase. Esto no demuestra que no existan movimientos en Stripe; comprueba la sincronización en Make.</p>
-                :<div className="commerce-sales-list">{verifiedSales.map(s=>(
+                :<div className="commerce-sales-list">{verifiedSales.slice(0,60).map(s=>(
                   <div className="commerce-sale" key={s.id}>
                     <div><strong>{s.product_code||'Producto sin identificar'}</strong><small>{s.purchased_at?new Date(s.purchased_at).toLocaleDateString('es-US'): 'Fecha pendiente'}</small></div>
                     <span>{s.status||'Estado no disponible'}</span>
-                    <b>{typeof s.amount_cents==='number'&&Number.isFinite(s.amount_cents)?new Intl.NumberFormat('es-US',{style:'currency',currency:s.currency?.toUpperCase()==='USD'?'USD':'USD'}).format(s.amount_cents/100):'Importe por revisar'}</b>
+                    <b>{formatSaleAmount(s)}</b>
                   </div>
                 ))}</div>}
-                <p className="commerce-privacy-note">No se muestran correos ni datos personales de compradores en esta vista, especialmente útil al grabar pantalla.</p>
+                {verifiedSales && verifiedSales.length>60 && <p className="commerce-privacy-note">Se muestran los últimos 60 pagos; las cifras del resumen utilizan todos los registros consultados.</p>}
+                <p className="commerce-privacy-note">No se muestran correos ni datos personales de compradores en esta vista. Para conciliar la facturación completa, usa los reportes originales de Stripe y Make.</p>
               </section>
             </>
           )}

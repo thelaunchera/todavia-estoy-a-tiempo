@@ -401,15 +401,42 @@ export async function getStudioBonusResources(): Promise<StudioBonusResource[]> 
 }
 
 export type VerifiedSale = { id: string; product_code: string|null; amount_cents: number|null; currency: string|null; status: string|null; purchased_at: string|null };
+export type VerifiedOwnership = { product_code:string; status:string };
+export async function getVerifiedOwnership():Promise<VerifiedOwnership[]>{
+  if(!client)throw new Error('Esta vista necesita Supabase.');
+  await owner();
+  // La misma tabla que alimenta los estados de "comprado" del centro.
+  const all:VerifiedOwnership[]=[];
+  const pageSize=400;
+  for(let start=0;start<4000;start+=pageSize){
+    const {data,error}=await client.from('podcast_hub_entitlements')
+      .select('product_code,status,id').eq('status','active')
+      .order('id',{ascending:true}).range(start,start+pageSize-1);
+    if(error)throw error;
+    const page=(data||[]) as VerifiedOwnership[];
+    all.push(...page);
+    if(page.length<pageSize)return all;
+  }
+  throw new Error('Demasiados registros de acceso: resumen incompleto.');
+}
 export async function getVerifiedSales(): Promise<VerifiedSale[]> {
   if(!client)throw new Error('Esta vista necesita Supabase.');
-  // El RLS de podcast_sales permite leer únicamente a la administradora del Estudio.
   await owner();
-  const {data,error}=await client.from('podcast_sales')
-    .select('id,product_code,amount_cents,currency,status,purchased_at')
-    .order('purchased_at',{ascending:false}).limit(80);
-  if(error)throw error;
-  return (data||[]) as VerifiedSale[];
+  // Leer todas las páginas; no calcular ingresos a partir de los últimos 80.
+  // Cota conservadora: si se alcanza, mostrar error y no una suma engañosa.
+  const all:VerifiedSale[]=[];
+  const pageSize=400;
+  for(let start=0;start<4000;start+=pageSize){
+    const {data,error}=await client.from('podcast_sales')
+      .select('id,product_code,amount_cents,currency,status,purchased_at')
+      .order('purchased_at',{ascending:false}).order('id',{ascending:true})
+      .range(start,start+pageSize-1);
+    if(error)throw error;
+    const page=(data||[]) as VerifiedSale[];
+    all.push(...page);
+    if(page.length<pageSize)return all;
+  }
+  throw new Error('Se alcanzó el límite de registros; no mostrar sumas parciales.');
 }
 
 export type StudioStudent = {
