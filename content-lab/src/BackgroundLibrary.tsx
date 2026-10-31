@@ -1,7 +1,7 @@
 import React,{useRef,useState,useEffect} from 'react';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
-import {isBowBackground,BOW_BACKGROUNDS} from './BowBackgrounds';
-import {isScrapbookBackground,SCRAPBOOK_BACKGROUNDS} from './ScrapbookBackgrounds';
+import {isBowBackground} from './BowBackgrounds';
+import {isScrapbookBackground} from './ScrapbookBackgrounds';
 import BackgroundThumbnail from './BackgroundThumbnail';
 import {ArrowRight,Download,Search,Upload} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
