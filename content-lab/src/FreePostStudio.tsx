@@ -97,11 +97,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   setHistory(p=>[...p.slice(-24),decor]);setFuture([]);onChange(next);
  };
  const undo=()=>{
-  const past=history.at(-1);if(!past)return;
+  const past=history[history.length-1];if(!past)return;
   setFuture(f=>[...f,decor]);setHistory(h=>h.slice(0,-1));onChange(past);
  };
  const redo=()=>{
-  const next=future.at(-1);if(!next)return;
+  const next=future[future.length-1];if(!next)return;
   setHistory(h=>[...h,decor]);setFuture(f=>f.slice(0,-1));onChange(next);
  };
  const addAsset=(assetId:string,point:Point={x:.5,y:.5})=>{
