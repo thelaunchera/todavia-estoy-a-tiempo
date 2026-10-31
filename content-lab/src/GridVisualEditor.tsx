@@ -5,10 +5,10 @@ type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls;
 type Brand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string;secondaryColor?:string};
 type Props={
  tile:Tile;index:number;brand:Brand;photo?:string;original?:string;logo?:string;preserve:boolean;
- exportSize:ExportSize;onChange:(next:VisualControls)=>void;
+ exportSize:ExportSize;onChange:(next:VisualControls)=>void;stickerImages?:Record<string,string>;
 };
 const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,textX:0,textY:0,textScale:1};
-export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange}:Props){
+export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
  const [layer,setLayer]=useState<'photo'|'text'>('photo');
  const [advanced,setAdvanced]=useState(false);
@@ -19,12 +19,12 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   // Rendering each 1080px Canvas on every pointer movement locks up iOS.
   // A short debounce keeps the result exact while maintaining responsive drag.
   const handle=setTimeout(()=>{
-   composeGridPoster(tile,index,brand,{photo,original,logo,preserve},exportSize)
+   composeGridPoster(tile,index,brand,{photo,original,logo,preserve,stickerImages},exportSize)
     .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.72));setFit(fit)}})
     .catch(()=>{if(active)setPreview('')});
   },120);
   return()=>{active=false;clearTimeout(handle)};
- },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize]);
+ },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize,stickerImages]);
  const set=(key:keyof typeof defaults,value:number)=>onChange({...current,[key]:value});
  const start=(e:React.PointerEvent<HTMLDivElement>)=>{
   if(!preview)return;
