@@ -1,0 +1,7 @@
+
+.template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px;max-height:322px;overflow-y:auto;scrollbar-width:thin}
+.template-grid button{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;min-height:75px;padding:7px 3px!important;font-size:10px!important;word-break:break-word;line-height:1.2}
+.template-icon{width:35px!important;height:30px!important;display:block!important}
+.template-grid .template-icon{background:linear-gradient(135deg,#b7d3df 0 48%,#f0e9dd 48% 75%,#9aa6ac 75%)}
+.template-grid button:nth-child(3n) .template-icon{background:linear-gradient(90deg,#c5e0e8 45%,#1b272d 45%)}
+.template-grid button:nth-child(5n) .template-icon{background:linear-gradient(#d5b9ae 0 58%,#f6f0e9 58%)}

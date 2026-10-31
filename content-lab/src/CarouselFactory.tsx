@@ -1,0 +1,309 @@
+
+import React, { useEffect, useMemo, useState } from 'react';
+import { api } from './platform/client';
+import {
+  Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
+  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3
+} from 'lucide-react';
+import './CarouselFactory.css';
+
+type Brand = {
+  id: string; name: string; handle: string; audience: string; voice: string;
+  rules: string; language: 'English' | 'Español'; color: string; background: string;
+};
+type Post = {
+  id?: string; brandId: string; title: string; format: string; angle: string;
+  hook: string; slides: string; caption: string; cta: string; visual: string;
+  status: string; template: string; assetId: string; date: string;
+  designData?: string; updatedAt?: string;
+};
+type Asset = { id: string; brandId: string; name: string; mime: string };
+type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
+type Slide = {
+  key: string; eyebrow: string; title: string; description: string;
+  layout: Layout; assetId: string;
+};
+type Props = {
+  brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
+  onChange: (next: Post) => void; onSave: () => void;
+  onNewAsset: (asset: Asset, dataUrl: string) => void;
+  loadImage: (id: string) => void; uploadImage: () => void;
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;
+};
+const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+const layoutNames: Record<Layout,string> = {
+  cover: 'Editorial cover', statement: 'Statement', photo: 'Photo story',
+  steps: 'Useful points', split: 'Split editorial', closing: 'Final CTA'
+};
+const defaultLabel = (brand: Brand) => brand.language === 'English' ? 'A CLOSER LOOK' : 'OTRA MANERA DE VERLO';
+const makeSlide = (i: number, headline: string, assetId = ''): Slide => ({
+  key: 'slide-' + i, eyebrow: i === 0 ? 'THE BIG IDEA' : 'THE STORY',
+  title: headline.slice(0,420), description: '',
+  layout: i === 0 ? 'cover' : i % 3 === 0 ? 'photo' : i % 2 === 0 ? 'steps' : 'statement',
+  assetId
+});
+function parseSlides(post: Post, brand: Brand): Slide[] {
+  if (post.designData) {
+    try {
+      const data: unknown = JSON.parse(post.designData);
+      if (Array.isArray(data) && data.length >= 2 && data.length <= 8) {
+        return data.map((s, i) => ({
+          key: String(s.key || 'slide-' + i),
+          eyebrow: String(s.eyebrow || ''),
+          title: String(s.title || ''),
+          description: String(s.description || ''),
+          layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
+          assetId: String(s.assetId || '')
+        }));
+      }
+    } catch { /* fall back to the legacy text draft */ }
+  }
+  const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
+  const title = post.hook || (brand.language === 'English' ? 'One idea worth sharing' : 'Una idea que merece contarse');
+  const result: Slide[] = [makeSlide(0,title,post.assetId)];
+  entries.forEach((s,i)=>result.push(makeSlide(i+1,s)));
+  if(result.length < 3) {
+    result.push(makeSlide(result.length,brand.language === 'English' ? 'What needs to change?' : '¿Qué podemos cambiar?'));
+    result.push(makeSlide(result.length,brand.language === 'English' ? 'A simpler way forward' : 'Una forma más sencilla'));
+  }
+  result.push({
+    ...makeSlide(result.length,post.cta || (brand.language === 'English' ? 'Your next step starts here.' : 'Empieza con un paso.')),
+    eyebrow:brand.language === 'English' ? 'THE NEXT STEP' : 'TU SIGUIENTE PASO',layout:'closing'
+  });
+  return result;
+}
+const textColor = (color: string) => {
+  if (!/^#[0-9A-F]{6}$/i.test(color)) return '#191919';
+  const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
+  return r*.299+g*.587+b*.114>148?'#191919':'#fff';
+};
+function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: number,maxW: number,size: number,lines: number,color: string,font='Georgia') {
+  const words=text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+  let built:string[]=[];
+  for(let fontSize=size;fontSize>=32;fontSize-=4) {
+    ctx.font='bold '+fontSize+'px '+font+', serif';
+    built=[];let next='';
+    words.forEach(word=>{
+      const trial=next?next+' '+word:word;
+      if(ctx.measureText(trial).width>maxW&&next){built.push(next);next=word;}else next=trial;
+    });
+    if(next)built.push(next);
+    if(built.length<=lines&&built.every(line=>ctx.measureText(line).width<=maxW)){size=fontSize;break;}
+    size=fontSize;
+  }
+  const spacing=Math.round(size*1.17);
+  ctx.font='bold '+size+'px '+font+', serif';ctx.fillStyle=color;
+  built.slice(0,lines).forEach((line,i)=>ctx.fillText(line,x,y+i*spacing));
+}
+async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>) {
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
+  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
+  const paper=brand.background,accent=brand.color,ink=textColor(paper),onAccent=textColor(accent);
+  const rect=(x:number,y:number,w:number,h:number,color:string)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
+  const label=(text:string,x:number,y:number,color:string,size=24)=>{
+    ctx.fillStyle=color;ctx.font='700 '+size+'px Arial, sans-serif';
+    ctx.fillText(text.slice(0,50),x,y);
+  };
+  const photo=async(x:number,y:number,w:number,h:number)=>{
+    if(!slide.assetId||!images[slide.assetId])return false;
+    const img=new Image();img.src=images[slide.assetId];
+    await new Promise<void>((resolve,reject)=>{img.onload=()=>resolve();img.onerror=()=>reject(new Error('No se pudo cargar esta fotografía.'));});
+    const z=Math.max(w/img.width,h/img.height),sw=w/z,sh=h/z;
+    ctx.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,x,y,w,h);
+    return true;
+  };
+  const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title||'Your idea here',x,y,w,size,maxLines,color);
+  const body=(x:number,y:number,w:number,color=ink,maxLines=3)=>{
+    if(slide.description)fillLines(ctx,slide.description,x,y,w,41,maxLines,color,'Arial');
+  };
+  const footer=(color=ink)=>{
+    label(brand.name.toUpperCase(),72,1284,color,21);
+    label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),885,1284,color,21);
+  };
+  rect(0,0,1080,1350,paper);
+  if(slide.layout==='cover') {
+    label(slide.eyebrow||defaultLabel(brand),74,138,ink);rect(74,170,126,8,accent);
+    title(74,348,920,106,5);
+    rect(635,735,398,445,accent);
+    const shown=await photo(635,735,398,445);
+    if(!shown){ctx.fillStyle=ink;ctx.beginPath();ctx.arc(835,940,100,0,Math.PI*2);ctx.fill();}
+    body(74,1060,490,ink,3);footer();
+  } else if(slide.layout==='statement') {
+    rect(0,0,1080,1350,accent);
+    ctx.strokeStyle=onAccent;ctx.lineWidth=3;ctx.strokeRect(68,69,944,1212);
+    label(slide.eyebrow||defaultLabel(brand),116,150,onAccent);
+    title(116,428,850,108,6,onAccent);
+    body(116,1040,825,onAccent,3);footer(onAccent);
+  } else if(slide.layout==='photo') {
+    rect(0,0,1080,730,accent);const shown=await photo(0,0,1080,730);
+    if(!shown){rect(95,98,890,540,paper);rect(165,168,750,400,accent);}
+    label(slide.eyebrow||defaultLabel(brand),75,832,ink);
+    title(75,952,925,80,3);
+    body(75,1155,900,ink,2);footer();
+  } else if(slide.layout==='steps') {
+    label(slide.eyebrow||defaultLabel(brand),74,135,ink);
+    title(74,275,930,78,3);
+    rect(74,535,932,4,accent);
+    const points=slide.description.split(/\n|•/).map(s=>s.trim()).filter(Boolean).slice(0,3);
+    if(points.length){
+      points.forEach((p,j)=>{
+        const y=630+j*173;label(String(j+1).padStart(2,'0'),75,y,accent,34);
+        fillLines(ctx,p,180,y,775,48,2,ink,'Arial');
+        rect(180,y+82,760,1,accent);
+      });
+    } else {
+      rect(74,659,700,12,accent);rect(74,829,560,12,accent);rect(74,999,780,12,accent);
+    }
+    footer();
+  } else if(slide.layout==='split') {
+    rect(0,0,530,1350,accent);const shown=await photo(530,0,550,1350);
+    if(!shown)rect(590,240,410,865,paper);
+    label(slide.eyebrow||defaultLabel(brand),60,147,onAccent);
+    title(60,340,430,78,8,onAccent);
+    body(60,1110,430,onAccent,3);footer(onAccent);
+  } else {
+    rect(0,0,1080,1350,accent);rect(73,75,934,1200,paper);
+    label(slide.eyebrow||'ONE LAST THING',116,174,ink);
+    title(116,450,843,99,6);
+    body(116,1040,840,ink,3);rect(116,1151,175,10,accent);
+    label(brand.name.toUpperCase(),116,1225,ink,22);
+    label(String(i+1).padStart(2,'0'),895,1225,ink,22);
+  }
+  return canvas;
+}
+const filename=(post:Post,i:number)=>{
+  const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
+  return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
+};
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving}:Props) {
+  const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
+  const [current,setCurrent]=useState(0);
+  const [preview,setPreview]=useState('');
+  const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const [idea,setIdea]=useState('');
+  const [imagePrompt,setImagePrompt]=useState('');
+  const [imageMode,setImageMode]=useState<'new'|'variation'>('new');
+  const [sourceId,setSourceId]=useState('');
+  const [busy,setBusy]=useState('');
+  useEffect(()=>{setCurrent(0);setDownloads([]);},[brand.id,post.id]);
+  const i=Math.min(current,slides.length-1),slide=slides[i];
+  const setAll=(all:Slide[])=>{
+    onChange({...post,format:'Carousel',designData:JSON.stringify(all.slice(0,8)),hook:all[0].title});
+    setDownloads([]);
+  };
+  const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
+  const insert=()=>{
+    if(slides.length>=8)return notify('Máximo ocho slides.');
+    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:defaultLabel(brand)};
+    setAll([...slides.slice(0,-1),next,...slides.slice(-1)]);
+    setCurrent(slides.length-1);
+  };
+  const remove=()=>{
+    if(slides.length<=2)return notify('Necesitas al menos dos slides.');
+    if(!window.confirm('¿Eliminar este slide?'))return;
+    setAll(slides.filter((_,j)=>j!==i));setCurrent(Math.max(0,i-1));
+  };
+  useEffect(()=>{
+    slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);});
+  },[post.designData,brand.id]);
+  useEffect(()=>{
+    let active=true;
+    drawSlide(slide,i,slides.length,brand,images).then(c=>{
+      if(active)setPreview(c.toDataURL('image/png'));
+    }).catch(showError);
+    return()=>{active=false;};
+  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slides.length,brand.color,brand.background,images]);
+  const makeCopy=async()=>{
+    if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
+    setBusy('copy');
+    try{
+      const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational'});
+      const updated:Post={...post,...data,format:'Carousel',brandId:brand.id,designData:''};
+      onChange({...updated,designData:JSON.stringify(parseSlides(updated,brand))});
+      setCurrent(0);setDownloads([]);
+      notify('Carrusel listo para editar, slide por slide.');
+    }catch(e){showError(e)}finally{setBusy('');}
+  };
+  const createImage=async()=>{
+    if(imagePrompt.trim().length<15)return notify('Describe la imagen con más detalle.');
+    if(imageMode==='variation'&&!sourceId)return notify('Selecciona primero una foto de referencia.');
+    setBusy('image');
+    try{
+      const {data}=await api.post('/api/ai-image',{
+        brandId:brand.id,prompt:imagePrompt,mode:imageMode,
+        assetId:imageMode==='variation'?sourceId:''
+      });
+      const {content,...asset}=data as Asset & {content:string};
+      onNewAsset(asset,'data:'+data.mime+';base64,'+content);
+      replace({assetId:data.id});
+      notify('Nueva imagen creada; el archivo original permanece intacto.');
+    }catch(e){showError(e)}finally{setBusy('');}
+  };
+  const exportOne=async(n=i)=>{
+    setBusy('export');
+    try{
+      const canvas=await drawSlide(slides[n],n,slides.length,brand,images);
+      const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=filename(post,n);a.click();
+      notify('Slide '+(n+1)+' descargado como PNG individual.');
+    }catch(e){showError(e)}finally{setBusy('');}
+  };
+  const exportAll=async()=>{
+    setBusy('all');
+    try{
+      const result:{name:string,url:string}[]=[];
+      for(let n=0;n<slides.length;n++){
+        const canvas=await drawSlide(slides[n],n,slides.length,brand,images);
+        result.push({name:filename(post,n),url:canvas.toDataURL('image/png')});
+      }
+      setDownloads(result);
+      notify('Los PNG están listos para descargarlos uno por uno.');
+    }catch(e){showError(e)}finally{setBusy('');}
+  };
+  return <div className="factory">
+    <div className="factory-header">
+      <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
+      <button className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+    </div>
+    <div className="factory-idea">
+      <div><div className="eyebrow">01 / CONTENT ENGINE</div><h2>Start with one good idea.</h2><p>La IA escribe el carrusel en {brand.language}, siguiendo las reglas de {brand.name}.</p></div>
+      <div><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate full carousel</button></div>
+    </div>
+    <div className="factory-work">
+      <div className="factory-edit">
+        <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
+        <div className="factory-slide-strip">
+          {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>{layoutNames[s.layout]}</span></button>)}
+          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
+        </div>
+        <div className="factory-panel">
+          <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Edit this slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
+          <label>Layout</label><select value={slide.layout} onChange={e=>replace({layout:e.target.value as Layout})}>{layouts.map(v=><option key={v} value={v}>{layoutNames[v]}</option>)}</select>
+          <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
+          <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
+          <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
+          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">No photo · Graphic only</option>{assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
+        </div>
+        <div className="factory-panel factory-ai">
+          <div className="factory-panel-title"><div><div className="eyebrow">03 / IMAGE MAKER</div><h3><Sparkles size={18}/> AI Image Lab</h3></div></div>
+          <p>Crea imágenes nuevas para una publicación o variaciones creativas de una fotografía. No modifica el original.</p>
+          <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Create new</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Photo variation</button></div>
+          {imageMode==='variation'&&<><label>Original photo (reference)</label><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Choose a photo…</option>{assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></>}
+          <label>Visual prompt</label><textarea rows={3} value={imagePrompt} onChange={e=>setImagePrompt(e.target.value)} placeholder="Editorial photo of cookies on a blue table, beautiful morning light, no text or logos…"/>
+          <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate image for this slide</button>
+          <small>Las generaciones pueden consumir créditos. No uses variaciones IA de screenshots de la App ni de fotos donde necesites fidelidad exacta de rostros o detalles.</small>
+        </div>
+      </div>
+      <aside className="factory-right">
+        <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
+        <div className="factory-preview">{preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>
+        <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
+        <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
+        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Prepare every slide separately</button>
+        {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
+        <div className="factory-hint"><ImagePlus size={16}/> Las imágenes originales se mantienen intactas. Puedes cambiar el layout de cada slide sin afectar los demás.</div>
+      </aside>
+    </div>
+  </div>;
+}
