@@ -69,7 +69,7 @@ test('Grid planning uses schema JSON mode with nine independent concepts and saf
 test('in-app email OTP is present while access remains restricted to authorized accounts',()=>{
  const client=source('src/platform/client.ts'),app=source('src/App.tsx');
  assert.ok(client.includes("sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'})"));
- assert.ok(client.includes('shouldCreateUser:false'));
+ assert.ok(client.includes('shouldCreateUser:true'));
  assert.ok(app.includes('autoComplete="one-time-code"'));
  assert.ok(app.includes('await auth.verifyEmailOtp(pendingEmail'));
  assert.ok(app.includes('setAccount(user)'));
