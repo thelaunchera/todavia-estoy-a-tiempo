@@ -1098,7 +1098,7 @@ function App() {
                 ].map(s => (
                   <div key={s.label}>
                     <span>{t(s.label)}</span>
-                    <strong>{String(s.n).padStart(2, '0')}</strong>
+                    <strong>{s.n}</strong>
                     <small>{t(s.detail)}</small>
                   </div>
                 ))}
