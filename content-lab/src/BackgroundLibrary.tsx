@@ -38,7 +38,16 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<Filter>('scrapbook'),[search,setSearch]=useState('');
  const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
- useEffect(()=>{own.slice(0,12).forEach(a=>{if(!images[a.id])loadImage(a.id)})},[assets,images]);
+ const requestedPreviews=useRef(new Set<string>());
+ useEffect(()=>{
+   // A large imported ZIP must still show every thumbnail after a reload.
+   own.slice(0,80).forEach(a=>{
+     if(!images[a.id]&&!requestedPreviews.current.has(a.id)){
+       requestedPreviews.current.add(a.id);
+       loadImage(a.id);
+     }
+   });
+ },[assets,images,loadImage]);
  const upload=async(file?:File)=>{
    if(!file)return;setBusy(true);setError('');
    try{const item=await onUpload(file);if(item){loadImage(item.id);onDesign('brand',item.id)}}
