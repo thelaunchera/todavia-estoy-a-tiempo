@@ -63,11 +63,13 @@ test('Public wallpapers have clear exclusive categories and retired bows remain 
   assert.ok(categories.includes("id:'"+category+"'"),category);
  }
  assert.ok(categories.includes("category==='all'?lookup.has(id)"));
- assert.ok(gallery.includes("setFilter]=useState<BackgroundCategory>('all')"));
+ assert.ok(gallery.includes("setFilter]=useState<GalleryFilter>('all')"));
  assert.ok(!gallery.includes("Coquette & bows"));
  assert.ok(!palette.includes("Aesthetic · 20"));
  assert.ok(!assets.includes("...BOW_BACKGROUNDS"));
  assert.ok(assets.includes("if(isBowBackground(id)){paintBowBackground(ctx,w,h,id);return}"));
  assert.ok(gallery.includes('Mis fondos guardados'));
+ assert.ok(gallery.includes("label:'Mis fondos'"));
+ assert.ok(gallery.includes('ownVisible.map'));
  assert.ok(gallery.includes('backgrounds.filter(item=>belongsToBackgroundCategory'));
 });
