@@ -53,6 +53,17 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+/** Reflow only default-position photos; never overwrite a placement moved by a person. */
+const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
+ if(!slide.assetId)return {...slide,layout};
+ const old=photoDefault(slide.layout),existing=slide.photoPosition;
+ const isAutomatic=!existing||(['x','y','w','h'] as const).every(key=>Math.abs(existing[key]-old[key])<.01);
+ if(!isAutomatic)return {...slide,layout};
+ const target=photoDefault(layout);
+ return {...slide,layout,photoPosition:{...target,
+  ...(existing?.crop?{crop:existing.crop}:{}),
+  ...(existing?.cornerRadius!==undefined?{cornerRadius:existing.cornerRadius}:{})}};
+};
 const editorialTextGeometry=(slide:Slide,field:'eyebrow'|'title'|'description')=>{
  const plan=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim());
  const p=field==='title'?plan.title:field==='description'?plan.body:
@@ -537,10 +548,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   const applyRhythm=()=>{
     const rhythm=editorialRhythmForSlides(slides);
-    setAll(slides.map((item,n)=>({...item,layout:rhythm[n],photoFocus:item.photoFocus||'top'})),normalizeCarouselStyle({...style,editorialRhythm:true}));
+    setAll(slides.map((item,n)=>({...reflowDefaultPhoto(item,rhythm[n]),photoFocus:item.photoFocus||'top'})),normalizeCarouselStyle({...style,editorialRhythm:true}));
     notify('Ritmo editorial aplicado: slides fotográficos, tipográficos y mixtos. Tus fotos y textos siguen editables.');
   };
-  const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
+  const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>{
+    if(j!==i)return s;
+    // A newly chosen photo should not land over the headline by default.
+    if(style.editorialRhythm&&typeof patch.assetId==='string'&&patch.assetId&&!s.assetId&&!s.photoPosition){
+      const layout=s.layout==='statement'?'cover':s.layout;
+      return {...reflowDefaultPhoto({...s,assetId:patch.assetId},layout),...patch};
+    }
+    return {...s,...patch};
+  }));
   const updateDecoration=(next:Partial<Slide>)=>{
     const hasBg=('backgroundImageId' in next)||('backgroundId' in next);
     const changedBackground=hasBg&&(
@@ -1093,7 +1112,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <div className="factory-panel-title"><div><div className="eyebrow">SLIDE {i+1} / {slides.length}</div><h3>Escribe el mensaje de este slide</h3></div><button className="factory-delete" onClick={remove} title="Eliminar slide"><Trash2 size={17}/></button></div>
           <p className="factory-blank-hint">Lienzo libre: textos, fotos y elementos editables en el editor superior.</p>
           <label>Composición de este slide
-            <select aria-label="Composición de este slide" value={slide.layout} onChange={e=>setAll(slides.map((part,n)=>n===i?{...part,layout:e.target.value as Layout}:part),normalizeCarouselStyle({...style,editorialRhythm:true}))}>
+            <select aria-label="Composición de este slide" value={slide.layout} onChange={e=>setAll(slides.map((part,n)=>n===i?reflowDefaultPhoto(part,e.target.value as Layout):part),normalizeCarouselStyle({...style,editorialRhythm:true}))}>
               <option value="statement">Tipográfico · titular protagonista</option>
               <option value="cover">Editorial · foto y titular</option>
               <option value="photo">Fotográfico · imagen protagonista</option>
