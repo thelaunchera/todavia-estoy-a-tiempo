@@ -127,7 +127,11 @@ export async function paintPanoramaLayers(
   const r=clampPanoramaRect(layer.rect),w=r.w*width,h=r.h*height;
   ctx.save();ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
   ctx.rotate((r.angle||0)*Math.PI/180);
-  if(layer.kind==='text')textPaint(ctx,layer,w,h);
+  if(layer.kind==='text'){
+    try{await document.fonts?.load('700 '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
+    catch{/* Offline fallback retains exported text. */}
+    textPaint(ctx,layer,w,h);
+   }
   else if(layer.kind==='shape')shapePaint(ctx,layer,w,h);
   else{
    const src=images[layer.assetId];
