@@ -38,7 +38,7 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -78,6 +78,8 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
            backgroundId:typeof s.backgroundId==='string'?s.backgroundId:'brand',stickerIds:Array.isArray(s.stickerIds)?s.stickerIds.filter((x:unknown)=>typeof x==='string').slice(0,3):[],
            backgroundImageId:typeof s.backgroundImageId==='string'?s.backgroundImageId.slice(0,150):'',
+           backgroundColor:typeof s.backgroundColor==='string'&&/^#[0-9a-f]{6}$/i.test(s.backgroundColor)?s.backgroundColor:undefined,
+           backgroundGradient:typeof s.backgroundGradient==='string'&&/^#[0-9a-f]{6}$/i.test(s.backgroundGradient)?s.backgroundGradient:undefined,
            photoPosition:s.photoPosition&&typeof s.photoPosition==='object'?clampRect(s.photoPosition):undefined,
            stickerPositions:normalizedPositions(s.stickerPositions)
         }));
@@ -181,7 +183,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     try{await paintCoverImage(ctx,images[slide.backgroundImageId],1080,1350)}catch{rect(0,0,1080,1350,paper)}
   }else if(slide.backgroundId&&slide.backgroundId!=='brand')paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
   else {
-    const start=style.canvasColor||'#FFFFFF',end=style.canvasGradient;
+    const start=slide.backgroundColor||style.canvasColor||'#FFFFFF',end=slide.backgroundGradient||style.canvasGradient;
     if(end){const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,start);g.addColorStop(1,end);
       ctx.fillStyle=g;ctx.fillRect(0,0,1080,1350);}
     else rect(0,0,1080,1350,start);
@@ -906,6 +908,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
+            <div><label>Color <input type="color" value={slide.backgroundColor||style.canvasColor}
+              onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:e.target.value})}/></label>
+              <label>Degradado <input type="checkbox" checked={!!slide.backgroundGradient}
+                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',
+                  backgroundGradient:e.target.checked?'#EAD9F0':undefined})}/></label>
+              {slide.backgroundGradient&&<label>Segundo color <input type="color" value={slide.backgroundGradient}
+                onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundGradient:e.target.value})}/></label>}
+              <button type="button" onClick={()=>replace({backgroundId:'brand',backgroundImageId:'',
+                backgroundColor:undefined,backgroundGradient:undefined})}>Volver al fondo general</button>
+            </div>
+          </details>}
           <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''} stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
