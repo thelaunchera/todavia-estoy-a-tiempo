@@ -54,6 +54,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   const [chooseExisting,setChooseExisting]=useState(false);
   const [exportSize,setExportSize]=useState<ExportSize>('portrait');
   const [qaNotes,setQaNotes]=useState<string[]>([]);
+  const [sessionPhotos,setSessionPhotos]=useState(0);
   const [reviewed,setReviewed]=useState(false);
   const [connection,setConnection]=useState<'unknown'|'ready'|'error'>('unknown');
   const [testPhoto,setTestPhoto]=useState('');
@@ -111,7 +112,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
       const src='data:'+data.mime+';base64,'+data.content;
-      setTestPhoto(src);onNewAsset({id:data.id,brandId:brand.id,name:data.name||'Cloudflare test',mime:data.mime},src);
+      setTestPhoto(src);setSessionPhotos(n=>n+1);onNewAsset({id:data.id,brandId:brand.id,name:data.name||'Cloudflare test',mime:data.mime},src);
       setConnection('ready');notify('¡Foto generada y guardada en tu biblioteca privada!');
     }catch(e){showError(e)}
     finally{setBusy('')}
@@ -137,6 +138,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     const next=data.grid as Grid;const a=data.asset as Asset;
     setGrid(next);setGrids(old=>old.map(x=>x.id===next.id?next:x));
     onNewAsset(a,'data:'+a.mime+';base64,'+data.content);
+    setSessionPhotos(n=>n+1);
     return next;
   };
   const generate=async(i:number)=>{
@@ -241,6 +243,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
           <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.assetId?'GENERADO':'CONCEPTO'}</span>
         </button>)}</div>
+        <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
            {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
           </select></div>
