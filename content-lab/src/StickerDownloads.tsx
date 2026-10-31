@@ -51,10 +51,10 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
    const existing=new Set(files.filter(a=>!a.shared).map(a=>a.name.toLowerCase()));
    const uploadList:{file:File;group:string}[]=[];
    for(const file of list){
-    if(/\\.zip$/i.test(file.name)){
+    if(/[.]zip$/i.test(file.name)){
      if(file.size>85000000)throw Error('El ZIP no puede superar 85 MB.');
      const archive=await unpackZip(new Uint8Array(await file.arrayBuffer()));
-     const entries=Object.entries(archive).filter(([name,bytes])=>/\\.png$/i.test(name)&&!name.includes('__MACOSX')&&bytes.byteLength>200&&bytes.byteLength<=5000000);
+     const entries=Object.entries(archive).filter(([name,bytes])=>/[.]png$/i.test(name)&&!name.includes('__MACOSX')&&bytes.byteLength>200&&bytes.byteLength<=5000000);
      if(entries.length>200)throw Error('Colección demasiado grande: máximo 200 stickers.');
      for(const [name,bytes] of entries){
        const basename=name.split('/').pop()||'sticker.png';
@@ -65,7 +65,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
          uploadList.push({file:new File([new Uint8Array(bytes)],basename,{type:'image/png'}),group:finalGroup});
        }
      }
-    }else if(file.type==='image/png'||/\\.png$/i.test(file.name)){
+    }else if(file.type==='image/png'||/[.]png$/i.test(file.name)){
       if(!existing.has(file.name.toLowerCase())){
        existing.add(file.name.toLowerCase());uploadList.push({file,group:groupOf(file.name)});
       }
