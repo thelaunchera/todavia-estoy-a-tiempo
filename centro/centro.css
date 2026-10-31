@@ -209,3 +209,18 @@ body.modal-open{overflow:hidden}
  .program .program-cover.program-cover-image{height:auto;aspect-ratio:3/2;border-radius:10px}
  .product-tile .tile-cover.tile-cover-resource{height:auto;aspect-ratio:3/2}
 }
+
+/* Transparencia comercial y rutas legales del centro. No interfiere con pagos ni autorizaciones. */
+.center-nav nav a[href="./contacto.html"]{color:#d1e6f1}
+.footer{align-items:center}
+.footer nav{display:flex;align-items:center;flex-wrap:wrap;gap:9px 16px}
+.footer nav a,.footer nav button{font:700 11px/1.6 'DM Sans',Arial,sans-serif;letter-spacing:0;text-decoration:none;border:0;background:transparent;padding:7px 0;color:#b9d2e2;cursor:pointer}
+.footer nav a:hover,.footer nav button:hover{text-decoration:underline;color:#fff}
+.help-strip p a{color:#cce6f3;text-underline-offset:3px}
+.product-legal-disclosure{margin:15px 0 7px;padding:18px 19px;border:1px solid #c8d9e3;border-radius:13px;background:#edf3f6}
+.product-legal-disclosure strong{display:block;font-size:13px;color:#284b64;margin:0 0 6px}
+.product-legal-disclosure p{margin:0 0 9px;font-size:12px;line-height:1.75;color:#506c7f}
+.product-legal-disclosure p:last-child{margin:0}
+.product-legal-disclosure a{font-weight:750;color:#2d617e;white-space:normal;text-underline-offset:3px}
+.auth-foot a{color:#c1dbea;text-underline-offset:3px}
+@media(max-width:690px){.footer{align-items:flex-start;flex-direction:column}.footer nav{gap:7px 13px}.footer nav a,.footer nav button{min-height:34px}.product-legal-disclosure{padding:15px 16px}}
