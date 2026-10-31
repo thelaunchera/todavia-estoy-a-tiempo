@@ -119,3 +119,17 @@
 .factory-touch-toggle.active{background:#1e4756;border-color:#1e4756;color:white;box-shadow:0 6px 15px #3b738330}
 @media(hover:hover){.factory-touch-toggle:hover{transform:translateY(-1px)}}
 @media(prefers-reduced-motion:reduce){.factory-touch-toggle{transition:none}}
+
+/* Residential photo examples show actual frame differences, not abstract shapes. */
+.factory-frame-modes .factory-frame-mini{width:min(100%,112px);height:92px;display:flex;align-items:stretch;justify-content:stretch;overflow:hidden;flex:none;background:#eaf2f3;border-color:#c4d4d7}
+.factory-frame-mini img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.factory-frame-modes .factory-frame-mini.rounded{border-radius:20px}
+.factory-frame-modes .factory-frame-mini.super-rounded{border-radius:35px}
+.factory-frame-modes .factory-frame-mini.polaroid{border:6px solid white;border-bottom-width:17px;border-radius:4px;box-shadow:0 3px 12px #1e404b24}
+.factory-frame-modes .factory-frame-mini.soft-shadow{border:5px solid white;border-radius:12px;box-shadow:0 12px 18px #17384439}
+.factory-frame-modes .factory-frame-mini.double-border{border:5px double #6d9bae;border-radius:13px}
+.factory-frame-modes button{padding:11px 6px;min-height:132px}
+.factory-frame-explain{font-size:11px;color:#728992;line-height:1.45;margin:4px 0 10px}
+.factory-free-create{border:1px solid #8db5bd!important;background:#e8f4f5!important;color:#2f5964!important;font-weight:750!important;margin-bottom:11px}
+.factory-free-create:hover{background:#daeff1!important}
+@media(max-width:420px){.factory-frame-modes .factory-frame-mini{height:75px}.factory-frame-modes button{min-height:116px;padding:8px 3px}}
