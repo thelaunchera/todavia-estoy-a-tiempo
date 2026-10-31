@@ -182,6 +182,10 @@ export default function TouchLayerCanvas({
   };
   const chosen = layers.find(layer => layer.id === selected);
   const selectedRect = chosen ? getRect(chosen) : undefined;
+  const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
+    ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*1350,
+      chosen.frameStyle||'panorama').radius/Math.max(1,Math.min(selectedRect.w*1080*pageCount,selectedRect.h*1350)))
+    : 0);
   const commit = (patch: Partial<TouchRect>) => {
     if (!chosen || !selectedRect) return;
     const next = clamp({...selectedRect, ...patch});
@@ -310,15 +314,9 @@ export default function TouchLayerCanvas({
       <strong>{chosen.name}</strong>
       {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
         <div className="touch-editor-corner-controls">
-          <label htmlFor="corner-radius-control">Redondear esquinas <output>{Math.round(selectedRect.cornerRadius??(
-             chosen.kind==='photo' ? (chosen.frameStyle==='none'?0:
-               chosen.frameStyle==='panorama'||!chosen.frameStyle?6:5) : 0
-          ))}%</output></label>
+          <label htmlFor="corner-radius-control">Redondear esquinas <output>{selectedCornerRadius}%</output></label>
           <input id="corner-radius-control" type="range" min="0" max="50" step="1"
-            aria-label="Redondear esquinas del elemento" value={selectedRect.cornerRadius??(
-             chosen.kind==='photo' ? (chosen.frameStyle==='none'?0:
-               chosen.frameStyle==='panorama'||!chosen.frameStyle?6:5) : 0
-            )}
+            aria-label="Redondear esquinas del elemento" value={selectedCornerRadius}
             onChange={e=>commit({cornerRadius:Number(e.target.value)})}/>
           <div className="touch-editor-corner-presets">
             <button type="button" onClick={()=>commit({cornerRadius:0})}>Rectas</button>
