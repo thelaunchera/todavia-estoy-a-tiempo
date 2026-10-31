@@ -53,6 +53,13 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+const editorialTextGeometry=(slide:Slide,field:'eyebrow'|'title'|'description')=>{
+ const plan=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim());
+ const p=field==='title'?plan.title:field==='description'?plan.body:
+  {x:plan.eyebrow.x,top:plan.eyebrow.top,width:840,size:25,lines:1};
+ return {rect:{x:p.x/1080,y:p.top/1350,w:p.width/1080,
+  h:Math.min(.75,Math.max(.07,(p.size*p.lines*1.12)/1350))},fontSize:p.size};
+};
 const layoutNames: Record<Layout,string> = {
   cover: 'Editorial cover', statement: 'Statement', photo: 'Photo story',
   steps: 'Useful points', split: 'Split editorial', closing: 'Final CTA'
@@ -591,14 +598,16 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       {field:'eyebrow' as const,value:part.eyebrow,name:'Etiqueta',rect:{x:.068,y:.061,w:.86,h:.08},fontSize:25},
       {field:'title' as const,value:part.title,name:'Título',rect:{x:.068,y:.18,w:.86,h:.38},fontSize:92},
       {field:'description' as const,value:part.description,name:'Descripción',rect:{x:.068,y:.58,w:.86,h:.28},fontSize:38},
-    ].filter(item=>item.value.trim()).map(item=>({
+    ].filter(item=>item.value.trim()).map(item=>{
+      const geometry=style.editorialRhythm?editorialTextGeometry(part,item.field):{rect:item.rect,fontSize:item.fontSize};
+      return ({
       id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
       font:item.field==='title'?(part.titleFont||style.font)==='brand'?(brand.headingFont||'serif').toLowerCase():(part.titleFont||style.font):'sans',
-      fontSize:item.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
-      rect:{...item.rect,x:(n+item.rect.x)/slides.length,w:item.rect.w/slides.length},
+      fontSize:geometry.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
+      rect:{...geometry.rect,x:(n+geometry.rect.x)/slides.length,w:geometry.rect.w/slides.length},
       page:n,sourceField:item.field,placement:'front' as const,
-    }))):[]),
+    });})):[]),
   ]);
   const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
     .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
@@ -946,7 +955,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
             }
-            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
+            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:(['cover','statement','photo','steps','split','closing'] as Layout[])[n],eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
               backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||''}));
             setAll(next,normalizeCarouselStyle({...style,editorialRhythm:true}));setCurrent(0);notify('Nuevo carrusel de 6 slides preparado.');
           }}><Plus size={16}/> Nuevo carrusel</button>
