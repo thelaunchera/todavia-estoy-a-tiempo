@@ -83,6 +83,8 @@ function shapePaint(ctx:CanvasRenderingContext2D,shape:PanoramaLayer,w:number,h:
 export function panoramaFont(font?:string){
  const fonts:Record<string,string>={
   serif:'Georgia,serif',sans:'Arial,sans-serif',brand:'Georgia,serif',
+  prompt:'Prompt,Arial,sans-serif',futura:'Futura,Arial,sans-serif',
+  'dm serif display':'"DM Serif Display",Georgia,serif',
   cormorant:'"Cormorant Garamond",Georgia,serif',
   playfair:'"Playfair Display",Georgia,serif',
   fraunces:'Fraunces,Georgia,serif',bodoni:'"Bodoni Moda",Georgia,serif',
