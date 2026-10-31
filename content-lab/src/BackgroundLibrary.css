@@ -105,3 +105,11 @@
 .background-collection-chips button.selected span{opacity:1}
 .background-library .background-results{font-size:11px;color:#6d838c;margin:11px 0 14px}
 @media(max-width:700px){.background-sections{gap:22px}.background-collection-chips{display:flex;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;overscroll-behavior-x:contain;padding-bottom:6px}.background-collection-chips>button{flex:none}.background-category-heading h2{font-size:21px}.background-category-heading p{font-size:10px}}
+
+
+.background-shared-preview{display:flex;width:100%;aspect-ratio:4/5;border-radius:15px;overflow:hidden;
+ background:#f6f3ee;align-items:center;justify-content:center}
+.background-shared-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.background-shared-loading{display:block;width:43%;height:30%;background:#e5e9e8;border-radius:12px}
+.background-publish-category{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:#3b606a;font-size:12px;font-weight:700}
+.background-publish-category select{border:1px solid #c9dee0;background:#fff;min-height:38px;padding:8px;border-radius:10px;color:#315766}
