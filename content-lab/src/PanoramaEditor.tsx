@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ImagePlus, Maximize2, Minimize2, Upload } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2 } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import { assetCategory, displayAssetName, type LibraryAsset } from './MediaAsset';
@@ -12,12 +12,14 @@ type Props = {
   onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
   onAdd: (assetId: string, point: Point) => void;
   onRemove: (id: string) => void;
+  textElements: {id: string; name: string; preview: string}[];
+  onRemoveText: (id: string) => void;
   onUpload: (files: File[], point: Point) => Promise<void>;
   error: string; onRetry: () => void;
 };
 export default function PanoramaEditor({
   preview, count, seamless, layers, assets, images, loadImage, onCommit, onAdd,
-  onRemove, onUpload, error, onRetry,
+  onRemove, textElements, onRemoveText, onUpload, error, onRetry,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [filter, setFilter] = useState('');
@@ -79,6 +81,16 @@ export default function PanoramaEditor({
       <TouchLayerCanvas preview={preview} layers={layers} ratio={count * 1080 / 1350}
         pageCount={count} onCommit={onCommit} onRemove={onRemove}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
+      <details className="panorama-text-manager"><summary>Textos del carrusel ({textElements.length}) · borrar</summary>
+        <p>Los textos se eliminan aquí; las fotos y stickers se borran desde el lienzo o su lista.</p>
+        <div className="panorama-text-items">{textElements.map(item => <div className="panorama-text-item" key={item.id}>
+          <div><strong>{item.name}</strong><span>{item.preview}</span></div>
+          <button type="button" title={'Borrar ' + item.name} aria-label={'Borrar ' + item.name}
+            onClick={() => { if (window.confirm('¿Borrar este texto del carrusel?')) onRemoveText(item.id); }}>
+            <Trash2 size={16}/><span>Borrar</span></button>
+        </div>)}</div>
+        {!textElements.length && <p>No hay textos añadidos en el carrusel.</p>}
+      </details>
       <small className="panorama-export-note">{count} PNG individuales · 1080 × 1350 cada uno · las líneas de corte y los controles no aparecen en la descarga.</small>
     </div></div>
   </section>;
