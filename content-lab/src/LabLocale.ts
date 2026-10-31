@@ -161,6 +161,25 @@ const pairs:[string,string][]=[
  ['Save changes','Guardar cambios'],
  ['Plan your content','Organiza tu contenido'],
  ['Upload files','Subir archivos'],
+
+ ['YOUR CREATIVE HQ','TU ESTUDIO CREATIVO'],
+ ['CONTENT LAB · FIRST STEPS','CONTENT LAB · PRIMEROS PASOS'],
+ ['YOUR CREATIVE DESK','TU MESA CREATIVA'],
+ ['better content.','mejor contenido.'],
+ ['MADE SIMPLE ↗','HECHO FÁCIL ↗'],
+ ['THE CONTENT ENGINE','TU MOTOR DE CONTENIDO'],
+ ['ACTIVE BRAND','MARCA ACTIVA'],['LANGUAGE','IDIOMA'],
+ ['SAVED POSTS','POSTS GUARDADOS'],
+ ['PICK UP WHERE YOU LEFT OFF','CONTINÚA DONDE LO DEJASTE'],
+ ['SAVED MASTER PROMPTS','MASTER PROMPTS GUARDADOS'],
+ ['composer.','compositor.'],
+ ['SEPARATE BRANDS. CLEAR VOICES.','CADA MARCA CON SU PROPIA VOZ.'],
+ ['your rules.','tus reglas.'],
+ ['BRAND KIT · PALETA PERSONAL PARA CADA MARCA','KIT DE MARCA · TU PALETA PERSONAL'],
+ ['Prompt Studio · 30 recetas','Estudio de prompts · 30 recetas'],
+ ['Selecciona tu idioma · Choose your language','Elige el idioma de tu cuenta'],
+ ['Idioma / Language','Idioma'],
+ ['Idioma del sitio / Site language','Idioma del sitio'],
 ];
 const enToEs=new Map(pairs),esToEn=new Map(pairs.map(([en,es])=>[es,en]));
 const originals=new WeakMap<Text,{source:string,last:string}>();
