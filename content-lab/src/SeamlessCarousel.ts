@@ -1,4 +1,5 @@
-import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 export type SeamlessPage={title:string;eyebrow:string;description:string;assetId?:string;stickerIds?:string[]};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
 export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string};
@@ -71,7 +72,7 @@ export async function drawSeamlessPages(pages:SeamlessPage[],brand:SeamlessBrand
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;
   ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
   ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
-  ctx.save();ctx.translate(x,0);paintFreeStickers(ctx,W,H,page.stickerIds,accent);ctx.restore();
+  ctx.save();ctx.translate(x,0);await paintOriginalStickerImages(ctx,W,H,page.stickerIds,images);ctx.restore();
  }
  return splitIntoPages(wide,total);
 }
