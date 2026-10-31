@@ -64,3 +64,19 @@ test('la protección forma parte de la compilación del portal, sin activar cobr
  assert.match(room,/robots" content="noindex,nofollow/);
  assert.match(room,/src="\.\/curso\.js\?v=/);
 });
+
+
+test('Aula: correo y contraseña, recuperación, acceso de 24 horas y sin enlaces mágicos',()=>{
+ assert.match(room,/id="login-password"[^>]*type="password"|type="password" id="login-password"/);
+ assert.match(room,/id="remember-device"/);
+ assert.match(room,/id="register-form"/);
+ assert.match(room,/id="reset-email-form"/);
+ assert.match(room,/id="new-password-form"/);
+ assert.match(course,/auth\.signInWithPassword\(/);
+ assert.match(course,/auth\.signUp\(/);
+ assert.match(course,/auth\.resetPasswordForEmail\(/);
+ assert.match(course,/auth\.updateUser\(\{password:/);
+ assert.match(course,/const DAY_MS=24\*60\*60\*1000/);
+ assert.match(course,/!hasAulaSession\(who\.id\)/);
+ assert.doesNotMatch(course,/signInWithOtp\(/);
+});

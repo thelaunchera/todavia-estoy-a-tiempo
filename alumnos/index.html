@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=aula-sidebar-20261028-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=curso-recursos-20261029-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261029-plus-v1">
+<link rel="stylesheet" href="./curso.css?v=20261031-password-v3"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=curso-recursos-20261029-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261029-plus-v1">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -31,21 +31,64 @@
       <h1 id="entry-title">Tu espacio para <em>seguir creando.</em></h1>
       <p class="aula-entry-intro">Aquí están tus lecciones, tus materiales y lo que has avanzado. Vuelve cuando quieras y continúa a tu ritmo.</p>
     </div>
-    <section id="login-panel" class="panel" hidden aria-labelledby="aula-login-title">
-      <div class="aula-login-heading">
-        <span class="aula-login-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
-        <span class="aula-login-label">ACCESO SOLO PARA ALUMNOS</span>
+    <section id="login-panel" class="panel aula-auth-card" hidden aria-labelledby="aula-login-title">
+      <p class="aula-auth-kicker"><span class="aula-auth-kicker-dot" aria-hidden="true"></span> ACCESO A TU CLASE</p>
+      <div class="aula-auth-modes" aria-label="Opciones de acceso">
+        <button class="aula-auth-mode is-active" type="button" data-auth-mode="login" aria-pressed="true">Iniciar sesión</button>
+        <button class="aula-auth-mode" type="button" data-auth-mode="register" aria-pressed="false">Primera vez aquí</button>
       </div>
-      <h2 id="aula-login-title">Entra a tu aula.</h2>
-      <p>Usa el mismo correo con el que compraste la clase. Te enviaremos un enlace seguro, sin contraseña.</p>
-      <form id="login-form">
-        <label for="login-email">Tu correo de compra</label>
-        <input type="email" id="login-email" required autocomplete="email" inputmode="email" placeholder="nombre@correo.com" maxlength="254">
-        <button type="submit"><span>Enviarme enlace de acceso</span><span class="aula-login-arrow" aria-hidden="true">↗</span></button>
+      <div class="aula-auth-title">
+        <h2 id="aula-login-title">Qué gusto verte por aquí.</h2>
+        <p id="aula-auth-description">Entra con el correo de tu compra y tu contraseña.</p>
+      </div>
+      <form id="login-form" class="aula-auth-form">
+        <label for="login-email">Correo electrónico</label>
+        <input type="email" id="login-email" required autocomplete="username" inputmode="email" placeholder="nombre@correo.com" maxlength="254">
+        <label for="login-password">Contraseña</label>
+        <div class="aula-password-field">
+          <input type="password" id="login-password" required autocomplete="current-password" placeholder="Tu contraseña" minlength="8" maxlength="128">
+          <button type="button" class="aula-password-toggle" data-password-toggle="login-password" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+        <div class="aula-auth-options">
+          <label class="aula-remember"><input type="checkbox" id="remember-device" checked><span>Recordar este dispositivo por 24 horas</span></label>
+          <button class="aula-auth-inline" id="forgot-password-trigger" type="button">Olvidé mi contraseña</button>
+        </div>
+        <button class="aula-auth-submit" type="submit"><span>Entrar a mi aula</span><span aria-hidden="true">→</span></button>
       </form>
-      <div class="aula-login-footer">
-        <small>El acceso se habilita únicamente con una compra confirmada.</small>
-        <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda para entrar?</a>
+      <form id="register-form" class="aula-auth-form" hidden>
+        <p class="aula-auth-explain">Si es tu primera vez, crea una contraseña con el correo que usaste al comprar. Tendrás que confirmar tu email.</p>
+        <label for="register-email">Correo de la compra</label>
+        <input type="email" id="register-email" required autocomplete="email" inputmode="email" placeholder="nombre@correo.com" maxlength="254">
+        <label for="register-password">Crea tu contraseña</label>
+        <div class="aula-password-field">
+          <input type="password" id="register-password" required autocomplete="new-password" minlength="8" maxlength="128" placeholder="Mínimo 8 caracteres">
+          <button type="button" class="aula-password-toggle" data-password-toggle="register-password" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+        <label for="register-confirm">Confirma tu contraseña</label>
+        <input type="password" id="register-confirm" required autocomplete="new-password" minlength="8" maxlength="128" placeholder="Repite tu contraseña">
+        <button class="aula-auth-submit" type="submit"><span>Crear mi cuenta</span><span aria-hidden="true">→</span></button>
+      </form>
+      <form id="reset-email-form" class="aula-auth-form" hidden>
+        <p class="aula-auth-explain">Te enviaremos un correo para crear una nueva contraseña. Revisa también Spam o Promociones.</p>
+        <label for="reset-email">Correo de tu cuenta</label>
+        <input id="reset-email" type="email" required autocomplete="email" inputmode="email" placeholder="nombre@correo.com" maxlength="254">
+        <button class="aula-auth-submit" type="submit"><span>Enviar enlace para recuperar</span><span aria-hidden="true">→</span></button>
+        <button class="aula-auth-back" type="button" data-auth-mode="login">← Volver a iniciar sesión</button>
+      </form>
+      <form id="new-password-form" class="aula-auth-form" hidden>
+        <p class="aula-auth-explain">Elige tu nueva contraseña para entrar a tu aula cuando quieras.</p>
+        <label for="new-password">Nueva contraseña</label>
+        <div class="aula-password-field">
+          <input type="password" id="new-password" autocomplete="new-password" required minlength="8" maxlength="128" placeholder="Mínimo 8 caracteres">
+          <button type="button" class="aula-password-toggle" data-password-toggle="new-password" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+        <label for="new-password-confirm">Confirma tu nueva contraseña</label>
+        <input type="password" id="new-password-confirm" autocomplete="new-password" required minlength="8" maxlength="128" placeholder="Repite tu contraseña">
+        <button class="aula-auth-submit" type="submit"><span>Guardar mi contraseña</span><span aria-hidden="true">→</span></button>
+      </form>
+      <div class="aula-auth-bottom">
+        <span>El contenido está disponible solo para alumnos con compra confirmada.</span>
+        <a class="support" href="#soporte-aula" data-course-help aria-controls="soporte-aula" aria-expanded="false">¿Necesitas ayuda?</a>
       </div>
     </section>
     <section id="no-access" class="panel" hidden aria-labelledby="aula-no-access-title">
@@ -291,5 +334,5 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=curso-recursos-20261029-v1"></script>
+<script type="module" src="./curso.js?v=20261031-password-v3"></script>
 </body></html>
