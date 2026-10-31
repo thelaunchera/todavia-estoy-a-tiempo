@@ -29,7 +29,7 @@ test('AI vision source and style review are explicit and optional',()=>{
  for(const part of ["@cf/qwen/qwen3.8-27b","inspectReference(","analysisStatus","visualDescription","image_url"])assert.ok(edge.includes(part));
  assert.ok(edge.includes("analysisStatus='vision'"));
  assert.ok(edge.includes('analysisStatus,visualDescription,posts'));
- assert.ok(edge.includes('No text, words')||edge.includes('NO text, words'));
+ assert.ok(edge.includes('No fabricated words, logos')||edge.includes('No fabricated logos, watermarks'));
 });
 test('iPhone editing, quality checks and explicit image quota confirmation',()=>{
  const grid=src('src/BrandGrid.tsx'),edit=src('src/GridVisualEditor.tsx');
