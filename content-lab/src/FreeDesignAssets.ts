@@ -28,6 +28,16 @@ export const FREE_STICKERS=[
  {id:'underline',name:'Subrayado',emoji:'〰',group:'Editorial'},
  {id:'notecard',name:'Nota de papel',emoji:'📝',group:'Editorial'},
  {id:'check',name:'Check doodle',emoji:'✓',group:'Editorial'}
+ ,{id:'avatar-pilates',name:'Avatar Pilates',emoji:'🧘🏽‍♀️',group:'Avatares'},
+ {id:'avatar-gym',name:'Avatar Gym',emoji:'🏋🏽‍♀️',group:'Avatares'},
+ {id:'avatar-stretch',name:'Avatar Stretch',emoji:'🤸🏽‍♀️',group:'Avatares'},
+ {id:'matcha-latte',name:'Matcha latte',emoji:'🍵',group:'Matcha'},
+ {id:'matcha-cup',name:'Matcha Club',emoji:'🧋',group:'Matcha'},
+ {id:'pilates-mat',name:'Pilates Mat',emoji:'🧘',group:'Pilates'},
+ {id:'pilates-ball',name:'Pilates Ball',emoji:'🏐',group:'Pilates'},
+ {id:'workout',name:'Workout',emoji:'💪',group:'Ejercicios'},
+ {id:'training',name:'Training',emoji:'🏃🏽‍♀️',group:'Ejercicios'},
+ {id:'sports',name:'Sports',emoji:'👟',group:'Ejercicios'}
 ] as const;
 export type FreeStickerId=typeof FREE_STICKERS[number]['id'];
 export type FreeBackgroundId='brand'|'warm-paper'|'soft-blue'|'sage'|'butter-cream'|'pink-paper'|'editorial-grid'|'soft-gradient'|'grain-ivory'|'night-editorial'|'dotted-paper';
@@ -107,4 +117,18 @@ export function paintFreeStickers(ctx:CanvasRenderingContext2D,w:number,h:number
   }
   ctx.restore();
  }
+}
+
+/** Downloadable free preview icons, separately from the original artist PNG bundle. */
+export function downloadFreeStickerPNG(id:string){
+ if(!FREE_STICKERS.some(x=>x.id===id))throw Error('Sticker desconocido');
+ const canvas=document.createElement('canvas');canvas.width=640;canvas.height=640;
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo exportar el sticker.');
+ ctx.save();
+ const scale=3.5;
+ ctx.translate(320-640*.86*scale,320-640*.18*scale);
+ ctx.scale(scale,scale);
+ paintFreeStickers(ctx,640,640,[id],'#A97892');
+ ctx.restore();
+ const a=document.createElement('a');a.download='sticker-'+id+'-gratis.png';a.href=canvas.toDataURL('image/png');a.click();
 }
