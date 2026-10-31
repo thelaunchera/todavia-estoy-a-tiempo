@@ -1,0 +1,50 @@
+/* Content Lab motion language: adapted from the TLE site's gentle
+   editorial reveals, hover lift and glass surfaces. Functional controls stay
+   fully usable with touch, keyboard and reduced-motion preferences. */
+:root{--lab-motion-ease:cubic-bezier(.22,1,.36,1);--lab-motion-spring:cubic-bezier(.18,.85,.26,1.18);--lab-motion-fast:170ms;--lab-motion-medium:300ms;--lab-motion-slow:460ms}
+@keyframes labPageEnter{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:translateZ(0)}}
+@keyframes labCardEnter{from{opacity:0;transform:translateY(10px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes labFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes labSuccess{0%{transform:scale(.88);opacity:.3}70%{transform:scale(1.05);opacity:1}100%{transform:scale(1)}}
+.app-shell .content[data-lab-tab]{animation:labPageEnter .38s var(--lab-motion-ease) both}
+.app-shell .top{position:sticky;top:0;z-index:3;background:rgba(255,255,255,.91);backdrop-filter:blur(18px) saturate(1.14);-webkit-backdrop-filter:blur(18px) saturate(1.14)}
+.app-shell .sidebar{transition:transform var(--lab-motion-medium) var(--lab-motion-ease),box-shadow var(--lab-motion-medium)}
+.app-shell .overlay{animation:labFadeIn .2s ease both;backdrop-filter:blur(3px)}
+.app-shell .sidebar nav button{transition:background var(--lab-motion-fast),color var(--lab-motion-fast),transform var(--lab-motion-fast) var(--lab-motion-ease);position:relative}
+.app-shell .sidebar nav button.active:before{content:"";position:absolute;left:3px;top:25%;height:50%;width:3px;border-radius:10px;background:#73a7b9}
+.app-shell .lab-mobile-dock button{transition:background var(--lab-motion-fast),color var(--lab-motion-fast),transform var(--lab-motion-fast) var(--lab-motion-spring)}
+.app-shell .lab-mobile-dock button.active svg{transform:translateY(-1px);transition:transform var(--lab-motion-fast)}
+.app-shell .btn,.app-shell button{ -webkit-tap-highlight-color:transparent}
+.app-shell .sticker-downloads-grid article,.app-shell .background-library-grid article,.app-shell .ml-card,.app-shell .free-decor-sticker-cell,.app-shell .factory-thumbnail,.app-shell .factory-overview-grid button{transition:border-color var(--lab-motion-medium),box-shadow var(--lab-motion-medium),transform var(--lab-motion-medium) var(--lab-motion-ease),background var(--lab-motion-medium)}
+.app-shell .sticker-downloads-grid article,.app-shell .background-library-grid article{animation:labCardEnter .36s var(--lab-motion-ease) both}
+.app-shell .sticker-downloads-grid article:nth-child(4n + 2),.app-shell .background-library-grid article:nth-child(3n + 2){animation-delay:50ms}
+.app-shell .sticker-downloads-grid article:nth-child(4n + 3),.app-shell .background-library-grid article:nth-child(3n + 3){animation-delay:85ms}
+.app-shell .sticker-downloads-grid article:nth-child(4n + 4){animation-delay:110ms}
+.app-shell .free-decor-main-tabs button,.app-shell .free-decor-groups button,.app-shell .sticker-downloads-filters button,.app-shell .free-decor-backgrounds button,.app-shell .sticker-downloads-grid button,.app-shell .background-library-grid button,.app-shell .sticker-import-bar button{transition:background var(--lab-motion-fast),color var(--lab-motion-fast),border-color var(--lab-motion-fast),box-shadow var(--lab-motion-medium),transform var(--lab-motion-fast) var(--lab-motion-ease)}
+.app-shell .free-decor-main-tabs button.active,.app-shell .free-decor-backgrounds button.selected,.app-shell .free-decor-sticker-cell button.selected{box-shadow:0 4px 14px #33515b18}
+.app-shell .free-decor-backgrounds button.selected{outline-color:#719dad}
+.app-shell .free-decor-sticker-cell img,.app-shell .sticker-downloads-preview img,.app-shell .background-preview{transition:transform var(--lab-motion-slow) var(--lab-motion-ease),filter var(--lab-motion-medium)}
+.app-shell .free-decor-backgrounds,.app-shell .free-decor-stickers{animation:labFadeIn .27s ease both}
+.app-shell .sticker-import-status{animation:labPageEnter .25s var(--lab-motion-ease) both}
+.app-shell .sticker-import-status svg{animation:labSuccess .42s var(--lab-motion-spring) both}
+.app-shell .factory-preview img{transition:opacity .22s ease;animation:labFadeIn .2s both}
+.app-shell .factory-slide-strip,.app-shell .factory-overview-grid,.app-shell .free-decor-groups,.app-shell .sticker-downloads-filters{overscroll-behavior-x:contain;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.app-shell :where(button,input,select,textarea,a):focus-visible{outline:3px solid #82b3c9;outline-offset:3px}
+.app-shell :where(button,select,input,textarea):disabled{cursor:not-allowed}
+@media(hover:hover) and (pointer:fine){
+ .app-shell .sidebar nav button:hover:not(.active){transform:translateX(3px)}
+ .app-shell .sticker-downloads-grid article:hover,.app-shell .background-library-grid article:hover,.app-shell .ml-card:hover{transform:translateY(-4px);box-shadow:0 16px 35px #253d4d12;border-color:#bbd5de}
+ .app-shell .factory-thumbnail:hover,.app-shell .factory-overview-grid button:hover{transform:translateY(-3px)}
+ .app-shell .free-decor-sticker-cell:hover img,.app-shell .sticker-downloads-grid article:hover img{transform:scale(1.065)}
+ .app-shell .background-library-grid article:hover .background-preview{transform:scale(1.015)}
+ .app-shell .sticker-downloads-grid article button:hover,.app-shell .sticker-import-bar button:hover,.app-shell .free-decor-backgrounds button:hover,.app-shell .background-library-grid article button:hover{transform:translateY(-1px)}
+}
+@media(pointer:coarse){
+ .app-shell .sticker-downloads-grid article,.app-shell .background-library-grid article{animation-duration:.22s}
+ .app-shell button{touch-action:manipulation}
+ .app-shell :where(.free-decor-main-tabs button,.sticker-downloads-filters button,.free-decor-groups button){min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+ .app-shell *,.app-shell *:before,.app-shell *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+ .app-shell .content[data-lab-tab],.app-shell .sticker-downloads-grid article,.app-shell .background-library-grid article{opacity:1!important;transform:none!important}
+}
