@@ -91,3 +91,17 @@
  .background-collection-import .background-zip-download,
  .background-collection-import .btn{width:100%;justify-content:center}
 }
+
+/* Browse by real categories; labels stay above the image tiles instead of repeating in each card. */
+.background-sections{display:grid;gap:27px;margin-top:14px}
+.background-category{min-width:0}
+.background-category-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
+.background-category-heading h2{font-family:'DM Serif Display',Georgia,serif;color:#203b43;font-weight:400;font-size:clamp(20px,3vw,27px);line-height:1.2;margin:0 0 3px}
+.background-category-heading p{font-size:11px;color:#758a91;margin:0;line-height:1.5}
+.background-category-heading>span{font-size:10px;color:#56747e;border:1px solid #d6e3e4;background:#f7faf9;border-radius:999px;padding:7px 10px;white-space:nowrap}
+.background-collection-chips{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.background-collection-chips button{white-space:nowrap}
+.background-collection-chips button span{opacity:.7}
+.background-collection-chips button.selected span{opacity:1}
+.background-library .background-results{font-size:11px;color:#6d838c;margin:11px 0 14px}
+@media(max-width:700px){.background-sections{gap:22px}.background-collection-chips{display:flex;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;overscroll-behavior-x:contain;padding-bottom:6px}.background-collection-chips>button{flex:none}.background-category-heading h2{font-size:21px}.background-category-heading p{font-size:10px}}
