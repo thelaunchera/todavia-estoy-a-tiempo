@@ -32,7 +32,7 @@ type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type PhotoFrame = 'none'|'rounded'|'super-rounded'|'polaroid'|'soft-shadow'|'double-border';
 const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'rounded',name:'Rounded'},{id:'super-rounded',name:'Super soft'},{id:'polaroid',name:'Polaroid'},{id:'soft-shadow',name:'Floating'},{id:'double-border',name:'Double line'}];
 // Licensed Unsplash residential photographs for non-exported frame previews only.
-const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80"];
+const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
   layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
