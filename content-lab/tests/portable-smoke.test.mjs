@@ -29,7 +29,9 @@ test('Cross-brand source photos are not reused and server errors are readable',(
  const grid=source('src/BrandGrid.tsx');
  const client=source('src/platform/client.ts');
  const backend=source('supabase/functions/content-lab-generate/index.ts');
- assert.ok(grid.includes("setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null)"));
+ assert.ok(grid.includes("const ownChoice=initialSelection?.brandId===brand.id?initialSelection:null"));
+ assert.ok(grid.includes("setSourceId(ownChoice?.sourceId||'')"));
+ assert.ok(grid.includes('library.some(a=>a.id===sourceId)'));
  assert.ok(grid.includes('library.some(a=>a.id===sourceId)'));
  assert.ok(grid.includes('Biblioteca privada por marca'));
  assert.ok(client.includes('context.clone().json()'));
