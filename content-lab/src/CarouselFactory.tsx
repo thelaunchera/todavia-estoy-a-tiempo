@@ -223,7 +223,7 @@ const filename=(post:Post,i:number)=>{
 export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
-  const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
+  const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
   const socialDestination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
   const socialLabel=platformName(socialDestination);
   const destinationAccount=socialAccount(brand,socialDestination);
