@@ -646,6 +646,26 @@ function App() {
     }).catch(err);
     return ()=>{cancelled=true};
   },[tab,account?.email]);
+  const deleteLibraryAsset=async(asset:Asset):Promise<void>=>{
+    const category=assetCategory(asset);
+    if(asset.shared&&!aiWallet?.admin)throw Error('Solo la administradora puede borrar recursos compartidos.');
+    const name=displayAssetName(asset);
+    const visibility=asset.shared?'de la biblioteca de TODOS los alumnos':'de tu biblioteca privada';
+    if(!window.confirm('¿Eliminar definitivamente '+name+' '+visibility+'?\n\nSi lo usaste en un diseño guardado, podría dejar de verse. Esta acción no se puede deshacer.'))return;
+    const endpoint=asset.shared
+      ?category==='sticker'?'/api/sticker-catalog/'+asset.id.slice('shared-'.length)
+         :'/api/background-catalog/'+asset.id.slice('shared-background-'.length)
+      :'/api/assets/'+asset.id;
+    try{
+      setBusy('delete-asset');
+      await api.delete(endpoint);
+      const {data}=await api.get('/api/data');
+      setAssets(data.assets||[]);
+      setImages(old=>{const next={...old};delete next[asset.id];return next});
+      toast((category==='sticker'?'Sticker':'Fondo')+' eliminado ✓');
+    }catch(e){err(e)}
+    finally{setBusy('')}
+  };
   const publishSharedSticker=async(file:File,stickerGroup:string):Promise<Asset|null>=>{
     if(!aiWallet?.admin)throw Error('Solo la administradora publica stickers para todos.');
     if(!/[.]png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
@@ -1493,7 +1513,7 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad} onUse={(id,destination)=>{
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} onDelete={deleteLibraryAsset} loadImage={imageLoad} onUse={(id,destination)=>{
                     if(destination==='cover'){
                       setEditor(old=>{
                         const decor=readCoverDecor(old.designData);
@@ -1512,6 +1532,7 @@ function App() {
   isAdmin={Boolean(aiWallet?.admin)}
   assets={library} images={images} loadImage={imageLoad}
   onUpload={async(file,category)=>aiWallet?.admin?publishSharedBackground(file,category):upload(file,'background')}
+  onDelete={deleteLibraryAsset}
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
