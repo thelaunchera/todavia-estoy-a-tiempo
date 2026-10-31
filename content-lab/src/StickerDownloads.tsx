@@ -8,11 +8,11 @@ type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onUpload:(file:File)=>Promise<LibraryAsset|null>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
  isAdmin:boolean;loadImage:(id:string)=>void};
-const groups=['Todos','Avatares','Matcha y café','Pilates','Ejercicios','Aesthetic'];
+const groups=['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
  if(/avatar|character|girl|portrait/.test(n))return 'Avatares';
- if(/matcha|coffee|latte|tea|croissant|tumbler|cup/.test(n))return 'Matcha y café';
+ if(/matcha|coffee|latte|tea|croissant|tumbler|cup/.test(n))return 'Matcha';
  if(/pilates|reformer|barre|grip.sock|yoga|stretch|mermaid|shoulder.bridge|magic.circle/.test(n))return 'Pilates';
  if(/squat|workout|gym|fitness|dumbbell|kettlebell|lunge|exercise|strength|sneaker|rope|run|training|treadmill|band|plank/.test(n))return 'Ejercicios';
  return 'Aesthetic';
