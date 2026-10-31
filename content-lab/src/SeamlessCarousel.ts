@@ -41,7 +41,7 @@ export async function paintSeamlessTypography(
  for(const [i,page] of pages.entries()){
   const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */}
-  const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars')?'#FFFFFF':'#191919';
+  const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':'#191919';
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
    ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
   words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
@@ -80,7 +80,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const x=i*W,page=pages[i];
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
-  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars',ink=dark?'#FFFFFF':'#191919';
+  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn'||backgroundId==='rust-autumn',ink=dark?'#FFFFFF':'#191919';
   // Light local text halo: readable without breaking the continuous artwork.
   const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
   grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
