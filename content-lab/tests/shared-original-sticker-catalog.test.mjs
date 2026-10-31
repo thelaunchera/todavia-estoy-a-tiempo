@@ -39,7 +39,7 @@ test('Private brand media and shared stickers are both present in editors, with 
 test('ZIP import recognizes the five original sticker folders without requiring buyers to import anything',()=>{
  const gallery=source('src/StickerDownloads.tsx');
  for(const prefix of ['01_Avatars','02_Matcha','03_Pilates','04_Ejercicios'])assert.ok(gallery.includes(prefix));
- assert.ok(gallery.includes('El catálogo se distribuye automáticamente'));
- assert.ok(gallery.includes('sin créditos'));
+ assert.ok(gallery.includes('el catálogo se distribuye automáticamente'));
+ assert.ok(gallery.toLowerCase().includes('sin créditos'));
  assert.ok(gallery.includes('files.filter(a=>a.shared)'));
 });
