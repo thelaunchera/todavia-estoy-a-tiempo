@@ -54,3 +54,7 @@ El frontend recibe únicamente identificadores públicos `VITE_CONTENT_LAB_SUPAB
 - *Carousel Factory* y editor de publicaciones: disponibles en el frontend privado cuando el login esté configurado.
 
 El antiguo AppDeploy permanece como referencia temporal y no debe eliminarse mientras existan borradores/fotos sin exportar.
+
+## Solución al error de Cloudflare «Could not route» (2026-10-31)
+
+La primera prueba real falló porque `CLOUDFLARE_ACCOUNT_ID` incluía un espacio insertado durante el copiado. El backend ahora elimina los espacios en blanco (incluidos saltos de línea) antes de usar el ID, verifica que tenga exactamente 32 dígitos hexadecimales y traduce los errores de permisos/ID a mensajes en español sin mostrar identificadores privados. Si la conexión vuelve a fallar, revisa que `CLOUDFLARE_ACCOUNT_ID` y `CLOUDFLARE_API_TOKEN` pertenezcan a la misma cuenta gratuita de Cloudflare. Las claves no se escriben en GitHub ni en el frontend.
