@@ -45,7 +45,6 @@ const INITIAL:BaseLink[] = [
   {key:'lab-editor',title:'The Content Lab · Editor',url:'https://podcast.thelaunchera.com/content-lab/',category:'lab',visibility:'interno',description:'Herramienta privada; venta y acceso de compradores aún no abiertos'},
   {key:'lab-prompts',title:'Master Prompts · Biblioteca gratis',url:'https://podcast.thelaunchera.com/content-lab/prompts/',category:'lab',visibility:'publico',description:'Recurso público, listo para compartir'},
   {key:'lab-repo',title:'Content Lab · Código GitHub',url:'https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/content-lab',category:'lab',visibility:'interno',description:'Fuente del editor en GitHub'},
-  {key:'lab-board',title:'Brand Board Studio · Prototipo anterior',url:'https://the-launch-era-brand-board-studio-evbqlv.v2.appdeploy.ai/',category:'lab',visibility:'revision',description:'Referencia anterior; no sustituye los proyectos del Studio en GitHub'},
   {key:'lab-notion',title:'Inventario general · Notion',url:'https://app.notion.com/p/40aa68f2ee6e817bbccbc3c56095cbf8?pvs=204',category:'lab',visibility:'interno',description:'Registro maestro de enlaces y cambios del 31 de octubre'}
 ];
 const shareable = (v:Visibility) => v==='publico' || v==='demo';
