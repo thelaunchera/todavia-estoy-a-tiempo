@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {resolve,dirname} from 'node:path';
+const here=dirname(fileURLToPath(import.meta.url));
+const src=(p)=>readFileSync(resolve(here,'..',p),'utf8');
+test('Carousel designs keep one master art direction while reading legacy data',()=>{
+ const helper=src('src/CarouselArtDirection.ts'),ui=src('src/CarouselFactory.tsx');
+ assert.match(helper,/version:2/);
+ assert.ok(helper.includes('if(Array.isArray(parsed))'));
+ assert.ok(ui.includes('encodeCarouselDesign(all,nextStyle)'));
+ assert.ok(ui.includes('encodeCarouselDesign(parseSlides(updated,brand),style)'));
+ assert.ok(ui.includes('getCarouselPalette(brand,style)'));
+ assert.ok(ui.includes('drawSlide(slides[n],n,slides.length,brand,images,style)'));
+});
+test('Style references are sampled locally and never pasted into carousel slides',()=>{
+ const helper=src('src/CarouselArtDirection.ts'),ui=src('src/CarouselFactory.tsx');
+ assert.ok(helper.includes('canvas.getContext'));
+ assert.ok(helper.includes('getImageData'));
+ assert.ok(ui.includes('sampleReferencePalette(url)'));
+ assert.ok(ui.includes('ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id)'));
+ assert.ok(ui.includes('referenceAssetId'));
+ assert.ok(ui.includes('La imagen no se copia'));
+});
+test('Portrait and product photo modes stay distinct with credits confirmed',()=>{
+ const ui=src('src/CarouselFactory.tsx');
+ assert.ok(ui.includes("imageSubjectType==='portrait'"));
+ assert.ok(ui.includes("imageSubjectType==='product'"));
+ assert.ok(ui.includes("subjectType:imageSubjectType"));
+ assert.ok(ui.includes("window.confirm('Esta foto utilizará 1 crédito"));
+ assert.ok(ui.includes("photoFocus"));
+ assert.ok(ui.includes('warnings=slides.flatMap'));
+});
