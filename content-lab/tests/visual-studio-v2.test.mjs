@@ -58,7 +58,7 @@ test('photo frame can be moved and resized separately from crop/zoom',()=>{
 test('grid QA reports aggregate pending count, not nine repetitive warnings',()=>{
  const grid=src('src/BrandGrid.tsx');
  assert.ok(grid.includes('pending++'));
- assert.ok(grid.includes("pending+' de 9 publicaciones sin imagen final"));
+ assert.ok(grid.includes("pending+' de 9 publicaciones sin diseño exportable"));
  assert.ok(!grid.includes("found.push('Post '+(i+1)+': imagen pendiente.')"));
 });
 
