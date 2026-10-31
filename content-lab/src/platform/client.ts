@@ -29,6 +29,8 @@ const base64=(blob:Blob)=>new Promise<string>((resolve,reject)=>{
 const seed=async()=>{
   const brands=await list('brands');if(brands.length)return brands;
   const me=await current();
+  const {data:owner}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+  if(!owner)return []; // Each paying buyer starts with an empty private brand library.
   const profiles=[
     {name:'The Launch Era',handle:'@thelaunchera_ai',audience:'Residential cleaning business owners in the USA',voice:'Clear, modern, human and premium',rules:'Public copy US English only. Focus on bookings, clients, quotes, invoices, jobs, follow-ups and cleaning operations. Never invent functionality. Real screenshots stay unaltered.',language:'English',color:'#BED8E9',background:'#FAF8F3'},
     {name:'Todavía estoy a tiempo',handle:'',audience:'Personas que sienten que van tarde y quieren volver a empezar',voice:'Íntimo, humano, conversacional',rules:'Todo el contenido público en español latino. No inventar episodios, historias personales o detalles íntimos. Mantener las cuentas separadas.',language:'Español',color:'#CDB8A9',background:'#F8EEE8'}
@@ -59,13 +61,20 @@ export const auth={
     if(!configured)return null;
     const {data:{user}}=await sb.auth.getUser();
     if(!user)return null;
-    const {data}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
-    return data?{email:user.email}:null;
+    const {data:admin}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
+    if(admin)return {email:user.email};
+    if(!user.email)return null;
+    // Server-enforced RLS returns only this verified email's active membership.
+    const {data:paid}=await sb.from('content_lab_memberships')
+      .select('id').eq('buyer_email',user.email.trim().toLowerCase()).eq('status','active').maybeSingle();
+    return paid?{email:user.email}:null;
   },
   signInWithOtp:async(email:string)=>{
     requireConfig();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Introduce tu correo electrónico.');
-    out(await sb.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:false,emailRedirectTo:window.location.origin+window.location.pathname}}));
+    // New buyers can sign in after a verified checkout. Unpaid accounts have
+    // no membership and cannot read or write Content Lab rows or Storage.
+    out(await sb.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}}));
   },
   verifyEmailOtp:async(email:string,code:string)=>{
     requireConfig();
