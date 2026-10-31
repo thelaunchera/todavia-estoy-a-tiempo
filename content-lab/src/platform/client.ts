@@ -169,7 +169,7 @@ export const api={
       const {data:admin,error:roleError}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
       if(roleError)throw Error(roleError.message);
       if(!admin)throw Error('Solo la administradora puede publicar stickers para todos los compradores.');
-      const name=String(payload.name||'').replace(/[<>\\x00-\\x1f]/g,'').trim().slice(0,120);
+      const name=String(payload.name||'').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,120);
       if(!name)throw Error('Sticker sin nombre.');
       const allowed=['Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
       const category=allowed.includes(payload.category)?payload.category:'Aesthetic';
