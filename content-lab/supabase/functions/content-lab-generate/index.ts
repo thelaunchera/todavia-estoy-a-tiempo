@@ -193,7 +193,12 @@ Deno.serve(async request=>{
   // credits, per-user daily allowance, and the shared platform safety ceiling.
   if(['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action)){
    if(!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))return send({error:'La devolución segura de créditos está en mantenimiento. No se consumió ninguno.'},503);
-   const {data:reservation,error:quotaError}=await supabase.rpc('content_lab_reserve_ai',{p_action:action});
+   // The buyer's identity comes from getUser(jwt), never from the request body.
+   // Only the service role can invoke the signed, quota-reserving function.
+   const service=createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',
+     {auth:{autoRefreshToken:false,persistSession:false}});
+   const {data:reservation,error:quotaError}=await service.rpc('content_lab_reserve_ai',
+     {p_action:action,p_user:user.id,p_email:user.email||''});
    if(quotaError)return send({error:quotaError.message},429);
    reservationId=String(reservation?.reservation_id||'');
    reservationUserId=user.id;
