@@ -103,7 +103,7 @@ test('Aula: productos por compra separados y Lab cerrado sin pago público',()=>
  assert.match(room,/https:\/\/thelaunchera\.com\/service-checkout\/\?offer=ai-business/);
  assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/);
  assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/);
- assert.doesNotMatch(room,/href="[^"]*(?:content-lab|lab\/checkout)/);
+ assert.doesNotMatch(room,/href="[^"]*(?:content-lab\/(?!prompts\/)|lab\/checkout)/,'El Lab de pago y sus checkouts privados no deben ser enlaces públicos');
  assert.match(course,/catalogo:'Todos los productos'/);
 });
 
@@ -139,8 +139,8 @@ test('Catálogo de productos: acceso privado, PDF reales y Lab sin checkout púb
  assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/,'Cuaderno apunta a su landing real');
  assert.match(course,/from\('content_lab_memberships'\)/,'Lab consulta la membresía real');
  assert.match(course,/member\?\.status==='active'/,'Solo membresía activa habilita acceso');
- const studio=read('estudio-control/src/Studio.tsx');
- const service=read('estudio-control/src/supabase-client.ts');
+ const studio=readFileSync('estudio-control/src/Studio.tsx','utf8');
+ const service=readFileSync('estudio-control/src/supabase-client.ts','utf8');
  assert.match(studio,/Centro de ventas y productos/);
  assert.match(studio,/getVerifiedSales\(\)/,'Ventas se leen al abrir panel');
  assert.match(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No prometer compras de Lab activas');
