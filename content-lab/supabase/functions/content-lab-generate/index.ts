@@ -254,15 +254,16 @@ Deno.serve(async request=>{
     'Visible product/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
     'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'.',
     'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
-    'Create only three short strings for each of the nine posts: headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
+    'Each of the nine posts must have a short headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
+    'For personal/editorial ABOUT ME designs add optional handwritten (2-5 words) and callouts (up to FOUR brief annotation texts, 4-15 words) ONLY when they are supported by owner brief or brand notes. Do not invent biography, identity, credentials, results or personal facts. If unsupported, return empty callouts.',
     'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
-    'Return JSON with one key posts containing an array of exactly nine objects, each {headline,subtext,caption}. No explanations, no scene key.'
+    'Return JSON with one key posts containing an array of exactly nine objects, each {headline,subtext,caption,handwritten,callouts}. No explanations, no scene key.'
    ].join('\n');
    const schema={
     type:'object',
     properties:{
      posts:{type:'array',items:{type:'object',
-      properties:{headline:{type:'string'},subtext:{type:'string'},caption:{type:'string'}},
+      properties:{headline:{type:'string'},subtext:{type:'string'},caption:{type:'string'},handwritten:{type:'string'},callouts:{type:'array',items:{type:'string'}}},
       required:['headline','subtext','caption']
      }}
     },
@@ -308,7 +309,10 @@ Deno.serve(async request=>{
       background:sequence[i%sequence.length]==='split'?'ivory':'photo',
       backgroundColor:clean(b.background,12)||'#FAF8F3',
       accentColor:clean(b.color,12)||'#BED8E9',
-      kicker:clean(b.name,85),handwritten:'',callouts:[],overlay:.12
+      kicker:clean(b.name,85),
+      handwritten:clean(p.handwritten,85),
+      callouts:Array.isArray(p.callouts)?p.callouts.slice(0,4).map((t:unknown)=>clean(t,140)).filter(Boolean):[],
+      overlay:.12
     }}:{})
    }));
    return send(await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts}));

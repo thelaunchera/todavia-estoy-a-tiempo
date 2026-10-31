@@ -119,7 +119,7 @@ export async function renderEditorial(input:{
  const fontScale=q(Number(input.move?.textScale||1),.55,1.7);
  const ty=(n:number)=>Y(q(n+textDY,topSafe,bottomSafe-.13));
  const tx=(n:number)=>X(q(n+textDX,.025,.85));
- const fg=fullBleed&&['portrait','typographic'].includes(mode)?'#FFFFFF':ink;
+ const fg=design.textColor&&/^#[a-f0-9]{6}$/i.test(design.textColor)?design.textColor:(fullBleed&&['portrait','typographic'].includes(mode)?'#FFFFFF':ink);
  const label=String(design.kicker||input.brandName||'').trim().slice(0,55).toUpperCase();
  // All preset-specific typography is still editable through explicit user text controls.
  let fit=true;
