@@ -8,6 +8,8 @@ import {
 import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
+import FreeDecorControls from './FreeDecorControls';
+import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -24,7 +26,7 @@ type Asset = { id: string; brandId: string; name: string; mime: string };
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;
+  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -58,7 +60,8 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
           assetId: String(s.assetId || ''),
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
-          accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0
+          accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
+           backgroundId:typeof s.backgroundId==='string'?s.backgroundId:'brand',stickerIds:Array.isArray(s.stickerIds)?s.stickerIds.filter((x:unknown)=>typeof x==='string').slice(0,3):[]
         }));
     }
   }
@@ -130,7 +133,9 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     label(footerName,72,1284,color,21);
     label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),885,1284,color,21);
   };
-  rect(0,0,1080,1350,paper);
+  const decorated=!!slide.backgroundId&&slide.backgroundId!=='brand';
+  if(decorated)paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
+  else rect(0,0,1080,1350,paper);
   if(slide.layout==='cover') {
     label(slide.eyebrow||defaultLabel(brand),74,138,ink);rect(74,170,126,8,accent);
     title(74,348,920,106,5);
@@ -139,13 +144,14 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     if(!shown){rect(650,751,368,415,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.beginPath();ctx.arc(835,958,129,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.moveTo(706,957);ctx.lineTo(706,1114);ctx.stroke();}
     body(74,1060,490,ink,3);footer();
   } else if(slide.layout==='statement') {
-    rect(0,0,1080,1350,accent);
-    ctx.strokeStyle=onAccent;ctx.lineWidth=3;ctx.strokeRect(68,69,944,1212);
-    label(slide.eyebrow||defaultLabel(brand),116,150,onAccent);
-    title(116,428,850,108,6,onAccent);
-    body(116,1040,825,onAccent,3);footer(onAccent);
+    if(!decorated)rect(0,0,1080,1350,accent);
+    const statementInk=decorated?(slide.backgroundId==='night-editorial'?'#FFFFFF':'#191919'):onAccent;
+    ctx.strokeStyle=statementInk;ctx.lineWidth=3;ctx.strokeRect(68,69,944,1212);
+    label(slide.eyebrow||defaultLabel(brand),116,150,statementInk);
+    title(116,428,850,108,6,statementInk);
+    body(116,1040,825,statementInk,3);footer(statementInk);
   } else if(slide.layout==='photo') {
-    rect(0,0,1080,730,accent);const shown=await photo(0,0,1080,730);
+    if(!decorated)rect(0,0,1080,730,accent);const shown=await photo(0,0,1080,730);
     if(!shown){rect(0,0,1080,730,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.strokeRect(90,95,900,550);}
     label(slide.eyebrow||defaultLabel(brand),75,832,ink);
     title(75,952,925,80,3);
@@ -172,13 +178,14 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     title(60,340,430,78,8,onAccent);
     body(60,1110,430,onAccent,3);footer(onAccent);
   } else {
-    rect(0,0,1080,1350,accent);rect(73,75,934,1200,paper);
+    if(!decorated){rect(0,0,1080,1350,accent);rect(73,75,934,1200,paper);}
     label(slide.eyebrow||'ONE LAST THING',116,174,ink);
     title(116,450,843,99,6);
     body(116,1040,840,ink,3);rect(116,1151,175,10,accent);
     label(footerName,116,1225,ink,22);
     label(String(i+1).padStart(2,'0'),895,1225,ink,22);
   }
+  paintFreeStickers(ctx,1080,1350,slide.stickerIds,accent);
   return canvas;
 }
 const filename=(post:Post,i:number)=>{
@@ -271,7 +278,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(active)setPreview(c.toDataURL('image/png'));
     }).catch(showError);
     return()=>{active=false;};
-  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
+  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slide.backgroundId,slide.stickerIds,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
     setBusy('copy');
@@ -390,6 +397,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)}/>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
         <div className="factory-panel factory-ai">
