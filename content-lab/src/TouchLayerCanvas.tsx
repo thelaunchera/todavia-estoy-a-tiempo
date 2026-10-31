@@ -1,19 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampPanoramaRect } from './TouchGeometry';
-import { coverPlacement, normalizeCrop, photoFrameMetrics } from './PhotoCrop';
+import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2 } from 'lucide-react';
 import './TouchLayerCanvas.css';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker';
+  placement?: 'behind-text' | 'front';
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
-  preview: string; layers: TouchLayer[];
+  preview: string; textOverlay?: string; layers: TouchLayer[];
   onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
   ratio?: number; pageCount?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
+  onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
 };
@@ -25,8 +27,8 @@ type Gesture = {
   pinchDistance?: number; pinchCenter?: [number, number];
 };
 export default function TouchLayerCanvas({
-  preview, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, onEmpty,
-  onRemove, onDropAsset, onDropFiles,
+  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, onEmpty,
+  onRemove, onReorder, onDropAsset, onDropFiles,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
@@ -162,6 +164,20 @@ export default function TouchLayerCanvas({
     const next = clamp({...selectedRect, ...patch});
     update(chosen.id, next); onCommit(chosen.kind, chosen.id, next);
   };
+  const fitWholePhoto = async () => {
+    if (!chosen || chosen.kind !== 'photo') return;
+    const img = new Image(); img.src = chosen.src;
+    try {
+      await img.decode();
+      if (!img.naturalWidth || !img.naturalHeight) throw Error('missing dimensions');
+      const current = getRect(chosen);
+      const point = {x: current.x + current.w / 2, y: current.y + current.h / 2};
+      const next = initialPanoramaPhotoRect(img.naturalWidth / img.naturalHeight, pageCount, point);
+      const rect = clamp({...current, ...next});
+      update(chosen.id, rect); onCommit(chosen.kind, chosen.id, rect);
+      setCropping(false);
+    } catch { /* Keep the image as-is if its original proportions are unavailable. */ }
+  };
   const deleteLayer = (id: string) => {
     if (!onRemove || !window.confirm('¿Borrar este elemento del carrusel? El archivo original seguirá en tu biblioteca.')) return;
     onRemove(id);
@@ -193,6 +209,7 @@ export default function TouchLayerCanvas({
           : <div className="touch-editor-loading">Preparando lienzo…</div>}
         {layers.map(layer => {
           const rect = getRect(layer), active = selected === layer.id;
+          const z = pageCount > 1 ? (layer.placement === 'behind-text' ? 2 : 5) : 5;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*1350;
           const metrics=photoFrameMetrics(fw,fh,mode);
@@ -205,7 +222,7 @@ export default function TouchLayerCanvas({
           return <div key={layer.id} data-layer={layer.id}
             className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
-              height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)'}}
+              height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)', zIndex:z}}
             tabIndex={0} role="button" aria-label={'Mover ' + layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
@@ -233,6 +250,8 @@ export default function TouchLayerCanvas({
               {!cropping && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
           </div>;
         })}
+        {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
+          alt="" draggable={false} aria-hidden="true"/>}
         {pageCount > 1 && <div className="panorama-cut-guides" aria-hidden="true">
           {Array.from({length: pageCount}, (_, n) => <div key={n} style={{left: n / pageCount * 100 + '%', width: 100 / pageCount + '%'}}>
             <span>SLIDE {n + 1}</span></div>)}
@@ -243,7 +262,9 @@ export default function TouchLayerCanvas({
       : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
-      {chosen.kind === 'photo' && <><button type="button" aria-pressed={cropping}
+      {chosen.kind === 'photo' && <><button type="button" className="touch-editor-fit"
+        onClick={() => { void fitWholePhoto(); }}>Mostrar foto completa</button>
+        <button type="button" aria-pressed={cropping}
         onClick={() => setCropping(v => !v)}>{cropping ? '✓ Listo · mover marco' : 'Recortar / encuadrar'}</button>
         {cropping && <><label>Zoom <input aria-label="Zoom del encuadre" type="range" min="1" max="4" step=".05"
           value={normalizeCrop(selectedRect.crop).zoom}
@@ -253,6 +274,13 @@ export default function TouchLayerCanvas({
       {!cropping && <><label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="1"
         value={selectedRect.angle || 0} onChange={e => commit({angle: Number(e.target.value)})}/></label>
         <button type="button" onClick={() => commit({angle: 0})}>Enderezar</button></>}
+      {onReorder && <div className="touch-editor-order-controls" aria-label="Orden de capas">
+        <span>Orden de capas</span>
+        <button type="button" onClick={()=>onReorder(chosen.id,'backward')}>Un nivel atrás</button>
+        <button type="button" onClick={()=>onReorder(chosen.id,'forward')}>Un nivel delante</button>
+        <button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar al fondo</button>
+        <button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer al frente</button>
+      </div>}
     </div>}
     {pageCount > 1 && onRemove && <div className="touch-editor-layer-list" aria-label="Elementos del carrusel">
       <strong>Fotos y stickers ({layers.length})</strong>
