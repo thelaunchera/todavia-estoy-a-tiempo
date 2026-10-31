@@ -309,3 +309,68 @@
 .club-flow-note{border-top:1px solid #dfe5e8;margin:4px 0 0!important;padding-top:17px;color:#526a7c!important;font-size:12px!important;font-style:italic}
 @media(max-width:720px){.club-aula-copy,.club-aula-visual{flex:1 1 auto;width:100%}.club-editorial-flow{max-width:none;margin:8px 0 0}.club-aula-entry{gap:24px}}
 @media(prefers-reduced-motion:reduce){.club-editorial-flow,.club-flow-step{transition:none!important;animation:none!important}}
+
+
+/* Entrada de alumnos: editorial, cálida y personal; sin modificar las reglas de acceso. */
+body:not(.aula-member){background:#f6f3eb}
+body:not(.aula-member) .top{background:#fbfaf7;border-bottom:1px solid #e3e2dc}
+body:not(.aula-member) .top-inner{min-height:83px}
+.aula-entry{min-height:calc(100dvh - 145px);padding:clamp(32px,4.8vw,70px) 0 clamp(48px,6vw,84px);background:radial-gradient(ellipse at 15% 20%,#e9f1f4 0%,transparent 48%),#f6f3eb}
+.aula-entry-layout{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr);gap:clamp(28px,6vw,85px);align-items:center}
+.aula-entry-copy{min-width:0;padding:9px 0}
+.aula-entry-back{display:inline-flex;align-items:center;text-decoration:none;font:650 12px/1.5 'DM Sans',Arial,sans-serif;color:#47647a;border-bottom:1px solid #bacbd5;padding:5px 0;margin-bottom:clamp(31px,4vw,52px)}
+.aula-entry-back:hover{color:#142d43;border-color:#142d43}
+.aula-entry-eyebrow{margin:0 0 19px;font:750 10px/1.5 'DM Sans',Arial,sans-serif;letter-spacing:.18em;color:#537e96}
+.aula-entry h1{font:400 clamp(38px,4.6vw,68px)/1.06 'DM Serif Display',Georgia,serif;letter-spacing:-.03em;color:#1a3045;max-width:680px;margin:0}
+.aula-entry h1 em{display:block;font-style:italic;color:#7394ab}
+.aula-entry-intro{max-width:515px;color:#596e7c;font-size:clamp(14px,1.2vw,16px);line-height:1.75;margin:18px 0 0}
+.aula-entry #room-message{max-width:560px;margin:23px 0 0;background:#e9f0f3;border:1px solid #d1dfe7;color:#46647a;padding:11px 14px;border-radius:10px;box-shadow:none;font-size:12px}
+.aula-entry #room-message[data-ok="true"]{display:none}
+.aula-entry .panel{max-width:560px;margin:19px 0 0;padding:clamp(23px,3.1vw,35px);background:#fffdf9;border:1px solid #dde4e6;border-radius:18px;box-shadow:0 17px 43px #2037500b}
+.aula-entry .panel .eyebrow{font-size:10px;letter-spacing:.15em;color:#7291a5;font-weight:750;margin:0 0 9px}
+.aula-entry .panel h2{font:400 clamp(27px,2.8vw,35px)/1.18 'DM Serif Display',Georgia,serif;letter-spacing:-.025em;color:#1a3348;margin:0 0 10px}
+.aula-entry .panel>p:not(.eyebrow){font-size:13px;line-height:1.65;color:#617483;margin:0 0 7px}
+.aula-entry .panel form{margin:22px 0 14px}
+.aula-entry .panel label{margin:0 0 8px;color:#334d5c;font-size:12px}
+.aula-entry .formline{display:flex;gap:8px;align-items:stretch}
+.aula-entry .formline input{min-width:0;width:100%;min-height:49px;border:1px solid #c8d4da;border-radius:9px;background:#fff;color:#182f45;padding:12px 14px;font-size:14px}
+.aula-entry .formline button{flex:0 0 auto;min-height:49px;padding:12px 18px;border-radius:9px;background:#1a3650;color:#fff;font-size:12px}
+.aula-entry .formline button:hover{background:#2b526e}
+.aula-entry .panel small{display:block;margin-top:7px;color:#758795;font-size:11px;line-height:1.6}
+.aula-entry .panel .support{margin:13px 0 0;color:#315f79;font-size:12px;font-weight:650;text-underline-offset:4px}
+.aula-entry-visual{position:relative;isolation:isolate;height:clamp(500px,68dvh,745px);margin:0;overflow:hidden;border-radius:20px;background:#b5c3ce;box-shadow:0 25px 65px #1a324527}
+.aula-entry-visual img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.aula-entry-visual:after{content:"";position:absolute;inset:55% 0 0;z-index:0;background:linear-gradient(transparent,#101f30a8);pointer-events:none}
+.aula-entry-visual figcaption{position:absolute;bottom:22px;left:26px;right:26px;z-index:1;display:flex;justify-content:space-between;align-items:end;gap:14px;padding-top:15px;border-top:1px solid #fff8;color:white}
+.aula-visual-index{font-size:10px;font-weight:700;letter-spacing:.16em}
+.aula-visual-label{font:italic 17px/1.2 'DM Serif Display',Georgia,serif;text-align:right}
+body.aula-member .aula-entry{display:none!important}
+@media(max-width:990px){
+ .aula-entry-layout{grid-template-columns:minmax(0,1fr) minmax(260px,.8fr);gap:25px}
+ .aula-entry .formline{flex-direction:column}
+ .aula-entry .formline button{width:100%}
+ .aula-entry-visual{height:580px}
+}
+@media(max-width:760px){
+ .aula-entry{padding:30px 0 45px}
+ .aula-entry-layout{grid-template-columns:1fr;gap:24px}
+ .aula-entry-copy{padding:0}
+ .aula-entry-back{margin-bottom:26px}
+ .aula-entry h1{font-size:clamp(37px,8vw,54px)}
+ .aula-entry h1 em{display:inline}
+ .aula-entry-intro{margin-top:13px}
+ .aula-entry .formline{flex-direction:row}
+ .aula-entry .formline button{width:auto}
+ .aula-entry-visual{height:clamp(280px,55vw,410px);border-radius:17px}
+}
+@media(max-width:540px){
+ .aula-entry{padding:25px 0 38px}
+ .aula-entry h1{font-size:clamp(35px,10vw,48px)}
+ .aula-entry h1 em{display:block}
+ .aula-entry .panel{padding:23px 19px}
+ .aula-entry .formline{flex-direction:column}
+ .aula-entry .formline button{width:100%}
+ .aula-entry-visual{height:280px}
+ .aula-entry-visual figcaption{left:17px;right:17px;bottom:18px}
+}
+@media(prefers-reduced-motion:reduce){.aula-entry *{transition:none!important}}
