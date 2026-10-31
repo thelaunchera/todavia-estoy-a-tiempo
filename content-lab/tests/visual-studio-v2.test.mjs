@@ -110,3 +110,19 @@ test('iPhone editor debounces canvas preview and hides expert controls until nee
  assert.ok(editor.includes('aria-expanded={advanced}'));
  assert.ok(editor.includes('{advanced&&<>'));
 });
+
+test('editorial original-photo reuse is intentional and cannot trigger duplicate image warnings',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes("if(p.assetId)used.set(p.assetId,i)"));
+ assert.ok(grid.includes("if(!(p.design&&grid.kind==='preserve'))"));
+ assert.ok(grid.includes("'DISEÑO LISTO'"));
+ assert.ok(grid.includes("bg-free-design"));
+ assert.ok(grid.includes("Generar foto con IA (1 crédito)"));
+});
+test('draft flushes on app backgrounding, brand switch and project switch',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes("document.visibilityState==='hidden'"));
+ assert.ok(grid.includes("document.addEventListener('visibilitychange'"));
+ assert.ok(grid.includes("flushDraft();\n    setSourceId('')"));
+ assert.ok(grid.includes("onClick={()=>{flushDraft();setGrid(g);"));
+});
