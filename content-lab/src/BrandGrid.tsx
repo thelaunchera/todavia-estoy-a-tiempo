@@ -1,5 +1,5 @@
 
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import {api} from './platform/client';
 import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,ArrowRight,Palette,LayoutGrid,Camera} from 'lucide-react';
 import './BrandGrid.css';
@@ -11,7 +11,8 @@ type Brand={id:string;name:string;handle:string;language:string;color:string;bac
 type Asset={id:string;brandId:string;name:string;mime:string};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -47,7 +48,7 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
@@ -62,6 +63,57 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
   const [reviewed,setReviewed]=useState(false);
   const [connection,setConnection]=useState<'unknown'|'ready'|'error'>('unknown');
   const [testPhoto,setTestPhoto]=useState('');
+  const [saveState,setSaveState]=useState<'saved'|'pending'|'saving'|'error'>('saved');
+  const savedSignature=useRef<Record<string,string>>({});
+  const gridRef=useRef<Grid|null>(null);
+  const saveQueue=useRef<Promise<void>>(Promise.resolve());
+  const autoTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const [creditPrompt,setCreditPrompt]=useState<{kind:'photo'|'creative';units:number;title:string}|null>(null);
+  const creditDecision=useRef<((approved:boolean)=>void)|null>(null);
+  gridRef.current=grid;
+  const signature=(g:Grid)=>JSON.stringify({title:g.title,posts:g.posts});
+  const todayUTC=new Date().toISOString().slice(0,10);
+  const usedToday=(kind:'photo'|'creative')=>wallet?.quota_day===todayUTC?Number(kind==='photo'?wallet.photo_today:wallet.creative_today)||0:0;
+  const available=(kind:'photo'|'creative')=>!wallet||wallet.admin?Infinity:Math.max(0,Math.min(
+    Number(kind==='photo'?wallet.photo_remaining:wallet.creative_remaining)||0,
+    10-usedToday(kind)
+  ));
+  const askCredits=(kind:'photo'|'creative',units:number,title:string):Promise<boolean>=>{
+    if(units<1)return Promise.resolve(true);
+    if(units>available(kind)){
+      notify('No tienes suficientes créditos o alcanzaste el límite diario. Puedes seguir editando sin consumir IA.');
+      return Promise.resolve(false);
+    }
+    return new Promise(resolve=>{creditDecision.current=resolve;setCreditPrompt({kind,units,title});});
+  };
+  const respondCredits=(answer:boolean)=>{creditDecision.current?.(answer);creditDecision.current=null;setCreditPrompt(null)};
+  useEffect(()=>()=>{creditDecision.current?.(false);if(autoTimer.current)clearTimeout(autoTimer.current)},[]);
+  // Background writes are serialized per browser, never stored in shared/localStorage.
+  // A new grid's baseline is its server-loaded snapshot; editing it creates a draft.
+  useEffect(()=>{
+    if(!grid?.id)return;
+    const key=grid.id,snapshot=signature(grid);
+    if(!(key in savedSignature.current)){savedSignature.current[key]=snapshot;setSaveState('saved');return;}
+    if(savedSignature.current[key]===snapshot)return;
+    setSaveState('pending');
+    if(autoTimer.current)clearTimeout(autoTimer.current);
+    autoTimer.current=setTimeout(()=>{
+      const current=gridRef.current;if(!current||current.id!==key)return;
+      const currentSnapshot=signature(current);
+      if(savedSignature.current[key]===currentSnapshot)return;
+      setSaveState('saving');
+      const copy={title:current.title,posts:current.posts};
+      saveQueue.current=saveQueue.current.catch(()=>{}).then(async()=>{
+        await api.put('/api/grids/'+key,copy);
+        savedSignature.current[key]=currentSnapshot;
+        setGrids(prev=>prev.map(g=>g.id===key?{...g,...copy}:g));
+        if(gridRef.current?.id===key){
+          setSaveState(signature(gridRef.current)===currentSnapshot?'saved':'pending');
+        }
+      }).catch(error=>{setSaveState('error');showError(error)});
+    },1400);
+    return()=>{if(autoTimer.current)clearTimeout(autoTimer.current)};
+  },[grid?.id,grid?.title,grid?.posts]);
   const library=assets.filter(a=>a.brandId===brand.id),own=grids.filter(g=>g.brandId===brand.id);
   const wrongOriginal=!!sourceId&&!!assets.find(a=>a.id===sourceId&&a.brandId!==brand.id);
   const wrongReference=!!referenceId&&!!assets.find(a=>a.id===referenceId&&a.brandId!==brand.id);
@@ -86,9 +138,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
     if(wrongOriginal||wrongReference)return notify('La foto pertenece a otra marca. Cambia a su marca o vuelve a subirla en '+brand.name+'.');
     if(!library.some(a=>a.id===sourceId))return notify('Selecciona una foto guardada en '+brand.name+'.');
     if(referenceId&&!library.some(a=>a.id===referenceId))return notify('La referencia es de otra marca. Súbela en '+brand.name+'.');
+    if(!await askCredits('creative',3,'Preparar 9 ideas con IA'))return;
     setBusy('plan');
     try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief,designMode,designPreset});
-      const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
+      const g=data as Grid;savedSignature.current[g.id]=signature(g);
+      setGrid(g);setSaveState('saved');setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
       notify(g.planningSource==='template'
        ? 'Preparé 9 conceptos editables con plantilla de respaldo. No se generaron fotos.'
        : g.analysisStatus==='vision'
@@ -108,6 +162,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
   const testOnePhoto=async()=>{
     if(!sourceId)return notify('Primero selecciona una foto original.');
     if(!library.some(a=>a.id===sourceId))return notify('Esta foto está guardada en otra marca. Vuelve a subirla desde '+brand.name+'.');
+    if(!await askCredits('photo',1,'Generar una foto de prueba'))return;
     setBusy('test-photo');setTestPhoto('');
     try{
       const {data}=await api.post('/api/ai-image',{
@@ -134,13 +189,23 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
     }catch(e){showError(e)}
   };
   const save=async(g:Grid)=>{
-    const {data}=await api.put('/api/grids/'+g.id,{title:g.title,posts:g.posts});
-    const next=data as Grid;setGrid(next);setGrids(old=>old.map(x=>x.id===next.id?next:x));return next;
+    if(autoTimer.current)clearTimeout(autoTimer.current);
+    await saveQueue.current.catch(()=>{});
+    setSaveState('saving');
+    try{
+      const {data}=await api.put('/api/grids/'+g.id,{title:g.title,posts:g.posts});
+      const next=data as Grid;
+      savedSignature.current[g.id]=signature(next);
+      setGrids(old=>old.map(x=>x.id===next.id?next:x));
+      if(gridRef.current?.id===g.id&&signature(gridRef.current)===signature(g))setSaveState('saved');
+      return next;
+    }catch(e){setSaveState('error');throw e}
   };
   const generateOne=async(g:Grid,i:number)=>{
     const {data}=await api.post('/api/grid-image',{gridId:g.id,index:i});
     const next=data.grid as Grid;const a=data.asset as Asset;
-    setGrid(next);setGrids(old=>old.map(x=>x.id===next.id?next:x));
+    savedSignature.current[next.id]=signature(next);
+    setGrid(next);setSaveState('saved');setGrids(old=>old.map(x=>x.id===next.id?next:x));
     onNewAsset(a,'data:'+a.mime+';base64,'+data.content);
     setSessionPhotos(n=>n+1);
     return next;
@@ -148,6 +213,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
   const generate=async(i:number)=>{
     if(!grid)return;
     if(grid.posts[i].design&&grid.kind==='preserve')return notify('Este diseño editorial usa la foto original y no necesita generar otra con IA. Edita el fondo o descarga el PNG.');
+    if(!await askCredits('photo',1,'Generar post '+(i+1)))return;
     setBusy('image-'+i);
     try{const saved=await save(grid);await generateOne(saved,i);notify('Post '+(i+1)+' generado. Los demás no se cambiaron.')}
     catch(e){showError(e)}finally{setBusy('')}
@@ -164,7 +230,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
   const generateAll=async()=>{
     if(!grid)return;
     if(grid.posts.every(p=>!!p.design)&&grid.kind==='preserve')return notify('Estos nueve diseños editoriales utilizan tu fotografía original; puedes editarlos y descargarlos sin gastar cuota de IA.');
-    if(!window.confirm('La IA generará todas las fotos pendientes con tu cuota gratuita de Cloudflare. ¿Continuar?'))return;
+    const remaining=grid.posts.filter(p=>!p.assetId&&!(p.design&&grid.kind==='preserve')).length;
+    if(!remaining)return notify('Ya tienes todas las fotos que necesitas.');
+    if(!await askCredits('photo',remaining,'Generar '+remaining+' fotos pendientes'))return;
     try{const g=await save(grid);await generateRemaining(g);notify('Fotos pendientes generadas. Revísalas antes de publicar.')}
     catch(e){showError(e);notify('Las fotos terminadas se conservan. Puedes continuar generando las pendientes.')}
     finally{setBusy('')}
@@ -217,6 +285,19 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
   const gridPending=grid?.posts.filter(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])).length||0;
   const tile=grid?.posts[selected];
   return <div className="brand-grid-tool">
+    {creditPrompt&&<div className="bg-credit-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)respondCredits(false)}}>
+      <div className="bg-credit-dialog" role="dialog" aria-modal="true" aria-labelledby="bg-credit-title">
+        <div className="bg-credit-symbol"><Sparkles size={23}/></div>
+        <h2 id="bg-credit-title">{creditPrompt.title}</h2>
+        <p>Esta acción usará <strong>{creditPrompt.units} {creditPrompt.kind==='photo'?'crédito'+(creditPrompt.units===1?' de foto':'s de fotos'):'créditos creativos'}</strong> de tu Content Lab.</p>
+        <p className="bg-credit-info">{wallet?.admin?'Cuenta de propietaria: sujeto al límite global de Cloudflare.':
+          wallet?'Disponibles hoy: '+available(creditPrompt.kind)+' · Límite diario 10.': 'Supabase comprobará el saldo y el límite diario antes de comenzar.'}</p>
+        <p className="bg-credit-hint">Los fondos, las letras y los PNG editados sin IA no gastan créditos.</p>
+        <div className="bg-credit-buttons"><button type="button" className="btn ghost" onClick={()=>respondCredits(false)}>Cancelar</button>
+          <button type="button" className="btn dark" onClick={()=>respondCredits(true)}>Confirmar y generar <ArrowRight size={16}/></button>
+        </div>
+      </div>
+    </div>}
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una referencia. Nueve fotos nuevas, escenas y composiciones distintas.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
     <div className="bg-layout"><div className="bg-column">
       <div className="bg-box"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
@@ -242,7 +323,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
             <p className="bg-note">Con una foto original puedes crear publicaciones completas sin gastar cuota en fotos nuevas. La referencia inspira el estilo; puedes ajustar fuentes, textos y colores.</p>
           </>}
         </div>
-        <label>Modo de imagen</label><div className="bg-modes"><button className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div>
+        {designMode==='photo'&&<><label>Tipo de imagen</label><div className="bg-modes"><button type="button" className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button type="button" className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div></>}
         <label>Tu idea creativa</label><textarea rows={3} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Ej. Feed editorial premium, colores de mi marca, fotos lifestyle, tipografía grande, cada post diferente."/>
         <div className="bg-test-controls">
           {isAdmin&&<><button className="btn ghost wide" disabled={!!busy||!!uploading} onClick={checkConnection}>
@@ -259,10 +340,12 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,onUploadFil
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{setGrid(g);setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Sube una foto para generar nueve ideas visuales originales, cada una como publicación independiente.</p></div>:<>
-        <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p></div><button className="btn ghost" onClick={()=>save(grid).then(()=>notify('Grid guardado')).catch(showError)}><Save size={16}/> Guardar</button></div>
+        <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
+         {saveState==='saved'?'✓ Cambios guardados':saveState==='pending'?'Guardado automático pendiente…':saveState==='saving'?'Guardando cambios…':'No se pudieron guardar los cambios.'}
+        </span></div><button className="btn ghost" disabled={busy==='export'} onClick={()=>save(grid).then(()=>notify('Grid guardado')).catch(showError)}><Save size={16}/> {saveState==='error'?'Reintentar':'Guardar ahora'}</button></div>
         <div className="v2-vision-status" role="status">{grid.analysisStatus==='vision'
          ? '✓ La IA observó la foto principal y la referencia de estilo al preparar los conceptos.'
          : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
