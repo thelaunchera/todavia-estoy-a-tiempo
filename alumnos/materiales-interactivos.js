@@ -20,6 +20,12 @@ const headers=[
  ['ejemplo','Ejemplo explicado','Mira qué tiene cada sección de una página.'],
  ['revision','Antes de publicar','Comprueba cada paso en tu proyecto.']
 ];
+const materialGroups=[
+ {id:'empezar',title:'Empieza aquí',views:['inicio','funciona','organizacion']},
+ {id:'construir',title:'Crea tu web',views:['mara','ejemplo','make','conectores']},
+ {id:'recursos',title:'Tus recursos',views:['prompts','cuaderno','seguridad','legal']},
+ {id:'publicar',title:'Antes de publicar',views:['revision']}
+];
 let running=0;
 export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons}){
  if(!root||root.dataset.mounted==='true')return;
@@ -44,10 +50,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  const app=el('div','mi-app');
  root.appendChild(app);
  app.innerHTML=`<div class="mi-header"><div><span class="mi-eyebrow">TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA</span><h2>Tu mesa de trabajo<span>.</span></h2><p>Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.</p></div></div>
- <nav class="mi-tabs" aria-label="Materiales de la clase"></nav>
+ <nav class="mi-tabs" aria-label="Cuatro categorías de materiales"></nav><nav class="mi-subtabs" aria-label="Contenido de la categoría"></nav>
  <div class="mi-content" aria-live="polite"></div>
  <div class="mi-footer"><span>Un paso claro es mejor que diez pantallas bonitas.</span><span>Materiales de Tu primera web con IA · Uso personal</span></div>`;
- const tabs=app.querySelector('.mi-tabs'), content=app.querySelector('.mi-content');
+ const tabs=app.querySelector('.mi-tabs'),subtabs=app.querySelector('.mi-subtabs'),content=app.querySelector('.mi-content');
  const tools=el('div','mi-toolbar');
  tools.innerHTML='<span>Elige lo que necesitas para tu proyecto.</span><button type="button" class="mi-print">Imprimir o guardar en PDF</button>';
  tabs.after(tools);
@@ -105,7 +111,13 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const intro=app.querySelector('.mi-header p');
   if(headline) headline.textContent=view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
   if(intro) intro.textContent=view==='prompts'?'12 prompts para copiar, adaptar y usar mientras construyes tu propia página.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
-  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===view?'page':'false'));
+  const activeGroup=materialGroups.find(group=>group.views.includes(view));
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.group===activeGroup?.id?'page':'false'));
+  subtabs.replaceChildren();
+  for(const child of activeGroup?.views||[]){
+   const meta=headers.find(h=>h[0]===child);if(!meta)continue;
+   const b=el('button',null,meta[1]);b.type='button';b.dataset.view=child;b.setAttribute('aria-current',child===view?'page':'false');b.addEventListener('click',()=>go(child));subtabs.append(b);
+  }
   content.replaceChildren();
   if(view==='inicio')renderStart();
   if(view==='funciona')renderWebBasics(content,go);
@@ -232,8 +244,9 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',()=>onGoLessons?.());
  }
- headers.forEach(([view,title])=>{
-  const b=el('button',null,title);b.type='button';b.dataset.view=view;b.setAttribute('aria-current',view===current?'page':'false');b.addEventListener('click',()=>go(view));tabs.append(b);
+ materialGroups.forEach(group=>{
+  const b=el('button',null,group.title);b.type='button';b.dataset.group=group.id;b.setAttribute('aria-current','false');
+  b.addEventListener('click',()=>go(group.views[0]));tabs.append(b);
  });
  go('inicio');
  return {go};

@@ -1,5 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=curso-recursos-20261029-v1';
+import {mountMateriales} from './materiales-interactivos.js?v=20261031-four-groups-v2';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261028-final-v1';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -93,7 +93,7 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
+ inicio:'Mi inicio', catalogo:'Todos los productos', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';

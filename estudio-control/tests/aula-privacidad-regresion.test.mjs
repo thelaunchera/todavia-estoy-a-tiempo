@@ -92,3 +92,17 @@ test('Aula de principiantes: primero el siguiente paso, después herramientas op
  assert.match(course,/lessons\.findIndex\(item=>!done\.has\(item\.lesson_code\)\)/,'El alumno retoma la primera lección sin terminar');
  assert.match(course,/\$\('lesson-prev'\)\.disabled=i<=0/,'La primera lección no permite retroceder');
 });
+
+
+test('Aula: productos por compra separados y Lab cerrado sin pago público',()=>{
+ assert.match(room,/data-aula-panel="catalogo"/);
+ assert.match(room,/learning-shelf-grid/);
+ assert.match(room,/Content Lab/);
+ assert.match(room,/Checkout no habilitado/);
+ assert.match(room,/https:\/\/thelaunchera\.com\/service-checkout\/\?offer=booking-flow/);
+ assert.match(room,/https:\/\/thelaunchera\.com\/service-checkout\/\?offer=ai-business/);
+ assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/);
+ assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/);
+ assert.doesNotMatch(room,/href="[^"]*(?:content-lab|lab\/checkout)/);
+ assert.match(course,/catalogo:'Todos los productos'/);
+});

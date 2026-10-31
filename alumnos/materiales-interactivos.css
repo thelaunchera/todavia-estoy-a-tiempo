@@ -182,3 +182,12 @@
 @media(max-width:700px){.mi-extras-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mi-extras-card{padding:16px}.mi-extras-prompt-text{max-height:240px}}
 @media(max-width:400px){.mi-extras-stats{gap:7px}.mi-extras-stats>div{padding:11px}}
 @media print{.mi-extras-copy,.mi-extras-open{display:none!important}.mi-extras-prompt-text{max-height:none;overflow:visible}.mi-extras-card{break-inside:avoid}}
+
+/* Four helpful groups instead of 12 tabs across the student's screen. */
+.mi-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible;scroll-snap-type:none}
+.mi-tabs button{flex:none;white-space:normal;text-align:center;padding:11px 9px;line-height:1.4}
+.mi-subtabs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:-13px 0 24px}
+.mi-subtabs button{min-height:40px;padding:9px 13px;border-radius:99px;border:1px solid #d6e3e7;background:#fffefa;color:#476b80;font-size:11px;font-weight:750;cursor:pointer}
+.mi-subtabs button[aria-current=page]{background:#294c64;color:white;border-color:#294c64}
+.mi-subtabs button:focus-visible{outline:3px solid #85b5d0;outline-offset:2px}
+@media(max-width:640px){.mi-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.mi-subtabs{margin:-11px 0 21px}.mi-subtabs button{font-size:10px;min-height:40px}}

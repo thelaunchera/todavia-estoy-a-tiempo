@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=20261031-student-journey-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=curso-recursos-20261029-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-student-journey-v1">
+<link rel="stylesheet" href="./curso.css?v=20261031-student-journey-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261031-four-groups-v2"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-learning-hub-v2">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -127,6 +127,7 @@
     <nav class="aula-navigation" aria-label="Secciones de tu clase">
       <p class="aula-nav-group">TU ESPACIO</p>
       <button class="aula-side-link" type="button" data-aula-view="inicio" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg></span><span>Mi inicio</span></button>
+      <button class="aula-side-link" type="button" data-aula-view="catalogo" aria-current="false"><span class="aula-side-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5h18v14H3zM8 5v14M13 9h5M13 13h5"/></svg></span><span>Todos los productos</span></button>
       <button class="aula-side-link" type="button" data-aula-view="lecciones" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H3z"/><path d="M21 5h-5a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h5z"/></svg></span><span>Mis lecciones</span></button>
       <div class="lesson-index" aria-label="Lista de lecciones"><h3>CONTENIDO DE LA CLASE</h3><div id="lesson-buttons"></div></div>
       <p class="aula-nav-group">MIS HERRAMIENTAS</p>
@@ -148,6 +149,19 @@
        <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista de administración · Centro de alumnos</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div><a href="../estudio/">Volver a mi Estudio</a></div>
 
     <div data-aula-panel="inicio" class="aula-panel aula-home-dashboard" hidden>
+      <section class="learning-shelf" aria-labelledby="learning-shelf-title">
+       <div class="learning-shelf-head"><div><p class="dashboard-overline">MI CENTRO DE APRENDIZAJE</p><h2 id="learning-shelf-title">Tus espacios, en un solo lugar.</h2><p>Entra a tu clase o explora lo que viene después, sin perderte entre enlaces.</p></div><button type="button" data-aula-view="catalogo" class="learning-shelf-browse">Ver todos los productos <span aria-hidden="true">↗</span></button></div>
+       <div class="learning-shelf-grid">
+         <button type="button" class="learning-product learning-product-course" data-aula-view="lecciones" aria-label="Entrar a Tu primera web con IA">
+           <span class="learning-product-art" aria-hidden="true"><span class="learning-product-number">01 / CLASE PRÁCTICA</span><strong>Tu primera<br><em>web con IA.</em></strong><span class="learning-product-art-foot">DE TU IDEA A UNA WEB REAL</span></span>
+           <span class="learning-product-meta"><span><strong>Tu primera web con IA</strong><small>Mi clase · Abrir lecciones</small></span><span class="learning-product-tag">ENTRAR <span aria-hidden="true">↗</span></span></span>
+         </button>
+         <div class="learning-product learning-product-lab" aria-label="Content Lab todavía no está disponible para comprar">
+           <span class="learning-product-art" aria-hidden="true"><span class="learning-product-number">02 / HERRAMIENTA DIGITAL</span><strong>Content<br><em>Lab.</em></strong><span class="learning-product-art-foot">CREA · ORGANIZA · PUBLICA</span></span>
+           <span class="learning-product-meta"><span><strong>Content Lab</strong><small>Acceso independiente · Pago no habilitado</small></span><span class="learning-product-tag learning-product-locked"><span aria-hidden="true">♧</span> BLOQUEADO</span></span>
+         </div>
+       </div>
+      </section>
       <section class="dashboard-hero" aria-labelledby="student-greeting-title">
         <div class="dashboard-hero-copy">
           <p class="dashboard-overline">MI ESPACIO PARA APRENDER</p>
@@ -232,6 +246,57 @@
         <div><strong>¿Algo no te sale como esperabas?</strong><p>Escríbeme desde aquí, sin salir del aula ni perder tu avance.</p></div>
         <button type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false">Pedir ayuda aquí</button>
       </section>
+    </div>
+    <div data-aula-panel="catalogo" class="aula-panel student-catalog" hidden>
+      <div class="aula-section-heading"><p class="eyebrow">TUS OPCIONES EN UN SOLO LUGAR</p><h1>Explora el centro.</h1><p>Cada producto tiene su propia compra y acceso. Ver una tarjeta no significa haberlo comprado.</p></div>
+      <section class="student-catalog-group" aria-labelledby="catalog-learning-title">
+        <div class="student-catalog-heading"><div><span>01 / APRENDIZAJE Y HERRAMIENTAS</span><h2 id="catalog-learning-title">Mis programas</h2></div></div>
+        <div class="student-catalog-programs">
+          <button class="student-catalog-program" data-aula-view="lecciones" type="button"><span class="student-program-art student-program-course"><small>CURSO 01</small><strong>Tu primera<br>web con IA</strong></span><span class="student-program-bottom"><strong>Tu primera web con IA</strong><small>Entrar a mis lecciones</small></span></button>
+          <div class="student-catalog-program" aria-label="Content Lab bloqueado"><span class="student-program-art student-program-lab"><small>PRODUCTO 02</small><strong>Content<br>Lab</strong></span><span class="student-program-bottom"><strong>Content Lab</strong><small>Bloqueado · Checkout no habilitado</small></span></div>
+        </div>
+      </section>
+      <section class="student-catalog-group" aria-labelledby="catalog-tle-title">
+        <div class="student-catalog-heading"><div><span>02 / THE LAUNCH ERA</span><h2 id="catalog-tle-title">Servicios y asistentes</h2></div><p>Sus checkouts actuales se abren en The Launch Era, donde se verifica el pago.</p></div>
+        <div class="student-market-grid"><article class="student-market-card">
+  <div class="student-market-cover student-market-cover-blue" aria-hidden="true"><span>THE LAUNCH ERA / 01</span><strong>BOOKING</strong></div>
+  <span class="student-market-type">Agenda, solicitudes y Command Center</span><h3>Booking Automation + Command Center</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=booking-flow" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de Booking Automation + Command Center en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article>
+<article class="student-market-card">
+  <div class="student-market-cover student-market-cover-light" aria-hidden="true"><span>THE LAUNCH ERA / 02</span><strong>WEBSITE</strong></div>
+  <span class="student-market-type">Consultas y seguimiento desde tu web</span><h3>Website Automation</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=website-automation" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de Website Automation en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article>
+<article class="student-market-card">
+  <div class="student-market-cover student-market-cover-dark" aria-hidden="true"><span>THE LAUNCH ERA / 03</span><strong>AI BOOKING</strong></div>
+  <span class="student-market-type">Asistente para reservas y consultas</span><h3>AI Booking Assistant</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=ai-booking" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de AI Booking Assistant en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article>
+<article class="student-market-card">
+  <div class="student-market-cover student-market-cover-blue" aria-hidden="true"><span>THE LAUNCH ERA / 04</span><strong>AI FOLLOW-UP</strong></div>
+  <span class="student-market-type">Seguimiento de clientes potenciales</span><h3>AI Follow-Up Assistant</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=ai-followup" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de AI Follow-Up Assistant en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article>
+<article class="student-market-card">
+  <div class="student-market-cover student-market-cover-light" aria-hidden="true"><span>THE LAUNCH ERA / 05</span><strong>AI BUSINESS</strong></div>
+  <span class="student-market-type">Booking y Follow-Up en un sistema</span><h3>AI Business Assistant</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=ai-business" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de AI Business Assistant en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article>
+<article class="student-market-card">
+  <div class="student-market-cover student-market-cover-dark" aria-hidden="true"><span>THE LAUNCH ERA / 06</span><strong>VIRTUAL ASSISTANT</strong></div>
+  <span class="student-market-type">Apoyo operativo por suscripción</span><h3>VA Essential Support</h3><p>Servicio independiente. La compra no desbloquea automáticamente el aula de esta clase.</p>
+  <a href="https://thelaunchera.com/service-checkout/?offer=va" target="_blank" rel="noopener noreferrer" aria-label="Abrir checkout de VA Essential Support en The Launch Era">Abrir checkout seguro <span aria-hidden="true">↗</span></a>
+ </article></div>
+      </section>
+      <section class="student-catalog-group" aria-labelledby="catalog-podcast-title">
+        <div class="student-catalog-heading"><div><span>03 / TODAVÍA ESTOY A TIEMPO</span><h2 id="catalog-podcast-title">Productos digitales</h2></div><p>Los PDFs comprados se entregan por correo; no son módulos de esta clase.</p></div>
+        <div class="student-market-grid student-market-pdfs">
+          <article class="student-market-card"><div class="student-market-cover student-market-cover-podcast"><span>DIARIO DIGITAL</span><strong>No voy<br>tarde.</strong></div><span class="student-market-type">Diario para volver a mí</span><h3>No voy tarde</h3><p>PDF digital del podcast.</p><a href="../productos/no-voy-tarde.html" target="_blank" rel="noopener noreferrer">Ver producto y compra <span aria-hidden="true">↗</span></a></article>
+          <article class="student-market-card"><div class="student-market-cover student-market-cover-podcast2"><span>CUADERNO DIGITAL</span><strong>Empezar<br>de nuevo.</strong></div><span class="student-market-type">14 días de pequeños pasos</span><h3>Empezar de nuevo</h3><p>PDF digital del podcast.</p><a href="../productos/empezar-de-nuevo.html" target="_blank" rel="noopener noreferrer">Ver producto y compra <span aria-hidden="true">↗</span></a></article>
+        </div>
+      </section>
+      <p class="student-catalog-note">El acceso a la clase continúa cerrado al público mientras está en preparación. El checkout del Lab aún no está habilitado. Cada compra se verifica en su sistema correspondiente.</p>
     </div>
     <div data-aula-panel="lecciones" class="aula-panel">
       <div class="aula-section-heading"><p class="eyebrow">APRENDE PASO A PASO</p><h1>Mis lecciones</h1><p>Elige una lección en el menú. Tus avances se guardan en tu cuenta.</p></div>
@@ -353,5 +418,5 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=20261031-student-journey-v1"></script>
+<script type="module" src="./curso.js?v=20261031-product-center-v2"></script>
 </body></html>
