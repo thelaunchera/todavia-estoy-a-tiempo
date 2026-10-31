@@ -8,18 +8,18 @@ This project is inside the SAME repository/branch family as \`estudio-control/\`
 - ✅ Source copied from the current AppDeploy Content Lab on 31 October 2026.
 - ✅ Portable React frontend, isolated folder, separate design files, 1 Photo → 9 Posts.
 - ✅ Portable Supabase Auth/Database/Storage API adapter and private schema.
-- ⏳ A **dedicated Supabase project**, its authentication owner allowlist, and a server-side AI API key must be configured before this GitHub version can run.
+- ⏳ The EXISTING podcast Supabase project now contains isolated Content Lab tables, a private bucket and owner allowlist. Its GitHub frontend is being connected; a server-only Gemini API key remains to be configured.
 - ⏳ Existing AppDeploy user-generated photos/drafts are NOT automatically migrated. Source code and user data are different.
 - ⏳ Deployment to a dedicated URL is separate from committing to GitHub. The existing AppDeploy URL remains the live working version until replacement is tested.
 - ⏳ Real-photo end-to-end image quality requires an authenticated run with actual provider credits; compiling or deployment checks cannot establish visual quality.
 
 ## Development
 
-1. Configure a *separate* Supabase project for Content Lab, NOT the podcast Supabase database and not the Cleaning App database.
-2. Run \`supabase/schema.sql\` in that new project's SQL Editor. It enables RLS and creates a private Storage bucket.
-3. Sign up using the owner's email via private magic link. Approve the owner's UUID in \`content_lab_admins\` from SQL Editor (never store this UUID in GitHub).
+1. Use the EXISTING podcast Supabase project (`fhrvuhikrybobidxpvnh`) with Content Lab's separate prefixed tables and private storage (do not alter existing podcast tables).
+2. Content Lab's RLS schema and private Storage bucket have already been applied to the existing podcast project (2026-10-31). The committed SQL documents the current setup.
+3. The single existing podcast Studio owner is automatically allowed by Content Lab. No new accounts are created by the Lab's magic-link login.
 4. Copy \`.env.example\` to \`.env.local\`, set only the public Supabase URL and publishable key.
-5. Deploy the \`supabase/functions/content-lab-generate\` function to this new project; configure \`GEMINI_API_KEY\` as a **server secret** and optionally choose \`GEMINI_TEXT_MODEL\` and \`GEMINI_IMAGE_MODEL\`. Never prefix secret values with \`VITE_\`.
+5. The \`content-lab-generate\` Edge Function is already deployed in the shared podcast project; configure \`GEMINI_API_KEY\` as a **server secret** and optionally choose \`GEMINI_TEXT_MODEL\` and \`GEMINI_IMAGE_MODEL\`. Never prefix secret values with \`VITE_\`.
 6. \`npm install && npm run build\`; then \`npm run dev\` to test locally.
 7. Configure the Auth redirect for the future dedicated Content Lab domain. Keep Studio untouched.
 
@@ -65,3 +65,9 @@ Deployment checklist:
 7. Export/migrate old AppDeploy media and content only after completing a careful privacy/data mapping; copying the frontend does not copy user data.
 
 **Cost guardrail:** Start with **one** generated image and check actual Gemini usage before creating nine. Credits, quotas and rates vary by provider and plan. Never automatically call the paid API from a background page load.
+
+## 2026-10-31: Podcast Supabase integration status
+
+User approved sharing the podcast's existing Supabase project. The database hosts isolated `content_lab_*` tables, `content_lab_admins` with the single podcast owner, and the private `content-lab-private` Storage bucket with RLS. Supabase Edge Function `content-lab-generate` was deployed with `verify_jwt=true`. The GitHub Pages build uses this project's **public** URL and publishable key, which are safe to expose in a frontend because RLS protects all private data. The Studio's data and deployment are unchanged.
+
+**Only missing operational key**: a privately saved `GEMINI_API_KEY` in the Supabase project Edge Function secrets, plus any required Auth redirect allowlist for `https://podcast.thelaunchera.com/content-lab/`. Do NOT place this secret in source code or GitHub Pages. Until set, AI photo creation returns a clear configuration error. Old AppDeploy photos and projects have not been imported.
