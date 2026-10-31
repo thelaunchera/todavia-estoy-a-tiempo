@@ -23,18 +23,23 @@ export async function makeCover(post:Post,brand:Brand,src?:string,images:Record<
 export function CreativeCover({post,brand,photo,images={},onDecorChange}:{post:Post;brand:Brand;photo?:string;images?:Record<string,string>;onDecorChange?:(next:CoverDecor)=>void}){
   const [url,setUrl]=useState(''),[failure,setFailure]=useState(false),[touchEdit,setTouchEdit]=useState(false);
   const decor=readCoverDecor(post.designData);
+  const needsExample=!post.hook?.trim()&&!post.title?.trim();
+  // The sample is PREVIEW-ONLY. It is never persisted or added to the exported PNG.
+  const previewPost=needsExample?{...post,hook:'Your next big idea.',cta:post.cta?.trim()||'Made your way.'}:post;
   useEffect(()=>{
-    let active=true;setFailure(false);
-    makeCover(post,brand,photo,images,touchEdit).then(c=>{if(active)setUrl(c.toDataURL('image/png'))})
+    let active=true;setFailure(false);setUrl('');
+    makeCover(previewPost,brand,photo,images,touchEdit).then(c=>{if(active)setUrl(c.toDataURL('image/png'))})
     .catch(()=>{if(active)setFailure(true)});
     return()=>{active=false};
   },[post.template,post.hook,post.cta,post.title,post.designData,brand.name,brand.color,brand.background,brand.secondaryColor,brand.headingFont,brand.bodyFont,photo,images,touchEdit]);
-  if(failure)return <div className="cover-error">No se pudo preparar la vista previa.</div>;
-  if(!url)return <div className="cover-error"><LoaderCircle size={24}/></div>;
   const layers=decor.stickerIds.filter(id=>images[id]).map((id,i)=>({id,kind:'sticker' as const,name:'Sticker',src:images[id],rect:clampRect(decor.stickerPositions[id]||stickerDefault(i))}));
   return <div className="cover-touch-workspace">
-   {onDecorChange&&<button className="factory-touch-toggle" type="button" aria-pressed={touchEdit} onClick={()=>setTouchEdit(v=>!v)}>{touchEdit?'✓ Finalizar movimiento':'👆 Mover stickers con el dedo · gratis'}</button>}
-   {touchEdit&&onDecorChange?<TouchLayerCanvas preview={url} layers={layers} onCommit={(_kind,id,rect)=>onDecorChange({...decor,stickerPositions:{...decor.stickerPositions,[id]:rect}})}/>:<img src={url} alt="Vista previa de la composición seleccionada" style={{display:'block',width:'100%',aspectRatio:'4 / 5',objectFit:'contain',borderRadius:12}}/>}
+   {needsExample&&<div className="cover-demo-label">VISTA DE EJEMPLO <span>Escribe tu título para personalizarla</span></div>}
+   {onDecorChange&&layers.length>0&&<button className="cover-touch-toggle" type="button" aria-pressed={touchEdit} onClick={()=>setTouchEdit(v=>!v)}>{touchEdit?'✓ Terminar edición':'👆 Mover y ajustar stickers'}</button>}
+   {failure?<div className="cover-error cover-failure">No se pudo preparar la vista previa. Prueba otro formato o fotografía.</div>:
+    !url?<div className="cover-loading" role="status" aria-label="Preparando vista previa"><LoaderCircle className="spin" size={25}/><span>Preparando tu diseño…</span></div>:
+    touchEdit&&onDecorChange?<TouchLayerCanvas preview={url} layers={layers} onCommit={(_kind,id,rect)=>onDecorChange({...decor,stickerPositions:{...decor.stickerPositions,[id]:rect}})}/>:
+    <img className="cover-artwork" src={url} alt="Vista previa de la composición seleccionada" draggable={false}/>}
   </div>;
 }
 export async function exportCreativeCover(post:Post,brand:Brand,photo?:string,images:Record<string,string>={}){
