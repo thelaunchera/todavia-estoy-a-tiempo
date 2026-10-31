@@ -42,3 +42,26 @@
 .panorama-body.panorama-library-collapsed{grid-template-columns:minmax(0,1fr)}
 .panorama-editor .panorama-workspace{background:#eff3f3}
 @media(max-width:760px){.panorama-quicktools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;overscroll-behavior-x:contain}.panorama-quicktools button{white-space:nowrap;flex:none}.panorama-body.panorama-library-collapsed{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Mobile-first simple carousel: photo upload never hidden behind media drawer. */
+.panorama-editor{padding:16px;margin:12px 0}
+.panorama-heading{margin-bottom:10px}
+.panorama-heading h2{font-size:clamp(21px,3vw,26px);margin:5px 0}
+.panorama-heading p{font-size:11px}
+.panorama-primary-actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0;align-items:center}
+.panorama-primary-actions button{min-height:43px;padding:9px 12px;font-size:12px;font-weight:750;
+ border-radius:10px;border:1px solid #c9d9da;background:#fff;color:#355666;
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+.panorama-primary-actions .panorama-add-photo{background:#22343b;color:#fff;border-color:#22343b}
+.panorama-primary-actions button:disabled{opacity:.5}
+.panorama-primary-actions .panorama-more-toggle{margin-left:auto}
+.panorama-quicktools{padding:8px;background:#f1f5f4;border-radius:9px;margin-bottom:11px}
+@media(max-width:760px){
+ .panorama-editor{padding:10px;border-radius:12px}
+ .panorama-primary-actions{display:grid;grid-template-columns:1fr 1fr}
+ .panorama-primary-actions button{min-width:0;padding:10px 5px;font-size:11px}
+ .panorama-heading .btn{padding:7px 10px;min-height:36px}
+ .panorama-workspace{padding:6px}
+ .panorama-heading p{display:none}
+}
