@@ -7,11 +7,12 @@ import {
 } from 'lucide-react';
 import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
+import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
   rules: string; language: 'English' | 'Español'; color: string; background: string;
-  headingFont?:string;bodyFont?:string;referenceAssetId?:string;
+  headingFont?:string;bodyFont?:string;referenceAssetId?:string;secondaryColor?:string;additionalColors?:string[];socialAccounts?:SocialAccounts;primaryPlatform?:SocialPlatform;
 };
 type Post = {
   id?: string; brandId: string; title: string; format: string; angle: string;
@@ -23,7 +24,7 @@ type Asset = { id: string; brandId: string; name: string; mime: string };
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';
+  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -56,7 +57,8 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           description: String(s.description || ''),
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
           assetId: String(s.assetId || ''),
-          photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center'
+          photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
+          accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0
         }));
     }
   }
@@ -95,7 +97,10 @@ function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: numbe
 async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle) {
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
-  const {paper,accent,ink,onAccent,muted,outline}=getCarouselPalette(brand,style);
+  const {paper,accent,ink,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
+  const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
+  const handle=socialAccount(brand,destination);
+  const footerName=(handle&&!/^https?:\/\//i.test(handle)?handle:brand.name).toUpperCase().slice(0,32);
   const bh=(brand.headingFont||'').toLowerCase();
   const heading=style.font==='serif'?'Georgia, serif':style.font==='sans'?'Arial, sans-serif':
     bh==='prompt'?'Prompt, Arial, sans-serif':bh==='futura'?'Futura, Arial, sans-serif':
@@ -122,7 +127,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     if(slide.description)fillLines(ctx,slide.description,x,y,w,41,maxLines,color,bodyFont);
   };
   const footer=(color=ink)=>{
-    label(brand.name.toUpperCase(),72,1284,color,21);
+    label(footerName,72,1284,color,21);
     label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),885,1284,color,21);
   };
   rect(0,0,1080,1350,paper);
@@ -171,7 +176,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     label(slide.eyebrow||'ONE LAST THING',116,174,ink);
     title(116,450,843,99,6);
     body(116,1040,840,ink,3);rect(116,1151,175,10,accent);
-    label(brand.name.toUpperCase(),116,1225,ink,22);
+    label(footerName,116,1225,ink,22);
     label(String(i+1).padStart(2,'0'),895,1225,ink,22);
   }
   return canvas;
@@ -184,6 +189,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
+  const socialDestination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
+  const socialLabel=platformName(socialDestination);
+  const destinationAccount=socialAccount(brand,socialDestination);
+  const palette=brandPalette(brand);
   const [current,setCurrent]=useState(0);
   const [preview,setPreview]=useState('');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
@@ -193,8 +202,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [sourceId,setSourceId]=useState('');
   const [imageSubjectType,setImageSubjectType]=useState<'portrait'|'product'>('portrait');
   const [referenceReport,setReferenceReport]=useState('');
+  const [overview,setOverview]=useState<string[]>([]);
+  const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setDownloads([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
@@ -206,7 +217,21 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   });
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
-    setDownloads([]);
+    setDownloads([]);setOverview([]);
+  };
+  const previewAll=async()=>{
+    setOverviewBusy(true);setOverview([]);
+    try{
+      const previews:string[]=[];
+      for(let n=0;n<slides.length;n++){
+        const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
+        const small=document.createElement('canvas');small.width=270;small.height=338;
+        const context=small.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
+        context.drawImage(canvas,0,0,270,338);
+        previews.push(small.toDataURL('image/jpeg',.72));
+      }
+      setOverview(previews);notify('Vista previa completa preparada sin consumir créditos.');
+    }catch(e){showError(e)}finally{setOverviewBusy(false)}
   };
   const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
   const applyReference=async()=>{
@@ -246,12 +271,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(active)setPreview(c.toDataURL('image/png'));
     }).catch(showError);
     return()=>{active=false;};
-  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slides.length,brand.color,brand.background,brand.headingFont,brand.bodyFont,style,images]);
+  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
     setBusy('copy');
     try{
-      const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational'});
+      const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational',platform:socialDestination});
       const updated:Post={...post,...data,format:'Carousel',brandId:brand.id,designData:''};
       onChange({...updated,designData:encodeCarouselDesign(parseSlides(updated,brand),style)});
       setCurrent(0);setDownloads([]);
@@ -306,6 +331,15 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     </div>
     <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
       <div className="factory-style-title"><div><span className="eyebrow">02 / BRAND KIT LOCK</span><h2>Un solo estilo para todos los slides.</h2><p>Fondos, tipografías y colores conectados. Cambia aquí una vez y el carrusel completo sigue la misma dirección de arte.</p></div><span className="factory-style-lock"><Check size={15}/> Estilo maestro activo</span></div>
+      <div className="factory-destination">
+        <label>¿Dónde vas a publicar este carrusel?
+          <select value={style.targetPlatform} onChange={e=>setArtStyle({targetPlatform:e.target.value as CarouselStyle['targetPlatform']})}>
+            <option value="brand">Mi red principal ({platformName(preferredPlatform(brand))})</option>
+            {SOCIAL_PLATFORMS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
+          </select>
+        </label>
+        <p><strong>{socialLabel}</strong> · {destinationAccount||'Cuenta aún no configurada'} · Descargas manuales, sin publicación automática.</p>
+      </div>
       <div className="factory-style-controls">
         <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
           <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
@@ -329,7 +363,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         {style.referenceAssetId&&images[style.referenceAssetId]&&<img className="factory-reference-thumb" src={images[style.referenceAssetId]} alt="Referencia usada solo como inspiración"/>}
       </div>
       <div className="factory-style-footer">
-        <div className="factory-style-swatches"><span style={{background:getCarouselPalette(brand,style).paper}}/><span style={{background:getCarouselPalette(brand,style).accent}}/><span style={{background:getCarouselPalette(brand,style).muted}}/><small>Paleta compartida · todos los slides</small></div>
+        <div className="factory-style-swatches">{palette.map((c,n)=><span key={n} title={c} style={{background:c}}/>)}<span title="Fondo" style={{background:brand.background}}/><small>Paleta guardada · usa otros tonos por slide cuando quieras</small></div>
         <button type="button" className="btn ghost" onClick={applyRhythm}><Layers3 size={15}/> Aplicar composición coordinada</button>
       </div>
       {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
@@ -347,6 +381,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
           <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
           <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+           <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
+             <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
+             {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
+           </select>
            <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
              <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
            </select>
@@ -375,7 +413,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <div className="factory-preview">{preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>
         <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
         <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
-        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Prepare every slide separately</button>
+        <button className="btn ghost wide" onClick={previewAll} disabled={!!busy||overviewBusy}>{overviewBusy?<LoaderCircle className="spin" size={16}/>:<Layers3 size={16}/>} Ver el carrusel completo · gratis</button>
+        {overview.length>0&&<div className="factory-overview" aria-label="Vista previa de todos los slides"><strong>Tu carrusel, como una colección</strong><div className="factory-overview-grid">{overview.map((src,n)=><button type="button" key={n} onClick={()=>setCurrent(n)} title={'Ir al slide '+(n+1)}><img src={src} alt={'Vista previa slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}</div></div>}
+        <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Preparar PNG individuales</button>
         {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
         <div className="factory-hint"><ImagePlus size={16}/> El estilo maestro afecta todo el carrusel; el texto, las fotografías y la composición de cada slide siguen siendo editables.</div>
          <div className="factory-quality"><strong>Revisión antes de publicar</strong><p>Comprobamos longitud del texto y si faltan fotografías. Revisa manualmente ortografía, identidad facial y manos.</p>
