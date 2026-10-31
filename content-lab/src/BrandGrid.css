@@ -159,3 +159,17 @@
 
 .bg-free-design{display:flex;align-items:center;gap:8px;flex:1 1 250px;font-size:12px;line-height:1.5;padding:12px;color:#2a6d5e;background:#eaf6f0;border:1px solid #c8e5d7;border-radius:10px}
 .bg-free-design svg{flex-shrink:0}
+
+/* Clear prompt bridge and honest optional one-click variations */
+.bg-prompt-hub{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:#eaf3f6;border:1px solid #cfe3e8;border-radius:12px;padding:13px 14px;margin:18px 0 13px}
+.bg-prompt-hub>div{flex:1;min-width:180px}
+.bg-prompt-hub strong{display:block;font-size:13px;color:#295664}
+.bg-prompt-hub small{display:block;margin-top:5px;font-size:11px;line-height:1.5;color:#5c7d88}
+.bg-prompt-hub .btn{font-size:11px;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.bg-photo-variations{padding:12px;border:1px solid #dae8ea;border-radius:11px;background:#f5fafa;margin:10px 0}
+.bg-photo-variations strong{font-size:12px;color:#305663;display:block;margin-bottom:10px}
+.bg-photo-variations>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bg-photo-variations button{font-size:11px;color:#345e6b;padding:10px;border-radius:9px;border:1px solid #c9e0e7;background:white;cursor:pointer;min-width:0}
+.bg-photo-variations button:disabled{opacity:.55;cursor:not-allowed}
+.bg-photo-variations small{font-size:10px;color:#68848e;line-height:1.5;display:block;margin-top:10px}
+@media(max-width:600px){.bg-prompt-hub{flex-direction:column;align-items:stretch}.bg-prompt-hub .btn{width:100%}}
