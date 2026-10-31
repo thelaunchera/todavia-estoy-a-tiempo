@@ -7,7 +7,7 @@
  *
  * No generative AI or credits are used. All export sizes use the same painter.
  */
-import {BOW_BACKGROUNDS,isBowBackground,paintBowBackground,type BowBackgroundId} from './BowBackgrounds';
+import {isBowBackground,paintBowBackground,type BowBackgroundId} from './BowBackgrounds';
 import {SCRAPBOOK_BACKGROUNDS,isScrapbookBackground,paintScrapbookBackground,type ScrapbookBackgroundId} from './ScrapbookBackgrounds';
 export const FREE_STICKERS=[
  {id:'pink-bow',name:'Lazo rosa',emoji:'🎀',group:'Cute'},
@@ -65,7 +65,6 @@ export const FREE_BACKGROUNDS:{id:FreeBackgroundId;name:string;color:string;desc
  {id:'journal-tape',name:'Creative Journal',color:'#FCF7ED',description:'Cinta washi y papel'},
  {id:'coffee-check',name:'Coffee Club',color:'#E5D2BB',description:'Tablero café con leche'},
  {id:'night-stars',name:'Midnight Stars',color:'#26313E',description:'Constelaciones sutiles'},
- ...BOW_BACKGROUNDS,
  ...SCRAPBOOK_BACKGROUNDS
 ];
 export type FreeDecoration={stickerIds?:string[];backgroundId?:FreeBackgroundId};
