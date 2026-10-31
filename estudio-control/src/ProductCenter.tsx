@@ -1,5 +1,5 @@
 import {useMemo,useState} from 'react';
-import {Copy, ExternalLink, Search, BookOpen, LockKeyhole, ShoppingBag, AlertCircle, Check} from 'lucide-react';
+import {Copy, ExternalLink, Search, BookOpen, LockKeyhole, ShoppingBag, AlertCircle} from 'lucide-react';
 import {resolveStudioLinks, type StudioEntry, type Category, PUBLICATION_LABELS, type PublicationState} from './LinkCenter';
 import './product-center.css';
 
@@ -13,7 +13,7 @@ export const PRODUCTS_CATALOG:ProductInfo[]=[
   {id:'ai-booking',category:'thelaunchera',title:'AI Booking Assistant',description:'Asistente de IA para solicitudes y reservas.',linkKey:'tle-ai-booking',sourceKey:'tle-home-code',state:'revision',note:'Revisar precio, implementación y activación antes de compartir una oferta.',shareable:false},
   {id:'website-auto',category:'thelaunchera',title:'Website Automation',description:'Automatizaciones para capturar y atender solicitudes en websites.',linkKey:'tle-website-auto',sourceKey:'tle-home-code',state:'revision',note:'La ruta requiere validación comercial antes de enviarla.',shareable:false},
   {id:'va',category:'thelaunchera',title:'VA Essential Support',description:'Servicio de asistencia para tareas administrativas acordadas.',linkKey:'tle-va',sourceKey:'tle-home-code',state:'revision',note:'Confirmar condiciones y disponibilidad antes de ofrecerlo.',shareable:false},
-  {id:'starter',category:'thelaunchera',title:'Lead-to-Booking Starter Kit',description:'Recurso gratuito para dueños de cleaning businesses.',linkKey:'tle-free',sourceKey:'tle-home-code',state:'publicado',note:'Página de recurso del website; verificar el correo de entrega de vez en cuando.',shareable:true},
+  {id:'starter',category:'thelaunchera',title:'Lead-to-Booking Starter Kit',description:'Recurso gratuito para dueños de cleaning businesses.',linkKey:'tle-free',sourceKey:'tle-home-code',state:'revision',note:'Ruta histórica del recurso; comprobar formulario y correo de entrega antes de compartirla.',shareable:false},
   {id:'pod-guide',category:'podcast',title:'5 preguntas para cuando sientes que vas tarde',description:'Guía gratuita entregada desde el formulario del podcast.',linkKey:'pod-free',sourceKey:'pod-code',state:'publicado',price:'Gratis',note:'Compartir el formulario, no la carpeta fuente ni un enlace de descarga privado.',shareable:true},
   {id:'pod-diary',category:'podcast',title:'No voy tarde · Diario',description:'Diario digital de reflexiones y escritura personal.',linkKey:'pod-diario',sourceKey:'pod-code',state:'revision',price:'$1.99',note:'Landing y enlace de pago configurados en GitHub. Falta verificar compra y entrega completas.',shareable:false},
   {id:'pod-workbook',category:'podcast',title:'Empezar de nuevo · Cuaderno',description:'Cuaderno digital de 14 días para organizar pequeños pasos.',linkKey:'pod-empezar',sourceKey:'pod-code',state:'revision',price:'$3.99',note:'Landing y enlace de pago configurados en GitHub. Falta verificar compra y entrega completas.',shareable:false},
