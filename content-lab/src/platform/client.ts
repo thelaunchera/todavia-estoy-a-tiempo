@@ -85,7 +85,13 @@ export const api={
       const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
       const path=me.id+'/'+crypto.randomUUID()+'.'+ext;
       out(await sb.storage.from(bucket).upload(path,bytes,{contentType:mime,upsert:false}));
-      try{return {data:await add('assets',{brandId:payload.brandId,path,mime,name:payload.name})};}
+      try{
+        // Cloudflare FLUX.2 Klein accepts image-to-image reference photos smaller than 512x512.
+        // Keep the original resolution in private Storage and a separate tiny reference in owner-only RLS.
+        const original=await (await fetch('data:'+mime+';base64,'+payload.content)).blob();
+        const preview=await image.resizeIfNeeded(original,{maxDimension:480,maxPixels:230400,quality:0.68,mimeType:'image/jpeg'});
+        return {data:await add('assets',{brandId:payload.brandId,path,mime,name:payload.name,aiReference:preview.data})};
+      }
       catch(e){await sb.storage.from(bucket).remove([path]);throw e;}
     }
     if(['/api/ideas','/api/ai-image','/api/grid-plan','/api/grid-image'].includes(path))
