@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="AI Booking Assistant">
+<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#183A4A"/><stop offset="1" stop-color="#407E83"/></linearGradient><radialGradient id="glow" cx="75%" cy="45%" r="65%"><stop stop-color="#C7EEE9" stop-opacity=".3"/><stop offset="1" stop-color="#C7EEE9" stop-opacity="0"/></radialGradient><filter id="drop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="9"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".23"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect width="720" height="480" fill="url(#bg)"/><rect width="720" height="480" fill="url(#glow)"/>
+<path d="M-80 470 C 130 385 191 562 396 443 S 620 327 832 405" fill="none" stroke="#F4F8FF" stroke-opacity=".095" stroke-width="2"/>
+<g fill="none" stroke="#FFFFFF" stroke-opacity=".12" stroke-width="1.6"><circle cx="610" cy="201" r="208"/><circle cx="610" cy="201" r="252"/></g>
+<rect x="48" y="42" width="24" height="3" rx="1.5" fill="#C7EEE9"/>
+<text x="84" y="49" font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2" font-size="15" fill="#C7EEE9">THE LAUNCH ERA</text>
+<text x="50" y="115" font-family="Arial,Helvetica,sans-serif" letter-spacing="2.4" font-size="15" font-weight="700" fill="#E2EBF4" fill-opacity=".88">03 / SERVICE STUDIO</text>
+<g font-family="Arial,Helvetica,sans-serif" letter-spacing="-1.8" font-weight="800" fill="#FFFFFF">
+<text x="48" y="211" font-size="55">AI Booking</text>
+<text x="48" y="279" font-size="55">Assistant</text>
+</g>
+<rect x="49" y="303" width="44" height="3" rx="1.5" fill="#C7EEE9"/>
+<text x="50" y="345" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="1" font-size="16" fill="#C7EEE9">SMARTER BOOKINGS</text>
+
+ <circle cx="571" cy="258" r="137" fill="none" stroke="#FFFFFF" stroke-opacity=".19" stroke-width="1.5"/>
+ <circle cx="572" cy="257" r="102" fill="#DCF7F3" fill-opacity=".12" stroke="#FFFFFF" stroke-opacity=".26" stroke-width="1.5"/>
+ <path d="M430 147h202a18 18 0 0 1 18 18v78a18 18 0 0 1-18 18H516l-30 28v-28h-56a18 18 0 0 1-18-18v-78a18 18 0 0 1 18-18z" fill="#E1F7F2" fill-opacity=".93" filter="url(#drop)"/>
+ <text x="441" y="182" font-size="15" font-family="Arial" font-weight="700" fill="#194C57">How can I help?</text>
+ <rect x="440" y="202" width="160" height="8" rx="4" fill="#7AAEB3" fill-opacity=".58"/><rect x="440" y="220" width="110" height="7" rx="3.5" fill="#95BFC0" fill-opacity=".55"/>
+ <rect x="508" y="291" width="165" height="59" rx="14" fill="#153C4A" fill-opacity=".94" stroke="#D7FCF3" stroke-opacity=".55"/>
+ <circle cx="528" cy="315" r="7" fill="#C3F6E5"/>
+ <text x="543" y="315" font-size="11" fill="#FFFFFF" font-weight="700" font-family="Arial">Booking request</text>
+ <text x="543" y="332" font-size="10" fill="#B5DCD5" font-family="Arial">Ready to review</text>
+ <path d="M433 317h38" stroke="#C8F9EE" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 7"/>
+<path d="M48 403 H672" stroke="#FFFFFF" stroke-opacity=".22"/>
+<text x="49" y="438" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2" fill="#EBF5FA" fill-opacity=".9">REPLY / QUALIFY / ORGANIZE</text>
+<text x="670" y="438" text-anchor="end" font-family="Arial" font-size="14" font-weight="700" fill="#C7EEE9">TLE / 26</text>
+</svg>
