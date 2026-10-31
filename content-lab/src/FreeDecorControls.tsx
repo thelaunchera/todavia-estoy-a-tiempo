@@ -23,6 +23,7 @@ function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;
 }
 export default function FreeDecorControls({backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground}:Props){
  const [tab,setTab]=useState<'stickers'|'backgrounds'>('stickers');
+ const [expanded,setExpanded]=useState(false);
  const [group,setGroup]=useState('Todos');
  const uploadRef=useRef<HTMLInputElement>(null),[uploading,setUploading]=useState(false);
  const ownBackgrounds=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
@@ -36,7 +37,10 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
   onChange({backgroundId,backgroundImageId,stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
  };
  return <section className="free-decor-controls" aria-label="Stickers y fondos">
-  <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Personaliza con tus stickers originales y fondos.</p></div></div>
+  <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Stickers y fondos a tu gusto, sin ocupar toda la pantalla.</p></div>
+    <button type="button" className="free-decor-collapse" aria-expanded={expanded}
+      onClick={()=>setExpanded(value=>!value)}>{expanded?'Recoger panel ↑':'Abrir panel ↓'}</button></div>
+  {expanded && <div className="free-decor-expanded">
   <div className="free-decor-main-tabs"><button type="button" aria-pressed={tab==='stickers'} className={tab==='stickers'?'active':''} onClick={()=>setTab('stickers')}>🎀 Stickers PNG</button><button type="button" aria-pressed={tab==='backgrounds'} className={tab==='backgrounds'?'active':''} onClick={()=>setTab('backgrounds')}>🎨 Backgrounds</button></div>
   {tab==='backgrounds'?<div>
     <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir mi background'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
@@ -49,5 +53,6 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
     <div className="free-decor-empty"><strong>Aquí aparecerán tus stickers PNG originales.</strong><p>No se mostrarán emojis de relleno. Cuando la administradora publique la colección, aparecerá aquí automáticamente.</p>{onOpenLibrary&&<button type="button" onClick={onOpenLibrary}>Abrir biblioteca de stickers</button>}</div>}
    </>}
   <div className="free-decor-footer"><small>Máximo 3 stickers por slide. Las fotografías originales no se modifican.</small>{selected.length>0&&<button type="button" onClick={()=>onChange({backgroundId,backgroundImageId,stickerIds:[]})}>Quitar stickers</button>}</div>
+  </div>}
  </section>
 }
