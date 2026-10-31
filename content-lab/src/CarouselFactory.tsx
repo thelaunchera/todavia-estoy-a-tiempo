@@ -9,7 +9,8 @@ import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
-import {paintFreeBackground,paintFreeStickers,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {drawSeamlessPages} from './SeamlessCarousel';
 
 type Brand = {
@@ -186,7 +187,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     label(footerName,116,1225,ink,22);
     label(String(i+1).padStart(2,'0'),895,1225,ink,22);
   }
-  paintFreeStickers(ctx,1080,1350,slide.stickerIds,accent);
+  await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images);
   return canvas;
 }
 const filename=(post:Post,i:number)=>{
@@ -274,7 +275,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(slides.filter((_,j)=>j!==i));setCurrent(Math.max(0,i-1));
   };
   useEffect(()=>{
-    slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);});
+    slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);(s.stickerIds||[]).forEach(id=>{if(!images[id])loadImage(id)});});
     if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
     if(style.seamlessAssetId&&!images[style.seamlessAssetId])loadImage(style.seamlessAssetId);
   },[post.designData,brand.id,style.referenceAssetId,style.seamlessAssetId]);
