@@ -900,7 +900,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
            </select>
            <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
-             <p className="factory-frame-explain">Opcional: las fotos se pueden usar sin marco. No se añaden diseños predeterminados.</p>
+             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
              <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
            </details>
            <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
