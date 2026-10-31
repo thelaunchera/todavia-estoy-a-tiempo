@@ -12,6 +12,8 @@ import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {drawSeamlessPages} from './SeamlessCarousel';
+import TouchLayerCanvas from './TouchLayerCanvas';
+import {photoDefault,stickerDefault,clampRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
 import type {LibraryAsset} from './MediaAsset';
 
 type Brand = {
@@ -31,14 +33,14 @@ type PhotoFrame = 'none'|'rounded'|'super-rounded'|'polaroid'|'soft-shadow'|'dou
 const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'rounded',name:'Rounded'},{id:'super-rounded',name:'Super soft'},{id:'polaroid',name:'Polaroid'},{id:'soft-shadow',name:'Floating'},{id:'double-border',name:'Double line'}];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;
+  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
   onChange: (next: Post) => void; onSave: () => void;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
-  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId}; initialSticker?:{version:number;brandId?:string;id?:string};
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const layoutNames: Record<Layout,string> = {
@@ -67,7 +69,10 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
-           backgroundId:typeof s.backgroundId==='string'?s.backgroundId:'brand',stickerIds:Array.isArray(s.stickerIds)?s.stickerIds.filter((x:unknown)=>typeof x==='string').slice(0,3):[]
+           backgroundId:typeof s.backgroundId==='string'?s.backgroundId:'brand',stickerIds:Array.isArray(s.stickerIds)?s.stickerIds.filter((x:unknown)=>typeof x==='string').slice(0,3):[],
+           backgroundImageId:typeof s.backgroundImageId==='string'?s.backgroundImageId.slice(0,150):'',
+           photoPosition:s.photoPosition&&typeof s.photoPosition==='object'?clampRect(s.photoPosition):undefined,
+           stickerPositions:normalizedPositions(s.stickerPositions)
         }));
     }
   }
@@ -103,7 +108,7 @@ function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: numbe
   ctx.font='bold '+size+'px '+font;ctx.fillStyle=color;
   built.slice(0,lines).forEach((line,i)=>ctx.fillText(line,x,y+i*spacing));
 }
-async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle) {
+async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle,editorMode=false) {
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
   const {paper,accent,ink,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
@@ -121,7 +126,8 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     ctx.fillStyle=color;ctx.font='700 '+size+'px '+bodyFont;
     ctx.fillText(text.slice(0,50),x,y);
   };
-  const photo=async(x:number,y:number,w:number,h:number)=>{
+  const photo=async(x:number,y:number,w:number,h:number,free=false)=>{
+    if(slide.photoPosition&&!free)return true;
     if(!slide.assetId||!images[slide.assetId])return false;
     const img=new Image();img.src=images[slide.assetId];
     await img.decode();
@@ -162,13 +168,15 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     label(footerName,72,1284,color,21);
     label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),885,1284,color,21);
   };
-  const decorated=!!slide.backgroundId&&slide.backgroundId!=='brand';
-  if(decorated)paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
+  const decorated=(!!slide.backgroundId&&slide.backgroundId!=='brand')||!!slide.backgroundImageId;
+  if(slide.backgroundImageId&&images[slide.backgroundImageId]){
+    try{await paintCoverImage(ctx,images[slide.backgroundImageId],1080,1350)}catch{rect(0,0,1080,1350,paper)}
+  }else if(slide.backgroundId&&slide.backgroundId!=='brand')paintFreeBackground(ctx,1080,1350,slide.backgroundId,accent,paper);
   else rect(0,0,1080,1350,paper);
   if(slide.layout==='cover') {
     label(slide.eyebrow||defaultLabel(brand),74,138,ink);rect(74,170,126,8,accent);
     title(74,348,920,106,5);
-    rect(635,735,398,445,accent);
+    if(!slide.photoPosition)rect(635,735,398,445,accent);
     const shown=await photo(635,735,398,445);
     if(!shown){rect(650,751,368,415,muted);ctx.strokeStyle=outline;ctx.lineWidth=7;ctx.beginPath();ctx.arc(835,958,129,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.moveTo(706,957);ctx.lineTo(706,1114);ctx.stroke();}
     body(74,1060,490,ink,3);footer();
@@ -214,14 +222,22 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     label(footerName,116,1225,ink,22);
     label(String(i+1).padStart(2,'0'),895,1225,ink,22);
   }
-  await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images);
+  if(slide.photoPosition&&slide.assetId&&!editorMode){
+    const p=clampRect(slide.photoPosition),pw=p.w*1080,ph=p.h*1350;
+    ctx.save();
+    ctx.translate((p.x+p.w/2)*1080,(p.y+p.h/2)*1350);
+    ctx.rotate((p.angle||0)*Math.PI/180);
+    await photo(-pw/2,-ph/2,pw,ph,true);
+    ctx.restore();
+  }
+  if(!editorMode)await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images,slide.stickerPositions);
   return canvas;
 }
 const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
