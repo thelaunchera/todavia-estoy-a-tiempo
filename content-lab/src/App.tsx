@@ -1811,11 +1811,11 @@ function App() {
           onChange={e => upload(e.target.files?.[0])}
         />
         {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
-          {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'grid',label:'Diseñar',icon:WandSparkles},
-              {id:'stickers',label:'Stickers',icon:ImagePlus},{id:'backgrounds',label:'Fondos',icon:Palette},
-              {id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
+          {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
+              {id:'vertical',label:'Reels',icon:Film},{id:'stickers',label:'Stickers',icon:ImagePlus},
+              {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
             .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
-              className={tab===item.id?'active':''} onClick={()=>navigate(item.id)}>
+              className={tab===item.id?'active':''} onClick={()=>item.id==='factory'?startFactory():item.id==='vertical'?startVertical():navigate(item.id)}>
               <item.icon size={21}/><span>{t(item.label)}</span></button>)}
         </nav>}
         {notice && (
