@@ -1,1 +1,18 @@
 .touch-editor{width:100%;max-width:100%;min-width:0}.touch-editor-stage{position:relative;overflow:hidden;width:100%;max-width:100%;background:#edf2f3;border-radius:20px;border:1px solid #d8e6e9;isolation:isolate;user-select:none;-webkit-user-select:none}.touch-editor-base{width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}.touch-editor-loading{position:absolute;inset:0;display:grid;place-items:center;color:#68818a;font-size:12px}.touch-editor-layer{position:absolute;touch-action:none;cursor:grab;outline:none;z-index:2;transform-origin:center center;display:grid;place-items:center;border-radius:12px}.touch-editor-layer:active{cursor:grabbing}.touch-editor-layer img{pointer-events:none;display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}.touch-editor-layer.photo img{object-fit:cover;border-radius:clamp(8px,3vw,24px)}.touch-editor-layer.active{z-index:4}.touch-editor-outline{position:absolute;inset:-3px;border:2px solid #4096b6;border-radius:14px;box-shadow:0 0 0 1px white,0 0 15px #20506a44;pointer-events:none}.touch-editor-layer:focus-visible .touch-editor-outline{border-color:#006eae}.touch-editor-resize{position:absolute;right:-10px;bottom:-10px;border:3px solid white;border-radius:50%;background:#277e9d;width:24px;height:24px;box-shadow:0 3px 10px #213b4d33;touch-action:none}.touch-editor-help{font-size:11px;color:#66828b;line-height:1.5;margin:9px 0}.touch-editor-options{display:flex;align-items:center;gap:12px;background:#f2f8f8;border:1px solid #d4e6e8;border-radius:11px;padding:9px 12px;flex-wrap:wrap}.touch-editor-options strong{font-size:12px}.touch-editor-options label{display:flex;align-items:center;gap:7px;font-size:11px;flex:1}.touch-editor-options input{flex:1;accent-color:#3c88a3;max-width:180px}.touch-editor-options button{background:#fff;border:1px solid #cee1e6;color:#416575;padding:7px 9px;border-radius:8px;font-size:11px}@media(prefers-reduced-motion:reduce){.touch-editor *{transition:none!important;animation:none!important}}
+.touch-editor-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 0;scrollbar-width:thin}
+.touch-editor-image-window{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.touch-editor-layer.photo .touch-editor-image-window{border-radius:6%}
+.touch-editor-layer.photo img{border-radius:0}
+.touch-editor-layer.cropping{cursor:move}
+.touch-editor-options button[aria-pressed=true]{background:#d7ecf5;color:#194f64;border-color:#4f90ab}
+.touch-editor-options input[type=range]{min-height:28px}
+.panorama-canvas .touch-editor-stage{border-radius:8px;border:0;max-width:none}
+.panorama-guide-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:#385362;margin:0 0 12px}
+.panorama-guide-toggle input{width:17px;height:17px;accent-color:#317e9c}
+.panorama-cut-guides{position:absolute;inset:0;pointer-events:none;z-index:6}
+.panorama-cut-guides>div{position:absolute;height:100%;top:0;border-left:2px dashed #558cbe;border-right:1px solid #ffffff80;box-sizing:border-box}
+.panorama-cut-guides span{display:inline-block;padding:5px 9px;background:#194c69;color:white;font:700 9px Arial,sans-serif;letter-spacing:.05em}
+.touch-editor-stage.drag-over{outline:3px solid #358aae;outline-offset:-3px}
+.touch-editor-photo-frame{position:absolute;inset:0;pointer-events:none}
+.touch-editor-double-border{position:absolute;inset:1.5%;border:1px solid;pointer-events:none}
+.touch-editor .touch-editor-layer.active{z-index:2}

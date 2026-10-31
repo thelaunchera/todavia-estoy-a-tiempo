@@ -5,6 +5,7 @@
  */
 import {brandPalette,type BrandIdentity,type SocialPlatform} from './BrandIdentity';
 import type {FreeBackgroundId} from './FreeDesignAssets';
+import {normalizePanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 export type CarouselMood='editorial'|'soft'|'bold'|'dark';
 export type CarouselFont='brand'|'serif'|'sans';
 export type CarouselStyle={
@@ -17,6 +18,7 @@ export type CarouselStyle={
   seamlessEnabled:boolean;
   seamlessBackgroundId:FreeBackgroundId;
   seamlessAssetId:string;
+  panoramaLayers?:PanoramaLayer[];
 };
 export const DEFAULT_CAROUSEL_STYLE:CarouselStyle={
   mood:'editorial',font:'brand',referenceAssetId:'',
@@ -33,7 +35,8 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
     targetPlatform:['brand','instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'].includes(String(v.targetPlatform))?v.targetPlatform as CarouselStyle['targetPlatform']:'brand',
     seamlessEnabled:v.seamlessEnabled===true,
     seamlessBackgroundId:['brand','warm-paper','soft-blue','sage','butter-cream','pink-paper','editorial-grid','soft-gradient','grain-ivory','night-editorial','dotted-paper'].includes(String(v.seamlessBackgroundId))?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
-    seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):''
+    seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):'',
+    panoramaLayers:normalizePanoramaLayers(v.panoramaLayers)
   };
 }
 export function readCarouselDesign(value:string):{slides:unknown[]|null;style:CarouselStyle}{
