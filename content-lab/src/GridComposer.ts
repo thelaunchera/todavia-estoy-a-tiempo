@@ -4,6 +4,7 @@
  * by Canvas after the AI photograph, avoiding AI-generated misspelled lettering.
  * All coordinates are relative to target canvas so every export is composed (not stretched).
  */
+import {renderEditorial,type EditorialDesign} from './EditorialPoster';
 export type ExportSize='portrait'|'square'|'story';
 export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safeTop:number;safeBottom:number}>={
   portrait:{w:1080,h:1350,title:'Post · 4:5',safeTop:0.055,safeBottom:0.065},
@@ -34,7 +35,7 @@ export const LAYOUTS:Layout[]=[
  {name:'Graphic Cutout',image:[.11,.27,.54,.65],type:[.58,.12,.36,.44],accent:'cutout',shape:'split'},
  {name:'Story Card',image:[.12,.17,.76,.52],type:[.12,.74,.76,.14],accent:'pill',shape:'paper',align:'center'}
 ];
-type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls};
+type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls;design?:EditorialDesign};
 type Brand={name:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string};
 const validColor=(s:string|undefined,fallback:string)=>/^#[a-fA-F0-9]{6}$/.test(s||'')?s!:fallback;
 const luminance=(color:string)=>{const cs=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*cs[0]+.7152*cs[1]+.0722*cs[2]};
@@ -112,6 +113,19 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  const W=metrics.w,H=metrics.h,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
  try{if((brand.headingFont||'').toLowerCase()==='prompt'&&document.fonts)await document.fonts.load('700 82px Prompt');}catch{/* fall back without blocking export */}
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el canvas');
+ if(tile.design){
+   const editorial=await renderEditorial({
+    canvas,
+    photo:photos.photo||photos.original||'',
+    original:photos.original,logo:photos.logo,
+    headline:tile.headline||'',subtext:tile.subtext||'',
+    brandName:brand.name,design:tile.design,
+    brandColor:brand.color,paperColor:brand.background,
+    safeTop:metrics.safeTop,safeBottom:metrics.safeBottom,
+    move:tile.layout
+   });
+   return {canvas,fit:editorial.fit,contrast:editorial.contrast,format:'Editorial · '+tile.design.preset};
+ }
  const accent=validColor(brand.color,'#BED8E9'),paper=validColor(brand.background,'#FAF8F3'),second=validColor(brand.secondaryColor,'#E5D5C6');
  const dark=fmt.dark,base=fmt.shape==='solid'?accent:fmt.shape==='dark'?'#191919':paper;
  const ink=inkOn(base),secondaryInk=inkOn(paper);
