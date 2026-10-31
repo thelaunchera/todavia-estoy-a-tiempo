@@ -26,9 +26,11 @@ type Post = {
 };
 type Asset = { id: string; brandId: string; name: string; mime: string };
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
+type PhotoFrame = 'none'|'rounded'|'super-rounded'|'polaroid'|'soft-shadow'|'double-border';
+const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'rounded',name:'Rounded'},{id:'super-rounded',name:'Super soft'},{id:'polaroid',name:'Polaroid'},{id:'soft-shadow',name:'Floating'},{id:'double-border',name:'Double line'}];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];
+  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -47,7 +49,7 @@ const makeSlide = (i: number, headline: string, assetId = ''): Slide => ({
   key: 'slide-' + i, eyebrow: i === 0 ? 'THE BIG IDEA' : 'THE STORY',
   title: headline.slice(0,420), description: '',
   layout: i === 0 ? 'cover' : i % 3 === 0 ? 'photo' : i % 2 === 0 ? 'steps' : 'statement',
-  assetId
+  assetId,frameStyle:i===0?'rounded':'none'
 });
 function parseSlides(post: Post, brand: Brand): Slide[] {
   const saved=readCarouselDesign(post.designData||'');
@@ -62,6 +64,7 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
           assetId: String(s.assetId || ''),
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
+           frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
            backgroundId:typeof s.backgroundId==='string'?s.backgroundId:'brand',stickerIds:Array.isArray(s.stickerIds)?s.stickerIds.filter((x:unknown)=>typeof x==='string').slice(0,3):[]
         }));
@@ -120,11 +123,34 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   const photo=async(x:number,y:number,w:number,h:number)=>{
     if(!slide.assetId||!images[slide.assetId])return false;
     const img=new Image();img.src=images[slide.assetId];
-    await new Promise<void>((resolve,reject)=>{img.onload=()=>resolve();img.onerror=()=>reject(new Error('No se pudo cargar esta fotografía.'));});
-    const z=Math.max(w/img.width,h/img.height),sw=w/z,sh=h/z;
+    await img.decode();
+    if(!img.naturalWidth||!img.naturalHeight)return false;
+    const mode=slide.frameStyle||'none',inset=mode==='polaroid'?Math.max(13,w*.042):mode==='none'?0:Math.max(7,w*.018);
+    const bottom=mode==='polaroid'?Math.max(44,h*.11):inset;
+    const outerRadius=mode==='super-rounded'?Math.min(w,h)*.12:mode==='rounded'?Math.min(w,h)*.066:mode==='polaroid'?Math.min(w,h)*.025:mode==='none'?0:Math.min(w,h)*.048;
+    const radius=Math.max(0,outerRadius-inset*.38);
+    if(mode!=='none'){
+      ctx.save();
+      if(mode==='soft-shadow'||mode==='polaroid'){
+        ctx.shadowColor='rgba(21,38,45,.22)';ctx.shadowBlur=35;ctx.shadowOffsetY=12;
+      }
+      ctx.fillStyle=mode==='polaroid'?'#FFFCF7':paper;
+      ctx.beginPath();ctx.roundRect(x,y,w,h,outerRadius);ctx.fill();ctx.restore();
+    }
+    const dx=x+inset,dy=y+inset,dw=w-2*inset,dh=h-inset-bottom;
+    if(dw<=0||dh<=0)return false;
+    const z=Math.max(dw/img.naturalWidth,dh/img.naturalHeight),sw=dw/z,sh=dh/z;
     const f=slide.photoFocus||'center';
-    const cy=f==='top'?Math.max(0,(img.height-sh)*.12):f==='bottom'?Math.max(0,(img.height-sh)*.9):Math.max(0,(img.height-sh)/2);
-    ctx.drawImage(img,Math.max(0,(img.width-sw)/2),cy,sw,sh,x,y,w,h);
+    const cy=f==='top'?Math.max(0,(img.naturalHeight-sh)*.12):f==='bottom'?Math.max(0,(img.naturalHeight-sh)*.9):Math.max(0,(img.naturalHeight-sh)/2);
+    ctx.save();
+    ctx.beginPath();ctx.roundRect(dx,dy,dw,dh,radius);ctx.clip();
+    ctx.drawImage(img,Math.max(0,(img.naturalWidth-sw)/2),cy,sw,sh,dx,dy,dw,dh);
+    ctx.restore();
+    if(mode==='double-border'){
+      ctx.save();ctx.strokeStyle=accent;ctx.lineWidth=3;
+      ctx.beginPath();ctx.roundRect(x+6,y+6,w-12,h-12,outerRadius);ctx.stroke();
+      ctx.strokeStyle=paper;ctx.beginPath();ctx.roundRect(dx+7,dy+7,dw-14,dh-14,Math.max(2,radius-2));ctx.stroke();ctx.restore();
+    }
     return true;
   };
   const title=(x:number,y:number,w:number,size:number,maxLines:number,color=ink)=>fillLines(ctx,slide.title||'Your idea here',x,y,w,size,maxLines,color,heading);
@@ -418,6 +444,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
            </select>
+           <label>Photo frames · redondeados y editoriales</label>
+           <div className="factory-frame-modes" role="group" aria-label="Elegir marco fotográfico">{photoFrames.map(f=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}/><small>{f.name}</small></button>)}</div>
            <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
              <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
            </select>
