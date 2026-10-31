@@ -13,24 +13,15 @@ export function reorderPanoramaLayers(layers: PanoramaLayer[], id: string, actio
   sorted.splice(from, 1);
   const destination = action === 'back' ? 0 : action === 'front' ? sorted.length
     : Math.max(0, Math.min(sorted.length, from + (action === 'forward' ? 1 : -1)));
-  const nextPlacement: LayerPlacement = action === 'back' ? 'behind-text' : action === 'front' ? 'front'
-    : action === 'forward'
-      ? (sorted[destination]?.placement === 'behind-text' ? 'behind-text' : 'front')
-      : (sorted[destination-1]?.placement === 'behind-text' || destination === 0 && current.placement === 'behind-text'
-        ? 'behind-text' : destination === 0 && current.placement === 'front' && sorted[0]?.placement === 'behind-text'
-          ? 'behind-text' : current.placement || 'front');
-  // Adjacent move: crossing the dividing line between text layers changes placement.
   const behindCount = sorted.filter(layer => layer.placement === 'behind-text').length;
-  const placement: LayerPlacement = action === 'back' ? 'behind-text' : action === 'front' ? 'front'
+  const placement: LayerPlacement = action === 'back' ? 'behind-text'
+    : action === 'front' ? 'front'
     : destination < behindCount ? 'behind-text'
     : destination > behindCount ? 'front'
-    : action === 'backward' && current.placement !== 'behind-text' && behindCount > 0 ? 'behind-text'
-    : action === 'forward' && current.placement === 'behind-text' ? 'front'
-    : nextPlacement;
+    : current.placement || 'front';
   sorted.splice(destination, 0, {...current, placement});
   return sorted;
 }
-
 
 export type PanoramaLayer = {
   id: string;
