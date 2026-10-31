@@ -85,7 +85,7 @@ begin
  values(v_day,0) on conflict(quota_day) do nothing;
  update public.content_lab_ai_global_daily
  set units_used=units_used+v_global
- where quota_day=v_day and units_used+v_global<=120;
+ where quota_day=v_day and units_used+v_global<=50;
  if not found then
    raise exception 'Se alcanzó el límite diario compartido de IA. Vuelve mañana (UTC).';
  end if;
