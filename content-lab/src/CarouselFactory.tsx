@@ -238,11 +238,12 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
         // automatic lines, stickers, blocks or fake decorative elements.
         label(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),82,1270,ink,19);
       }
+      }
+      // A photo belongs to the editable slide regardless of its typography rhythm.
       if(slide.assetId&&slide.photoPosition){
         const p=clampRect(slide.photoPosition),pw=p.w*1080,ph=p.h*1350;
         ctx.save();ctx.translate((p.x+p.w/2)*1080,(p.y+p.h/2)*1350);
         ctx.rotate((p.angle||0)*Math.PI/180);await photo(-pw/2,-ph/2,pw,ph,true);ctx.restore();
-      }
       }
       await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images,slide.stickerPositions);
     }
