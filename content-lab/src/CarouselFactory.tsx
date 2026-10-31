@@ -121,7 +121,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
   const {paper,accent,ink:paletteInk,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
-  const ink=['night-editorial','night-stars'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
+  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
   const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
   const handle=socialAccount(brand,destination);
   const footerName=(handle&&!/^https?:\/\//i.test(handle)?handle:brand.name).toUpperCase().slice(0,32);
@@ -190,7 +190,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     body(74,1060,490,ink,3);footer();
   } else if(slide.layout==='statement') {
     if(!decorated)rect(0,0,1080,1350,accent);
-    const statementInk=decorated?(['night-editorial','night-stars'].includes(slide.backgroundId||'')?'#FFFFFF':'#191919'):onAccent;
+    const statementInk=decorated?(['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':'#191919'):onAccent;
     ctx.strokeStyle=statementInk;ctx.lineWidth=3;ctx.strokeRect(68,69,944,1212);
     slide.eyebrow&&label(slide.eyebrow,116,150,statementInk);
     title(116,428,850,108,6,statementInk);
@@ -258,7 +258,7 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
   const heading=carouselFontFamily(slide.titleFont||style.font,brand.headingFont);
   try{await document.fonts?.load('700 80px '+heading);}catch{/* Offline font fallback */}
   const {ink:paletteInk,accent,onAccent}=getCarouselPalette(brand,style,slide.accentIndex||0);
-  const ink=['night-editorial','night-stars'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
+  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
   const decorated=(!!slide.backgroundId&&slide.backgroundId!=='brand')||!!slide.backgroundImageId;
   const label=(t:string,x:number,y:number,color:string,size=24)=>{
    if(!t)return;ctx.fillStyle=color;ctx.font='700 '+size+'px '+bodyFont;
@@ -277,7 +277,7 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
    label(slide.eyebrow,74,138,ink);title(74,348,920,106,5);
    body(74,1060,490,ink,3);footer();
   }else if(slide.layout==='statement'){
-   const statementInk=decorated?(['night-editorial','night-stars'].includes(slide.backgroundId||'')?'#FFFFFF':'#191919'):onAccent;
+   const statementInk=decorated?(['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':'#191919'):onAccent;
    label(slide.eyebrow,116,150,statementInk);
    title(116,428,850,108,6,statementInk);
    body(116,1040,825,statementInk,3);footer(statementInk);
