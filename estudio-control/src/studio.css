@@ -2219,3 +2219,35 @@ a:focus-visible {
  }
  .studio-student-tabs .studio-student-tab-link svg:last-child{display:none}
 }
+
+/* Centro de ventas - enfocado en pagos existentes, no en cifras fabricadas. */
+.commerce-hero{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid #314c61;border-radius:22px;padding:clamp(23px,3vw,38px);background:linear-gradient(135deg,#1c3049,#294d62);color:#fff;margin:0 0 23px}
+.commerce-hero h2{font-size:clamp(24px,3.5vw,41px);line-height:1.2;font-weight:650;margin:9px 0}
+.commerce-hero p{font-size:13px;color:#d1e2eb;line-height:1.7;max-width:640px;margin:0}
+.commerce-hero .eyebrow{color:#b7d5e6}
+.commerce-hero-mark{color:#b9d9e7}
+.commerce-error{padding:13px;border:1px solid #cc8b7b;color:#8b4330;border-radius:10px}
+.commerce-catalog,.commerce-operations{margin:22px 0 0}
+.commerce-section-heading h2,.commerce-operations h2{font-size:clamp(23px,2.8vw,33px);margin:6px 0 8px;color:#1e364b}
+.commerce-section-heading>p,.commerce-operations>p{font-size:13px;line-height:1.65;color:#678092;margin:0 0 15px}
+.commerce-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.commerce-product{background:#fffefa;border:1px solid #dce4e9;border-radius:17px;overflow:hidden;min-width:0;display:grid;grid-template-columns:33% 1fr;align-items:stretch}
+.commerce-product>img{width:100%;height:100%;min-height:187px;object-fit:cover;object-position:50% 30%}
+.commerce-lab-art{display:flex;align-items:center;justify-content:center;padding:15px;min-height:187px;background:linear-gradient(135deg,#193149,#54738b);color:#fff;font:400 clamp(18px,2.2vw,26px) 'DM Serif Display',Georgia,serif;letter-spacing:-.05em}
+.commerce-lab-art em{color:#c1d9e4}
+.commerce-product-copy{min-width:0;padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px}
+.commerce-product-copy h3{font:600 19px/1.2 'DM Sans',Arial,sans-serif;margin:0;color:#1b3a50}
+.commerce-product-copy p{font-size:12px;line-height:1.65;color:#688092;margin:0 0 8px;flex:1}
+.commerce-product-copy a{color:#205a7c;text-decoration:underline;text-underline-offset:4px;font-weight:800;font-size:12px}
+.commerce-tag{align-self:flex-start;font:800 9px/1.6 'DM Sans',Arial,sans-serif;letter-spacing:.06em;border:1px solid #d0dfe8;background:#eff4f6;color:#497088;border-radius:99px;padding:6px 10px}
+.commerce-tag.is-live{background:#e4f1e9;color:#34694e;border-color:#b3d7bd}
+.commerce-tag.is-closed{background:#f3eee7;color:#7a6650;border-color:#e2d7c6}
+.commerce-operations{padding:23px;border:1px solid #d9e4e9;border-radius:17px;background:#fffefb}
+.commerce-sale{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:20px;padding:15px 0;border-bottom:1px solid #e4ecef;align-items:center;font-size:12px}
+.commerce-sale strong{display:block;color:#263f53}
+.commerce-sale small{display:block;margin-top:4px;color:#8a99a5}
+.commerce-sale span{color:#5b788a}
+.commerce-sale b{color:#173f5c}
+.commerce-privacy-note{margin-top:18px!important;font-size:11px!important}
+@media(max-width:1080px){.commerce-cards{grid-template-columns:1fr}}
+@media(max-width:500px){.commerce-product{grid-template-columns:130px minmax(0,1fr)}.commerce-product-copy{padding:14px}.commerce-product>img,.commerce-lab-art{min-height:200px}.commerce-sale{grid-template-columns:1fr auto}.commerce-sale>span{grid-column:1/-1;grid-row:2}.commerce-hero-mark{display:none}}

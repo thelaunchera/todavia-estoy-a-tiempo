@@ -293,6 +293,29 @@ function lessonsUI(){
  const nextIndex=adminPreview?0:lessons.findIndex(item=>!done.has(item.lesson_code));
  choose(nextIndex<0?lessons.length-1:nextIndex);
 }
+async function refreshProductShelf(){
+ const statusEl=$('learning-lab-status'),actionEl=$('learning-lab-action'),hint=$('learning-lab-hint');
+ if(!statusEl||!actionEl||!hint||!user)return;
+ // La presencia de una tarjeta no autoriza el acceso. Solo verificamos la compra
+ // en Supabase; la propia app Lab vuelve a exigir membresía vía RLS.
+ try{
+  const email=(user.email||'').trim().toLowerCase();
+  const [{data:member,error:memberError},{data:admin,error:adminError}]=await Promise.all([
+   db.from('content_lab_memberships').select('status').eq('buyer_email',email).maybeSingle(),
+   db.from('content_lab_admins').select('user_id').eq('user_id',user.id).maybeSingle()
+  ]);
+  if(memberError||adminError)return;
+  if(member?.status==='active'||admin?.user_id===user.id){
+   statusEl.textContent=admin?.user_id===user.id?'VISTA PRIVADA':'TU ACCESO';
+   statusEl.classList.add('is-available');
+   actionEl.href='../content-lab/';
+   actionEl.textContent=admin?.user_id===user.id?'Abrir Content Lab (admin) ↗':'Entrar a mi Content Lab ↗';
+   actionEl.classList.remove('is-muted');
+   hint.textContent=admin?.user_id===user.id?'Vista de administración. La venta pública permanece pausada.':'Tu compra del Lab fue verificada.';
+  }
+ }catch{/* mantener la tarjeta bloqueada ante problemas de red */}
+}
+
 async function showCourse(email,asAdmin=false){
  adminPreview=asAdmin;
  if(!asAdmin){
@@ -359,6 +382,7 @@ async function refreshAuth(){
   user=who;out.hidden=false;status('Comprobando permisos…');
   if(!owner&&!who.email_confirmed_at){display(noAccess);status('Confirma tu correo antes de entrar al aula.');return;}
   await showCourse((who.email||'').trim().toLowerCase(),owner);
+  if(!course.hidden)void refreshProductShelf();
  }catch(e){display(login);status('No pudimos comprobar el acceso. Actualiza la página o pide ayuda si continúa.');console.error('Course portal auth check error',e?.code||'unknown');}
 }
 $('login-form').addEventListener('submit',async e=>{

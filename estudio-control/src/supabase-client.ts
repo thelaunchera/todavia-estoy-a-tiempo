@@ -400,6 +400,18 @@ export async function getStudioBonusResources(): Promise<StudioBonusResource[]> 
   }));
 }
 
+export type VerifiedSale = { id: string; product_code: string|null; amount_cents: number|null; currency: string|null; status: string|null; purchased_at: string|null };
+export async function getVerifiedSales(): Promise<VerifiedSale[]> {
+  if(!client)throw new Error('Esta vista necesita Supabase.');
+  // El RLS de podcast_sales permite leer únicamente a la administradora del Estudio.
+  await owner();
+  const {data,error}=await client.from('podcast_sales')
+    .select('id,product_code,amount_cents,currency,status,purchased_at')
+    .order('purchased_at',{ascending:false}).limit(80);
+  if(error)throw error;
+  return (data||[]) as VerifiedSale[];
+}
+
 export type StudioStudent = {
   buyer_email: string;
   status: 'pending' | 'active' | 'refunded' | 'revoked';
