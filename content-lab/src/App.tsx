@@ -1009,6 +1009,7 @@ function App() {
           {brand && tab === 'grid' && (
             <BrandGrid
               isAdmin={Boolean(aiWallet?.admin)}
+              wallet={aiWallet}
               brand={brand}
               assets={library}
               images={images}
