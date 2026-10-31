@@ -7,7 +7,7 @@ import './StickerDownloads.css';
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onUpload:(file:File)=>Promise<LibraryAsset|null>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
- isAdmin:boolean;loadImage:(id:string)=>void};
+ isAdmin:boolean;loadImage:(id:string)=>void;onUse:(id:string)=>void};
 const groups=['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
@@ -35,7 +35,7 @@ function StickerPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;lo
  },[asset.id,Boolean(src)]);
  return <div ref={ref} className="sticker-downloads-preview">{src?<img src={src} alt={displayAssetName(asset)} loading="lazy"/>:<span className="sticker-thumb-loading" aria-label="Cargando ilustración"><LoaderCircle size={18} className="spin"/></span>}</div>;
 }
-export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,isAdmin,loadImage}:Props){
+export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,isAdmin,loadImage,onUse}:Props){
  const fileRef=useRef<HTMLInputElement>(null);
  const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
  const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
@@ -99,7 +99,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
    <div><strong>{dragActive?'Suelta el archivo PNG o ZIP aquí 🎀':isAdmin?'Publicar colección para todos los compradores':'Tus propios stickers (opcional)'}</strong><p>{isAdmin?'Selecciona el paquete original completo una sola vez. Después estará disponible automáticamente para todos los compradores con acceso activo. Los duplicados exactos se descartan por contenido.':'La biblioteca compartida se actualiza automáticamente. También puedes añadir PNG privados de tu marca, sin modificar el catálogo compartido.'}</p></div><button type="button" className="btn dark" disabled={running} onClick={()=>fileRef.current?.click()}>{running?<LoaderCircle className="spin" size={15}/>:<Upload size={15}/>} {isAdmin?'Publicar PNG / ZIP':'Subir mis PNG'}</button><input type="file" ref={fileRef} hidden accept=".zip,image/png" multiple onChange={e=>void importFiles(Array.from(e.target.files||[]))}/></div>
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" onClick={()=>download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
+  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id)}>Usar en carrusel</button><button type="button" onClick={()=>download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
   <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
  </section>;
 }
