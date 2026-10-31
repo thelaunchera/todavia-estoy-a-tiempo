@@ -4,7 +4,7 @@ import {PROMPT_TEMPLATES,PROMPT_CATEGORIES,fillTemplate,promptLang,type PromptTe
 import {DEFAULT_CONTROLS,composeCreativePrompt,type PromptControls} from './PromptEngine';
 import {api} from './platform/client';
 type Brand={id:string;name:string;language:string;background:string;rules:string};
-type Saved={id:string;brandId:string;title:string;text:string;settings?:PromptControls;favorite?:boolean;updatedAt?:string};
+type Saved={id:string;brandId:string;title:string;text:string;rawInstruction?:string;settings?:PromptControls;favorite?:boolean;updatedAt?:string};
 type Props={brand:Brand;onUse:(draft:string,settings:PromptControls)=>void;notify:(s:string)=>void;showError:(e:unknown)=>void};
 const getError=(e:unknown)=>e instanceof Error?e.message:'No se pudo completar la acción.';
 export default function PromptStudio({brand,onUse,notify,showError}:Props){
@@ -44,7 +44,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
   setBusy(true);
   try{
    if(saved.length>=100)throw Error('Límite de 100 prompts guardados por marca. Elimina uno antes de continuar.');
-   const {data}=await api.post('/api/prompts',{brandId:brand.id,title:(customTitle.trim()||(en?'My photography prompt':'Mi prompt fotográfico')).slice(0,100),text:compiled,settings});
+   const {data}=await api.post('/api/prompts',{brandId:brand.id,title:(customTitle.trim()||(en?'My photography prompt':'Mi prompt fotográfico')).slice(0,100),text:compiled,rawInstruction:manual,settings});
    setSaved(s=>[data,...s]);notify(en?'Saved privately to this brand.':'Guardado de forma privada en esta marca.');
   }catch(e){showError(e)}finally{setBusy(false)}
  };
@@ -58,7 +58,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  };
  const useSaved=(item:Saved)=>{
   if(item.settings)setSettings(item.settings);
-  setManual(item.text);setCustomTitle(item.title);setMode('library');notify(en?'Saved prompt ready to edit.':'Prompt guardado listo para editar.');
+  setManual(item.rawInstruction??item.text);setCustomTitle(item.title);setMode('library');notify(en?'Saved prompt ready to edit.':'Prompt guardado listo para editar.');
  };
  return <section className="ps-wrap" aria-label="Prompt Studio">
   <header className="ps-hero">
