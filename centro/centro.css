@@ -183,3 +183,11 @@ body.modal-open{overflow:hidden}
  .product-tile button.tile-details{font-size:11px;min-height:46px;padding:10px 8px}
 }
 @media(max-width:380px){.center-nav .brand-logo{width:130px}.center-nav .brand-subtitle{font-size:7px}}
+
+/* Portadas originales de servicios The Launch Era.
+   Cada tarjeta muestra su imagen completa sin superponer títulos duplicados. */
+.product-tile .tile-cover.tile-cover-image{width:100%;height:auto;aspect-ratio:3/2;min-height:0;display:block;padding:0;border-radius:14px;overflow:hidden;background:#1a2d43;box-shadow:0 15px 34px #07111a24;border:1px solid #ffffff21}
+.product-tile .tile-cover.tile-cover-image::after{content:none}
+.product-tile .tile-cover.tile-cover-image img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+.product-tile .tile-cover.tile-cover-image img[loading="lazy"]{background:#1a2d43}
+@media(max-width:540px){.product-tile .tile-cover.tile-cover-image{border-radius:12px}}
