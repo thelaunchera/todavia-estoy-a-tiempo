@@ -521,7 +521,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     ].filter(item=>item.value.trim()).map(item=>({
       id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
-      font:item.field==='title'?(part.titleFont||style.font):'sans',
+      font:item.field==='title'?(part.titleFont||style.font)==='brand'?(brand.headingFont||'serif').toLowerCase():(part.titleFont||style.font):'sans',
       fontSize:item.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
       rect:{...item.rect,x:(n+item.rect.x)/slides.length,w:item.rect.w/slides.length},
       page:n,sourceField:item.field,placement:'front' as const,
@@ -570,7 +570,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const n=Math.min(i,slides.length-1),count=slides.length;
     const newLayer:PanoramaLayer=kind==='text'
       ?{id:currentId,kind,assetId:'',name:'Texto libre',placement:'front',
-         text:'Escribe tu título',font:style.font,fontSize:86,lineHeight:1.12,spacing:0,color:'#191919',
+         text:'Escribe tu título',font:style.font==='brand'?(brand.headingFont||'serif').toLowerCase():style.font,fontSize:86,lineHeight:1.12,spacing:0,color:readableColor(style.canvasColor||'#FFFFFF'),
          rect:{x:(n+.12)/count,y:.35,w:.76/count,h:.24}}
       :{id:currentId,kind,assetId:'',name:'Collage · '+(shape||'paper'),shape:shape||'paper',
          placement:'front',color:shape==='tape'?'#E5C9AA':'#F1E5D2',
