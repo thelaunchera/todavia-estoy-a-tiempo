@@ -363,7 +363,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const futureHistory=useRef<string[]>([]);
   const [historyVersion,setHistoryVersion]=useState(0);
   const recordHistory=(snapshot:string)=>{
-    if(snapshot&&pastHistory.current.at(-1)!==snapshot){
+    if(snapshot&&pastHistory.current[pastHistory.current.length-1]!==snapshot){
       pastHistory.current=[...pastHistory.current.slice(-39),snapshot];
       futureHistory.current=[];
       setHistoryVersion(n=>n+1);
@@ -492,9 +492,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:{...clampRect(slide.photoPosition),crop:slide.photoPosition.crop||normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})},frameStyle:slide.frameStyle||'none',paper:getCarouselPalette(brand,style).paper,accent:getCarouselPalette(brand,style).accent}]:[]),
     ...(slide.stickerIds||[]).filter(id=>images[id]).map((id,index)=>({id,kind:'sticker' as const,name:ownedAssets.find(a=>a.id===id)?.displayName||'Sticker',src:images[id],rect:clampRect(slide.stickerPositions?.[id]||stickerDefault(index))}))
   ];
-  const moveTouchLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
+  const moveTouchLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
     if(kind==='photo')replace({photoPosition:clampRect(rect)});
-    else replace({stickerPositions:{...slide.stickerPositions,[id]:clampRect(rect)}});
+    else if(kind==='sticker')replace({stickerPositions:{...slide.stickerPositions,[id]:clampRect(rect)}});
   };
   const pageLayers=slides.flatMap((part,n)=>[
     ...(part.assetId&&images[part.assetId]?[{
