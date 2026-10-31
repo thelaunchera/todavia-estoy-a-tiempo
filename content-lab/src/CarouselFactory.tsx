@@ -11,11 +11,11 @@ import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccou
 import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
-import {drawSeamlessPages,drawSeamlessCanvas} from './SeamlessCarousel';
+import {drawSeamlessPages,drawSeamlessCanvas,paintSeamlessTypography} from './SeamlessCarousel';
 import TouchLayerCanvas from './TouchLayerCanvas';
 import PanoramaEditor from './PanoramaEditor';
-import {coverPlacement,normalizeCrop,photoFrameMetrics} from './PhotoCrop';
-import {overlayPanoramaPages,paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
+import {coverPlacement,normalizeCrop,photoFrameMetrics,initialPanoramaPhotoRect} from './PhotoCrop';
+import {overlayPanoramaPages,paintPanoramaLayers,reorderPanoramaLayers,type LayerMove,type PanoramaLayer} from './PanoramaLayers';
 import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 
@@ -242,6 +242,80 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   if(!editorMode)await paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds,images,slide.stickerPositions);
   return canvas;
 }
+
+/** Transparent text-only pass for putting photos behind headlines in preview AND exports. */
+async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
+ slides:Slide[],brand:Brand,style:CarouselStyle){
+ const bh=(brand.headingFont||'').toLowerCase();
+ const heading=style.font==='serif'?'Georgia, serif':style.font==='sans'?'Arial, sans-serif':
+   bh==='prompt'?'Prompt, Arial, sans-serif':bh==='futura'?'Futura, Arial, sans-serif':
+   bh==='dm serif display'?'DM Serif Display, Georgia, serif':'Georgia, serif';
+ const bodyFont=(brand.bodyFont||'').toLowerCase()==='futura'?'Futura, Arial, sans-serif':'Arial, sans-serif';
+ try{if(document.fonts)await Promise.all([document.fonts.load('700 80px '+heading),
+  document.fonts.load('500 32px '+bodyFont)]);}catch{/* Local font fallback */}
+ const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
+ const handle=socialAccount(brand,destination);
+ const footerName=(handle&&!/^https?:\/\//i.test(handle)?handle:brand.name).toUpperCase().slice(0,32);
+ for(let n=0;n<slides.length;n++){
+  ctx.save();ctx.translate(n*1080,0);
+  const slide=slides[n];
+  const {ink,accent,onAccent}=getCarouselPalette(brand,style,slide.accentIndex||0);
+  const decorated=(!!slide.backgroundId&&slide.backgroundId!=='brand')||!!slide.backgroundImageId;
+  const label=(t:string,x:number,y:number,color:string,size=24)=>{
+   if(!t)return;ctx.fillStyle=color;ctx.font='700 '+size+'px '+bodyFont;
+   ctx.fillText(t.slice(0,50),x,y);
+  };
+  const title=(x:number,y:number,w:number,size:number,lines:number,color=ink)=>
+    fillLines(ctx,slide.title,x,y,w,size,lines,color,heading);
+  const body=(x:number,y:number,w:number,color=ink,lines=3)=>{
+   if(slide.description)fillLines(ctx,slide.description,x,y,w,41,lines,color,bodyFont);
+  };
+  const footer=(color=ink)=>{
+   label(footerName,72,1284,color,21);
+   label(String(n+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0'),885,1284,color,21);
+  };
+  if(slide.layout==='cover'){
+   label(slide.eyebrow,74,138,ink);title(74,348,920,106,5);
+   body(74,1060,490,ink,3);footer();
+  }else if(slide.layout==='statement'){
+   const statementInk=decorated?(slide.backgroundId==='night-editorial'?'#FFFFFF':'#191919'):onAccent;
+   label(slide.eyebrow,116,150,statementInk);
+   title(116,428,850,108,6,statementInk);
+   body(116,1040,825,statementInk,3);footer(statementInk);
+  }else if(slide.layout==='photo'){
+   label(slide.eyebrow,75,832,ink);title(75,952,925,80,3);
+   body(75,1155,900,ink,2);footer();
+  }else if(slide.layout==='steps'){
+   label(slide.eyebrow,74,135,ink);title(74,275,930,78,3);
+   const points=slide.description.split(/\n|•/).map(t=>t.trim()).filter(Boolean).slice(0,3);
+   points.forEach((point,j)=>{
+    const y=630+j*173;label(String(j+1).padStart(2,'0'),75,y,accent,34);
+    fillLines(ctx,point,180,y,775,48,2,ink,'Arial');
+   });
+   footer();
+  }else if(slide.layout==='split'){
+   label(slide.eyebrow,60,147,onAccent);title(60,340,430,78,8,onAccent);
+   body(60,1110,430,onAccent,3);footer(onAccent);
+  }else{
+   label(slide.eyebrow,116,174,ink);title(116,450,843,99,6);
+   body(116,1040,840,ink,3);
+   label(footerName,116,1225,ink,22);
+   label(String(n+1).padStart(2,'0'),895,1225,ink,22);
+  }
+  ctx.restore();
+ }
+}
+async function photoAspectFromSource(src?:string):Promise<number>{
+ if(!src)return .75;
+ try{const image=new Image();image.src=src;await image.decode();
+  return image.naturalHeight?image.naturalWidth/image.naturalHeight:.75;
+ }catch{return .75;}
+}
+async function photoAspectFromFile(file:File):Promise<number>{
+ const src=URL.createObjectURL(file);
+ try{return await photoAspectFromSource(src);}finally{URL.revokeObjectURL(src);}
+}
+
 const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
@@ -258,6 +332,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const [preview,setPreview]=useState('');
   const [panoramaPreview,setPanoramaPreview]=useState('');
+  const [panoramaTextPreview,setPanoramaTextPreview]=useState('');
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
@@ -271,7 +346,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overview,setOverview]=useState<string[]>([]);
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaError('');},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
@@ -288,7 +363,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
     if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
-    return overlayPanoramaPages(all,style.panoramaLayers||[],images);
+    return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
@@ -414,6 +489,20 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         {id,assetId:source.assetId,name:kind==='photo'?'Foto libre':'Sticker libre',kind,rect:clampPanoramaRect(rect)}]});
     }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect}:layer)});
   };
+  const reorderPanoramaLayer=(id:string,action:LayerMove)=>{
+    const source=pageLayers.find(layer=>layer.id===id);
+    let nextSlides=slides;
+    let layers=style.panoramaLayers||[];
+    if(source){
+      if(layers.length>=24)return notify('Máximo 24 capas en el panorama.');
+      nextSlides=slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
+        ?{...part,assetId:'',photoPosition:part.photoPosition||photoDefault(part.layout)}
+        :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
+      layers=[...layers,{id,assetId:source.assetId,name:source.name,kind:source.kind,
+        rect:clampPanoramaRect(source.rect),placement:'front'}];
+    }
+    setAll(nextSlides,{...style,panoramaLayers:reorderPanoramaLayers(layers,id,action)});
+  };
   const removePanoramaLayer=(id:string)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source)setAll(slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
@@ -430,18 +519,20 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   // Uploads may finish after several renders; always merge into the latest draft.
   const latestDraft=useRef({post,slides,style,ownedAssets});
   latestDraft.current={post,slides,style,ownedAssets};
-  const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number}}[])=>{
+  const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
     const latest=latestDraft.current;
     const nextSlides=[...latest.slides];
     let nextStyle={...latest.style};
-    for(const {asset,point} of items){
+    for(const {asset,point,ratio} of items){
       if(!latest.ownedAssets.some(a=>a.id===asset.id)&&asset.brandId!==brand.id&&!asset.shared)continue;
       const kind=assetCategory(asset)==='sticker'?'sticker' as const:'photo' as const;
       const count=nextSlides.length;
       if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
-      const w=(kind==='photo'?.65:.2)/count,h=kind==='photo'?.48:.18;
+      const w=.2/count,h=.18;
+      const rect=kind==='photo'?initialPanoramaPhotoRect(ratio||.75,count,point)
+        :{x:point.x-w/2,y:point.y-h/2,w,h};
       const layer:PanoramaLayer={id:'panorama-'+crypto.randomUUID(),assetId:asset.id,
-        name:displayAssetName(asset),kind,rect:clampPanoramaRect({x:point.x-w/2,y:point.y-h/2,w,h},.055/count)};
+        name:displayAssetName(asset),kind,rect:clampPanoramaRect(rect,.055/count)};
       nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
     }
     onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
@@ -452,17 +543,20 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const asset=ownedAssets.find(a=>a.id===id);
     if(!asset)return notify('Selecciona una foto de la biblioteca de esta marca.');
     if(!images[id])loadImage(id);
-    addPanoramaAssets([{asset,point}]);
+    void photoAspectFromSource(images[id]).then(ratio=>{
+      if(latestDraft.current.post.brandId===brand.id)addPanoramaAssets([{asset,point,ratio}]);
+    });
   };
   const uploadPanoramaPhotos=async(files:File[],point:{x:number;y:number})=>{
-    const uploaded:{asset:Asset;point:{x:number;y:number}}[]=[];
+    const uploaded:{asset:Asset;point:{x:number;y:number};ratio?:number}[]=[];
     const originBrand=brand.id;
     for(const file of files.slice(0,8)){
       if(!file.type.startsWith('image/')&&!/\.(heic|heif)$/i.test(file.name)){
         notify('Solo puedes añadir archivos de imagen al lienzo.');continue;
       }
+      const ratio=await photoAspectFromFile(file);
       const asset=await onUploadPhoto(file);
-      if(asset)uploaded.push({asset,point:{x:Math.min(.95,point.x+uploaded.length*.03),y:point.y}});
+      if(asset)uploaded.push({asset,ratio,point:{x:Math.min(.95,point.x+uploaded.length*.03),y:point.y}});
     }
     if(uploaded.length&&latestDraft.current.post.brandId===originBrand)addPanoramaAssets(uploaded);
   };
