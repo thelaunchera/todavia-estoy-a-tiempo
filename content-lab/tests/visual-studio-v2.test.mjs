@@ -33,7 +33,7 @@ test('AI vision source and style review are explicit and optional',()=>{
 });
 test('iPhone editing, quality checks and explicit image quota confirmation',()=>{
  const grid=src('src/BrandGrid.tsx'),edit=src('src/GridVisualEditor.tsx');
- for(const txt of ['GridVisualEditor','checkQuality','hamming(','window.confirm(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
+ for(const txt of ['GridVisualEditor','checkQuality','hamming(','askCredits(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
  assert.ok(edit.includes('onPointerMove={move}'));
  assert.ok(edit.includes("imageZoom"));
  assert.ok(edit.includes("textScale"));
