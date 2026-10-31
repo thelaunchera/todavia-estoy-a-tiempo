@@ -92,7 +92,7 @@ Referencia: documentación oficial [Supabase Passwordless email sign-in](https:/
 - 60 generaciones de fotos IA iniciales (1 foto = 1 crédito).
 - 30 créditos creativos: idea = 1; preparar grid con IA = 3, incluye análisis de referencias.
 - Límite por día y comprador: 10 fotos, 10 créditos creativos. Reinicio UTC.
-- Techo compartido de seguridad = 120 unidades ponderadas/día (foto 1, idea 2, grid plan 4). Son unidades internas, NO neuronas reales de Cloudflare.
+- Techo compartido de seguridad = 50 unidades ponderadas/día (foto 1, idea 2, grid plan 4). Son unidades internas, NO neuronas reales de Cloudflare.
 - Diagnóstico técnico Cloudflare solo para la propietaria.
 - Errores de inferencia devuelven crédito por RPC de servicio; un grid preparado por plantilla local no debe cobrar IA.
 - Editor editorial, movimiento de capas, cambios de fondo y fuentes, biblioteca y exportación de PNG local NO consumen créditos IA.
@@ -106,4 +106,4 @@ Stripe cobra normalmente 2.9% + $0.30 por tarjeta doméstica de EE.UU.; de $10 r
 
 El pago único compra acceso permanente a las herramientas locales y una cuota **finita** inicial de IA. Los paquetes de créditos adicionales requerirán su propio pago Stripe y entrega verificada mediante Make. No existen todavía productos de recarga ni checkout activo.
 
-**QA antes de abrir ventas:** probar una compra real, Stripe→Make→Supabase→correo→OTP iPhone, dos compradores aislados, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago sigue desactivado. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado NO garantiza que no se consuman las 10k neuronas diarias.
+**QA antes de abrir ventas:** probar una compra real, Stripe→Make→Supabase→correo→OTP iPhone, dos compradores aislados, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago sigue desactivado. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado de 50/día NO garantiza que no se consuman las 10k neuronas diarias.
