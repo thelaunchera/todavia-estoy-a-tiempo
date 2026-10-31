@@ -12,6 +12,7 @@ import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {drawSeamlessPages} from './SeamlessCarousel';
+import type {LibraryAsset} from './MediaAsset';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -24,7 +25,7 @@ type Post = {
   status: string; template: string; assetId: string; date: string;
   designData?: string; updatedAt?: string;
 };
-type Asset = { id: string; brandId: string; name: string; mime: string; shared?:boolean; category?:string; stickerGroup?:string };
+type Asset = LibraryAsset;
 type Layout = 'cover' | 'statement' | 'photo' | 'steps' | 'split' | 'closing';
 type PhotoFrame = 'none'|'rounded'|'super-rounded'|'polaroid'|'soft-shadow'|'double-border';
 const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'rounded',name:'Rounded'},{id:'super-rounded',name:'Super soft'},{id:'polaroid',name:'Polaroid'},{id:'soft-shadow',name:'Floating'},{id:'double-border',name:'Double line'}];
