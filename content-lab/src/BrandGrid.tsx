@@ -87,7 +87,30 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
     return new Promise(resolve=>{creditDecision.current=resolve;setCreditPrompt({kind,units,title});});
   };
   const respondCredits=(answer:boolean)=>{creditDecision.current?.(answer);creditDecision.current=null;setCreditPrompt(null)};
-  useEffect(()=>()=>{creditDecision.current?.(false);if(autoTimer.current)clearTimeout(autoTimer.current)},[]);
+  // Flush a still-pending draft on iPhone app backgrounding, brand switches or
+  // editor exit. Requests stay ordered so an older save cannot overwrite a newer one.
+  const flushDraft=()=>{
+    if(autoTimer.current)clearTimeout(autoTimer.current);
+    const current=gridRef.current;if(!current?.id)return;
+    const key=current.id,snap=signature(current);
+    if(savedSignature.current[key]===snap)return;
+    const copy={title:current.title,posts:current.posts};
+    saveQueue.current=saveQueue.current.catch(()=>{}).then(async()=>{
+      await api.put('/api/grids/'+key,copy);
+      savedSignature.current[key]=snap;
+      setGrids(prev=>prev.map(g=>g.id===key?{...g,...copy}:g));
+    }).catch(e=>console.warn('Content Lab pending draft could not be saved:',e));
+  };
+  useEffect(()=>{
+    const onVisibility=()=>{if(document.visibilityState==='hidden')flushDraft()};
+    document.addEventListener('visibilitychange',onVisibility);
+    return()=>{
+      creditDecision.current?.(false);
+      if(autoTimer.current)clearTimeout(autoTimer.current);
+      if(gridRef.current)flushDraft();
+      document.removeEventListener('visibilitychange',onVisibility);
+    };
+  },[]);
   // Background writes are serialized per browser, never stored in shared/localStorage.
   // A new grid's baseline is its server-loaded snapshot; editing it creates a draft.
   useEffect(()=>{
@@ -119,6 +142,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
   const wrongReference=!!referenceId&&!!assets.find(a=>a.id===referenceId&&a.brandId!==brand.id);
   // Switching Instagram accounts must never retain the old account's selected photos.
   useEffect(()=>{
+    flushDraft();
     setSourceId('');setReferenceId(brand.referenceAssetId||'');setGrid(null);setSelected(0);
     setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
@@ -340,7 +364,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Sube una foto para generar nueve ideas visuales originales, cada una como publicación independiente.</p></div>:<>
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
