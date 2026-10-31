@@ -731,18 +731,18 @@ function App() {
             the content lab<span>.</span>
           </div>
           <div>
-            <div className="eyebrow">YOUR PRIVATE CREATIVE SPACE</div>
+            <div className="eyebrow">{t('YOUR PRIVATE CREATIVE SPACE')}</div>
             <h1>
               {t("Less scrolling.")}
               <br />
               <em>{t("More creating.")}</em>
             </h1>
-            <p>A thoughtful home for your ideas, brands and content.</p>
+            <p>{t('A thoughtful home for your ideas, brands and content.')}</p>
           </div>
           <div className="login-tags">
-            <span>CREATE</span>
-            <span>CURATE</span>
-            <span>PUBLISH</span>
+            <span>{t('CREATE')}</span>
+            <span>{t('CURATE')}</span>
+            <span>{t('PUBLISH')}</span>
           </div>
         </section>
         <section className="login-right">
@@ -750,7 +750,7 @@ function App() {
             <div className="lockcircle">
               <LockKeyhole size={23} />
             </div>
-            <p className="lab-language-question">Selecciona tu idioma · Choose your language</p>
+            <p className="lab-language-question">{loginLanguage==='es'?'Elige el idioma de tu cuenta':'Choose your account language'}</p>
             <div className="lab-login-language" role="group" aria-label="Idioma / Language">
               <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')} aria-pressed={loginLanguage==='es'}>Español latino</button>
               <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')} aria-pressed={loginLanguage==='en'}>English</button>
