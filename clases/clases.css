@@ -2681,3 +2681,99 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
   body:not(.class-page-v2) .learning-visual{min-height:0}
   body:not(.class-page-v2) .help-section.section-pad{padding:48px 0}
 }
+
+
+/* Clase · oferta de lanzamiento de 15 días (sin alterar el contador pre-lanzamiento) */
+.class-page-v2 .class-offer-window{
+  display:flex;align-items:center;gap:12px;width:100%;min-width:0;
+  padding:12px 15px;border:1px solid #aec8d8;border-radius:16px;
+  background:#e8f1f6;color:#1b405b;
+}
+.class-page-v2 .class-offer-window-icon{
+  flex:none;display:grid;place-items:center;width:34px;height:34px;
+  border-radius:50%;background:#d4e5ef;color:#255873;
+}
+.class-page-v2 .class-offer-window-icon svg{width:19px;height:19px}
+.class-page-v2 .class-offer-window>span:last-child{display:flex;flex-direction:column;gap:3px;min-width:0}
+.class-page-v2 .class-offer-window strong{font:700 .8rem/1.4 var(--sans,Arial,sans-serif);letter-spacing:.01em}
+.class-page-v2 .class-offer-window small{font:.73rem/1.5 var(--sans,Arial,sans-serif);color:#526e7e}
+.class-page-v2 .class-faq-pricing[open]{background:#fffdf9}
+.class-page-v2 .class-faq-pricing .class-faq-answer--price{padding:0 18px 22px;margin:0;max-width:none}
+.class-page-v2 .class-faq-offer-card{
+  position:relative;overflow:hidden;
+  padding:clamp(20px,3.4vw,32px);
+  border-radius:22px;border:1px solid #c1d5e1;
+  background:linear-gradient(145deg,#f1f7fa 0%,#e5f0f7 100%);
+  box-shadow:0 12px 25px rgba(21,59,80,.055);
+}
+.class-page-v2 .class-faq-offer-card:before{
+  content:"";position:absolute;pointer-events:none;width:210px;height:210px;
+  border-radius:50%;background:#c9e2ef55;right:-115px;top:-125px;
+}
+.class-page-v2 .class-faq-offer-top{position:relative;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.class-page-v2 .class-faq-offer-eyebrow{
+  color:#2b5f7d;font:700 .68rem/1.5 var(--sans,Arial,sans-serif);
+  letter-spacing:.13em;
+}
+.class-page-v2 .class-faq-offer-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;
+  border-radius:999px;background:#274f69;color:#fffdf9;
+  font:700 .69rem/1 var(--sans,Arial,sans-serif);letter-spacing:.075em;white-space:nowrap;
+}
+.class-page-v2 .class-faq-offer-pill svg{width:15px;height:15px;flex:none}
+.class-page-v2 .class-faq-offer-prices{
+  position:relative;display:flex;flex-wrap:wrap;align-items:end;gap:clamp(24px,6vw,58px);
+  padding:19px 0 18px;
+}
+.class-page-v2 .class-faq-offer-launch,
+.class-page-v2 .class-faq-offer-regular{display:flex;flex-direction:column;gap:5px}
+.class-page-v2 .class-faq-offer-prices span{
+  font:.76rem/1.5 var(--sans,Arial,sans-serif);color:#536f82;
+}
+.class-page-v2 .class-faq-offer-launch strong{
+  color:#173b55;font:500 clamp(3.5rem,8vw,5.4rem)/1 var(--serif,Georgia,serif);
+  letter-spacing:-.055em;font-variant-numeric:tabular-nums;
+}
+.class-page-v2 .class-faq-offer-regular{padding-bottom:5px}
+.class-page-v2 .class-faq-offer-regular del{
+  color:#637d90;font:400 clamp(1.5rem,3.5vw,2rem)/1.2 var(--serif,Georgia,serif);
+  text-decoration-color:#8da4b4;text-decoration-thickness:1.5px;
+}
+.class-page-v2 .class-faq-offer-rule{height:1px;background:#bdd2df}
+.class-page-v2 .class-faq .class-faq-offer-description{
+  max-width:650px;padding:0;margin:16px 0 20px;color:#354f61;
+  font:400 .93rem/1.75 var(--sans,Arial,sans-serif);
+}
+.class-page-v2 .class-faq .class-faq-offer-description strong{color:#1b455f}
+.class-page-v2 .class-faq-offer-link{
+  display:inline-flex;align-items:center;justify-content:center;gap:18px;
+  max-width:100%;padding:13px 19px;text-decoration:none;text-align:center;
+  color:#fff;background:#183c56;border:1px solid #183c56;border-radius:999px;
+  font:600 .82rem/1.4 var(--sans,Arial,sans-serif);transition:background .2s ease,transform .2s ease;
+}
+.class-page-v2 .class-faq-offer-link:hover{background:#2c5b78;transform:translateY(-1px)}
+.class-page-v2 .class-faq-offer-link:focus-visible{outline:3px solid #4781a4;outline-offset:3px}
+.class-page-v2 .class-faq .class-faq-offer-disclaimer{
+  padding:0;margin:12px 0 0;color:#627d8d;font:400 .75rem/1.5 var(--sans,Arial,sans-serif);
+}
+.class-page-v2 .class-price-bottom-window{
+  display:flex;align-items:start;gap:8px;padding:10px 0 0;max-width:475px;
+  color:#dbe9f3;font:600 .81rem/1.55 var(--sans,Arial,sans-serif);
+}
+.class-page-v2 .class-price-bottom-window span{color:#a4d2e7}
+@media(max-width:600px){
+  .class-page-v2 .class-offer-window{padding:11px 12px;gap:10px}
+  .class-page-v2 .class-faq-pricing .class-faq-answer--price{padding:0 12px 19px}
+  .class-page-v2 .class-faq-offer-card{padding:18px 16px;border-radius:19px}
+  .class-page-v2 .class-faq-offer-eyebrow{font-size:.6rem}
+  .class-page-v2 .class-faq-offer-pill{font-size:.62rem;padding:7px 10px}
+  .class-page-v2 .class-faq-offer-prices{gap:20px;padding:20px 0 15px}
+  .class-page-v2 .class-faq-offer-launch strong{font-size:3.65rem}
+  .class-page-v2 .class-faq .class-faq-offer-description{font-size:.88rem}
+  .class-page-v2 .class-faq-offer-link{width:100%;font-size:.78rem;padding:14px 13px}
+  .class-page-v2 .class-price-bottom-window{font-size:.76rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .class-page-v2 .class-faq-offer-link{transition:none}
+  .class-page-v2 .class-faq-offer-link:hover{transform:none}
+}
