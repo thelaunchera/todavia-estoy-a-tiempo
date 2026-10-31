@@ -1204,7 +1204,7 @@ function App() {
             </section>
           )}
           {brand && tab === 'prompt-studio' && (
-            <PromptStudio brand={brand} notify={toast} showError={err}
+            <PromptStudio brand={brand} locale={loginLanguage} notify={toast} showError={err}
               onUse={(text,settings)=>{
                 setChosenPrompt({version:Date.now(),text,settings});
                 navigate('grid');
