@@ -114,3 +114,8 @@
 .factory-frame-mini.double-border{border:4px double #77a8b6;border-radius:7px}
 .factory-preview img{touch-action:pan-y;user-select:none;-webkit-user-select:none}
 @media(max-width:530px){.factory-frame-modes{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.factory-frame-modes button{padding:8px 3px}}
+
+.factory-touch-toggle{width:100%;background:#f0f7f7;border:1px solid #c5dce3;border-radius:12px;padding:13px;color:#315d69;font-size:12px;font-weight:700;margin:8px 0 13px;min-height:44px;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s}
+.factory-touch-toggle.active{background:#1e4756;border-color:#1e4756;color:white;box-shadow:0 6px 15px #3b738330}
+@media(hover:hover){.factory-touch-toggle:hover{transform:translateY(-1px)}}
+@media(prefers-reduced-motion:reduce){.factory-touch-toggle{transition:none}}
