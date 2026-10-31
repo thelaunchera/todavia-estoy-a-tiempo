@@ -6,6 +6,7 @@ import PromptStudio from './PromptStudio';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
 import FreePostStudio from './FreePostStudio';
+import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
@@ -27,6 +28,7 @@ import {
   Images,
   Settings2,
   Layers3,
+  Film,
   Plus,
   ArrowRight,
   ArrowUpRight,
@@ -94,7 +96,7 @@ type Post = {
   designData?: string;
 };
 type Asset = LibraryAsset;
-type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
+type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
 const angles = [
   'Pain point',
   'Educational',
@@ -106,7 +108,8 @@ const angles = [
 const formats = ['Carousel', 'Single post', 'Reel', 'Story'];
 const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'home', title: 'Overview', icon: LayoutDashboard },
-  { id: 'create', title: 'Create content', icon: WandSparkles },
+  { id: 'create', title: 'Posts · 4:5', icon: WandSparkles },
+  { id: 'vertical', title: 'Reels e historias · 9:16', icon: Film },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
@@ -119,7 +122,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'brands', title: 'Brand settings', icon: Settings2 },
 ];
 const navGroups:{title:string;items:Tab[]}[]=[
-  {title:'CREAR',items:['home','factory','grid','create']},
+  {title:'CREAR',items:['home','factory','vertical','create','grid']},
   {title:'TUS RECURSOS',items:['media','backgrounds','stickers','formats']},
   {title:'INSPIRACIÓN',items:['prompt-studio','prompts']},
   {title:'GUARDAR Y ORGANIZAR',items:['posts','brands']},
@@ -493,8 +496,17 @@ function App() {
     setEditor(p => ({ ...p, [key]: val }));
   const startFactory = () => {
     if (!brand) return;
-    setEditor(newPost(brand.id));
+    setEditor({...newPost(brand.id),format:'Carousel'});
     navigate('factory');
+  };
+  const startVertical = (format:'Reel'|'Story'='Reel')=>{
+    if(!brand)return;
+    setEditor({...newPost(brand.id),format,title:format==='Reel'?'Portada de Reel':'Historia',
+      hook:'',designData:writeCoverDecor('',{...readCoverDecor(''),color:'#FAF8F3',
+        headlineRect:{x:.08,y:.09,w:.84,h:.2},
+        primaryPhotoRect:{x:.07,y:.33,w:.86,h:.55},
+        headlineStyle:{font:'serif',fontSize:88,color:'#191919',lineHeight:1.1,spacing:0}})});
+    navigate('vertical');
   };
   const navigate = (id: Tab) => {
     setTab(id);
@@ -503,7 +515,7 @@ function App() {
   };
   const start = (angle = 'Pain point') => {
     if (!brand) return;
-    setEditor({ ...newPost(brand.id), angle });
+    setEditor({ ...newPost(brand.id), angle,format:'Single post' });
     setManualOpen(false);
     setTopic('');
     setAlternatives([]);
@@ -515,7 +527,7 @@ function App() {
     setManualOpen(true);
     setTopic('');
     setAlternatives([]);
-    navigate('create');
+    navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
   const save = async () => {
     if (!editor.title.trim()) return toast('Escribe un título para guardarlo.');
@@ -1260,6 +1272,15 @@ function App() {
               saving={busy === 'save'}
             />
           )}
+          {brand && tab === 'vertical' && (
+            <VerticalStudio post={editor} brand={brand} assets={library} images={images}
+              locale={loginLanguage} saving={busy==='save'} onSave={save}
+              onChange={patch=>setEditor(old=>({...old,...patch}))}
+              onUploadPhoto={async file=>upload(file,'original',false)}
+              onUploadBackground={async file=>upload(file,'background',false)}
+              loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
+              notify={toast}/>
+          )}
           {brand && tab === 'create' && (
             <>
               <div className="pageheading">
@@ -1302,9 +1323,7 @@ function App() {
                           value={editor.format}
                           onChange={e => change('format', e.target.value)}
                         >
-                          {formats.map(x => (
-                            <option key={x} value={x}>{x==='Single post'?(loginLanguage==='es'?'Post individual':'Single post'):x}</option>
-                          ))}
+                          <option value="Single post">{loginLanguage==='es'?'Post individual (4:5)':'Single post (4:5)'}</option>
                         </select>
                       </div>
                       <details className="lab-angle-advanced"><summary>{loginLanguage==='es'?'Ajustar enfoque':'Change content angle'}</summary>
