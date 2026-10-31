@@ -390,6 +390,7 @@ function App() {
   const [editor, setEditor] = useState<Post>(newPost(''));
   const [brandForm, setBrandForm] = useState<Brand | null>(null);
   const [topic, setTopic] = useState('');
+  const [manualOpen,setManualOpen]=useState(false);
   const [alternatives, setAlternatives] = useState<string[]>([]);
   const [images, setImages] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState('');
@@ -503,6 +504,7 @@ function App() {
   const start = (angle = 'Pain point') => {
     if (!brand) return;
     setEditor({ ...newPost(brand.id), angle });
+    setManualOpen(false);
     setTopic('');
     setAlternatives([]);
     navigate('create');
@@ -510,6 +512,7 @@ function App() {
   const edit = (post: Post) => {
     setCurrent(post.brandId);
     setEditor({ ...post });
+    setManualOpen(true);
     setTopic('');
     setAlternatives([]);
     navigate('create');
@@ -558,7 +561,8 @@ function App() {
       });
       setEditor(p => ({ ...p, ...data, brandId: brand.id, designData: '' }));
       setAlternatives(data.alternatives || []);
-      toast('Ya tienes una propuesta para revisar ✨');
+      setManualOpen(true);
+      toast('La IA preparó tu propuesta. Revísala y cambia lo que quieras.');
     } catch (e) {
       err(e);
     } finally {
@@ -1267,7 +1271,7 @@ function App() {
                     {t("Content")} <em>composer.</em>
                   </h1>
                   <p>{t('Give it a purpose. Give it your voice. Make it yours.')}</p>
-                  <button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> {t("Design full carousel")} <ArrowRight size={16} /></button>
+                  {editor.format==='Carousel'&&<button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> {loginLanguage==='es'?'Diseñar carrusel completo':'Design full carousel'}</button>}
                 </div>
                 <button className="btn ghost" onClick={() => start()}>
                   <RotateCcw size={16} /> {t("Start fresh")}
@@ -1278,9 +1282,9 @@ function App() {
                   <section className="panel">
                     <div className="panelhead">
                       <span>01</span>
-                      <h3>{t('Set the direction')}</h3>
+                      <h3>{loginLanguage==='es'?'Cuéntale a la IA qué quieres crear':'Tell AI what to create'}</h3>
                     </div>
-                    <label>{t('What should we talk about?')}</label>
+                    <label>{loginLanguage==='es'?'Describe tu idea en tus palabras':'Describe your idea in your words'}</label>
                     <textarea
                       rows={3}
                       value={topic}
@@ -1299,26 +1303,18 @@ function App() {
                           onChange={e => change('format', e.target.value)}
                         >
                           {formats.map(x => (
-                            <option key={x}>{x}</option>
+                            <option key={x} value={x}>{x==='Single post'?(loginLanguage==='es'?'Post individual':'Single post'):x}</option>
                           ))}
                         </select>
                       </div>
-                      <div>
+                      <details className="lab-angle-advanced"><summary>{loginLanguage==='es'?'Ajustar enfoque':'Change content angle'}</summary>
                         <label>{t('Content angle')}</label>
-                        <select
-                          value={editor.angle}
-                          onChange={e => change('angle', e.target.value)}
-                        >
-                          {angles.map(x => (
-                            <option key={x}>{x}</option>
-                          ))}
+                        <select value={editor.angle} onChange={e=>change('angle',e.target.value)}>
+                          {angles.map(x=><option key={x}>{x}</option>)}
                         </select>
-                      </div>
+                      </details>
                     </div>
-                    <div className="aiinfo">
-                      <Sparkles size={17} /> Follows {brand.name}'s voice ·{' '}
-                      {brand.language}
-                    </div>
+                    <p className="lab-ai-message">{loginLanguage==='es'?'Escribe como hablas. La IA propondrá el texto usando la voz de tu marca; tú decides qué conservar.':'Write naturally. AI drafts in your brand voice; you decide what to keep.'}</p>
                     <button
                       className="btn dark wide"
                       disabled={busy === 'ai'}
@@ -1330,19 +1326,18 @@ function App() {
                         <WandSparkles size={17} />
                       )}{' '}
                       {busy === 'ai'
-                        ? 'Creating your content…'
-                        : 'Generate with AI'}{' '}
-                      <ArrowRight size={17} />
+                        ? (loginLanguage==='es'?'Creando…':'Creating…')
+                        : (loginLanguage==='es'?'Crear con IA · 1 crédito':'Create with AI · 1 credit')}
                     </button>
-                    <small className="note">
-                      AI may consume AppDeploy credits. Check all details before
-                      publishing.
-                    </small>
+                    <small className="note">{loginLanguage==='es'?'Puedes editar todo antes de guardar. Las fotos con IA se generan por separado.':'Everything is editable before saving. AI photos are generated separately.'}</small>
+                    <button className="btn ghost wide" type="button" onClick={()=>setManualOpen(v=>!v)}>
+                      {manualOpen?(loginLanguage==='es'?'Recoger editor':'Collapse editor'):(loginLanguage==='es'?'Editar todo manualmente':'Edit everything manually')}
+                    </button>
                   </section>
-                  <section className="panel">
+                  <section className={'panel lab-manual-panel'+(manualOpen?' is-open':'')} hidden={!manualOpen}>
                     <div className="panelhead">
                       <span>02</span>
-                      <h3>{t('Refine the words')}</h3>
+                      <h3>{loginLanguage==='es'?'Edita el resultado a tu manera':'Edit your result'}</h3>
                     </div>
                     <label>{t('Internal title *')}</label>
                     <input
@@ -1398,7 +1393,7 @@ function App() {
                       <Copy size={16} /> {t("Copy content")}
                     </button>
                   </section>
-                  <section className="panel">
+                  <section className="panel lab-save-panel">
                     <div className="panelhead">
                       <span>03</span>
                       <h3>{t('Save & organize')}</h3>
@@ -1436,9 +1431,9 @@ function App() {
                 </div>
                 <aside className="visual cover-studio">
                   <div className="cover-studio-heading">
-                    <div className="eyebrow">{t('COVER PREVIEW')}</div>
-                    <h3>{t('Your graphic direction')}</h3>
-                    <small>{t("Instagram · 1080 × 1350 PNG")}</small>
+                    <div className="eyebrow">{loginLanguage==='es'?'VISTA PREVIA':'PREVIEW'}</div>
+                    <h3>{editor.format==='Reel'?'Reel':editor.format==='Story'?'Story':loginLanguage==='es'?'Tu diseño':'Your design'}</h3>
+                    <small>Instagram · 1080 × {['Reel','Story'].includes(editor.format)?'1920 · 9:16':'1350 · 4:5'} PNG</small>
                   </div>
                   <FreePostStudio post={editor} brand={brand}
                     assets={library} images={images} locale={loginLanguage}
