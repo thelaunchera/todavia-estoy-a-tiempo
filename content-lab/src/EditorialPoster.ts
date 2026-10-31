@@ -3,6 +3,7 @@
  * separate, exact, editable Canvas layers. No AI renders text in the photo.
  * Designed for personal-brand intro, magazine, luxury campaign, and products.
  */
+import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
 export type EditorialPreset='portrait'|'annotated'|'magazine'|'split'|'typographic';
 export const EDITORIAL_PRESETS:{id:EditorialPreset;name:string;description:string}[]=[
  {id:'portrait',name:'Portrait Campaign',description:'Foto protagonista + título editorial grande'},
@@ -22,6 +23,8 @@ export type EditorialDesign={
  kicker?:string;
  callouts?:string[];
  overlay?:number;
+ backgroundPattern?:FreeBackgroundId;
+ stickerIds?:string[];
 };
 export const DEFAULT_EDITORIAL:EditorialDesign={preset:'portrait',font:'elegant',background:'photo',overlay:.1,callouts:[]};
 const hex=(v:string|undefined,f:string)=>/^#[a-f0-9]{6}$/i.test(v||'')?v!:f;
@@ -76,6 +79,9 @@ export async function renderEditorial(input:{
   const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,paper);g.addColorStop(.55,accent);g.addColorStop(1,paper);
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
  }else if(background==='color'){ctx.fillStyle=accent;ctx.fillRect(0,0,W,H);}
+ if(design.backgroundPattern&&design.backgroundPattern!=='brand'&&background!=='photo'){
+  paintFreeBackground(ctx,W,H,design.backgroundPattern,accent,paper);
+ }
  const left=q(input.move?.imageX||0,-.55,.55),top=q(input.move?.imageY||0,-.55,.55),zoom=q(input.move?.imageZoom||1,1,3);
  const fullBleed=background==='photo'&&['portrait','annotated','magazine','typographic'].includes(mode);
  const framing=mode==='split'?[.40,.07,.56,.86]:mode==='magazine'?[.23,.05,.54,.92]:mode==='typographic'?[.30,.18,.66,.77]:[.04,.08,.92,.86];
@@ -171,6 +177,7 @@ export async function renderEditorial(input:{
    ctx.drawImage(im,X(.84),Y(topSafe+.01),im.naturalWidth*k,im.naturalHeight*k);
   }catch{/* Logo optional; private library may be loading. */}
  }
+ paintFreeStickers(ctx,W,H,design.stickerIds,accent);
  // Contrast estimate applies to typography panel rather than raw photograph.
  return {fit,contrast:4.6};
 }
