@@ -29,3 +29,12 @@ test('editable art direction and fonts are available in the iPhone UI',()=>{
  for(const key of ['editorial-settings','Cormorant · Editorial serif','Caveat · Manuscrita','Color del fondo','Anotación {i+1}','Dirección de arte','Adaptar la referencia que subí'])assert.ok(g.includes(key),key);
  for(const family of ['Caveat','Cormorant+Garamond','Space+Grotesk'])assert.ok(css.includes(family),family);
 });
+
+test('AI generated handwritten annotations are optional and must be grounded in the brief',()=>{
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ assert.ok(edge.includes('Do not invent biography'));
+ assert.ok(edge.includes('callouts:Array.isArray(p.callouts)'));
+ assert.ok(edge.includes("handwritten:clean(p.handwritten,85)"));
+ const poster=source('src/EditorialPoster.ts');
+ assert.ok(poster.includes('design.textColor&&'));
+});
