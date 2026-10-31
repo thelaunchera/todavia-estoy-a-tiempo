@@ -35,7 +35,7 @@ type Props = {
   onChange: (next: Post) => void; onSave: () => void;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
-  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const layoutNames: Record<Layout,string> = {
@@ -194,7 +194,7 @@ const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
@@ -412,7 +412,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
            </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)}/>
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} stickerIds={slide.stickerIds||[]} onChange={next=>replace(next)} assets={ownedAssets} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}/>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
         <div className="factory-panel factory-ai">
