@@ -76,3 +76,13 @@
 .touch-snap-toggle input{accent-color:#317e9c;width:16px;height:16px}
 .touch-layer-mini{display:grid;place-items:center;width:39px;height:39px;min-width:39px;border-radius:6px;background:#e8edef;color:#37576b;font:700 22px Georgia,serif}
 @media(max-width:560px){.touch-editor-type-settings{grid-template-columns:1fr}.panorama-guide-legend{flex-wrap:wrap}.touch-snap-toggle{width:100%;margin-left:0}}
+
+/* Compact corner controls: the selection keeps the working canvas uncluttered. */
+.touch-editor-corner-controls{display:flex;flex-direction:column;gap:7px;flex:1 1 230px;min-width:min(100%,230px);padding:9px 11px;background:#fff;border:1px solid #d6e4e8;border-radius:12px}
+.touch-editor-corner-controls label{display:flex;justify-content:space-between;align-items:center;gap:8px;flex:none;margin:0;font-size:12px;font-weight:700;color:#284958}
+.touch-editor-corner-controls output{font-variant-numeric:tabular-nums;font-size:12px;color:#315f77;font-weight:800}
+.touch-editor-corner-controls input[type=range]{display:block;width:100%;max-width:none;min-height:36px;margin:0;accent-color:#367d9d;touch-action:pan-y}
+.touch-editor-corner-presets{display:flex;flex-wrap:wrap;gap:6px}
+.touch-editor-corner-presets button{flex:1 1 auto;min-height:32px;padding:6px 9px;border:1px solid #cbdde4;border-radius:9px;font-size:11px;color:#335969;background:#f6fafb;cursor:pointer}
+.touch-editor-corner-presets button:focus-visible{outline:3px solid #85b5ce;outline-offset:2px}
+@media(max-width:620px){.touch-editor-corner-controls{flex-basis:100%;min-width:0}.touch-editor-corner-presets button{font-size:11px;min-height:38px}}
