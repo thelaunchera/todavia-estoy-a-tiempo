@@ -187,6 +187,8 @@ const filename=(post:Post,i:number)=>{
 };
 export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
+  const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
+  const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id),[assets,brand.id]);
   const [current,setCurrent]=useState(0);
   const [preview,setPreview]=useState('');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
@@ -194,12 +196,30 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [imagePrompt,setImagePrompt]=useState('');
   const [imageMode,setImageMode]=useState<'new'|'variation'>('new');
   const [sourceId,setSourceId]=useState('');
+  const [imageSubjectType,setImageSubjectType]=useState<'portrait'|'product'>('portrait');
+  const [referenceReport,setReferenceReport]=useState('');
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setDownloads([]);},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setDownloads([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
-  const setAll=(all:Slide[])=>{
-    onChange({...post,format:'Carousel',designData:JSON.stringify(all.slice(0,8)),hook:all[0].title});
+  const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
+    onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);
+  };
+  const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
+  const applyReference=async()=>{
+    if(!style.referenceAssetId)return notify('Elige una referencia de esta marca.');
+    const url=images[style.referenceAssetId];if(!url)return notify('La imagen todavía está cargando.');
+    try{
+      const sample=await sampleReferencePalette(url);
+      setAll(slides,{...style,referenceColor:sample.color,accentSource:'reference',mood:sample.mood});
+      setReferenceReport('Referencia interpretada: '+sample.summary+' · '+sample.color+'. No se copia la fotografía. Sin créditos IA.');
+      notify('Paleta y contraste aplicados a todos los slides. Sin créditos.');
+    }catch(e){showError(e)}
+  };
+  const applyRhythm=()=>{
+    const rhythm:Layout[]=['cover','statement','photo','steps','statement','split','photo','closing'];
+    setAll(slides.map((item,n)=>({...item,layout:n===slides.length-1?'closing':rhythm[n],photoFocus:item.photoFocus||'top'})));
+    notify('Se aplicó un ritmo visual coherente; no cambié textos ni fotos.');
   };
   const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>j===i?{...s,...patch}:s));
   const insert=()=>{
@@ -215,21 +235,22 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   useEffect(()=>{
     slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);});
-  },[post.designData,brand.id]);
+    if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
+  },[post.designData,brand.id,style.referenceAssetId]);
   useEffect(()=>{
     let active=true;
-    drawSlide(slide,i,slides.length,brand,images).then(c=>{
+    drawSlide(slide,i,slides.length,brand,images,style).then(c=>{
       if(active)setPreview(c.toDataURL('image/png'));
     }).catch(showError);
     return()=>{active=false;};
-  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slides.length,brand.color,brand.background,images]);
+  },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slides.length,brand.color,brand.background,brand.headingFont,brand.bodyFont,style,images]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
     setBusy('copy');
     try{
       const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational'});
       const updated:Post={...post,...data,format:'Carousel',brandId:brand.id,designData:''};
-      onChange({...updated,designData:JSON.stringify(parseSlides(updated,brand))});
+      onChange({...updated,designData:encodeCarouselDesign(parseSlides(updated,brand),style)});
       setCurrent(0);setDownloads([]);
       notify('Carrusel listo para editar, slide por slide.');
     }catch(e){showError(e)}finally{setBusy('');}
@@ -237,11 +258,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const createImage=async()=>{
     if(imagePrompt.trim().length<15)return notify('Describe la imagen con más detalle.');
     if(imageMode==='variation'&&!sourceId)return notify('Selecciona primero una foto de referencia.');
+    if(!window.confirm('Esta foto utilizará 1 crédito de IA. ¿Generar?'))return;
     setBusy('image');
     try{
       const {data}=await api.post('/api/ai-image',{
-        brandId:brand.id,prompt:imagePrompt,mode:imageMode,
-        assetId:imageMode==='variation'?sourceId:''
+        brandId:brand.id,prompt:imagePrompt,mode:imageMode,subjectType:imageSubjectType,
+        assetId:imageMode==='variation'?sourceId:'',
+        referenceId:imageMode==='variation'&&style.referenceAssetId&&style.referenceAssetId!==sourceId?style.referenceAssetId:''
       });
       const {content,...asset}=data as Asset & {content:string};
       onNewAsset(asset,'data:'+data.mime+';base64,'+content);
@@ -252,7 +275,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const exportOne=async(n=i)=>{
     setBusy('export');
     try{
-      const canvas=await drawSlide(slides[n],n,slides.length,brand,images);
+      const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
       const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=filename(post,n);a.click();
       notify('Slide '+(n+1)+' descargado como PNG individual.');
     }catch(e){showError(e)}finally{setBusy('');}
@@ -262,7 +285,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     try{
       const result:{name:string,url:string}[]=[];
       for(let n=0;n<slides.length;n++){
-        const canvas=await drawSlide(slides[n],n,slides.length,brand,images);
+        const canvas=await drawSlide(slides[n],n,slides.length,brand,images,style);
         result.push({name:filename(post,n),url:canvas.toDataURL('image/png')});
       }
       setDownloads(result);
