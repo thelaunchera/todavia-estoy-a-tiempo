@@ -1,0 +1,100 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>One Product → 8 Layouts | Content Lab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+*{box-sizing:border-box}body{margin:0;background:#f8f7f3;color:#202b30;font:14px 'DM Sans',Arial}button,input,textarea,select{font:inherit}button{cursor:pointer}
+header{background:white;padding:20px 4%;border-bottom:1px solid #e0e5e5;display:flex;justify-content:space-between;align-items:center}
+header strong{font-size:20px;letter-spacing:-1px}header strong i{color:#8bafbd}a{color:#477c8e}
+main{max-width:1400px;margin:auto;padding:38px 4% 70px}.eyebrow{font-size:10px;font-weight:800;letter-spacing:1.5px;color:#6b96a5}
+h1{font:normal clamp(41px,5vw,71px)/1.04 'DM Serif Display',serif;letter-spacing:-1.5px;margin:14px 0}h1 em{color:#7b9fae}p{line-height:1.7;color:#829298}
+.intro{max-width:760px}.info{padding:15px 20px;background:#e7f2f5;border-radius:12px;margin:20px 0 25px;font-size:12px;color:#526e79}
+.grid{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr);gap:19px;align-items:start}
+.panel{background:#fff;border:1px solid #dfe8e7;border-radius:15px;padding:25px}h2{font-size:24px;margin:6px 0 12px}
+label{display:block;margin:13px 0 5px;font-size:11px;font-weight:800;color:#5e6f76}
+input,select,textarea{width:100%;border:1px solid #d9e4e6;padding:12px;border-radius:9px;background:#fcfefe;color:#22323a}
+textarea{resize:vertical}.half{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.file{position:relative;display:grid;place-items:center;gap:6px;min-height:174px;border:1.5px dashed #a5c5d1;background:#f2f9fb;border-radius:12px;margin-top:15px;text-align:center}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}.file img{max-height:134px;max-width:95%;object-fit:contain;display:none}.file strong{font-size:12px}.file small{font-size:10px;color:#7c8f97}
+.radio{display:flex;gap:14px;font-size:12px}.radio label{display:flex;align-items:center;gap:7px;font-weight:500}.radio input{width:auto}
+.privacy{color:#638576;background:#edf5ef;padding:11px;border-radius:9px;font-size:11px;margin-top:16px}
+.outputHeader{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.buttons{display:flex;align-items:start;gap:7px;flex-wrap:wrap}
+.action{background:#21353e;color:#fff;border:0;border-radius:8px;padding:11px 13px;font-size:11px;font-weight:800}.action.alt{background:#eaf4f8;color:#44798a}
+.item{border:1px solid #e0e9e8;border-radius:12px;margin-top:9px;overflow:hidden}.item>.top{padding:13px;display:flex;align-items:center;gap:12px;border:0;background:#fff;width:100%;text-align:left}
+.number{display:grid;place-items:center;min-width:39px;height:39px;background:#e4f0f5;border-radius:10px;color:#507f91;font:italic 22px Georgia,serif}
+.item .top strong{font-size:13px}.item .top small{display:block;color:#819097;font-size:10px;margin-top:4px}.item .top>span:last-child{margin-left:auto;font-weight:800;font-size:24px;color:#779eab}
+.body{padding:0 13px 15px}.body textarea{min-height:230px;background:#192e37;color:#eef6f7;border:0;font:11px/1.55 ui-monospace,monospace}
+footer{font-size:11px;color:#829397;margin-top:20px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:550px){main{padding:23px 14px}.panel{padding:16px}.half{grid-template-columns:1fr}.outputHeader{flex-direction:column}h1{font-size:44px}}
+</style></head><body>
+<header><strong>content lab<i>.</i></strong><a href="../">Volver al Lab</a></header>
+<main><div class="intro"><div class="eyebrow">SAVED MASTER PROMPTS / 1 PRODUCT PHOTO</div><h1>One product.<br><em>Eight compositions.</em></h1><p>Una sola foto, ocho anuncios editoriales diferentes, la misma identidad y el mismo texto. Genera cada composición individualmente, sin collages.</p></div>
+<div class="info"><b>Importante:</b> Este preset reorganiza el mismo producto. Es distinto del modo <b>1 Photo → 9 Posts</b>, que crea nueve fotografías nuevas. Aquí se generan ocho prompts completos para copiar, sin gastar créditos ni subir fotos a servidores.</div>
+<div class="grid"><section class="panel"><div class="eyebrow">01 / YOUR SOURCE</div><h2>Prepara la composición</h2>
+<label for="brand">Cuenta</label><select id="brand"><option value="tle">The Launch Era · English</option><option value="podcast">Todavía estoy a tiempo · Español</option><option value="other">Otra marca</option></select>
+<div class="half"><div><label for="brandName">Nombre de marca</label><input id="brandName" value="The Launch Era"></div><div><label for="product">Producto</label><input id="product" placeholder="Cookie, matcha, perfume…"></div></div>
+<div class="file"><img id="preview" alt="Foto original"><span id="fileSymbol" style="font-size:31px">▧</span><strong id="fileLabel">Selecciona tu foto</strong><small>Tu imagen queda en tu navegador</small><input type="file" id="photo" accept="image/*,.heic,.heif" aria-label="Subir foto original"></div>
+<div class="radio"><label><input type="radio" name="kind" checked value="product"> Solo producto</label><label><input type="radio" name="kind" value="poster"> Póster diseñado</label></div>
+<label for="headline">Headline exacto</label><input id="headline" placeholder="Texto principal">
+<label for="support">Supporting text</label><textarea id="support" rows="2" placeholder="Información real, sin inventar beneficios"></textarea>
+<div class="half"><div><label for="tagline">Tagline</label><input id="tagline"></div><div><label for="details">Detalles adicionales</label><input id="details"></div></div>
+<label for="palette">Colores y estilo</label><input id="palette" value="Warm Ivory #FAF8F3, Soft Black #191919, Soft Blue">
+<label for="notes">Notas</label><textarea id="notes" rows="2" placeholder="Sin objetos extra, fotografía auténtica, sombras suaves…"></textarea>
+<p class="privacy">🔒 La foto solo se previsualiza localmente. Para usar los prompts, adjunta la misma foto en la herramienta donde generes la imagen.</p>
+</section><section class="panel"><div class="outputHeader"><div><div class="eyebrow">02 / COPY EACH PROMPT</div><h2>8 direcciones listas</h2></div><div class="buttons"><button class="action alt" id="copyAll">Copiar los 8</button><button class="action" id="saveAll">Guardar TXT</button></div></div><div id="output"></div></section></div>
+<footer>Fuente: <a href="https://ugc.production.linktr.ee/f5d411b4-6af4-4a34-b33f-0edd22e9b778_One-Poster-Eight-Compositions-Master-Prompt.pdf" target="_blank" rel="noopener">One Poster, Eight Compositions — Master Prompt</a>. Adaptación para Content Lab.</footer>
+</main><script>
+const layouts=[
+['Asymmetric Editorial','Producto grande a la derecha','Place hero product on RIGHT, about 55% of canvas width. Stack main headline LEFT with small information below; asymmetrical but balanced negative space.'],
+['Monumental Center','Headline grande y producto debajo','Use a monumental upper-middle headline taking 80-90% width. Center product BELOW with an intentional safe lower-edge crop. Secondary copy at small corners.'],
+['Type Behind Product','Titular detrás del objeto','Make huge headline a background typographic layer. Center product in FOREGROUND, obscuring a few headline letters without losing readability. Keep support copy on clean edges.'],
+['Side-Cropped Close-Up','Crop del producto desde un lado','Enlarge the real product to enter from ONE SIDE and BOTTOM. Reserve an uninterrupted opposing zone for stacked copy. Essential labels must remain readable.'],
+['Offset Negative Space','Producto abajo derecha, mucho aire','Put product in LOWER RIGHT at medium-large size. Compact headline in UPPER LEFT, unusually spacious center, tiny refined corner details.'],
+['Diagonal Visual Flow','Lectura diagonal, sin girar texto','Place product HIGH RIGHT and headline LOW LEFT, forming diagonal flow by visual position. Do not rotate letters or warp the product.'],
+['Vertical Editorial Stack','Texto arriba y producto abajo','Three zones: narrow title at TOP, supporting content at MID, product emerging from BOTTOM. Strict vertical editorial rhythm and generous breathing room.'],
+['Magazine Column Split','Columna 33% texto, 67% producto','Unequal editorial columns: LEFT 33% for title/copy and RIGHT 67% for one large product. Align typography to an invisible common grid.']
+];
+const $=id=>document.getElementById(id);
+const text=(id,fall)=>$(id).value.trim()||fall;
+const es=()=> $('brand').value==='podcast'||$('brand').value==='other';
+const build=(i)=>{
+ const lang=es()?'Latin American Spanish':'US English';
+ const tags=es()?['[TÍTULO]','[TEXTO SECUNDARIO]','[FRASE DE MARCA]','[DETALLES]']:['[MAIN HEADLINE]','[SUPPORTING TEXT]','[TAGLINE]','[DETAILS]'];
+ const master='Treat the uploaded photo as the visual master. Preserve product shape, colors, material, proportions, logos, printing, packaging, and readable details exactly. Never stretch or invent product properties.';
+ return [
+ 'COMPOSITION '+String(i+1).padStart(2,'0')+' / 08 — '+layouts[i][0],
+ 'Create ONE stand-alone vertical 4:5 premium editorial advertising poster (target 2160×2700 pixels or highest available), not a collage, contact sheet or multiple images.',
+ 'Product: '+text('product','the exact object shown in the uploaded photo')+'. '+master,
+ document.querySelector('input[name=kind]:checked').value==='poster'?'Already-designed poster: keep every original word, type style, color and photographic treatment unchanged. Move and resize only.':'Product-only photo: develop one restrained advertising style based on this photo, without inventing logos, features, claims or other products.',
+ 'Exact brand name: '+text('brandName',es()?'[NOMBRE DE MARCA]':'[BRAND NAME]')+'. Never draw an invented logo.',
+ 'COPY (DO NOT REWORD OR TRANSLATE):\nHeadline: '+text('headline',tags[0])+'\nSupporting copy: '+text('support',tags[1])+'\nTagline: '+text('tagline',tags[2])+'\nDetails: '+text('details',tags[3]),
+ 'All visible copy language: '+lang+'. If exact copy is supplied, keep it verbatim.',
+ 'Shared brand palette/style for all eight: '+text('palette','same visual palette as original')+'. '+text('notes','Clean restrained visual atmosphere.'),
+ 'LAYOUT DIRECTION: '+layouts[i][2],
+ 'Change ONLY positions, scale, controlled crop, alignment, layering, typographic hierarchy and negative space. Make composition visually distinctive while keeping one cohesive brand campaign.',
+ 'Realistic material and shadows, high contrast, generous margins. Protect product logo and all printed details. No fake UI, gradients, invented props, clutter, additional objects or unsupported advertising text.',
+ 'OUTPUT: ONE completed individual portrait 4:5 poster. No explanatory text.'
+ ].join('\n\n');
+};
+let selected=0;
+function render(){const root=$('output');root.replaceChildren();
+ layouts.forEach((v,i)=>{const article=document.createElement('article');article.className='item';
+  const btn=document.createElement('button');btn.className='top';btn.type='button';
+  const n=document.createElement('b');n.className='number';n.textContent=String(i+1).padStart(2,'0');
+  const heading=document.createElement('span');heading.className='heading';
+  const strong=document.createElement('strong');strong.textContent=v[0];const desc=document.createElement('small');desc.textContent=v[1];heading.append(strong,desc);
+  const toggle=document.createElement('span');toggle.textContent=selected===i?'−':'+';btn.append(n,heading,toggle);
+  btn.onclick=()=>{selected=selected===i?-1:i;render()};article.append(btn);
+  if(selected===i){const body=document.createElement('div');body.className='body';const textarea=document.createElement('textarea');textarea.readOnly=true;textarea.rows=17;textarea.value=build(i);
+    const copy=document.createElement('button');copy.className='action';copy.textContent='Copiar prompt '+String(i+1).padStart(2,'0');copy.onclick=()=>copyText(build(i));body.append(textarea,copy);article.append(body)}
+  root.append(article);
+ });
+}
+const all=()=>layouts.map((v,i)=>build(i)).join('\n\n'+'-'.repeat(40)+'\n\n');
+async function copyText(v){try{await navigator.clipboard.writeText(v);alert('Copiado ✓')}catch{alert('Selecciona el texto y cópialo manualmente')}}
+$('copyAll').onclick=()=>copyText(all());
+$('saveAll').onclick=()=>{const u=URL.createObjectURL(new Blob([all()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='one-product-eight-compositions.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)};
+$('brand').onchange=()=>{const v=$('brand').value;$('brandName').value=v==='tle'?'The Launch Era':v==='podcast'?'Todavía estoy a tiempo':'';$('palette').value=v==='tle'?'Warm Ivory #FAF8F3, Butter Yellow #F2D85B, Soft Black #191919, Soft Blue':v==='podcast'?'Warm neutrals, soft blush, deep espresso, intimate editorial':' ';render()};
+['brandName','product','headline','support','tagline','details','palette','notes'].forEach(id=>$(id).addEventListener('input',render));
+document.querySelectorAll('input[name=kind]').forEach(x=>x.onchange=render);
+$('photo').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>25000000){alert('Foto mayor de 25MB');return}const u=URL.createObjectURL(f),img=$('preview');img.src=u;img.style.display='block';$('fileSymbol').style.display='none';$('fileLabel').textContent=f.name;img.onload=()=>URL.revokeObjectURL(u);img.onerror=()=>{img.style.display='none';$('fileSymbol').style.display='block';alert('La foto HEIC puede requerir conversión para verse, pero los prompts están disponibles')}};
+render();
+</script></body></html>
