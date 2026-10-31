@@ -32,6 +32,26 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
  }
  return output;
 };
+
+/** Paints transparent typography over back-layer photos (matches the original layout). */
+export async function paintSeamlessTypography(
+ ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId,
+) {
+ const font=brand.headingFont==='Prompt'?'Prompt, Arial, sans-serif':
+   brand.headingFont==='Futura'?'Futura, Arial, sans-serif':'Georgia, serif';
+ try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */ }
+ pages.forEach((page,i)=>{
+  const x=i*W,ink=backgroundId==='night-editorial'?'#FFFFFF':'#191919';
+  if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
+   ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
+  words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
+  if(page.description)words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
+  ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;ctx.textBaseline='top';
+  ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
+  ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0'),x+W-183,H-90);
+ });
+}
+
 /** Renders ONE continuous design first and then slices it on exact 1080px boundaries. */
 export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement>{
  if(pages.length<2||pages.length>8)throw Error('El carrusel seamless necesita entre 2 y 8 slides.');
@@ -65,7 +85,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
   grad.addColorStop(1,'rgba(250,248,243,0)');
   ctx.fillStyle=grad;ctx.fillRect(x,0,W,H*.65);
-  const label=((page.eyebrow||brand.name).slice(0,45)).toUpperCase();
+  const label=(page.eyebrow||'').slice(0,45).toUpperCase();
   ctx.fillStyle=ink;ctx.textBaseline='top';ctx.font='700 25px Arial, sans-serif';
   ctx.fillText(label,x+82,95);
   words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
@@ -89,7 +109,13 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   if(!opts.editorMode)await paintOriginalStickerImages(ctx,W,H,page.stickerIds,images,page.stickerPositions);
   ctx.restore();
  }
- if(!opts.editorMode)await paintPanoramaLayers(ctx,wide.width,H,opts.layers||[],images);
+ if(!opts.editorMode) {
+  const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
+  const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
+  await paintPanoramaLayers(ctx,wide.width,H,behind,images);
+  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId);
+  await paintPanoramaLayers(ctx,wide.width,H,front,images);
+ }
  return wide;
 }
 
