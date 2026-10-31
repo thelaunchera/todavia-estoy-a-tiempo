@@ -94,8 +94,8 @@ jobs:
           npm run build
       - name: Compilar Content Lab en GitHub
         env:
-          VITE_CONTENT_LAB_SUPABASE_URL: ${{ vars.VITE_CONTENT_LAB_SUPABASE_URL }}
-          VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_CONTENT_LAB_SUPABASE_URL: https://fhrvuhikrybobidxpvnh.supabase.co
+          VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY: sb_publishable_Uj2dcLjktTPVb-IcAD5RSA_6J0AAfM-
         run: |
           cd content-lab
           npm install --no-audit --no-fund

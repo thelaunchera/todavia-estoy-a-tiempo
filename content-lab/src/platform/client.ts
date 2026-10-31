@@ -16,7 +16,11 @@ const unwrap=(r:any)=>({...r.payload,id:r.id});
 const list=async(name:string):Promise<any[]>=>out(await tab(name).select('id,payload').order('created_at',{ascending:true})).map(unwrap);
 const read=async(name:string,id:string)=>{const x=out(await tab(name).select('id,payload').eq('id',id).maybeSingle());if(!x)throw Error('Registro no encontrado.');return unwrap(x);};
 const add=async(name:string,payload:any)=>{const me=await current();return unwrap(out(await tab(name).insert({owner_id:me.id,payload}).select('id,payload').single()));};
-const update=async(name:string,id:string,payload:any)=>unwrap(out(await tab(name).update({payload,updated_at:new Date().toISOString()}).eq('id',id).select('id,payload').single()));
+const update=async(name:string,id:string,payload:any)=>{
+  const existing=await read(name,id);
+  const {id:discard,...original}=existing;
+  return unwrap(out(await tab(name).update({payload:{...original,...payload},updated_at:new Date().toISOString()}).eq('id',id).select('id,payload').single()));
+};
 const remove=async(name:string,id:string)=>{out(await tab(name).delete().eq('id',id));return {deleted:true}};
 const base64=(blob:Blob)=>new Promise<string>((resolve,reject)=>{
   const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]||'');
@@ -48,7 +52,7 @@ export const auth={
   signInWithOtp:async(email:string)=>{
     requireConfig();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Introduce tu correo electrónico.');
-    out(await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin+window.location.pathname}}));
+    out(await sb.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:window.location.origin+window.location.pathname}}));
   },
   signOut:async()=>{out(await sb.auth.signOut())}
 };

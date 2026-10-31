@@ -1,6 +1,6 @@
 
--- Content Lab: standalone schema for a SEPARATE Supabase project.
--- Do not run this in Podcast Studio or Cleaning App databases.
+-- Content Lab data lives in the EXISTING podcast Supabase project, but all Content Lab tables, Storage and RLS policies are isolated.
+-- Do NOT touch existing podcast_* tables or Cleaning App data.
 create extension if not exists pgcrypto;
 create table if not exists public.content_lab_admins (
  user_id uuid primary key references auth.users(id) on delete cascade,
@@ -13,9 +13,8 @@ drop policy if exists "lab admin reads own authorization" on public.content_lab_
 create policy "lab admin reads own authorization" on public.content_lab_admins
   for select to authenticated using(user_id=(select auth.uid()));
 
--- Administrator must be inserted privately via SQL Editor after signup:
--- insert into public.content_lab_admins(user_id) values ('AUTH_USER_UUID');
--- Never put the UUID or an email into this public git repository.
+-- Reuse ONLY the already-approved podcast Studio owner (never all podcast users).
+-- No personal identifiers are stored in GitHub.
 do $$
 declare table_name text;
 begin
@@ -48,3 +47,8 @@ create policy "lab private storage create" on storage.objects for insert to auth
 create policy "lab private storage delete" on storage.objects for delete to authenticated
  using(bucket_id='content-lab-private' and (storage.foldername(name))[1]=(select auth.uid())::text
  and exists(select 1 from public.content_lab_admins a where a.user_id=(select auth.uid())));
+
+-- Grant only existing podcast Studio owner access to the isolated Content Lab tables.
+insert into public.content_lab_admins(user_id)
+select user_id from public.podcast_studio_admins where role='owner'
+on conflict (user_id) do nothing;
