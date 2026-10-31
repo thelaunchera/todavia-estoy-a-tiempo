@@ -29,11 +29,11 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
  const upload=async(file?:File)=>{if(!file||!onUploadBackground)return;setUploading(true);try{const item=await onUploadBackground(file);if(item){loadImage?.(item.id);onChange({backgroundId:'brand',backgroundImageId:item.id,stickerIds:selected})}}finally{setUploading(false);if(uploadRef.current)uploadRef.current.value=''}};
  const originals=assets.filter(a=>assetCategory(a)==='sticker');
  const selected=stickerIds.filter(id=>originals.some(a=>a.id===id)).slice(0,3);
- const groupFor=(name:string)=>/avatar/i.test(name)?'Avatares':/matcha|coffee|tea|cup/i.test(name)?'Matcha':/pilates|reformer|barre|yoga|stretch/i.test(name)?'Pilates':/squat|fitness|gym|dumbbell|workout|exercise|lunge|treadmill|plank/i.test(name)?'Fitness':'Aesthetic';
+ const groupFor=(name:string)=>/avatar/i.test(name)?'Avatares':/matcha|coffee|tea|cup/i.test(name)?'Matcha':/pilates|reformer|barre|yoga|stretch/i.test(name)?'Pilates':/squat|fitness|gym|dumbbell|workout|exercise|lunge|treadmill|plank/i.test(name)?'Ejercicios':'Aesthetic';
  const visible=originals.filter(a=>group==='Todos'||(a.shared?a.stickerGroup:groupFor(a.name))===group);
  const toggle=(id:string)=>{
   if(!images[id])loadImage?.(id);
-  onChange({backgroundId,stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
+  onChange({backgroundId,backgroundImageId,stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
  };
  return <section className="free-decor-controls" aria-label="Decoración gratis">
   <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Decora con PNG originales y fondos gratuitos. Sin créditos IA.</p></div><span>FREE</span></div>
@@ -48,6 +48,6 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
     {visible.length?<div className="free-decor-stickers">{visible.map(a=><div key={a.id} className="free-decor-sticker-cell"><button type="button" aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''} onClick={()=>toggle(a.id)}><StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/><small>{displayAssetName(a)}</small></button></div>)}</div>:
     <div className="free-decor-empty"><strong>Aquí aparecerán tus stickers PNG originales.</strong><p>No se mostrarán emojis de relleno. Cuando la administradora publique la colección, aparecerá aquí automáticamente.</p>{onOpenLibrary&&<button type="button" onClick={onOpenLibrary}>Abrir biblioteca de stickers</button>}</div>}
    </>}
-  <div className="free-decor-footer"><small>Máximo 3 stickers por slide. Las fotografías originales no se modifican.</small>{selected.length>0&&<button type="button" onClick={()=>onChange({backgroundId,stickerIds:[]})}>Quitar stickers</button>}</div>
+  <div className="free-decor-footer"><small>Máximo 3 stickers por slide. Las fotografías originales no se modifican.</small>{selected.length>0&&<button type="button" onClick={()=>onChange({backgroundId,backgroundImageId,stickerIds:[]})}>Quitar stickers</button>}</div>
  </section>
 }
