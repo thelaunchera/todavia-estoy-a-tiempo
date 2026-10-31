@@ -28,7 +28,8 @@ test('Static template gallery removed from post creation; layered full photo stu
  assert.ok(studio.includes("kind:'photo'"));
  assert.ok(studio.includes('onDropFiles='));
  assert.ok(studio.includes('onReorder={reorder}'));
- assert.ok(studio.includes('await paintPanoramaLayers(ctx,1080,1350'));
+ assert.ok(studio.includes('await paintPanoramaLayers(ctx,width,height'));
+ assert.ok(studio.includes('ratio={1080/freePostDimensions(post.format).height}'));
  assert.ok(decor.includes('normalizePanoramaLayers(p.layers)'));
  assert.ok(layer.includes('paintPanoramaLayers('));
 });
