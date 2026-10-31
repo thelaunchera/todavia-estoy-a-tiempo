@@ -48,6 +48,17 @@ const gridShots=[
  'full product on minimal architectural pedestal with exceptionally broad negative space and tonal light',
  'cinematic low-angle campaign finale, spotlight, dramatic atmosphere and rich shadows'
 ] as const;
+const portraitShots=[
+ 'relaxed full-length standing portrait, actual flat pavement, natural lighting, both feet touching ground',
+ 'waist-up candid portrait in a normal room, hands resting outside frame, recognizable relaxed face',
+ 'close natural facial portrait, consistent eyes, nose, jaw and hair, realistic skin texture, no hands visible',
+ 'authentic outdoor walking portrait, natural stride, believable leg geometry, no platform or stage',
+ 'ordinary chair seated editorial portrait, realistic pose and fabric folds, feet naturally grounded',
+ 'three-quarter portrait leaning near a real wall, hands relaxed, subtle candid expression',
+ 'natural side or three-quarter face portrait by a window, same recognizable face, no visible hands',
+ 'full-length street-style portrait, subtle change of outfit layers, flat uninterrupted pavement, authentic expression',
+ 'cinematic but realistic dusk portrait on genuine ground with practical light, no artificial stage'
+] as const;
 const gridLayouts=['Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props','Hands-on Editorial','High Contrast','Minimal Premium','Campaign Finale'] as const;
 const fallbackTexts={
  English:{
@@ -61,12 +72,12 @@ const fallbackTexts={
   captions:['A veces solo hace falta cambiar el ángulo.','Una composición sencilla deja que el producto hable.','Los detalles merecen su momento.','El contexto también cuenta una historia.','La misma referencia, una idea completamente diferente.','Una escena auténtica, sin adornos innecesarios.','Repetir formas cambia lo que vemos.','Dar espacio también es una decisión creativa.','Nueve maneras de mirar un mismo producto.']
  }
 } as const;
-function fallbackGridPlan(lang:'English'|'Español',name:string,brief:string){
+function fallbackGridPlan(lang:'English'|'Español',name:string,brief:string,isPortrait=false){
  const t=fallbackTexts[lang];
  return {
   title:lang==='English'?'Nine distinct directions':'Nueve direcciones diferentes',
   concept:lang==='English'?'A coherent nine-photo editorial series from one original reference.':'Una serie editorial de nueve fotos distintas a partir de la referencia original.',
-  posts:gridShots.map((scene,i)=>({headline:t.titles[i],subtext:t.subtexts[i],caption:t.captions[i],scene:'Shot '+(i+1)+': '+scene+'. Follow the original real subject and this creative brief without inventing product attributes: '+brief.slice(0,250)}))
+  posts:(isPortrait?portraitShots:gridShots).map((scene,i)=>({headline:t.titles[i],subtext:t.subtexts[i],caption:t.captions[i],scene:'Shot '+(i+1)+': '+scene+'. Follow the original real subject and this creative brief without inventing product attributes: '+brief.slice(0,250)}))
  };
 }
 
@@ -281,18 +292,19 @@ Deno.serve(async request=>{
      console.warn('Image vision unavailable; grid planning falls back to text. ',e instanceof Error?e.message:'');
     }
    }
+   const isPortrait=body.kind==='portrait';
    const prompt=[
-    'Create a campaign of exactly 9 independent Instagram posts from ONE product reference. Do not make a carousel or repeat the same photograph.',
+    isPortrait?'Create NINE distinct realistic photo posts of the SAME REAL PERSON using image 1 as the true portrait identity. Use natural portrait camera angles, real floors and streets. No surreal podiums, stages, geometric platforms, product flat-lays or floating people.': 'Create a campaign of exactly 9 independent Instagram posts from ONE product reference. Do not make a carousel or repeat the same photograph.',
     'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Latin American Spanish')+'.',
     'Brand: '+clean(b.name,100)+'. Voice: '+clean(b.voice,130)+'.',
     'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
     'Creative brief from owner — follow their specific instructions before general creative defaults: '+clean(body.brief,1900)+'.',
-    'Visible product/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
+    'Visible subject/source image analysis (if available): '+(visualDescription||'NOT VERIFIED BY VISION, rely only on owner brief and do not infer source appearance.')+'.',
     'Style kit: '+clean(b.photoMood,250)+'. Never: '+clean(b.avoid,300)+'.',
     'Source image filename: '+clean(source.name,140)+'. Do NOT invent product ingredients, prices, testimonials or unverified benefits.',
     'Each of the nine posts must have a short headline (2-6 words), subtext (4-9 words), caption (one natural sentence).',
     'For personal/editorial ABOUT ME designs add optional handwritten (2-5 words) and callouts (up to FOUR brief annotation texts, 4-15 words) ONLY when they are supported by owner brief or brand notes. Do not invent biography, identity, credentials, results or personal facts. If unsupported, return empty callouts.',
-    'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
+    isPortrait?'Use the nine portrait treatments: standing, waist-up candid, face close-up, walking, seated, leaning against a normal wall, window portrait, full-length street style, natural cinematic outdoor portrait. Accurate hands, feet and face. Never use sculptural platforms or product photography prompts.':'In order, the nine distinct creative treatments: studio hero; graphic flat lay; macro texture; lifestyle wide; surreal still-life; hands-on; repeating pattern; minimalist podium; cinematic finale.',
     'Return JSON with one key posts containing an array of exactly nine objects, each {headline,subtext,caption,handwritten,callouts}. No explanations, no scene key.'
    ].join('\n');
    const schema={
@@ -322,7 +334,7 @@ Deno.serve(async request=>{
     // Keep authenticated/permission/quota errors visible. Only a genuinely
     // unparseable/incomplete text response falls back to local prewritten concepts.
     if(!(e instanceof Error)||!(/JSON_FORMAT:|JSON Mode couldn't be met|JSON Mode could not be met|JSON Mode couldn.t be met|output validation/i.test(e.message)))throw e;
-    planningSource='template';plan=fallbackGridPlan(lang,b.name,clean(body.brief,450));
+    planningSource='template';plan=fallbackGridPlan(lang,b.name,clean(body.brief,450),isPortrait);
    }
    const designMode=body.designMode==='editorial'?'editorial':'photo';
    const accepted=['portrait','annotated','magazine','split','typographic'];
@@ -337,7 +349,7 @@ Deno.serve(async request=>{
    const sequence=[firstStyle,...accepted.filter(p=>p!==firstStyle)];
    const posts=plan.posts.map((p:any,i:number)=>({
     index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
-    scene:'Shot '+(i+1)+': '+gridShots[i]+'. Visual description: '+clean(visualDescription,370)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,900),
+    scene:'Shot '+(i+1)+': '+(isPortrait?portraitShots:gridShots)[i]+'. Visual description: '+clean(visualDescription,370)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,900),
     format:gridLayouts[i],assetId:'',
     ...(designMode==='editorial'?{design:{
       preset:sequence[i%sequence.length],
@@ -351,7 +363,7 @@ Deno.serve(async request=>{
       overlay:.12
     }}:{})
    }));
-   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,creativeSettings:body.creativeSettings||null,brief:clean(body.brief,1900),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
+   const saved=await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='portrait'?'portrait':body.kind==='preserve'?'preserve':'product',designMode,creativeSettings:body.creativeSettings||null,brief:clean(body.brief,1900),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts});
    if(planningSource==='template')await rollback();
    return send(saved);
   }
@@ -359,7 +371,7 @@ Deno.serve(async request=>{
    const grid=await find('grids',clean(body.gridId,100)),i=Number(body.index);
    if(!Number.isInteger(i)||i<0||i>8)throw Error('Número de imagen inválido.');
    const b=await find('brands',grid.brandId);
-   const shots=[
+   const productShots=[
     'single 3/4 front item studio hero, softbox light',
     'top-down graphic paper geometric flat lay',
     'extreme close macro product texture, no full product',
@@ -370,21 +382,23 @@ Deno.serve(async request=>{
     'minimal product on architectural pedestal and negative space',
     'cinematic low diagonal campaign photograph with dramatic spotlights'
    ];
+   const shots=grid.kind==='portrait'?portraitShots:productShots;
    const references:{data:string;mime:string}[]=[];
    if(grid.kind!=='preserve'){const p=await aiReference(grid.sourceId);references.push({data:p.data,mime:p.mime});}
    if(grid.referenceId){const p=await aiReference(grid.referenceId);references.push({data:p.data,mime:p.mime});}
    const settings=grid.creativeSettings||{};
-   const guidance=settings.fidelity==='strict'?5.7:4.2;
+   const guidance=grid.kind==='portrait'||settings.fidelity==='strict'?5.7:4.2;
    const userDirection=clean(grid.brief,1900);
    const finalNegative=clean(settings.avoid,210);
    const prompt=[
     'Photograph ONE coherent VERTICAL 4:5 realistic image, not a collage.',
-    'CUSTOM USER REQUEST (highest priority for creative direction): '+userDirection,
+    'CUSTOM USER REQUEST (creative direction): '+userDirection,
+    grid.kind==='portrait'?'MANDATORY REALISTIC PORTRAIT RULES: preserve the recognizable real face, hair, skin, body proportions and facial features from image 1; normal two arms, two legs, natural shoulders and hands; if a hand is visible it must have exactly five naturally shaped digits including one thumb, never extra or fused fingers. Both feet contact a normal continuous real floor or pavement. NEVER draw a raised round platform, pedestal, floating stage, runway, sculptural block, mannequin, doll or surreal physical setting; no exaggerated face retouching.':'',
     'SHOT '+(i+1)+' of 9: '+shots[i]+'.',
     'Composition '+clean(grid.posts[i].scene,260)+'.',
     'BRAND '+clean(b.name,90)+', color scheme '+clean(b.color,20)+' '+clean(b.background,20)+'.',
     'REALISM: physical texture, correct scale, coherent window or studio light, realistic human proportions, plausible shadows and reflections.',
-    grid.kind==='preserve'?'Make only a tasteful background with NO product or simulated screenshot; the genuine source photo will be composited unchanged.':'First image is the real product or face reference. Maintain recognizability, avoid invented packaging or physical attributes. Second reference is style only.',
+    grid.kind==='preserve'?'Make only a tasteful background with NO product or simulated screenshot; the genuine source photo will be composited unchanged.':grid.kind==='portrait'?'Image 1 is the original REAL PERSON for identity; match facial features without inventing a different face. If image 2 exists it is STYLE ONLY, do not copy its person.':'Image 1 is the actual product; preserve material and form; second reference is style only.',
     'AVOID: '+clean(b.avoid,180)+'; '+finalNegative+'. No fabricated words, logos, watermarks, letters or UI.',
     'The exact text and graphic design will be added later as editable layers.'
    ].join(' ').slice(0,3200);
@@ -409,14 +423,17 @@ Deno.serve(async request=>{
     sources.push({data:style.data,mime:style.mime});
    }
    const settings=body.creativeSettings||{};
-   const guidance=settings.fidelity==='strict'?5.7:4.2;
+   const subjectType=body.subjectType==='product'?'product':body.subjectType==='preserve'?'preserve':'portrait';
+   if(subjectType==='preserve')throw Error('Para conservar la foto exactamente, usa Diseño editorial. No hace falta regenerarla con IA.');
+   const guidance=subjectType==='portrait'||settings.fidelity==='strict'?5.7:4.2;
    const userPrompt=clean(body.prompt,1900);
    if(!userPrompt)throw Error('Escribe la escena o el prompt que quieres generar.');
    const final=[
     'Make ONE real photographic image, 4:5 portrait. Brand: '+clean(b.name,100)+'.',
     'USER PROMPT: '+userPrompt,
+    subjectType==='portrait'?'PRIORITY PORTRAIT FIDELITY: This is a REAL PERSON, never a product. Use photo reference 1 for the SAME recognizable face, eye spacing, nose, jaw, hair and natural skin. Realistic body and neutral relaxed pose; TWO arms and TWO legs only, accurate joints and feet. Every visible hand must have exactly five anatomically plausible fingers including one thumb; no extra, missing, merged or distorted digits. Hands may stay outside frame. Feet stand on flat real pavement or ordinary continuous flooring. STRICTLY NO raised circular pedestal, floating disc, podium, platform, geometric stage, surreal objects, mannequin or plastic skin. Keep human scale, consistent sunlight and believable ground shadows.':'PRODUCT FIDELITY: keep the actual product form, realistic materials, honest scale and no invented packaging.',
     'Photo realism: real materials and textures, realistic light, accurate anatomy, physically plausible reflections and honest shadows.',
-    'Fidelity: '+(settings.fidelity==='strict'?'Preserve exact reference identity as closely as the generative model allows.':'Allow art-directed changes but keep the recognizable subject.') ,
+    'Fidelity: '+(subjectType==='portrait'||settings.fidelity==='strict'?'Preserve reference identity as closely as this model allows; do not change defining facial traits.':'Allow art-directed changes but keep the recognizable subject.') ,
     'Avoid: '+clean(b.avoid,140)+' '+clean(settings.avoid,180)+'. No fabricated logos, watermarks, lettering, prices or fake app screens. Exact captions belong in a separate text layer.'
    ].join(' ').slice(0,3200);
    const image:any=await cloudflareRequest(final,sources,true,undefined,{guidance});
