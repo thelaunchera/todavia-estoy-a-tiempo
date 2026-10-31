@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
 
 const url=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL||'');
 const key=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY||'');
@@ -38,6 +39,11 @@ const sharedBackgrounds=async()=>{
   .select('id,name,category,mime,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
  if(error)throw Error(error.message);
  return (data||[]).map(backgroundRecord);
+};
+const hiddenBackgrounds=async()=>{
+ const {data,error}=await tab('hidden_backgrounds').select('id');
+ if(error)throw Error(error.message);
+ return (data||[]).map(x=>x.id as string);
 };
 const add=async(name:string,payload:any)=>{const me=await current();return unwrap(out(await tab(name).insert({owner_id:me.id,payload}).select('id,payload').single()));};
 const update=async(name:string,id:string,payload:any)=>{
@@ -132,12 +138,13 @@ export const api={
     requireConfig();
     if(path==='/api/sticker-catalog')return {data:await sharedStickers()};
     if(path==='/api/background-catalog')return {data:await sharedBackgrounds()};
+    if(path==='/api/hidden-backgrounds')return {data:await hiddenBackgrounds()};
     if(path==='/api/data'){
       const brands=await seed();
-      const [posts,assets,stickers,backgrounds]=await Promise.all([
-        list('posts'),list('assets'),sharedStickers(),sharedBackgrounds()
+      const [posts,assets,stickers,backgrounds,hiddenBackgroundIds]=await Promise.all([
+        list('posts'),list('assets'),sharedStickers(),sharedBackgrounds(),hiddenBackgrounds()
       ]);
-      return {data:{brands,posts,assets:[...assets,...stickers,...backgrounds]}};
+      return {data:{brands,posts,assets:[...assets,...stickers,...backgrounds],hiddenBackgroundIds}};
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
     if(path==='/api/prompts')return {data:await list('prompts')};
@@ -186,6 +193,17 @@ export const api={
   },
   post:async(path:string,payload:any):Promise<{data:any}>=>{
     requireConfig();
+    if(path==='/api/hidden-backgrounds'){
+      const me=await current();
+      const {data:admin,error:authError}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+      if(authError)throw Error(authError.message);
+      if(!admin)throw Error('Solo la administradora puede quitar fondos incluidos.');
+      const id=String(payload?.id||'');
+      if(!FREE_BACKGROUNDS.some(x=>x.id===id))throw Error('Fondo incluido no válido.');
+      const {error}=await tab('hidden_backgrounds').insert({id,hidden_by:me.id});
+      if(error&&error.code!=='23505')throw Error(error.message);
+      return {data:{hidden:true,id}};
+    }
     if(path==='/api/brands')return {data:await add('brands',payload)};
     if(path==='/api/posts')return {data:await add('posts',payload)};
     if(path==='/api/prompts'){
