@@ -182,11 +182,12 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     setBusy('quality');
     try{
      const found:string[]=[];
+     let pending=0;
      const used=new Map<string,number>();
      const hashes:{n:number;value:string}[]=[];
      for(let i=0;i<grid.posts.length;i++){
       const p=grid.posts[i];const image=p.assetId?images[p.assetId]:null;
-      if(!p.assetId||!image){found.push('Post '+(i+1)+': imagen pendiente.');continue;}
+      if(!p.assetId||!image){pending++;continue;}
       if(used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo.');
       used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
@@ -197,11 +198,14 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
       for(const prev of hashes)if(hamming(hash,prev.value)<=5){found.push('Posts '+(prev.n+1)+' y '+(i+1)+': fotos visualmente muy similares; revísalas.');break;}
       hashes.push({n:i,value:hash});
      }
-     found.push('Revisión humana necesaria: inspecciona etiquetas, texto inventado por IA, logos, manos y fidelidad del producto. El Lab no puede garantizar estos detalles automáticamente.');
+     if(pending>0)found.unshift(pending+' de 9 publicaciones sin imagen final. La vista previa puede mostrar tu foto original, pero eso no significa que ya se hayan generado fotos nuevas. Genera cada post cuando lo necesites.');
+     else found.unshift('Las 9 publicaciones tienen una imagen final. Revisa las indicaciones antes de exportar.');
+     found.push('Inspección visual pendiente: revisa etiquetas, manos, logos y que el producto sea fiel al original.');
      setQaNotes(found);setReviewed(false);
-     notify('Revisión preparada. Comprueba los avisos antes de publicar.');
+     notify(pending>0?'Hay '+pending+' fotos finales pendientes. Conservé todas tus ideas y fotografías originales.':'Revisión terminada. Comprueba los avisos antes de exportar.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
+  const gridPending=grid?.posts.filter(p=>!p.assetId||!images[p.assetId]).length||0;
   const tile=grid?.posts[selected];
   return <div className="brand-grid-tool">
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una referencia. Nueve fotos nuevas, escenas y composiciones distintas.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
@@ -250,7 +254,12 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
         <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!reviewed||!grid.posts.every(p=>Boolean(p.assetId&&images[p.assetId]))} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
         <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No genera más imágenes.</p></div>
           <button className="btn ghost" disabled={!!busy} onClick={checkQuality}>Revisar grid</button>
-          {qaNotes.length>0&&<><div className="bg-qa-list">{qaNotes.map((note,i)=><p key={i}>• {note}</p>)}</div><label className="bg-qa-confirm"><input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)}/> Revisé los detalles de las fotografías y apruebo el contenido para publicar.</label></>}
+          {qaNotes.length>0&&<><div className="bg-qa-list" role="status">{qaNotes.map((note,i)=><p key={i}>{i===0?'':'• '}{note}</p>)}</div>
+           {gridPending===0?<label className="bg-qa-confirm">
+             <input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)} aria-label="Confirmar revisión de todas las imágenes"/>
+             <span>He revisado las nueve imágenes y apruebo el contenido para descargar.</span>
+            </label>:<p className="bg-qa-pending">Primero genera las fotos finales. No necesitas marcar ninguna casilla para continuar editando tus conceptos.</p>}
+          </>}
          </div>
         <div className="bg-editor"><div className="bg-title"><span>{String(selected+1).padStart(2,'0')}</span><div><h3>Editar post {selected+1}</h3><p>Esta publicación es independiente.</p></div></div>
           <label>Formato visual · 20 composiciones diferentes</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
@@ -258,6 +267,9 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
           <label>Subtítulo</label><input value={tile?.subtext||''} onChange={e=>update({subtext:e.target.value})}/>
           <label>Caption</label><textarea rows={3} value={tile?.caption||''} onChange={e=>update({caption:e.target.value})}/>
           <label>Dirección de la foto</label><textarea rows={3} value={tile?.scene||''} onChange={e=>update({scene:e.target.value})}/>
+          {tile&&<div className="bg-editor-preview-note">{!tile.assetId
+              ? 'Vista previa de diseño: todavía no se ha generado la foto final de este post. Conservamos la imagen original para ayudarte a organizar la composición.'
+              : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
           <p className="bg-note">El texto se coloca como capa editable después de crear la foto. Nunca pidas a la IA que escriba títulos en el producto.</p>
           <div className="bg-post-actions"><button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar este post':'Generar este post'}</button><button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>

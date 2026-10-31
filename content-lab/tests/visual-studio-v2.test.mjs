@@ -33,8 +33,31 @@ test('AI vision source and style review are explicit and optional',()=>{
 });
 test('iPhone editing, quality checks and explicit image quota confirmation',()=>{
  const grid=src('src/BrandGrid.tsx'),edit=src('src/GridVisualEditor.tsx');
- for(const txt of ['GridVisualEditor','checkQuality','hamming(','window.confirm(','Revisé los detalles'])assert.ok(grid.includes(txt),txt);
+ for(const txt of ['GridVisualEditor','checkQuality','hamming(','window.confirm(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
  assert.ok(edit.includes('onPointerMove={move}'));
  assert.ok(edit.includes("imageZoom"));
  assert.ok(edit.includes("textScale"));
+});
+
+test('mobile review checkbox uses a real 20px column instead of global 100%-wide input',()=>{
+ const styles=src('src/BrandGrid.css');
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(styles.includes('.bg-qa-confirm input[type="checkbox"]'));
+ assert.ok(styles.includes('width:20px!important'));
+ assert.ok(styles.includes('grid-template-columns:22px minmax(0,1fr)'));
+ assert.ok(grid.includes('<span>He revisado las nueve imágenes'));
+ assert.ok(grid.includes('gridPending===0'));
+});
+test('photo frame can be moved and resized separately from crop/zoom',()=>{
+ const composer=src('src/GridComposer.ts'),editor=src('src/GridVisualEditor.tsx');
+ for(const key of ['frameX','frameY','frameScale']){assert.ok(composer.includes(key));assert.ok(editor.includes(key));}
+ assert.ok(editor.includes("if(layer==='photo')onChange({...from,frameX:"));
+ assert.ok(gridSource().includes('Vista previa de diseño'));
+ function gridSource(){return src('src/BrandGrid.tsx');}
+});
+test('grid QA reports aggregate pending count, not nine repetitive warnings',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes('pending++'));
+ assert.ok(grid.includes("pending+' de 9 publicaciones sin imagen final"));
+ assert.ok(!grid.includes("found.push('Post '+(i+1)+': imagen pendiente.')"));
 });

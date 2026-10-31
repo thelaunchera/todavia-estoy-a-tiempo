@@ -10,10 +10,10 @@ export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safe
   square:{w:1080,h:1080,title:'Square · 1:1',safeTop:0.07,safeBottom:0.075},
   story:{w:1080,h:1920,title:'Story / Reel · 9:16',safeTop:0.14,safeBottom:0.19}
 };
-export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;textX?:number;textY?:number;textScale?:number};
+export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number};
 export type Layout={name:string;image:[number,number,number,number];type:[number,number,number,number];accent:string;shape:string;align?:CanvasTextAlign;dark?:boolean};
 export const LAYOUTS:Layout[]=[
- {name:'Editorial Hero',image:[0,0,.99,.64],type:[.06,.73,.88,.17],accent:'rule',shape:'flat'},
+ {name:'Editorial Hero',image:[.06,.06,.88,.59],type:[.065,.70,.87,.19],accent:'rule',shape:'flat'},
  {name:'Bold Typography',image:[.53,.53,.39,.31],type:[.07,.17,.83,.35],accent:'frame',shape:'solid'},
  {name:'Macro Texture',image:[0,0,1,.79],type:[.07,.83,.86,.12],accent:'rule',shape:'bottomPanel'},
  {name:'Lifestyle Scene',image:[.08,.13,.84,.61],type:[.08,.81,.84,.12],accent:'corner',shape:'paper'},
@@ -121,7 +121,13 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  const tx=clamp(Number(control.textX||0),-.35,.35)*W,ty=clamp(Number(control.textY||0),-.35,.35)*H;
  const zoom=clamp(Number(control.imageZoom||1),1,3);
  const [ix,iy,iw,ih]=fmt.image;const [hx,hy,hw,hh]=fmt.type;
- await drawPhoto(ctx,photos.photo||'',ix*W,iy*H,iw*W,ih*H,zoom,dx,dy);
+ // Unlike crop position, frame controls move/resize the actual photo rectangle.
+ // Keep the full frame within the composed export, including on a narrow iPhone.
+ const frameScale=clamp(Number(control.frameScale||1),.45,1.7);
+ const fw=clamp(iw*frameScale,.12,.98),fh=clamp(ih*frameScale,.12,.87);
+ const fx=clamp(ix+(iw-fw)/2+clamp(Number(control.frameX||0),-.75,.75),0,1-fw);
+ const fy=clamp(iy+(ih-fh)/2+clamp(Number(control.frameY||0),-.75,.75),0,1-fh);
+ await drawPhoto(ctx,photos.photo||'',fx*W,fy*H,fw*W,fh*H,zoom,dx,dy);
  if(photos.preserve&&photos.original){
   // Overlay original screenshot/photo unchanged: only center it safely within its card.
   const ox=.56*W,oy=.59*H,ow=.4*W,oh=.3*H;
