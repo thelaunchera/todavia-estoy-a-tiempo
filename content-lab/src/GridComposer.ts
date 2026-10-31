@@ -5,7 +5,8 @@
  * All coordinates are relative to target canvas so every export is composed (not stretched).
  */
 import {renderEditorial,type EditorialDesign} from './EditorialPoster';
-import {paintFreeBackground,paintFreeStickers,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
+import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 export type ExportSize='portrait'|'square'|'story';
 export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safeTop:number;safeBottom:number}>={
   portrait:{w:1080,h:1350,title:'Post · 4:5',safeTop:0.055,safeBottom:0.065},
@@ -109,7 +110,7 @@ async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:numb
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(im,px,py,im.naturalWidth*k,im.naturalHeight*k);ctx.restore();
  return true;
 }
-export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean},size:ExportSize='portrait'){
+export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean;stickerImages?:Record<string,string>},size:ExportSize='portrait'){
  const fmt=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length],metrics=EXPORT_SIZES[size];
  const W=metrics.w,H=metrics.h,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
  try{if((brand.headingFont||'').toLowerCase()==='prompt'&&document.fonts)await document.fonts.load('700 82px Prompt');}catch{/* fall back without blocking export */}
@@ -177,6 +178,6 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
    ctx.drawImage(im,W*.81+(lw-im.naturalWidth*k)/2,H*(metrics.safeTop+.01),im.naturalWidth*k,im.naturalHeight*k);
   }catch{/* An inaccessible logo cannot prevent an otherwise safe export. */}
  }
- paintFreeStickers(ctx,W,H,tile.stickerIds,accent);
+ await paintOriginalStickerImages(ctx,W,H,tile.stickerIds,photos.stickerImages);
  return {canvas,fit:didFit,contrast:contrast(headlineColor,fmt.shape==='dark'?'#191919':base),format:fmt.name};
 }
