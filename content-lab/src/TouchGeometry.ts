@@ -1,13 +1,14 @@
 /** Persisted percentage-based geometry used by mouse, pencil and finger.
  * All values are normalized to the actual export canvas, not screen pixels.
  */
-export type TouchRect={x:number;y:number;w:number;h:number;angle?:number};
+import {normalizeCrop,type PhotoCrop} from './PhotoCrop';
+export type TouchRect={x:number;y:number;w:number;h:number;angle?:number;crop?:PhotoCrop};
 export type StickerPositions=Record<string,TouchRect>;
 export const safeNumber=(value:unknown,fallback:number)=>typeof value==='number'&&Number.isFinite(value)?value:fallback;
-export const clampRect=(r:TouchRect):TouchRect=>{
- const w=Math.max(.055,Math.min(.95,safeNumber(r.w,.15)));
- const h=Math.max(.055,Math.min(.95,safeNumber(r.h,.15)));
- return {x:Math.max(0,Math.min(1-w,safeNumber(r.x,.4))),y:Math.max(0,Math.min(1-h,safeNumber(r.y,.4))),w,h,angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0)))};
+export const clampRect=(r:TouchRect,minWidth=.055):TouchRect=>{
+ const w=Math.max(minWidth,Math.min(1,safeNumber(r.w,.15)));
+ const h=Math.max(.055,Math.min(1,safeNumber(r.h,.15)));
+ return {x:Math.max(0,Math.min(1-w,safeNumber(r.x,.4))),y:Math.max(0,Math.min(1-h,safeNumber(r.y,.4))),w,h,angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0))),...(r.crop?{crop:normalizeCrop(r.crop)}:{})};
 };
 export const stickerDefault=(index:number):TouchRect=>[
  {x:.76,y:.13,w:.19,h:.17,angle:-9},{x:.08,y:.71,w:.18,h:.17,angle:8},{x:.72,y:.72,w:.17,h:.16,angle:12}

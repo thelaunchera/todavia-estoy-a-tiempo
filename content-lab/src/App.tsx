@@ -1114,6 +1114,7 @@ function App() {
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
+              onUploadPhoto={async file=>upload(file,'original')}
               onUploadBackground={async file=>upload(file,'background')}
               initialBackground={backgroundPref.brandId===brand.id?backgroundPref:undefined}
               initialSticker={stickerPref.brandId===brand.id?stickerPref:undefined}

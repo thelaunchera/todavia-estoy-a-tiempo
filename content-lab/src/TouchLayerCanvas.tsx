@@ -1,95 +1,226 @@
-import React,{useEffect,useRef,useState} from 'react';
-import type {TouchRect} from './TouchGeometry';
-import {clampRect} from './TouchGeometry';
+import React, { useEffect, useRef, useState } from 'react';
+import type { TouchRect } from './TouchGeometry';
+import { clampRect } from './TouchGeometry';
+import { coverPlacement, normalizeCrop, photoFrameMetrics } from './PhotoCrop';
 import './TouchLayerCanvas.css';
-type Layer={id:string;name:string;src:string;rect:TouchRect;kind:'photo'|'sticker'};
-type Props={preview:string;layers:Layer[];onCommit:(kind:'photo'|'sticker',id:string,rect:TouchRect)=>void;ratio?:number;onEmpty?:()=>void};
-type Gesture={kind:'photo'|'sticker';id:string;start:TouchRect;startX:number;startY:number;width:number;height:number;resize:boolean;pinchDistance?:number;pinchCenter?:[number,number]};
-export default function TouchLayerCanvas({preview,layers,onCommit,ratio=1080/1350,onEmpty}:Props){
- const [draft,setDraft]=useState<Record<string,TouchRect>>({});
- const [selected,setSelected]=useState('');
- const stage=useRef<HTMLDivElement>(null);
- const pointers=useRef(new Map<number,{x:number;y:number}>());
- const gesture=useRef<Gesture|null>(null);
- const draftRef=useRef(draft);draftRef.current=draft;
- const layersRef=useRef(layers);layersRef.current=layers;
- useEffect(()=>{if(!gesture.current)setDraft({})},[layers]);
- const getRect=(layer:Layer)=>draftRef.current[layer.id]||layer.rect;
- const update=(id:string,next:TouchRect)=>{
-  const rect=clampRect(next);draftRef.current={...draftRef.current,[id]:rect};setDraft(draftRef.current);
- };
- const down=(e:React.PointerEvent<HTMLDivElement>,layer:Layer)=>{
-  e.preventDefault();e.stopPropagation();
-  setSelected(layer.id);
-  const stageRect=stage.current?.getBoundingClientRect();if(!stageRect)return;
-  e.currentTarget.setPointerCapture(e.pointerId);
-  pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  const existing=gesture.current;
-  if(existing&&existing.id===layer.id&&pointers.current.size>=2){
-   const [a,b]=[...pointers.current.values()];
-   const distance=Math.hypot(a.x-b.x,a.y-b.y);
-   gesture.current={...existing,start:getRect(layer),pinchDistance:Math.max(distance,1),pinchCenter:[(a.x+b.x)/2,(a.y+b.y)/2],resize:false};
-   return;
-  }
-  gesture.current={kind:layer.kind,id:layer.id,start:getRect(layer),startX:e.clientX,startY:e.clientY,width:stageRect.width,height:stageRect.height,resize:!!(e.target as HTMLElement).closest('[data-resize-handle]')};
- };
- const move=(e:React.PointerEvent<HTMLDivElement>,layer:Layer)=>{
-  if(!gesture.current||gesture.current.id!==layer.id||!pointers.current.has(e.pointerId))return;
-  e.preventDefault();
-  pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  const g=gesture.current;
-  if(pointers.current.size>=2&&g.pinchDistance&&g.pinchCenter){
-   const [a,b]=[...pointers.current.values()];
-   const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
-   const scale=Math.max(.35,Math.min(3,distance/g.pinchDistance));
-   const w=g.start.w*scale,h=g.start.h*scale;
-   const centerX=(a.x+b.x)/2,centerY=(a.y+b.y)/2;
-   update(g.id,{...g.start,w,h,x:g.start.x-(w-g.start.w)/2+(centerX-g.pinchCenter[0])/g.width,y:g.start.y-(h-g.start.h)/2+(centerY-g.pinchCenter[1])/g.height});
-  }else{
-   const dx=(e.clientX-g.startX)/g.width,dy=(e.clientY-g.startY)/g.height;
-   if(g.resize){
-    const amount=Math.max(dx,dy*ratio);const factor=Math.max(.4,Math.min(2.8,1+amount/Math.max(.08,g.start.w)));
-    update(g.id,{...g.start,w:g.start.w*factor,h:g.start.h*factor});
-   }else update(g.id,{...g.start,x:g.start.x+dx,y:g.start.y+dy});
-  }
- };
- const done=(e:React.PointerEvent<HTMLDivElement>,layer:Layer)=>{
-  if(!pointers.current.has(e.pointerId))return;
-  e.preventDefault();e.stopPropagation();
-  try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}
-  pointers.current.delete(e.pointerId);
-  if(pointers.current.size>0){
-   // When one finger remains, anchor subsequent dragging to the current position.
-   const remaining=[...pointers.current.values()][0],g=gesture.current;
-   if(g){gesture.current={...g,start:getRect(layer),startX:remaining.x,startY:remaining.y,pinchDistance:undefined,pinchCenter:undefined,resize:false}}
-   return;
-  }
-  const g=gesture.current;gesture.current=null;
-  if(g&&g.id===layer.id){
-   const rect=draftRef.current[layer.id];if(rect)onCommit(layer.kind,layer.id,rect);
-  }
- };
- const chosen=layers.find(layer=>layer.id===selected);
- const selectedRect=chosen?getRect(chosen):undefined;
- return <div className="touch-editor" aria-label="Editor táctil de capas. Arrastra fotos y stickers con el dedo. Junta dos dedos para cambiar tamaño.">
-   <div ref={stage} className="touch-editor-stage" style={{aspectRatio:String(ratio)}} onClick={e=>{if(e.target===e.currentTarget){setSelected('');onEmpty?.()}}}>
-    {preview?<img className="touch-editor-base" src={preview} alt="Diseño con texto y fondo" draggable={false}/>:<div className="touch-editor-loading">Preparando editor…</div>}
-    {layers.map(layer=>{
-      const rect=getRect(layer),active=selected===layer.id;
-      return <div key={layer.id} data-layer={layer.id} className={'touch-editor-layer '+layer.kind+(active?' active':'')} style={{left:(rect.x*100)+'%',top:(rect.y*100)+'%',width:(rect.w*100)+'%',height:(rect.h*100)+'%',transform:'rotate('+(rect.angle||0)+'deg)'}}
-       tabIndex={0} role="button" aria-label={'Mover '+layer.name} aria-pressed={active}
-       onPointerDown={e=>down(e,layer)} onPointerMove={e=>move(e,layer)} onPointerUp={e=>done(e,layer)} onPointerCancel={e=>done(e,layer)}
-       onKeyDown={e=>{if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const r=getRect(layer),step=e.shiftKey?.03:.01;const rect=clampRect({...r,x:r.x+(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0),y:r.y+(e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0)});update(layer.id,rect);onCommit(layer.kind,layer.id,rect)}}>
-       <img src={layer.src} alt="" draggable={false}/>
-       {active&&<><span className="touch-editor-outline"/><span className="touch-editor-resize" data-resize-handle aria-hidden="true"/></>}
+
+export type TouchLayer = {
+  id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker';
+  frameStyle?: string; paper?: string; accent?: string;
+};
+type Props = {
+  preview: string; layers: TouchLayer[];
+  onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
+  ratio?: number; pageCount?: number; onEmpty?: () => void;
+  onRemove?: (id: string) => void;
+  onDropAsset?: (id: string, point: {x: number; y: number}) => void;
+  onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
+};
+type Gesture = {
+  id: string; start: TouchRect; startX: number; startY: number;
+  width: number; height: number; resize: boolean; crop: boolean;
+  overflowX: number; overflowY: number;
+  pinchDistance?: number; pinchCenter?: [number, number];
+};
+export default function TouchLayerCanvas({
+  preview, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, onEmpty,
+  onRemove, onDropAsset, onDropFiles,
+}: Props) {
+  const [draft, setDraft] = useState<Record<string, TouchRect>>({});
+  const [selected, setSelected] = useState('');
+  const [cropping, setCropping] = useState(false);
+  const [guides, setGuides] = useState(true);
+  const [dragOver, setDragOver] = useState(false);
+  const stage = useRef<HTMLDivElement>(null);
+  const pointers = useRef(new Map<number, {x: number; y: number}>());
+  const gesture = useRef<Gesture | null>(null);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const clamp = (rect: TouchRect) => clampRect(rect, .055 / pageCount);
+  useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
+  useEffect(() => { setCropping(false); }, [selected]);
+  const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
+  const update = (id: string, next: TouchRect) => {
+    const rect = clamp(next);
+    draftRef.current = {...draftRef.current, [id]: rect};
+    setDraft(draftRef.current);
+  };
+  const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    e.preventDefault(); e.stopPropagation();
+    setSelected(layer.id);
+    const bounds = stage.current?.getBoundingClientRect();
+    if (!bounds) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointers.current.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    const existing = gesture.current;
+    if (existing && existing.id === layer.id && pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = {...existing, start: getRect(layer),
+        pinchDistance: Math.max(Math.hypot(a.x - b.x, a.y - b.y), 1),
+        pinchCenter: [(a.x + b.x) / 2, (a.y + b.y) / 2], resize: false};
+      return;
+    }
+    const rect = getRect(layer);
+    const img = e.currentTarget.querySelector('img');
+    const metrics=photoFrameMetrics(rect.w*1080*pageCount,rect.h*1350,layer.frameStyle||'panorama');
+    const pixelScale=bounds.height/1350;
+    const frameW = rect.w * bounds.width-2*metrics.inset*pixelScale;
+    const frameH = rect.h * bounds.height-(metrics.inset+metrics.bottom)*pixelScale;
+    const placement = coverPlacement(img?.naturalWidth || 1, img?.naturalHeight || 1,
+      frameW, frameH, rect.crop);
+    gesture.current = {
+      id: layer.id, start: rect, startX: e.clientX, startY: e.clientY,
+      width: bounds.width, height: bounds.height,
+      resize: !!(e.target as HTMLElement).closest('[data-resize-handle]'),
+      crop: cropping && selected === layer.id && layer.kind === 'photo',
+      overflowX: Math.max(0, placement.width - frameW),
+      overflowY: Math.max(0, placement.height - frameH),
+    };
+  };
+  const move = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    const g = gesture.current;
+    if (!g || g.id !== layer.id || !pointers.current.has(e.pointerId)) return;
+    e.preventDefault();
+    pointers.current.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    if (pointers.current.size >= 2 && g.pinchDistance && g.pinchCenter) {
+      const [a, b] = [...pointers.current.values()];
+      const scale = Math.max(.35, Math.min(3, Math.hypot(a.x - b.x, a.y - b.y) / g.pinchDistance));
+      if (g.crop) {
+        update(g.id, {...g.start, crop: normalizeCrop({...g.start.crop,
+          zoom: normalizeCrop(g.start.crop).zoom * scale})});
+      } else {
+        const w = g.start.w * scale, h = g.start.h * scale;
+        update(g.id, {...g.start, w, h,
+          x: g.start.x - (w - g.start.w) / 2 + ((a.x + b.x) / 2 - g.pinchCenter[0]) / g.width,
+          y: g.start.y - (h - g.start.h) / 2 + ((a.y + b.y) / 2 - g.pinchCenter[1]) / g.height});
+      }
+    } else if (g.crop) {
+      const angle = (g.start.angle || 0) * Math.PI / 180;
+      const dx = e.clientX - g.startX, dy = e.clientY - g.startY;
+      const crop = normalizeCrop(g.start.crop);
+      update(g.id, {...g.start, crop: normalizeCrop({...crop,
+        x: crop.x - (g.overflowX > .5 ? (dx * Math.cos(angle) + dy * Math.sin(angle)) / g.overflowX : 0),
+        y: crop.y - (g.overflowY > .5 ? (dy * Math.cos(angle) - dx * Math.sin(angle)) / g.overflowY : 0)})});
+    } else {
+      const dx = (e.clientX - g.startX) / g.width, dy = (e.clientY - g.startY) / g.height;
+      if (g.resize) {
+        const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
+        update(g.id, {...g.start, w: g.start.w * factor, h: g.start.h * factor});
+      } else update(g.id, {...g.start, x: g.start.x + dx, y: g.start.y + dy});
+    }
+  };
+  const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    if (!pointers.current.has(e.pointerId)) return;
+    e.preventDefault(); e.stopPropagation();
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* Already released. */ }
+    pointers.current.delete(e.pointerId);
+    const g = gesture.current;
+    if (pointers.current.size > 0 && g) {
+      const remaining = [...pointers.current.values()][0];
+      gesture.current = {...g, start: getRect(layer), startX: remaining.x, startY: remaining.y,
+        pinchDistance: undefined, pinchCenter: undefined, resize: false};
+      return;
+    }
+    gesture.current = null;
+    if (g?.id === layer.id && draftRef.current[layer.id]) {
+      onCommit(layer.kind, layer.id, draftRef.current[layer.id]);
+    }
+  };
+  const chosen = layers.find(layer => layer.id === selected);
+  const selectedRect = chosen ? getRect(chosen) : undefined;
+  const commit = (patch: Partial<TouchRect>) => {
+    if (!chosen || !selectedRect) return;
+    const next = clamp({...selectedRect, ...patch});
+    update(chosen.id, next); onCommit(chosen.kind, chosen.id, next);
+  };
+  return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
+    aria-label="Editor visual de fotos y stickers">
+    {pageCount > 1 && <label className="panorama-guide-toggle"><input type="checkbox"
+      checked={guides} onChange={e => setGuides(e.target.checked)}/> Mostrar líneas de corte · no se descargan</label>}
+    <div className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
+      <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
+        style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
+        onClick={e => { if (e.target === e.currentTarget) { setSelected(''); onEmpty?.(); } }}
+        onDragOver={e => { if (onDropAsset || onDropFiles) { e.preventDefault(); setDragOver(true); } }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => {
+          e.preventDefault(); setDragOver(false);
+          const bounds = e.currentTarget.getBoundingClientRect();
+          const point = {x: Math.max(0, Math.min(1, (e.clientX - bounds.left) / bounds.width)),
+            y: Math.max(0, Math.min(1, (e.clientY - bounds.top) / bounds.height))};
+          const id = e.dataTransfer.getData('application/x-content-lab-asset');
+          if (id) onDropAsset?.(id, point);
+          else if (e.dataTransfer.files.length) onDropFiles?.([...e.dataTransfer.files], point);
+        }}>
+        {preview ? <img className="touch-editor-base" src={preview} alt="Fondo y textos del diseño" draggable={false}/>
+          : <div className="touch-editor-loading">Preparando lienzo…</div>}
+        {layers.map(layer => {
+          const rect = getRect(layer), active = selected === layer.id;
+          const crop = normalizeCrop(rect.crop);
+          const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*1350;
+          const metrics=photoFrameMetrics(fw,fh,mode);
+          const radius=(r:number,w:number,h:number)=>`${100*r/w}% / ${100*r/h}%`;
+          const photoWindow:React.CSSProperties=layer.kind==='photo'?{
+            left:100*metrics.inset/fw+'%',right:100*metrics.inset/fw+'%',
+            top:100*metrics.inset/fh+'%',bottom:100*metrics.bottom/fh+'%',
+            borderRadius:radius(metrics.innerRadius,fw-2*metrics.inset,fh-metrics.inset-metrics.bottom),
+          }:{};
+          return <div key={layer.id} data-layer={layer.id}
+            className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (active && cropping ? ' cropping' : '')}
+            style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
+              height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)'}}
+            tabIndex={0} role="button" aria-label={'Mover ' + layer.name} aria-pressed={active}
+            onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
+            onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
+            onDoubleClick={() => { if (layer.kind === 'photo') { setSelected(layer.id); setCropping(true); } }}
+            onKeyDown={e => {
+              if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+              e.preventDefault(); setSelected(layer.id);
+              const r = getRect(layer), step = e.shiftKey ? .03 : .01;
+              const rect = clamp({...r, x: r.x + (e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0) / pageCount,
+                y: r.y + (e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0)});
+              update(layer.id, rect); onCommit(layer.kind, layer.id, rect);
+            }}>
+            {layer.kind==='photo'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
+              style={{borderRadius:radius(metrics.radius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
+                boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
+            <div className="touch-editor-image-window" style={photoWindow}>
+              <img src={layer.src} alt="" draggable={false} style={layer.kind === 'photo' ? {
+                objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
+                transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
+              } : undefined}/>
+            </div>
+            {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
+              style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(metrics.radius,fw,fh)}}/>}
+            {active && <><span className="touch-editor-outline"/>
+              {!cropping && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
+          </div>;
+        })}
+        {pageCount > 1 && guides && <div className="panorama-cut-guides" aria-hidden="true">
+          {Array.from({length: pageCount}, (_, n) => <div key={n} style={{left: n / pageCount * 100 + '%', width: 100 / pageCount + '%'}}>
+            <span>SLIDE {n + 1}</span></div>)}
+        </div>}
       </div>
-    })}
-   </div>
-   <p className="touch-editor-help">👆 Arrastra para mover · pellizca con dos dedos o usa la esquina para cambiar tamaño · toca una capa para seleccionarla.</p>
-   {chosen&&selectedRect&&<div className="touch-editor-options">
-     <strong>{chosen.kind==='photo'?'📷 Foto':'🎀 Sticker'} seleccionado</strong>
-     <label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="5" value={selectedRect.angle||0} onChange={e=>{const rect={...selectedRect,angle:Number(e.target.value)};update(chosen.id,rect);onCommit(chosen.kind,chosen.id,rect)}}/></label>
-     <button type="button" onClick={()=>{const next={...selectedRect,angle:0};update(chosen.id,next);onCommit(chosen.kind,chosen.id,next)}}>Enderezar</button>
-   </div>}
+    </div>
+    <p className="touch-editor-help">{cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
+      : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
+    {chosen && selectedRect && <div className="touch-editor-options">
+      <strong>{chosen.name}</strong>
+      {chosen.kind === 'photo' && <><button type="button" aria-pressed={cropping}
+        onClick={() => setCropping(v => !v)}>{cropping ? '✓ Listo · mover marco' : 'Recortar / encuadrar'}</button>
+        {cropping && <><label>Zoom <input aria-label="Zoom del encuadre" type="range" min="1" max="4" step=".05"
+          value={normalizeCrop(selectedRect.crop).zoom}
+          onChange={e => commit({crop: normalizeCrop({...selectedRect.crop, zoom: Number(e.target.value)})})}/></label>
+          <button type="button" onClick={() => commit({crop: normalizeCrop()})}>Centrar foto</button></>}
+      </>}
+      {!cropping && <><label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="1"
+        value={selectedRect.angle || 0} onChange={e => commit({angle: Number(e.target.value)})}/></label>
+        <button type="button" onClick={() => commit({angle: 0})}>Enderezar</button></>}
+      {onRemove && <button type="button" onClick={() => {
+        if (window.confirm('¿Quitar esta capa del diseño? Tu archivo original se conserva.')) {
+          onRemove(chosen.id); setSelected('');
+        }
+      }}>Quitar del diseño</button>}
+    </div>}
   </div>;
 }

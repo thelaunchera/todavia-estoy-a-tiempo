@@ -11,10 +11,13 @@ import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccou
 import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
-import {drawSeamlessPages} from './SeamlessCarousel';
+import {drawSeamlessPages,drawSeamlessCanvas} from './SeamlessCarousel';
 import TouchLayerCanvas from './TouchLayerCanvas';
+import PanoramaEditor from './PanoramaEditor';
+import {coverPlacement,normalizeCrop,photoFrameMetrics} from './PhotoCrop';
+import {overlayPanoramaPages,paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 import {photoDefault,stickerDefault,clampRect,normalizedPositions,paintCoverImage,type TouchRect,type StickerPositions} from './TouchGeometry';
-import type {LibraryAsset} from './MediaAsset';
+import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -43,6 +46,7 @@ type Props = {
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
   notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
+  onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const layoutNames: Record<Layout,string> = {
@@ -111,6 +115,8 @@ function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: numbe
   built.slice(0,lines).forEach((line,i)=>ctx.fillText(line,x,y+i*spacing));
 }
 async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Record<string,string>,style:CarouselStyle,editorMode=false) {
+  if(slide.assetId&&!slide.photoPosition)slide={...slide,photoPosition:{...photoDefault(slide.layout),
+    crop:normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})}};
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
   const {paper,accent,ink,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
@@ -134,10 +140,8 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     const img=new Image();img.src=images[slide.assetId];
     await img.decode();
     if(!img.naturalWidth||!img.naturalHeight)return false;
-    const mode=slide.frameStyle||'none',inset=mode==='polaroid'?Math.max(13,w*.042):mode==='none'?0:Math.max(7,w*.018);
-    const bottom=mode==='polaroid'?Math.max(44,h*.11):inset;
-    const outerRadius=mode==='super-rounded'?Math.min(w,h)*.12:mode==='rounded'?Math.min(w,h)*.066:mode==='polaroid'?Math.min(w,h)*.025:mode==='none'?0:Math.min(w,h)*.048;
-    const radius=Math.max(0,outerRadius-inset*.38);
+    const mode=slide.frameStyle||'none';
+    const {inset,bottom,radius:outerRadius,innerRadius:radius}=photoFrameMetrics(w,h,mode);
     if(mode!=='none'){
       ctx.save();
       if(mode==='soft-shadow'||mode==='polaroid'){
@@ -153,7 +157,10 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     const cy=f==='top'?Math.max(0,(img.naturalHeight-sh)*.12):f==='bottom'?Math.max(0,(img.naturalHeight-sh)*.9):Math.max(0,(img.naturalHeight-sh)/2);
     ctx.save();
     ctx.beginPath();ctx.roundRect(dx,dy,dw,dh,radius);ctx.clip();
-    ctx.drawImage(img,Math.max(0,(img.naturalWidth-sw)/2),cy,sw,sh,dx,dy,dw,dh);
+    if(slide.photoPosition?.crop){
+      const p=coverPlacement(img.naturalWidth,img.naturalHeight,dw,dh,slide.photoPosition.crop);
+      ctx.drawImage(img,dx+p.x,dy+p.y,p.width,p.height);
+    }else ctx.drawImage(img,Math.max(0,(img.naturalWidth-sw)/2),cy,sw,sh,dx,dy,dw,dh);
     ctx.restore();
     if(mode==='double-border'){
       ctx.save();ctx.strokeStyle=accent;ctx.lineWidth=3;
@@ -239,7 +246,7 @@ const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
@@ -250,6 +257,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [current,setCurrent]=useState(0);
   const swipeStart=useRef<{x:number;y:number}|null>(null);
   const [preview,setPreview]=useState('');
+  const [panoramaPreview,setPanoramaPreview]=useState('');
+  const [panoramaError,setPanoramaError]=useState('');
+  const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const [idea,setIdea]=useState('');
@@ -261,7 +271,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overview,setOverview]=useState<string[]>([]);
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaError('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
@@ -271,9 +281,15 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(part.description.length>260)result.push('Slide '+(n+1)+': texto secundario demasiado largo.');
     return result;
   });
-  const renderAllSlides=async()=>style.seamlessEnabled
-    ?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color})
-    :Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
+  const renderAllSlides=async()=>{
+    const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
+    required.push(...(style.panoramaLayers||[]).map(layer=>layer.assetId));
+    if(style.seamlessEnabled)required.push(style.seamlessAssetId);
+    if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers});
+    const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
+    return overlayPanoramaPages(all,style.panoramaLayers||[],images);
+  };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);setOverview([]);
@@ -351,16 +367,102 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }else replace(next);
   };
   const enableTouch=()=>{
-    if(!touchEdit&&slide.assetId&&!slide.photoPosition)replace({photoPosition:photoDefault(slide.layout)});
+    if(!touchEdit&&slide.assetId&&!slide.photoPosition)replace({photoPosition:{...photoDefault(slide.layout),crop:normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})}});
     setTouchEdit(v=>!v);
   };
   const touchLayers=[
-    ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:clampRect(slide.photoPosition)}]:[]),
+    ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:{...clampRect(slide.photoPosition),crop:slide.photoPosition.crop||normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})},frameStyle:slide.frameStyle||'none',paper:getCarouselPalette(brand,style).paper,accent:getCarouselPalette(brand,style).accent}]:[]),
     ...(slide.stickerIds||[]).filter(id=>images[id]).map((id,index)=>({id,kind:'sticker' as const,name:ownedAssets.find(a=>a.id===id)?.displayName||'Sticker',src:images[id],rect:clampRect(slide.stickerPositions?.[id]||stickerDefault(index))}))
   ];
   const moveTouchLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
     if(kind==='photo')replace({photoPosition:clampRect(rect)});
     else replace({stickerPositions:{...slide.stickerPositions,[id]:clampRect(rect)}});
+  };
+  const pageLayers=slides.flatMap((part,n)=>[
+    ...(part.assetId&&images[part.assetId]?[{
+      id:'page-photo-'+part.key,kind:'photo' as const,name:'Foto · slide '+(n+1),
+      src:images[part.assetId],rect:{...clampRect(part.photoPosition||photoDefault(part.layout)),
+        x:(n+clampRect(part.photoPosition||photoDefault(part.layout)).x)/slides.length,
+        w:clampRect(part.photoPosition||photoDefault(part.layout)).w/slides.length,
+        crop:part.photoPosition?.crop||normalizeCrop({y:part.photoFocus==='top'?.12:part.photoFocus==='bottom'?.9:.5})},
+      frameStyle:style.seamlessEnabled?'panorama':part.frameStyle||'none',
+      paper:getCarouselPalette(brand,style,part.accentIndex||0).paper,accent:getCarouselPalette(brand,style,part.accentIndex||0).accent,
+      page:n,assetId:part.assetId
+    }]:[]),
+    ...(part.stickerIds||[]).filter(id=>images[id]).map((id,index)=>{
+      const r=clampRect(part.stickerPositions?.[id]||stickerDefault(index));
+      return {id:'page-sticker-'+part.key+'-'+id,kind:'sticker' as const,
+        name:'Sticker · slide '+(n+1),src:images[id],rect:{...r,x:(n+r.x)/slides.length,w:r.w/slides.length},page:n,assetId:id};
+    })
+  ]);
+  const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
+    .filter(layer=>images[layer.assetId]).map(layer=>({...layer,src:images[layer.assetId]}))];
+  const movePanoramaLayer=(kind:'photo'|'sticker',id:string,rect:TouchRect)=>{
+    const source=pageLayers.find(layer=>layer.id===id);
+    if(source){
+      if(style.seamlessEnabled){
+        if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
+        const next=slides.map((part,n)=>n!==source.page?part:kind==='photo'
+          ?{...part,assetId:'',photoPosition:undefined}
+          :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)});
+        setAll(next,{...style,panoramaLayers:[...(style.panoramaLayers||[]),
+          {id,assetId:source.assetId,name:source.name,kind,rect}]});
+      }else{
+        const local=clampRect({...rect,x:rect.x*slides.length-source.page,w:rect.w*slides.length});
+        setAll(slides.map((part,n)=>n!==source.page?part:kind==='photo'
+          ?{...part,photoPosition:local}
+          :{...part,stickerPositions:{...part.stickerPositions,[source.assetId]:local}}));
+      }
+    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect}:layer)});
+  };
+  const removePanoramaLayer=(id:string)=>{
+    const source=pageLayers.find(layer=>layer.id===id);
+    if(source)setAll(slides.map((part,n)=>n!==source.page?part:source.kind==='photo'
+      ?{...part,assetId:'',photoPosition:undefined}
+      :{...part,stickerIds:(part.stickerIds||[]).filter(value=>value!==source.assetId)}));
+    else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
+  };
+  // Uploads may finish after several renders; always merge into the latest draft.
+  const latestDraft=useRef({post,slides,style,ownedAssets});
+  latestDraft.current={post,slides,style,ownedAssets};
+  const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number}}[])=>{
+    const latest=latestDraft.current;
+    let nextSlides=[...latest.slides],nextStyle={...latest.style};
+    for(const {asset,point} of items){
+      if(!latest.ownedAssets.some(a=>a.id===asset.id)&&asset.brandId!==brand.id&&!asset.shared)continue;
+      const kind=assetCategory(asset)==='sticker'?'sticker' as const:'photo' as const;
+      const count=nextSlides.length,n=Math.min(count-1,Math.floor(point.x*count));
+      if(nextStyle.seamlessEnabled){
+        if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
+        const w=(kind==='photo'?.65:.2)/count,h=kind==='photo'?.48:.18;
+        const layer:PanoramaLayer={id:'panorama-'+crypto.randomUUID(),assetId:asset.id,
+          name:displayAssetName(asset),kind,rect:clampRect({x:point.x-w/2,y:point.y-h/2,w,h},.055/count)};
+        nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
+      }else nextSlides=nextSlides.map((part,j)=>j!==n?part:kind==='photo'
+        ?{...part,assetId:asset.id,photoPosition:clampRect({...photoDefault(part.layout),crop:normalizeCrop()})}
+        :{...part,stickerIds:[...(part.stickerIds||[]).filter(id=>id!==asset.id),asset.id].slice(-3)});
+    }
+    onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
+      designData:encodeCarouselDesign(nextSlides,nextStyle)});
+    setDownloads([]);setOverview([]);
+  };
+  const addPanoramaAsset=(id:string,point:{x:number;y:number})=>{
+    const asset=ownedAssets.find(a=>a.id===id);
+    if(!asset)return notify('Selecciona una foto de la biblioteca de esta marca.');
+    if(!images[id])loadImage(id);
+    addPanoramaAssets([{asset,point}]);
+  };
+  const uploadPanoramaPhotos=async(files:File[],point:{x:number;y:number})=>{
+    const uploaded:{asset:Asset;point:{x:number;y:number}}[]=[];
+    const originBrand=brand.id;
+    for(const file of files.slice(0,8)){
+      if(!file.type.startsWith('image/')&&!/\.(heic|heif)$/i.test(file.name)){
+        notify('Solo puedes añadir archivos de imagen al lienzo.');continue;
+      }
+      const asset=await onUploadPhoto(file);
+      if(asset)uploaded.push({asset,point:{x:Math.min(.95,point.x+uploaded.length*.03),y:point.y}});
+    }
+    if(uploaded.length&&latestDraft.current.post.brandId===originBrand)addPanoramaAssets(uploaded);
   };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
@@ -377,14 +479,62 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     slides.forEach(s=>{if(s.assetId&&!images[s.assetId])loadImage(s.assetId);if(s.backgroundImageId&&!images[s.backgroundImageId])loadImage(s.backgroundImageId);(s.stickerIds||[]).forEach(id=>{if(!images[id])loadImage(id)});});
     if(style.referenceAssetId&&!images[style.referenceAssetId])loadImage(style.referenceAssetId);
     if(style.seamlessAssetId&&!images[style.seamlessAssetId])loadImage(style.seamlessAssetId);
+    (style.panoramaLayers||[]).forEach(layer=>{if(!images[layer.assetId])loadImage(layer.assetId)});
   },[post.designData,brand.id,style.referenceAssetId,style.seamlessAssetId]);
   useEffect(()=>{
     let active=true;
-    (style.seamlessEnabled?drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:brand.color,editorMode:touchEdit}).then(all=>all[i]):drawSlide(slide,i,slides.length,brand,images,style,touchEdit)).then(c=>{
-      if(active)setPreview(c.toDataURL('image/png'));
-    }).catch(showError);
-    return()=>{active=false;};
+    const timer=window.setTimeout(()=>{
+      const render=async()=>{
+        if(style.seamlessEnabled){
+          const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
+            assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
+            layers:style.panoramaLayers});
+          const page=document.createElement('canvas');page.width=432;page.height=540;
+          page.getContext('2d')?.drawImage(wide,i*1080,0,1080,1350,0,0,432,540);
+          wide.width=1;return page;
+        }
+        const page=await drawSlide(slide,i,slides.length,brand,images,style,touchEdit);
+        if(!touchEdit&&style.panoramaLayers?.length){
+          const ctx=page.getContext('2d');if(ctx){ctx.save();ctx.translate(-i*1080,0);
+            await paintPanoramaLayers(ctx,slides.length*1080,1350,style.panoramaLayers,images);ctx.restore();}
+        }
+        return page;
+      };
+      void render().then(c=>{
+        if(active)setPreview(c.toDataURL('image/png'));
+        c.width=1;
+      }).catch(e=>{if(active&&!(e instanceof Error&&e.message.includes('todavía está cargando')))showError(e)});
+    },120);
+    return()=>{active=false;window.clearTimeout(timer);};
   },[i,slide.key,slide.eyebrow,slide.title,slide.description,slide.layout,slide.assetId,slide.photoFocus,slide.accentIndex,slide.backgroundId,slide.backgroundImageId,slide.photoPosition,slide.stickerPositions,slide.stickerIds,touchEdit,slides.length,brand.color,brand.background,brand.secondaryColor,brand.additionalColors,brand.headingFont,brand.bodyFont,style,images]);
+  useEffect(()=>{
+    let active=true;
+    setPanoramaError('');
+    const render=async()=>{
+      // Photo slots are removed from this base and represented as live DOM layers.
+      const editable=slides.map(part=>({...part,photoPosition:part.assetId
+        ?part.photoPosition||photoDefault(part.layout):part.photoPosition}));
+      if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
+        backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
+        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true});
+      const wide=document.createElement('canvas');wide.width=432*slides.length;wide.height=540;
+      const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
+      for(let n=0;n<editable.length;n++){
+        if(!active)return wide;
+        const canvas=await drawSlide(editable[n],n,slides.length,brand,images,style,true);
+        ctx.drawImage(canvas,n*432,0,432,540);canvas.width=1;
+      }
+      return wide;
+    };
+    const timer=window.setTimeout(()=>{void render().then(wide=>{
+      if(!active){wide.width=1;return;}
+      const small=document.createElement('canvas');small.width=slides.length*432;small.height=540;
+      small.getContext('2d')?.drawImage(wide,0,0,small.width,small.height);
+      setPanoramaPreview(small.toDataURL('image/png'));
+      wide.width=1;small.width=1;
+    }).catch(e=>{if(active)setPanoramaError(e instanceof Error?e.message:'No se pudo preparar la vista previa.');});},120);
+    return()=>{active=false;window.clearTimeout(timer)};
+  },[post.designData,images,brand,previewRevision]);
   const makeCopy=async()=>{
     if(idea.trim().length<8)return notify('Describe un problema o una idea más específica.');
     if(!window.confirm('Usar la IA para escribir este carrusel consume 1 crédito de ideas. También puedes crearlo manualmente con el botón de 6 slides. ¿Continuar?'))return;
@@ -417,7 +567,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const exportOne=async(n=i)=>{
     setBusy('export');
     try{
-      const canvas=style.seamlessEnabled?(await renderAllSlides())[n]:await drawSlide(slides[n],n,slides.length,brand,images,style);
+      const canvas=(await renderAllSlides())[n];
       const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=filename(post,n);a.click();
       notify('Slide '+(n+1)+' descargado como PNG individual.');
     }catch(e){showError(e)}finally{setBusy('');}
@@ -493,6 +643,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <p>Los textos se mantienen dentro de cada slide. Las formas y el fondo cruzan los cortes para que al deslizar se vea un solo diseño continuo.</p>
       </div>}
     </section>
+    <PanoramaEditor preview={panoramaPreview} count={slides.length} seamless={style.seamlessEnabled}
+      layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage}
+      onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
+      onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
     <div className="factory-work">
       <div className="factory-edit">
         <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
@@ -539,7 +693,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <aside className="factory-right">
         <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
-         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={enableTouch}>{touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
+         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={()=>{
+           if(style.seamlessEnabled||style.panoramaLayers?.length){document.querySelector('.panorama-editor')?.scrollIntoView({behavior:'smooth',block:'start'});setTouchEdit(false)}else enableTouch();
+         }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Editar en el lienzo panorámico':touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
         {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
         <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
          onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}

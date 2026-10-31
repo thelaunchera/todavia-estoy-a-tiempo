@@ -1,9 +1,11 @@
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
-import {clampRect,type TouchRect,type StickerPositions} from './TouchGeometry';
-export type SeamlessPage={title:string;eyebrow:string;description:string;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
+import {clampRect,photoDefault,type TouchRect,type StickerPositions} from './TouchGeometry';
+import {coverPlacement,normalizeCrop} from './PhotoCrop';
+import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
+export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;layers?:PanoramaLayer[]};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -31,7 +33,7 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
  return output;
 };
 /** Renders ONE continuous design first and then slices it on exact 1080px boundaries. */
-export async function drawSeamlessPages(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement[]>{
+export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement>{
  if(pages.length<2||pages.length>8)throw Error('El carrusel seamless necesita entre 2 y 8 slides.');
  const total=pages.length,wide=document.createElement('canvas');wide.width=total*W;wide.height=H;
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
@@ -74,18 +76,24 @@ export async function drawSeamlessPages(pages:SeamlessPage[],brand:SeamlessBrand
   ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
   ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
   ctx.save();ctx.translate(x,0);
-  if(!opts.editorMode&&page.photoPosition&&page.assetId&&images[page.assetId]){
+  if(!opts.editorMode&&page.assetId&&images[page.assetId]){
     try{
-      const p=clampRect(page.photoPosition),im=await load(images[page.assetId]);
-      const fw=p.w*W,fh=p.h*H,z=Math.max(fw/im.naturalWidth,fh/im.naturalHeight),iw=im.naturalWidth*z,ih=im.naturalHeight*z;
+      const p=clampRect(page.photoPosition||photoDefault(page.layout||'photo')),im=await load(images[page.assetId]);
+      const fw=p.w*W,fh=p.h*H,placement=coverPlacement(im.naturalWidth,im.naturalHeight,fw,fh,p.crop||normalizeCrop({y:page.photoFocus==='top'?.12:page.photoFocus==='bottom'?.9:.5}));
       ctx.save();ctx.translate((p.x+p.w/2)*W,(p.y+p.h/2)*H);
       ctx.rotate((p.angle||0)*Math.PI/180);
       ctx.beginPath();ctx.roundRect(-fw/2,-fh/2,fw,fh,Math.min(fw,fh)*.06);ctx.clip();
-      ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();
+      ctx.drawImage(im,-fw/2+placement.x,-fh/2+placement.y,placement.width,placement.height);ctx.restore();
     }catch{/* Keep all other pages exportable. */}
   }
   if(!opts.editorMode)await paintOriginalStickerImages(ctx,W,H,page.stickerIds,images,page.stickerPositions);
   ctx.restore();
  }
- return splitIntoPages(wide,total);
+ if(!opts.editorMode)await paintPanoramaLayers(ctx,wide.width,H,opts.layers||[],images);
+ return wide;
+}
+
+export async function drawSeamlessPages(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement[]>{
+ const wide=await drawSeamlessCanvas(pages,brand,images,opts);
+ return splitIntoPages(wide,pages.length);
 }
