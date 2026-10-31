@@ -3,9 +3,10 @@ import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {clampRect,photoDefault,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {coverPlacement,normalizeCrop} from './PhotoCrop';
 import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
-export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
+import {carouselFontFamily,type CarouselFont} from './CarouselArtDirection';
+export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;layers?:PanoramaLayer[]};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[]};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -35,12 +36,11 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
 
 /** Paints transparent typography over back-layer photos (matches the original layout). */
 export async function paintSeamlessTypography(
- ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId,
+ ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId, fontId:CarouselFont='brand',
 ) {
- const font=brand.headingFont==='Prompt'?'Prompt, Arial, sans-serif':
-   brand.headingFont==='Futura'?'Futura, Arial, sans-serif':'Georgia, serif';
- try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */ }
- pages.forEach((page,i)=>{
+ for(const [i,page] of pages.entries()){
+  const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
+  try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */}
   const x=i*W,ink=backgroundId==='night-editorial'?'#FFFFFF':'#191919';
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
    ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
@@ -49,7 +49,7 @@ export async function paintSeamlessTypography(
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;ctx.textBaseline='top';
   ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
   ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0'),x+W-183,H-90);
- });
+ }
 }
 
 /** Renders ONE continuous design first and then slices it on exact 1080px boundaries. */
@@ -75,10 +75,11 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  ctx.beginPath();ctx.moveTo(0,H*.68);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.3,H*.55,x+W*.72,H*.81,x+W,H*.62)}
  ctx.stroke();ctx.restore();
- const font=brand.headingFont==='Prompt'?'Prompt, Arial, sans-serif':brand.headingFont==='Futura'?'Futura, Arial, sans-serif':'Georgia, serif';
- try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
+ // The heading is resolved for each slide, so local overrides match the master type picker.
  for(let i=0;i<total;i++){
   const x=i*W,page=pages[i];
+  const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
+  try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
   const dark=opts.backgroundId==='night-editorial',ink=dark?'#FFFFFF':'#191919';
   // Light local text halo: readable without breaking the continuous artwork.
   const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
@@ -113,7 +114,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
   await paintPanoramaLayers(ctx,wide.width,H,behind,images);
-  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId);
+  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font);
   await paintPanoramaLayers(ctx,wide.width,H,front,images);
  }
  return wide;
