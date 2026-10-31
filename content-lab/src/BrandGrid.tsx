@@ -15,7 +15,8 @@ type Props={brand:Brand;assets:Asset[];images:Record<string,string>;onUploadFile
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
-    photo:images[tile.assetId],original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'
+    photo:(tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId],
+    original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design
   },size)).canvas;
 }
 async function imageFingerprint(src:string):Promise<string>{
@@ -145,21 +146,24 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     return next;
   };
   const generate=async(i:number)=>{
-    if(!grid)return;setBusy('image-'+i);
+    if(!grid)return;
+    if(grid.posts[i].design&&grid.kind==='preserve')return notify('Este diseño editorial usa la foto original y no necesita generar otra con IA. Edita el fondo o descarga el PNG.');
+    setBusy('image-'+i);
     try{const saved=await save(grid);await generateOne(saved,i);notify('Post '+(i+1)+' generado. Los demás no se cambiaron.')}
     catch(e){showError(e)}finally{setBusy('')}
   };
   const generateRemaining=async(initial:Grid)=>{
     let g=initial;
     for(let i=0;i<9;i++){
-      if(g.posts[i].assetId)continue;
+      if(g.posts[i].assetId||g.posts[i].design&&g.kind==='preserve')continue;
       setBusy('image-'+i);
       g=await generateOne(g,i);
     }
     return g;
   };
   const generateAll=async()=>{
-    if(!grid)return;setBusy('all');
+    if(!grid)return;
+    if(grid.posts.every(p=>!!p.design)&&grid.kind==='preserve')return notify('Estos nueve diseños editoriales utilizan tu fotografía original; puedes editarlos y descargarlos sin gastar cuota de IA.');
     if(!window.confirm('La IA generará todas las fotos pendientes con tu cuota gratuita de Cloudflare. ¿Continuar?'))return;
     try{const g=await save(grid);await generateRemaining(g);notify('Fotos pendientes generadas. Revísalas antes de publicar.')}
     catch(e){showError(e);notify('Las fotos terminadas se conservan. Puedes continuar generando las pendientes.')}
@@ -191,12 +195,12 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
      const hashes:{n:number;value:string}[]=[];
      for(let i=0;i<grid.posts.length;i++){
       const p=grid.posts[i];
-      const image=p.assetId?images[p.assetId]:(p.design?images[grid.sourceId]:null);
+      const image=p.design&&grid.kind==='preserve'?images[grid.sourceId]:p.assetId?images[p.assetId]:null;
       if(!image){pending++;continue;}
       if(used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo.');
       used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
-      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'},exportSize);
+      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design},exportSize);
       if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
       if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
       const hash=await imageFingerprint(image);
@@ -320,7 +324,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
           {tile&&<div className="bg-editor-preview-note">{!tile.assetId
               ? tile.design?'Vista previa editorial usando tu foto original: este diseño ya se puede exportar sin generar otra foto.':'Vista previa de diseño: todavía no se ha generado la foto final. Conservamos la original para planificar.'
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
-          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions"><button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar este post':'Generar este post'}</button><button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
           <p className="bg-note">Modo foto/App intacta: la imagen original se compone sin alterarla. En modo producto la IA crea fotografías nuevas; revisa el resultado antes de publicar.</p>
