@@ -90,7 +90,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    }finally{setBusy(false);if(bulkFileRef.current)bulkFileRef.current.value=''}
  };
  const backgrounds=FREE_BACKGROUNDS.filter(item=>
-  filter!=='mine'&&belongsToBackgroundCategory(item.id,filter)&&
+  filter!=='mine'&&filter!=='shared'&&belongsToBackgroundCategory(item.id,filter)&&
   (item.name+' '+item.description).toLowerCase().includes(search.toLowerCase().trim()));
  const sections=BACKGROUND_CATEGORIES.map(group=>({
    ...group,
