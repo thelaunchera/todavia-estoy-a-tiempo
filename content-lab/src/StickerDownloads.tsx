@@ -7,7 +7,7 @@ import './StickerDownloads.css';
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onUpload:(file:File)=>Promise<LibraryAsset|null>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
- isAdmin:boolean;loadImage:(id:string)=>void;onUse:(id:string)=>void};
+ isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
 const groups=['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
@@ -39,6 +39,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
  const fileRef=useRef<HTMLInputElement>(null);
  const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
  const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
+ const [destination,setDestination]=useState<'carousel'|'cover'>('carousel');
  const [dragActive,setDragActive]=useState(false);
  const files=useMemo(()=>assets.filter(a=>(a.brandId===brandId||a.shared)&&assetCategory(a)==='sticker'),[assets,brandId]);
  const publicCount=files.filter(a=>a.shared).length;
@@ -85,9 +86,9 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   }catch(e){setProgress('No se pudo importar: '+(e instanceof Error?e.message:String(e)))}
   finally{setRunning(false);if(fileRef.current)fileRef.current.value=''}
  };
- const download=(asset:LibraryAsset)=>{
-  const url=images[asset.id];
-  if(!url){loadImage(asset.id);setProgress('La imagen se está cargando. Vuelve a pulsar Descargar.');return}
+ const download=async(asset:LibraryAsset)=>{
+  const url=images[asset.id]||await Promise.resolve(loadImage(asset.id));
+  if(!url){setProgress('No se pudo cargar este PNG. Revisa tu conexión y vuelve a probar.');return}
   const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset).replace(/[^a-z0-9áéíóú_-]+/gi,'-')||'sticker')+'.png';document.body.appendChild(a);a.click();a.remove();
  };
  return <section className="sticker-downloads" aria-label="Stickers PNG originales">
@@ -98,8 +99,9 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
    onDrop={e=>{e.preventDefault();setDragActive(false);if(!running)void importFiles(Array.from(e.dataTransfer.files))}}>
    <div><strong>{dragActive?'Suelta el archivo PNG o ZIP aquí 🎀':isAdmin?'Publicar colección para todos los compradores':'Tus propios stickers (opcional)'}</strong><p>{isAdmin?'Selecciona el paquete original completo una sola vez. Después estará disponible automáticamente para todos los compradores con acceso activo. Los duplicados exactos se descartan por contenido.':'La biblioteca compartida se actualiza automáticamente. También puedes añadir PNG privados de tu marca, sin modificar el catálogo compartido.'}</p></div><button type="button" className="btn dark" disabled={running} onClick={()=>fileRef.current?.click()}>{running?<LoaderCircle className="spin" size={15}/>:<Upload size={15}/>} {isAdmin?'Publicar PNG / ZIP':'Subir mis PNG'}</button><input type="file" ref={fileRef} hidden accept=".zip,image/png" multiple onChange={e=>void importFiles(Array.from(e.target.files||[]))}/></div>
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
+  <div className="sticker-destination"><label htmlFor="sticker-use-where">Añadir sticker a</label><select id="sticker-use-where" value={destination} onChange={e=>setDestination(e.target.value as 'carousel'|'cover')}><option value="carousel">Carrusel (slide actual)</option><option value="cover">Post individual / cover</option></select><small>También puedes añadirlos directamente desde Brand Grid, Carousel Factory y el editor de posts.</small></div>
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id)}>Usar en carrusel</button><button type="button" onClick={()=>download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
+  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" onClick={()=>void download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
   <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
  </section>;
 }
