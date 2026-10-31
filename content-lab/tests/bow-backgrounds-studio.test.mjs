@@ -68,7 +68,7 @@ test('Public wallpapers have clear exclusive categories and retired bows remain 
  assert.ok(!palette.includes("Aesthetic · 20"));
  assert.ok(!assets.includes("...BOW_BACKGROUNDS"));
  assert.ok(assets.includes("if(isBowBackground(id)){paintBowBackground(ctx,w,h,id);return}"));
- assert.ok(gallery.includes('Mis fondos guardados'));
+ assert.ok(gallery.includes("'Mis fondos privados'"));
  assert.ok(gallery.includes("label:'Mis fondos'"));
  assert.ok(gallery.includes('ownVisible.map'));
  assert.ok(gallery.includes('backgrounds.filter(item=>belongsToBackgroundCategory'));
