@@ -10,7 +10,7 @@ type Brand={id:string;name:string;color:string;background:string;headingFont?:st
 type Props={
  post:Post;brand:Brand;assets:LibraryAsset[];images:Record<string,string>;locale:'es'|'en';
  onChange:(next:Partial<Post>)=>void;onSave:()=>void;saving:boolean;
- onUploadPhoto:(file:File)=>Promise<{id:string}|null>;
+ onUploadPhoto:(file:File)=>Promise<LibraryAsset|null>;
  onUploadBackground:(file:File)=>Promise<LibraryAsset|null>;
  loadImage:(id:string)=>void;onOpenStickers:()=>void;notify:(message:string)=>void;
 };
@@ -33,7 +33,7 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
  const t=labels[locale];
  const photoRef=useRef<HTMLInputElement>(null),videoRef=useRef<HTMLInputElement>(null),player=useRef<HTMLVideoElement>(null);
  const [videoUrl,setVideoUrl]=useState(''),[videoName,setVideoName]=useState(''),[busy,setBusy]=useState(false);
- const [advanced,setAdvanced]=useState(false);
+ const [advanced,setAdvanced]=useState(true);
  useEffect(()=>()=>{if(videoUrl)URL.revokeObjectURL(videoUrl)},[videoUrl]);
  const setEditorial=(name:'light'|'full'|'dark')=>{
    const d=readCoverDecor(post.designData);
