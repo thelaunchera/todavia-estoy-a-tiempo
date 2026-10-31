@@ -360,6 +360,7 @@ function App() {
   const [query, setQuery] = useState('');
   const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string}>({version:0});
   const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId}>({version:0});
+  const [stickerPref,setStickerPref]=useState<{version:number;brandId?:string;id?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
   const toast = (s: string) => {
     setNotice(s);
@@ -1107,6 +1108,7 @@ function App() {
           {brand && tab === 'factory' && (
             <CarouselFactory
               initialBackground={backgroundPref.brandId===brand.id?backgroundPref:undefined}
+              initialSticker={stickerPref.brandId===brand.id?stickerPref:undefined}
               brand={brand}
               post={editor}
               assets={library}
@@ -1440,7 +1442,7 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad}/>}
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad} onUse={id=>{setStickerPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
           {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={(id)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
