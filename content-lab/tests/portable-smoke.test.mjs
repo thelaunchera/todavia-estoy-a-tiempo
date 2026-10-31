@@ -107,7 +107,7 @@ test('membership and storage RLS isolate by both authenticated owner UUID and pa
 test('AI credits are atomic and charged before all provider calls, with server-only refund',()=>{
  const edge=source('supabase/functions/content-lab-generate/index.ts');
  const sql=source('supabase/migrations/20261031_ai_credit_budget.sql');
- assert.ok(edge.includes("supabase.rpc('content_lab_reserve_ai'"));
+ assert.ok(edge.includes("service.rpc('content_lab_reserve_ai'"));
  assert.ok(edge.includes("service.rpc('content_lab_refund_ai'"));
  assert.ok(edge.includes("if(planningSource==='template')await rollback()"));
  for(const s of ['pg_advisory_xact_lock','photo_remaining integer not null default 60','creative_remaining integer not null default 30','units_used+v_global<=50','auth.role()'])assert.ok(sql.includes(s),s);
