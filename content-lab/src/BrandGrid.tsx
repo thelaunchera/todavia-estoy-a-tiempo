@@ -44,7 +44,13 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     if((!tile.assetId||!images[tile.assetId])&&(!tile.design||!images[grid.sourceId])||(grid.kind==='preserve'&&!images[grid.sourceId])){
       setPreview('');return()=>{on=false};
     }
-    poster(tile,idx,grid,brand,images).then(canvas=>{if(on)setPreview(canvas.toDataURL('image/jpeg',0.7))})
+    poster(tile,idx,grid,brand,images).then(canvas=>{
+      if(!on){canvas.width=1;canvas.height=1;return;}
+      const thumb=document.createElement('canvas');thumb.width=540;thumb.height=Math.round(540*canvas.height/canvas.width);
+      const ctx=thumb.getContext('2d');if(ctx){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+        ctx.drawImage(canvas,0,0,thumb.width,thumb.height);setPreview(thumb.toDataURL('image/png'));}
+      canvas.width=1;canvas.height=1;thumb.width=1;thumb.height=1;
+    })
       .catch(()=>{if(on)setPreview('')});
     return()=>{on=false};
   },[tile.assetId,tile.headline,tile.subtext,tile.format,tile.design,tile.layout,tile.backgroundId,tile.stickerIds,tile.design?.backgroundPattern,tile.design?.stickerIds,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
