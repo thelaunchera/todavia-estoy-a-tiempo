@@ -42,7 +42,7 @@ function fillGradient(ctx:Ctx,w:number,h:number,a:string,b:string,mode:'diagonal
 }
 function satinBow(ctx:Ctx,x:number,y:number,size:number,rose:string,edge:string,angle=0,opacity=1){
  ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.scale(size,size);ctx.globalAlpha*=opacity;
- ctx.shadowColor='#34172340';ctx.shadowBlur=.035;ctx.shadowOffsetY=.013;
+ ctx.shadowColor='#34172340';ctx.shadowBlur=Math.max(2,size*.048);ctx.shadowOffsetY=Math.max(1,size*.013);
  const loop=(side:number)=>{
   ctx.save();ctx.scale(side,1);ctx.beginPath();
   ctx.moveTo(0,.005);ctx.bezierCurveTo(.2,-.16,.54,-.47,.59,-.20);
