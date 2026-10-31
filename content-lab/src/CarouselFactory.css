@@ -292,3 +292,15 @@
  .factory-background-main{padding:8px}
  .factory-background-main .free-decor-expanded{max-height:48vh}
 }
+
+/* Editorial variety: one simple action and an optional per-slide override. */
+.factory-rhythm-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+ padding:17px 18px;margin:16px 0 20px;border:1px solid #d8e2df;
+ background:linear-gradient(115deg,#faf8f3,#eff6f7);border-radius:14px}
+.factory-rhythm-controls>div{flex:1 1 210px;min-width:0}
+.factory-rhythm-controls strong{font-size:14px;color:#191919}
+.factory-rhythm-controls p,.factory-rhythm-note{font-size:11px;line-height:1.6;color:#62777b;margin:5px 0 0}
+.factory-rhythm-controls button{min-height:39px;white-space:normal}
+.factory-rhythm-note{padding:9px 12px;background:#f4f8f7;border-radius:9px;margin:10px 0}
+@media(max-width:580px){.factory-rhythm-controls{align-items:stretch;flex-direction:column}
+ .factory-rhythm-controls button{width:100%}}
