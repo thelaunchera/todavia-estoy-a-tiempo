@@ -926,54 +926,47 @@ function App() {
         <div className="content" data-lab-tab={tab} key={tab}>
           {brand && tab === 'home' && (
             <>
-              <section className="lab-quickstart" aria-label={t('Guía para empezar')}>
-                <div className="lab-quickstart-heading">
-                  <div><span className="eyebrow">{t('CONTENT LAB · FIRST STEPS')}</span>
-                    <h2>{t(setupStepsDone===3?'Tu estudio está en marcha. ✨':'Empieza a crear en 3 pasos.')}</h2>
-                    <p>{t('No necesitas saber diseñar ni programar. Elige una acción y continúa desde donde quedaste.')}</p>
+              <section className="lab-home-greeting" aria-label={loginLanguage==='es'?'Bienvenida a tu estudio':'Welcome to your studio'}>
+                <div className="lab-greeting-main">
+                  <div className="lab-greeting-copy">
+                    <span className="lab-greeting-kicker"><Sparkles size={15} aria-hidden="true"/>
+                      {loginLanguage==='es'?'TU ESPACIO CREATIVO':'YOUR CREATIVE SPACE'}
+                    </span>
+                    <h1>{loginLanguage==='es'?'¡Qué gusto verte de nuevo! 👋':'Welcome back! 👋'}</h1>
+                    <p>{loginLanguage==='es'
+                      ?'Tu estudio está listo. ¿Qué vamos a crear hoy?'
+                      :'Your studio is ready. What shall we create today?'}</p>
+                    {brand.name&&brand.name!=='My Brand'&&<span className="lab-greeting-brand">
+                      {loginLanguage==='es'?'Trabajando en':'Working on'} <strong>{brand.name}</strong>
+                    </span>}
                   </div>
-                  <span className="lab-start-count" aria-label={loginLanguage==='es'?setupStepsDone+' de 3 pasos':setupStepsDone+' of 3 steps'}>{setupStepsDone}/3</span>
-                </div>
-                <div className="lab-quick-progress" role="progressbar" aria-valuenow={setupStepsDone} aria-valuemin={0} aria-valuemax={3} aria-label={t('Progreso de configuración')}>
-                  <span style={{width:(setupStepsDone/3*100)+'%'}}/>
-                </div>
-                <div className="lab-quick-steps">
-                  {setupSteps.map((step,i)=><button key={step.title} type="button" className={'lab-quick-step '+(step.ready?'completed':'')}
-                    onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
-                    <span className="lab-step-num">{step.ready?<Check size={18}/>:String(i+1).padStart(2,'0')}</span>
-                    <span className="lab-quick-text"><strong>{t(step.title)}</strong><small>{t(step.subtitle)}</small></span>
-                    <ArrowRight size={17}/>
-                  </button>)}
-                </div>
-                <div className="lab-quick-shortcuts">
-                  <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> {t("1 Photo → 9 Posts")}</button>
-                  <button type="button" onClick={()=>navigate('prompt-studio')}><BookOpen size={17}/> {t("Prompt Studio · 30 recetas")}</button>
-                  <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> {t("Mis diseños")}</button>
-                </div>
-              </section>
-              <section className="intro">
-                <div>
-                  <div className="eyebrow">
-                    <i className="greendot" /> {t('YOUR CREATIVE DESK')}
+                  <div className="lab-greeting-actions">
+                    <button type="button" className="btn dark" onClick={()=>start()}>
+                      <Plus size={17} aria-hidden="true"/>
+                      {loginLanguage==='es'?'Crear publicación':'Create post'}
+                    </button>
+                    <button type="button" className="lab-greeting-secondary" onClick={startFactory}>
+                      {loginLanguage==='es'?'Abrir carruseles':'Open carousels'}
+                      <ArrowRight size={16} aria-hidden="true"/>
+                    </button>
                   </div>
-                  <h1>
-                    {t('Make room for')}
-                    <br />
-                    <em>{t('better content.')}</em>
-                  </h1>
-                  <p>
-                    {t('One home for your ideas. A different voice for every brand.')}
-                  </p>
                 </div>
-                <div className="hero-art">
-                  <span>{t('the')}</span>
-                  <strong>
-                    {t('creative')}
-                    <br />
-                    {t('process.')}
-                  </strong>
-                  <small>{t('MADE SIMPLE ↗')}</small>
-                </div>
+                {setupStepsDone<3&&<details className="lab-greeting-progress">
+                  <summary>
+                    <Check size={15} aria-hidden="true"/>
+                    <span>{loginLanguage==='es'?'Mis primeros pasos':'My first steps'}</span>
+                    <strong>{setupStepsDone}/3</strong>
+                    <ChevronDown size={16} aria-hidden="true"/>
+                  </summary>
+                  <div className="lab-greeting-checklist">
+                    {setupSteps.map(step=><button key={step.title} type="button" className={step.ready?'complete':''}
+                      onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
+                      <span className="lab-greeting-checkicon">{step.ready?<Check size={15}/>:<ArrowRight size={15}/>}</span>
+                      <span>{t(step.title)}</span>
+                      <small>{step.ready?(loginLanguage==='es'?'Listo':'Done'):(loginLanguage==='es'?'Pendiente':'To do')}</small>
+                    </button>)}
+                  </div>
+                </details>}
               </section>
               <section className="stats">
                 {[
