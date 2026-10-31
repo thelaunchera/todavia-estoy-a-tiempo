@@ -105,7 +105,6 @@ const angles = [
   'POV / Relatable',
   'Storytelling',
 ];
-const formats = ['Carousel', 'Single post', 'Reel', 'Story'];
 const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'home', title: 'Overview', icon: LayoutDashboard },
   { id: 'create', title: 'Posts · 4:5', icon: WandSparkles },
@@ -957,7 +956,7 @@ function App() {
               const Icon=item.icon;
               return <button type="button" key={item.id}
                 className={tab===item.id?'active':''}
-                onClick={()=>navigate(item.id)}>
+                onClick={()=>item.id==='vertical'?startVertical():item.id==='factory'?startFactory():item.id==='create'?start():navigate(item.id)}>
                 <Icon size={19} strokeWidth={1.8}/>{t(item.title)}
                 {item.id==='posts'&&<b>{mine.length}</b>}
               </button>;
@@ -1011,11 +1010,17 @@ function App() {
             <span className="private">
               <LockKeyhole size={13} /> {loginLanguage==='es'?'PRIVADO':'PRIVATE'}
             </span>
-            <button type="button" className="btn dark compact lab-primary-create" onClick={() => start()}
-              aria-label={t('Create content')}>
-              <Plus size={18} /><span className="lab-create-label-long">{t("Create content")}</span>
-              <span className="lab-create-label-short">{loginLanguage==='es'?'Crear':'Create'}</span>
-            </button>
+            <details className="lab-create-menu">
+              <summary className="btn dark compact lab-primary-create" aria-label={t('Create content')}>
+                <Plus size={18}/><span>{loginLanguage==='es'?'Crear':'Create'}</span>
+              </summary>
+              <div className="lab-create-choices">
+                <button onClick={()=>start()}>{loginLanguage==='es'?'Post · 4:5':'Post · 4:5'}</button>
+                <button onClick={startFactory}>{loginLanguage==='es'?'Carrusel · 4:5':'Carousel · 4:5'}</button>
+                <button onClick={()=>startVertical('Reel')}>Reel · 9:16</button>
+                <button onClick={()=>startVertical('Story')}>{loginLanguage==='es'?'Historia · 9:16':'Story · 9:16'}</button>
+              </div>
+            </details>
           </div>
         </header>
         <div className="content" data-lab-tab={tab} key={tab}>
@@ -1041,8 +1046,10 @@ function App() {
                       {loginLanguage==='es'?'Crear publicación':'Create post'}
                     </button>
                     <button type="button" className="lab-greeting-secondary" onClick={startFactory}>
-                      {loginLanguage==='es'?'Abrir carruseles':'Open carousels'}
-                      <ArrowRight size={16} aria-hidden="true"/>
+                      {loginLanguage==='es'?'Carruseles':'Carousels'}
+                    </button>
+                    <button type="button" className="lab-greeting-secondary" onClick={()=>startVertical()}>
+                      <Film size={16}/>{loginLanguage==='es'?'Reels e historias':'Reels and Stories'}
                     </button>
                   </div>
                 </div>
