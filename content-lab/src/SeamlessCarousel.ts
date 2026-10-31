@@ -3,7 +3,7 @@ import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {clampRect,photoDefault,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {coverPlacement,normalizeCrop} from './PhotoCrop';
 import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
-import {carouselFontFamily,type CarouselFont} from './CarouselArtDirection';
+import {carouselFontFamily,readableColor,type CarouselFont} from './CarouselArtDirection';
 export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
 export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;canvasColor?:string;canvasGradient?:string};
@@ -41,7 +41,7 @@ export async function paintSeamlessTypography(
  for(const [i,page] of pages.entries()){
   const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */}
-  const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':'#191919';
+  const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':(freeCanvas&&backgroundId==='brand'?readableColor(brand.background):'#191919');
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
    ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+82,95);}
   words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
@@ -87,7 +87,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const x=i*W,page=pages[i];
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
-  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn',ink=dark?'#FFFFFF':'#191919';
+  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn'||(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')&&readableColor(opts.canvasColor||'#FFFFFF')==='#FFFFFF'),ink=dark?'#FFFFFF':'#191919';
   if(!opts.freeCanvas){
     const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
     grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
