@@ -1,15 +1,67 @@
-import React,{useMemo,useState} from 'react';
-import {Download,Search,Images} from 'lucide-react';
-import {FREE_STICKERS,downloadFreeStickerPNG} from './FreeDesignAssets';
+import React,{useMemo,useRef,useState} from 'react';
+import {Download,Search,Images,Upload,Check,LoaderCircle} from 'lucide-react';
+import {unzip} from 'fflate';
+import {displayAssetName,assetCategory,type LibraryAsset} from './MediaAsset';
 import './StickerDownloads.css';
-const groups=['Todos','Avatares','Matcha','Ejercicios','Pilates','Cute','Florales','Detalles','Editorial','Lifestyle'];
-export default function StickerDownloads(){
+
+type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;onUpload:(file:File)=>Promise<LibraryAsset|null>;loadImage:(id:string)=>void};
+const groups=['Todos','Avatares','Matcha y café','Pilates','Ejercicios','Aesthetic'];
+const groupOf=(name:string)=>{
+ const n=name.toLowerCase();
+ if(/avatar|character|girl|portrait/.test(n))return 'Avatares';
+ if(/matcha|coffee|latte|tea|croissant|tumbler|cup/.test(n))return 'Matcha y café';
+ if(/pilates|reformer|barre|grip.sock|yoga|stretch|mermaid|shoulder.bridge|magic.circle/.test(n))return 'Pilates';
+ if(/squat|workout|gym|fitness|dumbbell|kettlebell|lunge|exercise|strength|sneaker|rope|run|training|treadmill|band|plank/.test(n))return 'Ejercicios';
+ return 'Aesthetic';
+};
+function unpackZip(blob:Uint8Array):Promise<Record<string,Uint8Array>>{
+ return new Promise((resolve,reject)=>unzip(blob,(error,files)=>error?reject(error):resolve(files)));
+}
+export default function StickerDownloads({brandId,assets,images,onUpload,loadImage}:Props){
+ const fileRef=useRef<HTMLInputElement>(null);
  const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
- const matches=useMemo(()=>FREE_STICKERS.filter(s=>(category==='Todos'||s.group===category)&&s.name.toLowerCase().includes(search.toLowerCase())),[category,search]);
- return <section className="sticker-downloads" aria-label="Stickers PNG gratuitos">
-  <div className="sticker-downloads-head"><div><span className="eyebrow">FREE STICKER LIBRARY</span><h2>Stickers para tus posts</h2><p>Descarga cada ilustración PNG con fondo transparente, sin gastar créditos. Avatares, matcha, fitness, Pilates y detalles aesthetics.</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
+ const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
+ const files=useMemo(()=>assets.filter(a=>a.brandId===brandId&&assetCategory(a)==='sticker'),[assets,brandId]);
+ const matches=useMemo(()=>files.filter(a=>(category==='Todos'||groupOf(a.name)===category)&&displayAssetName(a).toLowerCase().includes(search.toLowerCase())),[files,category,search]);
+ const importFiles=async(list:File[])=>{
+  if(!list.length)return;
+  setRunning(true);let saved=0,failed=0;
+  try{
+   const existing=new Set(files.map(a=>a.name.toLowerCase()));
+   const uploadList:File[]=[];
+   for(const file of list){
+    if(/\.zip$/i.test(file.name)){
+     if(file.size>85_000_000)throw Error('El ZIP es demasiado grande (máximo 85 MB).');
+     const archive=await unpackZip(new Uint8Array(await file.arrayBuffer()));
+     const entries=Object.entries(archive).filter(([name,bytes])=>/\.png$/i.test(name)&&!name.includes('__MACOSX')&&bytes.byteLength>1000&&bytes.byteLength<5_000_000);
+     if(entries.length>200)throw Error('Selecciona una colección de máximo 200 stickers.');
+     for(const [name,bytes] of entries){
+      const basename=name.split('/').pop()||'sticker.png';
+      if(!existing.has(basename.toLowerCase())){existing.add(basename.toLowerCase());uploadList.push(new File([new Uint8Array(bytes)],basename,{type:'image/png'}))}
+     }
+    }else if(file.type==='image/png'||/\.png$/i.test(file.name)){
+     if(!existing.has(file.name.toLowerCase())){existing.add(file.name.toLowerCase());uploadList.push(file)}
+    }
+   }
+   for(let i=0;i<uploadList.length;i++){
+    setProgress('Importando stickers originales '+(i+1)+' / '+uploadList.length);
+    const item=await onUpload(uploadList[i]);if(item)saved++;else failed++;
+   }
+   setProgress(saved+' stickers PNG guardados'+(failed?' · '+failed+' no se pudieron guardar':'')+'. Sin créditos IA.');
+  }catch(e){setProgress('No se pudo importar: '+(e instanceof Error?e.message:String(e)))}
+  finally{setRunning(false);if(fileRef.current)fileRef.current.value=''}
+ };
+ const download=(asset:LibraryAsset)=>{
+  const url=images[asset.id];
+  if(!url){loadImage(asset.id);setProgress('La imagen se está cargando. Vuelve a pulsar Descargar.');return}
+  const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset).replace(/[^a-z0-9áéíóú_-]+/gi,'-')||'sticker')+'.png';document.body.appendChild(a);a.click();a.remove();
+ };
+ return <section className="sticker-downloads" aria-label="Stickers PNG originales">
+  <div className="sticker-downloads-head"><div><span className="eyebrow">ORIGINAL PNG STICKERS · SIN IA</span><h2>Stickers de verdad, no emojis.</h2><p>Avatares, matcha, Pilates, fitness y wellness. Cada sticker se muestra con su imagen original y se descarga individualmente en PNG transparente.</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
+  <div className="sticker-import-bar"><div><strong>Mi colección de stickers</strong><p>Importa los PNG originales de tu biblioteca, o el ZIP de stickers que recibiste. Los archivos se guardan en tu marca, sin regenerarlos con IA.</p></div><button type="button" className="btn dark" disabled={running} onClick={()=>fileRef.current?.click()}>{running?<LoaderCircle className="spin" size={15}/>:<Upload size={15}/>} Importar PNG / ZIP</button><input type="file" ref={fileRef} hidden accept=".zip,image/png" multiple onChange={e=>void importFiles(Array.from(e.target.files||[]))}/></div>
+  {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(s=><article key={s.id}><div className="sticker-downloads-preview"><span role="img" aria-label={s.name}>{s.emoji}</span></div><strong>{s.name}</strong><small>{s.group}</small><button type="button" onClick={()=>downloadFreeStickerPNG(s.id)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={20}/> No hay stickers con ese nombre.</div>}
-  <p className="sticker-downloads-note">Estas son ilustraciones editoriales descargables del Content Lab. La colección de PNG ilustrados originales de Pilates y fitness se está revisando por separado.</p>
- </section>
+  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><div className="sticker-downloads-preview">{images[asset.id]?<img src={images[asset.id]} alt={displayAssetName(asset)} loading="lazy"/>:<button type="button" onClick={()=>loadImage(asset.id)}>Cargar PNG</button>}</div><strong>{displayAssetName(asset)}</strong><small>{groupOf(asset.name)}</small><button type="button" onClick={()=>download(asset)}><Download size={14}/> Descargar PNG</button></article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Importa la colección original para ver aquí las ilustraciones reales. No se mostrarán emojis de relleno.'}</div>}
+  <p className="sticker-downloads-note">La biblioteca personal de ChatGPT y la biblioteca privada del sitio son servicios diferentes. Importar el ZIP una sola vez añade los originales a este workspace. El proceso no consume créditos de generación.</p>
+ </section>;
 }
