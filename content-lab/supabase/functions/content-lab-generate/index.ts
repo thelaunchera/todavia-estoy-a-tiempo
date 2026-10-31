@@ -265,7 +265,12 @@ Deno.serve(async request=>{
   if(action==='ideas'){
    const b=await find('brands',clean(body.brandId,100));
    const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
-   const obj:any=await cloudflareRequest('Return JSON {title,hook,slides,caption,cta,visual,alternatives}. 3 alternative hooks, five short slide lines. Write ALL public content only in '+lang+'. Brand '+b.name+', audience '+b.audience+', rules '+b.rules+'. Topic '+clean(body.topic,900)+'. Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)+'. Never invent product details or testimonials.');
+   const platforms=['instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'];
+   const primary=platforms.includes(b.primaryPlatform)?b.primaryPlatform:'instagram';
+   const destination=platforms.includes(body.platform)?body.platform:primary;
+   const account=clean(b.socialAccounts?.[destination]||(destination==='instagram'?b.handle:''),160);
+   const context='Publishing destination: '+destination+'. Adapt the hook, pacing and caption to this platform while respecting brand voice, audience and language. User-provided page or handle: '+account+'. Never claim that an external account is connected or a post has been published.';
+   const obj:any=await cloudflareRequest('Return JSON {title,hook,slides,caption,cta,visual,alternatives}. 3 alternative hooks, five short slide lines. Write ALL public content only in '+lang+'. Brand '+b.name+', audience '+b.audience+', rules '+b.rules+'. '+context+' Topic '+clean(body.topic,900)+'. Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)+'. Never invent product details or testimonials.');
    return send({title:clean(obj.title,150),hook:clean(obj.hook,500),slides:clean(obj.slides,3500),caption:clean(obj.caption,4500),cta:clean(obj.cta,250),visual:clean(obj.visual,900),alternatives:Array.isArray(obj.alternatives)?obj.alternatives.slice(0,3):[]});
   }
   if(action==='grid-plan'){
