@@ -24,3 +24,14 @@ test('No-cost diagnostic and one-photo test are protected and visible',()=>{
  assert.ok(grid.includes('Probar 1 foto gratis'));
  assert.ok(!grid.includes("await generateRemaining(g);\n      notify('Tus nueve publicaciones están listas.')"));
 });
+
+test('Cross-brand source photos are not reused and server errors are readable',()=>{
+ const grid=source('src/BrandGrid.tsx');
+ const client=source('src/platform/client.ts');
+ const backend=source('supabase/functions/content-lab-generate/index.ts');
+ assert.ok(grid.includes("setSourceId('');setReferenceId('');setGrid(null)"));
+ assert.ok(grid.includes('library.some(a=>a.id===sourceId)'));
+ assert.ok(grid.includes('Cada cuenta tiene su biblioteca separada'));
+ assert.ok(client.includes('context.clone().json()'));
+ assert.ok(backend.includes('Esta foto está guardada en otra marca'));
+});

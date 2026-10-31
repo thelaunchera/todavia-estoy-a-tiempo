@@ -37,7 +37,20 @@ const seed=async()=>{
 };
 async function useEdge(action:string,body:any){
   const {data,error}=await sb.functions.invoke('content-lab-generate',{body:{action,...body}});
-  if(error)throw Error(error.message||'El servicio de IA no respondió.');
+  if(error){
+    // Supabase wraps non-2xx responses in a generic error. Read the JSON response
+    // so the user sees the real reason (wrong brand, credentials, or free quota).
+    let message='';
+    const context=(error as {context?:Response}).context;
+    if(context&&typeof context.json==='function'){
+      try{
+        const payload=await context.clone().json();
+        message=typeof payload?.error==='string'?payload.error:
+                typeof payload?.message==='string'?payload.message:'';
+      }catch{/* Preserve the original error when response is not JSON. */}
+    }
+    throw Error(message||error.message||'El servicio de IA no respondió.');
+  }
   if(data?.error)throw Error(data.error);
   return data;
 }
