@@ -30,6 +30,18 @@ export default function PanoramaEditor({
   const [libraryOpen,setLibraryOpen]=useState(false);
   const [filter, setFilter] = useState('');
   const [uploading, setUploading] = useState(false);
+  useEffect(()=>{
+    const onKey=(event:KeyboardEvent)=>{
+      if(!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='z')return;
+      const target=event.target as HTMLElement|null;
+      if(target?.closest('input,textarea,[contenteditable="true"]'))return;
+      if(event.shiftKey?canRedo:canUndo){
+        event.preventDefault();if(event.shiftKey)onRedo();else onUndo();
+      }
+    };
+    document.addEventListener('keydown',onKey);
+    return()=>document.removeEventListener('keydown',onKey);
+  },[onUndo,onRedo,canUndo,canRedo]);
   const input = useRef<HTMLInputElement>(null);
   const available = assets.filter(a => assetCategory(a) !== 'background' &&
     displayAssetName(a).toLowerCase().includes(filter.toLowerCase())).slice(0, 36);
