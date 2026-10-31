@@ -352,14 +352,22 @@ function App() {
       const mail=(account?.email||pendingEmail||loginEmail).trim().toLowerCase();
       if(mail)localStorage.setItem('content-lab:language:'+mail,next);
     }catch{/* Storage can be disabled in private tabs. */}
+    if(account)void auth.setPreferredLanguage(next).catch(()=>{});
   };
   useEffect(()=>{
     const mail=account?.email?.trim().toLowerCase();
     if(!mail)return;
-    try{
-      const preferred=localStorage.getItem('content-lab:language:'+mail);
-      if(preferred==='en'||preferred==='es')setLoginLanguage(preferred);
-    }catch{/* Keep current selection. */}
+    let active=true;
+    void auth.getPreferredLanguage().then(server=>{
+      if(!active)return;
+      const local=(()=>{try{return localStorage.getItem('content-lab:language:'+mail)}catch{return null}})();
+      const preferred=server||local;
+      if(preferred==='es'||preferred==='en'){
+        setLoginLanguage(preferred);
+        try{localStorage.setItem('content-lab:language',preferred)}catch{}
+      }
+    }).catch(()=>{});
+    return()=>{active=false};
   },[account?.email]);
   useEffect(()=>installLabLocale(loginLanguage),[loginLanguage,account,tab]);
   const [waiting, setWaiting] = useState(true);
@@ -409,7 +417,8 @@ function App() {
     setLoginBusy(true);
     try {
       const email = loginEmail.trim();
-      await auth.signInWithOtp(email);
+      await auth.signInWithOtp(email,loginLanguage);
+      try{localStorage.setItem('content-lab:language:'+email.toLowerCase(),loginLanguage)}catch{}
       setPendingEmail(email);
       setLoginStage('code');
       setLoginCode('');
@@ -427,6 +436,7 @@ function App() {
         throw Error(loginLanguage==='es'?'Este correo aún no tiene acceso privado. El acceso para compradores se habilitará después de la compra.':'This email does not have private access yet. Customer access opens after purchase.');
       }
       await reload();
+      await auth.setPreferredLanguage(loginLanguage).catch(()=>{});
       setAccount(user);
       setLoginCode('');
     } catch (e) {err(e);} finally {setLoginBusy(false);}
