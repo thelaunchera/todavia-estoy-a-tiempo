@@ -375,6 +375,7 @@ export default function TouchLayerCanvas({
         <button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar al fondo</button>
         <button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer al frente</button>
       </div>}</div>}
+    </div>}
     {pageCount > 1 && onRemove && <details className="touch-editor-layer-list" aria-label="Elementos del carrusel">
       <summary>Administrar elementos ({layers.length})</summary>
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
