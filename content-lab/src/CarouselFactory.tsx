@@ -767,7 +767,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         backgroundGradient:slide.backgroundGradient}));
       onChange({...updated,designData:encodeCarouselDesign(generated,style)});
       setCurrent(0);setDownloads([]);
-      notify('Carrusel listo para editar, slide por slide.');
+      setStudioTab('style');
+      notify('Tu carrusel está preparado. Elige un fondo o cambia cualquier texto.');
     }catch(e){showError(e)}finally{setBusy('');}
   };
   const createImage=async()=>{
@@ -834,10 +835,21 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <div className="factory-design-flow"><span>INSPIRACIÓN</span><span>FOTO</span><span>FONDO</span><span>TEXTO</span><span>DETALLES</span></div>
     {studioTab==='inspiration'&&<section className="factory-inspiration">
       <div className="factory-step-intro">
-        <span className="factory-step-eyebrow">PASO 1 DE 5 · INSPIRACIÓN</span>
-        <h2>Antes de diseñar, decide qué quieres mostrar.</h2>
-        <p>Observa una referencia, identifica su jerarquía y elige una foto protagonista. Inspirarse no es copiar.</p>
+        <span className="factory-step-eyebrow">CREA A TU MANERA</span>
+        <h2>Cuéntame qué quieres publicar.</h2>
+        <p>Escribe como se lo contarías a alguien. La IA prepara los textos; después puedes poner tus fotos y fondos sin empezar de cero.</p>
       </div>
+      <div className="factory-simple-ai">
+        <label htmlFor="factory-ai-brief">Tu idea</label>
+        <textarea id="factory-ai-brief" rows={3} value={idea} onChange={e=>setIdea(e.target.value)}
+          placeholder="Quiero un carrusel para explicar por qué se pierden clientes cuando no doy seguimiento. Que suene natural y tenga un buen cierre."/>
+        <button type="button" className="btn dark" disabled={!!busy} onClick={makeCopy}>
+          {busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>}
+          Crear carrusel con IA · 1 crédito
+        </button>
+        <small>La IA propone los textos. Puedes cambiar cada frase, foto o fondo antes de guardar.</small>
+      </div>
+      <details className="factory-reference-fold"><summary>Tengo una foto de referencia</summary>
             <div className="factory-reference">
         <div className="factory-reference-copy"><strong>¿Te dieron una referencia visual?</strong><p>Úsala como inspiración de paleta y contraste, sin copiar su fotografía ni sus textos. El análisis de color es gratuito.</p></div>
         <div className="factory-reference-actions">
@@ -854,7 +866,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div className="factory-inspiration-hint"><strong>Tu punto de partida</strong>
         <p>Una imagen principal · dos o tres colores · un mensaje que se entienda de un vistazo.</p>
       </div>
-      <div className="factory-step-footer"><span>Si ya tienes clara la idea, puedes empezar sin subir referencia.</span>
+      </details>
+      <div className="factory-step-footer"><span>También puedes diseñar sin IA, desde un lienzo vacío.</span>
         <button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Siguiente: foto <ArrowRight size={16}/></button>
       </div>
     </section>}
@@ -869,7 +882,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
             }
-            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{}}));
+            const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:'statement' as Layout,eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
+              backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||''}));
             setAll(next);setCurrent(0);notify('Nuevo carrusel de 6 slides preparado.');
           }}><Plus size={16}/> Nuevo carrusel</button>
         </div>
