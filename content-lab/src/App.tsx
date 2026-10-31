@@ -312,6 +312,13 @@ function App() {
   const [tab, setTab] = useState<Tab>('home');
   const [menu, setMenu] = useState(false);
   const [switcher, setSwitcher] = useState(false);
+  // Prevent background page scrolling while the mobile drawer owns touch scroll.
+  useEffect(() => {
+    if (!menu) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [menu]);
   const [editor, setEditor] = useState<Post>(newPost(''));
   const [brandForm, setBrandForm] = useState<Brand | null>(null);
   const [topic, setTopic] = useState('');
@@ -617,7 +624,7 @@ function App() {
   return (
     <div className="app-shell">
       {menu && <div className="overlay" onClick={() => setMenu(false)} />}
-      <aside className={'sidebar ' + (menu ? 'open' : '')}>
+      <aside className={'sidebar ' + (menu ? 'open' : '')} aria-label="Menú de Content Lab">
         <div className="identity">
           <div className="monogram">c.</div>
           <div>
@@ -626,6 +633,9 @@ function App() {
             </div>
             <small>YOUR CREATIVE HQ</small>
           </div>
+          <button className="sidebar-close" type="button" aria-label="Cerrar menú" onClick={() => setMenu(false)}>
+            <X size={20} />
+          </button>
         </div>
         <div className="side-label">YOUR ACCOUNTS</div>
         <div className="switchwrap">
@@ -702,7 +712,7 @@ function App() {
       <main>
         <header className="top">
           <div>
-            <button className="hamburger" onClick={() => setMenu(true)}>
+            <button className="hamburger" type="button" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu(true)}>
               <Menu size={22} />
             </button>
             <span className="eyebrow">MY WORKSPACE</span>
