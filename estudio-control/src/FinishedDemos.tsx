@@ -8,7 +8,7 @@ const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
- url:string; source:string; note:string; kind:'static'|'video'|'other';
+ url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
  promptsFor?:'casa-brownie'|'crumb'|'aftr';
 };
 const finishedDemos:Demo[]=[
@@ -58,6 +58,28 @@ const finishedDemos:Demo[]=[
   note:'Concepto ficticio 21+. Las reservas, entradas, ofertas y formularios solo se simulan; no hay cobros ni datos reales.',
   kind:'other',
   promptsFor:'aftr'
+ } ,
+ {
+  id:'cb-depot',
+  title:'CB Depot · Mobile Detailing',
+  category:'Proyecto de cliente · web y reservas de detailing',
+  description:'Proyecto real para un negocio de detailing móvil: identidad visual, fotografías de vehículos, catálogo de servicios y recorrido para solicitar una cita o cotización.',
+  image:'https://thelaunchera.com/assets/clients/cb-depot/photos/hero-desktop.webp',
+  url:'https://cb-depot-booking.pages.dev/',
+  source:'https://github.com/thelaunchera/cb-depot-booking',
+  note:'Proyecto de cliente real. El formulario puede recibir reservas y solicitudes auténticas: no lo utilices para pruebas ni compartas información privada del cliente.',
+  kind:'live'
+ },
+ {
+  id:'sample-cleaning',
+  title:'Sample Cleaning · Booking',
+  category:'Limpieza residencial · demo interactivo',
+  description:'Ejemplo público de una página de reservas para limpieza: servicios, elección de opciones y recorrido de cotización para explorar cómo se organiza la experiencia.',
+  image:'https://images.pexels.com/photos/37184168/pexels-photo-37184168.jpeg?auto=compress&cs=tinysrgb&w=1800&q=85',
+  url:'https://thelaunchera.com/sample-cleaning/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/sample-cleaning',
+  note:'Simulación pública de The Launch Era: no crea citas, no cobra y no envía datos a clientes. Es distinta de los demos personalizados que requieren verificación.',
+  kind:'other'
  }
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
@@ -71,17 +93,17 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Aquí encuentras Casa Brownie (con foto y con video), CRUMB y AFTR. Las Vegas. Cada marca tiene su identidad y repositorio de referencia. Las dos vistas de Casa Brownie comparten la misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, CB Depot y Sample Cleaning. Distingue los conceptos de práctica del proyecto real de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
-     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:<CheckCircle2 size={14}/>} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':'DEMO INTERACTIVO'}</span></div>
+     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:<CheckCircle2 size={14}/>} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
      <div className="finished-demo-body">
-       <span className="finished-demo-status"><CheckCircle2 size={14}/> Demo terminado</span>
+       <span className="finished-demo-status"><CheckCircle2 size={14}/> {d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
        <div className="finished-demo-actions">
-         <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':'Abrir demo'} <ExternalLink size={15}/></a>
+         <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'} <ExternalLink size={15}/></a>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio <ExternalLink size={14}/></a>
        </div>
        <small>{d.note}</small>
