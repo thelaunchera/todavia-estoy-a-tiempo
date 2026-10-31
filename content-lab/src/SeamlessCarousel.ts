@@ -1,4 +1,5 @@
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
+import {isBowBackground} from './BowBackgrounds';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
 import {clampRect,photoDefault,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {coverPlacement,normalizeCrop} from './PhotoCrop';
@@ -65,6 +66,14 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
    if(b){const g=ctx.createLinearGradient(0,0,wide.width,H);g.addColorStop(0,a);g.addColorStop(1,b);
      ctx.fillStyle=g;ctx.fillRect(0,0,wide.width,H);}
    else{ctx.fillStyle=a;ctx.fillRect(0,0,wide.width,H);}
+ }else if(isBowBackground(opts.backgroundId)){
+   // Keep bows at true slide scale on panoramas; avoid gigantic ribbons on 8-slide canvases.
+   // Every tile is painted using the same 1080×1350 renderer as regular slides.
+   for(let n=0;n<total;n++){
+     ctx.save();ctx.translate(n*W,0);
+     paintFreeBackground(ctx,W,H,opts.backgroundId,accent,brand.background);
+     ctx.restore();
+   }
  }else paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'brand',accent,brand.background);
  if(opts.assetId&&images[opts.assetId]){
   const im=await load(images[opts.assetId]);const ratio=Math.max(wide.width/im.naturalWidth,H/im.naturalHeight);
