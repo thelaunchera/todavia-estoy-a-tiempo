@@ -58,3 +58,33 @@ El antiguo AppDeploy permanece como referencia temporal y no debe eliminarse mie
 ## Solución al error de Cloudflare «Could not route» (2026-10-31)
 
 La primera prueba real falló porque `CLOUDFLARE_ACCOUNT_ID` incluía un espacio insertado durante el copiado. El backend ahora elimina los espacios en blanco (incluidos saltos de línea) antes de usar el ID, verifica que tenga exactamente 32 dígitos hexadecimales y traduce los errores de permisos/ID a mensajes en español sin mostrar identificadores privados. Si la conexión vuelve a fallar, revisa que `CLOUDFLARE_ACCOUNT_ID` y `CLOUDFLARE_API_TOKEN` pertenezcan a la misma cuenta gratuita de Cloudflare. Las claves no se escriben en GitHub ni en el frontend.
+
+## Lanzamiento Content Lab ($10 compra única) — estado real
+
+- **Entrada gratuita:** La ruta `/content-lab/prompts/` con los ocho Master Prompts es **pública intencionalmente**, para que la audiencia los copie y conozca el producto. No almacenar allí prompts premium ni datos privados.
+- **Oferta futura:** Precio definido de **$10 USD de compra única**, editor personal en español e inglés. La invitación pública dice "Próximamente"; **no acepta pagos**, ni activa clientes todavía.
+- **Seguridad actual:** El Content Lab privado sigue limitado a los administradores existentes. Las tablas y Storage usan RLS de propietario; el frontend no crea usuarios desconocidos (`shouldCreateUser:false`). **No prometer acceso comercial hasta implementar entitlements y checkout verificado del servidor**, no desde JavaScript del usuario.
+- **Costos de IA:** Cloudflare Free se comparte. Antes de vender, agregar límite por cliente, alertas de cuota y una política clara de generaciones incluidas; el pago único no debe significar IA ilimitada sin financiación.
+- **Bilingüe:** Login inicial disponible ES/EN y cada marca conserva idioma de copy, pero la traducción completa del resto del editor sigue pendiente de implementación y revisión.
+
+### Inicio de sesión sin salir de la app (OTP en el mismo iPhone)
+
+El Lab presenta un campo donde introducir el código numérico del correo. `supabase.auth.verifyOtp({ email, token, type: 'email' })` crea la sesión **en el mismo contexto web/PWA**, por lo que ya no hace falta pulsar el enlace que abre Safari.
+
+**Paso de configuración aún necesario en Supabase (sin conectores para editar plantillas Auth):**
+1. Ve a `https://supabase.com/dashboard/project/fhrvuhikrybobidxpvnh/auth/templates`.
+2. Abre el template **Magic Link** del proyecto del podcast y conserva las variables de seguridad de Supabase. Haz que el correo contenga también `{{ .Token }}` visible para el usuario, por ejemplo:
+
+```html
+<h2>Tu código de acceso a Content Lab</h2>
+<p>Introdúcelo en la misma ventana donde solicitaste iniciar sesión:</p>
+<p style="font-size:32px;letter-spacing:5px;font-weight:bold">{{ .Token }}</p>
+<p>Este código es privado, no lo compartas.</p>
+<p>O abre el enlace si prefieres iniciar sesión en el navegador: <a href="{{ .ConfirmationURL }}">Entrar en el navegador</a></p>
+```
+
+3. Asegura el redirect `https://podcast.thelaunchera.com/content-lab/` en Auth → URL Configuration.
+4. Prueba con **la cuenta propietaria autorizada**. Si el correo no muestra el código, la UI no puede fabricarlo; revisa la plantilla y no reportes que OTP funcionó.
+5. Cuando exista el proveedor de pagos, implementar comprador autenticado + entitlement validado por webhook + RLS por `auth.uid()` + cuota por cuenta. No abrir el esquema ni quitar el requisito admin previamente.
+
+Referencia: documentación oficial [Supabase Passwordless email sign-in](https://supabase.com/docs/guides/auth/auth-email-passwordless).

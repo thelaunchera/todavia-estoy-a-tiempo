@@ -304,6 +304,11 @@ async function downloadPng(post: Post, brand: Brand, photo?: string) {
 function App() {
   const [account, setAccount] = useState<{ email?: string } | null>(null);
   const [loginEmail, setLoginEmail] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [loginCode, setLoginCode] = useState('');
+  const [loginStage, setLoginStage] = useState<'email'|'code'>('email');
+  const [loginBusy, setLoginBusy] = useState(false);
+  const [loginLanguage, setLoginLanguage] = useState<'es'|'en'>('es');
   const [waiting, setWaiting] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -343,6 +348,32 @@ function App() {
         x.message ||
         'No se pudo completar.'
     );
+  };
+  const requestLoginCode = async () => {
+    setLoginBusy(true);
+    try {
+      const email = loginEmail.trim();
+      await auth.signInWithOtp(email);
+      setPendingEmail(email);
+      setLoginStage('code');
+      setLoginCode('');
+      toast(loginLanguage==='es'?'Revisa tu correo y escribe el código aquí, sin salir del Lab.':'Check your inbox and enter the code here, without leaving the Lab.');
+    } catch (e) {err(e);} finally {setLoginBusy(false);}
+  };
+  const confirmLoginCode = async () => {
+    setLoginBusy(true);
+    try {
+      // OTP verifies in this very browser/PWA context. No cross-app magic-link navigation.
+      await auth.verifyEmailOtp(pendingEmail, loginCode.replace(/\s/g,''));
+      const user = await auth.getUser();
+      if (!user) {
+        await auth.signOut();
+        throw Error(loginLanguage==='es'?'Este correo aún no tiene acceso privado. El acceso para compradores se habilitará después de la compra.':'This email does not have private access yet. Customer access opens after purchase.');
+      }
+      await reload();
+      setAccount(user);
+      setLoginCode('');
+    } catch (e) {err(e);} finally {setLoginBusy(false);}
   };
   const reload = async () => {
     const { data } = await api.get('/api/data');
@@ -588,35 +619,49 @@ function App() {
             <div className="lockcircle">
               <LockKeyhole size={23} />
             </div>
-            <div className="eyebrow">A SPACE JUST FOR YOU</div>
-            <h2>
-              Welcome to your
-              <br />
-              Content Lab.
-            </h2>
-            <p>
-              Inicia sesión en tu espacio privado. Tus marcas y publicaciones
-              estarán separadas del Studio.
-            </p>
+            <div className="lab-login-language" role="group" aria-label="Idioma / Language">
+              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>setLoginLanguage('es')} aria-pressed={loginLanguage==='es'}>ES</button>
+              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>setLoginLanguage('en')} aria-pressed={loginLanguage==='en'}>EN</button>
+            </div>
+            <div className="eyebrow">{loginLanguage==='es'?'TU ESPACIO CREATIVO PRIVADO':'YOUR PRIVATE CREATIVE SPACE'}</div>
+            <h2>{loginLanguage==='es'?'Tu Content Lab.':'Your Content Lab.'}</h2>
+            <p>{loginLanguage==='es'
+                ? 'Entra con un código sin salir de esta pantalla. Cada cuenta tendrá su propia biblioteca de fotos y publicaciones.'
+                : 'Sign in with a code without leaving this screen. Each account will have its own photo and content library.'}</p>
             {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
               <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
                 El editor privado de GitHub aún necesita conectar su propio Supabase y el proveedor de IA.
                 La biblioteca de Master Prompts ya está disponible aquí, sin subir tus fotos.
               </p>
             )}
-            <label htmlFor="lab-email">Correo privado</label>
-            <input id="lab-email" type="email" placeholder="Tu correo autorizado" autoComplete="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
-            <button
-              className="btn dark wide"
-              disabled={!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL}
-              onClick={() => auth.signInWithOtp(loginEmail).then(() => toast('Enlace privado enviado. Comprueba tu correo.')).catch(err)}
-            >
-              Enviar enlace de acceso <ArrowRight size={18} />
-            </button>
-            <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>Abrir los 8 Master Prompts</a>
-            <small>
-              <ShieldCheck size={16} /> Protected personal access
-            </small>
+            {loginStage==='email'?(
+              <form onSubmit={e=>{e.preventDefault();void requestLoginCode()}}>
+                <label htmlFor="lab-email">{loginLanguage==='es'?'Correo electrónico':'Email address'}</label>
+                <input id="lab-email" type="email" required placeholder={loginLanguage==='es'?'Tu correo autorizado':'Your authorized email'} autoComplete="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}/>
+                <button className="btn dark wide" type="submit" disabled={loginBusy||!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL}>
+                  {loginBusy?<LoaderCircle size={18}/>:<ArrowRight size={18}/>}
+                  {loginLanguage==='es'?'Enviar código de acceso':'Send sign-in code'}
+                </button>
+              </form>
+            ):(
+              <form onSubmit={e=>{e.preventDefault();void confirmLoginCode()}}>
+                <p className="lab-login-address">{loginLanguage==='es'?'Código para':'Code for'} <strong>{pendingEmail}</strong></p>
+                <label htmlFor="lab-code">{loginLanguage==='es'?'Código de tu correo':'Code from your email'}</label>
+                <input id="lab-code" type="text" inputMode="numeric" pattern="[0-9]{6,8}" minLength={6} maxLength={8} required autoComplete="one-time-code" autoCapitalize="off" autoCorrect="off" placeholder="••••••" value={loginCode} onChange={e=>setLoginCode(e.target.value.replace(/\D/g,'').slice(0,8))}/>
+                <button className="btn dark wide" type="submit" disabled={loginBusy||loginCode.length<6}>
+                  {loginBusy?<LoaderCircle size={18}/>:<ShieldCheck size={18}/>}
+                  {loginLanguage==='es'?'Entrar a mi Content Lab':'Open my Content Lab'}
+                </button>
+                <button className="lab-login-back" type="button" disabled={loginBusy} onClick={()=>{setLoginStage('email');setLoginCode('')}}>
+                  {loginLanguage==='es'?'Cambiar correo o solicitar otro código':'Change email or request another code'}
+                </button>
+                <small className="lab-login-hint">{loginLanguage==='es'
+                   ? 'El acceso por código funciona sin abrir Safari cuando el correo incluye un código numérico. Si solo recibes un enlace, la plantilla de correo de Supabase aún debe configurarse.'
+                   : 'Code sign-in stays in this app when the email contains a numeric code. If you only receive a link, the Supabase email template still needs configuration.'}</small>
+              </form>
+            )}
+            <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
+            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal protegido · $10 pago único próximamente':'Private access · $10 one-time purchase coming soon'}</small>
           </div>
         </section>
       </div>

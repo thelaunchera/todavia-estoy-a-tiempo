@@ -23,6 +23,15 @@ textarea{resize:vertical}.half{display:grid;grid-template-columns:1fr 1fr;gap:10
 .item .top strong{font-size:13px}.item .top small{display:block;color:#819097;font-size:10px;margin-top:4px}.item .top>span:last-child{margin-left:auto;font-weight:800;font-size:24px;color:#779eab}
 .body{padding:0 13px 15px}.body textarea{min-height:230px;background:#192e37;color:#eef6f7;border:0;font:11px/1.55 ui-monospace,monospace}
 footer{font-size:11px;color:#829397;margin-top:20px}
+.offer{margin-top:34px;background:#22323c;color:#fff;border-radius:18px;padding:30px;display:grid;grid-template-columns:1fr auto;gap:14px 26px;align-items:center}
+.offer h2{font:normal clamp(26px,3vw,43px)/1.12 'DM Serif Display',serif;margin:4px 0 10px;color:#fff}
+.offer p{color:#c4d6db;margin:5px 0}
+.offer strong.price{font-size:32px;color:#ecf5f6;white-space:nowrap}
+.offer .offer-label{color:#c0dfeb;font-weight:700;font-size:11px;letter-spacing:1.1px}
+.offer a{display:inline-flex;align-items:center;justify-content:center;background:#c3dce8;color:#192931;text-decoration:none;padding:15px 22px;border-radius:9px;font-weight:800;font-size:13px}
+.offer .offer-notice{grid-column:1/-1;font-size:11px;color:#c8d7db}
+@media(max-width:700px){.offer{grid-template-columns:1fr;padding:22px}.offer a{width:100%}}
+
 @media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:550px){main{padding:23px 14px}.panel{padding:16px}.half{grid-template-columns:1fr}.outputHeader{flex-direction:column}h1{font-size:44px}}
 </style></head><body>
 <header><strong>content lab<i>.</i></strong><a href="../">Volver al Lab</a></header>
@@ -40,6 +49,14 @@ footer{font-size:11px;color:#829397;margin-top:20px}
 <label for="notes">Notas</label><textarea id="notes" rows="2" placeholder="Sin objetos extra, fotografía auténtica, sombras suaves…"></textarea>
 <p class="privacy">🔒 La foto solo se previsualiza localmente. Para usar los prompts, adjunta la misma foto en la herramienta donde generes la imagen.</p>
 </section><section class="panel"><div class="outputHeader"><div><div class="eyebrow">02 / COPY EACH PROMPT</div><h2>8 direcciones listas</h2></div><div class="buttons"><button class="action alt" id="copyAll">Copiar los 8</button><button class="action" id="saveAll">Guardar TXT</button></div></div><div id="output"></div></section></div>
+<section class="offer" aria-label="Content Lab completo"><div>
+  <div class="offer-label">DESPUÉS DE TUS PROMPTS GRATIS · AFTER THE FREE PROMPTS</div>
+  <h2>De una foto a un estudio creativo completo.</h2>
+  <p>Genera imágenes con IA, diseña publicaciones completas, organiza tus marcas y guarda tus creaciones en tu biblioteca privada.</p>
+  <p><b>English / Español.</b> Cada comprador tendrá su propio Content Lab.</p>
+ </div><div><strong class="price">$10 USD</strong><p>Un pago · One-time purchase</p><a href="../" aria-label="Explorar el Content Lab privado">Conoce Content Lab</a></div>
+ <div class="offer-notice">Próximamente · Coming soon. Aún no se están aceptando pagos; el acceso privado está reservado a cuentas autorizadas.</div>
+</section>
 <footer>Fuente: <a href="https://ugc.production.linktr.ee/f5d411b4-6af4-4a34-b33f-0edd22e9b778_One-Poster-Eight-Compositions-Master-Prompt.pdf" target="_blank" rel="noopener">One Poster, Eight Compositions — Master Prompt</a>. Adaptación para Content Lab.</footer>
 </main><script>
 const layouts=[
