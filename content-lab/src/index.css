@@ -1473,3 +1473,15 @@ input::placeholder {
     padding: 16px;
   }
 }
+
+/* Mobile email OTP: code stays inside installed Content Lab web app/PWA */
+.lab-login-language{display:flex;justify-content:flex-end;gap:6px;margin:0 0 8px}
+.lab-login-language button{padding:6px 11px;border-radius:8px;border:1px solid #d3e0e3;background:#fff;color:#6c8290;font-size:12px;font-weight:700}
+.lab-login-language button.active{background:#21353e;color:#fff;border-color:#21353e}
+.login-card form{width:100%}
+.login-card form .btn{margin-top:14px;display:flex;justify-content:center;align-items:center;gap:9px}
+.login-card #lab-code{font-size:24px;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:0.25em;text-align:center;min-height:56px}
+.login-card .lab-login-address{margin:14px 0 12px;overflow-wrap:anywhere;color:#5d7780}
+.login-card .lab-login-back{background:none;border:0;padding:12px 0;color:#3d778a;text-decoration:underline;font-size:12px;cursor:pointer}
+.login-card .lab-login-hint{font-size:11px;color:#74858b;line-height:1.6;margin:10px 0;display:block}
+@media(max-width:600px){.login-card{width:100%;max-width:100%}.login-card #lab-code{font-size:22px}}
