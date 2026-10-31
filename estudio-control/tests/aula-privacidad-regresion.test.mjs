@@ -80,3 +80,15 @@ test('Aula: correo y contraseña, recuperación, acceso de 24 horas y sin enlace
  assert.match(course,/!hasAulaSession\(who\.id\)/);
  assert.doesNotMatch(course,/signInWithOtp\(/);
 });
+
+
+test('Aula de principiantes: primero el siguiente paso, después herramientas opcionales',()=>{
+ const next=room.indexOf('class="dashboard-next-card"');
+ const tools=room.indexOf('class="dashboard-setup"');
+ assert.ok(next>0 && tools>next,'La acción principal aparece antes de la preparación técnica');
+ assert.match(room,/<details class="dashboard-setup-details">/,'Las instrucciones largas no saturan el inicio');
+ assert.match(room,/id="lesson-prev"/,'Se puede volver a la lección anterior');
+ assert.match(room,/class="lesson-resources" data-aula-view="materiales"/,'Cada lección enlaza a materiales');
+ assert.match(course,/lessons\.findIndex\(item=>!done\.has\(item\.lesson_code\)\)/,'El alumno retoma la primera lección sin terminar');
+ assert.match(course,/\$\('lesson-prev'\)\.disabled=i<=0/,'La primera lección no permite retroceder');
+});
