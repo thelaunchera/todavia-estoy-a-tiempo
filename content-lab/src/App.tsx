@@ -1358,7 +1358,8 @@ function App() {
                     onChange={next=>setEditor(old=>({...old,designData:writeCoverDecor(old.designData,{...readCoverDecor(old.designData),...next})}))}
                   />
                   </div>
-                  <div className="eyebrow design-label">CHOOSE A FORMAT</div>
+                  <details className="cover-layout-chooser">
+                    <summary><span><strong>Estilo del post</strong><small>Actual: {editor.template}</small></span><span className="cover-layout-change">Cambiar estilo</span></summary>
                   <div className="template-grid">
                     {templates.map(t => (
                       <button
@@ -1371,6 +1372,7 @@ function App() {
                       </button>
                     ))}
                   </div>
+                  </details>
                   <button
                     className="btn blue wide"
                     onClick={() =>
@@ -1379,10 +1381,10 @@ function App() {
                         .catch(err)
                     }
                   >
-                    <Download size={17} /> Export cover PNG
+                    <Download size={17} /> Descargar mi post PNG
                   </button>
                   <small className="note">
-                    24 quick cover styles available. Export one independent PNG. For a 9-post brand feed, open 1 Photo → 9 Posts.
+                    El diseño mantiene tus fotos, colores, fondos y stickers. Puedes elegir otro estilo sin perder la imagen que subiste.
                   </small>
                 </aside>
               </div>
