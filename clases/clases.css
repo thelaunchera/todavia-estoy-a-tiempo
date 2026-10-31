@@ -2778,3 +2778,183 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
   .class-page-v2 .class-faq-offer-link{transition:none}
   .class-page-v2 .class-faq-offer-link:hover{transform:none}
 }
+
+
+/* Rediseño de oferta aprobado · sin iconos de reloj. 30-oct-2026.
+   Clases/hero: fiel al ejemplo editorial elegido; FAQ a juego. */
+.class-page-v2 .class-hero .class-hero-intro>.class-price-campaign{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:flex-start!important;flex-wrap:nowrap!important;
+  box-sizing:border-box;gap:0!important;min-width:0;
+  width:100%!important;max-width:600px!important;
+  margin:clamp(26px,3.7vw,42px) auto 0!important;
+  padding:0!important;border:0!important;box-shadow:none!important;
+  background:transparent!important;text-align:center!important;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-campaign-pill,
+.class-page-v2 .class-faq .class-faq-offer-pill{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:9px;min-width:0;max-width:100%;box-sizing:border-box;
+  background:#e0ebf5!important;color:#1a3550!important;border:0!important;
+  padding:11px 18px!important;border-radius:999px!important;
+  font:700 clamp(.59rem,1.4vw,.73rem)/1.5 var(--sans,Arial,sans-serif)!important;
+  letter-spacing:.115em!important;text-align:center!important;
+  white-space:normal!important;text-transform:uppercase;
+}
+.class-page-v2 .class-campaign-pill>span,
+.class-page-v2 .class-faq-offer-pill>span{font-size:1.25em;line-height:1;color:#254863;flex:none}
+.class-page-v2 .class-hero .class-price-campaign .class-price-current{
+  display:flex!important;align-items:center!important;flex-direction:column!important;
+  width:100%;min-width:0;gap:0!important;margin:clamp(18px,3vw,28px) 0 0;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-price-label{
+  position:absolute!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;
+  white-space:nowrap!important;width:1px!important;height:1px!important;overflow:hidden!important;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-price-current strong{
+  color:#112a47!important;letter-spacing:-.058em!important;
+  font:400 clamp(4rem,7.7vw,6.1rem)/1.06 var(--serif,Georgia,serif)!important;
+  font-variant-numeric:tabular-nums;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-price-regular{
+  display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+  justify-content:center!important;align-items:baseline!important;
+  gap:8px!important;margin:8px 0 0!important;text-align:center;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-price-regular span{
+  color:#63798a!important;font:400 clamp(.85rem,1.55vw,1.04rem)/1.5 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-price-regular del{
+  color:#647b8e!important;text-decoration-color:#748d9d!important;
+  text-decoration-thickness:1.4px!important;
+  font:400 clamp(.96rem,1.65vw,1.18rem)/1.5 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-hero .class-price-campaign .class-campaign-divider,
+.class-page-v2 .class-faq .class-faq-offer-rule{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:14px;width:100%;height:auto!important;background:transparent!important;
+  color:#b7cbd9;margin:clamp(22px,3.5vw,31px) 0 clamp(17px,2.5vw,23px)!important;
+}
+.class-page-v2 .class-campaign-divider:before,
+.class-page-v2 .class-campaign-divider:after,
+.class-page-v2 .class-faq-offer-rule:before,
+.class-page-v2 .class-faq-offer-rule:after{
+  content:"";display:block;height:1px;flex:1;min-width:0;background:#c5d5df;
+}
+.class-page-v2 .class-campaign-divider>span,
+.class-page-v2 .class-faq-offer-rule>span{font-size:1.2rem;line-height:1;color:#9fbcd0}
+.class-page-v2 .class-hero .class-price-campaign p.class-campaign-detail{
+  padding:0!important;margin:0!important;max-width:510px!important;
+  color:#5b7285!important;text-align:center!important;
+  font:400 clamp(.87rem,1.65vw,1rem)/1.7 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-hero .class-price-campaign p.class-campaign-detail strong{
+  color:#1d3b56!important;font-weight:700!important;
+}
+.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions{
+  margin-top:clamp(19px,3.4vw,29px)!important;justify-content:center!important;
+}
+.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions .class-primary-button{
+  display:flex;justify-content:center;align-items:center;min-height:52px;
+  max-width:520px;width:100%;
+}
+.class-page-v2 .class-hero .class-campaign-notify-link{
+  display:block;width:max-content;max-width:100%;margin:16px auto 0;padding:4px 0;
+  text-align:center;color:#54718a;text-decoration:underline;
+  text-underline-offset:4px;text-decoration-thickness:1px;
+  font:400 clamp(.79rem,1.35vw,.9rem)/1.5 var(--sans,Arial,sans-serif);
+}
+.class-page-v2 .class-hero .class-campaign-notify-link:hover{color:#173b57}
+.class-page-v2 .class-hero .class-campaign-notify-link:focus-visible,
+.class-page-v2 .class-faq .class-faq-offer-link:focus-visible{outline:3px solid #6293b4;outline-offset:3px}
+
+/* FAQ: precio editorial sin reloj ni flechas SVG que rompen el móvil. */
+.class-page-v2 .class-faq .class-faq-pricing .class-faq-answer--price{
+  margin:0;padding:0 12px 22px!important;max-width:none!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-card{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  background:#fffefb!important;
+  border:1px solid #dbe4e9!important;border-radius:22px!important;
+  box-shadow:0 12px 28px #193e5810!important;
+  padding:clamp(21px,4vw,34px)!important;
+  text-align:center!important;overflow:hidden!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-card:before{content:none!important;display:none!important}
+.class-page-v2 .class-faq .class-faq-offer-top{display:flex;justify-content:center;width:100%;gap:0}
+.class-page-v2 .class-faq .class-faq-offer-prices{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  width:100%;gap:0!important;padding:14px 0 0!important;min-width:0;
+}
+.class-page-v2 .class-faq .class-faq-offer-launch{display:flex;align-items:center;flex-direction:column;gap:4px}
+.class-page-v2 .class-faq .class-faq-offer-launch span{
+  position:absolute;clip:rect(0,0,0,0);clip-path:inset(50%);
+  width:1px;height:1px;white-space:nowrap;overflow:hidden;
+}
+.class-page-v2 .class-faq .class-faq-offer-launch strong{
+  display:block;color:#112a47!important;
+  font:400 clamp(3.7rem,8vw,5.9rem)/1.1 var(--serif,Georgia,serif)!important;
+  letter-spacing:-.058em;word-break:normal;
+}
+.class-page-v2 .class-faq .class-faq-offer-regular{
+  display:flex!important;flex-direction:row!important;align-items:baseline!important;
+  justify-content:center!important;flex-wrap:wrap!important;
+  gap:8px!important;margin:6px 0 0;padding:0;
+}
+.class-page-v2 .class-faq .class-faq-offer-regular span{
+  color:#627b8d!important;font:400 clamp(.86rem,1.6vw,1rem)/1.5 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-regular del{
+  color:#607b90!important;text-decoration-color:#839bab!important;
+  font:400 clamp(1rem,2vw,1.25rem)/1.5 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-rule{
+  margin:clamp(18px,3.5vw,28px) 0 clamp(17px,3vw,25px)!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-description{
+  margin:0!important;padding:0!important;color:#5e7486!important;
+  max-width:590px!important;text-align:center!important;
+  font:400 clamp(.9rem,1.7vw,1rem)/1.72 var(--sans,Arial,sans-serif)!important;
+}
+.class-page-v2 .class-faq .class-faq-offer-description strong{color:#1b3a56!important}
+.class-page-v2 .class-faq .class-faq-offer-link{
+  display:flex!important;width:100%!important;max-width:580px!important;
+  min-height:52px;min-width:0;box-sizing:border-box;margin:clamp(22px,4vw,34px) auto 0;
+  align-items:center!important;justify-content:center!important;gap:8px;
+  border-radius:999px!important;background:#172b48!important;
+  border:1px solid #172b48!important;color:#fff!important;
+  font:600 clamp(.81rem,1.55vw,.91rem)/1.4 var(--sans,Arial,sans-serif)!important;
+  text-decoration:none!important;text-align:center!important;
+  padding:14px 20px!important;overflow-wrap:anywhere;
+}
+.class-page-v2 .class-faq .class-faq-offer-link:hover{background:#2d5571!important;color:#fff!important}
+.class-page-v2 .class-faq .class-faq-offer-disclaimer{
+  margin:11px 0 0!important;text-align:center!important;
+  font:400 .75rem/1.55 var(--sans,Arial,sans-serif)!important;color:#698092!important;
+}
+@media(max-width:650px){
+  .class-page-v2 .class-hero .class-hero-intro>.class-price-campaign{
+    margin-top:24px!important;padding:0!important;
+    width:100%!important;max-width:100%!important;
+  }
+  .class-page-v2 .class-hero .class-price-campaign .class-campaign-pill,
+  .class-page-v2 .class-faq .class-faq-offer-pill{
+    font-size:clamp(.56rem,2.35vw,.72rem)!important;
+    letter-spacing:.07em!important;padding:10px 13px!important;
+    gap:8px;
+  }
+  .class-page-v2 .class-hero .class-price-campaign .class-price-current{margin-top:17px}
+  .class-page-v2 .class-hero .class-price-campaign .class-price-current strong{
+    font-size:clamp(4.1rem,18vw,5.25rem)!important;
+  }
+  .class-page-v2 .class-hero .class-price-campaign .class-price-regular{margin-top:6px!important}
+  .class-page-v2 .class-hero .class-hero-intro>.class-hero-actions .class-primary-button{
+    width:100%!important;max-width:100%!important;
+  }
+  .class-page-v2 .class-hero .class-campaign-notify-link{font-size:.84rem;margin-top:14px}
+  .class-page-v2 .class-faq .class-faq-pricing .class-faq-answer--price{padding:0 8px 17px!important}
+  .class-page-v2 .class-faq .class-faq-offer-card{padding:22px 17px!important;border-radius:21px!important}
+  .class-page-v2 .class-faq .class-faq-offer-launch strong{font-size:clamp(4rem,17vw,5rem)!important}
+  .class-page-v2 .class-faq .class-faq-offer-link{padding:14px 12px!important}
+}
