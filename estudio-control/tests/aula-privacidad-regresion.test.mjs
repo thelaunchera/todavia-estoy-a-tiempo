@@ -106,3 +106,26 @@ test('Aula: productos por compra separados y Lab cerrado sin pago público',()=>
  assert.doesNotMatch(room,/href="[^"]*(?:content-lab|lab\/checkout)/);
  assert.match(course,/catalogo:'Todos los productos'/);
 });
+
+
+test('Centro de productos independiente, seguro y incluido en la publicación',()=>{
+ const center=readFileSync('centro/index.html','utf8');
+ const centerJs=readFileSync('centro/centro.js','utf8');
+ const centerCss=readFileSync('centro/centro.css','utf8');
+ assert.match(center,/id="programas"/);
+ assert.match(center,/id="servicios"/);
+ assert.match(center,/id="recursos"/);
+ assert.match(center,/id="access-overlay" hidden/);
+ assert.match(centerJs,/signInWithPassword\(/);
+ assert.match(centerJs,/podcast_hub_entitlements/);
+ assert.match(centerJs,/podcast_hub_releases/);
+ assert.match(centerJs,/REMEMBER_KEY='podcast_class_remember_24h_v1'/);
+ assert.match(centerJs,/if\(!open\)/);
+ assert.match(centerJs,/const has=purchased\.has\(code\),open=/);
+ assert.doesNotMatch(center,/href="[^"]*\/centro\/checkout/);
+ assert.match(room,/href="\.\.\/centro\/"/);
+ assert.match(workflow,/cp -R assets productos clases alumnos centro _podcast_pages\//);
+ assert.match(workflow,/node --check centro\/centro.js/);
+ assert.match(workflow,/test -s _podcast_pages\/centro\/index.html/);
+ assert.ok(centerCss.length>1000);
+});
