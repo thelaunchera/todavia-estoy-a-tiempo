@@ -23,7 +23,7 @@ async function inspectReference(images:{data:string;mime:string}[],brief:string)
  // Deliberate one-shot multimodal analysis; no model-generated claims about contents
  // are published without review. First image is the product, second optional image is style.
  const content:any[]=[{type:'text',text:
-  'Describe ONLY visible facts from the attached images. First image is the exact product or person to preserve; optional second image is style inspiration, never a second product to copy. Identify object, colors, real material/packaging/labels only when legible, framing, lighting, background and 5 useful different photo angles. Never guess prices, ingredient lists, people identities or unseen features. Keep under 140 words. Creative brief: '+clean(brief,360)
+  'Analyze TWO separate image roles: first is ORIGINAL subject/product/photo to preserve, second is optional CREATIVE STYLE REFERENCE. Describe visible subject truthfully, then describe reference VISUAL DESIGN: type families (serif, bold sans, handwriting), background/color/palette, poster composition, placement of subject, headline scale, magazine layout, handwritten annotations and arrows if present. Do not identify real people. Do not assume prices, credentials, ingredients, claims or unreadable labels. Visual guidance only: original text must be written later as exact separate layers. Under 190 words. Brief: '+clean(brief,360)
  }];
  for(const p of images.slice(0,2))content.push({type:'image_url',image_url:{url:'data:'+p.mime+';base64,'+p.data}});
  const response=await fetch(endpoint(visionModel),{
@@ -287,12 +287,31 @@ Deno.serve(async request=>{
     if(!(e instanceof Error)||!(/JSON_FORMAT:|JSON Mode couldn't be met|JSON Mode could not be met|JSON Mode couldn.t be met|output validation/i.test(e.message)))throw e;
     planningSource='template';plan=fallbackGridPlan(lang,b.name,clean(body.brief,450));
    }
+   const designMode=body.designMode==='editorial'?'editorial':'photo';
+   const accepted=['portrait','annotated','magazine','split','typographic'];
+   const requested=clean(body.designPreset,20);
+   // Lightweight, deterministic adaptation of visual style notes; no claim of pixel-level copying.
+   const referenceHints=visualDescription.toLowerCase();
+   const firstStyle=accepted.includes(requested)?requested:
+    /handwrit|annotation|hand.?drawn|arrow|callout|manuscri|flecha|anotaci/.test(referenceHints)?'annotated':
+    /magazine|editorial column|revista|monochrom|black and white/.test(referenceHints)?'magazine':
+    /split|diptych|two panels|half frame|dividid/.test(referenceHints)?'split':
+    /oversized typography|gigantic text|bold type|large type/.test(referenceHints)?'typographic':'portrait';
+   const sequence=[firstStyle,...accepted.filter(p=>p!==firstStyle)];
    const posts=plan.posts.map((p:any,i:number)=>({
     index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),
     scene:'Shot '+(i+1)+': '+gridShots[i]+'. Visual description: '+clean(visualDescription,440)+'. Mood: '+clean(b.photoMood,160)+'. Avoid: '+clean(b.avoid,140)+'. '+clean(body.brief,200),
-    format:gridLayouts[i],assetId:''
+    format:gridLayouts[i],assetId:'',
+    ...(designMode==='editorial'?{design:{
+      preset:sequence[i%sequence.length],
+      font:sequence[i%sequence.length]==='annotated'?'handwritten':'elegant',
+      background:sequence[i%sequence.length]==='split'?'ivory':'photo',
+      backgroundColor:clean(b.background,12)||'#FAF8F3',
+      accentColor:clean(b.color,12)||'#BED8E9',
+      kicker:clean(b.name,85),handwritten:'',callouts:[],overlay:.12
+    }}:{})
    }));
-   return send(await save('grids',{brandId,sourceId,referenceId,kind:body.kind==='preserve'?'preserve':'product',brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts}));
+   return send(await save('grids',{brandId,sourceId,referenceId,kind:designMode==='editorial'?'preserve':body.kind==='preserve'?'preserve':'product',designMode,brief:clean(body.brief,650),title:clean(plan.title,120),concept:clean(plan.concept,360),planningSource,analysisStatus,visualDescription,posts}));
   }
   if(action==='grid-image'){
    const grid=await find('grids',clean(body.gridId,100)),i=Number(body.index);

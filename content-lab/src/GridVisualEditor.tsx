@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {composeGridPoster,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
-type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls};
+import type {EditorialDesign} from './EditorialPoster';
+type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls;design?:EditorialDesign};
 type Brand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string;secondaryColor?:string};
 type Props={
  tile:Tile;index:number;brand:Brand;photo?:string;original?:string;logo?:string;preserve:boolean;
@@ -41,6 +42,7 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
  );
  return <div className="v2-editor" aria-label="Editor de capas">
   <div className="v2-editor-top"><div><strong>Editor visual · vista real</strong><small>{EXPORT_SIZES[exportSize].title} · {EXPORT_SIZES[exportSize].w} × {EXPORT_SIZES[exportSize].h}</small></div><button className="btn ghost" type="button" onClick={()=>onChange({...defaults})}>Restablecer</button></div>
+  {tile.design&&<p className="v2-hint">Diseño editorial completo: fotografía, ambiente, tipografía y anotaciones se combinan en el PNG. La foto original se mantiene intacta.</p>}
   <div className="v2-layer-pick" role="group" aria-label="Mover capa">
    <button className={layer==='photo'?'active':''} onClick={()=>setLayer('photo')} type="button">Mover foto</button>
    <button className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">Mover titular</button>
