@@ -44,6 +44,8 @@ const INITIAL:BaseLink[] = [
   {key:'school-pdf',title:'Materiales · PDF de la clase',url:'https://drive.google.com/drive/folders/1sR_keLOjf3OuXdKKJ8TAYRwCPI9i5NQq',category:'escuela',visibility:'interno',description:'Carpeta de producción, no enviar a público'},
   {key:'lab-editor',title:'The Content Lab · Editor',url:'https://podcast.thelaunchera.com/content-lab/',category:'lab',visibility:'interno',description:'Herramienta privada; venta y acceso de compradores aún no abiertos'},
   {key:'lab-prompts',title:'Master Prompts · Biblioteca gratis',url:'https://podcast.thelaunchera.com/content-lab/prompts/',category:'lab',visibility:'publico',description:'Recurso público, listo para compartir'},
+  {key:'lab-brand-board',title:'Brand Board Studio · Editor GitHub',url:'https://thelaunchera.github.io/demo-booking-landing-/brand-board-studio/',category:'lab',visibility:'interno',description:'Brand boards editables para marcas demo. Versión oficial publicada desde GitHub Pages'},
+  {key:'lab-brand-board-code',title:'Brand Board Studio · Código GitHub',url:'https://github.com/thelaunchera/demo-booking-landing-/tree/brand-board-studio',category:'lab',visibility:'interno',description:'Repositorio de desarrollo y editor de marca'},
   {key:'lab-repo',title:'Content Lab · Código GitHub',url:'https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/content-lab',category:'lab',visibility:'interno',description:'Fuente del editor en GitHub'},
   {key:'lab-notion',title:'Inventario general · Notion',url:'https://app.notion.com/p/40aa68f2ee6e817bbccbc3c56095cbf8?pvs=204',category:'lab',visibility:'interno',description:'Registro maestro de enlaces y cambios del 31 de octubre'}
 ];
