@@ -53,7 +53,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
-  const [kind,setKind]=useState('product');const [brief,setBrief]=useState('');
+  const [kind,setKind]=useState('portrait');const [brief,setBrief]=useState('');
   const [creativeSettings,setCreativeSettings]=useState<PromptControls|null>(null);
   useEffect(()=>{
     if(!promptSelection)return;
@@ -192,12 +192,13 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   };
   const testOnePhoto=async(variation='')=>{
     if(!sourceId)return notify('Primero selecciona una foto original.');
+   if(kind==='preserve')return notify('Para mantener exactamente tu foto original, utiliza Diseño editorial. La IA crea una imagen nueva y puede alterar el rostro.');
     if(!library.some(a=>a.id===sourceId))return notify('Esta foto está guardada en otra marca. Vuelve a subirla desde '+brand.name+'.');
     if(!await askCredits('photo',1,'Generar una foto de prueba'))return;
     setBusy('test-photo');setTestPhoto('');
     try{
       const {data}=await api.post('/api/ai-image',{
-        brandId:brand.id,assetId:sourceId,referenceId,mode:'variation',creativeSettings,
+        brandId:brand.id,assetId:sourceId,referenceId,mode:'variation',subjectType:kind,creativeSettings,
         prompt:(brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.')+(variation?' ADDITIONAL CHANGE FOR THIS NEW GENERATION: '+variation:'')
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
@@ -347,7 +348,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         <div className="editorial-mode">
           <strong>¿Qué quieres crear?</strong>
           <div className="bg-modes">
-            <button type="button" className={designMode==='editorial'?'selected':''} onClick={()=>{setDesignMode('editorial');setKind('preserve')}}><strong>Diseño editorial completo</strong><small>Fondo + foto + tipografía + anotaciones</small></button>
+            <button type="button" className={designMode==='editorial'?'selected':''} onClick={()=>setDesignMode('editorial')}><strong>Diseño editorial completo</strong><small>Fondo + foto + tipografía + anotaciones</small></button>
             <button type="button" className={designMode==='photo'?'selected':''} onClick={()=>setDesignMode('photo')}><strong>Campaña fotográfica</strong><small>Fotos nuevas con IA</small></button>
           </div>
           {designMode==='editorial'&&<><label htmlFor="style-reference">Dirección de arte</label>
@@ -358,13 +359,17 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
             <p className="bg-note">Con una foto original puedes crear publicaciones completas sin gastar cuota en fotos nuevas. La referencia inspira el estilo; puedes ajustar fuentes, textos y colores.</p>
           </>}
         </div>
-        {designMode==='photo'&&<><label>Tipo de imagen</label><div className="bg-modes"><button type="button" className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button type="button" className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div></>}
+        <label>Tipo de sujeto para generar con IA</label><div className="bg-modes">
+          <button type="button" className={kind==='portrait'?'selected':''} onClick={()=>setKind('portrait')}><strong>Persona / retrato</strong><small>Misma cara · anatomía natural</small></button>
+          <button type="button" className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas de producto</small></button>
+          <button type="button" className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Solo diseño editorial, sin IA</small></button>
+         </div>
         <div className="bg-prompt-hub"><div><strong>Prompt Helper · 30 recetas</strong>
          <small>{creativeSettings?'✓ Prompt y ajustes importados de tu biblioteca privada':'Escribe tu prompt libre o abre la biblioteca para recibir ayuda.'}</small></div>
          <button type="button" className="btn ghost" onClick={()=>onOpenPrompts?.()}>Abrir Prompt Studio <ArrowRight size={15}/></button>
         </div>
         <label>Tu idea creativa / Your prompt</label><textarea rows={5} maxLength={1900} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Escribe exactamente lo que quieres crear. La IA lo combinará con el Brand Kit y reglas de fotografía realista."/>
-        <small className="bg-note">Tu texto libre se usa al planificar las nueve ideas y al generar fotos. La IA no garantiza logos ni rostros exactos; el modo editorial puede conservar la foto original.</small>
+        <small className="bg-note">{kind==='portrait'?'Retrato: se prioriza conservar tu cara y generar escenarios reales sin tarimas. Revisa siempre las manos, dedos y pies; la IA puede equivocarse.':kind==='preserve'?'Conservar intacta: elige Diseño editorial y descarga tu foto original con texto y diseño; no necesitas generar otra imagen.':'Producto: el generador crea escenas de objetos, no retratos humanos.'} La IA no garantiza fidelidad exacta. No se hacen reintentos automáticos que gasten créditos.</small>
         <div className="bg-test-controls">
           {isAdmin&&<><button className="btn ghost wide" disabled={!!busy||!!uploading} onClick={checkConnection}>
             {busy==='connection'?<LoaderCircle size={17} className="spin"/>:<Check size={17}/>}
@@ -372,7 +377,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           </button>
           {connection==='ready'&&<p className="bg-connection-ok">✓ Cuenta y token de Cloudflare conectados. Puedes probar una foto.</p>}
           {connection==='error'&&<p className="bg-connection-error">Cloudflare no respondió. Revisa los permisos del token en Supabase.</p>}</>}
-          <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading} onClick={()=>testOnePhoto()}>
+          <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading||kind==='preserve'} onClick={()=>testOnePhoto()}>
             {busy==='test-photo'?<LoaderCircle size={17} className="spin"/>:<ImagePlus size={17}/>}
             {busy==='test-photo'?'Generando una foto…':'Generar 1 foto · 1 crédito IA'}
           </button>
@@ -383,7 +388,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
                <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('More candid natural light, less staged, authentic textures and subtle imperfections.')}>Más natural</button>
                <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Premium editorial art direction, refined lighting and tactile materials without plastic shine.')}>Más editorial</button>
                <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Different camera viewpoint, credible wide composition, no duplicate objects.')}>Otro ángulo</button>
-               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Change ONLY the environmental setting and lighting, keep recognizable product identity.')}>Otro fondo</button>
+               <button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Change ONLY the environmental setting and lighting, preserve the same real person facial identity if the source is a portrait.')}>Otro fondo</button>
+                {kind==='portrait'&&<button disabled={!!busy} type="button" onClick={()=>testOnePhoto('Keep hands relaxed and natural, without extra, merged or missing fingers, correct limb joints, feet on normal real ground, no platforms or stages.')}>Manos naturales</button>}
              </div><small>Estas acciones crean otra imagen usando tu fotografía de referencia; no retocan píxeles de la foto generada.</small>
            </div>
            <button className="btn ghost" onClick={downloadTest}><Download size={16}/> Descargar PNG</button>
@@ -392,7 +398,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Sube una foto para generar nueve ideas visuales originales, cada una como publicación independiente.</p></div>:<>
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
@@ -413,7 +419,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar fotos pendientes</button>}
           {grid.kind==='preserve'&&grid.posts.every(p=>p.design)&&<p className="bg-free-design"><Check size={17}/> Tus nueve diseños usan la foto original. No necesitas generar imágenes con IA.</p>}
           <button className="btn ghost" disabled={!!busy||!reviewed||gridPending>0} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
-        <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No genera más imágenes.</p></div>
+        <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No detecta automáticamente dedos, manos ni identidad facial: revísalos antes de aprobar. No genera más imágenes.</p></div>
           <button className="btn ghost" disabled={!!busy} onClick={checkQuality}>Revisar grid</button>
           {qaNotes.length>0&&<><div className="bg-qa-list" role="status">{qaNotes.map((note,i)=><p key={i}>{i===0?'':'• '}{note}</p>)}</div>
            {gridPending===0?<label className="bg-qa-confirm">
@@ -467,7 +473,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
             <button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
-          <p className="bg-note">Modo foto/App intacta: la imagen original se compone sin alterarla. En modo producto la IA crea fotografías nuevas; revisa el resultado antes de publicar.</p>
+          <p className="bg-note">Modo editorial: la imagen original no se altera. Modo retrato: la IA crea otra foto, y puede cambiar detalles; comprueba rostro, manos, dedos, pies y fondo antes de publicar.</p>
         </div>
         {downloads.length>0&&<div className="bg-downloads"><h3><Check size={19}/> PNG individuales · {EXPORT_SIZES[exportSize].title}</h3><p>Descarga cada archivo por separado. Sin ZIP ni collages. Composiciones revisadas.</p><div>{downloads.map((v,i)=><a key={i} href={v.url} download={v.name}><Download size={15}/> Post {String(i+1).padStart(2,'0')}.png</a>)}</div></div>}
       </>}
