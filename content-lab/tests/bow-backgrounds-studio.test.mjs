@@ -21,6 +21,10 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
  const gallery=read('src/BackgroundLibrary.tsx');
  const palette=read('src/FreeDecorControls.tsx');
  assert.ok(painter.includes('paintBowBackground(ctx,w,h,id)'));
+ const seamless=read('src/SeamlessCarousel.ts');
+ assert.ok(seamless.includes('isBowBackground(opts.backgroundId)'));
+ assert.ok(seamless.includes('paintFreeBackground(ctx,W,H,opts.backgroundId'));
+
  assert.ok(thumb.includes('paintFreeBackground(ctx,240,300,id)'));
  assert.ok(gallery.includes('paintFreeBackground(ctx,1080,1350,id)'));
  assert.ok(gallery.includes('<BackgroundThumbnail'));
