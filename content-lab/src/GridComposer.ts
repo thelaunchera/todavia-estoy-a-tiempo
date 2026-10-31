@@ -141,14 +141,18 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  const fw=clamp(iw*frameScale,.12,.98),fh=clamp(ih*frameScale,.12,.87);
  const fx=clamp(ix+(iw-fw)/2+clamp(Number(control.frameX||0),-.75,.75),0,1-fw);
  const fy=clamp(iy+(ih-fh)/2+clamp(Number(control.frameY||0),-.75,.75),0,1-fh);
- await drawPhoto(ctx,photos.photo||'',fx*W,fy*H,fw*W,fh*H,zoom,dx,dy);
  if(photos.preserve&&photos.original){
-  // Overlay original screenshot/photo unchanged: only center it safely within its card.
-  const ox=.56*W,oy=.59*H,ow=.4*W,oh=.3*H;
-  ctx.fillStyle=paper;ctx.fillRect(ox-8,oy-8,ow+16,oh+16);
-  const im=new Image();im.src=photos.original;await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('No se pudo abrir el original'))});
-  const k=Math.min(ow/im.naturalWidth,oh/im.naturalHeight);
-  ctx.drawImage(im,ox+(ow-im.naturalWidth*k)/2,oy+(oh-im.naturalHeight*k)/2,im.naturalWidth*k,im.naturalHeight*k);
+  // Use the actual unaltered photo in this selected layout, not a tiny inset.
+  // Contain the entire bitmap: never crop faces, hands or screenshots.
+  const im=new Image();im.src=photos.original;
+  await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('No se pudo abrir la foto original'))});
+  const ox=fx*W,oy=fy*H,ow=fw*W,oh=fh*H;
+  const scale=Math.min(ow/im.naturalWidth,oh/im.naturalHeight);
+  const w=im.naturalWidth*scale,h=im.naturalHeight*scale;
+  ctx.fillStyle=paper;ctx.fillRect(ox,oy,ow,oh);
+  ctx.drawImage(im,ox+(ow-w)/2,oy+(oh-h)/2,w,h);
+ }else{
+  await drawPhoto(ctx,photos.photo||'',fx*W,fy*H,fw*W,fh*H,zoom,dx,dy);
  }
  // Text is always drawn from EXACT editor strings, never delegated to an image model.
  // Safe areas are respected for Reels/Stories.
