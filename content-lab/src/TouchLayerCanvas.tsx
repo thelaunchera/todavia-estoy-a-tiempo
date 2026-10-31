@@ -3,16 +3,20 @@ import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampPanoramaRect } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2 } from 'lucide-react';
+import { panoramaFont,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
 
 export type TouchLayer = {
-  id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker';
+  id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
+  text?:string; font?:string; fontSize?:number; color?:string; lineHeight?:number; spacing?:number;
+  outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
   preview: string; textOverlay?: string; layers: TouchLayer[];
-  onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
+  onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
+  onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
   ratio?: number; pageCount?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
@@ -28,12 +32,15 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, onEmpty,
-  onRemove, onReorder, onDropAsset, onDropFiles,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
   const [cropping, setCropping] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [snapEnabled,setSnapEnabled]=useState(true);
+  const [snapGuides,setSnapGuides]=useState<{x?:number;y?:number}|null>(null);
+  const [stageHeight,setStageHeight]=useState(540);
   const stage = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   const autoPanFrame = useRef(0);
@@ -46,11 +53,26 @@ export default function TouchLayerCanvas({
   useEffect(() => { setCropping(false); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
+  useEffect(()=>{
+    const el=stage.current;if(!el)return;
+    const resize=()=>setStageHeight(el.getBoundingClientRect().height||540);
+    resize();const observer=new ResizeObserver(resize);observer.observe(el);
+    return()=>observer.disconnect();
+  },[pageCount]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const update = (id: string, next: TouchRect) => {
     const rect = clamp(next);
     draftRef.current = {...draftRef.current, [id]: rect};
     setDraft(draftRef.current);
+  };
+  const applySmartSnap=(r:TouchRect,width:number,height:number):TouchRect=>{
+    if(!snapEnabled||pageCount<=1){setSnapGuides(null);return r;}
+    const cx=r.x+r.w/2,cy=r.y+r.h/2;
+    const candidates=Array.from({length:pageCount},(_,i)=>(i+.5)/pageCount);
+    const x=candidates.find(value=>Math.abs(value-cx)*width<9);
+    const y=[.25,.5,.75].find(value=>Math.abs(value-cy)*height<9);
+    setSnapGuides(x===undefined&&y===undefined?null:{x,y});
+    return {...r,x:x===undefined?r.x:x-r.w/2,y:y===undefined?r.y:y-r.h/2};
   };
   const startAutoPan=()=>{
     window.cancelAnimationFrame(autoPanFrame.current);
@@ -136,7 +158,7 @@ export default function TouchLayerCanvas({
       if (g.resize) {
         const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
         update(g.id, {...g.start, w: g.start.w * factor, h: g.start.h * factor});
-      } else update(g.id, {...g.start, x: g.start.x + dx, y: g.start.y + dy});
+      } else update(g.id, applySmartSnap({...g.start, x: g.start.x + dx, y: g.start.y + dy},g.width,g.height));
     }
   };
   const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
@@ -152,6 +174,7 @@ export default function TouchLayerCanvas({
       return;
     }
     gesture.current = null;
+    setSnapGuides(null);
     window.cancelAnimationFrame(autoPanFrame.current);
     if (g?.id === layer.id && draftRef.current[layer.id]) {
       onCommit(layer.kind, layer.id, draftRef.current[layer.id]);
@@ -186,7 +209,9 @@ export default function TouchLayerCanvas({
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
-      Grid de {pageCount} slides siempre visible · la división ocurre al descargar</div>}
+      Grid de {pageCount} slides siempre visible · la división ocurre al descargar
+      <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
+        onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
     {onRemove && <div className="touch-editor-actionbar"><span>{chosen ? 'Seleccionado: ' + chosen.name : 'Toca una foto o sticker para seleccionarlo'}</span>
       <button type="button" className="touch-editor-delete-primary" disabled={!chosen}
         onClick={() => { if (chosen) deleteLayer(chosen.id); }}><Trash2 size={16}/> Borrar elemento</button></div>}
@@ -238,12 +263,24 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
               style={{borderRadius:radius(metrics.radius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
-            <div className="touch-editor-image-window" style={photoWindow}>
+            {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={photoWindow}>
               <img src={layer.src} alt="" draggable={false} style={layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>
-            </div>
+            </div>}
+            {layer.kind==='text'&&<div className="touch-editor-free-text" style={{
+              fontFamily:panoramaFont(layer.font),
+              fontSize:(layer.fontSize||76)*stageHeight/1350+'px',
+              lineHeight:layer.lineHeight||1.12,
+              letterSpacing:(layer.spacing||0)*stageHeight/1350+'px',
+              color:layer.color||'#191919',
+              textShadow:layer.shadow?'0 2px 7px #19191966':undefined,
+              WebkitTextStroke:layer.outline?'1px #FFFFFF':undefined,
+            }}>{layer.text||''}</div>}
+            {layer.kind==='shape'&&<div className={'touch-editor-collage-shape shape-'+(layer.shape||'paper')}
+              style={{background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
+                borderColor:layer.color||'#F1E5D2'}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(metrics.radius,fw,fh)}}/>}
             {active && <><span className="touch-editor-outline"/>
@@ -252,6 +289,10 @@ export default function TouchLayerCanvas({
         })}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
           alt="" draggable={false} aria-hidden="true"/>}
+        {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
+          {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
+          {snapGuides.y!==undefined&&<span className="horizontal" style={{top:snapGuides.y*100+'%'}}/>}
+        </div>}
         {pageCount > 1 && <div className="panorama-cut-guides" aria-hidden="true">
           {Array.from({length: pageCount}, (_, n) => <div key={n} style={{left: n / pageCount * 100 + '%', width: 100 / pageCount + '%'}}>
             <span>SLIDE {n + 1}</span></div>)}
@@ -262,6 +303,33 @@ export default function TouchLayerCanvas({
       : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
+      {chosen.kind==='text'&&onUpdate&&<div className="touch-editor-type-settings">
+        <label>Texto<textarea rows={2} aria-label="Editar texto libre" value={chosen.text||''}
+          onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
+        <label>Fuente<select aria-label="Fuente de texto libre" value={chosen.font||'serif'}
+          onChange={e=>onUpdate(chosen.id,{font:e.target.value})}>
+          {['serif','sans','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
+           .map(v=><option key={v} value={v}>{v[0].toUpperCase()+v.slice(1)}</option>)}
+        </select></label>
+        <label>Tamaño <input type="range" min="20" max="240" step="2" value={chosen.fontSize||76}
+          onChange={e=>onUpdate(chosen.id,{fontSize:Number(e.target.value)})}/><span>{chosen.fontSize||76}px</span></label>
+        <label>Interlineado <input type="range" min=".7" max="2" step=".05" value={chosen.lineHeight||1.12}
+          onChange={e=>onUpdate(chosen.id,{lineHeight:Number(e.target.value)})}/></label>
+        <label>Espaciado <input type="range" min="-6" max="35" step="1" value={chosen.spacing||0}
+          onChange={e=>onUpdate(chosen.id,{spacing:Number(e.target.value)})}/></label>
+        <label>Color <input type="color" aria-label="Color de texto libre"
+          value={chosen.color||'#191919'} onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
+        <label><input type="checkbox" checked={!!chosen.shadow} onChange={e=>onUpdate(chosen.id,{shadow:e.target.checked})}/> Sombra</label>
+        <label><input type="checkbox" checked={!!chosen.outline} onChange={e=>onUpdate(chosen.id,{outline:e.target.checked})}/> Contorno</label>
+      </div>}
+      {chosen.kind==='shape'&&onUpdate&&<div className="touch-editor-type-settings">
+        <label>Forma<select value={chosen.shape||'paper'}
+          onChange={e=>onUpdate(chosen.id,{shape:e.target.value as PanoramaLayer['shape']})}>
+          <option value="paper">Papel</option><option value="tape">Cinta washi</option>
+          <option value="frame">Marco</option><option value="circle">Círculo</option></select></label>
+        <label>Color <input type="color" value={chosen.color||'#F1E5D2'}
+          onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
+      </div>}
       {chosen.kind === 'photo' && <><button type="button" className="touch-editor-fit"
         onClick={() => { void fitWholePhoto(); }}>Mostrar foto completa</button>
         <button type="button" aria-pressed={cropping}
@@ -287,7 +355,9 @@ export default function TouchLayerCanvas({
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
         <button type="button" className={selected === layer.id ? 'selected' : ''}
           onClick={() => setSelected(layer.id)} aria-pressed={selected === layer.id}
-          title={'Seleccionar ' + layer.name}><img src={layer.src} alt=""/><span>{layer.name}</span></button>
+          title={'Seleccionar ' + layer.name}>{layer.kind==='text'?<span className="touch-layer-mini">T</span>:
+          layer.kind==='shape'?<span className="touch-layer-mini">▧</span>:
+          <img src={layer.src} alt=""/>}<span>{layer.name}</span></button>
         <button type="button" className="touch-editor-layer-trash" title={'Borrar ' + layer.name}
           aria-label={'Borrar ' + layer.name} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
       </div>)}</div>
