@@ -30,7 +30,15 @@ const seed=async()=>{
   const brands=await list('brands');if(brands.length)return brands;
   const me=await current();
   const {data:owner}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
-  if(!owner)return []; // Each paying buyer starts with an empty private brand library.
+  if(!owner){
+    // A new buyer gets ONLY their own neutral brand (never the owner's profiles).
+    const personal=await add('brands',{
+      name:'My Brand',handle:'',audience:'',voice:'Friendly, clear, human',
+      rules:'No fabricated business claims or personal biography.',
+      language:'English',color:'#BED8E9',background:'#FAF8F3'
+    });
+    return [personal];
+  }
   const profiles=[
     {name:'The Launch Era',handle:'@thelaunchera_ai',audience:'Residential cleaning business owners in the USA',voice:'Clear, modern, human and premium',rules:'Public copy US English only. Focus on bookings, clients, quotes, invoices, jobs, follow-ups and cleaning operations. Never invent functionality. Real screenshots stay unaltered.',language:'English',color:'#BED8E9',background:'#FAF8F3'},
     {name:'Todavía estoy a tiempo',handle:'',audience:'Personas que sienten que van tarde y quieren volver a empezar',voice:'Íntimo, humano, conversacional',rules:'Todo el contenido público en español latino. No inventar episodios, historias personales o detalles íntimos. Mantener las cuentas separadas.',language:'Español',color:'#CDB8A9',background:'#F8EEE8'}
@@ -94,6 +102,16 @@ export const api={
       return {data:{brands,posts,assets}};
     }
     if(path==='/api/grids')return {data:{grids:await list('grids')}};
+    if(path==='/api/ai-wallet'){
+      const me=await current();
+      const {data:owner}=await tab('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+      if(owner)return {data:{admin:true}};
+      const {data:wallet,error}=await sb.from('content_lab_ai_wallets')
+       .select('photo_remaining,creative_remaining,photo_today,creative_today,quota_day')
+       .eq('user_id',me.id).maybeSingle();
+      if(error)throw Error(error.message);
+      return {data:wallet||{photo_remaining:60,creative_remaining:30,photo_today:0,creative_today:0,quota_day:''}};
+    }
     if(path.startsWith('/api/assets/')){
       const id=decodeURIComponent(path.slice('/api/assets/'.length));
       const asset=await read('assets',id);
@@ -123,8 +141,11 @@ export const api={
       }
       catch(e){await sb.storage.from(bucket).remove([path]);throw e;}
     }
-    if(['/api/ideas','/api/ai-image','/api/grid-plan','/api/grid-image','/api/connection-test'].includes(path))
-      return {data:await useEdge(path.slice(5),payload)};
+    if(['/api/ideas','/api/ai-image','/api/grid-plan','/api/grid-image','/api/connection-test'].includes(path)){
+      const data=await useEdge(path.slice(5),payload);
+      window.dispatchEvent(new Event('content-lab-credit-change'));
+      return {data};
+    }
     throw Error('Ruta no disponible: '+path);
   },
   put:async(path:string,payload:any):Promise<{data:any}>=>{
