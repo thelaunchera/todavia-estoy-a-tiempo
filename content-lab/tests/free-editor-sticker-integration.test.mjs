@@ -26,7 +26,7 @@ test('All three graphic editors preserve original sticker layers and custom back
 });
 test('Carousel generation and editing work without invoking AI and exports keep stickers',()=>{
  const car=read('src/CarouselFactory.tsx'),overlay=read('src/OriginalStickerOverlays.ts');
- assert.ok(car.includes('Crear 6 slides gratis · sin IA'));
+ assert.ok(car.includes('Crear 6 slides · sin IA'));
  assert.ok(car.includes('setAll(next);setCurrent(0)'));
  assert.ok(car.includes('La IA es opcional'));
  assert.ok(car.includes("if(!window.confirm('Esta foto utilizará 1 crédito de IA."));
