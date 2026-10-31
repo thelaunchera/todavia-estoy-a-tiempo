@@ -1,8 +1,9 @@
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
-export type SeamlessPage={title:string;eyebrow:string;description:string;assetId?:string;stickerIds?:string[]};
+import {clampRect,type TouchRect,type StickerPositions} from './TouchGeometry';
+export type SeamlessPage={title:string;eyebrow:string;description:string;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -72,7 +73,19 @@ export async function drawSeamlessPages(pages:SeamlessPage[],brand:SeamlessBrand
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;
   ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
   ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
-  ctx.save();ctx.translate(x,0);await paintOriginalStickerImages(ctx,W,H,page.stickerIds,images);ctx.restore();
+  ctx.save();ctx.translate(x,0);
+  if(!opts.editorMode&&page.photoPosition&&page.assetId&&images[page.assetId]){
+    try{
+      const p=clampRect(page.photoPosition),im=await load(images[page.assetId]);
+      const fw=p.w*W,fh=p.h*H,z=Math.max(fw/im.naturalWidth,fh/im.naturalHeight),iw=im.naturalWidth*z,ih=im.naturalHeight*z;
+      ctx.save();ctx.translate((p.x+p.w/2)*W,(p.y+p.h/2)*H);
+      ctx.rotate((p.angle||0)*Math.PI/180);
+      ctx.beginPath();ctx.roundRect(-fw/2,-fh/2,fw,fh,Math.min(fw,fh)*.06);ctx.clip();
+      ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();
+    }catch{/* Keep all other pages exportable. */}
+  }
+  if(!opts.editorMode)await paintOriginalStickerImages(ctx,W,H,page.stickerIds,images,page.stickerPositions);
+  ctx.restore();
  }
  return splitIntoPages(wide,total);
 }
