@@ -6,7 +6,7 @@ import PromptStudio from './PromptStudio';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
 import FreePostStudio from './FreePostStudio';
-import {installLabLocale} from './LabLocale';
+import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import FreeDecorControls from './FreeDecorControls';
@@ -475,6 +475,7 @@ function App() {
       .catch(err)
       .finally(() => setWaiting(false));
   }, []);
+  const t = (value:string):string=>uiText(value,loginLanguage);
   const brand = brands.find(b => b.id === current) || brands[0];
   const mine = posts.filter(p => p.brandId === brand?.id);
   const library = assets.filter(a => a.brandId === brand?.id || a.shared === true);
@@ -807,21 +808,21 @@ function App() {
             <div className="logo">
               content lab<span>.</span>
             </div>
-            <small>YOUR CREATIVE HQ</small>
+            <small>{t('YOUR CREATIVE HQ')}</small>
           </div>
           <button className="sidebar-close" type="button" aria-label="Cerrar menú" onClick={() => setMenu(false)}>
             <X size={20} />
           </button>
         </div>
-        <div className="side-label">YOUR ACCOUNTS</div>
+        <div className="side-label">{t('YOUR ACCOUNTS')}</div>
         <div className="switchwrap">
           <button className="switch" onClick={() => setSwitcher(v => !v)}>
             <span className="brand-avatar" style={{ background: brand?.color }}>
               {brand?.name[0] || '+'}
             </span>
             <span>
-              <strong>{brand?.name || 'Select a brand'}</strong>
-              <small>{brand?.handle || 'Personal workspace'}</small>
+              <strong>{brand?.name || t('Select a brand')}</strong>
+              <small>{brand?.handle || t('Personal workspace')}</small>
             </span>
             <ChevronDown size={16} />
           </button>
@@ -854,7 +855,7 @@ function App() {
         </div>
         <nav aria-label="Herramientas del Content Lab">
           {navGroups.map(group=><div className="lab-nav-group" key={group.title}>
-            <div className="side-label lab-nav-group-title">{group.title}</div>
+            <div className="side-label lab-nav-group-title">{t(group.title)}</div>
             {group.items.map(id=>{
               const item=nav.find(entry=>entry.id===id);
               if(!item)return null;
@@ -862,22 +863,22 @@ function App() {
               return <button type="button" key={item.id}
                 className={tab===item.id?'active':''}
                 onClick={()=>navigate(item.id)}>
-                <Icon size={19} strokeWidth={1.8}/>{item.title}
+                <Icon size={19} strokeWidth={1.8}/>{t(item.title)}
                 {item.id==='posts'&&<b>{mine.length}</b>}
               </button>;
             })}
           </div>)}
         </nav>
         {aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
-          <strong>AI credits · Tu saldo</strong>
-          <p>{aiWallet.photo_remaining??60} photos/fotos · {aiWallet.creative_remaining??30} ideas/créditos creativos</p>
-          <small>10 fotos por día, máximo 10 créditos de ideas/día. Editar y exportar tus PNG sin IA no gasta créditos.</small>
+          <strong>{loginLanguage==='es'?'Créditos de IA · Tu saldo':'AI credits · Your balance'}</strong>
+          <p>{aiWallet.photo_remaining??60} {loginLanguage==='es'?'fotos':'photos'} · {aiWallet.creative_remaining??30} {loginLanguage==='es'?'créditos creativos':'creative credits'}</p>
+          <small>{loginLanguage==='es'?'10 fotos por día y un máximo de 10 créditos de ideas. Editar y descargar tus PNG no consume créditos.':'10 photos per day and up to 10 idea credits. Editing and downloading PNGs does not use credits.'}</small>
         </div>}
         <div className="side-footer">
           <div className="side-inspo">
             <Sparkles size={21} />
-            <strong>Good content starts with intention.</strong>
-            <p>Less noise, more meaning.</p>
+            <strong>{t('Good content starts with intention.')}</strong>
+            <p>{t('Less noise, more meaning.')}</p>
           </div>
           <button
             className="signout"
@@ -885,7 +886,7 @@ function App() {
           >
             <span className="person">D</span>
             <span>
-              <strong>My private workspace</strong>
+              <strong>{t('My private workspace')}</strong>
               <small>{account.email}</small>
             </span>
             <LogOut size={17} />
@@ -898,9 +899,9 @@ function App() {
             <button className="hamburger" type="button" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu(true)}>
               <Menu size={22} />
             </button>
-            <span className="eyebrow">MY WORKSPACE</span>
+            <span className="eyebrow">{t('MY WORKSPACE')}</span>
             <span className="slash">/</span>
-            <strong>{nav.find(n => n.id === tab)?.title}</strong>
+            <strong>{t(nav.find(n => n.id === tab)?.title||'')}</strong>
           </div>
           <div>
             <div className="lab-site-locale" role="group" aria-label="Idioma del sitio / Site language">
@@ -922,11 +923,11 @@ function App() {
             <>
               <section className="lab-quickstart" aria-label="Guía para empezar">
                 <div className="lab-quickstart-heading">
-                  <div><span className="eyebrow">CONTENT LAB · FIRST STEPS</span>
-                    <h2>{setupStepsDone===3?'Tu estudio está en marcha. ✨':'Empieza a crear en 3 pasos.'}</h2>
-                    <p>No necesitas saber diseñar ni programar. Elige una acción y continúa desde donde quedaste.</p>
+                  <div><span className="eyebrow">{t('CONTENT LAB · FIRST STEPS')}</span>
+                    <h2>{t(setupStepsDone===3?'Tu estudio está en marcha. ✨':'Empieza a crear en 3 pasos.')}</h2>
+                    <p>{t('No necesitas saber diseñar ni programar. Elige una acción y continúa desde donde quedaste.')}</p>
                   </div>
-                  <span className="lab-start-count" aria-label={setupStepsDone+' de 3 pasos'}>{setupStepsDone}/3</span>
+                  <span className="lab-start-count" aria-label={loginLanguage==='es'?setupStepsDone+' de 3 pasos':setupStepsDone+' of 3 steps'}>{setupStepsDone}/3</span>
                 </div>
                 <div className="lab-quick-progress" role="progressbar" aria-valuenow={setupStepsDone} aria-valuemin={0} aria-valuemax={3} aria-label="Progreso de configuración">
                   <span style={{width:(setupStepsDone/3*100)+'%'}}/>
@@ -935,7 +936,7 @@ function App() {
                   {setupSteps.map((step,i)=><button key={step.title} type="button" className={'lab-quick-step '+(step.ready?'completed':'')}
                     onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
                     <span className="lab-step-num">{step.ready?<Check size={18}/>:String(i+1).padStart(2,'0')}</span>
-                    <span className="lab-quick-text"><strong>{step.title}</strong><small>{step.subtitle}</small></span>
+                    <span className="lab-quick-text"><strong>{t(step.title)}</strong><small>{t(step.subtitle)}</small></span>
                     <ArrowRight size={17}/>
                   </button>)}
                 </div>
@@ -949,25 +950,25 @@ function App() {
               <section className="intro">
                 <div>
                   <div className="eyebrow">
-                    <i className="greendot" /> YOUR CREATIVE DESK
+                    <i className="greendot" /> {t('YOUR CREATIVE DESK')}
                   </div>
                   <h1>
-                    Make room for
+                    {t('Make room for')}
                     <br />
-                    <em>better content.</em>
+                    <em>{t('better content.')}</em>
                   </h1>
                   <p>
-                    One home for your ideas. A different voice for every brand.
+                    {t('One home for your ideas. A different voice for every brand.')}
                   </p>
                 </div>
                 <div className="hero-art">
-                  <span>the</span>
+                  <span>{t('the')}</span>
                   <strong>
-                    creative
+                    {t('creative')}
                     <br />
-                    process.
+                    {t('process.')}
                   </strong>
-                  <small>MADE SIMPLE ↗</small>
+                  <small>{t('MADE SIMPLE ↗')}</small>
                 </div>
               </section>
               <section className="stats">
@@ -995,9 +996,9 @@ function App() {
                   },
                 ].map(s => (
                   <div key={s.label}>
-                    <span>{s.label}</span>
+                    <span>{t(s.label)}</span>
                     <strong>{String(s.n).padStart(2, '0')}</strong>
-                    <small>{s.detail}</small>
+                    <small>{t(s.detail)}</small>
                   </div>
                 ))}
               </section>
@@ -1005,8 +1006,8 @@ function App() {
                 <section className="homeideas">
                   <div className="cardheading">
                     <div>
-                      <div className="eyebrow">THE CONTENT ENGINE</div>
-                      <h2>What are we creating today?</h2>
+                      <div className="eyebrow">{t('THE CONTENT ENGINE')}</div>
+                      <h2>{t('What are we creating today?')}</h2>
                     </div>
                     <Sparkles size={25} />
                   </div>
@@ -1046,27 +1047,27 @@ function App() {
                         onClick={() => start(a.angle)}
                       >
                         <a.icon size={23} />
-                        <strong>{a.name}</strong>
-                        <small>{a.sub}</small>
+                        <strong>{t(a.name)}</strong>
+                        <small>{t(a.sub)}</small>
                         <ArrowUpRight size={17} />
                       </button>
                     ))}
                   </div>
                 </section>
                 <section className="homebrand">
-                  <div className="eyebrow">ACTIVE BRAND</div>
+                  <div className="eyebrow">{t('ACTIVE BRAND')}</div>
                   <h2>{brand.name}</h2>
-                  <p>{brand.audience || 'Define your audience in settings.'}</p>
+                  <p>{brand.audience || t('Define your audience in settings.')}</p>
                   <div className="dots">
                     <i style={{ background: brand.color }} />
                     <i style={{ background: brand.background }} />
                     <i style={{ background: '#191919' }} />
                   </div>
                   <div className="brand-detail">
-                    LANGUAGE <strong>{brand.language}</strong>
+                    {t('LANGUAGE')} <strong>{brand.language}</strong>
                   </div>
                   <div className="brand-detail">
-                    SAVED POSTS <strong>{mine.length}</strong>
+                    {t('SAVED POSTS')} <strong>{mine.length}</strong>
                   </div>
                   <button
                     className="textlink"
@@ -1081,8 +1082,8 @@ function App() {
               </div>
               <div className="sectionheading">
                 <div>
-                  <div className="eyebrow">PICK UP WHERE YOU LEFT OFF</div>
-                  <h2>Recent creations</h2>
+                  <div className="eyebrow">{t('PICK UP WHERE YOU LEFT OFF')}</div>
+                  <h2>{t('Recent creations')}</h2>
                 </div>
                 <button className="textlink" onClick={() => navigate('posts')}>
                   View all <ArrowRight size={16} />
@@ -1191,7 +1192,7 @@ function App() {
                   <h1>
                     Content <em>composer.</em>
                   </h1>
-                  <p>Give it a purpose. Give it your voice. Make it yours.</p>
+                  <p>{t('Give it a purpose. Give it your voice. Make it yours.')}</p>
                   <button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> Design full carousel <ArrowRight size={16} /></button>
                 </div>
                 <button className="btn ghost" onClick={() => start()}>
@@ -1203,9 +1204,9 @@ function App() {
                   <section className="panel">
                     <div className="panelhead">
                       <span>01</span>
-                      <h3>Set the direction</h3>
+                      <h3>{t('Set the direction')}</h3>
                     </div>
-                    <label>What should we talk about?</label>
+                    <label>{t('What should we talk about?')}</label>
                     <textarea
                       rows={3}
                       value={topic}
@@ -1218,7 +1219,7 @@ function App() {
                     />
                     <div className="double">
                       <div>
-                        <label>Format</label>
+                        <label>{t('Format')}</label>
                         <select
                           value={editor.format}
                           onChange={e => change('format', e.target.value)}
@@ -1229,7 +1230,7 @@ function App() {
                         </select>
                       </div>
                       <div>
-                        <label>Content angle</label>
+                        <label>{t('Content angle')}</label>
                         <select
                           value={editor.angle}
                           onChange={e => change('angle', e.target.value)}
@@ -1267,15 +1268,15 @@ function App() {
                   <section className="panel">
                     <div className="panelhead">
                       <span>02</span>
-                      <h3>Refine the words</h3>
+                      <h3>{t('Refine the words')}</h3>
                     </div>
-                    <label>Internal title *</label>
+                    <label>{t('Internal title *')}</label>
                     <input
                       value={editor.title}
                       onChange={e => change('title', e.target.value)}
                       placeholder="Name this idea"
                     />
-                    <label>Cover hook</label>
+                    <label>{t('Cover hook')}</label>
                     <textarea
                       rows={2}
                       value={editor.hook}
@@ -1292,27 +1293,27 @@ function App() {
                         ))}
                       </div>
                     )}
-                    <label>Slides / Script</label>
+                    <label>{t('Slides / Script')}</label>
                     <textarea
                       rows={5}
                       value={editor.slides}
                       onChange={e => change('slides', e.target.value)}
                       placeholder="One slide or talking point per line…"
                     />
-                    <label>Caption</label>
+                    <label>{t('Caption')}</label>
                     <textarea
                       rows={5}
                       value={editor.caption}
                       onChange={e => change('caption', e.target.value)}
                       placeholder="Write like a human, not a template…"
                     />
-                    <label>CTA</label>
+                    <label>{t('CTA')}</label>
                     <input
                       value={editor.cta}
                       onChange={e => change('cta', e.target.value)}
                       placeholder="What should they do next?"
                     />
-                    <label>Visual direction</label>
+                    <label>{t('Visual direction')}</label>
                     <textarea
                       rows={2}
                       value={editor.visual}
@@ -1326,11 +1327,11 @@ function App() {
                   <section className="panel">
                     <div className="panelhead">
                       <span>03</span>
-                      <h3>Save & organize</h3>
+                      <h3>{t('Save & organize')}</h3>
                     </div>
                     <div className="double">
                       <div>
-                        <label>Status</label>
+                        <label>{t('Status')}</label>
                         <select
                           value={editor.status}
                           onChange={e => change('status', e.target.value)}
@@ -1341,7 +1342,7 @@ function App() {
                         </select>
                       </div>
                       <div>
-                        <label>Planned date</label>
+                        <label>{t('Planned date')}</label>
                         <input
                           type="date"
                           value={editor.date}
@@ -1361,8 +1362,8 @@ function App() {
                 </div>
                 <aside className="visual cover-studio">
                   <div className="cover-studio-heading">
-                    <div className="eyebrow">COVER PREVIEW</div>
-                    <h3>Your graphic direction</h3>
+                    <div className="eyebrow">{t('COVER PREVIEW')}</div>
+                    <h3>{t('Your graphic direction')}</h3>
                     <small>Instagram · 1080 × 1350 PNG</small>
                   </div>
                   <FreePostStudio post={editor} brand={brand}
@@ -1383,9 +1384,9 @@ function App() {
             <>
               <div className="pageheading">
                 <div>
-                  <div className="eyebrow">YOUR CONTENT COLLECTION</div>
+                  <div className="eyebrow">{t('YOUR CONTENT COLLECTION')}</div>
                   <h1>
-                    Everything you've <em>made.</em>
+                    Everything you've <em>{t('made.')}</em>
                   </h1>
                   <p>Only publications belonging to {brand.name}.</p>
                 </div>
@@ -1450,8 +1451,8 @@ function App() {
               ) : (
                 <div className="empty">
                   <FolderOpen size={32} />
-                  <h3>Nothing here yet.</h3>
-                  <p>Start with one meaningful idea.</p>
+                  <h3>{t('Nothing here yet.')}</h3>
+                  <p>{t('Start with one meaningful idea.')}</p>
                   <button className="btn dark" onClick={() => start()}>
                     Create content
                   </button>
@@ -1533,7 +1534,7 @@ function App() {
                   </div>
                   <div className="double">
                     <div>
-                      <label>Name *</label>
+                      <label>{t('Name *')}</label>
                       <input
                         value={brandForm.name}
                         onChange={e =>
@@ -1548,7 +1549,7 @@ function App() {
                       </select>
                     </div>
                   </div>
-                  <label>Ideal audience</label>
+                  <label>{t('Ideal audience')}</label>
                   <textarea
                     rows={2}
                     value={brandForm.audience}
@@ -1556,7 +1557,7 @@ function App() {
                       setBrandForm({ ...brandForm, audience: e.target.value })
                     }
                   />
-                  <label>Voice & personality</label>
+                  <label>{t('Voice & personality')}</label>
                   <textarea
                     rows={2}
                     value={brandForm.voice}
@@ -1564,7 +1565,7 @@ function App() {
                       setBrandForm({ ...brandForm, voice: e.target.value })
                     }
                   />
-                  <label>Instructions for content AI</label>
+                  <label>{t('Instructions for content AI')}</label>
                   <textarea
                     rows={4}
                     value={brandForm.rules}
@@ -1574,7 +1575,7 @@ function App() {
                   />
                   <div className="double">
                     <div>
-                      <label>Public content language</label>
+                      <label>{t('Public content language')}</label>
                       <select
                         value={brandForm.language}
                         onChange={e =>
@@ -1589,7 +1590,7 @@ function App() {
                       </select>
                     </div>
                     <div>
-                      <label>Brand colors</label>
+                      <label>{t('Brand colors')}</label>
                       <div className="colorinputs">
                         <input
                           type="color"
@@ -1701,7 +1702,7 @@ function App() {
                     onClick={() => setBrandForm(newBrand())}
                   >
                     <Plus size={30} />
-                    <strong>Add another account</strong>
+                    <strong>{t('Add another account')}</strong>
                     <small>A fresh voice, a separate space.</small>
                   </button>
                 </div>
@@ -1720,9 +1721,9 @@ function App() {
           {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'grid',label:'Diseñar',icon:WandSparkles},
               {id:'stickers',label:'Stickers',icon:ImagePlus},{id:'backgrounds',label:'Fondos',icon:Palette},
               {id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
-            .map(item=><button type="button" key={item.id} aria-label={item.label} aria-current={tab===item.id?'page':undefined}
+            .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
               className={tab===item.id?'active':''} onClick={()=>navigate(item.id)}>
-              <item.icon size={21}/><span>{item.label}</span></button>)}
+              <item.icon size={21}/><span>{t(item.label)}</span></button>)}
         </nav>}
         {notice && (
           <div className="toast">
