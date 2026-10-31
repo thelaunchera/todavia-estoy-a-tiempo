@@ -1,5 +1,5 @@
 import React,{useRef,useState,useEffect} from 'react';
-import {unzipSync,strFromU8} from 'fflate';
+import {unzipSync} from 'fflate';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {isBowBackground} from './BowBackgrounds';
 import {isScrapbookBackground} from './ScrapbookBackgrounds';
@@ -8,7 +8,7 @@ import {ArrowRight,Download,Search,Upload} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
-type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File)=>Promise<LibraryAsset|null>};
+type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File)=>Promise<LibraryAsset|null>;isAdmin?:boolean};
 type Filter='all'|'scrapbook'|'bows'|'editorial'|'gradients'|'retro'|'dark';
 const GRADIENT_IDS=new Set(['soft-gradient','sunset-peach','lavender-haze']);
 const RETRO_IDS=new Set(['rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check']);
@@ -32,7 +32,7 @@ const COLLECTIONS:{id:Filter;label:string}[]=[
  {id:'retro',label:'📷 Retro & papel'},
  {id:'dark',label:'🌙 Oscuros'},
 ];
-export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload}:Props){
+export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,isAdmin=false}:Props){
  const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
@@ -112,7 +112,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    </div>
   </article>)}</div>
   {backgrounds.length===0&&<p className="background-empty">No hay fondos con ese nombre. Prueba otra búsqueda.</p>}
-  <details className="background-library-upload background-collection-import">
+  {isAdmin&&<details className="background-library-upload background-collection-import">
    <summary>Importar colección completa · ZIP</summary>
    <div>
     <strong>Todos tus fondos individuales, en una sola importación</strong>
@@ -130,7 +130,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
       {bulkProgress.done===bulkProgress.total&&!busy&&bulkProgress.failed===0&&<strong>Colección importada ✓</strong>}
     </div>}
    </div>
-  </details>
+  </details>}
   <details className="background-library-upload">
     <summary>Subir mi propio fondo</summary>
     <div><strong>Tu propia fotografía o diseño</strong>
