@@ -9,6 +9,8 @@ import {CreativeCover,exportCreativeCover} from './CreativeCover';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import MediaLibrary from './MediaLibrary';
+import StickerDownloads from './StickerDownloads';
+import BackgroundLibrary from './BackgroundLibrary';
 import FormatGallery from './FormatGallery';
 import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
@@ -86,7 +88,7 @@ type Post = {
   designData?: string;
 };
 type Asset = LibraryAsset;
-type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands';
+type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
 const angles = [
   'Pain point',
   'Educational',
@@ -102,6 +104,8 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Create content', icon: WandSparkles },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
+  { id: 'stickers', title: 'Stickers PNG · gratis', icon: ImagePlus },
+  { id: 'backgrounds', title: 'Backgrounds · gratis', icon: Palette },
   { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
   { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
@@ -559,7 +563,7 @@ function App() {
     }
   };
   useEffect(() => {
-    if (tab === 'media')
+    if (tab === 'media' || tab === 'stickers')
       library.forEach(a => {
         if (!images[a.id]) void imageLoad(a.id);
       });
@@ -591,7 +595,7 @@ function App() {
       let prepared;
       try {
         prepared = await image.resizeIfNeeded(input, {
-          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: 'image/jpeg'
+          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: category==='sticker'?'image/png':'image/jpeg'
         });
       } catch {
         throw new Error('No se pudo convertir esta foto. Prueba la opción de foto compatible de tu iPhone.');
@@ -610,7 +614,7 @@ function App() {
       setAssets(prev => [asset, ...prev]);
       setImages(prev => ({ ...prev, [asset.id]: 'data:' + prepared.mimeType + ';base64,' + prepared.data }));
       if (tab === 'create') change('assetId', asset.id);
-      toast('Foto optimizada y guardada en ' + brand.name + ' ✓');
+      toast((category==='sticker'?'Sticker PNG transparente':'Foto')+' guardado en '+brand.name+' ✓');
       return asset;
     } catch (e) {
       err(e);
@@ -1398,6 +1402,8 @@ function App() {
               )}
             </>
           )}
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} onUpload={async file=>upload(file,'sticker')} loadImage={imageLoad}/>}
+          {brand && tab === 'backgrounds' && <BackgroundLibrary onDesign={()=>navigate('factory')}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
                onUpload={async(file,category)=>upload(file,category)}
@@ -1638,9 +1644,10 @@ function App() {
         />
         {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
           {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'grid',label:'Diseñar',icon:WandSparkles},
-              {id:'create',label:'Crear',icon:Plus},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
+              {id:'stickers',label:'Stickers',icon:ImagePlus},{id:'backgrounds',label:'Fondos',icon:Palette},
+              {id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
             .map(item=><button type="button" key={item.id} aria-label={item.label} aria-current={tab===item.id?'page':undefined}
-              className={tab===item.id?'active':''} onClick={()=>item.id==='create'?start():navigate(item.id)}>
+              className={tab===item.id?'active':''} onClick={()=>navigate(item.id)}>
               <item.icon size={21}/><span>{item.label}</span></button>)}
         </nav>}
         {notice && (
