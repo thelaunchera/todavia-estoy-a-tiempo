@@ -1,16 +1,39 @@
 import React,{useRef,useState,useEffect} from 'react';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {isBowBackground,BOW_BACKGROUNDS} from './BowBackgrounds';
+import {isScrapbookBackground,SCRAPBOOK_BACKGROUNDS} from './ScrapbookBackgrounds';
 import BackgroundThumbnail from './BackgroundThumbnail';
 import {ArrowRight,Download,Search,Upload} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
 type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File)=>Promise<LibraryAsset|null>};
-type Filter='bows'|'all'|'classic';
+type Filter='all'|'scrapbook'|'bows'|'editorial'|'gradients'|'retro'|'dark';
+const GRADIENT_IDS=new Set(['soft-gradient','sunset-peach','lavender-haze']);
+const RETRO_IDS=new Set(['rust-autumn','terracotta-check','vintage-paper','journal-tape','coffee-check']);
+const DARK_IDS=new Set(['night-editorial','night-stars']);
+function inCollection(id:FreeBackgroundId,filter:Filter){
+ if(filter==='all')return true;
+ if(filter==='scrapbook')return isScrapbookBackground(id);
+ if(filter==='bows')return isBowBackground(id);
+ if(isScrapbookBackground(id)||isBowBackground(id))return false;
+ if(filter==='gradients')return GRADIENT_IDS.has(id);
+ if(filter==='retro')return RETRO_IDS.has(id);
+ if(filter==='dark')return DARK_IDS.has(id);
+ return !GRADIENT_IDS.has(id)&&!RETRO_IDS.has(id)&&!DARK_IDS.has(id);
+}
+const COLLECTIONS:{id:Filter;label:string}[]=[
+ {id:'all',label:'Todos'},
+ {id:'scrapbook',label:'✂️ Scrapbook'},
+ {id:'bows',label:'🎀 Coquette & bows'},
+ {id:'editorial',label:'✦ Minimal & editorial'},
+ {id:'gradients',label:'🌈 Gradientes'},
+ {id:'retro',label:'📷 Retro & papel'},
+ {id:'dark',label:'🌙 Oscuros'},
+];
 export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload}:Props){
  const fileRef=useRef<HTMLInputElement>(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const [filter,setFilter]=useState<Filter>('bows'),[search,setSearch]=useState('');
+ const [filter,setFilter]=useState<Filter>('scrapbook'),[search,setSearch]=useState('');
  const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
  useEffect(()=>{own.slice(0,12).forEach(a=>{if(!images[a.id])loadImage(a.id)})},[assets,images]);
  const upload=async(file?:File)=>{
@@ -20,8 +43,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    finally{setBusy(false);if(fileRef.current)fileRef.current.value=''}
  };
  const backgrounds=FREE_BACKGROUNDS.filter(item=>{
-  if(filter==='bows'&&!isBowBackground(item.id))return false;
-  if(filter==='classic'&&isBowBackground(item.id))return false;
+  if(!inCollection(item.id,filter))return false;
   return (item.name+' '+item.description).toLowerCase().includes(search.toLowerCase().trim());
  });
  const download=(id:FreeBackgroundId)=>{
@@ -35,14 +57,15 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  return <section className="background-library">
   <header><span className="eyebrow">BACKGROUND STUDIO · GRATIS</span>
    <h1>Fondos que sí dan ganas de diseñar.</h1>
-   <p>20 fondos aesthetic nuevos: lazos de satén, encajes, cuadros, flores, perlas y scrapbook. Son diseños originales, sin textos encima y listos para tus carruseles.</p>
+   <p>Explora {FREE_BACKGROUNDS.length} fondos por estilo: scrapbook, coquette, gradientes, retro, minimal y oscuro. Sin textos ni marcas; listos para personalizar cada slide.</p>
   </header>
   <div className="background-library-filters" role="group" aria-label="Colecciones de fondos">
-   <button type="button" className={filter==='bows'?'selected':''} aria-pressed={filter==='bows'} onClick={()=>setFilter('bows')}>🎀 Coquette & bows · {BOW_BACKGROUNDS.length}</button>
-   <button type="button" className={filter==='classic'?'selected':''} aria-pressed={filter==='classic'} onClick={()=>setFilter('classic')}>Minimal y editoriales</button>
-   <button type="button" className={filter==='all'?'selected':''} aria-pressed={filter==='all'} onClick={()=>setFilter('all')}>Ver todos</button>
+   <div className="background-collection-chips">
+    {COLLECTIONS.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{FREE_BACKGROUNDS.filter(item=>inCollection(item.id,group.id)).length}</span></button>)}
+   </div>
    <label><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fondo…" aria-label="Buscar fondos"/></label>
   </div>
+  <p className="background-results" aria-live="polite">{backgrounds.length} diseños en esta colección · Selecciona uno para aplicarlo o descarga el PNG individual.</p>
   <div className="background-library-grid">{backgrounds.map(b=><article key={b.id}>
    <BackgroundThumbnail id={b.id} alt={'Vista previa sin texto: '+b.name}/>
    <div className="background-library-card-bottom"><div><strong>{b.name}</strong><small>{b.description}</small></div></div>
