@@ -22,10 +22,10 @@ function compile(name) {
 }
 const load = name => import(pathToFileURL(compile(name)).href);
 process.on('exit', () => rmSync(temp, {recursive: true, force: true}));
-const { coverPlacement, normalizeCrop } = await load('PhotoCrop');
+const { coverPlacement, normalizeCrop, initialPanoramaPhotoRect } = await load('PhotoCrop');
 const { clampRect, clampPanoramaRect, photoDefault } = await load('TouchGeometry');
 const { encodeCarouselDesign, readCarouselDesign } = await load('CarouselArtDirection');
-const { normalizePanoramaLayers } = await load('PanoramaLayers');
+const { normalizePanoramaLayers, reorderPanoramaLayers } = await load('PanoramaLayers');
 
 test('crop zoom always fills its frame, including portrait, landscape and full-bleed photos', () => {
   for (const [iw, ih, w, h] of [[2000, 1000, 600, 800], [900, 1600, 1000, 500], [1080, 1350, 1080, 1350]]) {
@@ -106,7 +106,7 @@ test('adding several photos with seamless off keeps separate free layers and exi
   const add=editorAction('addPanoramaAssets',{
     latestDraft:{current:{post:{brandId:'brand'},slides,style:{seamlessEnabled:false},ownedAssets:[asset]}},
     brand:{id:'brand'},assetCategory:()=> 'original',displayAssetName:()=> 'Added',
-    crypto,clampPanoramaRect,encodeCarouselDesign,onChange:next=>{saved=next},
+    crypto,clampPanoramaRect,initialPanoramaPhotoRect,encodeCarouselDesign,onChange:next=>{saved=next},
     notify:message=>{throw Error(message)},setDownloads:()=>{},setOverview:()=>{},
   });
   add([{asset,point:{x:.1,y:.4}},{asset,point:{x:.8,y:.6}}]);
@@ -114,4 +114,42 @@ test('adding several photos with seamless off keeps separate free layers and exi
   assert.equal(data.style.panoramaLayers.length,2);
   assert.equal(data.slides[0].assetId,'existing');
   assert.notEqual(data.style.panoramaLayers[0].id,data.style.panoramaLayers[1].id);
+});
+
+test('portrait images enter the panorama with their full aspect ratio, leaving the head visible',()=>{
+  for(const [ratio,count] of [[.56,4],[.75,4],[.8,6],[1.3,4],[1.78,4]]){
+    const rect=initialPanoramaPhotoRect(ratio,count,{x:.5,y:.5});
+    const screenRatio=(rect.w*count*1080)/(rect.h*1350);
+    assert.ok(Math.abs(screenRatio-ratio)<1e-9,'aspect ratio '+ratio);
+    assert.ok(rect.y>=0&&rect.y+rect.h<=1);
+    assert.ok(rect.w<=.88/count+1e-9);
+    assert.deepEqual(rect.crop,{x:.5,y:.12,zoom:1});
+    const p=coverPlacement(1000*ratio,1000,rect.w*count*1080,rect.h*1350,rect.crop);
+    assert.ok(Math.abs(p.y)<1e-6, 'full vertical photo never clips the head');
+    assert.ok(Math.abs(p.x)<1e-6,'photo width fits exactly');
+  }
+});
+
+test('forward/back layer controls persist across save and respect the text boundary',()=>{
+ const base=[
+   {id:'a',assetId:'a',name:'A',kind:'photo',rect:{x:0,y:0,w:.2,h:.2},placement:'behind-text'},
+   {id:'b',assetId:'b',name:'B',kind:'sticker',rect:{x:.3,y:.1,w:.2,h:.2},placement:'front'},
+   {id:'c',assetId:'c',name:'C',kind:'photo',rect:{x:.5,y:.2,w:.2,h:.2},placement:'front'},
+ ];
+ let layers=reorderPanoramaLayers(base,'b','backward');
+ assert.deepEqual(layers.map(layer=>layer.id),['b','a','c']);
+ assert.equal(layers[0].placement,'behind-text');
+ layers=reorderPanoramaLayers(layers,'a','forward');
+ assert.deepEqual(layers.map(layer=>layer.id),['b','c','a']);
+ assert.equal(layers[2].placement,'front');
+ layers=reorderPanoramaLayers(layers,'c','back');
+ assert.equal(layers[0].id,'c');
+ assert.equal(layers[0].placement,'behind-text');
+ layers=reorderPanoramaLayers(layers,'c','front');
+ assert.equal(layers.at(-1).id,'c');
+ assert.equal(layers.at(-1).placement,'front');
+ const serialized=encodeCarouselDesign([{title:'A'},{title:'B'}],{panoramaLayers:layers});
+ const persisted=readCarouselDesign(serialized).style.panoramaLayers;
+ assert.deepEqual(persisted.map(item=>item.id),layers.map(item=>item.id));
+ assert.deepEqual(persisted.map(item=>item.placement),layers.map(item=>item.placement));
 });
