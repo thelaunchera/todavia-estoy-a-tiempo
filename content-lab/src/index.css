@@ -1650,3 +1650,15 @@ input::placeholder {
  .lab-greeting-progress{margin-top:11px;padding-top:6px}
 }
 @media(max-width:375px){.lab-greeting-actions{flex-direction:column}}
+
+
+/* Six focused destinations, not mixed sizes in the same editor. */
+@media(max-width:850px){
+ .lab-mobile-dock{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}
+ .lab-mobile-dock button{font-size:9px;line-height:1.15;min-width:0;padding:6px 2px}
+ .lab-mobile-dock button svg{width:19px;height:19px}
+}
+@media(max-width:375px){
+ .lab-mobile-dock button{font-size:8px}
+ .lab-mobile-dock button svg{width:18px;height:18px}
+}
