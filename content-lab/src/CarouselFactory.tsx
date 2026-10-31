@@ -62,8 +62,8 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
   }
   const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
   const title = post.hook || (brand.language === 'English' ? 'One idea worth sharing' : 'Una idea que merece contarse');
-  const result: Slide[] = [makeSlide(0,title,post.assetId)];
-  entries.forEach((s,i)=>result.push(makeSlide(i+1,s)));
+  const result: Slide[] = [{...makeSlide(0,title,post.assetId),eyebrow:brand.language==='Español'?'LA GRAN IDEA':'THE BIG IDEA',photoFocus:'top'}];
+  entries.forEach((entry,n)=>result.push({...makeSlide(n+1,entry),eyebrow:brand.language==='Español'?'LA HISTORIA':'THE STORY'}));
   if(result.length < 3) {
     result.push(makeSlide(result.length,brand.language === 'English' ? 'What needs to change?' : '¿Qué podemos cambiar?'));
     result.push(makeSlide(result.length,brand.language === 'English' ? 'A simpler way forward' : 'Una forma más sencilla'));
@@ -74,11 +74,6 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
   });
   return result;
 }
-const textColor = (color: string) => {
-  if (!/^#[0-9A-F]{6}$/i.test(color)) return '#191919';
-  const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
-  return r*.299+g*.587+b*.114>148?'#191919':'#fff';
-};
 function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: number,maxW: number,size: number,lines: number,color: string,font='Georgia, serif') {
   const words=text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
   let built:string[]=[];
@@ -201,6 +196,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [busy,setBusy]=useState('');
   useEffect(()=>{setCurrent(0);setDownloads([]);setReferenceReport('');setSourceId('');},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  const warnings=slides.flatMap((part,n)=>{
+    const result:string[]=[];
+    if(!part.title.trim())result.push('Slide '+(n+1)+': falta el titular.');
+    if(part.title.length>(part.layout==='split'?95:part.layout==='cover'?115:155))result.push('Slide '+(n+1)+': titular largo, revisa la vista previa.');
+    if(['photo','split'].includes(part.layout)&&!part.assetId)result.push('Slide '+(n+1)+': diseño fotográfico sin foto.');
+    if(part.description.length>260)result.push('Slide '+(n+1)+': texto secundario demasiado largo.');
+    return result;
+  });
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);
@@ -301,6 +304,36 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div><div className="eyebrow">01 / CONTENT ENGINE</div><h2>Start with one good idea.</h2><p>La IA escribe el carrusel en {brand.language}, siguiendo las reglas de {brand.name}.</p></div>
       <div><textarea rows={3} value={idea} onChange={e=>setIdea(e.target.value)} placeholder={brand.language==='English'?'e.g. Why cleaning clients disappear after requesting a quote':'Ej. Sentir que vas tarde en la vida y aprender a empezar otra vez'}/><button className="btn dark" onClick={makeCopy} disabled={!!busy}>{busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate full carousel</button></div>
     </div>
+    <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
+      <div className="factory-style-title"><div><span className="eyebrow">02 / BRAND KIT LOCK</span><h2>Un solo estilo para todos los slides.</h2><p>Fondos, tipografías y colores conectados. Cambia aquí una vez y el carrusel completo sigue la misma dirección de arte.</p></div><span className="factory-style-lock"><Check size={15}/> Estilo maestro activo</span></div>
+      <div className="factory-style-controls">
+        <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
+          <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
+        </select></label>
+        <label>Tipografía<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
+          <option value="brand">Usar mi Brand Kit</option><option value="serif">Editorial serif</option><option value="sans">Moderna sans serif</option>
+        </select></label>
+        <label>Paleta<select aria-label="Paleta del carrusel" value={style.accentSource} onChange={e=>setArtStyle({accentSource:e.target.value as CarouselStyle['accentSource']})}>
+          <option value="brand">Colores de mi marca</option><option value="reference" disabled={!style.referenceColor}>Colores de la referencia</option>
+        </select></label>
+      </div>
+      <div className="factory-reference">
+        <div className="factory-reference-copy"><strong>¿Te dieron una referencia visual?</strong><p>Úsala como inspiración de paleta y contraste, sin copiar su fotografía ni sus textos. El análisis de color es gratuito.</p></div>
+        <div className="factory-reference-actions">
+          <select aria-label="Referencia de estilo" value={style.referenceAssetId} onChange={e=>{setArtStyle({referenceAssetId:e.target.value});setReferenceReport('')}}>
+            <option value="">Sin referencia de estilo</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+          <button type="button" className="btn ghost" onClick={uploadImage}><Upload size={15}/> Subir referencia</button>
+          <button type="button" className="btn dark" onClick={applyReference} disabled={!style.referenceAssetId||!images[style.referenceAssetId]}>Tomar colores · gratis</button>
+        </div>
+        {style.referenceAssetId&&images[style.referenceAssetId]&&<img className="factory-reference-thumb" src={images[style.referenceAssetId]} alt="Referencia usada solo como inspiración"/>}
+      </div>
+      <div className="factory-style-footer">
+        <div className="factory-style-swatches"><span style={{background:getCarouselPalette(brand,style).paper}}/><span style={{background:getCarouselPalette(brand,style).accent}}/><span style={{background:getCarouselPalette(brand,style).muted}}/><small>Paleta compartida · todos los slides</small></div>
+        <button type="button" className="btn ghost" onClick={applyRhythm}><Layers3 size={15}/> Aplicar composición coordinada</button>
+      </div>
+      {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
+    </section>
     <div className="factory-work">
       <div className="factory-edit">
         <div className="factory-section"><strong>02 / Slide storyboard</strong><span>{slides.length} slides · Editable</span></div>
