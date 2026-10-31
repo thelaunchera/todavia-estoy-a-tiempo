@@ -369,13 +369,14 @@ function App() {
     }).catch(()=>{});
     return()=>{active=false};
   },[account?.email]);
-  useEffect(()=>installLabLocale(loginLanguage),[loginLanguage,account]);
+
   const [waiting, setWaiting] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [current, setCurrent] = useState('');
   const [tab, setTab] = useState<Tab>('home');
+  useEffect(()=>{if(waiting)return;return installLabLocale(loginLanguage)},[loginLanguage,account,waiting,tab]);
   const [menu, setMenu] = useState(false);
   const [switcher, setSwitcher] = useState(false);
   // Prevent background page scrolling while the mobile drawer owns touch scroll.
