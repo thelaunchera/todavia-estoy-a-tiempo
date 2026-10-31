@@ -48,6 +48,13 @@ type Brand = {
   language: 'English' | 'Español';
   color: string;
   background: string;
+  secondaryColor?: string;
+  headingFont?: string;
+  bodyFont?: string;
+  photoMood?: string;
+  avoid?: string;
+  logoAssetId?: string;
+  referenceAssetId?: string;
 };
 type Post = {
   id?: string;
@@ -116,6 +123,13 @@ const newBrand = (): Brand => ({
   language: 'English',
   color: '#BED8E9',
   background: '#FAF8F3',
+  secondaryColor: '#E7D8C9',
+  headingFont: 'Prompt',
+  bodyFont: 'Futura',
+  photoMood: 'Natural editorial, human, realistic',
+  avoid: 'Fake labels, made-up UI, AI-looking faces, duplicate scenes',
+  logoAssetId: '',
+  referenceAssetId: '',
 });
 const ink = (hex: string) => {
   if (!/^#[0-9a-f]{6}$/i.test(hex)) return '#191919';
@@ -1497,6 +1511,21 @@ function App() {
                       </div>
                     </div>
                   </div>
+                  <div className="brandkit-extra">
+                    <div className="eyebrow">BRAND KIT · CADA CUENTA GUARDA SUS PROPIOS ESTILOS</div>
+                    <div className="double">
+                      <div><label>Color secundario</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
+                      <div><label>Logo guardado en biblioteca</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">Sin logo</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+                    </div>
+                    <div className="double">
+                      <div><label>Fuente para títulos</label><select value={brandForm.headingFont||'Prompt'} onChange={e=>setBrandForm({...brandForm,headingFont:e.target.value})}>{['Prompt','Georgia','Sans','Futura'].map(f=><option key={f}>{f}</option>)}</select></div>
+                      <div><label>Fuente de texto</label><select value={brandForm.bodyFont||'Futura'} onChange={e=>setBrandForm({...brandForm,bodyFont:e.target.value})}>{['Futura','Arial','Georgia','Prompt'].map(f=><option key={f}>{f}</option>)}</select></div>
+                    </div>
+                    <label>Estilo de fotografía</label><textarea rows={2} value={brandForm.photoMood||''} onChange={e=>setBrandForm({...brandForm,photoMood:e.target.value})} placeholder="Ej. Fotografías reales, sombras naturales, editorial de producto."/>
+                    <label>Nunca generar / modificar</label><textarea rows={3} value={brandForm.avoid||''} onChange={e=>setBrandForm({...brandForm,avoid:e.target.value})} placeholder="Ej. No inventar logos, etiquetas, capturas de la App, rostros o precios."/>
+                    <label>Referencia de estilo por defecto</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">Sin referencia fija</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+                    <small>Sube primero el logo y tus referencias en Media library con esta cuenta activa. Solo se mostrarán archivos de la misma marca.</small>
+                  </div>
                   <div className="formend">
                     <button
                       className="btn ghost"
@@ -1525,7 +1554,7 @@ function App() {
                       <div className="brandcolors">
                         <i style={{ background: b.color }} />
                         <i style={{ background: b.background }} />
-                        <i style={{ background: '#191919' }} />
+                        <i style={{ background: b.secondaryColor||'#191919' }} />
                       </div>
                       <div className="brandfoot">
                         <span>
