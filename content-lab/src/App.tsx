@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
+import PromptStudio from './PromptStudio';
+import './PromptStudio.css';
+import type {PromptControls} from './PromptEngine';
 import {CreativeCover,exportCreativeCover} from './CreativeCover';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
@@ -36,6 +39,7 @@ import {
   Upload,
   RotateCcw,
   Palette,
+  BookOpen,
 } from 'lucide-react';
 
 type Brand = {
@@ -75,7 +79,7 @@ type Post = {
   designData?: string;
 };
 type Asset = { id: string; brandId: string; name: string; mime: string };
-type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands';
+type Tab = 'home' | 'create' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands';
 const angles = [
   'Pain point',
   'Educational',
@@ -91,6 +95,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Create content', icon: WandSparkles },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
+  { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
   { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
   { id: 'media', title: 'Media library', icon: Images },
@@ -303,6 +308,7 @@ async function downloadPng(post: Post, brand: Brand, photo?: string) {
 }
 function App() {
   const [account, setAccount] = useState<{ email?: string } | null>(null);
+  const [chosenPrompt,setChosenPrompt]=useState<{version:number;text:string;settings:PromptControls}|null>(null);
   const [aiWallet, setAiWallet] = useState<{
     admin?:boolean;photo_remaining?:number;creative_remaining?:number;
     photo_today?:number;creative_today?:number;quota_day?:string;
@@ -820,6 +826,7 @@ function App() {
                 </div>
                 <div className="lab-quick-shortcuts">
                   <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> 1 Photo → 9 Posts</button>
+                  <button type="button" onClick={()=>navigate('prompt-studio')}><BookOpen size={17}/> Prompt Studio · 30 recetas</button>
                   <button type="button" onClick={()=>start()}><Plus size={17}/> Crear publicación</button>
                   <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> Mis diseños</button>
                 </div>
@@ -1006,8 +1013,17 @@ function App() {
               <a className="btn dark" href="./prompts/" target="_blank" rel="noreferrer">Abrir biblioteca de prompts</a>
             </section>
           )}
+          {brand && tab === 'prompt-studio' && (
+            <PromptStudio brand={brand} notify={toast} showError={err}
+              onUse={(text,settings)=>{
+                setChosenPrompt({version:Date.now(),text,settings});
+                navigate('grid');
+              }}/>
+          )}
           {brand && tab === 'grid' && (
             <BrandGrid
+              promptSelection={chosenPrompt}
+              onOpenPrompts={()=>navigate('prompt-studio')}
               isAdmin={Boolean(aiWallet?.admin)}
               wallet={aiWallet}
               brand={brand}
