@@ -90,3 +90,38 @@
 @media(max-width:600px){.v2-slider-grid{grid-template-columns:1fr}.v2-editor{padding:11px}.bg-export-setting{flex-direction:column;align-items:stretch}}
 
 .v2-usage-note{border:1px solid #d0e4e2;background:#f1f8f4;color:#557668;border-radius:11px;padding:12px 14px;font-size:11px;line-height:1.65;margin:14px 0}.v2-usage-note strong{display:block;color:#2c6155;font-size:12px}
+
+/* 2026-10-31 iPhone fixes: checkbox input must never inherit the global 100%-width text-input rule. */
+.brand-grid-tool .bg-qa-panel{min-width:0;overflow-wrap:anywhere}
+.brand-grid-tool .bg-qa-panel .bg-qa-confirm{
+ display:grid!important;grid-template-columns:22px minmax(0,1fr);
+ align-items:start;justify-content:initial;gap:13px!important;
+ width:100%;min-width:0;max-width:100%;
+ margin:5px 0 0;padding:12px 13px;
+ background:#fff;border:1px solid #dce8ea;border-radius:11px;
+ font-size:12px!important;font-weight:500;line-height:1.5;
+ white-space:normal;overflow-wrap:anywhere
+}
+.brand-grid-tool .bg-qa-panel .bg-qa-confirm input[type="checkbox"]{
+ display:block;width:20px!important;min-width:20px;max-width:20px;
+ height:20px!important;min-height:20px;
+ margin:1px 0 0!important;padding:0!important;
+ flex:0 0 20px;border-radius:5px;accent-color:#7298a9
+}
+.brand-grid-tool .bg-qa-confirm span{display:block;min-width:0;max-width:100%;width:auto;white-space:normal;overflow-wrap:break-word}
+.brand-grid-tool .bg-qa-list{width:100%;min-width:0}
+.brand-grid-tool .bg-qa-list p{overflow-wrap:break-word}
+.brand-grid-tool .bg-qa-list p:first-child{font-weight:700;color:#355d69}
+.brand-grid-tool .bg-qa-pending{font-size:12px;color:#526f79;line-height:1.55;margin:0}
+.brand-grid-tool .bg-editor-preview-note{
+ border:1px solid #d7e8eb;background:#f0f7f8;color:#456e7b;border-radius:9px;
+ padding:11px 13px;margin:13px 0 0;font-size:12px;line-height:1.55
+}
+@media(max-width:600px){
+ .brand-grid-tool .bg-qa-panel{padding:14px;max-width:100%}
+ .brand-grid-tool .bg-qa-panel .bg-qa-confirm{grid-template-columns:22px minmax(0,1fr);padding:11px}
+ .brand-grid-tool .v2-editor-top{flex-wrap:wrap}
+ .brand-grid-tool .v2-editor-top>div{min-width:0;flex:1 1 150px}
+ .brand-grid-tool .v2-editor-top .btn{flex:0 0 auto}
+ .brand-grid-tool .v2-preview-wrap{width:100%;max-width:100%}
+}
