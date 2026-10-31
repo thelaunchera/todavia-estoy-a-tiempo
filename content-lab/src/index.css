@@ -1528,3 +1528,27 @@ input::placeholder {
  .toast{bottom:calc(100px + env(safe-area-inset-bottom))}
 }
 @media(max-width:600px){.lab-quickstart-heading p{font-size:12px}.lab-quick-shortcuts button{flex:1;justify-content:center;min-width:145px}}
+
+/* Buyer brand identity: additional swatches and per-platform account fields. */
+.brand-panel{max-width:920px}
+.lab-brand-palette-editor,.lab-social-accounts{margin:21px 0 24px;padding:19px;background:#fbfaf7;border:1px solid #e7e7e0;border-radius:16px}
+.lab-brand-palette-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:15px}
+.lab-brand-palette-head strong,.lab-social-accounts-head strong{font-size:15px;color:#233437}
+.lab-brand-palette-head p,.lab-social-accounts-head p{font-size:12px;line-height:1.65;color:#6d7c80;margin:6px 0 0;max-width:630px}
+.lab-brand-palette-head .btn{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:11px;padding:9px 12px;flex:none}
+.lab-brand-palette-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.lab-brand-palette-tile{display:flex;align-items:center;min-width:0;gap:9px;background:#fff;border:1px solid #e1e8e7;border-radius:10px;padding:10px}
+.lab-brand-palette-swatch{flex:none;width:30px;height:30px;border-radius:9px;border:1px solid #00000019}
+.lab-brand-palette-name{font-size:11px;font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}
+.lab-brand-palette-name small{font-size:10px;font-weight:500;color:#849296;display:block;margin-top:3px}
+.lab-brand-palette-tile input[type=color]{flex:none;width:31px;height:32px;padding:1px;border:0;border-radius:6px;cursor:pointer;background:transparent}
+.lab-brand-color-remove{flex:none;border:0;background:#f8eeee;border-radius:7px;color:#a66363;width:26px;height:30px;display:grid;place-items:center}
+.lab-brand-palette-editor>small{display:block;color:#839094;font-size:10px;margin-top:12px;line-height:1.5}
+.lab-social-accounts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:17px;row-gap:6px;margin-top:13px}
+.lab-social-field{min-width:0;margin-top:7px!important}
+.lab-social-field span{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:#3c5256;margin-bottom:7px}
+.lab-social-field span small{font-size:9px;color:#426a77;background:#e6f2f5;border-radius:8px;padding:3px 8px}
+.lab-social-field input{width:100%;min-width:0;font-size:13px;background:#fff;border-radius:10px}
+.brandcolors{display:flex;gap:5px;flex-wrap:wrap}.brandcolors i{flex:none;display:inline-block;width:19px;height:19px;border-radius:50%;border:1px solid #0000001b}
+@media(max-width:700px){.lab-brand-palette-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-brand-palette-head{flex-direction:column}.lab-social-accounts-grid{grid-template-columns:1fr}.lab-brand-palette-editor,.lab-social-accounts{padding:15px}}
+@media(max-width:370px){.lab-brand-palette-list{grid-template-columns:1fr}}
