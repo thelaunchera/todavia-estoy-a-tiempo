@@ -40,14 +40,14 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
   const ids = new Set<string>();
   return value.slice(0, 24).flatMap(item => {
     if (!item || typeof item !== 'object' || typeof item.id !== 'string' || !item.id ||
-        !['photo','sticker','text','shape'].includes(item.kind) ||
+        (item.kind!==undefined && !['photo','sticker','text','shape'].includes(item.kind)) ||
         ((item.kind==='photo'||item.kind==='sticker')&&(typeof item.assetId !== 'string'||!item.assetId)) ||
         !item.rect || ids.has(item.id)) return [];
     ids.add(item.id);
     return [{
       id: item.id.slice(0, 160), assetId: typeof item.assetId==='string'?item.assetId.slice(0,150):'',
       name: String(item.name || 'Elemento').slice(0, 100),
-      kind: item.kind as PanoramaLayer['kind'],
+      kind: (item.kind||'photo') as PanoramaLayer['kind'],
       ...(item.kind === 'text' ? {
         text:String(item.text||'').slice(0,1600),
         font:String(item.font||'serif').slice(0,40),
