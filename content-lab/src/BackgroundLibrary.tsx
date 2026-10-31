@@ -34,7 +34,7 @@ const COLLECTIONS:{id:Filter;label:string}[]=[
 ];
 export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,isAdmin=false}:Props){
  const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
-  [busy,setBusy]=useState(false),[error,setError]=useState(''),
+  [busy,setBusy]=useState(false),[error,setError]=useState(''),[zipError,setZipError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<Filter>('scrapbook'),[search,setSearch]=useState('');
  const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
@@ -47,37 +47,42 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  };
  const importCollection=async(file?:File)=>{
    if(!file)return;
-   setError('');setBusy(true);setBulkProgress(null);
+   setZipError('');setBusy(true);setBulkProgress(null);
    try{
-     if(!/\.zip$/i.test(file.name)||file.size>15_000_000)
-       throw Error('El paquete debe ser ZIP y pesar menos de 15 MB.');
+     const name=file.name||'archivo';
+     const sizeMB=(file.size/1_000_000).toFixed(1);
+     if(!/\.zip$/i.test(name)&&!/(application\\/zip|x-zip-compressed)/i.test(file.type))
+       throw Error('El archivo seleccionado no es ZIP. Usa el paquete “Content_Lab_Importar_36_Fondos.zip”.');
+     if(file.size>15_000_000)
+       throw Error('Elegiste “'+name+'” ('+sizeMB+' MB). Esa es la versión pesada. Descarga el ZIP ligero de 3.2 MB desde el enlace de arriba.');
      const extracted=unzipSync(new Uint8Array(await file.arrayBuffer()));
-     const entries=Object.entries(extracted).filter(([path])=>
-       !path.startsWith('__MACOSX/')&&!path.includes('..')&&/\.(png|jpe?g|webp)$/i.test(path)
+     const entries=Object.entries(extracted).filter(([entry])=>
+       !entry.startsWith('__MACOSX/')&&!entry.includes('..')&&/\.(png|jpe?g|webp)$/i.test(entry)
      );
      if(entries.length<1||entries.length>60)
-       throw Error('El ZIP debe contener entre 1 y 60 fondos individuales.');
+       throw Error('El ZIP no contiene una colección válida. Usa el de 36 fondos preparado para el Lab.');
      const totalBytes=entries.reduce((sum,[,bytes])=>sum+bytes.byteLength,0);
-     if(totalBytes>42_000_000)throw Error('Los fondos descomprimidos superan el límite de 42 MB.');
+     if(totalBytes>42_000_000)throw Error('Los archivos del ZIP son demasiado grandes para importar desde el móvil.');
      const existing=new Set(own.map(a=>displayAssetName(a).toLowerCase().replace(/[^a-z0-9]/g,'')));
      let done=0,failed=0;
      setBulkProgress({done,total:entries.length,failed});
      for(const [path,bytes] of entries){
-       const name=path.split('/').pop()||'background.webp';
-       const clean=name.replace(/\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ');
+       const filename=path.split('/').pop()||'fondo.webp';
+       const clean=filename.replace(/\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ');
        const key=clean.toLowerCase().replace(/[^a-z0-9]/g,'');
        if(existing.has(key)){done++;setBulkProgress({done,total:entries.length,failed});continue}
-       const mime=/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg';
-       const uploadFile=new File([new Uint8Array(bytes)],name,{type:mime});
+       const mime=/\.png$/i.test(filename)?'image/png':/\.webp$/i.test(filename)?'image/webp':'image/jpeg';
+       const uploadFile=new File([new Uint8Array(bytes)],filename,{type:mime});
        try{
          const item=await onUpload(uploadFile);
          if(item){existing.add(key);loadImage(item.id)}else failed++;
        }catch{failed++}
        done++;setBulkProgress({done,total:entries.length,failed});
      }
-     if(failed) setError(failed+' fondos no se pudieron guardar. Los demás permanecen en tu biblioteca.');
-   }catch(e){setError(e instanceof Error?e.message:'No se pudo importar la colección ZIP.')}
-   finally{setBusy(false);if(bulkFileRef.current)bulkFileRef.current.value=''}
+     if(failed) setZipError('Se guardaron '+(entries.length-failed)+' fondos; '+failed+' fallaron. Puedes intentar otra vez: se omitirán los duplicados.');
+   }catch(e){
+     setZipError(e instanceof Error?e.message:'No se pudo leer el ZIP. Prueba el paquete ligero preparado para el Lab.');
+   }finally{setBusy(false);if(bulkFileRef.current)bulkFileRef.current.value=''}
  };
  const backgrounds=FREE_BACKGROUNDS.filter(item=>{
   if(!inCollection(item.id,filter))return false;
@@ -116,13 +121,17 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    <summary>Importar colección completa · ZIP</summary>
    <div>
     <strong>Todos tus fondos individuales, en una sola importación</strong>
-    <p>Selecciona el ZIP de la colección. El Lab añadirá cada imagen a los fondos de tu marca,
-     evitando nombres duplicados. No se consumen créditos de IA.</p>
+    <p>Importa los 36 fondos a tu biblioteca en una sola vez, sin gastar créditos de IA.</p>
+    <a className="background-zip-download" href="https://drive.google.com/file/d/1P4askVlzAjOBP4PuoSpgwOk7vs0yeeVr/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">
+      <Download size={17}/> Paso 1 · Descargar ZIP ligero (3.2 MB)
+    </a>
+    <small className="background-import-hint">No selecciones «Content_Lab_Fondos_Originales.zip» (77 MB). Ese paquete es solo para guardar los archivos en alta resolución.</small>
     <button className="btn dark" type="button" disabled={busy} onClick={()=>bulkFileRef.current?.click()}>
-      <Upload size={16}/>{busy?'Importando colección…':'Elegir ZIP de fondos'}
+      <Upload size={16}/>{busy?'Importando colección…':'Paso 2 · Elegir ZIP ligero'}
     </button>
     <input ref={bulkFileRef} hidden type="file" accept=".zip,application/zip,application/x-zip-compressed"
       onChange={e=>void importCollection(e.target.files?.[0])}/>
+    {zipError&&<p className="background-zip-error" role="alert">{zipError}</p>}
     {bulkProgress&&<div className="background-import-progress" role="status" aria-live="polite">
       <progress value={bulkProgress.done} max={bulkProgress.total}/>
       <span>{bulkProgress.done} de {bulkProgress.total} fondos procesados
