@@ -4,7 +4,7 @@ import {normalizePanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 export type CoverDecor={
  backgroundId:FreeBackgroundId;backgroundImageId:string;stickerIds:string[];
  stickerPositions:StickerPositions;
- layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];
+ layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
  headlineStyle?:{font?:string;fontSize?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number};
  color:string;gradient:string;
 };
@@ -22,6 +22,7 @@ export function readCoverDecor(data?:string):CoverDecor{
    stickerPositions:normalizedPositions(p.stickerPositions),
    layers:normalizePanoramaLayers(p.layers),
    headlineRect:p.headlineRect&&typeof p.headlineRect==='object'?p.headlineRect:undefined,
+   primaryPhotoRect:p.primaryPhotoRect&&typeof p.primaryPhotoRect==='object'?p.primaryPhotoRect:undefined,
    headlineStyle:p.headlineStyle&&typeof p.headlineStyle==='object'?{
     font:String(p.headlineStyle.font||'serif'),fontSize:Number(p.headlineStyle.fontSize)||82,
     color:hex(p.headlineStyle.color,'#191919'),shadow:p.headlineStyle.shadow===true,
