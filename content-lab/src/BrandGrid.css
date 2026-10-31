@@ -156,3 +156,6 @@
 .v2-simple-controls strong{font-size:12px}
 .v2-toggle-advanced{background:transparent;border:0;padding:9px 0;color:#3f7987;font-size:12px;text-decoration:underline;cursor:pointer}
 @media(max-width:600px){.bg-credit-dialog{padding:23px}.bg-credit-buttons{flex-direction:column}.bg-credit-buttons .btn{width:100%}}
+
+.bg-free-design{display:flex;align-items:center;gap:8px;flex:1 1 250px;font-size:12px;line-height:1.5;padding:12px;color:#2a6d5e;background:#eaf6f0;border:1px solid #c8e5d7;border-radius:10px}
+.bg-free-design svg{flex-shrink:0}
