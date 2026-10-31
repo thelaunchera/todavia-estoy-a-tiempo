@@ -5,10 +5,11 @@ import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,Arr
 import './BrandGrid.css';
 import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
 import GridVisualEditor from './GridVisualEditor';
+import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
@@ -31,13 +32,13 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
   const [preview,setPreview]=useState('');
   useEffect(()=>{
     let on=true;
-    if(!tile.assetId||!images[tile.assetId]||(grid.kind==='preserve'&&!images[grid.sourceId])){
+    if((!tile.assetId||!images[tile.assetId])&&(!tile.design||!images[grid.sourceId])||(grid.kind==='preserve'&&!images[grid.sourceId])){
       setPreview('');return()=>{on=false};
     }
     poster(tile,idx,grid,brand,images).then(canvas=>{if(on)setPreview(canvas.toDataURL('image/jpeg',0.7))})
       .catch(()=>{if(on)setPreview('')});
     return()=>{on=false};
-  },[tile.assetId,tile.headline,tile.subtext,tile.format,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
+  },[tile.assetId,tile.headline,tile.subtext,tile.format,tile.design,tile.layout,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
   if(preview)return <img src={preview} alt={'Post '+(idx+1)+' diseñado'}/>;
   return <div className={'bg-concept bg-concept-'+idx}>
     <span>{tile.format||CREATIVE_FORMATS[idx]}</span><i/>
@@ -47,6 +48,8 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
 }
 export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
+  const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
+  const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
   const [kind,setKind]=useState('product');const [brief,setBrief]=useState('');
   const [grids,setGrids]=useState<Grid[]>([]);const [grid,setGrid]=useState<Grid|null>(null);
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
@@ -83,7 +86,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     if(!library.some(a=>a.id===sourceId))return notify('Selecciona una foto guardada en '+brand.name+'.');
     if(referenceId&&!library.some(a=>a.id===referenceId))return notify('La referencia es de otra marca. Súbela en '+brand.name+'.');
     setBusy('plan');
-    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief});
+    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief,designMode,designPreset});
       const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
       notify(g.planningSource==='template'
        ? 'Preparé 9 conceptos editables con plantilla de respaldo. No se generaron fotos.'
@@ -164,14 +167,15 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   };
   const download=async(i:number)=>{
     if(!grid)return;
-    if(!grid.posts[i].assetId||!images[grid.posts[i].assetId])return notify('Genera primero una foto nueva para este post.');
+    if(!images[grid.sourceId]&&(!grid.posts[i].assetId||!images[grid.posts[i].assetId]))return notify('Carga primero tu foto principal.');
+    if(!grid.posts[i].design&&(!grid.posts[i].assetId||!images[grid.posts[i].assetId]))return notify('Genera primero una foto nueva para este post.');
     try{const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);
       const a=document.createElement('a');a.download='brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+EXPORT_SIZES[exportSize].w+'x'+EXPORT_SIZES[exportSize].h+'.png';a.href=c.toDataURL('image/png');a.click();notify('PNG del post '+(i+1)+' descargado.');
     }catch(e){showError(e)}
   };
   const prepare=async()=>{
     if(!grid)return;
-    if(grid.posts.some(p=>!p.assetId||!images[p.assetId]))return notify('Termina de generar las nueve fotos antes de descargar.');
+    if(grid.posts.some(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])))return notify('Faltan algunas fotos o diseños finales por preparar.');
     setBusy('export');
     try{const files=[];for(let i=0;i<9;i++){const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);files.push({name:'brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+exportSize+'.png',url:c.toDataURL('image/png')})}
       setDownloads(files);notify('Nueve archivos PNG preparados para descarga individual.');
@@ -186,8 +190,9 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
      const used=new Map<string,number>();
      const hashes:{n:number;value:string}[]=[];
      for(let i=0;i<grid.posts.length;i++){
-      const p=grid.posts[i];const image=p.assetId?images[p.assetId]:null;
-      if(!p.assetId||!image){pending++;continue;}
+      const p=grid.posts[i];
+      const image=p.assetId?images[p.assetId]:(p.design?images[grid.sourceId]:null);
+      if(!image){pending++;continue;}
       if(used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo.');
       used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
@@ -198,14 +203,14 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
       for(const prev of hashes)if(hamming(hash,prev.value)<=5){found.push('Posts '+(prev.n+1)+' y '+(i+1)+': fotos visualmente muy similares; revísalas.');break;}
       hashes.push({n:i,value:hash});
      }
-     if(pending>0)found.unshift(pending+' de 9 publicaciones sin imagen final. La vista previa puede mostrar tu foto original, pero eso no significa que ya se hayan generado fotos nuevas. Genera cada post cuando lo necesites.');
+     if(pending>0)found.unshift(pending+' de 9 publicaciones sin diseño exportable. Si quieres conservar tu retrato, usa un diseño editorial con la foto original. Si quieres escenas nuevas, genera cada foto con IA.');
      else found.unshift('Las 9 publicaciones tienen una imagen final. Revisa las indicaciones antes de exportar.');
      found.push('Inspección visual pendiente: revisa etiquetas, manos, logos y que el producto sea fiel al original.');
      setQaNotes(found);setReviewed(false);
      notify(pending>0?'Hay '+pending+' fotos finales pendientes. Conservé todas tus ideas y fotografías originales.':'Revisión terminada. Comprueba los avisos antes de exportar.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
-  const gridPending=grid?.posts.filter(p=>!p.assetId||!images[p.assetId]).length||0;
+  const gridPending=grid?.posts.filter(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])).length||0;
   const tile=grid?.posts[selected];
   return <div className="brand-grid-tool">
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una referencia. Nueve fotos nuevas, escenas y composiciones distintas.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
@@ -219,6 +224,20 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
         {(wrongOriginal||wrongReference)&&<p role="alert" className="bg-connection-error">Una foto pertenece a otra marca. Cambia de cuenta o vuelve a subir la foto desde {brand.name}.</p>}
         <button className="bg-link" onClick={()=>setChooseExisting(v=>!v)}>{chooseExisting?'Ocultar biblioteca':'O usar fotos ya guardadas'} <ArrowRight size={15}/></button>
         {chooseExisting&&<div className="bg-saved-select"><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Foto principal</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><select value={referenceId} onChange={e=>setReferenceId(e.target.value)}><option value="">Sin referencia</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>}
+        <div className="editorial-mode">
+          <strong>¿Qué quieres crear?</strong>
+          <div className="bg-modes">
+            <button type="button" className={designMode==='editorial'?'selected':''} onClick={()=>{setDesignMode('editorial');setKind('preserve')}}><strong>Diseño editorial completo</strong><small>Fondo + foto + tipografía + anotaciones</small></button>
+            <button type="button" className={designMode==='photo'?'selected':''} onClick={()=>setDesignMode('photo')}><strong>Campaña fotográfica</strong><small>Fotos nuevas con IA</small></button>
+          </div>
+          {designMode==='editorial'&&<><label htmlFor="style-reference">Dirección de arte</label>
+            <select id="style-reference" value={designPreset} onChange={e=>setDesignPreset(e.target.value as 'reference'|EditorialPreset)}>
+              <option value="reference">Adaptar la referencia que subí</option>
+              {EDITORIAL_PRESETS.map(p=><option key={p.id} value={p.id}>{p.name} — {p.description}</option>)}
+            </select>
+            <p className="bg-note">Con una foto original puedes crear publicaciones completas sin gastar cuota en fotos nuevas. La referencia inspira el estilo; puedes ajustar fuentes, textos y colores.</p>
+          </>}
+        </div>
         <label>Modo de imagen</label><div className="bg-modes"><button className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div>
         <label>Tu idea creativa</label><textarea rows={3} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Ej. Feed editorial premium, colores de mi marca, fotos lifestyle, tipografía grande, cada post diferente."/>
         <div className="bg-test-controls">
@@ -251,7 +270,7 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
            {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
           </select></div>
-        <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!reviewed||!grid.posts.every(p=>Boolean(p.assetId&&images[p.assetId]))} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
+        <div className="bg-grid-actions"><button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar las 9 imágenes</button><button className="btn ghost" disabled={!!busy||!reviewed||gridPending>0} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
         <div className="bg-qa-panel"><div><strong>Control de calidad</strong><p>Detecta fotos repetidas, titulares que no caben y publicaciones pendientes. No genera más imágenes.</p></div>
           <button className="btn ghost" disabled={!!busy} onClick={checkQuality}>Revisar grid</button>
           {qaNotes.length>0&&<><div className="bg-qa-list" role="status">{qaNotes.map((note,i)=><p key={i}>{i===0?'':'• '}{note}</p>)}</div>
@@ -262,16 +281,47 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
           </>}
          </div>
         <div className="bg-editor"><div className="bg-title"><span>{String(selected+1).padStart(2,'0')}</span><div><h3>Editar post {selected+1}</h3><p>Esta publicación es independiente.</p></div></div>
+          {tile&&<div className="editorial-settings">
+            <div className="bg-title"><span><Palette size={17}/></span><div><h3>Diseño de arte</h3><p>Controles reales de fondo, letra y anotaciones. Se guardan con este post.</p></div></div>
+            <label>Estilo del post</label>
+            <select value={tile.design?.preset||'classic'} onChange={e=>update({design:e.target.value==='classic'?undefined:{...(tile.design||{preset:'portrait'}),preset:e.target.value as EditorialPreset}})}>
+              <option value="classic">Composición clásica</option>
+              {EDITORIAL_PRESETS.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            {tile.design&&<>
+              <div className="editorial-fields">
+                <label>Tipografía del título<select value={tile.design.font||'elegant'} onChange={e=>update({design:{...tile.design!,font:e.target.value as EditorialDesign['font']}})}>
+                  <option value="elegant">Cormorant · Editorial serif</option><option value="modern">DM Sans · Moderna</option>
+                  <option value="handwritten">Caveat · Manuscrita</option><option value="bold">Space Grotesk · Impactante</option>
+                </select></label>
+                <label>Fondo<select value={tile.design.background||'photo'} onChange={e=>update({design:{...tile.design!,background:e.target.value as EditorialDesign['background']}})}>
+                  <option value="photo">Foto original a pantalla completa</option><option value="ivory">Papel cálido</option><option value="color">Color sólido</option><option value="gradient">Gradiente de marca</option>
+                </select></label>
+                <label>Color del fondo<input type="color" value={tile.design.backgroundColor||brand.background} onChange={e=>update({design:{...tile.design!,backgroundColor:e.target.value}})}/></label>
+                <label>Color del texto<input type="color" value={tile.design.textColor||'#24231f'} onChange={e=>update({design:{...tile.design!,textColor:e.target.value}})}/></label>
+                <label>Color de acento<input type="color" value={tile.design.accentColor||brand.color} onChange={e=>update({design:{...tile.design!,accentColor:e.target.value}})}/></label>
+                <label>Texto de revista / manuscrito<input value={tile.design.handwritten||''} placeholder="Ej. hi, I'm Dailin" onChange={e=>update({design:{...tile.design!,handwritten:e.target.value}})}/></label>
+                <label>Etiqueta editorial<input value={tile.design.kicker||''} placeholder="Ej. ABOUT ME" onChange={e=>update({design:{...tile.design!,kicker:e.target.value}})}/></label>
+                {(tile.design.preset==='annotated'||tile.design.preset==='magazine')&&[0,1,2,3].map(i=><label key={i}>Anotación {i+1}
+                  <textarea rows={2} maxLength={140} placeholder="Escribe solo información real sobre tu marca" value={tile.design?.callouts?.[i]||''}
+                    onChange={e=>{const items=[...(tile.design?.callouts||[])];items[i]=e.target.value;update({design:{...tile.design!,callouts:items}})}}/>
+                </label>)}
+                <label>Intensidad del contraste de la foto
+                  <input type="range" min={0} max={0.65} step={0.05} value={tile.design.overlay??.13} onChange={e=>update({design:{...tile.design!,overlay:Number(e.target.value)}})}/>
+                </label>
+              </div>
+            </>}
+          </div>}
           <label>Formato visual · 20 composiciones diferentes</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
           <label>Titular</label><input value={tile?.headline||''} onChange={e=>update({headline:e.target.value})}/>
           <label>Subtítulo</label><input value={tile?.subtext||''} onChange={e=>update({subtext:e.target.value})}/>
           <label>Caption</label><textarea rows={3} value={tile?.caption||''} onChange={e=>update({caption:e.target.value})}/>
           <label>Dirección de la foto</label><textarea rows={3} value={tile?.scene||''} onChange={e=>update({scene:e.target.value})}/>
           {tile&&<div className="bg-editor-preview-note">{!tile.assetId
-              ? 'Vista previa de diseño: todavía no se ha generado la foto final de este post. Conservamos la imagen original para ayudarte a organizar la composición.'
+              ? tile.design?'Vista previa editorial usando tu foto original: este diseño ya se puede exportar sin generar otra foto.':'Vista previa de diseño: todavía no se ha generado la foto final. Conservamos la original para planificar.'
               : 'Foto generada para este post. Puedes mover la imagen y el titular sin gastar créditos.'}</div>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} exportSize={exportSize} onChange={layout=>update({layout})}/>}
-          <p className="bg-note">El texto se coloca como capa editable después de crear la foto. Nunca pidas a la IA que escriba títulos en el producto.</p>
+          <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions"><button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar este post':'Generar este post'}</button><button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
           <p className="bg-note">Modo foto/App intacta: la imagen original se compone sin alterarla. En modo producto la IA crea fotografías nuevas; revisa el resultado antes de publicar.</p>
         </div>
