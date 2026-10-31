@@ -8,6 +8,7 @@
  * No generative AI or credits are used. All export sizes use the same painter.
  */
 import {BOW_BACKGROUNDS,isBowBackground,paintBowBackground,type BowBackgroundId} from './BowBackgrounds';
+import {SCRAPBOOK_BACKGROUNDS,isScrapbookBackground,paintScrapbookBackground,type ScrapbookBackgroundId} from './ScrapbookBackgrounds';
 export const FREE_STICKERS=[
  {id:'pink-bow',name:'Lazo rosa',emoji:'🎀',group:'Cute'},
  {id:'pink-heart',name:'Corazón suave',emoji:'🩷',group:'Cute'},
@@ -41,7 +42,7 @@ export const FREE_STICKERS=[
  {id:'sports',name:'Sports',emoji:'👟',group:'Ejercicios'}
 ] as const;
 export type FreeStickerId=typeof FREE_STICKERS[number]['id'];
-export type FreeBackgroundId='brand'|'warm-paper'|'soft-blue'|'sage'|'butter-cream'|'pink-paper'|'editorial-grid'|'soft-gradient'|'grain-ivory'|'night-editorial'|'dotted-paper'|'rust-autumn'|'terracotta-check'|'vintage-paper'|'sunset-peach'|'lavender-haze'|'blueprint-lines'|'botanical-sage'|'journal-tape'|'coffee-check'|'night-stars'|BowBackgroundId;
+export type FreeBackgroundId='brand'|'warm-paper'|'soft-blue'|'sage'|'butter-cream'|'pink-paper'|'editorial-grid'|'soft-gradient'|'grain-ivory'|'night-editorial'|'dotted-paper'|'rust-autumn'|'terracotta-check'|'vintage-paper'|'sunset-peach'|'lavender-haze'|'blueprint-lines'|'botanical-sage'|'journal-tape'|'coffee-check'|'night-stars'|BowBackgroundId|ScrapbookBackgroundId;
 export const FREE_BACKGROUNDS:{id:FreeBackgroundId;name:string;color:string;description:string}[]=[
  {id:'brand',name:'Colores de mi marca',color:'#FAF8F3',description:'Usa el Brand Kit'},
  {id:'warm-paper',name:'Warm Ivory',color:'#FAF8F3',description:'Papel cálido'},
@@ -64,12 +65,14 @@ export const FREE_BACKGROUNDS:{id:FreeBackgroundId;name:string;color:string;desc
  {id:'journal-tape',name:'Creative Journal',color:'#FCF7ED',description:'Cinta washi y papel'},
  {id:'coffee-check',name:'Coffee Club',color:'#E5D2BB',description:'Tablero café con leche'},
  {id:'night-stars',name:'Midnight Stars',color:'#26313E',description:'Constelaciones sutiles'},
- ...BOW_BACKGROUNDS
+ ...BOW_BACKGROUNDS,
+ ...SCRAPBOOK_BACKGROUNDS
 ];
 export type FreeDecoration={stickerIds?:string[];backgroundId?:FreeBackgroundId};
 const color=(s:string,fallback:string)=>/^#[0-9a-f]{6}$/i.test(s)?s:fallback;
 export function paintFreeBackground(ctx:CanvasRenderingContext2D,w:number,h:number,id:FreeBackgroundId|undefined,brandColor='#BED8E9',brandPaper='#FAF8F3'){
  if(isBowBackground(id)){paintBowBackground(ctx,w,h,id);return}
+ if(isScrapbookBackground(id)){paintScrapbookBackground(ctx,w,h,id);return}
  const chosen=FREE_BACKGROUNDS.find(x=>x.id===id)||FREE_BACKGROUNDS[0];
  const base=chosen.id==='brand'?color(brandPaper,'#FAF8F3'):chosen.color;
  ctx.fillStyle=base;ctx.fillRect(0,0,w,h);
