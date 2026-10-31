@@ -33,7 +33,7 @@ do $$
 declare tbl text;
 begin
  foreach tbl in array array['brands','posts','assets','grids'] loop
-  execute format('drop policy if exists %L on public.%I','lab authorized owner only','content_lab_'||tbl);
+  execute format('drop policy if exists %I on public.%I','lab authorized owner only','content_lab_'||tbl);
   execute format($pol$
     create policy "lab verified owner or paid buyer only" on public.%I
     for all to authenticated
