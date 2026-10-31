@@ -30,6 +30,9 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
  const [group,setGroup]=useState('Todos');
  const uploadRef=useRef<HTMLInputElement>(null),[uploading,setUploading]=useState(false);
  const ownBackgrounds=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
+ const studioBackgrounds=assets.filter(a=>assetCategory(a)==='background'&&a.shared);
+ useEffect(()=>{studioBackgrounds.slice(0,12).forEach(a=>{if(!images[a.id])loadImage?.(a.id)})},
+    [studioBackgrounds.map(a=>a.id).join('|')]);
  const upload=async(file?:File)=>{if(!file||!onUploadBackground)return;setUploading(true);try{const item=await onUploadBackground(file);if(item){loadImage?.(item.id);onChange({backgroundId:'brand',backgroundImageId:item.id,stickerIds:selected})}}finally{setUploading(false);if(uploadRef.current)uploadRef.current.value=''}};
  const originals=assets.filter(a=>assetCategory(a)==='sticker');
  const selected=stickerIds.filter(id=>originals.some(a=>a.id===id)).slice(0,3);
@@ -47,8 +50,18 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
   <div className="free-decor-main-tabs"><button type="button" aria-pressed={tab==='stickers'} className={tab==='stickers'?'active':''} onClick={()=>setTab('stickers')}>🎀 Stickers PNG</button><button type="button" aria-pressed={tab==='backgrounds'} className={tab==='backgrounds'?'active':''} onClick={()=>setTab('backgrounds')}>🎨 Fondos</button></div>
   {tab==='backgrounds'?<div>
     <div className="free-decor-upload"><strong>Mis fondos</strong>{onUploadBackground&&<><button type="button" disabled={uploading} onClick={()=>uploadRef.current?.click()}>{uploading?'Subiendo…':'+ Subir fondo'}</button><input hidden ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/></>}</div>
+    <p className="free-decor-label">Mis fondos privados · solo yo</p>
     {ownBackgrounds.length>0&&<div className="free-decor-backgrounds">{ownBackgrounds.map(a=><button type="button" key={a.id} aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''} onClick={()=>{if(!images[a.id])loadImage?.(a.id);onChange({backgroundId:'brand',backgroundImageId:a.id,stickerIds:selected})}}><i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/><span>{displayAssetName(a)}</span></button>)}</div>}
-    <p className="free-decor-label">Fondos incluidos</p>
+    <p className="free-decor-label">Fondos del estudio · para todos</p>
+    {studioBackgrounds.length>0&&<div className="free-decor-backgrounds">
+      {studioBackgrounds.filter(a=>backgroundKind==='all'||a.backgroundGroup===BACKGROUND_CATEGORIES.find(cat=>cat.id===backgroundKind)?.label)
+        .map(a=><button type="button" key={a.id} aria-pressed={backgroundImageId===a.id}
+        className={backgroundImageId===a.id?'selected':''}
+        onClick={()=>{if(!images[a.id])loadImage?.(a.id);onChange({backgroundId:'brand',backgroundImageId:a.id,stickerIds:selected})}}>
+        <i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/>
+        <span>{displayAssetName(a)}</span></button>)}
+    </div>}
+    <p className="free-decor-label">Fondos incluidos en Content Lab</p>
     <div className="free-decor-background-filters" role="group" aria-label="Categorías de fondos">
       <button type="button" aria-pressed={backgroundKind==='all'} className={backgroundKind==='all'?'active':''} onClick={()=>setBackgroundKind('all')}>Todos</button>
       {BACKGROUND_CATEGORIES.map(category=><button type="button" key={category.id} aria-pressed={backgroundKind===category.id}
