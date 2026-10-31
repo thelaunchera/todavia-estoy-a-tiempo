@@ -4,6 +4,7 @@
  * This deliberately consumes zero Workers AI credits.
  */
 import {brandPalette,type BrandIdentity,type SocialPlatform} from './BrandIdentity';
+import type {FreeBackgroundId} from './FreeDesignAssets';
 export type CarouselMood='editorial'|'soft'|'bold'|'dark';
 export type CarouselFont='brand'|'serif'|'sans';
 export type CarouselStyle={
@@ -13,10 +14,13 @@ export type CarouselStyle={
   accentSource:'brand'|'reference';
   referenceColor:string;
   targetPlatform:'brand'|SocialPlatform;
+  seamlessEnabled:boolean;
+  seamlessBackgroundId:FreeBackgroundId;
+  seamlessAssetId:string;
 };
 export const DEFAULT_CAROUSEL_STYLE:CarouselStyle={
   mood:'editorial',font:'brand',referenceAssetId:'',
-  accentSource:'brand',referenceColor:'',targetPlatform:'brand'
+  accentSource:'brand',referenceColor:'',targetPlatform:'brand',seamlessEnabled:false,seamlessBackgroundId:'soft-gradient',seamlessAssetId:''
 };
 export function normalizeCarouselStyle(value:unknown):CarouselStyle{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -26,7 +30,10 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
     referenceAssetId:typeof v.referenceAssetId==='string'?v.referenceAssetId.slice(0,110):'',
     accentSource:v.accentSource==='reference'?'reference':'brand',
     referenceColor:typeof v.referenceColor==='string'&&/^#[0-9A-F]{6}$/i.test(v.referenceColor)?v.referenceColor:'',
-    targetPlatform:['brand','instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'].includes(String(v.targetPlatform))?v.targetPlatform as CarouselStyle['targetPlatform']:'brand'
+    targetPlatform:['brand','instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'].includes(String(v.targetPlatform))?v.targetPlatform as CarouselStyle['targetPlatform']:'brand',
+    seamlessEnabled:v.seamlessEnabled===true,
+    seamlessBackgroundId:['brand','warm-paper','soft-blue','sage','butter-cream','pink-paper','editorial-grid','soft-gradient','grain-ivory','night-editorial','dotted-paper'].includes(String(v.seamlessBackgroundId))?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
+    seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):''
   };
 }
 export function readCarouselDesign(value:string):{slides:unknown[]|null;style:CarouselStyle}{
