@@ -369,7 +369,7 @@ function App() {
     }).catch(()=>{});
     return()=>{active=false};
   },[account?.email]);
-  useEffect(()=>installLabLocale(loginLanguage),[loginLanguage,account,tab]);
+  useEffect(()=>installLabLocale(loginLanguage),[loginLanguage,account]);
   const [waiting, setWaiting] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
