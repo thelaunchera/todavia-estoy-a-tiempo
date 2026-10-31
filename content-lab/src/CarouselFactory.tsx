@@ -88,6 +88,10 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
         }));
     }
   }
+  if(!post.id&&!post.hook.trim()&&!post.slides.trim()&&!post.cta.trim()){
+    return Array.from({length:4},(_,n)=>({...makeSlide(n,''),eyebrow:'',description:'',
+      layout:'statement' as Layout,frameStyle:'none' as const,assetId:''}));
+  }
   const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
   const title = post.hook || (brand.language === 'English' ? 'One idea worth sharing' : 'Una idea que merece contarse');
   const result: Slide[] = [{...makeSlide(0,title,post.assetId),eyebrow:brand.language==='Español'?'LA GRAN IDEA':'THE BIG IDEA',photoFocus:'top'}];
@@ -367,7 +371,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('inspiration');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
@@ -657,14 +661,20 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const uploaded:{asset:Asset;point:{x:number;y:number};ratio?:number}[]=[];
     const originBrand=brand.id;
     for(const file of files.slice(0,8)){
-      if(!file.type.startsWith('image/')&&!/\.(heic|heif)$/i.test(file.name)){
-        notify('Solo puedes añadir archivos de imagen al lienzo.');continue;
+      if(!file.type.startsWith('image/')&&!/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name)){
+        notify('Selecciona una fotografía PNG, JPG, HEIC o WEBP.');continue;
       }
-      const ratio=await photoAspectFromFile(file);
-      const asset=await onUploadPhoto(file);
-      if(asset)uploaded.push({asset,ratio,point:{x:Math.min(.95,point.x+uploaded.length*.03),y:point.y}});
+      try{
+        const ratio=await photoAspectFromFile(file).catch(()=>.75);
+        const asset=await onUploadPhoto(file);
+        if(!asset){notify('No se pudo añadir '+file.name+'. Comprueba el aviso de subida.');continue;}
+        uploaded.push({asset,ratio,point:{x:Math.min(.95,point.x+uploaded.length*.03),y:point.y}});
+      }catch(e){notify('No se pudo añadir '+file.name+': '+(e instanceof Error?e.message:'intenta otra vez'));}
     }
-    if(uploaded.length&&latestDraft.current.post.brandId===originBrand)addPanoramaAssets(uploaded);
+    if(uploaded.length&&latestDraft.current.post.brandId===originBrand){
+      addPanoramaAssets(uploaded);
+      notify(uploaded.length===1?'Foto añadida. Tócala para moverla o cambiar tamaño.':uploaded.length+' fotos añadidas al carrusel.');
+    }
   };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
