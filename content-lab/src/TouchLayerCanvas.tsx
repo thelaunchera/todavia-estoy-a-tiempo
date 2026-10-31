@@ -308,7 +308,7 @@ export default function TouchLayerCanvas({
           onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
         <label>Fuente<select aria-label="Fuente de texto libre" value={chosen.font||'serif'}
           onChange={e=>onUpdate(chosen.id,{font:e.target.value})}>
-          {['serif','sans','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
+          {['serif','sans','prompt','futura','dm serif display','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
            .map(v=><option key={v} value={v}>{v[0].toUpperCase()+v.slice(1)}</option>)}
         </select></label>
         <label>Tamaño <input type="range" min="20" max="240" step="2" value={chosen.fontSize||76}
