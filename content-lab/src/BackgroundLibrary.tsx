@@ -75,7 +75,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  const sections=BACKGROUND_CATEGORIES.map(group=>({
    ...group,items:backgrounds.filter(item=>belongsToBackgroundCategory(item.id,group.id))
  })).filter(group=>group.items.length>0);
- const categoryButtons:[{id:'all';label:string},...{id:BackgroundCategory;label:string}[]]=[
+ const categoryButtons:{id:BackgroundCategory;label:string}[]=[
    {id:'all',label:'Todos'},
    ...BACKGROUND_CATEGORIES.map(group=>({id:group.id,label:group.label})),
  ];
