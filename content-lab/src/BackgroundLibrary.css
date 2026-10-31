@@ -48,3 +48,18 @@
 .background-library-upload>div{margin-top:14px}
 .background-own{margin-top:30px}.background-own h2{font:400 28px Georgia,serif}
 @media(max-width:720px){.background-library-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.background-library-grid article{padding:6px}.background-library-card-bottom{padding:9px 5px 8px}.background-library-card-bottom strong{font-size:12px}.background-library-card-bottom small{font-size:10px}.background-download-button{flex-basis:41px}.background-library-filters{gap:6px}.background-library-filters>button{font-size:11px;padding:9px}.background-library-filters>label{flex-basis:100%}}
+
+/* Compact, scrollable style collections; mobile-friendly without crowding the editor. */
+.background-library-filters{align-items:flex-start}
+.background-collection-chips{display:flex;flex-wrap:wrap;gap:7px;flex:1 1 640px;min-width:0}
+.background-collection-chips>button{border:1px solid #d2dede;border-radius:999px;background:white;color:#405d63;min-height:39px;padding:8px 11px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.background-collection-chips>button span{font-size:10px;opacity:.72;font-variant-numeric:tabular-nums}
+.background-collection-chips>button.selected{background:#223a44;border-color:#223a44;color:#fff}
+.background-collection-chips>button:focus-visible{outline:3px solid #82b3c9;outline-offset:2px}
+.background-library-filters>label{flex:0 1 220px}
+.background-results{font-size:11px;color:#789097;margin:-5px 0 13px}
+@media(max-width:720px){
+ .background-collection-chips{flex-wrap:nowrap;overflow-x:auto;padding:0 0 8px;scroll-snap-type:x proximity;scrollbar-width:thin}
+ .background-collection-chips>button{flex:none;scroll-snap-align:start}
+ .background-library-filters>label{flex-basis:100%}
+}
