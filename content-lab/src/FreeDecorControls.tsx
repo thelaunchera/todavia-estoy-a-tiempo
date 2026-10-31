@@ -2,6 +2,7 @@ import React,{useEffect,useRef,useState} from 'react';
 import {FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
 import {BACKGROUND_CATEGORIES,belongsToBackgroundCategory,type BackgroundCategory} from './BackgroundCategories';
 import BackgroundThumbnail from './BackgroundThumbnail';
+import {isBackgroundVisible} from './BackgroundVisibility';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './FreeDecorControls.css';
 type Props={
@@ -67,7 +68,7 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
       {BACKGROUND_CATEGORIES.map(category=><button type="button" key={category.id} aria-pressed={backgroundKind===category.id}
         className={backgroundKind===category.id?'active':''} onClick={()=>setBackgroundKind(category.id)}>{category.label}</button>)}
     </div>
-    <div className="free-decor-backgrounds">{FREE_BACKGROUNDS.filter(b=>belongsToBackgroundCategory(b.id,backgroundKind))
+    <div className="free-decor-backgrounds">{FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&belongsToBackgroundCategory(b.id,backgroundKind))
       .map(b=><button type="button" aria-pressed={!backgroundImageId&&backgroundId===b.id}
         className={!backgroundImageId&&backgroundId===b.id?'selected':''} key={b.id}
         onClick={()=>onChange({backgroundId:b.id,backgroundImageId:'',stickerIds:selected})}>
