@@ -10,7 +10,9 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.match(helper,/version:2/);
  assert.ok(helper.includes('if(Array.isArray(parsed))'));
  assert.ok(ui.includes('encodeCarouselDesign(all,nextStyle)'));
- assert.ok(ui.includes('encodeCarouselDesign(parseSlides(updated,brand),style)'));
+ assert.ok(ui.includes('encodeCarouselDesign(generated,style)'));
+ assert.ok(ui.includes('const generated=parseSlides(updated,brand).map'));
+ assert.ok(ui.includes('backgroundImageId,backgroundColor:slide.backgroundColor'));
  assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
  assert.ok(ui.includes('const canvas=(await renderAllSlides())[n]'));
  assert.ok(ui.includes('overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style))'));
