@@ -7,19 +7,20 @@ import './PanoramaEditor.css';
 
 type Point = {x: number; y: number};
 type Props = {
-  preview: string; count: number; seamless: boolean; layers: TouchLayer[];
+  preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void;
   onCommit: (kind: 'photo' | 'sticker', id: string, rect: TouchRect) => void;
   onAdd: (assetId: string, point: Point) => void;
   onRemove: (id: string) => void;
+  onReorder: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   textElements: {id: string; name: string; preview: string}[];
   onRemoveText: (id: string) => void;
   onUpload: (files: File[], point: Point) => Promise<void>;
   error: string; onRetry: () => void;
 };
 export default function PanoramaEditor({
-  preview, count, seamless, layers, assets, images, loadImage, onCommit, onAdd,
-  onRemove, textElements, onRemoveText, onUpload, error, onRetry,
+  preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onAdd,
+  onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [filter, setFilter] = useState('');
@@ -78,8 +79,8 @@ export default function PanoramaEditor({
       {!available.length && <p>Sube tus fotos para empezar.</p>}
     </aside><div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
-      <TouchLayerCanvas preview={preview} layers={layers} ratio={count * 1080 / 1350}
-        pageCount={count} onCommit={onCommit} onRemove={onRemove}
+      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} ratio={count * 1080 / 1350}
+        pageCount={count} onCommit={onCommit} onRemove={onRemove} onReorder={onReorder}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
       <details className="panorama-text-manager"><summary>Textos del carrusel ({textElements.length}) · borrar</summary>
         <p>Los textos se eliminan aquí; las fotos y stickers se borran desde el lienzo o su lista.</p>
