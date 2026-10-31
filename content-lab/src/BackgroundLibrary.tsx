@@ -7,18 +7,37 @@ import {ArrowRight,Download,Search,Upload} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
-type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File)=>Promise<LibraryAsset|null>;isAdmin?:boolean};
-type GalleryFilter=BackgroundCategory|'mine';
+type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;isAdmin?:boolean};
+type GalleryFilter=BackgroundCategory|'mine'|'shared';
+function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
+ const target=useRef<HTMLSpanElement>(null);
+ useEffect(()=>{
+   if(src)return;
+   const el=target.current;if(!el)return;
+   if(typeof IntersectionObserver==='undefined'){loadImage(asset.id);return}
+   const io=new IntersectionObserver(entries=>{
+     if(entries.some(e=>e.isIntersecting)){io.disconnect();loadImage(asset.id)}
+   },{rootMargin:'240px'});
+   io.observe(el);return()=>io.disconnect();
+ },[asset.id,src,loadImage]);
+ return <span ref={target} className="background-shared-preview">
+   {src?<img loading="lazy" src={src} alt={'Fondo '+displayAssetName(asset)}/>:<span className="background-shared-loading"/>}
+ </span>;
+}
 export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,isAdmin=false}:Props){
  const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[zipError,setZipError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<GalleryFilter>('all'),[search,setSearch]=useState('');
+ const [uploadCategory,setUploadCategory]=useState('Editoriales');
  const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
+ const shared=assets.filter(a=>assetCategory(a)==='background'&&a.shared);
+ const sharedVisible=shared.filter(a=>
+   displayAssetName(a).toLowerCase().includes(search.toLowerCase().trim()));
  const requestedPreviews=useRef(new Set<string>());
  useEffect(()=>{
    // A large imported ZIP must still show every thumbnail after a reload.
-   own.slice(0,80).forEach(a=>{
+   [...own.slice(0,40),...shared.slice(0,40)].forEach(a=>{
      if(!images[a.id]&&!requestedPreviews.current.has(a.id)){
        requestedPreviews.current.add(a.id);
        loadImage(a.id);
@@ -27,7 +46,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  },[assets,images,loadImage]);
  const upload=async(file?:File)=>{
    if(!file)return;setBusy(true);setError('');
-   try{const item=await onUpload(file);if(item){loadImage(item.id);onDesign('brand',item.id)}}
+   try{const item=await onUpload(file,uploadCategory);if(item){loadImage(item.id);onDesign('brand',item.id)}}
    catch(e){setError(e instanceof Error?e.message:'No se pudo subir el fondo.')}
    finally{setBusy(false);if(fileRef.current)fileRef.current.value=''}
  };
@@ -49,7 +68,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
        throw Error('El ZIP no contiene una colección válida. Usa el de 36 fondos preparado para el Lab.');
      const totalBytes=entries.reduce((sum,[,bytes])=>sum+bytes.byteLength,0);
      if(totalBytes>42_000_000)throw Error('Los archivos del ZIP son demasiado grandes para importar desde el móvil.');
-     const existing=new Set(own.map(a=>displayAssetName(a).toLowerCase().replace(/[^a-z0-9]/g,'')));
+     const existing=new Set([...own,...shared].map(a=>displayAssetName(a).toLowerCase().replace(/[^a-z0-9]/g,'')));
      let done=0,failed=0;
      setBulkProgress({done,total:entries.length,failed});
      for(const [path,bytes] of entries){
@@ -60,7 +79,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
        const mime=/\.png$/i.test(filename)?'image/png':/\.webp$/i.test(filename)?'image/webp':'image/jpeg';
        const uploadFile=new File([new Uint8Array(bytes)],filename,{type:mime});
        try{
-         const item=await onUpload(uploadFile);
+         const item=await onUpload(uploadFile,uploadCategory);
          if(item){existing.add(key);loadImage(item.id)}else failed++;
        }catch{failed++}
        done++;setBulkProgress({done,total:entries.length,failed});
@@ -74,12 +93,15 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   filter!=='mine'&&belongsToBackgroundCategory(item.id,filter)&&
   (item.name+' '+item.description).toLowerCase().includes(search.toLowerCase().trim()));
  const sections=BACKGROUND_CATEGORIES.map(group=>({
-   ...group,items:backgrounds.filter(item=>belongsToBackgroundCategory(item.id,group.id))
- })).filter(group=>group.items.length>0);
+   ...group,
+   items:backgrounds.filter(item=>belongsToBackgroundCategory(item.id,group.id)),
+   sharedItems:sharedVisible.filter(item=>item.backgroundGroup===group.label)
+ })).filter(group=>(filter==='all'||filter===group.id)&&(group.items.length+group.sharedItems.length>0));
  const categoryButtons:{id:GalleryFilter;label:string}[]=[
    {id:'all',label:'Todos'},
    ...BACKGROUND_CATEGORIES.map(group=>({id:group.id,label:group.label})),
-   ...(own.length?[{id:'mine' as const,label:'Mis fondos'}]:[]),
+   {id:'shared',label:'Del estudio'},
+   {id:'mine',label:'Mis fondos'},
  ];
  const ownVisible=own.filter(a=>displayAssetName(a).toLowerCase().includes(search.toLowerCase().trim()));
  const download=(id:FreeBackgroundId)=>{
@@ -97,16 +119,18 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   </header>
   <div className="background-library-filters" role="group" aria-label="Colecciones de fondos">
    <div className="background-collection-chips">
-    {categoryButtons.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{group.id==='mine'?own.length:FREE_BACKGROUNDS.filter(item=>belongsToBackgroundCategory(item.id,group.id as BackgroundCategory)).length}</span></button>)}
+    {categoryButtons.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{group.id==='mine'?own.length:group.id==='shared'?shared.length:
+       FREE_BACKGROUNDS.filter(item=>belongsToBackgroundCategory(item.id,group.id as BackgroundCategory)).length+
+       shared.filter(item=>group.id==='all'||item.backgroundGroup===group.label).length}</span></button>)}
    </div>
    <label><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fondo…" aria-label="Buscar fondos"/></label>
   </div>
-  <p className="background-results" aria-live="polite">{filter==='mine'?ownVisible.length:backgrounds.length} fondos disponibles{filter==='all'?' · Ordenados por categoría':' en esta categoría'}</p>
+  <p className="background-results" aria-live="polite">{filter==='mine'?ownVisible.length:filter==='shared'?sharedVisible.length:backgrounds.length+sharedVisible.filter(a=>filter==='all'||a.backgroundGroup===BACKGROUND_CATEGORIES.find(c=>c.id===filter)?.label).length} fondos disponibles{filter==='all'?' · Ordenados por categoría':' en esta categoría'}</p>
   <div className="background-sections">
     {sections.map(group=><section className="background-category" key={group.id} aria-label={group.label}>
       <div className="background-category-heading"><div>
         <h2>{group.label}</h2><p>{group.description}</p></div>
-        <span>{group.items.length} {group.items.length===1?'fondo':'fondos'}</span>
+        <span>{group.items.length+group.sharedItems.length} {group.items.length+group.sharedItems.length===1?'fondo':'fondos'}</span>
       </div>
       <div className="background-library-grid">{group.items.map(b=><article key={b.id}>
        <BackgroundThumbnail id={b.id} alt={'Vista previa sin texto: '+b.name}/>
@@ -115,15 +139,42 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
         <button className="background-use-button" type="button" onClick={()=>onDesign(b.id)}>Usar fondo <ArrowRight size={14}/></button>
         <button className="background-download-button" type="button" aria-label={'Descargar '+b.name+' en PNG'} onClick={()=>download(b.id)} title="Descargar PNG individual"><Download size={16}/></button>
        </div>
+      </article>)}
+      {group.sharedItems.map(asset=><article key={asset.id}>
+        <AssetPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/>
+        <div className="background-library-card-bottom"><div><strong>{displayAssetName(asset)}</strong>
+          <small>Incluido para todos los alumnos</small></div></div>
+        <div className="background-card-actions">
+          <button className="background-use-button" type="button"
+            onClick={()=>onDesign('brand',asset.id)}>Usar fondo <ArrowRight size={14}/></button>
+          <button className="background-download-button" type="button"
+            aria-label={'Descargar '+displayAssetName(asset)} onClick={()=>{
+              const url=images[asset.id];if(!url)return loadImage(asset.id);
+              const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset)||'fondo')+'.png';a.click();
+            }}><Download size={16}/></button>
+        </div>
       </article>)}</div>
     </section>)}
   </div>
-  {backgrounds.length===0&&filter!=='mine'&&<p className="background-empty">No hay fondos con ese nombre. Prueba otra búsqueda.</p>}
+  {filter==='shared'&&<section className="background-category" aria-label="Fondos compartidos del estudio">
+    <div className="background-category-heading"><div><h2>Fondos del estudio</h2>
+      <p>Publicados por la administradora para todos los alumnos</p></div>
+      <span>{sharedVisible.length} fondos</span></div>
+    <div className="background-library-grid">{sharedVisible.map(asset=><article key={asset.id}>
+      <AssetPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/>
+      <div className="background-library-card-bottom"><div><strong>{displayAssetName(asset)}</strong>
+      <small>{asset.backgroundGroup||'Fondo compartido'}</small></div></div>
+      <button className="background-use-button" type="button" onClick={()=>onDesign('brand',asset.id)}>
+        Usar fondo <ArrowRight size={14}/></button>
+    </article>)}</div>
+  </section>}
+  {backgrounds.length===0&&!['mine','shared'].includes(filter)&&sections.length===0&&
+    <p className="background-empty">No hay fondos con ese nombre. Prueba otra búsqueda.</p>}
   {isAdmin&&<details className="background-library-upload background-collection-import">
    <summary>Importar colección completa · ZIP</summary>
    <div>
-    <strong>Todos tus fondos individuales, en una sola importación</strong>
-    <p>Importa los 36 fondos a tu biblioteca en una sola vez, sin gastar créditos de IA.</p>
+    <strong>Publicar fondos para todos los alumnos</strong>
+    <p>El ZIP se publicará en la biblioteca compartida y estará disponible para todas las cuentas activas.</p>
     <a className="background-zip-download" href="https://drive.google.com/file/d/1P4askVlzAjOBP4PuoSpgwOk7vs0yeeVr/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">
       <Download size={17}/> Paso 1 · Descargar ZIP ligero (3.2 MB)
     </a>
@@ -143,16 +194,22 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    </div>
   </details>}
   <details className="background-library-upload">
-    <summary>Subir mi propio fondo</summary>
-    <div><strong>Tu propia fotografía o diseño</strong>
-     <p>Guárdalo en tu biblioteca privada y úsalo en el carrusel sin gastar créditos de IA.</p>
+    <summary>{isAdmin?'Publicar fondo para todos':'Subir mi fondo privado'}</summary>
+    <div><strong>{isAdmin?'Biblioteca compartida de alumnos':'Mi biblioteca privada'}</strong>
+     <p>{isAdmin?'Este fondo quedará incluido para todas las cuentas con acceso activo.':
+      'Solo tú puedes ver y utilizar este fondo. Ninguna otra cuenta tendrá acceso.'}</p>
+     {isAdmin&&<label className="background-publish-category">Categoría del fondo
+       <select value={uploadCategory} onChange={e=>setUploadCategory(e.target.value)}>
+        {BACKGROUND_CATEGORIES.map(cat=><option key={cat.id} value={cat.label}>{cat.label}</option>)}
+       </select>
+     </label>}
      <button className="btn dark" type="button" disabled={busy} onClick={()=>fileRef.current?.click()}>
        <Upload size={16}/>{busy?'Subiendo…':'Elegir archivo'}</button>
      <input ref={fileRef} hidden type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/>
     </div>
   </details>
   {error&&<p role="alert">{error}</p>}
-  {own.length>0&&(filter==='all'||filter==='mine')&&<section className="background-own"><h2>Mis fondos guardados</h2>
+  {(filter==='mine'||own.length>0&&filter==='all')&&<section className="background-own"><h2>Mis fondos guardados</h2>
    <div className="background-library-grid own-backgrounds">{ownVisible.map(a=><article key={a.id}>
      <div className="background-preview uploaded-background" style={{backgroundImage:images[a.id]?'url('+images[a.id]+')':undefined}}>
        {!images[a.id]&&<button type="button" onClick={()=>loadImage(a.id)}>Cargar imagen</button>}
