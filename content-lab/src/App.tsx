@@ -631,7 +631,8 @@ function App() {
     let cancelled=false;
     void api.get('/api/sticker-catalog').then(({data})=>{
       if(cancelled)return;
-      setAssets(prev=>[...prev.filter(asset=>!asset.shared),...(data as Asset[])]);
+      setAssets(prev=>[...prev.filter(asset=>assetCategory(asset)!=='sticker'||!asset.shared),
+        ...(data as Asset[])]);
     }).catch(err);
     return ()=>{cancelled=true};
   },[tab,account?.email]);
@@ -652,8 +653,40 @@ function App() {
     setAssets(prev=>prev.some(a=>a.id===item.id)?prev:[...prev,item]);
     return item;
   };
+  const publishSharedBackground=async(file:File,backgroundGroup='Editoriales'):Promise<Asset|null>=>{
+    if(!aiWallet?.admin)throw Error('Solo la administradora puede publicar fondos compartidos.');
+    setBusy('upload');
+    try{
+      if(file.size>25000000)throw Error('El fondo no puede superar los 25 MB antes de optimizarlo.');
+      const isHeic=/heic|heif/i.test(file.type)||/\.(heic|heif)$/i.test(file.name);
+      let original:File|Blob=file;
+      if(isHeic){
+        const converted=await heic2any({blob:file,toType:'image/jpeg',quality:0.82});
+        original=Array.isArray(converted)?converted[0]:converted;
+      }
+      const mime=file.type==='image/png'?'image/png':
+        file.type==='image/webp'?'image/webp':'image/jpeg';
+      const optimized=await image.resizeIfNeeded(original,{
+        maxDimension:1500,maxPixels:1800000,quality:0.80,mimeType:mime
+      });
+      const {data}=await api.post('/api/background-catalog',{
+        name:file.name.replace(/\.(png|jpe?g|webp|heic|heif)$/i,'').replace(/[_-]+/g,' ').trim(),
+        category:backgroundGroup,mime:optimized.mimeType,content:optimized.data
+      });
+      const item=data as Asset;
+      setAssets(prev=>prev.some(x=>x.id===item.id)?prev:[...prev,item]);
+      setImages(prev=>({...prev,[item.id]:'data:'+optimized.mimeType+';base64,'+optimized.data}));
+      toast('Fondo publicado para todos los alumnos ✓');
+      return item;
+    }catch(e){err(e);return null}
+    finally{setBusy('')}
+  };
   const upload = async (file?: File, category:MediaCategory='original', autoSelect=true): Promise<Asset | null> => {
     if (!file) return null;
+    // The administrator's background/sticker uploads are intentionally shared.
+    // Every buyer upload still goes to owner-only RLS tables and private Storage.
+    if(aiWallet?.admin&&category==='background')return publishSharedBackground(file);
+    if(aiWallet?.admin&&category==='sticker')return publishSharedSticker(file,'Aesthetic');
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
       return null;
@@ -1468,7 +1501,7 @@ function App() {
           {brand && tab === 'backgrounds' && <BackgroundLibrary
   isAdmin={Boolean(aiWallet?.admin)}
   assets={library} images={images} loadImage={imageLoad}
-  onUpload={async file=>upload(file,'background')}
+  onUpload={async(file,category)=>aiWallet?.admin?publishSharedBackground(file,category):upload(file,'background')}
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
