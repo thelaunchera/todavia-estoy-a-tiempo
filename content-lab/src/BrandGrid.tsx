@@ -22,7 +22,7 @@ export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
     photo:(tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId],
-    original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design
+    original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design,stickerImages:images
   },size)).canvas;
 }
 async function imageFingerprint(src:string):Promise<string>{
@@ -170,7 +170,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
-  useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
+  useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[]),...(grid?.posts.flatMap(p=>[...(p.stickerIds||[]),...(p.design?.stickerIds||[])])||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
   const update=(change:Partial<Tile>)=>{
     setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);
     setDownloads([]);setReviewed(false);setQaNotes([]);
