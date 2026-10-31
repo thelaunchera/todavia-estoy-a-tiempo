@@ -96,6 +96,8 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
   const [chooseExisting,setChooseExisting]=useState(false);
+  const [connection,setConnection]=useState<'unknown'|'ready'|'error'>('unknown');
+  const [testPhoto,setTestPhoto]=useState('');
   const library=assets.filter(a=>a.brandId===brand.id),own=grids.filter(g=>g.brandId===brand.id);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
@@ -110,10 +112,44 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
     setBusy('plan');
     try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief});
       const g=data as Grid;setGrid(g);setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
-      notify('Nueve ideas creativas listas. Generando nueve fotografías distintas…');
-      await generateRemaining(g);
-      notify('Tus nueve publicaciones están listas.');
+      notify('Nueve ideas listas. Puedes generar una sola publicación primero y el resto cuando quieras.');
     }catch(e){showError(e)}finally{setBusy('')}
+  };
+  const checkConnection=async()=>{
+    setBusy('connection');setConnection('unknown');
+    try{
+      const {data}=await api.post('/api/connection-test',{});
+      if(!data.ok)throw Error('La cuenta Cloudflare no respondió.');
+      setConnection('ready');notify('Cloudflare conectado: cuenta, token y modelo de texto verificados.');
+    }catch(e){setConnection('error');showError(e)}
+    finally{setBusy('')}
+  };
+  const testOnePhoto=async()=>{
+    if(!sourceId)return notify('Primero selecciona una foto original.');
+    setBusy('test-photo');setTestPhoto('');
+    try{
+      const {data}=await api.post('/api/ai-image',{
+        brandId:brand.id,assetId:sourceId,mode:'variation',
+        prompt:'Generate one premium ORIGINAL product lifestyle advertisement photo from the supplied real product reference. Change scene, camera angle and lighting significantly. Keep recognizable product identity. No fake text, new logos, labels, or watermarks. One standalone 4:5 vertical photo.'
+      });
+      if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
+      const src='data:'+data.mime+';base64,'+data.content;
+      setTestPhoto(src);onNewAsset({id:data.id,brandId:brand.id,name:data.name||'Cloudflare test',mime:data.mime},src);
+      setConnection('ready');notify('¡Foto generada y guardada en tu biblioteca privada!');
+    }catch(e){showError(e)}
+    finally{setBusy('')}
+  };
+  const downloadTest=async()=>{
+    if(!testPhoto)return;
+    try{
+      const im=new Image();im.src=testPhoto;
+      await new Promise<void>((resolve,reject)=>{im.onload=()=>resolve();im.onerror=()=>reject(Error('Imagen dañada'))});
+      const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
+      const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas no disponible.');
+      const scale=Math.max(1080/im.width,1350/im.height);
+      ctx.drawImage(im,(1080-im.width*scale)/2,(1350-im.height*scale)/2,im.width*scale,im.height*scale);
+      const a=document.createElement('a');a.download='content-lab-test-1080x1350.png';a.href=canvas.toDataURL('image/png');a.click();
+    }catch(e){showError(e)}
   };
   const save=async(g:Grid)=>{
     const {data}=await api.put('/api/grids/'+g.id,{title:g.title,posts:g.posts});
@@ -174,7 +210,20 @@ export default function BrandGrid({brand,assets,images,onUploadFile,onNewAsset,l
         {chooseExisting&&<div className="bg-saved-select"><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Foto principal</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select><select value={referenceId} onChange={e=>setReferenceId(e.target.value)}><option value="">Sin referencia</option>{library.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>}
         <label>Modo de imagen</label><div className="bg-modes"><button className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div>
         <label>Tu idea creativa</label><textarea rows={3} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Ej. Feed editorial premium, colores de mi marca, fotos lifestyle, tipografía grande, cada post diferente."/>
-        <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} {busy==='plan'?'Analizando foto…':busy.startsWith('image-')?'Generando foto '+(Number(busy.split('-')[1])+1)+'/9…':'Crear automáticamente 9 fotos'}</button><small className="bg-note">La IA interpreta tus referencias. No copia marcas ajenas ni puede garantizar una reproducción exacta del producto. Se utiliza la cuota gratuita diaria de Cloudflare. No se activan cargos.</small>
+        <div className="bg-test-controls">
+          <button className="btn ghost wide" disabled={!!busy||!!uploading} onClick={checkConnection}>
+            {busy==='connection'?<LoaderCircle size={17} className="spin"/>:<Check size={17}/>}
+            Comprobar conexión gratuita
+          </button>
+          {connection==='ready'&&<p className="bg-connection-ok">✓ Cuenta y token de Cloudflare conectados. Puedes probar una foto.</p>}
+          {connection==='error'&&<p className="bg-connection-error">Cloudflare no respondió. Revisa los permisos del token en Supabase.</p>}
+          <button className="btn dark wide" disabled={!sourceId||!!busy||!!uploading} onClick={testOnePhoto}>
+            {busy==='test-photo'?<LoaderCircle size={17} className="spin"/>:<ImagePlus size={17}/>}
+            {busy==='test-photo'?'Generando una foto…':'Probar 1 foto gratis'}
+          </button>
+          {testPhoto&&<div className="bg-test-result"><img src={testPhoto} alt="Foto real generada por Cloudflare"/><button className="btn ghost" onClick={downloadTest}><Download size={16}/> Descargar PNG</button><small>También guardada en tu biblioteca privada.</small></div>}
+        </div>
+        <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Prueba primero la conexión y genera una sola foto. Después prepara las 9 ideas y elige cuándo generar las demás. La IA utiliza la cuota diaria de Workers Free; no usa Gemini de pago.</small>
       </div>
       {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{setGrid(g);setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
