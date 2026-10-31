@@ -7,7 +7,7 @@ test('Strict brand language and original photo non-repetition rules exist',()=>{
 test('Private schema includes RLS',()=>{const s=source('supabase/schema.sql');assert.match(s,/enable row level security/);assert.match(s,/content_lab_admins/);assert.match(s,/content-lab-private/)});
 
 test('Gemini image-generation backend uses supported 4:5 model',()=>{
- const edge=get('supabase/functions/content-lab-generate/index.ts');
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
  assert.ok(edge.includes('gemini-3.1-flash-lite-image'));
  assert.ok(edge.includes("aspectRatio:'4:5'"));
  assert.ok(edge.includes("imageSize:'1K'"));
