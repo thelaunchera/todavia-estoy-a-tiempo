@@ -11,7 +11,7 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(helper.includes('if(Array.isArray(parsed))'));
  assert.ok(ui.includes('encodeCarouselDesign(all,nextStyle)'));
  assert.ok(ui.includes('encodeCarouselDesign(parseSlides(updated,brand),style)'));
- assert.ok(ui.includes('getCarouselPalette(brand,style)'));
+ assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
  assert.ok(ui.includes('drawSlide(slides[n],n,slides.length,brand,images,style)'));
 });
 test('Style references are sampled locally and never pasted into carousel slides',()=>{
