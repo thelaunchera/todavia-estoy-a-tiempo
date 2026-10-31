@@ -97,7 +97,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   </header>
   <div className="background-library-filters" role="group" aria-label="Colecciones de fondos">
    <div className="background-collection-chips">
-    {categoryButtons.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{group.id==='mine'?own.length:FREE_BACKGROUNDS.filter(item=>belongsToBackgroundCategory(item.id,group.id)).length}</span></button>)}
+    {categoryButtons.map(group=><button key={group.id} type="button" className={filter===group.id?'selected':''} aria-pressed={filter===group.id} onClick={()=>setFilter(group.id)}>{group.label} <span>{group.id==='mine'?own.length:FREE_BACKGROUNDS.filter(item=>belongsToBackgroundCategory(item.id,group.id as BackgroundCategory)).length}</span></button>)}
    </div>
    <label><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar fondo…" aria-label="Buscar fondos"/></label>
   </div>
