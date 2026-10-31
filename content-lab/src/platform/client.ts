@@ -310,11 +310,56 @@ export const api={
     return {data:await update(m[1],decodeURIComponent(m[2]),payload)};
   },
   delete:async(path:string):Promise<{data:any}>=>{
+    requireConfig();
+    // Never authorize a shared deletion using a client-provided isAdmin flag.
+    // Both the authorization lookup and the DELETE are checked by database RLS.
+    const shared=path.match(/^\/api\/(sticker-catalog|background-catalog)\/([a-f0-9-]{36})$/i);
+    if(shared){
+      const me=await current();
+      const {data:admin,error:adminError}=await tab('admins').select('user_id')
+        .eq('user_id',me.id).maybeSingle();
+      if(adminError)throw Error(adminError.message);
+      if(!admin)throw Error('Solo la administradora puede eliminar recursos del estudio.');
+      const type=shared[1]==='sticker-catalog'?'sticker_catalog':'background_catalog';
+      const id=shared[2];
+      const {data:record,error:readError}=await tab(type)
+        .select('id,path').eq('id',id).maybeSingle();
+      if(readError)throw Error(readError.message);
+      if(!record)throw Error('Este recurso ya no está disponible.');
+      // For older admin backgrounds, the original owner-only asset is also
+      // removed so it does not reappear in "Mis fondos" after deletion.
+      if(type==='background_catalog'&&!record.path.startsWith('shared-backgrounds/')){
+        const {data:legacy,error:legacyError}=await tab('assets')
+          .select('id').eq('owner_id',me.id).filter('payload->>path','eq',record.path);
+        if(legacyError)throw Error(legacyError.message);
+        if((legacy||[]).length){
+          const {data:removed,error:legacyDeleteError}=await tab('assets').delete()
+            .eq('owner_id',me.id).in('id',(legacy||[]).map(x=>x.id)).select('id');
+          if(legacyDeleteError)throw Error(legacyDeleteError.message);
+          if((removed||[]).length!==(legacy||[]).length)throw Error('No se pudieron eliminar todos los registros antiguos.');
+        }
+      }
+      const {data:deleted,error:deleteError}=await tab(type).delete().eq('id',id).select('id');
+      if(deleteError)throw Error(deleteError.message);
+      if(!deleted?.length)throw Error('No se eliminó el recurso. Revisa tus permisos.');
+      // Storage API permanently removes the actual file, never direct SQL.
+      out(await sb.storage.from(bucket).remove([record.path]));
+      return {data:{deleted:true}};
+    }
     const m=path.match(/^\/api\/(posts|assets|prompts)\/([^/]+)$/);
     if(!m)throw Error('Ruta de borrado inválida.');
     const id=decodeURIComponent(m[2]);
     if(m[1]==='assets'){
       const asset=await read('assets',id);
+      // If an admin deletes a historical shared background from their own
+      // assets page, unpublish its catalog reference as well.
+      const {data:admin}=await tab('admins').select('user_id')
+         .eq('user_id',(await current()).id).maybeSingle();
+      if(admin&&asset.category==='background'){
+        const {error:unpublishError}=await tab('background_catalog').delete()
+          .eq('path',asset.path);
+        if(unpublishError)throw Error(unpublishError.message);
+      }
       await remove('assets',id);
       out(await sb.storage.from(bucket).remove([asset.path]));
     }else await remove(m[1]==='prompts'?'prompts':'posts',id);
