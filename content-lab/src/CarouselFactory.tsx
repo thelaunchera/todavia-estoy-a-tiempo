@@ -360,7 +360,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('inspiration');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
@@ -454,6 +454,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(nextSlides,normalizeCarouselStyle({...style,seamlessBackgroundId:initialBackground.id,
      seamlessAssetId:initialBackground.imageAssetId||''}));
     if(initialBackground.imageAssetId&&!images[initialBackground.imageAssetId])loadImage(initialBackground.imageAssetId);
+    setStudioTab('style');
     notify('Fondo aplicado a todo el carrusel. Puedes cambiarlo slide por slide.');
   },[initialBackground?.version,brand.id]);
 
@@ -916,6 +917,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             </div>
           </details>}
 
+          <FreeDecorControls backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
+            stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets}
+            images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
+            onUploadBackground={onUploadBackground}/>
       </details>
       <div className="factory-step-footer"><span>El fondo acompaña a la foto, no le roba protagonismo.</span>
         <button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: textos <ArrowRight size={16}/></button></div>
