@@ -186,7 +186,7 @@ function Graphic({
     <img src={photo} alt="Imagen de la publicación" />
   ) : (
     <div className="photo-placeholder">
-      <ImagePlus size={30} /> {t("Your image here")}
+      <ImagePlus size={30} /> {uiText("Your image here",brand.language==="Español"?"es":"en")}
     </div>
   );
   if (post.template === 'Spotlight')
