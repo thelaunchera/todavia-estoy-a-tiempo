@@ -529,12 +529,14 @@ function App() {
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
   const save = async () => {
-    if (!editor.title.trim()) return toast('Escribe un título para guardarlo.');
+    const draft={...editor,title:editor.title.trim()||editor.hook.trim().slice(0,80)||
+      (editor.format==='Carousel'?'Mi carrusel':editor.format==='Reel'?'Portada de Reel':
+       editor.format==='Story'?'Mi historia':'Mi publicación')};
     setBusy('save');
     try {
       const { data } = editor.id
-        ? await api.put('/api/posts/' + editor.id, editor)
-        : await api.post('/api/posts', editor);
+        ? await api.put('/api/posts/' + editor.id, draft)
+        : await api.post('/api/posts', draft);
       setPosts(prev =>
         editor.id
           ? prev.map(x => (x.id === editor.id ? data : x))
