@@ -8,7 +8,7 @@ import WaitlistManager from './WaitlistManager';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, type ClassLaunchStats, type AudioStats } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -276,6 +276,17 @@ function App() {
   const [seriesTab,setSeriesTab] = useState<string>('all');
   const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
   const [classStats,setClassStats] = useState<ClassLaunchStats|null>(null);
+  const [verifiedSales,setVerifiedSales]=useState<VerifiedSale[]|null>(null);
+  const [salesError,setSalesError]=useState('');
+  useEffect(()=>{
+    if(page!=='ventas'||!account||!SUPABASE_ENABLED)return;
+    let cancelled=false;
+    setSalesError('');
+    getVerifiedSales().then(rows=>{if(!cancelled)setVerifiedSales(rows);})
+      .catch(()=>{if(!cancelled){setVerifiedSales(null);setSalesError('No se pudieron consultar los registros verificados.');}});
+    return()=>{cancelled=true;};
+  },[page,account]);
+
   useEffect(() => {
     if(page !== 'clases' || !account || !SUPABASE_ENABLED) return;
     let cancelled=false;
@@ -1365,42 +1376,38 @@ function App() {
           )}
           {page === 'ventas' && (
             <>
-              {head(
-                'Ingresos, sin números inventados',
-                'Un espacio para confirmar compras, entregas y reembolsos cuando se sincronice Stripe con Make.'
-              )}
-              <div className="finance">
-                <span>INGRESOS VERIFICADOS</span>
-                <h3>Sin sincronizar</h3>
-                <p>
-                  Aún no hay datos de ventas conectados a este estudio. No
-                  mostramos $0 porque no significa que no hayas vendido.
-                </p>
-                <div className="finance-mark" aria-hidden="true"><ReceiptText size={78} strokeWidth={1.15} /></div>
-              </div>
-              {statusPanel(
-                'Conectar compras verificadas',
-                data?.sources.sales ||
-                  'Se requiere una conexión segura con los eventos de pago y entrega.'
-              )}
-              <div className="mini-two">
-                <div>
-                  <CreditCard size={22} />
-                  <h3>Qué quedará registrado</h3>
-                  <p>
-                    Producto, importe confirmado, fecha, estado de envío y
-                    reembolsos sin duplicados.
-                  </p>
+              {head('Centro de ventas y productos','Todos los checkouts existentes, sus entregas y sus estados. Stripe se conecta por Make; aquí no se crean cobros nuevos.')}
+              <div className="commerce-hero">
+                <div><span className="eyebrow">REGISTRO PRIVADO DE VENTAS</span>
+                  <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' registros sincronizados'}</h2>
+                  <p>{verifiedSales===null?'Consulta pendiente. No equivale a cero ventas en Stripe.':'Registros guardados en Supabase después de las automatizaciones de compra. No representan necesariamente todo Stripe.'}</p>
                 </div>
-                <div>
-                  <ShieldCheck size={22} />
-                  <h3>Privado por diseño</h3>
-                  <p>
-                    Cuando grabes la pantalla, los datos de las personas estarán
-                    ocultos.
-                  </p>
-                </div>
+                <div className="commerce-hero-mark" aria-hidden="true"><ReceiptText size={49}/></div>
               </div>
+              {salesError && <p className="commerce-error" role="status">{salesError}</p>}
+              <section className="commerce-catalog" aria-labelledby="commerce-catalog-title">
+                <div className="commerce-section-heading"><span className="eyebrow">CATÁLOGO COMERCIAL</span><h2 id="commerce-catalog-title">Productos y checkouts</h2>
+                  <p>Solo los enlaces de pago ya disponibles y comprobados aparecen como compra abierta. Los productos en preparación no cobran todavía.</p></div>
+                <div className="commerce-cards">
+                  <article className="commerce-product"><img src="../assets/clase-mostrar-web-2026.webp" alt="Imagen de la clase de creación web" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-closed">PRELANZAMIENTO · ACCESO CERRADO</span><h3>Tu primera web con IA</h3><p>Clase práctica y centro de alumnos. Compra y automatización todavía sin activar.</p><a href="../clases/primera-landing.html" target="_blank" rel="noopener noreferrer">Ver lista de espera ↗</a></div></article>
+                  <article className="commerce-product"><div className="commerce-lab-art" aria-hidden="true">content <em>lab.</em></div><div className="commerce-product-copy"><span className="commerce-tag is-closed">CHECKOUT $10 · PAUSADO POR QA</span><h3>Content Lab</h3><p>Producto y enlace de Stripe creados mediante Make; la automatización de acceso sigue inactiva.</p><a href="../content-lab/" target="_blank" rel="noopener noreferrer">Abrir mi Lab privado ↗</a></div></article>
+                  <article className="commerce-product"><img src="../assets/productos/editorial/diario-carta-20261027.webp" alt="Portada del diario No voy tarde" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $1.99</span><h3>No voy tarde</h3><p>Diario digital. Compra desde su página pública y entrega verificada mediante Make.</p><a href="../productos/no-voy-tarde.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
+                  <article className="commerce-product"><img src="../assets/productos/editorial/workbook-puerta-20261027.webp" alt="Portada del cuaderno Empezar de nuevo" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $3.99</span><h3>Empezar de nuevo</h3><p>Cuaderno digital. Compra desde su página pública y entrega verificada mediante Make.</p><a href="../productos/empezar-de-nuevo.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
+                </div>
+              </section>
+              <section className="commerce-operations" aria-labelledby="commerce-oper-title">
+                <h2 id="commerce-oper-title">Compras registradas</h2>
+                {verifiedSales===null?<p>No se muestra ningún importe porque todavía no se pudo consultar la fuente.</p>
+                :verifiedSales.length===0?<p>Por ahora no hay compras registradas en Supabase. Esto no demuestra que no existan movimientos en Stripe; comprueba la sincronización en Make.</p>
+                :<div className="commerce-sales-list">{verifiedSales.map(s=>(
+                  <div className="commerce-sale" key={s.id}>
+                    <div><strong>{s.product_code||'Producto sin identificar'}</strong><small>{s.purchased_at?new Date(s.purchased_at).toLocaleDateString('es-US'): 'Fecha pendiente'}</small></div>
+                    <span>{s.status||'Estado no disponible'}</span>
+                    <b>{Number.isFinite(s.amount_cents)?new Intl.NumberFormat('es-US',{style:'currency',currency:s.currency?.toUpperCase()==='USD'?'USD':'USD'}).format(s.amount_cents/100):'Importe por revisar'}</b>
+                  </div>
+                ))}</div>}
+                <p className="commerce-privacy-note">No se muestran correos ni datos personales de compradores en esta vista, especialmente útil al grabar pantalla.</p>
+              </section>
             </>
           )}
           {page === 'audiencia' && (
