@@ -1,4 +1,4 @@
-import React,{useMemo,useRef,useState} from 'react';
+import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Upload,ImagePlus,Images,Check,Trash2,Pencil,Save,Search,ArrowRight,LoaderCircle,Palette,FolderHeart} from 'lucide-react';
 import {api} from './platform/client';
 import {MEDIA_CATEGORIES,assetCategory,displayAssetName,cleanAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
@@ -19,8 +19,9 @@ export default function MediaLibrary({brand,assets,images,busy,notify,showError,
  const [filter,setFilter]=useState<string>('all'),[search,setSearch]=useState('');
  const [sourceId,setSourceId]=useState(''),[referenceId,setReferenceId]=useState('');
  const [saving,setSaving]=useState(''),[editing,setEditing]=useState(''),[name,setName]=useState('');
+ useEffect(()=>{setSourceId('');setReferenceId('');setFilter('all');setSearch('');setEditing('')},[brand.id]);
  const own=assets.filter(a=>a.brandId===brand.id);
- const refs=own.filter(a=>assetCategory(a)==='reference');
+ const refs=own.filter(a=>assetCategory(a)==='reference'||a.id===brand.referenceAssetId);
  const originals=own.filter(a=>['original','screenshot','generated'].includes(assetCategory(a)));
  const visible=useMemo(()=>own.filter(a=>(filter==='all'||assetCategory(a)===filter)&&(!search.trim()||(displayAssetName(a)+' '+a.name).toLowerCase().includes(search.toLowerCase().trim()))),[own,filter,search]);
  const upload=async(file:File|undefined,category:MediaCategory)=>{
