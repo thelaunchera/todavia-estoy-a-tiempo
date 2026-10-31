@@ -6,7 +6,7 @@ import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 import {carouselFontFamily,type CarouselFont} from './CarouselArtDirection';
 export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[]};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;canvasColor?:string;canvasGradient?:string};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -36,7 +36,7 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
 
 /** Paints transparent typography over back-layer photos (matches the original layout). */
 export async function paintSeamlessTypography(
- ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId, fontId:CarouselFont='brand',
+ ctx: CanvasRenderingContext2D,pages: SeamlessPage[],brand: SeamlessBrand, backgroundId?: FreeBackgroundId, fontId:CarouselFont='brand', freeCanvas=false,
 ) {
  for(const [i,page] of pages.entries()){
   const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
@@ -47,8 +47,10 @@ export async function paintSeamlessTypography(
   words(ctx,page.title,x+82,244,W-164,92,5,ink,font);
   if(page.description)words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;ctx.textBaseline='top';
-  ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
-  ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0'),x+W-183,H-90);
+  if(!freeCanvas){
+    ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
+    ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0'),x+W-183,H-90);
+  }
  }
 }
 
@@ -58,7 +60,12 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  const total=pages.length,wide=document.createElement('canvas');wide.width=total*W;wide.height=H;
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
  const accent=/^#[0-9a-f]{6}$/i.test(opts.accent||'')?opts.accent!:brand.color;
- paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'soft-gradient',accent,brand.background);
+ if(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')){
+   const a=opts.canvasColor||'#FFFFFF',b=opts.canvasGradient;
+   if(b){const g=ctx.createLinearGradient(0,0,wide.width,H);g.addColorStop(0,a);g.addColorStop(1,b);
+     ctx.fillStyle=g;ctx.fillRect(0,0,wide.width,H);}
+   else{ctx.fillStyle=a;ctx.fillRect(0,0,wide.width,H);}
+ }else paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'brand',accent,brand.background);
  if(opts.assetId&&images[opts.assetId]){
   const im=await load(images[opts.assetId]);const ratio=Math.max(wide.width/im.naturalWidth,H/im.naturalHeight);
   const sw=wide.width/ratio,sh=H/ratio;
@@ -66,26 +73,27 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,wide.width,H);
   ctx.restore();
  }
- // Continuous graphic paths deliberately CROSS every 1080px cut.
- ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=accent;
+ // Legacy decorative waves are hidden for the new clean design studio.
+ if(!opts.freeCanvas){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=accent;
  ctx.beginPath();ctx.moveTo(0,H*.67);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.25,H*.45,x+W*.6,H*.8,x+W,H*.56)}
  ctx.lineTo(wide.width,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
  ctx.strokeStyle=accent;ctx.globalAlpha=.45;ctx.lineWidth=10;
  ctx.beginPath();ctx.moveTo(0,H*.68);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.3,H*.55,x+W*.72,H*.81,x+W,H*.62)}
- ctx.stroke();ctx.restore();
+ ctx.stroke();ctx.restore();}
  // The heading is resolved for each slide, so local overrides match the master type picker.
  for(let i=0;i<total;i++){
   const x=i*W,page=pages[i];
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
   const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn',ink=dark?'#FFFFFF':'#191919';
-  // Light local text halo: readable without breaking the continuous artwork.
-  const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
-  grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
-  grad.addColorStop(1,'rgba(250,248,243,0)');
-  ctx.fillStyle=grad;ctx.fillRect(x,0,W,H*.65);
+  if(!opts.freeCanvas){
+    const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
+    grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
+    grad.addColorStop(1,'rgba(250,248,243,0)');
+    ctx.fillStyle=grad;ctx.fillRect(x,0,W,H*.65);
+  }
   const label=(page.eyebrow||'').slice(0,45).toUpperCase();
   ctx.fillStyle=ink;ctx.textBaseline='top';ctx.font='700 25px Arial, sans-serif';
   ctx.fillText(label,x+82,95);
@@ -94,8 +102,10 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
    words(ctx,page.description,x+84,H-345,W-170,38,3,ink,'Arial, sans-serif');
   }
   ctx.font='700 20px Arial, sans-serif';ctx.fillStyle=ink;
-  ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
-  ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
+  if(!opts.freeCanvas){
+    ctx.fillText(brand.name.toUpperCase().slice(0,35),x+82,H-90);
+    ctx.fillText(String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0'),x+W-183,H-90);
+  }
   ctx.save();ctx.translate(x,0);
   if(!opts.editorMode&&page.assetId&&images[page.assetId]){
     try{
@@ -114,7 +124,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
   await paintPanoramaLayers(ctx,wide.width,H,behind,images);
-  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font);
+  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font,opts.freeCanvas);
   await paintPanoramaLayers(ctx,wide.width,H,front,images);
  }
  return wide;
