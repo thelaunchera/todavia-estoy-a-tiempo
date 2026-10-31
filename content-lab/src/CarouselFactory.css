@@ -160,3 +160,7 @@
 .factory-canvas-colors input[type=checkbox]{width:18px;height:18px;accent-color:#3b859a}
 .factory-canvas-colors>button{background:#fff;border:1px solid #aac5cb;padding:11px 13px;border-radius:10px;font-size:12px;color:#244c5b;cursor:pointer}
 .factory-blank-hint{background:#f6f9fa;border:1px solid #d9e8e9;border-radius:9px;padding:11px;font-size:11px;line-height:1.5;color:#536d73}
+
+.factory-optional-frames{margin:15px 0;background:#fafbfa;border:1px solid #e1e7e6;padding:13px;border-radius:10px}
+.factory-optional-frames summary{font-size:12px;font-weight:700;color:#46636b;cursor:pointer;user-select:none}
+.factory-optional-frames[open] summary{margin-bottom:10px}
