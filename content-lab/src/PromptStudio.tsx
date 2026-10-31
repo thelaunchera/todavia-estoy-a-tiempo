@@ -17,7 +17,7 @@ export default function PromptStudio({brand,onUse,notify,showError}:Props){
  const [saved,setSaved]=useState<Saved[]>([]);
  const [busy,setBusy]=useState(false),[loadError,setLoadError]=useState('');
  const [copied,setCopied]=useState(false);
- const update=<K extends keyof PromptControls>(key:K,v:PromptControls[K])=>setSettings(s=>({...s,[key]:v}));
+ const update=<K extends keyof PromptControls,>(key:K,v:PromptControls[K])=>setSettings(s=>({...s,[key]:v}));
  useEffect(()=>{setSettings({...DEFAULT_CONTROLS,environment:brand.background||''});setManual('');setCategory('all');setMode('library')},[brand.id]);
  const load=async()=>{
   try{
