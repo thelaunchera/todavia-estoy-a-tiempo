@@ -6,7 +6,7 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3
 } from 'lucide-react';
 import './CarouselFactory.css';
-import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
+import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
@@ -123,7 +123,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
   const {paper,accent,ink:paletteInk,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
-  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
+  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':style.freeCanvas?readableColor(slide.backgroundColor||style.canvasColor||'#FFFFFF'):paletteInk;
   const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
   const handle=socialAccount(brand,destination);
   const footerName=(handle&&!/^https?:\/\//i.test(handle)?handle:brand.name).toUpperCase().slice(0,32);
@@ -280,7 +280,7 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
   const heading=carouselFontFamily(slide.titleFont||style.font,brand.headingFont);
   try{await document.fonts?.load('700 80px '+heading);}catch{/* Offline font fallback */}
   const {ink:paletteInk,accent,onAccent}=getCarouselPalette(brand,style,slide.accentIndex||0);
-  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':paletteInk;
+  const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':style.freeCanvas?readableColor(slide.backgroundColor||style.canvasColor||'#FFFFFF'):paletteInk;
   const decorated=(!!slide.backgroundId&&slide.backgroundId!=='brand')||!!slide.backgroundImageId;
   const label=(t:string,x:number,y:number,color:string,size=24)=>{
    if(!t)return;ctx.fillStyle=color;ctx.font='700 '+size+'px '+bodyFont;
@@ -522,7 +522,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
       font:item.field==='title'?(part.titleFont||style.font):'sans',
-      fontSize:item.fontSize,color:'#191919',lineHeight:1.12,spacing:0,
+      fontSize:item.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
       rect:{...item.rect,x:(n+item.rect.x)/slides.length,w:item.rect.w/slides.length},
       page:n,sourceField:item.field,placement:'front' as const,
     }))):[]),
