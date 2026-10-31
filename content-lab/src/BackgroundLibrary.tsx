@@ -3,11 +3,11 @@ import {unzipSync} from 'fflate';
 import {FREE_BACKGROUNDS,paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {BACKGROUND_CATEGORIES,belongsToBackgroundCategory,type BackgroundCategory} from './BackgroundCategories';
 import BackgroundThumbnail from './BackgroundThumbnail';
-import {ArrowRight,Download,Search,Upload} from 'lucide-react';
+import {ArrowRight,Download,Search,Upload,Trash2} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
-type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;isAdmin?:boolean};
+type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;isAdmin?:boolean};
 type GalleryFilter=BackgroundCategory|'mine'|'shared';
 function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
  const target=useRef<HTMLSpanElement>(null);
@@ -24,7 +24,7 @@ function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;load
    {src?<img loading="lazy" src={src} alt={'Fondo '+displayAssetName(asset)}/>:<span className="background-shared-loading"/>}
  </span>;
 }
-export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,isAdmin=false}:Props){
+export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,onDelete,isAdmin=false}:Props){
  const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[zipError,setZipError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
@@ -152,6 +152,9 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
               const url=images[asset.id];if(!url)return loadImage(asset.id);
               const a=document.createElement('a');a.href=url;a.download=(displayAssetName(asset)||'fondo')+'.png';a.click();
             }}><Download size={16}/></button>
+          {isAdmin&&<button className="background-delete-button" type="button"
+            aria-label={'Eliminar fondo '+displayAssetName(asset)}
+            onClick={()=>void onDelete(asset)}><Trash2 size={15}/> Eliminar</button>}
         </div>
       </article>)}</div>
     </section>)}
@@ -166,6 +169,9 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
       <small>{asset.backgroundGroup||'Fondo compartido'}</small></div></div>
       <button className="background-use-button" type="button" onClick={()=>onDesign('brand',asset.id)}>
         Usar fondo <ArrowRight size={14}/></button>
+      {isAdmin&&<button className="background-delete-button" type="button"
+        aria-label={'Eliminar fondo '+displayAssetName(asset)}
+        onClick={()=>void onDelete(asset)}><Trash2 size={15}/> Eliminar</button>}
     </article>)}</div>
   </section>}
   {backgrounds.length===0&&!['mine','shared'].includes(filter)&&sections.length===0&&
@@ -216,6 +222,9 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
      </div>
      <div className="background-library-card-bottom"><div><strong>{displayAssetName(a)}</strong><small>Mi fondo</small></div></div>
      <button className="background-use-button" type="button" onClick={()=>onDesign('brand',a.id)}>Usar fondo <ArrowRight size={14}/></button>
+     <button className="background-delete-button" type="button"
+       aria-label={'Eliminar fondo '+displayAssetName(a)}
+       onClick={()=>void onDelete(a)}><Trash2 size={15}/> Eliminar</button>
     </article>)}</div>
    </section>}
   <div className="background-library-action"><p>Los fondos se aplican al lienzo y se descargan sin marcas ni texto de muestra.</p>
