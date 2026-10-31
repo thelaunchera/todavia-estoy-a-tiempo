@@ -901,7 +901,10 @@ function App() {
             </button>
             <span className="eyebrow">{t('MY WORKSPACE')}</span>
             <span className="slash">/</span>
-            <strong>{t(nav.find(n => n.id === tab)?.title||'')}</strong>
+            <strong className="lab-current-page">
+              <span className="lab-page-long">{t(nav.find(n => n.id === tab)?.title||'')}</span>
+              <span className="lab-page-short">{tab==='posts'?(loginLanguage==='es'?'Mis posts':'Posts'):t(nav.find(n => n.id === tab)?.title||'')}</span>
+            </strong>
           </div>
           <div>
             <div className="lab-site-locale" role="group" aria-label="Idioma del sitio / Site language">
@@ -913,8 +916,10 @@ function App() {
             <span className="private">
               <LockKeyhole size={13} /> {loginLanguage==='es'?'PRIVADO':'PRIVATE'}
             </span>
-            <button className="btn dark compact" onClick={() => start()}>
-              <Plus size={16} /> {t("Create content")}
+            <button type="button" className="btn dark compact lab-primary-create" onClick={() => start()}
+              aria-label={t('Create content')}>
+              <Plus size={18} /><span className="lab-create-label-long">{t("Create content")}</span>
+              <span className="lab-create-label-short">{loginLanguage==='es'?'Crear':'Create'}</span>
             </button>
           </div>
         </header>
@@ -1390,9 +1395,6 @@ function App() {
                   </h1>
                   <p>Only publications belonging to {brand.name}.</p>
                 </div>
-                <button className="btn dark" onClick={() => start()}>
-                  <Plus size={16} /> {t("New content")}
-                </button>
               </div>
               <div className="search">
                 <Search size={18} />
@@ -1453,9 +1455,7 @@ function App() {
                   <FolderOpen size={32} />
                   <h3>{t('Nothing here yet.')}</h3>
                   <p>{t('Start with one meaningful idea.')}</p>
-                  <button className="btn dark" onClick={() => start()}>
-                    {t("Create content")}
-                  </button>
+                  <small className="lab-empty-hint">{loginLanguage==='es'?'Usa «+ Crear» arriba para empezar tu primera publicación.':'Use “+ Create” above to start your first post.'}</small>
                 </div>
               )}
             </>
