@@ -53,3 +53,15 @@ test('Token diagnostic uses Cloudflare verification before making an AI call',()
  assert.ok(edge.includes('Cloudflare devolvió 403'));
  assert.equal(edge.includes("throw Error('Cloudflare rechazó el API Token."),false);
 });
+
+test('Grid planning uses schema JSON mode with nine independent concepts and safe fallback',()=>{
+ const edge=source('supabase/functions/content-lab-generate/index.ts');
+ const ui=source('src/BrandGrid.tsx');
+ assert.ok(edge.includes("structuredTextModel='@cf/meta/llama-3.1-8b-instruct'"));
+ assert.ok(edge.includes("response_format={type:'json_schema',json_schema:jsonSchema}"));
+ assert.ok(edge.includes("typeof output==='object'"));
+ assert.ok(edge.includes("const fallbackTexts="));
+ assert.ok(edge.includes("planningSource='template'"));
+ assert.ok(edge.includes("planningSource,posts"));
+ assert.ok(ui.includes("g.planningSource==='template'"));
+});
