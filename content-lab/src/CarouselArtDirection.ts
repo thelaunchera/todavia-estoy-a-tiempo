@@ -47,13 +47,14 @@ export type CarouselStyle={
   seamlessAssetId:string;
   panoramaLayers?:PanoramaLayer[];
   freeCanvas:boolean;
+  editorialRhythm:boolean;
   canvasColor:string;
   canvasGradient:string;
 };
 export const DEFAULT_CAROUSEL_STYLE:CarouselStyle={
   mood:'editorial',font:'brand',referenceAssetId:'',
   accentSource:'brand',referenceColor:'',targetPlatform:'brand',seamlessEnabled:false,seamlessBackgroundId:'brand',seamlessAssetId:'',
-  freeCanvas:true,canvasColor:'#FFFFFF',canvasGradient:''
+  freeCanvas:true,editorialRhythm:false,canvasColor:'#FFFFFF',canvasGradient:''
 };
 export function normalizeCarouselStyle(value:unknown):CarouselStyle{
   const v=value&&typeof value==='object'?value as Record<string,unknown>:{};
@@ -68,6 +69,7 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
     seamlessBackgroundId:FREE_BACKGROUNDS.some(b=>b.id===v.seamlessBackgroundId)?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
     seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):'',
     freeCanvas:v.freeCanvas!==false,
+    editorialRhythm:v.editorialRhythm===true,
     canvasColor:typeof v.canvasColor==='string'&&/^#[0-9a-f]{6}$/i.test(v.canvasColor)?v.canvasColor:'#FFFFFF',
     canvasGradient:typeof v.canvasGradient==='string'&&/^#[0-9a-f]{6}$/i.test(v.canvasGradient)?v.canvasGradient:'',
     panoramaLayers:normalizePanoramaLayers(v.panoramaLayers)
