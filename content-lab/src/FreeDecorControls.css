@@ -43,3 +43,8 @@
 .free-decor-background-filters{display:flex;gap:6px;margin:0 0 12px}
 .free-decor-background-filters button{flex:1;min-height:38px;background:#fff;border:1px solid #d5e3e5;border-radius:10px;color:#54727d;font-size:11px;font-weight:700;cursor:pointer}
 .free-decor-background-filters button.active{background:#e7f0f3;border-color:#78a9b8;color:#234d61}
+
+/* A single scrollable, responsive group selector shared with the full library. */
+.free-decor-background-filters{display:flex;align-items:center;gap:6px;overflow-x:auto;flex-wrap:nowrap;padding:2px 0 10px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.free-decor-background-filters button{flex:none;min-width:0;padding:8px 12px;white-space:nowrap}
+@media(max-width:640px){.free-decor-background-filters button{min-height:36px;font-size:10px}}
