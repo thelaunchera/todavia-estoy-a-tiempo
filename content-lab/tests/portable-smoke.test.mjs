@@ -92,7 +92,7 @@ test('paid buyer can access only the email-verified owned account and not seeded
  assert.ok(edge.includes("content_lab_memberships"));
  assert.ok(edge.includes("if(!admin&&!paid)"));
  assert.ok(edge.includes("if(paid&&!admin"));
- assert.ok(edge.includes("supabase.rpc('content_lab_reserve_ai'"));
+ assert.ok(edge.includes("service.rpc('content_lab_reserve_ai'"));
 });
 test('membership and storage RLS isolate by both authenticated owner UUID and paid email',()=>{
  const sql=source('supabase/migrations/20261031_paid_membership_isolation.sql');
@@ -112,6 +112,8 @@ test('AI credits are atomic and charged before all provider calls, with server-o
  assert.ok(edge.includes("if(planningSource==='template')await rollback()"));
  for(const s of ['pg_advisory_xact_lock','photo_remaining integer not null default 60','creative_remaining integer not null default 30','units_used+v_global<=50','auth.role()'])assert.ok(sql.includes(s),s);
  assert.ok(sql.includes("grant execute on function public.content_lab_refund_ai(uuid,uuid) to service_role"));
+ assert.ok(sql.includes("grant execute on function public.content_lab_reserve_ai(text,uuid,text) to service_role"));
+ assert.ok(sql.includes("if auth.role()<>'service_role' then"));
  assert.ok(sql.includes("photo_today else 0 end)+v_photo <= 10"));
 });
 test('new buyers get an isolated neutral brand, never admin seed brands',()=>{
