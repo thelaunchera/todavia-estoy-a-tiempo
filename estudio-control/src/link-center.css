@@ -72,3 +72,10 @@
 .lc-actions button:first-child{flex:1}
 .lc-modal{padding:22px}
 }
+
+/* Estado del despliegue y la preparación comercial: no confundir con visibilidad. */
+.lc-phase-publicado{background:#e5f3f6;color:#376b7b}
+.lc-phase-demo{background:#f1effb;color:#64588a}
+.lc-phase-produccion{background:#fff0d9;color:#906338}
+.lc-phase-revision{background:#faeae6;color:#9a5148}
+.lc-phase-interno{background:#eef0f2;color:#68737c}
