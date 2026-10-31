@@ -720,7 +720,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(hasBehind){
         const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
         const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
-        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas);
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor);
         else await paintCarouselTypography(typeCtx,slides,brand,style);
         const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
         scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
