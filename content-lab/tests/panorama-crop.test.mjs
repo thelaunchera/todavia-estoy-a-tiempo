@@ -155,3 +155,45 @@ test('forward/back layer controls persist across save and respect the text bound
  assert.deepEqual(persisted.map(item=>item.id),layers.map(item=>item.id));
  assert.deepEqual(persisted.map(item=>item.placement),layers.map(item=>item.placement));
 });
+
+
+test('free typography, collage shapes and custom white-to-gradient backgrounds survive save',()=>{
+ const slides=[{title:'',eyebrow:'',description:''},{title:'',eyebrow:'',description:''}];
+ const items=[
+   {id:'headline',kind:'text',assetId:'',name:'My headline',text:'Creative story',
+     font:'playfair',fontSize:92,lineHeight:1.22,spacing:3,color:'#243746',
+     shadow:true,outline:false,rect:{x:.08,y:.14,w:.45,h:.31},placement:'front'},
+   {id:'paper-1',kind:'shape',assetId:'',name:'Scrapbook paper',
+     shape:'paper',color:'#F2E3CD',rect:{x:.25,y:.34,w:.29,h:.43},placement:'behind-text'},
+ ];
+ const data=encodeCarouselDesign(slides,{freeCanvas:true,canvasColor:'#FFFFFF',
+   canvasGradient:'#F2DCE7',panoramaLayers:items});
+ const style=readCarouselDesign(data).style;
+ assert.equal(style.freeCanvas,true);
+ assert.equal(style.canvasColor,'#FFFFFF');
+ assert.equal(style.canvasGradient,'#F2DCE7');
+ assert.equal(style.panoramaLayers.length,2);
+ assert.equal(style.panoramaLayers[0].kind,'text');
+ assert.equal(style.panoramaLayers[0].font,'playfair');
+ assert.equal(style.panoramaLayers[0].fontSize,92);
+ assert.equal(style.panoramaLayers[0].spacing,3);
+ assert.equal(style.panoramaLayers[0].shadow,true);
+ assert.equal(style.panoramaLayers[1].kind,'shape');
+ assert.equal(style.panoramaLayers[1].shape,'paper');
+});
+test('mobile editing has collapsible libraries, draggable text, collage, snapping and undo',()=>{
+ const root=new URL('../src/',import.meta.url);
+ const canvas=readFileSync(new URL('TouchLayerCanvas.tsx',root),'utf8');
+ const factory=readFileSync(new URL('CarouselFactory.tsx',root),'utf8');
+ const palette=readFileSync(new URL('FreeDecorControls.tsx',root),'utf8');
+ const editor=readFileSync(new URL('PanoramaEditor.tsx',root),'utf8');
+ assert.ok(palette.includes('setExpanded'));
+ assert.ok(editor.includes('setLibraryOpen'));
+ assert.ok(editor.includes("onAddLayer('text')"));
+ assert.ok(editor.includes("onAddLayer('shape','tape')"));
+ assert.ok(canvas.includes('touch-editor-free-text'));
+ assert.ok(canvas.includes('applySmartSnap'));
+ assert.ok(factory.includes('restoreHistory'));
+ assert.ok(factory.includes('canvasGradient'));
+ assert.ok(factory.includes('backgroundColor'));
+});
