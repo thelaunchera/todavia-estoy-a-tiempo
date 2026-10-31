@@ -88,3 +88,5 @@
 .v2-slider span{font-variant-numeric:tabular-nums}
 .v2-slider input{grid-column:1/-1;width:100%;accent-color:#719bab;min-height:26px}
 @media(max-width:600px){.v2-slider-grid{grid-template-columns:1fr}.v2-editor{padding:11px}.bg-export-setting{flex-direction:column;align-items:stretch}}
+
+.v2-usage-note{border:1px solid #d0e4e2;background:#f1f8f4;color:#557668;border-radius:11px;padding:12px 14px;font-size:11px;line-height:1.65;margin:14px 0}.v2-usage-note strong{display:block;color:#2c6155;font-size:12px}
