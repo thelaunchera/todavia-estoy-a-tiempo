@@ -9,29 +9,56 @@ const language=(brand:any)=>{
  const name=String(brand.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  return name==='todavia estoy a tiempo'?'Español':name==='the launch era'?'English':brand.language==='English'?'English':'Español';
 };
-const key=Deno.env.get('GEMINI_API_KEY')||'';
-async function gemini(prompt:string,imgs:{data:string;mime:string}[]=[],photo=false){
- if(!key)throw Error('Falta GEMINI_API_KEY en los secretos del servidor.');
- // Gemini 2.5 Flash Image shut down 2026-10-02. The Lite image model supports 4:5 at 1K.
- const model=photo?(Deno.env.get('GEMINI_IMAGE_MODEL')||'gemini-3.1-flash-lite-image'):(Deno.env.get('GEMINI_TEXT_MODEL')||'gemini-2.5-flash');
- const parts:any[]=[{text:prompt},...imgs.map(x=>({inline_data:{mime_type:x.mime,data:x.data}}))];
- const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent',{
-  method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
-  body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:photo
-   ? {responseModalities:['TEXT','IMAGE'],imageConfig:{aspectRatio:'4:5',imageSize:'1K'}}
-   : {responseMimeType:'application/json'}})
- });
- const result=await response.json();
- if(!response.ok)throw Error('Error del proveedor de IA ('+response.status+'): '+clean(result.error?.message,240));
- const chunks=result.candidates?.[0]?.content?.parts||[];
+
+const accountId=(Deno.env.get('CLOUDFLARE_ACCOUNT_ID')||'').trim();
+const token=(Deno.env.get('CLOUDFLARE_API_TOKEN')||'').trim();
+const photoModel='@cf/black-forest-labs/flux-2-klein-4b';
+const textModel='@cf/meta/llama-3.1-8b-instruct-fp8-fast';
+const ensureFreeProvider=()=>{
+ if(!accountId||!token)throw Error('Para generar imágenes gratis conecta una cuenta Cloudflare Workers AI Free. Configura CLOUDFLARE_ACCOUNT_ID y CLOUDFLARE_API_TOKEN como secretos de Supabase. Gemini de pago está desactivado.');
+};
+const endpoint=(model:string)=>'https://api.cloudflare.com/client/v4/accounts/'+encodeURIComponent(accountId)+'/ai/run/'+model;
+const extractError=(body:any)=>String(body?.errors?.[0]?.message||body?.error||'Respuesta no disponible').slice(0,270);
+async function cloudflareRequest(prompt:string,inputs:{data:string;mime:string}[]=[],photo=false){
+ ensureFreeProvider();
+ const headers:Record<string,string>={'Authorization':'Bearer '+token};
+ let response:Response;
  if(photo){
-  const p=chunks.find((v:any)=>v.inlineData?.data||v.inline_data?.data);
-  if(!p)throw Error('La IA no entregó una imagen.');
-  return {data:p.inlineData?.data||p.inline_data.data,mime:p.inlineData?.mimeType||p.inline_data?.mime_type||'image/png'};
+  const form=new FormData();
+  form.set('prompt',prompt.slice(0,2000));
+  form.set('width','1024');
+  form.set('height','1280');
+  for(let i=0;i<Math.min(inputs.length,4);i++){
+   const reference=inputs[i];
+   const bytes=Uint8Array.from(atob(reference.data),c=>c.charCodeAt(0));
+   if(bytes.length>420000)throw Error('La foto de referencia debe optimizarse antes de generar. Vuelve a subirla desde la biblioteca.');
+   form.append('input_image_'+i,new Blob([bytes],{type:reference.mime}),'reference-'+i+'.jpg');
+  }
+  response=await fetch(endpoint(photoModel),{method:'POST',headers,body:form});
+ }else{
+  response=await fetch(endpoint(textModel),{method:'POST',
+   headers:{...headers,'Content-Type':'application/json'},
+   body:JSON.stringify({messages:[{role:'system',content:'Return syntactically valid JSON only. Never include markdown code fences.'},{role:'user',content:prompt}],max_tokens:3300,temperature:0.55})});
  }
- const text=chunks.map((v:any)=>v.text||'').join('').trim().replace(/^\\x60\\x60\\x60(?:json)?/i,'').replace(/\\x60\\x60\\x60$/,'').trim();
- return JSON.parse(text);
+ let body:any;
+ try{body=await response.json()}catch{throw Error('Cloudflare no devolvió una respuesta válida.');}
+ if(!response.ok||body.success===false){
+  if(response.status===429||response.status===402||/quota|neurons|limit|billing/i.test(extractError(body)))
+    throw Error('Se terminó la cuota gratuita de Cloudflare. No se generó ningún cargo; vuelve a intentarlo cuando se reinicie.');
+  throw Error('Cloudflare Workers AI: '+extractError(body));
+ }
+ if(photo){
+  const base64=body?.result?.image;
+  if(typeof base64!=='string'||!base64)throw Error('Cloudflare no devolvió la foto generada.');
+  return {data:base64,mime:'image/jpeg'};
+ }
+ const output=String(body?.result?.response||body?.result?.text||'').trim();
+ if(!output)throw Error('Cloudflare no devolvió el texto de la campaña.');
+ const from=output.indexOf('{'),to=output.lastIndexOf('}');
+ if(from<0||to<=from)throw Error('La IA no devolvió JSON; intenta nuevamente.');
+ return JSON.parse(output.slice(from,to+1));
 }
+
 Deno.serve(async request=>{
  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
  if(request.method!=='POST')return send({error:'Método no disponible'},405);
@@ -70,6 +97,11 @@ Deno.serve(async request=>{
    if(error||!data)throw Error('Imagen privada no encontrada.');
    return {mime:record.mime,data:b64(new Uint8Array(await data.arrayBuffer())),record};
   };
+  const aiReference=async(id:string)=>{
+   const record=await find('assets',id);
+   if(!record.aiReference)throw Error('Para usar la foto como referencia gratuita, vuelve a subirla. El Lab preparará automáticamente una copia pequeña para Cloudflare.');
+   return {data:String(record.aiReference),mime:'image/jpeg',record};
+  };
   const store=async(brandId:string,name:string,data:string,mime:string)=>{
    const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));
    if(bytes.length>8000000)throw Error('La imagen generada es demasiado grande.');
@@ -81,23 +113,21 @@ Deno.serve(async request=>{
   if(action==='ideas'){
    const b=await find('brands',clean(body.brandId,100));
    const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
-   const obj:any=await gemini('Return JSON {title,hook,slides,caption,cta,visual,alternatives}. 3 alternative hooks, five short slide lines. Write ALL public content only in '+lang+'. Brand '+b.name+', audience '+b.audience+', rules '+b.rules+'. Topic '+clean(body.topic,900)+'. Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)+'. Never invent product details or testimonials.');
+   const obj:any=await cloudflareRequest('Return JSON {title,hook,slides,caption,cta,visual,alternatives}. 3 alternative hooks, five short slide lines. Write ALL public content only in '+lang+'. Brand '+b.name+', audience '+b.audience+', rules '+b.rules+'. Topic '+clean(body.topic,900)+'. Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)+'. Never invent product details or testimonials.');
    return send({title:clean(obj.title,150),hook:clean(obj.hook,500),slides:clean(obj.slides,3500),caption:clean(obj.caption,4500),cta:clean(obj.cta,250),visual:clean(obj.visual,900),alternatives:Array.isArray(obj.alternatives)?obj.alternatives.slice(0,3):[]});
   }
   if(action==='grid-plan'){
    const brandId=clean(body.brandId,100),sourceId=clean(body.sourceId,100),referenceId=clean(body.referenceId,100);
    const b=await find('brands',brandId);
-   const source=await load(sourceId);
-   if(source.record.brandId!==brandId)throw Error('Foto de otra marca.');
-   const images=[{data:source.data,mime:source.mime}];
+   const source=await find('assets',sourceId);
+   if(source.brandId!==brandId)throw Error('Foto de otra marca.');
    if(referenceId&&referenceId!==sourceId){
-    const ref=await load(referenceId);
-    if(ref.record.brandId!==brandId)throw Error('Referencia de otra marca.');
-    images.push({data:ref.data,mime:ref.mime});
+    const ref=await find('assets',referenceId);
+    if(ref.brandId!==brandId)throw Error('Referencia de otra marca.');
    }
    const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
    const prompt='Art direct NINE DIFFERENT BRAND PHOTOGRAPHS, nine independent Instagram posts, not slides or repeat recolors/crops. Image 1 is product identity, optional image 2 is style reference only. Brand '+b.name+' voice '+b.voice+' colors '+b.color+' '+b.background+'. PUBLIC copy title, concept, all headlines, subtitles and captions ONLY IN '+lang+'. Brief '+clean(body.brief,650)+'. Nine shots in order: (1) 3/4 studio hero (2) overhead geometric flat-lay (3) extreme macro texture (4) distant lifestyle environment (5) surreal conceptual floating props (6) authentic hands holding subject (7) repeated product flat-lay pattern (8) restrained minimalist podium (9) cinematic low-angle finale. Every scene uses DIFFERENT camera, scale, angle, lighting, props and setting. Return ONLY JSON with title,concept,posts array of EXACTLY NINE objects {headline,subtext,caption,scene}. Headlines and captions must be useful, human and different. No fake facts.';
-   const plan:any=await gemini(prompt,images);
+   const plan:any=await cloudflareRequest(prompt+' Source photo filename: '+source.name+'. If not specified, describe the source neutrally without inventing its details.');
    if(!Array.isArray(plan.posts)||plan.posts.length!==9)throw Error('No se crearon los nueve conceptos.');
    const formats=['Editorial Hero','Bold Typography','Macro Texture','Lifestyle Scene','Playful Props','Hands-on Editorial','High Contrast','Minimal Premium','Campaign Finale'];
    const posts=plan.posts.map((p:any,i:number)=>({index:i,headline:clean(p.headline,150),subtext:clean(p.subtext,220),caption:clean(p.caption,1300),scene:clean(p.scene,700),format:formats[i],assetId:''}));
@@ -119,10 +149,10 @@ Deno.serve(async request=>{
     'cinematic low diagonal campaign photograph with dramatic spotlights'
    ];
    const references:{data:string;mime:string}[]=[];
-   if(grid.kind!=='preserve'){const p=await load(grid.sourceId);references.push({data:p.data,mime:p.mime});}
-   if(grid.referenceId){const p=await load(grid.referenceId);references.push({data:p.data,mime:p.mime});}
+   if(grid.kind!=='preserve'){const p=await aiReference(grid.sourceId);references.push({data:p.data,mime:p.mime});}
+   if(grid.referenceId){const p=await aiReference(grid.referenceId);references.push({data:p.data,mime:p.mime});}
    const prompt='Create ONE NEW PHOTOGRAPH in VERTICAL 4:5, not grid or collage. Shot '+(i+1)+' of nine, MANDATORY DIFFERENT shot: '+shots[i]+'. Scene '+grid.posts[i].scene+'. Brand '+b.name+' palette '+b.color+' '+b.background+'. Do not repeat/crop/recolor the source photo; truly new camera shot, light, props and environment. '+(grid.kind==='preserve'?'Create only aesthetic complementary background, no fake app UI, no subject, no screen; original image will be composited intact.':'First attached photo identifies real product: preserve its identity, shape, material and colors. Second photo optional style inspiration only. Do not reproduce someone else brand.')+' NO text, words, logos or watermarks.';
-   const image:any=await gemini(prompt,references,true);
+   const image:any=await cloudflareRequest(prompt,references,true);
    const asset=await store(grid.brandId,'Post '+(i+1)+' - '+grid.title,image.data,image.mime);
    const posts=grid.posts.map((p:any,j:number)=>j===i?{...p,assetId:asset.id}:p);
    const updated=await edit('grids',grid.id,{...grid,posts});
@@ -132,11 +162,11 @@ Deno.serve(async request=>{
    const b=await find('brands',clean(body.brandId,100));
    const sources:{data:string;mime:string}[]=[];
    if(body.mode==='variation'&&body.assetId){
-    const p=await load(clean(body.assetId,100));
+    const p=await aiReference(clean(body.assetId,100));
     if(p.record.brandId!==b.id)throw Error('Foto de otra marca.');
     sources.push({data:p.data,mime:p.mime});
    }
-   const image:any=await gemini('Make ONE vertical 4:5 original premium photography image for '+b.name+'. '+clean(body.prompt,700)+'. No logos, words, watermarks or invented app screens. Preserve subject identity when provided.',sources,true);
+   const image:any=await cloudflareRequest('Make ONE vertical 4:5 original premium photography image for '+b.name+'. '+clean(body.prompt,700)+'. No logos, words, watermarks or invented app screens. Preserve subject identity when provided.',sources,true);
    const asset=await store(b.id,'AI Photo - '+b.name,image.data,image.mime);
    return send({...asset,content:image.data});
   }
