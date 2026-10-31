@@ -9,7 +9,8 @@ type Props={
  backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];
  onChange:(next:{backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[]})=>void;
  title?:string;assets?:LibraryAsset[];images?:Record<string,string>;loadImage?:(id:string)=>void;
- onOpenLibrary?:()=>void;onUploadBackground?:(file:File)=>Promise<LibraryAsset|null>
+ onOpenLibrary?:()=>void;onUploadBackground?:(file:File)=>Promise<LibraryAsset|null>;
+ defaultTab?:'stickers'|'backgrounds';initiallyExpanded?:boolean;
 };
 function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage?:(id:string)=>void}){
  const ref=useRef<HTMLSpanElement>(null);
@@ -24,10 +25,10 @@ function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;
  },[asset.id,Boolean(src),loadImage]);
  return <span ref={ref} className="free-decor-real-preview">{src?<img alt={displayAssetName(asset)} src={src} loading="lazy"/>:<span aria-label="Cargando sticker" className="free-decor-loading"/>}</span>;
 }
-export default function FreeDecorControls({backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground}:Props){
- const [tab,setTab]=useState<'stickers'|'backgrounds'>('stickers');
+export default function FreeDecorControls({backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground,defaultTab='stickers',initiallyExpanded=false}:Props){
+ const [tab,setTab]=useState<'stickers'|'backgrounds'>(defaultTab);
  const [backgroundKind,setBackgroundKind]=useState<BackgroundCategory>('all');
- const [expanded,setExpanded]=useState(false);
+ const [expanded,setExpanded]=useState(initiallyExpanded);
  const [group,setGroup]=useState('Todos');
  const uploadRef=useRef<HTMLInputElement>(null),[uploading,setUploading]=useState(false);
  const ownBackgrounds=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
