@@ -24,7 +24,8 @@ test('All three graphic editors preserve original sticker layers and custom back
  assert.ok(car.includes('<TouchLayerCanvas'));
  assert.ok(cover.includes('legacyStickers(decor)'));
  assert.ok(cover.includes('renderFreePost(post,brand,images'));
- assert.ok(cover.includes('paintPanoramaLayers(ctx,1080,1350'));
+ assert.ok(cover.includes('paintPanoramaLayers(ctx,width,height'));
+ assert.ok(cover.includes('freePostDimensions(post.format)'));
  assert.ok(cover.includes('<TouchLayerCanvas'));
  assert.ok(assets.includes('onChange({backgroundId,backgroundImageId,stickerIds:'));
 });
