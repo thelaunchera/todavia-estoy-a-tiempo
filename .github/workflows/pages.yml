@@ -93,6 +93,7 @@ jobs:
           npm run test:spotify-links
           npm run test:editorial-plan
           npm run test:classes
+          node --test tests/link-center.test.mjs
           npm run build
       - name: Compilar Content Lab en GitHub
         env:
