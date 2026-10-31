@@ -557,8 +557,8 @@ function App() {
   // Una sola lista de la clase en Clases · grabación; no repetir en Tareas.
   const generalTasks=tasks.filter(x=>x.section!==CLASS_TASK_SECTION);
   const paidPdfSales=verifiedSales?.filter(s=>s.status?.toLowerCase()==='paid')||[];
-  const pdfRevenueUsdCents=paidPdfSales.filter(s=>s.currency?.toLowerCase()==='usd' && typeof s.amount_cents==='number')
-    .reduce((sum,s)=>sum+(s.amount_cents||0),0);
+  const paidUsdSales=paidPdfSales.filter(s=>s.currency?.toLowerCase()==='usd' && typeof s.amount_cents==='number');
+  const pdfRevenueUsdCents=paidUsdSales.reduce((sum,s)=>sum+(s.amount_cents||0),0);
   const activeProductAccess=verifiedOwnership?.filter(x=>x.status==='active')||[];
   const activeClassCount=activeProductAccess.filter(x=>x.product_code==='web-class').length;
   const activeLabCount=activeProductAccess.filter(x=>x.product_code==='content-lab').length;
@@ -1413,7 +1413,7 @@ function App() {
               {head('Centro de ventas y productos','Todos los checkouts existentes, sus entregas y sus estados. Stripe se conecta por Make; aquí no se crean cobros nuevos.')}
               <div className="commerce-hero">
                 <div><span className="eyebrow">REGISTRO PRIVADO · STRIPE A TRAVÉS DE MAKE</span>
-                  <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' pagos PDF registrados'}</h2>
+                  <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' movimientos PDF registrados'}</h2>
                   <p>Los importes vienen de los pagos PDF que Make registró en Supabase; no son el saldo completo de Stripe. El Lab, la clase y los servicios llevan controles de acceso o cobro separados.</p>
                   <div className="commerce-quick-actions">
                     <button type="button" onClick={()=>setSalesRefreshKey(n=>n+1)} disabled={salesRefreshing||!SUPABASE_ENABLED}>
@@ -1428,7 +1428,7 @@ function App() {
               {salesError && <p className="commerce-error" role="status">{salesError}</p>}
               <div className="commerce-summary" aria-label="Resumen de compras registradas">
                 <div><span>Pagos PDF confirmados</span><strong>{verifiedSales===null?'—':paidPdfSales.length}</strong><small>En el registro de Make/Supabase</small></div>
-                <div><span>Importe PDF registrado · USD</span><strong>{verifiedSales===null||paidPdfSales.length===0?'—':formatSaleAmount({amount_cents:pdfRevenueUsdCents,currency:'usd'} as VerifiedSale)}</strong><small>No es la facturación total de Stripe</small></div>
+                <div><span>Importe PDF registrado · USD</span><strong>{verifiedSales===null||paidUsdSales.length===0?'—':formatSaleAmount({amount_cents:pdfRevenueUsdCents,currency:'usd'} as VerifiedSale)}</strong><small>No es la facturación total de Stripe</small></div>
                 <div><span>Accesos de clase</span><strong>{verifiedOwnership===null?'—':activeClassCount}</strong><small>Independientes de las ventas PDF</small></div>
                 <div><span>Accesos de Content Lab</span><strong>{verifiedOwnership===null?'—':activeLabCount}</strong><small>Las ventas siguen pausadas por QA</small></div>
               </div>
