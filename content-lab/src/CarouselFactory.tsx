@@ -347,17 +347,26 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
           <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
           <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
+             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
+           </select>
           <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
-          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">No photo · Graphic only</option>{assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
         <div className="factory-panel factory-ai">
           <div className="factory-panel-title"><div><div className="eyebrow">03 / IMAGE MAKER</div><h3><Sparkles size={18}/> AI Image Lab</h3></div></div>
           <p>Crea imágenes nuevas para una publicación o variaciones creativas de una fotografía. No modifica el original.</p>
           <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Create new</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Photo variation</button></div>
-          {imageMode==='variation'&&<><label>Original photo (reference)</label><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Choose a photo…</option>{assets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></>}
+          <label>¿Qué estás fotografiando?</label><div className="factory-mode">
+             <button type="button" className={imageSubjectType==='portrait'?'selected':''} onClick={()=>setImageSubjectType('portrait')}>Persona / retrato</button>
+             <button type="button" className={imageSubjectType==='product'?'selected':''} onClick={()=>setImageSubjectType('product')}>Producto / objeto</button>
+           </div>
+           {imageMode==='variation'&&<><label>Foto original · sujeto principal</label><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Selecciona foto original…</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+             {style.referenceAssetId&&<small>La segunda referencia guía solamente el estilo. Tu foto original mantiene el papel de sujeto principal.</small>}
+           </>}
           <label>Visual prompt</label><textarea rows={3} value={imagePrompt} onChange={e=>setImagePrompt(e.target.value)} placeholder="Editorial photo of cookies on a blue table, beautiful morning light, no text or logos…"/>
-          <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generate image for this slide</button>
+          <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generar foto · 1 crédito IA</button>
           <small>Las generaciones pueden consumir créditos. No uses variaciones IA de screenshots de la App ni de fotos donde necesites fidelidad exacta de rostros o detalles.</small>
         </div>
       </div>
@@ -368,7 +377,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button className="btn dark wide" onClick={()=>exportOne()} disabled={!!busy}><Download size={16}/> Download slide {i+1} PNG</button>
         <button className="btn ghost wide" onClick={exportAll} disabled={!!busy}><Layers3 size={16}/> Prepare every slide separately</button>
         {downloads.length>0&&<div className="factory-exports"><strong><Check size={15}/> {downloads.length} individual files ready</strong><p>Descarga cada archivo por separado, sin ZIP ni collage.</p>{downloads.map((d,n)=><a key={d.name} href={d.url} download={d.name}><Download size={15}/> Slide {String(n+1).padStart(2,'0')}.png <ArrowRight size={14}/></a>)}</div>}
-        <div className="factory-hint"><ImagePlus size={16}/> Las imágenes originales se mantienen intactas. Puedes cambiar el layout de cada slide sin afectar los demás.</div>
+        <div className="factory-hint"><ImagePlus size={16}/> El estilo maestro afecta todo el carrusel; el texto, las fotografías y la composición de cada slide siguen siendo editables.</div>
+         <div className="factory-quality"><strong>Revisión antes de publicar</strong><p>Comprobamos longitud del texto y si faltan fotografías. Revisa manualmente ortografía, identidad facial y manos.</p>
+           {warnings.length?warnings.map((note,n)=><small key={n}>• {note}</small>):<span><Check size={15}/> Sin avisos de texto o fotografías pendientes.</span>}
+         </div>
       </aside>
     </div>
   </div>;
