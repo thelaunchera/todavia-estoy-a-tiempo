@@ -566,9 +566,15 @@ function App() {
     }
   };
   useEffect(() => {
-    if (tab === 'media' || tab === 'stickers')
+    if (tab === 'media')
       library.forEach(a => {
         if (!images[a.id]) void imageLoad(a.id);
+      });
+    // Load the opening row only. Remaining sticker thumbnails lazy-load in the
+    // scroll viewport to keep iPad memory and network usage smooth.
+    if (tab === 'stickers')
+      library.filter(a=>assetCategory(a)==='sticker').slice(0,8).forEach(a=>{
+        if(!images[a.id])void imageLoad(a.id);
       });
     if (tab === 'formats')
       library.filter(a=>['original','screenshot','generated'].includes(assetCategory(a)))
