@@ -33,7 +33,7 @@ test('AI vision source and style review are explicit and optional',()=>{
 });
 test('iPhone editing, quality checks and explicit image quota confirmation',()=>{
  const grid=src('src/BrandGrid.tsx'),edit=src('src/GridVisualEditor.tsx');
- for(const txt of ['GridVisualEditor','checkQuality','hamming(','window.confirm(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
+ for(const txt of ['GridVisualEditor','checkQuality','hamming(','askCredits(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
  assert.ok(edit.includes('onPointerMove={move}'));
  assert.ok(edit.includes("imageZoom"));
  assert.ok(edit.includes("textScale"));
@@ -73,4 +73,56 @@ test('fixed Content Lab sidebar scrolls independently on mobile Safari',()=>{
  assert.ok(app.includes('className="sidebar-close"'));
  assert.ok(app.includes('document.body.style.overflow'));
  assert.ok(app.includes('aria-expanded={menu}'));
+});
+
+test('home dashboard gives three-step guided flow plus iPhone dock',()=>{
+ const app=src('src/App.tsx'),css=src('src/index.css');
+ assert.ok(app.includes('setupStepsDone'));
+ assert.ok(app.includes('lab-quick-steps'));
+ assert.ok(app.includes('lab-mobile-dock'));
+ assert.ok(css.includes('env(safe-area-inset-bottom)'));
+ assert.ok(app.includes("onClick={()=>navigate('grid')}"));
+});
+test('grid edits autosave without exposing data in local browser storage',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes('saveQueue.current'));
+ assert.ok(grid.includes('savedSignature.current'));
+ assert.ok(grid.includes('setTimeout(()=>{'));
+ assert.ok(grid.includes("'/api/grids/'+key"));
+ assert.ok(grid.includes('Guardado automático pendiente'));
+ assert.ok(grid.includes('Reintentar'));
+ assert.ok(!grid.includes('localStorage.setItem'));
+});
+test('buyers approve exact AI credit cost for photos, plans and batches',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes("askCredits('creative',3"));
+ assert.ok(grid.includes("askCredits('photo',1"));
+ assert.ok(grid.includes("askCredits('photo',remaining"));
+ assert.ok(grid.includes("role=\"dialog\""));
+ assert.ok(grid.includes("creditDecision.current?.(answer)"));
+ assert.ok(grid.includes('units>available(kind)'));
+ assert.ok(!grid.includes("window.confirm('La IA generará"));
+});
+test('iPhone editor debounces canvas preview and hides expert controls until needed',()=>{
+ const editor=src('src/GridVisualEditor.tsx');
+ assert.ok(editor.includes('setTimeout(()=>{'));
+ assert.ok(editor.includes('},120)'));
+ assert.ok(editor.includes('aria-expanded={advanced}'));
+ assert.ok(editor.includes('{advanced&&<>'));
+});
+
+test('editorial original-photo reuse is intentional and cannot trigger duplicate image warnings',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes("if(p.assetId)used.set(p.assetId,i)"));
+ assert.ok(grid.includes("if(!(p.design&&grid.kind==='preserve'))"));
+ assert.ok(grid.includes("'DISEÑO LISTO'"));
+ assert.ok(grid.includes("bg-free-design"));
+ assert.ok(grid.includes("Generar foto con IA (1 crédito)"));
+});
+test('draft flushes on app backgrounding, brand switch and project switch',()=>{
+ const grid=src('src/BrandGrid.tsx');
+ assert.ok(grid.includes("document.visibilityState==='hidden'"));
+ assert.ok(grid.includes("document.addEventListener('visibilitychange'"));
+ assert.ok(grid.includes("flushDraft();\n    setSourceId('')"));
+ assert.ok(grid.includes("onClick={()=>{flushDraft();setGrid(g);"));
 });

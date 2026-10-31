@@ -137,3 +137,25 @@
 .editorial-fields input[type=range]{padding:5px}
 .editorial-settings .bg-title{margin-bottom:16px}
 @media(max-width:600px){.editorial-fields{grid-template-columns:1fr}.editorial-mode,.editorial-settings{padding:12px}.editorial-mode .bg-modes{grid-template-columns:1fr 1fr}}
+
+/* Credit-aware confirmations and honest autosave states */
+.bg-save-state{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #d6e6e8;background:#f5fafa;border-radius:8px;color:#58717b;font-size:11px;font-weight:600}
+.bg-save-state.saved{color:#39816d;border-color:#cde8dd;background:#eff9f3}
+.bg-save-state.error{color:#ab4e3f;border-color:#efcabe;background:#fff2eb}
+.bg-credit-overlay{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,28,35,.52);backdrop-filter:blur(6px)}
+.bg-credit-dialog{width:100%;max-width:415px;max-height:calc(100dvh - 50px);overflow:auto;background:#fdfdfc;border-radius:24px;padding:29px;box-shadow:0 22px 80px rgba(0,0,0,.21);color:#203b43}
+.bg-credit-symbol{background:#e5f0f3;border-radius:13px;width:48px;height:48px;display:grid;place-items:center;color:#527d8a;margin:0 0 15px}
+.bg-credit-dialog h2{font:500 30px/1.15 'DM Serif Display',Georgia,serif;margin:0 0 12px}
+.bg-credit-dialog p{line-height:1.6;font-size:13px;color:#59757e}
+.bg-credit-dialog strong{color:#244752}
+.bg-credit-info{background:#eaf5f7;border:1px solid #d2e6e9;border-radius:11px;padding:12px 14px;font-weight:600}
+.bg-credit-hint{font-size:11px!important}
+.bg-credit-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:23px}
+.bg-credit-buttons .btn{flex:1;min-width:125px;justify-content:center}
+.v2-simple-controls{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:13px 0 9px}
+.v2-simple-controls strong{font-size:12px}
+.v2-toggle-advanced{background:transparent;border:0;padding:9px 0;color:#3f7987;font-size:12px;text-decoration:underline;cursor:pointer}
+@media(max-width:600px){.bg-credit-dialog{padding:23px}.bg-credit-buttons{flex-direction:column}.bg-credit-buttons .btn{width:100%}}
+
+.bg-free-design{display:flex;align-items:center;gap:8px;flex:1 1 250px;font-size:12px;line-height:1.5;padding:12px;color:#2a6d5e;background:#eaf6f0;border:1px solid #c8e5d7;border-radius:10px}
+.bg-free-design svg{flex-shrink:0}

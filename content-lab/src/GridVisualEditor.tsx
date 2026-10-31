@@ -11,14 +11,19 @@ const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,tex
 export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
  const [layer,setLayer]=useState<'photo'|'text'>('photo');
+ const [advanced,setAdvanced]=useState(false);
  const drag=useRef<{x:number;y:number;from:VisualControls;size:{width:number;height:number}}|null>(null);
  const current={...defaults,...(tile.layout||{})};
  useEffect(()=>{
   let active=true;
-  composeGridPoster(tile,index,brand,{photo,original,logo,preserve},exportSize)
-   .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.8));setFit(fit)}})
-   .catch(()=>{if(active)setPreview('')});
-  return()=>{active=false};
+  // Rendering each 1080px Canvas on every pointer movement locks up iOS.
+  // A short debounce keeps the result exact while maintaining responsive drag.
+  const handle=setTimeout(()=>{
+   composeGridPoster(tile,index,brand,{photo,original,logo,preserve},exportSize)
+    .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.72));setFit(fit)}})
+    .catch(()=>{if(active)setPreview('')});
+  },120);
+  return()=>{active=false;clearTimeout(handle)};
  },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize]);
  const set=(key:keyof typeof defaults,value:number)=>onChange({...current,[key]:value});
  const start=(e:React.PointerEvent<HTMLDivElement>)=>{
@@ -51,16 +56,24 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
    {preview?<img src={preview} alt="Vista previa exacta de la publicación"/>:<div className="v2-preview-placeholder">Selecciona una imagen generada para ver el diseño completo.</div>}
   </div>
   <p className="v2-hint">Arrastra la foto para mover su recuadro o toca «Mover titular» para colocarlo. Los controles permiten agrandar el recuadro y encuadrar la imagen por separado.</p>
+  <div className="v2-simple-controls">
+   <strong>Controles esenciales</strong>
+   <button type="button" className="v2-toggle-advanced" aria-expanded={advanced} onClick={()=>setAdvanced(v=>!v)}>
+     {advanced?'Ocultar ajustes avanzados':'Mostrar ajustes avanzados'}
+   </button>
+  </div>
   <div className="v2-slider-grid">
-   {number('frameX','Recuadro izquierda / derecha',-.75,.75,.01)}
-   {number('frameY','Recuadro arriba / abajo',-.75,.75,.01)}
-   {number('frameScale','Tamaño del recuadro',.45,1.7,.05)}
-   {number('imageZoom','Zoom dentro del recuadro',1,3,.05)}
-   {number('imageX','Recorte horizontal',-.55,.55,.01)}
-   {number('imageY','Recorte vertical',-.55,.55,.01)}
-   {number('textX','Texto horizontal',-.35,.35,.01)}
-   {number('textY','Texto vertical',-.35,.35,.01)}
+   {number('frameScale','Tamaño de la foto',.45,1.7,.05)}
+   {number('imageZoom','Zoom de foto',1,3,.05)}
    {number('textScale','Tamaño del titular',.55,1.7,.05)}
+   {advanced&&<>
+     {number('frameX','Recuadro izquierda / derecha',-.75,.75,.01)}
+     {number('frameY','Recuadro arriba / abajo',-.75,.75,.01)}
+     {number('imageX','Recorte horizontal',-.55,.55,.01)}
+     {number('imageY','Recorte vertical',-.55,.55,.01)}
+     {number('textX','Texto horizontal',-.35,.35,.01)}
+     {number('textY','Texto vertical',-.35,.35,.01)}
+   </>}
   </div>
   {!fit&&<p role="alert" className="bg-connection-error">Este titular es demasiado largo para la composición. Reduce el tamaño o acorta el texto antes de exportar.</p>}
  </div>;

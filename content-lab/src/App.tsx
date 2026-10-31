@@ -415,6 +415,13 @@ function App() {
   const brand = brands.find(b => b.id === current) || brands[0];
   const mine = posts.filter(p => p.brandId === brand?.id);
   const library = assets.filter(a => a.brandId === brand?.id);
+  const setupBrandReady = Boolean(brand && brand.name.trim() && brand.name!=='My Brand' && brand.audience?.trim());
+  const setupStepsDone = Number(setupBrandReady)+Number(library.length>0)+Number(mine.length>0);
+  const setupSteps = [
+    {title:'Define tu marca',subtitle:'Colores, idioma, audiencia y estilo.',ready:setupBrandReady,tab:'brands' as Tab,icon:Palette},
+    {title:'Sube una foto',subtitle:'Usa la original o una referencia de estilo.',ready:library.length>0,tab:'media' as Tab,icon:ImagePlus},
+    {title:'Guarda tu primer post',subtitle:'Crea una publicación y guárdala en tu biblioteca.',ready:mine.length>0,tab:'create' as Tab,icon:WandSparkles},
+  ];
   const change = (key: keyof Post, val: string) =>
     setEditor(p => ({ ...p, [key]: val }));
   const startFactory = () => {
@@ -792,6 +799,31 @@ function App() {
         <div className="content">
           {brand && tab === 'home' && (
             <>
+              <section className="lab-quickstart" aria-label="Guía para empezar">
+                <div className="lab-quickstart-heading">
+                  <div><span className="eyebrow">CONTENT LAB · FIRST STEPS</span>
+                    <h2>{setupStepsDone===3?'Tu estudio está en marcha. ✨':'Empieza a crear en 3 pasos.'}</h2>
+                    <p>No necesitas saber diseñar ni programar. Elige una acción y continúa desde donde quedaste.</p>
+                  </div>
+                  <span className="lab-start-count" aria-label={setupStepsDone+' de 3 pasos'}>{setupStepsDone}/3</span>
+                </div>
+                <div className="lab-quick-progress" role="progressbar" aria-valuenow={setupStepsDone} aria-valuemin={0} aria-valuemax={3} aria-label="Progreso de configuración">
+                  <span style={{width:(setupStepsDone/3*100)+'%'}}/>
+                </div>
+                <div className="lab-quick-steps">
+                  {setupSteps.map((step,i)=><button key={step.title} type="button" className={'lab-quick-step '+(step.ready?'completed':'')}
+                    onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
+                    <span className="lab-step-num">{step.ready?<Check size={18}/>:String(i+1).padStart(2,'0')}</span>
+                    <span className="lab-quick-text"><strong>{step.title}</strong><small>{step.subtitle}</small></span>
+                    <ArrowRight size={17}/>
+                  </button>)}
+                </div>
+                <div className="lab-quick-shortcuts">
+                  <button type="button" onClick={()=>navigate('grid')}><Images size={17}/> 1 Photo → 9 Posts</button>
+                  <button type="button" onClick={()=>start()}><Plus size={17}/> Crear publicación</button>
+                  <button type="button" onClick={()=>navigate('posts')}><FolderOpen size={17}/> Mis diseños</button>
+                </div>
+              </section>
               <section className="intro">
                 <div>
                   <div className="eyebrow">
@@ -977,6 +1009,7 @@ function App() {
           {brand && tab === 'grid' && (
             <BrandGrid
               isAdmin={Boolean(aiWallet?.admin)}
+              wallet={aiWallet}
               brand={brand}
               assets={library}
               images={images}
@@ -1659,6 +1692,13 @@ function App() {
           hidden
           onChange={e => upload(e.target.files?.[0])}
         />
+        {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
+          {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'grid',label:'Diseñar',icon:WandSparkles},
+              {id:'create',label:'Crear',icon:Plus},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
+            .map(item=><button type="button" key={item.id} aria-label={item.label} aria-current={tab===item.id?'page':undefined}
+              className={tab===item.id?'active':''} onClick={()=>item.id==='create'?start():navigate(item.id)}>
+              <item.icon size={21}/><span>{item.label}</span></button>)}
+        </nav>}
         {notice && (
           <div className="toast">
             <Check size={18} />
