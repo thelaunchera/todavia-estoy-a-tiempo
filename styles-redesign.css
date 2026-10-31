@@ -1783,3 +1783,11 @@ html{scroll-padding-top:96px}
   .help-section .help-intro h2{font-size:clamp(2.3rem,9vw,3rem)}
   .help-section .help-toggle{width:auto;min-width:166px}
 }
+
+/* Acceso permanente para alumnos, integrado en la navegación pública. */
+.header .nav .student-access-nav{font-weight:650}
+@media (min-width:851px) and (max-width:1100px){
+  .header .nav{gap:12px}
+  .header .nav>a{font-size:.72rem}
+  .header .nav .nav-cta{padding-inline:12px!important}
+}
