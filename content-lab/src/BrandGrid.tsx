@@ -5,6 +5,7 @@ import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,Arr
 import './BrandGrid.css';
 import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
 import GridVisualEditor from './GridVisualEditor';
+import type {PromptControls} from './PromptEngine';
 import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
@@ -12,7 +13,7 @@ type Asset={id:string;brandId:string;name:string;mime:string};
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;onOpenPrompts?:()=>void;onUploadFile:(f:File)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -48,11 +49,17 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,onOpenPrompts,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
   const [kind,setKind]=useState('product');const [brief,setBrief]=useState('');
+  const [creativeSettings,setCreativeSettings]=useState<PromptControls|null>(null);
+  useEffect(()=>{
+    if(!promptSelection)return;
+    setBrief(promptSelection.text);
+    setCreativeSettings(promptSelection.settings);
+  },[promptSelection?.version]);
   const [grids,setGrids]=useState<Grid[]>([]);const [grid,setGrid]=useState<Grid|null>(null);
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
@@ -164,7 +171,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
     if(referenceId&&!library.some(a=>a.id===referenceId))return notify('La referencia es de otra marca. Súbela en '+brand.name+'.');
     if(!await askCredits('creative',3,'Preparar 9 ideas con IA'))return;
     setBusy('plan');
-    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief,designMode,designPreset});
+    try{const {data}=await api.post('/api/grid-plan',{brandId:brand.id,sourceId,referenceId,kind,brief,designMode,designPreset,creativeSettings});
       const g=data as Grid;savedSignature.current[g.id]=signature(g);
       setGrid(g);setSaveState('saved');setGrids(prev=>[g,...prev]);setSelected(0);setDownloads([]);
       notify(g.planningSource==='template'
@@ -190,8 +197,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
     setBusy('test-photo');setTestPhoto('');
     try{
       const {data}=await api.post('/api/ai-image',{
-        brandId:brand.id,assetId:sourceId,mode:'variation',
-        prompt:'Generate one premium ORIGINAL product lifestyle advertisement photo from the supplied real product reference. Change scene, camera angle and lighting significantly. Keep recognizable product identity. No fake text, new logos, labels, or watermarks. One standalone 4:5 vertical photo.'
+        brandId:brand.id,assetId:sourceId,referenceId,mode:'variation',creativeSettings,
+        prompt:brief.trim()||'Photograph one authentic premium lifestyle image of the supplied real subject, with believable light, materials and meaningful context. No text or fabricated logos.'
       });
       if(!data?.id||!data?.content)throw Error('Cloudflare no devolvió una foto válida.');
       const src='data:'+data.mime+';base64,'+data.content;
@@ -352,7 +359,12 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,onUp
           </>}
         </div>
         {designMode==='photo'&&<><label>Tipo de imagen</label><div className="bg-modes"><button type="button" className={kind==='product'?'selected':''} onClick={()=>setKind('product')}><strong>Producto</strong><small>Escenas nuevas</small></button><button type="button" className={kind==='preserve'?'selected':''} onClick={()=>setKind('preserve')}><strong>Foto / App intacta</strong><small>Conservar original</small></button></div></>}
-        <label>Tu idea creativa</label><textarea rows={3} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Ej. Feed editorial premium, colores de mi marca, fotos lifestyle, tipografía grande, cada post diferente."/>
+        <div className="bg-prompt-hub"><div><strong>Prompt Helper · 30 recetas</strong>
+         <small>{creativeSettings?'✓ Prompt y ajustes importados de tu biblioteca privada':'Escribe tu prompt libre o abre la biblioteca para recibir ayuda.'}</small></div>
+         <button type="button" className="btn ghost" onClick={()=>onOpenPrompts?.()}>Abrir Prompt Studio <ArrowRight size={15}/></button>
+        </div>
+        <label>Tu idea creativa / Your prompt</label><textarea rows={5} maxLength={1900} value={brief} onChange={e=>setBrief(e.target.value)} placeholder="Escribe exactamente lo que quieres crear. La IA lo combinará con el Brand Kit y reglas de fotografía realista."/>
+        <small className="bg-note">Tu texto libre se usa al planificar las nueve ideas y al generar fotos. La IA no garantiza logos ni rostros exactos; el modo editorial puede conservar la foto original.</small>
         <div className="bg-test-controls">
           {isAdmin&&<><button className="btn ghost wide" disabled={!!busy||!!uploading} onClick={checkConnection}>
             {busy==='connection'?<LoaderCircle size={17} className="spin"/>:<Check size={17}/>}
