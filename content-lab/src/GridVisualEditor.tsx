@@ -3,22 +3,22 @@ import {composeGridPoster,EXPORT_SIZES,type ExportSize,type VisualControls} from
 type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls};
 type Brand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string;secondaryColor?:string};
 type Props={
- tile:Tile;index:number;brand:Brand;photo?:string;original?:string;preserve:boolean;
+ tile:Tile;index:number;brand:Brand;photo?:string;original?:string;logo?:string;preserve:boolean;
  exportSize:ExportSize;onChange:(next:VisualControls)=>void;
 };
 const defaults={imageX:0,imageY:0,imageZoom:1,textX:0,textY:0,textScale:1};
-export default function GridVisualEditor({tile,index,brand,photo,original,preserve,exportSize,onChange}:Props){
+export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
  const [layer,setLayer]=useState<'photo'|'text'>('photo');
  const drag=useRef<{x:number;y:number;from:VisualControls;size:{width:number;height:number}}|null>(null);
  const current={...defaults,...(tile.layout||{})};
  useEffect(()=>{
   let active=true;
-  composeGridPoster(tile,index,brand,{photo,original,preserve},exportSize)
+  composeGridPoster(tile,index,brand,{photo,original,logo,preserve},exportSize)
    .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.8));setFit(fit)}})
    .catch(()=>{if(active)setPreview('')});
   return()=>{active=false};
- },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,preserve,exportSize]);
+ },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize]);
  const set=(key:keyof typeof defaults,value:number)=>onChange({...current,[key]:value});
  const start=(e:React.PointerEvent<HTMLDivElement>)=>{
   if(!preview)return;
