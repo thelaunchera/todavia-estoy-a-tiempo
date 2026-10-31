@@ -282,7 +282,10 @@ function App() {
   const [data, setData] = useState<Data | null>(null),
     [denied, setDenied] = useState(false),
     [error, setError] = useState('');
-  const [page, setPage] = useState<Page>(() => new URLSearchParams(window.location.search).get('seccion')==='ventas' ? 'ventas' : 'inicio'),
+  const [page, setPage] = useState<Page>(() => {
+    const section = new URLSearchParams(window.location.search).get('seccion');
+    return section === 'ventas' || section === 'links' ? section : 'inicio';
+  }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
@@ -586,7 +589,7 @@ function App() {
     setMobileNav(false);
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas') nextUrl.searchParams.set('seccion','ventas');
+    if (p==='ventas' || p==='links') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
