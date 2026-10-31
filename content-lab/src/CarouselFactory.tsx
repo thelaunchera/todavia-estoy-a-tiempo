@@ -6,7 +6,7 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3
 } from 'lucide-react';
 import './CarouselFactory.css';
-import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,type CarouselStyle} from './CarouselArtDirection';
+import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
 import {paintFreeBackground,FREE_BACKGROUNDS,type FreeBackgroundId} from './FreeDesignAssets';
@@ -38,7 +38,7 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -71,6 +71,7 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           title: String(s.title || ''),
           description: String(s.description || ''),
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
+          titleFont:isCarouselFont(s.titleFont)?s.titleFont:undefined,
           assetId: String(s.assetId || ''),
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
@@ -123,10 +124,7 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
   const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
   const handle=socialAccount(brand,destination);
   const footerName=(handle&&!/^https?:\/\//i.test(handle)?handle:brand.name).toUpperCase().slice(0,32);
-  const bh=(brand.headingFont||'').toLowerCase();
-  const heading=style.font==='serif'?'Georgia, serif':style.font==='sans'?'Arial, sans-serif':
-    bh==='prompt'?'Prompt, Arial, sans-serif':bh==='futura'?'Futura, Arial, sans-serif':
-    bh==='dm serif display'?'DM Serif Display, Georgia, serif':'Georgia, serif';
+  const heading=carouselFontFamily(slide.titleFont||style.font,brand.headingFont);
   const bodyFont=(brand.bodyFont||'').toLowerCase()==='futura'?'Futura, Arial, sans-serif':'Arial, sans-serif';
   try{if(document.fonts)await Promise.all([document.fonts.load('700 80px '+heading),document.fonts.load('500 32px '+bodyFont)]);}catch{/* Offline fallbacks */}
   const rect=(x:number,y:number,w:number,h:number,color:string)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h);};
@@ -246,12 +244,9 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
 /** Transparent text-only pass for putting photos behind headlines in preview AND exports. */
 async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
  slides:Slide[],brand:Brand,style:CarouselStyle){
- const bh=(brand.headingFont||'').toLowerCase();
- const heading=style.font==='serif'?'Georgia, serif':style.font==='sans'?'Arial, sans-serif':
-   bh==='prompt'?'Prompt, Arial, sans-serif':bh==='futura'?'Futura, Arial, sans-serif':
-   bh==='dm serif display'?'DM Serif Display, Georgia, serif':'Georgia, serif';
+ const defaultHeading=carouselFontFamily(style.font,brand.headingFont);
  const bodyFont=(brand.bodyFont||'').toLowerCase()==='futura'?'Futura, Arial, sans-serif':'Arial, sans-serif';
- try{if(document.fonts)await Promise.all([document.fonts.load('700 80px '+heading),
+ try{if(document.fonts)await Promise.all([document.fonts.load('700 80px '+defaultHeading),
   document.fonts.load('500 32px '+bodyFont)]);}catch{/* Local font fallback */}
  const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
  const handle=socialAccount(brand,destination);
@@ -259,6 +254,8 @@ async function paintCarouselTypography(ctx:CanvasRenderingContext2D,
  for(let n=0;n<slides.length;n++){
   ctx.save();ctx.translate(n*1080,0);
   const slide=slides[n];
+  const heading=carouselFontFamily(slide.titleFont||style.font,brand.headingFont);
+  try{await document.fonts?.load('700 80px '+heading);}catch{/* Offline font fallback */}
   const {ink,accent,onAccent}=getCarouselPalette(brand,style,slide.accentIndex||0);
   const decorated=(!!slide.backgroundId&&slide.backgroundId!=='brand')||!!slide.backgroundImageId;
   const label=(t:string,x:number,y:number,color:string,size=24)=>{
@@ -361,7 +358,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     required.push(...(style.panoramaLayers||[]).map(layer=>layer.assetId));
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
-    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers});
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
     return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
@@ -584,7 +581,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         if(style.seamlessEnabled){
           const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
             assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
-            layers:style.panoramaLayers});
+            layers:style.panoramaLayers,font:style.font});
           const page=document.createElement('canvas');page.width=432;page.height=540;
           page.getContext('2d')?.drawImage(wide,i*1080,0,1080,1350,0,0,432,540);
           wide.width=1;return page;
@@ -617,7 +614,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         ?part.photoPosition||photoDefault(part.layout):part.photoPosition}));
       if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
         backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
-        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true});
+        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font});
       const wide=document.createElement('canvas');wide.width=432*slides.length;wide.height=540;
       const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
       for(let n=0;n<editable.length;n++){
@@ -635,7 +632,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(hasBehind){
         const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
         const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
-        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId);
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font);
         else await paintCarouselTypography(typeCtx,slides,brand,style);
         const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
         scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
@@ -724,13 +721,23 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
           <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
         </select></label>
-        <label>Tipografía<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
-          <option value="brand">Usar mi Brand Kit</option><option value="serif">Editorial serif</option><option value="sans">Moderna sans serif</option>
+        <label>Tipografía principal<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
+          {CAROUSEL_FONTS.map(font=><option key={font.id} value={font.id}>{font.label} · {font.category}</option>)}
         </select></label>
         <label>Paleta<select aria-label="Paleta del carrusel" value={style.accentSource} onChange={e=>setArtStyle({accentSource:e.target.value as CarouselStyle['accentSource']})}>
           <option value="brand">Colores de mi marca</option><option value="reference" disabled={!style.referenceColor}>Colores de la referencia</option>
         </select></label>
       </div>
+      <details className="factory-type-gallery">
+        <summary>Ver las tipografías antes de elegir · {CAROUSEL_FONTS.length} estilos</summary>
+        <div className="factory-type-options">{CAROUSEL_FONTS.map(font=><button key={font.id}
+          type="button" aria-pressed={style.font===font.id}
+          className={style.font===font.id?'selected':''}
+          onClick={()=>setArtStyle({font:font.id})}>
+          <span style={{fontFamily:carouselFontFamily(font.id,brand.headingFont)}}>Your story.</span>
+          <small>{font.label}</small>
+        </button>)}</div>
+      </details>
       <div className="factory-reference">
         <div className="factory-reference-copy"><strong>¿Te dieron una referencia visual?</strong><p>Úsala como inspiración de paleta y contraste, sin copiar su fotografía ni sus textos. El análisis de color es gratuito.</p></div>
         <div className="factory-reference-actions">
@@ -773,6 +780,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <label>Layout</label><select value={slide.layout} onChange={e=>replace({layout:e.target.value as Layout})}>{layouts.map(v=><option key={v} value={v}>{layoutNames[v]}</option>)}</select>
           <label>Small heading</label><input value={slide.eyebrow} maxLength={80} onChange={e=>replace({eyebrow:e.target.value})}/>
           <label>Main headline</label><textarea rows={3} value={slide.title} maxLength={420} onChange={e=>replace({title:e.target.value})}/>
+          <div className="factory-title-font"><label htmlFor="slide-font-choice">Tipografía del título de este slide</label>
+            <select id="slide-font-choice" aria-label="Tipografía del título de este slide"
+              value={slide.titleFont||'inherit'} onChange={e=>replace({titleFont:e.target.value==='inherit'?undefined:e.target.value as CarouselFont})}>
+              <option value="inherit">Igual que el estilo maestro</option>
+              {CAROUSEL_FONTS.filter(font=>font.id!=='brand').map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
+            </select>
+            <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
+          </div>
           <label>Supporting copy (optional)</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
            <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
