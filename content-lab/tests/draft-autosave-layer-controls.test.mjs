@@ -1,0 +1,67 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+import ts from 'typescript';
+const read=name=>readFileSync(new URL('../src/'+name,import.meta.url),'utf8');
+test('Local drafts are private to account/brand/post, bounded and recoverable',()=>{
+ const code=read('DraftRecovery.ts');
+ const js=ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ const entries=new Map();
+ const localStorage={getItem:k=>entries.get(k)||null,setItem:(k,v)=>entries.set(k,v),removeItem:k=>entries.delete(k)};
+ const module={exports:{}};runInNewContext(js,{module,exports:module.exports,localStorage,Date,encodeURIComponent,JSON});
+ const m=module.exports;
+ const draft={brandId:'brandA',format:'Carousel',hook:'new copy',designData:'{"slides":[]}'};
+ assert.equal(m.draftFingerprint({...draft,id:'one',updatedAt:'2026-01-01'}),m.draftFingerprint({...draft,id:'two',updatedAt:'2026-03-01'}));
+ assert.notEqual(m.draftStorageKey('x@site.com',draft),m.draftStorageKey('y@site.com',draft));
+ assert.notEqual(m.draftStorageKey('x@site.com',draft),m.draftStorageKey('x@site.com',{...draft,brandId:'brandB'}));
+ assert.equal(m.writeDraftBackup('x@site.com',draft),true);
+ assert.equal(m.readDraftBackup('x@site.com',draft).post.hook,'new copy');
+ assert.equal(m.newerUnsavedBackup('x@site.com',{...draft,hook:'original'}).post.hook,'new copy');
+ m.removeDraftBackup('x@site.com',draft);
+ assert.equal(m.readDraftBackup('x@site.com',draft),null);
+});
+test('Autosave runs after debounced edits and offers restore without resetting canvas',()=>{
+ const app=read('App.tsx'),css=read('index.css');
+ assert.ok(app.includes("writeDraftBackup(account.email,editor)"));
+ assert.ok(app.includes('window.setTimeout(()=>{'));
+ assert.ok(app.includes('},1800)'));
+ assert.ok(app.includes('void save(editor,true)'));
+ assert.ok(app.includes('setRecovery(account?.email?newerUnsavedBackup'));
+ assert.ok(app.includes('Recuperar cambios'));
+ assert.ok(app.includes("window.addEventListener('pagehide',flush)"));
+ assert.ok(app.includes("draftFingerprint(editorLatestRef.current)===draftFingerprint(source)"));
+ assert.ok(css.includes('.lab-draft-recovery'));
+});
+test('A full carousel slide duplicates with distinct key and retains independent photos/stickers',()=>{
+ const source=read('CarouselFactory.tsx');
+ assert.ok(source.includes('const duplicateSlide=()=>'));
+ assert.ok(source.includes('if(slides.length>=8)'));
+ assert.ok(source.includes("key:'slide-copy-'+crypto.randomUUID()"));
+ assert.ok(source.includes('stickerPositions:{...slide.stickerPositions}'));
+ assert.ok(source.includes('const mapped=(style.panoramaLayers||[]).flatMap'));
+ assert.ok(source.includes('Duplicar este slide'));
+});
+test('Text duplication and locks are preserved in post and panorama data',()=>{
+ const post=read('FreePostStudio.tsx'),panorama=read('CarouselFactory.tsx'),touch=read('TouchLayerCanvas.tsx');
+ const layers=read('PanoramaLayers.ts'),cover=read('CoverDecor.ts');
+ assert.ok(post.includes('const duplicateText=(id:string)=>'));
+ assert.ok(post.includes('onDuplicateText={duplicateText}'));
+ assert.ok(post.includes('onToggleLock={toggleLock}'));
+ assert.ok(panorama.includes('const togglePanoramaLock=(id:string,locked:boolean)'));
+ assert.ok(panorama.includes('const duplicatePanoramaText=(id:string)=>'));
+ assert.ok(touch.includes('layer.locked'));
+ assert.ok(touch.includes('Desbloquear elemento'));
+ assert.ok(touch.includes('Duplicar texto'));
+ assert.ok(layers.includes('locked?:boolean'));
+ assert.ok(cover.includes('lockedStickerIds'));
+});
+test('First-time guide and mobile touch protections are present and nonblocking',()=>{
+ const guide=read('QuickStartGuide.tsx'),css=read('QuickStartGuide.css'),touch=read('TouchLayerCanvas.tsx');
+ assert.ok(guide.includes('content-lab:guide-dismissed:v1:'));
+ assert.ok(guide.includes('Crear mi carrusel'));
+ assert.ok(guide.includes('Guía rápida del Content Lab'));
+ assert.ok(css.includes('@media(max-width:850px)'));
+ assert.ok(touch.includes("interactionMode==='navigate'"));
+ assert.ok(touch.includes('goToPage(index)'));
+});
