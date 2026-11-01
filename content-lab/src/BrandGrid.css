@@ -308,3 +308,10 @@
 .bg-compact-plan-footer span{font-size:10px;line-height:1.45;color:#6d8988}
 .bg-compact-plan-footer button{display:flex;gap:5px;align-items:center;border:0;background:#eaf4f5;color:#3e6d7c;border-radius:8px;font-size:11px;font-weight:700;padding:10px;cursor:pointer}
 @media(max-width:600px){.bg-compact-plan{padding:10px}.bg-compact-plan-footer button{width:100%;justify-content:center}}
+
+
+.bg-calendar-return{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+ padding:11px 13px;background:#f3f8f8;border:1px solid #c4dce1;border-radius:12px;margin:0 0 12px}
+.bg-calendar-return span{font-size:12px;font-weight:750;color:#325b6c}
+.bg-calendar-return button{display:inline-flex;gap:7px;align-items:center;justify-content:center;min-height:43px}
+@media(max-width:650px){.bg-calendar-return button{width:100%}}
