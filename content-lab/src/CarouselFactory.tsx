@@ -556,7 +556,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     recordHistory(post.designData||encodeCarouselDesign(slides,style));
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
-    clearDownloads();setOverview([]);
+    // Keep the previous image visible until the updated design is rendered.
+    // Navigation and sticker selection should not flash back to a blank canvas.
+    clearDownloads();
   };
   const previewCache=useRef<Map<string,string>>(new Map());
   const buildOverview=async()=>{
@@ -604,7 +606,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     finally{setOverviewBusy(false)}
   };
   useEffect(()=>{
-    if(studioTab!=='slides'&&studioTab!=='review')return;
+    // The same final-quality preview must update on EVERY creative step.
     let active=true;
     const timer=window.setTimeout(()=>{
       void buildOverview().then(images=>{
@@ -618,7 +620,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     return()=>{active=false;window.clearTimeout(timer);};
   },[studioTab,post.designData,images,brand.id,previewRevision]);
   useEffect(()=>{
-    if(studioTab!=='slides'&&studioTab!=='review')return;
     const rail=carouselRailRef.current;
     const first=rail?.children[0] as HTMLElement | undefined;
     const target=rail?.children[i] as HTMLElement | undefined;
@@ -1149,6 +1150,36 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>IA</button>
     </nav>
     <div className="factory-design-flow"><span>INSPIRACIÓN</span><span>FOTO</span><span>FONDO</span><span>TEXTO</span><span>DETALLES</span></div>
+    <div className="factory-persistent-layout">
+      <aside className="factory-persistent-preview factory-right" aria-label="Vista previa del diseño que estás editando">
+        <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
+        <div className="factory-live-preview-compact">
+          <div className="factory-live-preview-thumb">
+            {overview[i]
+              ?<img src={overview[i]} alt={'Vista previa del slide '+(i+1)+' con foto, fondo, textos y stickers'} draggable={false}/>
+              :preview
+                ?<img src={preview} alt={'Vista provisional del slide '+(i+1)} draggable={false}/>
+                :<div className="factory-live-preview-loading"><LoaderCircle className="spin" size={20}/><span>Cargando vista…</span></div>}
+          </div>
+          <div className="factory-live-preview-controls">
+            <strong>Slide {i+1} / {slides.length}</strong>
+            <small>Los fondos y stickers se actualizan aquí al elegirlos.</small>
+            <div>
+              <button type="button" aria-label="Ver slide anterior" disabled={i===0} onClick={()=>setCurrent(v=>Math.max(0,v-1))}><ArrowLeft size={16}/></button>
+              <button type="button" aria-label="Ver slide siguiente" disabled={i===slides.length-1} onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))}><ArrowRight size={16}/></button>
+            </div>
+          </div>
+        </div>
+        <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
+        {studioTab==='slides'&&<button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit}
+          onClick={()=>{
+            if(style.seamlessEnabled||style.panoramaLayers?.length){setStudioTab('canvas');setTouchEdit(false)}
+            else enableTouch();
+          }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Mover elementos en el lienzo':touchEdit?'✓ Terminar de mover elementos':'👆 Mover fotos y stickers'}</button>}
+        {studioTab==='slides'&&touchEdit&&<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>}
+        {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
+      </aside>
+      <div className="factory-persistent-content">
     {studioTab==='inspiration'&&<section className="factory-inspiration">
       <div className="factory-step-intro">
         <span className="factory-step-eyebrow">CREA A TU MANERA</span>
@@ -1382,18 +1413,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
 
       </div>
-      <aside className="factory-right">
-        <div className="factory-section"><strong>Vista previa como carrusel</strong><span>4:5 · PNG 1080 × 1350</span></div>
-         <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={()=>{
-           if(style.seamlessEnabled||style.panoramaLayers?.length){document.querySelector('.panorama-editor')?.scrollIntoView({behavior:'smooth',block:'start'});setTouchEdit(false)}else enableTouch();
-         }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Editar en el lienzo panorámico':touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
-        {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
-          renderSwipePreview()}
-
-        <div className="factory-step-mini-actions">
-          <button type="button" className="btn ghost wide" onClick={()=>setStudioTab('canvas')}>Mover elementos en el lienzo</button>
-        </div>
-      </aside>
     </div>
 
       <div className="factory-step-footer"><span>Revisa el gancho, la secuencia y el cierre antes de descargar.</span><button type="button" className="btn dark" onClick={()=>setStudioTab('review')}>Siguiente: revisar <ArrowRight size={16}/></button></div>
@@ -1435,7 +1454,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
       </div>
-      {renderSwipePreview()}
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
         <strong><Check size={15}/> {downloads.length} PNG listos</strong>
         <p>Descárgalos individualmente, sin ZIP.</p>
@@ -1477,5 +1495,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button>
     </section>}
+      </div>
+    </div>
   </div>;
 }
