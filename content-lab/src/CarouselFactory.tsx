@@ -668,7 +668,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   const renderSwipePreview=()=>(
     <div className="factory-instagram-preview" aria-label="Previsualización completa del carrusel">
-      <div className="factory-swipe-caption"><span>DESLIZA PARA VER EL CARRUSEL</span><strong>{slides.length} diapositivas</strong></div>
+      <div className="factory-swipe-caption"><span>DESLIZA CON EL DEDO</span><strong>{style.seamlessEnabled?'Seamless':'Normal'} · {slides.length} slides</strong></div>
       <div className="factory-swipe-rail" ref={carouselRailRef} onScroll={syncCarouselScroll}>
         {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
           {overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
@@ -690,6 +690,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     </div>
   );
   const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
+  const chooseCarouselMode=(seamless:boolean)=>{
+    if(style.seamlessEnabled===seamless)return;
+    // Never destroy a design or delete saved panoramic layers when switching.
+    // Normal uses independent page backgrounds; seamless enables cross-slide art.
+    setAll(slides,normalizeCarouselStyle({...style,seamlessEnabled:seamless}));
+    setMobilePreviewOpen(false);
+    setStudioTab('canvas');
+    notify(seamless
+      ?'Seamless activado: estira fotos y fondos sobre las líneas de corte.'
+      :'Carrusel normal: edita cada slide por separado. Tus capas anteriores siguen guardadas.');
+  };
   const appliedStickerVersion=useRef(0);
   useEffect(()=>{
     if(!initialSticker?.version||initialSticker.brandId!==brand.id||!initialSticker.id||appliedStickerVersion.current===initialSticker.version)return;
@@ -1292,8 +1303,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         aria-label="Vista previa del diseño que estás editando">
         <button type="button" className="factory-mobile-preview-close" onClick={()=>setMobilePreviewOpen(false)}
           aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
-        <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
+        <div className="factory-section"><strong>{style.seamlessEnabled?'Vista seamless':'Vista del carrusel'}</strong><span>Slide {i+1}/{slides.length}</span></div>
         <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
+        {sheet&&<button type="button" className="factory-preview-edit" onClick={()=>{
+          setMobilePreviewOpen(false);setStudioTab(style.seamlessEnabled?'canvas':'slides');
+        }}>Editar slide {i+1} <ArrowRight size={17}/></button>}
         {studioTab==='slides'&&<button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit}
           onClick={()=>{
             if(style.seamlessEnabled||style.panoramaLayers?.length){setStudioTab('canvas');setTouchEdit(false)}
@@ -1314,6 +1328,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <button className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
     </div>
 
+    <div className="factory-format-switch" role="group" aria-label="Tipo de carrusel">
+      <button type="button" className={!style.seamlessEnabled?'active':''}
+        aria-pressed={!style.seamlessEnabled} onClick={()=>chooseCarouselMode(false)}>
+        <span className="factory-mode-icon" aria-hidden="true">▣ ▣</span><span><strong>Normal</strong>
+        <small>Cada slide tiene su propio diseño</small></span>
+      </button>
+      <button type="button" className={style.seamlessEnabled?'active':''}
+        aria-pressed={style.seamlessEnabled} onClick={()=>chooseCarouselMode(true)}>
+        <span className="factory-mode-icon" aria-hidden="true">▤</span><span><strong>Seamless</strong>
+        <small>Una imagen continúa y se corta entre slides</small></span>
+      </button>
+    </div>
     <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
       <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
         {([
@@ -1362,7 +1388,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           {busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>}
           Crear carrusel con IA · 1 crédito
         </button>
-        <small>La IA propone los textos. Puedes cambiar cada frase, foto o fondo antes de guardar.</small>
+        <small>La idea que escribes manda: no añadiremos sistemas, automatizaciones ni promesas que no pediste.</small>
       </div>
       <details className="factory-reference-fold"><summary>Tengo una foto de referencia</summary>
             <div className="factory-reference">
@@ -1493,7 +1519,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     </section>
 
           <section className="seamless-config">
-      <div className="seamless-header"><div><span className="eyebrow">SEAMLESS CAROUSEL</span><h2>Un lienzo continuo, dividido en slides.</h2><p>El fondo empieza blanco y no contiene líneas ni formas añadidas automáticamente. Solo tú decides qué elementos colocar.</p></div><label className="seamless-toggle"><input type="checkbox" checked={style.seamlessEnabled} onChange={e=>setArtStyle({seamlessEnabled:e.target.checked})}/><span>{style.seamlessEnabled?'Activado':'Activar seamless'}</span></label></div>
+      <div className="seamless-header"><div><span className="eyebrow">{style.seamlessEnabled?'SEAMLESS · CORTES CONTINUOS':'CARRUSEL NORMAL'}</span><h2>{style.seamlessEnabled?'Una imagen que cruza varias slides.':'Cada slide, independiente.'}</h2><p>{style.seamlessEnabled?'Arrastra tus fotos o fondos a través de las líneas azules. Se cortarán solo al descargar.':'Cada fondo y fotografía se queda dentro de su slide. Para extender imágenes, elige Seamless arriba.'}</p></div></div>
       {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{([
  {title:'✂️ Scrapbook',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&isScrapbookBackground(b.id))},
  {title:'🎀 Coquette & bows',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&isBowBackground(b.id))},
