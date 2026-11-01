@@ -1299,7 +1299,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <FreeDecorControls title="Elegir fondo" defaultTab="backgrounds" initiallyExpanded
           backgroundId={slide.backgroundId||'brand'}
           backgroundImageId={slide.backgroundImageId||''}
-          stickerIds={slide.stickerIds||[]} onChange={updateDecoration}
+          stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration}
           assets={ownedAssets} images={images} loadImage={loadImage}
           onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
         <button type="button" className="btn ghost factory-background-apply" onClick={backgroundOfAll}>
@@ -1351,7 +1351,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           </details>}
 
           <FreeDecorControls title="Añadir stickers" backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
-            stickerIds={slide.stickerIds||[]} onChange={updateDecoration} assets={ownedAssets}
+            stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration} assets={ownedAssets}
             images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
             onUploadBackground={onUploadBackground}/>
       </details>
