@@ -435,6 +435,17 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
+    {pageCount===1&&layers.some(layer=>layer.kind==='text')&&
+      <div className="touch-editor-post-text-list" aria-label="Seleccionar textos del post">
+        <strong>Editar textos del post</strong>
+        <div>{layers.filter(layer=>layer.kind==='text').map(layer=>
+          <button type="button" key={layer.id}
+            aria-pressed={selected===layer.id}
+            onClick={()=>selectFromList(layer.id)}>
+            <span aria-hidden="true">T</span> {layer.name}
+          </button>)}</div>
+        <small>Selecciona un texto y cámbialo de sitio, color o tipografía.</small>
+      </div>}
     <p className="touch-editor-help">{pageCount>1
       ?interactionMode==='navigate'?'Desliza el lienzo o usa las flechas para pasar de slide sin mover stickers.':
         'Primero elige una capa; después arrástrala. Usa las flechas para pasar de slide.'
@@ -486,9 +497,9 @@ export default function TouchLayerCanvas({
          </div>
          <div className="touch-editor-text-position" role="group" aria-label="Posición del texto en el diseño">
            <strong>Posición rápida</strong>
-           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.08})}>Arriba</button>
-           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.5-selectedRect!.h/2})}>Centro</button>
-           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.92-selectedRect!.h})}>Abajo</button>
+           <button type="button" onClick={()=>commit({x:(activePage+.5)/pageCount-selectedRect!.w/2,y:.08})}>Arriba</button>
+           <button type="button" onClick={()=>commit({x:(activePage+.5)/pageCount-selectedRect!.w/2,y:.5-selectedRect!.h/2})}>Centro</button>
+           <button type="button" onClick={()=>commit({x:(activePage+.5)/pageCount-selectedRect!.w/2,y:.92-selectedRect!.h})}>Abajo</button>
          </div>
         <label>Texto<textarea rows={2} aria-label="Editar texto libre" value={chosen.text||''}
           onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
