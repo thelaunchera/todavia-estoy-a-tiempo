@@ -91,6 +91,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
   const [chooseExisting,setChooseExisting]=useState(false);
   const openedCalendarVersion=useRef<number>(-1);
+  const resultsRef=useRef<HTMLDivElement>(null);
   const [exportSize,setExportSize]=useState<ExportSize>('portrait');
   const [qaNotes,setQaNotes]=useState<string[]>([]);
   const [sessionPhotos,setSessionPhotos]=useState(0);
@@ -200,6 +201,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     setBrief(saved.brief);setExpandedEditor(true);
     setDownloads([]);setReviewed(false);setSaveState('saved');
   },[initialSelection?.version,grids,brand.id]);
+  useEffect(()=>{
+    if(initialSelection?.fromCalendar&&grid?.id===initialSelection.openGridId){
+      resultsRef.current?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  },[grid?.id,initialSelection?.openGridId,initialSelection?.version]);
   useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[]),...(grid?.posts.flatMap(p=>[...(p.stickerIds||[]),...(p.design?.stickerIds||[]),...(p.backgroundImageId?[p.backgroundImageId]:[])])||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
   const update=(change:Partial<Tile>)=>{
     setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);
@@ -590,7 +596,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div></details>}
       {own.length>0&&<details className="bg-box bg-saved-projects"><summary>Mis proyectos guardados ({own.length})</summary><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setExpandedEditor(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></details>}
-    </div><div className="bg-results">
+    </div><div ref={resultsRef} className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Preparar mis 9 ideas». Verás diseños editables que puedes preparar y descargar sin gastar créditos.</p></div>:isExpress&&!expandedEditor?<>
         <section className="bg-compact-campaign" aria-label="Nueve ideas para tus posts">
           <div className="bg-compact-campaign-head">
