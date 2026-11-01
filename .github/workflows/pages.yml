@@ -106,6 +106,13 @@ jobs:
           npm test
           npm run build
           test -s dist/prompts/index.html
+          # Keep a non-hashed backup of this exact build's stylesheet.
+          css_asset=$(find dist/assets -maxdepth 1 -type f -name '*.css' -print -quit)
+          test -n "$css_asset"
+          cp "$css_asset" dist/lab-recovery.css
+          test -s dist/lab-recovery.css
+          grep -q -- '--content-lab-css-ready' dist/lab-recovery.css
+          grep -q '/content-lab/assets/' dist/index.html
       - name: Verificar iconos propios del Studio para iPhone y Android
         run: |
           test -s estudio-control/dist/icons/studio-blue-192.png
@@ -124,6 +131,7 @@ jobs:
         run: |
           test -s _podcast_pages/index.html
           test -s _podcast_pages/content-lab/index.html
+          test -s _podcast_pages/content-lab/lab-recovery.css
           test -s _podcast_pages/content-lab/prompts/index.html
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
