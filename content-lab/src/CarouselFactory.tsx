@@ -823,12 +823,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         crop:part.photoPosition?.crop||normalizeCrop({y:part.photoFocus==='top'?.12:part.photoFocus==='bottom'?.9:.5})},
       frameStyle:style.seamlessEnabled?'panorama':part.frameStyle||'none',
       paper:getCarouselPalette(brand,style,part.accentIndex||0).paper,accent:getCarouselPalette(brand,style,part.accentIndex||0).accent,
-      page:n,assetId:part.assetId,
+      page:n,assetId:part.assetId,locked:(style.lockedLayerIds||[]).includes('page-photo-'+part.key),
     }]:[]),
     ...(part.stickerIds||[]).filter(id=>images[id]).map((id,index)=>{
       const r=clampRect(part.stickerPositions?.[id]||stickerDefault(index));
       return {id:'page-sticker-'+part.key+'-'+id,kind:'sticker' as const,
-        name:'Sticker · slide '+(n+1),src:images[id],rect:{...r,x:(n+r.x)/slides.length,w:r.w/slides.length},page:n,assetId:id};
+        name:'Sticker · slide '+(n+1),src:images[id],rect:{...r,x:(n+r.x)/slides.length,w:r.w/slides.length},page:n,assetId:id,
+        locked:(style.lockedLayerIds||[]).includes('page-sticker-'+part.key+'-'+id)};
     }),
     ...(style.freeCanvas?([
       {field:'eyebrow' as const,value:part.eyebrow,name:'Etiqueta',rect:{x:.068,y:.061,w:.86,h:.08},fontSize:25},
@@ -839,6 +840,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       return ({
       id:'page-text-'+part.key+'-'+item.field,kind:'text' as const,assetId:'',
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
+       locked:(style.lockedLayerIds||[]).includes('page-text-'+part.key+'-'+item.field),
       font:item.field==='title'?(part.titleFont||style.font)==='brand'?(brand.headingFont||'serif').toLowerCase():(part.titleFont||style.font):'sans',
       fontSize:geometry.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
       rect:{...geometry.rect,x:(n+geometry.rect.x)/slides.length,w:geometry.rect.w/slides.length},
@@ -847,7 +849,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   ]);
   const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
     .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
-    .map(layer=>({...layer,src:images[layer.assetId]||''}))];
+    .map(layer=>({...layer,src:images[layer.assetId]||'',locked:layer.locked===true}))];
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -867,7 +869,25 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     ...(source.kind==='text'?{text:source.text,font:source.font,fontSize:source.fontSize,
       lineHeight:source.lineHeight,spacing:source.spacing,color:source.color}:{}),
   });
+  const togglePanoramaLock=(id:string,locked:boolean)=>{
+    if(pageLayers.some(layer=>layer.id===id)){
+      setArtStyle({lockedLayerIds:locked?[...new Set([...(style.lockedLayerIds||[]),id])]:
+        (style.lockedLayerIds||[]).filter(item=>item!==id)});
+    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>
+      layer.id===id?{...layer,locked}:layer)});
+  };
+  const duplicatePanoramaText=(id:string)=>{
+    if((style.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');return}
+    const source=panoramaLayers.find(layer=>layer.id===id&&layer.kind==='text');
+    if(!source)return;
+    const cloned:PanoramaLayer={...source,id:'text-copy-'+crypto.randomUUID(),locked:false,
+      name:source.name+' · copia',assetId:'',kind:'text',
+      rect:clampPanoramaRect({...source.rect,x:source.rect.x+.025/slides.length,y:source.rect.y+.02})};
+    setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),cloned]});
+    notify('Texto duplicado: conserva el color, la fuente y el tamaño.');
+  };
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
+    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
@@ -908,6 +928,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     return 'copied';
   };
   const updatePanoramaLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
+    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
@@ -930,6 +951,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify(kind==='text'?'Texto añadido: tócalo en el lienzo para editarlo y moverlo.':'Elemento de collage añadido. Arrástralo para colocarlo.');
   };
   const reorderPanoramaLayer=(id:string,action:LayerMove)=>{
+    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
     const source=pageLayers.find(layer=>layer.id===id);
     let nextSlides=slides;
     let layers=style.panoramaLayers||[];
@@ -941,6 +963,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(nextSlides,{...style,panoramaLayers:reorderPanoramaLayers(layers,id,action)});
   };
   const removePanoramaLayer=(id:string)=>{
+    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source)setAll(stripSource(source));
     else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
@@ -1338,7 +1361,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       </div>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
-       onCopySticker={copyPanoramaSticker}
+       onCopySticker={copyPanoramaSticker} onToggleLock={togglePanoramaLock} onDuplicateText={duplicatePanoramaText}
       onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
       onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
       canUndo={historyVersion>=0&&pastHistory.current.length>0}
