@@ -283,7 +283,8 @@ render();
    frame.alt='Ejemplo de publicación para cualquier producto: composición '+(current+1)+' de 8, mostrado con matcha';
    thumbnails.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-pressed',String(i===current));});
    dots.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-current',String(i===current));});
-   thumbnails[current].scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'nearest',inline:'nearest'});
+   const tray=thumbnails[current].parentElement;
+   if(tray && tray.scrollWidth>tray.clientWidth){const node=thumbnails[current];tray.scrollTo({left:node.offsetLeft-tray.offsetLeft-(tray.clientWidth-node.offsetWidth)/2,behavior:reduced.matches?'auto':'smooth'});}
    window.clearTimeout(timeout);
    timeout=window.setTimeout(()=>frame.classList.remove('is-changing'),310);
  };
