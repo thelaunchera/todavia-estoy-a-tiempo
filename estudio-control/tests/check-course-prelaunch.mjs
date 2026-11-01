@@ -108,7 +108,11 @@ console.log('QA precio $9.99/39.99 previsto, fecha oficial y botones ovalados: O
 assert.match(classPage,/Tu primera web con IA/i,'Nombre de la clase presente');
 assert.match(classPage,/Tu primera web <em>con IA/,'Título claro para visitantes en el hero');
 assert.doesNotMatch(classPage,/no un precio anterior de venta|no una venta anterior|comprobar que los materiales funcionan|clase en preparación|fecha objetivo/i);
-assert.doesNotMatch(classPage,/Stripe|Supabase|Make|nota interna|borrador de producción/i);
+assert.doesNotMatch(classPage,/Supabase|nota interna|borrador de producción/i);
+assert.match(classPage,/¿Qué son los plugins y cuestan dinero\?/,'La FAQ pública debe explicar las conexiones de forma comprensible');
+assert.match(classPage,/AppDeploy, Google\/Gmail, Make y Stripe/,'La FAQ educativa puede nombrar herramientas sin exponer procesos internos');
+assert.match(classPage,/Plus es opcional/,'Plus no es obligatorio para comenzar');
+assert.doesNotMatch(classPage,/SUSCRIPCIÓN PARA LA CLASE|Herramienta de IA · \$20 USD\/mes|ChatGPT Plus, que cuesta \$20 USD al mes/,'No se debe presentar Plus como requisito');
 console.log('QA editorial: contenido orientado al alumno sin procesos internos OK');
 
 /* Club de Ideas · verifica acceso privado, pantallas y ausencia de credenciales. */
