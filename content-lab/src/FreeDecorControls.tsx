@@ -116,6 +116,14 @@ export default function FreeDecorControls({
   addRecent(decorKey.sticker(id));
   onChange({stickerIds:[...selected,id]});
  };
+ const favoriteButton=(key:string,name:string)=>(
+  <button type="button" className={'free-decor-favorite'+(prefs.favorites.includes(key)?' is-favorite':'')}
+    aria-pressed={prefs.favorites.includes(key)}
+    aria-label={(prefs.favorites.includes(key)?'Quitar de favoritos: ':'Guardar como favorito: ')+name}
+    onClick={()=>favorite(key)} title={prefs.favorites.includes(key)?'Quitar favorito':'Guardar favorito'}>
+    {prefs.favorites.includes(key)?'★':'☆'} <span>{prefs.favorites.includes(key)?'Guardado':'Guardar'}</span>
+  </button>
+ );
  const upload=async(file?:File)=>{
   if(!file||!onUploadBackground)return;
   setUploading(true);setFeedback('');
@@ -167,17 +175,25 @@ export default function FreeDecorControls({
        onChange={e=>void upload(e.target.files?.[0])}/></>}
     </div>
     {ownMatches.length>0&&<><p className="free-decor-label">Mis archivos guardados</p>
-     <div className="free-decor-backgrounds">{ownMatches.map(a=><button type="button" key={a.id}
-      aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''}
-      onClick={()=>changeBackground('brand',a.id)}>
-      <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
-      <span>{displayAssetName(a)}</span></button>)}</div></>}
+     <div className="free-decor-backgrounds">{ownMatches.map(a=><div key={a.id} className="free-decor-background-tile">
+      <button type="button" aria-pressed={backgroundImageId===a.id}
+        className={backgroundImageId===a.id?'selected':''}
+        onClick={()=>changeBackground('brand',a.id)}>
+        <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
+        <span>{displayAssetName(a)}</span>
+      </button>
+      {favoriteButton(decorKey.imageBackground(a.id),displayAssetName(a))}
+     </div>)}</div></>}
     {studioMatches.length>0&&<><p className="free-decor-label">Fondos del estudio · para todos</p>
-     <div className="free-decor-backgrounds">{studioMatches.map(a=><button type="button" key={a.id}
-      aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''}
-      onClick={()=>changeBackground('brand',a.id)}>
-      <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
-      <span>{displayAssetName(a)}</span></button>)}</div></>}
+     <div className="free-decor-backgrounds">{studioMatches.map(a=><div key={a.id} className="free-decor-background-tile">
+      <button type="button" aria-pressed={backgroundImageId===a.id}
+        className={backgroundImageId===a.id?'selected':''}
+        onClick={()=>changeBackground('brand',a.id)}>
+        <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
+        <span>{displayAssetName(a)}</span>
+      </button>
+      {favoriteButton(decorKey.imageBackground(a.id),displayAssetName(a))}
+     </div>)}</div></>}
     <p className="free-decor-label">Fondos incluidos en Content Lab</p>
     <div className="free-decor-background-filters" role="group" aria-label="Categorías de fondos">
      <button type="button" aria-pressed={backgroundKind==='all'} className={backgroundKind==='all'?'active':''}
@@ -187,11 +203,14 @@ export default function FreeDecorControls({
       onClick={()=>setBackgroundKind(cat.id)}>{cat.label}</button>)}
     </div>
     {builtInMatches.length>0&&<div className="free-decor-backgrounds">{builtInMatches.map(b=>
-     <button type="button" key={b.id} aria-pressed={!backgroundImageId&&backgroundId===b.id}
-      className={!backgroundImageId&&backgroundId===b.id?'selected':''}
-      onClick={()=>changeBackground(b.id)}>
-      <BackgroundThumbnail id={b.id} alt={'Vista previa: '+b.name}/><span>{b.name}</span>
-     </button>)}</div>}
+     <div key={b.id} className="free-decor-background-tile">
+      <button type="button" aria-pressed={!backgroundImageId&&backgroundId===b.id}
+        className={!backgroundImageId&&backgroundId===b.id?'selected':''}
+        onClick={()=>changeBackground(b.id)}>
+        <BackgroundThumbnail id={b.id} alt={'Vista previa: '+b.name}/><span>{b.name}</span>
+      </button>
+      {favoriteButton(decorKey.freeBackground(b.id),b.name)}
+     </div>)}</div>}
     {!ownMatches.length&&!studioMatches.length&&!builtInMatches.length&&
      <div className="free-decor-no-results">No encontramos ese fondo. Prueba otra palabra o cambia la categoría.
       <button type="button" onClick={()=>{setSearch('');setBackgroundKind('all')}}>Mostrar todos</button>
@@ -210,7 +229,9 @@ export default function FreeDecorControls({
       aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''}
       onClick={()=>toggle(a.id)}>
       <StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
-      <small>{displayAssetName(a)}</small></button></div>)}</div>:
+      <small>{displayAssetName(a)}</small></button>
+      {favoriteButton(decorKey.sticker(a.id),displayAssetName(a))}
+     </div>)}</div>:
      <div className="free-decor-empty">
       <strong>{resourceFilter==='favorites'&&!visible.length?'Aún no tienes stickers favoritos.':
         resourceFilter==='recent'&&!visible.length?'Todavía no has usado stickers recientemente.':
