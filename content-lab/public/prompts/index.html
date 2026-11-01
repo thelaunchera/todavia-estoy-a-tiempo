@@ -226,6 +226,54 @@ main{padding-top:8px}
 .matcha-lock-cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:15px 25px;border-radius:999px;background:#29451c;color:#fff;text-decoration:none;font-weight:800}
 #access-placeholder.is-loading{opacity:.65}
 .matcha-access-ready{font-weight:700;color:#34582b;margin:0 0 19px;background:#e9f2e2;border-radius:12px;padding:13px 20px}
+
+/* 01 Nov: airy editorial hero; button NEVER floats over photo or gallery arrows */
+.editorial-hero.hero-with-carousel{position:relative;display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);align-items:center;gap:clamp(22px,4vw,56px);min-height:0;background:#fbf9f4;border:1px solid #ebe6dc;box-shadow:none;border-radius:22px;padding:clamp(24px,4.5vw,59px);overflow:hidden;text-align:left}
+.hero-with-carousel .hero-copy{position:relative;width:100%;max-width:570px;margin:0;z-index:2;align-self:center}
+.hero-with-carousel .hero-eyebrow{justify-content:flex-start;color:#80715e;letter-spacing:1.45px;font-size:10px}
+.hero-with-carousel .hero-dot{background:#aa9b7c}
+.hero-with-carousel h1{font-size:clamp(40px,4.7vw,67px);line-height:1.05;letter-spacing:-.05em;margin:17px 0 19px;max-width:12ch;color:#282a25}
+.hero-with-carousel h1 em{color:#858064}
+.hero-with-carousel .hero-lead{color:#66685f;max-width:45ch;font-size:clamp(13px,1.25vw,15px);line-height:1.63;margin:0 0 24px}
+.hero-with-carousel .hero-lead b{color:#444d3c}
+.hero-with-carousel .hero-start{position:relative;display:inline-flex;justify-content:center;align-items:center;gap:15px;max-width:100%;white-space:normal;background:#30392f;color:#fff!important;border-radius:999px;min-height:52px;padding:13px 24px;font-size:13px;line-height:1.45;box-shadow:none;z-index:2}
+.hero-with-carousel .hero-start:hover{background:#4a5847}
+.hero-with-carousel .hero-carousel{position:relative;inset:auto;width:100%;max-width:100%;min-width:0;margin:0;z-index:1}
+.hero-with-carousel .hero-featured-wrap{position:relative;inset:auto;height:clamp(320px,35vw,425px);width:100%;display:block;border-radius:15px;overflow:hidden;background:#e9e3db}
+.hero-with-carousel .hero-featured-photo{position:relative;inset:auto;display:block;height:100%;width:100%;max-height:none;border-radius:15px;box-shadow:none;filter:none;background:#e9e3db}
+.hero-with-carousel .hero-featured-photo:after{display:none}
+.hero-with-carousel .hero-featured-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 49%;filter:none;transition:opacity .24s ease}
+.hero-with-carousel .hero-photo-marker{display:none}
+.hero-with-carousel .hero-slider-controls{position:relative;inset:auto;pointer-events:auto;z-index:2;display:flex;gap:14px;justify-content:center;align-items:center;max-width:none;margin:14px 0 0}
+.hero-with-carousel .hero-arrow{position:static;flex:0 0 39px;width:39px;height:39px;transform:none;display:grid;place-items:center;border:1px solid #ddd9cc;border-radius:50%;background:#fff;color:#4c5644;font-size:28px;box-shadow:none}
+.hero-with-carousel .hero-thumbnails{display:none}
+.hero-with-carousel .hero-pagination{position:static;transform:none;display:flex;gap:9px;align-items:center;justify-content:center;margin:10px 0 0;min-height:16px}
+.hero-with-carousel .hero-dot-button{display:block;width:8px;height:8px;background:#cecac1;border:0;border-radius:50%;opacity:1}
+.hero-with-carousel .hero-dot-button.is-active{background:#647156;transform:scale(1.1)}
+.hero-with-carousel .hero-carousel-caption{position:static;color:#77776d;font-size:10px;line-height:1.5;text-align:center;margin:5px 0 0}
+.hero-with-carousel .hero-benefits{display:none}
+@media(max-width:780px){
+ .editorial-hero.hero-with-carousel{display:grid;grid-template-columns:1fr;gap:23px;padding:24px 20px 19px;min-height:0;border-radius:20px}
+ .hero-with-carousel .hero-copy{width:100%;max-width:none}
+ .hero-with-carousel .hero-eyebrow{font-size:9px;letter-spacing:1.1px}
+ .hero-with-carousel h1{font-size:clamp(37px,9vw,50px);margin:13px 0 14px;letter-spacing:-.04em;max-width:12ch}
+ .hero-with-carousel .hero-lead{font-size:13px;max-width:48ch;line-height:1.58;margin:0 0 18px}
+ .hero-with-carousel .hero-start{display:flex;width:100%;max-width:370px;justify-content:center;min-height:51px;min-width:0;padding:13px 18px;font-size:13px}
+ .hero-with-carousel .hero-carousel{position:relative;width:100%;margin:0;inset:auto}
+ .hero-with-carousel .hero-featured-wrap{position:relative;inset:auto;height:clamp(250px,74vw,360px);border-radius:14px}
+ .hero-with-carousel .hero-featured-photo{position:relative;inset:auto;border-radius:14px}
+ .hero-with-carousel .hero-featured-photo img{object-position:center 49%}
+ .hero-with-carousel .hero-slider-controls{position:relative;inset:auto;gap:16px;margin-top:12px;justify-content:center;pointer-events:auto}
+ .hero-with-carousel .hero-arrow{position:static;top:auto;transform:none;width:40px;height:40px;flex-basis:40px}
+ .hero-with-carousel .hero-pagination{position:static;inset:auto;transform:none;margin:6px 0}
+ .hero-with-carousel .hero-carousel-caption{display:block;margin:4px 0 0;font-size:10px}
+}
+@media(max-width:420px){
+ .editorial-hero.hero-with-carousel{padding:21px 17px 16px;gap:20px}
+ .hero-with-carousel h1{font-size:clamp(34px,9.4vw,43px)}
+ .hero-with-carousel .hero-start{font-size:12px;min-height:49px}
+ .hero-with-carousel .hero-featured-wrap{height:clamp(236px,72vw,295px)}
+}
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
