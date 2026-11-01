@@ -31,13 +31,13 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
  const layers:PanoramaLayer[]=[];
  if(post.assetId&&post.assetId!==decor.backgroundImageId&&!decor.layers.some(layer=>layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
-   rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
+   locked:decor.primaryPhotoLocked===true,rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
  const title=post.hook||post.title;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
    font:decor.headlineStyle?.font||brand.headingFont?.toLowerCase()||'serif',
    fontSize:decor.headlineStyle?.fontSize||84,fontWeight:decor.headlineStyle?.fontWeight||700,lineHeight:decor.headlineStyle?.lineHeight||1.12,
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
-   shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,
+   shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,locked:decor.headlineLocked===true,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
  return [...layers,...legacyStickers(decor),...decor.layers];
 }
@@ -137,6 +137,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   notify('Texto póster añadido. Tócalo y arrástralo; puedes cambiar su color.');
  };
  const updateLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
+  if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title'){
    if(patch.text!==undefined)onTitle(patch.text);
    const {text:unused,...styling}=patch;
@@ -147,6 +148,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,...patch}:l)});
  };
  const commit=(kind:PanoramaLayer['kind'],id:string,rect:TouchRect)=>{
+  if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title')update({...decor,headlineRect:clampRect(rect)});
   else if(id==='main-photo')update({...decor,primaryPhotoRect:clampFreePhotoRect(rect)});
   else if(id.startsWith('legacy-sticker-')){
@@ -154,7 +156,26 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    update({...decor,stickerPositions:{...decor.stickerPositions,[original]:clampRect(rect)}});
   }else update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,rect:kind==='photo'?clampFreePhotoRect(rect):clampRect(rect)}:l)});
  };
+ const toggleLock=(id:string,locked:boolean)=>{
+  if(id==='main-title'){update({...decor,headlineLocked:locked});return}
+  if(id==='main-photo'){update({...decor,primaryPhotoLocked:locked});return}
+  if(id.startsWith('legacy-sticker-')){
+   const asset=id.slice('legacy-sticker-'.length),ids=decor.lockedStickerIds||[];
+   update({...decor,lockedStickerIds:locked?[...new Set([...ids,asset])]:ids.filter(x=>x!==asset)});return;
+  }
+  update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,locked}:l)});
+ };
+ const duplicateText=(id:string)=>{
+  if(decor.layers.length>=22){notify('Máximo 22 elementos por post');return}
+  const original=layers.find(layer=>layer.id===id&&layer.kind==='text');
+  if(!original)return;
+  const clone:PanoramaLayer={...original,id:uniqueId(),locked:false,
+   name:original.name+' · copia',rect:clampRect({...original.rect,x:original.rect.x+.025,y:original.rect.y+.025})};
+  update({...decor,layers:[...decor.layers,clone]});
+  notify('Texto duplicado conservando color, tipografía y tamaño.');
+ };
  const remove=(id:string)=>{
+  if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title'){onTitle('');return}
   if(id==='main-photo'){notify(plain('Use Remove photo above','Usa Quitar foto en el panel superior',locale));return}
   if(id.startsWith('legacy-sticker-')){
@@ -164,6 +185,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   update({...decor,layers:decor.layers.filter(l=>l.id!==id)});
  };
  const reorder=(id:string,move:LayerMove)=>{
+  if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title'||id==='main-photo')return;
   update({...decor,layers:reorderPanoramaLayers(decor.layers,id,move)});
  };
@@ -257,7 +279,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
    <TouchLayerCanvas preview={preview} layers={touchLayers} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
-     onRemove={remove} onReorder={reorder} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
+     onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
   <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
     <button type="button" disabled={busy} onClick={()=>void exportFreePost(post,brand,images)
