@@ -216,6 +216,15 @@ main{padding-top:8px}
 .matcha-email-form small a{color:#304927;text-underline-offset:2px}
 .matcha-honeypot{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
 @media(max-width:780px){.matcha-email-optin{grid-template-columns:1fr;padding:20px;border-radius:21px;gap:18px}.matcha-email-intro h2{font-size:34px}.matcha-email-form{padding:18px}.matcha-email-form .matcha-send-button{width:100%}}
+
+#crear[hidden]{display:none!important}
+#access-placeholder[hidden]{display:none!important}
+.matcha-locked-prompt{scroll-margin-top:20px;text-align:center;margin:16px auto 43px;max-width:850px;padding:clamp(32px,5vw,58px) 20px;border:1px solid #d7e0d0;border-radius:24px;background:linear-gradient(120deg,#f6f8ef,#e8efe0)}
+.matcha-locked-prompt h2{font:normal clamp(28px,4.5vw,44px)/1.14 'DM Serif Display',Georgia,serif;color:#263d1b;max-width:26ch;margin:14px auto}
+.matcha-locked-prompt p{color:#52644e;line-height:1.7;max-width:60ch;margin:0 auto 25px}
+.matcha-lock-cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:15px 25px;border-radius:999px;background:#29451c;color:#fff;text-decoration:none;font-weight:800}
+#access-placeholder.is-loading{opacity:.65}
+.matcha-access-ready{font-weight:700;color:#34582b;margin:0 0 19px;background:#e9f2e2;border-radius:12px;padding:13px 20px}
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a><a href="#content-lab">Content Lab</a></nav></header>
 <main>
@@ -277,7 +286,13 @@ main{padding-top:8px}
 <p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback">Te pediremos que confirmes tu correo antes de enviarte el recurso. No solicitamos ninguna contraseña.</p>
 <small>Usaremos tu correo para entregarte el recurso. El newsletter es opcional y solo lo recibirás si lo seleccionas. <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>.</small>
 </form></section>
-<div id="crear" class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
+<section id="access-placeholder" class="matcha-locked-prompt" aria-labelledby="access-title">
+<span class="hero-eyebrow">LOS PROMPTS COMPLETOS · ACCESO PRIVADO</span>
+<h2 id="access-title">Un regalo que llega a tu correo. 🌿</h2>
+<p>Arriba puedes ver los ejemplos de matcha. Para copiar y personalizar las ocho instrucciones completas, solicita el freebie y confirma tu email. Recibirás un enlace personal para abrirlas.</p>
+<a href="#recibir" class="matcha-send-button matcha-lock-cta">Quiero mis ocho prompts gratis <span aria-hidden="true">→</span></a>
+</section>
+<div id="crear" class="grid" hidden aria-label="Editor privado de ocho prompts"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
 <label for="brandName">Marca con la que publicarás</label><input id="brandName" maxlength="120" autocomplete="organization" placeholder="Escribe el nombre de tu marca (o déjalo vacío)"><label for="copyLanguage">Idioma de los textos</label><select id="copyLanguage"><option value="es">Español latino</option><option value="en">English (US)</option></select>
 <div class="half"><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div><div><label for="headline">Título que quieres en el post</label><input id="headline" placeholder="Texto principal"></div></div>
 <div class="file"><img id="preview" alt="Foto original"><span id="fileSymbol" style="font-size:31px">▧</span><strong id="fileLabel">Elige la foto que quieres usar</strong><small>Tu imagen queda en tu navegador</small><input type="file" id="photo" accept="image/*,.heic,.heif" aria-label="Subir foto original"></div>
@@ -306,36 +321,31 @@ main{padding-top:8px}
   <div class="footer-bottom"><span>© 2026 The Launch Era. Todos los derechos reservados.</span><a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">Powered by <b>The Launch Era</b></a></div>
 </footer>
 </main><script>
-const layouts=[
-['Asymmetric Editorial','Producto grande a la derecha','Place hero product on RIGHT, about 55% of canvas width. Stack main headline LEFT with small information below; asymmetrical but balanced negative space.'],
-['Monumental Center','Headline grande y producto debajo','Use a monumental upper-middle headline taking 80-90% width. Center product BELOW with an intentional safe lower-edge crop. Secondary copy at small corners.'],
-['Type Behind Product','Titular detrás del objeto','Make huge headline a background typographic layer. Center product in FOREGROUND, obscuring a few headline letters without losing readability. Keep support copy on clean edges.'],
-['Side-Cropped Close-Up','Crop del producto desde un lado','Enlarge the real product to enter from ONE SIDE and BOTTOM. Reserve an uninterrupted opposing zone for stacked copy. Essential labels must remain readable.'],
-['Offset Negative Space','Producto abajo derecha, mucho aire','Put product in LOWER RIGHT at medium-large size. Compact headline in UPPER LEFT, unusually spacious center, tiny refined corner details.'],
-['Diagonal Visual Flow','Lectura diagonal, sin girar texto','Place product HIGH RIGHT and headline LOW LEFT, forming diagonal flow by visual position. Do not rotate letters or warp the product.'],
-['Vertical Editorial Stack','Texto arriba y producto abajo','Three zones: narrow title at TOP, supporting content at MID, product emerging from BOTTOM. Strict vertical editorial rhythm and generous breathing room.'],
-['Magazine Column Split','Columna 33% texto, 67% producto','Unequal editorial columns: LEFT 33% for title/copy and RIGHT 67% for one large product. Align typography to an invisible common grid.']
-];
+
+/* El texto real de los prompts se recupera del servidor SOLO con acceso verificado. */
+let layouts=[];
+let privateRules=null;
 const $=id=>document.getElementById(id);
 const text=(id,fall)=>$(id).value.trim()||fall;
 const es=()=> $('copyLanguage').value==='es';
-const build=(i)=>{
+const build=i=>{
+ if(!privateRules||!layouts[i])return '';
  const lang=es()?'Latin American Spanish':'US English';
  const tags=es()?['[TÍTULO]','[TEXTO SECUNDARIO]','[FRASE DE MARCA]','[DETALLES]']:['[MAIN HEADLINE]','[SUPPORTING TEXT]','[TAGLINE]','[DETAILS]'];
- const master='Treat the uploaded photo as the visual master. Preserve product shape, colors, material, proportions, logos, printing, packaging, and readable details exactly. Never stretch or invent product properties.';
+ const rules=privateRules;
  return [
- 'COMPOSITION '+String(i+1).padStart(2,'0')+' / 08 — '+layouts[i][0],
- 'Create ONE stand-alone vertical 4:5 premium editorial advertising poster (target 2160×2700 pixels or highest available), not a collage, contact sheet or multiple images.',
- 'Product: '+text('product','the exact object shown in the uploaded photo')+'. '+master,
- document.querySelector('input[name=kind]:checked').value==='poster'?'Already-designed poster: keep every original word, type style, color and photographic treatment unchanged. Move and resize only.':'Product-only photo: develop one restrained advertising style based on this photo, without inventing logos, features, claims or other products.',
- 'Exact brand name: '+text('brandName',es()?'[NOMBRE DE MARCA]':'[BRAND NAME]')+'. Never draw an invented logo.',
- 'COPY (DO NOT REWORD OR TRANSLATE):\nHeadline: '+text('headline',tags[0])+'\nSupporting copy: '+text('support',tags[1])+'\nTagline: '+text('tagline',tags[2])+'\nDetails: '+text('details',tags[3]),
- 'All visible copy language: '+lang+'. If exact copy is supplied, keep it verbatim.',
- 'Shared brand palette/style for all eight: '+text('palette','same visual palette as original')+'. '+text('notes','Clean restrained visual atmosphere.'),
- 'LAYOUT DIRECTION: '+layouts[i][2],
- 'Change ONLY positions, scale, controlled crop, alignment, layering, typographic hierarchy and negative space. Make composition visually distinctive while keeping one cohesive brand campaign.',
- 'Realistic material and shadows, high contrast, generous margins. Protect product logo and all printed details. No fake UI, gradients, invented props, clutter, additional objects or unsupported advertising text.',
- 'OUTPUT: ONE completed individual portrait 4:5 poster. No explanatory text.'
+  'COMPOSITION '+String(i+1).padStart(2,'0')+' / 08 — '+layouts[i].title,
+  rules.format,
+  'Product: '+text('product','the exact object shown in the uploaded photo')+'. '+rules.master,
+  document.querySelector('input[name=kind]:checked').value==='poster'?rules.poster:rules.product,
+  'Exact brand name: '+text('brandName',es()?'[NOMBRE DE MARCA]':'[BRAND NAME]')+'. '+rules.brand,
+  rules.copy+'\nHeadline: '+text('headline',tags[0])+'\nSupporting copy: '+text('support',tags[1])+'\nTagline: '+text('tagline',tags[2])+'\nDetails: '+text('details',tags[3]),
+  'All visible copy language: '+lang+'. '+rules.language,
+  'Shared brand palette/style for all eight: '+text('palette','same visual palette as original')+'. '+text('notes','Clean restrained visual atmosphere.'),
+  'LAYOUT DIRECTION: '+layouts[i].direction,
+  rules.spacing,
+  rules.quality,
+  rules.output
  ].join('\n\n');
 };
 let selected=0;
@@ -344,7 +354,7 @@ function render(){const root=$('output');root.replaceChildren();
   const btn=document.createElement('button');btn.className='top';btn.type='button';
   const n=document.createElement('b');n.className='number';n.textContent=String(i+1).padStart(2,'0');
   const heading=document.createElement('span');heading.className='heading';
-  const strong=document.createElement('strong');strong.textContent=v[0];const desc=document.createElement('small');desc.textContent=v[1];heading.append(strong,desc);
+  const strong=document.createElement('strong');strong.textContent=v.title;const desc=document.createElement('small');desc.textContent=v.desc;heading.append(strong,desc);
   const photo=document.createElement('img');photo.className='sample-thumb';photo.src='./matcha-'+String(i+1).padStart(2,'0')+'.jpg?v=hd-20261031';photo.alt='Ejemplo de la composición '+String(i+1)+' con matcha';photo.loading='lazy';photo.onerror=()=>photo.remove();
   const toggle=document.createElement('span');toggle.textContent=selected===i?'−':'+';btn.append(n,photo,heading,toggle);
   btn.onclick=()=>{selected=selected===i?-1:i;render()};article.append(btn);
@@ -434,5 +444,41 @@ render();
    button.disabled=false;button.textContent='Volver a intentar';
   }
  });
+})();
+
+/* La biblioteca NO se entrega en el HTML público: requiere un token emitido tras confirmar el correo. */
+(async function unlockPrivateMatchaPrompts(){
+ const found=location.hash.match(/^#access=([a-f0-9]{64})$/i);
+ let token=found?found[1]:sessionStorage.getItem('matcha_private_access_v1');
+ if(found){
+   sessionStorage.setItem('matcha_private_access_v1',token);
+   history.replaceState(history.state,'',location.pathname+location.search+'#crear');
+ }
+ if(!token)return;
+ const placeholder=document.getElementById('access-placeholder');
+ placeholder.classList.add('is-loading');
+ try{
+  const response=await fetch('https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-matcha-freebie?action=library',{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({access_token:token})
+  });
+  const result=await response.json();
+  if(!response.ok||!result.ok||!Array.isArray(result.layouts)||result.layouts.length!==8||!result.rules)throw Error('access');
+  layouts=result.layouts;privateRules=result.rules;
+  placeholder.hidden=true;
+  const editor=document.getElementById('crear');
+  editor.hidden=false;
+  const ready=document.createElement('p');ready.className='matcha-access-ready';
+  ready.textContent='✓ Tu correo está confirmado. Personaliza y copia tus ocho prompts. Tu foto nunca sale del navegador.';
+  editor.before(ready);
+  render();
+  editor.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+ }catch(error){
+  sessionStorage.removeItem('matcha_private_access_v1');
+  placeholder.classList.remove('is-loading');
+  const title=placeholder.querySelector('h2');
+  title.textContent='Tu enlace necesita renovarse';
+  placeholder.querySelector('p').textContent='Por seguridad no pudimos abrir los prompts con este enlace. Solicita otro acceso desde tu correo y confirma la nueva solicitud.';
+ }
 })();
 </script></body></html>
