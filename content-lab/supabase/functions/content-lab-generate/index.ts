@@ -296,8 +296,10 @@ Deno.serve(async request=>{
    ].join('\\n');
    const hasUnrequestedAutomation=(o:any)=>{
      if(requestedAutomation||!subjectIsFood)return false;
-     const text=[o?.hook,o?.slides,o?.cta,o?.caption].map(x=>clean(x,4500)).join(' ').toLowerCase();
-     return /automatiz|automat|automati|automate|automation|workflow|crm|software|sistema de ventas|sales system/i.test(text);
+     const text=[o?.title,o?.hook,o?.slides,o?.cta,o?.caption].map(x=>clean(x,4500)).join(' ').toLowerCase();
+     const shifted=/automatiz|automat|automati|automate|automation|workflow|crm|software|sistema de ventas|sales system|manual orders|pedidos manuales|manual processes/i.test(text);
+     const missingProduct=!/cookie|galleta|brownie|postre|pastel|tarta|cake|bakery|reposter|dessert/i.test(text);
+     return shifted||missingProduct;
    };
    let obj:any=await cloudflareRequest(scope);
    if(hasUnrequestedAutomation(obj)){
