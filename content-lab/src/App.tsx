@@ -781,7 +781,7 @@ function App() {
         prepared = await image.resizeIfNeeded(input, {
           maxDimension:preserveOriginal?3000:2160,
           maxPixels:preserveOriginal?7_000_000:4_600_000,
-          quality:preserveOriginal?.94:.88,
+          quality:preserveOriginal ? 0.94 : 0.88,
           mimeType:preserveOriginal?keepMime:category==='sticker'&&file.type==='image/png'?'image/png':'image/jpeg',
           preserveIfPossible:preserveOriginal,maxBytes:4_850_000
         });
