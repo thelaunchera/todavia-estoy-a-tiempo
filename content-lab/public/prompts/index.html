@@ -428,6 +428,22 @@ main{padding-top:8px}
   .hero-with-carousel .hero-copy{padding-top:16px}
 }
 
+
+/* Post-first carousel: keep every 4:5 composition visible without cropping. */
+@media(max-width:780px){
+ .hero-with-carousel .hero-carousel{height:clamp(285px,85vw,370px)}
+ .hero-with-carousel .hero-featured-photo{background:#1d321d}
+ .hero-with-carousel .hero-featured-photo img{
+   width:100%;height:100%;object-fit:contain;object-position:center center;
+   background:#1d321d;
+ }
+ .hero-with-carousel .hero-featured-photo:after{
+   background:linear-gradient(180deg,transparent 75%,rgba(16,34,17,.28) 100%);
+ }
+}
+@media(max-width:380px){
+ .hero-with-carousel .hero-carousel{height:clamp(285px,85vw,340px)}
+}
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
