@@ -11,6 +11,7 @@ export const CAROUSEL_FONTS=[
  {id:'brand',label:'Mi Brand Kit',family:'',category:'Marca'},
  {id:'serif',label:'Editorial clásica',family:'Georgia, serif',category:'Editorial'},
  {id:'sans',label:'Minimal moderna',family:'Arial, sans-serif',category:'Moderna'},
+ {id:'poster',label:'Poster Extra Bold',family:'"Archivo Black", Impact, "Arial Black", sans-serif',category:'Póster'},
  {id:'cormorant',label:'Cormorant Garamond',family:'"Cormorant Garamond", Georgia, serif',category:'Editorial'},
  {id:'playfair',label:'Playfair Display',family:'"Playfair Display", Georgia, serif',category:'Editorial'},
  {id:'fraunces',label:'Fraunces',family:'"Fraunces", Georgia, serif',category:'Editorial'},
