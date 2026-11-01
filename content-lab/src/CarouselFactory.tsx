@@ -482,6 +482,47 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
   const previewPageWidth=Math.min(900,Math.floor(6800/slides.length));
   const previewPageHeight=Math.round(previewPageWidth*1.25);
+  const [imageQualityNotes,setImageQualityNotes]=useState<string[]>([]);
+  const inspectImageQuality=async()=>{
+    const uses:{id:string;label:string;w:number;h:number;zoom:number}[]=[];
+    slides.forEach((part,n)=>{
+      if(part.assetId){
+        const rect=clampRect(part.photoPosition||photoDefault(part.layout));
+        uses.push({id:part.assetId,label:'Slide '+(n+1)+' · foto',
+          w:rect.w*1080,h:rect.h*1350,zoom:normalizeCrop(rect.crop).zoom});
+      }
+      if(part.backgroundImageId)uses.push({id:part.backgroundImageId,
+        label:'Slide '+(n+1)+' · fondo',w:1080,h:1350,zoom:1});
+    });
+    if(style.seamlessEnabled&&style.seamlessAssetId)uses.push({
+      id:style.seamlessAssetId,label:'Fondo continuo · '+slides.length+' slides',
+      w:1080*slides.length,h:1350,zoom:1});
+    const result:string[]=[];
+    const sizes=new Map<string,{w:number;h:number}>();
+    for(const use of uses){
+      const source=images[use.id];
+      if(!source)continue;
+      if(!sizes.has(use.id)){
+        const img=new Image();img.src=source;
+        try{
+          await img.decode();
+          if(img.naturalWidth&&img.naturalHeight)sizes.set(use.id,{w:img.naturalWidth,h:img.naturalHeight});
+        }catch{/* Renderer handles invalid or missing images. */}
+      }
+      const dimensions=sizes.get(use.id);
+      if(!dimensions)continue;
+      const scale=Math.max(use.w/dimensions.w,use.h/dimensions.h)*use.zoom;
+      if(scale>1.15)result.push(use.label+': imagen de '+dimensions.w+' × '+dimensions.h+
+        ' px ampliada '+scale.toFixed(1)+' veces. Puede verse borrosa; usa un original con más resolución.');
+    }
+    return result;
+  };
+  useEffect(()=>{
+    if(studioTab!=='review')return;
+    let active=true;
+    void inspectImageQuality().then(notes=>{if(active)setImageQualityNotes(notes)}).catch(()=>{});
+    return()=>{active=false};
+  },[studioTab,post.designData,images,brand.id]);
   const warnings=slides.flatMap((part,n)=>{
     const result:string[]=[];
     if(!part.title.trim())result.push('Slide '+(n+1)+': falta el titular.');
@@ -1009,8 +1050,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }catch(e){showError(e)}finally{setBusy('');}
   };
   const exportAll=async()=>{
-    if(slides.some(item=>item.description.trim().length>210||item.title.trim().length>155)&&
-      !window.confirm('Hay textos largos que podrían cortarse en el PNG. ¿Exportar de todas formas?'))return;
+    const notes=await inspectImageQuality();
+    setImageQualityNotes(notes);
+    const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
+    if((longText||notes.length>0)&&!window.confirm(
+      (longText?'Algunos textos podrían cortarse en el PNG. ':'')+
+      (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
+      '¿Exportar de todas formas?'))return;
     setBusy('all');
     try{
       const result:{name:string,url:string}[]=[];
@@ -1312,6 +1358,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <p>Revisa también las fotografías y los nombres antes de publicar.</p>
           {warnings.length>0&&<div className="factory-quality"><strong>Revisar</strong>
             {warnings.map((note,n)=><small key={n}>{note}</small>)}</div>}
+          {imageQualityNotes.length>0&&<div className="factory-quality" role="status">
+            <strong>Revisar calidad de fotos</strong>
+            {imageQualityNotes.map((note,n)=><small key={'image-'+n}>{note}</small>)}
+          </div>}
         </div>
               <div className="factory-destination">
         <label>¿Dónde vas a publicar este carrusel?
