@@ -28,7 +28,7 @@ export type PanoramaLayer = {
   assetId: string;
   name: string;
   kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; lineHeight?:number; spacing?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number;
   color?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   placement?: LayerPlacement;
@@ -52,6 +52,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         text:String(item.text||'').slice(0,1600),
         font:String(item.font||'serif').slice(0,40),
         fontSize:Math.max(20,Math.min(240,Number(item.fontSize)||76)),
+        fontWeight:[400,500,600,700,800,900].includes(Number(item.fontWeight))?Number(item.fontWeight):700,
         lineHeight:Math.max(.7,Math.min(2,Number(item.lineHeight)||1.12)),
         spacing:Math.max(-6,Math.min(35,Number(item.spacing)||0)),
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#191919',
@@ -92,6 +93,7 @@ export function panoramaFont(font?:string){
  const fonts:Record<string,string>={
   serif:'Georgia,serif',sans:'Arial,sans-serif',brand:'Georgia,serif',
   prompt:'Prompt,Arial,sans-serif',futura:'Futura,Arial,sans-serif',
+  poster:'"Archivo Black",Impact,"Arial Black",Arial,sans-serif',
   'dm serif display':'"DM Serif Display",Georgia,serif',
   cormorant:'"Cormorant Garamond",Georgia,serif',
   playfair:'"Playfair Display",Georgia,serif',
@@ -101,13 +103,17 @@ export function panoramaFont(font?:string){
   space:'"Space Grotesk",Arial,sans-serif',caveat:'Caveat,cursive'};
  return fonts[font||'']||fonts.serif;
 }
+export function panoramaTextWeight(value:unknown):number{
+ const n=Number(value);
+ return [400,500,600,700,800,900].includes(n)?n:700;
+}
 function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:number,h:number){
  const size=Math.max(20,Math.min(240,layer.fontSize||76));
  const leading=Math.max(.7,Math.min(2,layer.lineHeight||1.12));
  const text=layer.text||'';
  const maxWidth=Math.max(50,w-12);
  ctx.save();ctx.fillStyle=layer.color||'#191919';
- ctx.font='700 '+size+'px '+panoramaFont(layer.font);
+ ctx.font=panoramaTextWeight(layer.fontWeight)+' '+size+'px '+panoramaFont(layer.font);
  ctx.textBaseline='top';
  ctx.letterSpacing=(layer.spacing||0)+'px';
  if(layer.shadow){ctx.shadowColor='#1A1A1A66';ctx.shadowBlur=size*.13;ctx.shadowOffsetY=size*.05}
@@ -138,7 +144,7 @@ export async function paintPanoramaLayers(
   ctx.save();ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
   ctx.rotate((r.angle||0)*Math.PI/180);
   if(layer.kind==='text'){
-    try{await document.fonts?.load('700 '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
+    try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
     catch{/* Offline fallback retains exported text. */}
     textPaint(ctx,layer,w,h);
    }
