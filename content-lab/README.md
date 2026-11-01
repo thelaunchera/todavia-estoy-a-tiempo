@@ -5,7 +5,8 @@ Aplicación privada de contenido visual, alojada en GitHub Pages, en una carpeta
 ## Enlaces
 
 - App: https://podcast.thelaunchera.com/content-lab/
-- Master Prompts gratuitos: https://podcast.thelaunchera.com/content-lab/prompts/
+- Master Prompts gratuitos con ocho ejemplos de matcha y carrusel animado: https://podcast.thelaunchera.com/content-lab/prompts/
+- Comprar Content Lab — checkout activo en Make/Stripe ($10): https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z
 - Código: https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/content-lab
 
 ## Arquitectura (31 de octubre de 2026)
@@ -53,7 +54,7 @@ El frontend recibe únicamente identificadores públicos `VITE_CONTENT_LAB_SUPAB
 - *1 Product → 8 Compositions*: ocho prompts para cambiar composición manteniendo **la misma foto**, el mismo producto y el texto. **Gratis sin llamar a ninguna API**, se puede usar desde la biblioteca pública de prompts.
 - *Carousel Factory* y editor de publicaciones: disponibles en el frontend privado cuando el login esté configurado.
 
-El antiguo AppDeploy permanece como referencia temporal y no debe eliminarse mientras existan borradores/fotos sin exportar.
+El origen y los enlaces públicos oficiales son GitHub y GitHub Pages. El contenido privado anterior debe migrarse solo si existe respaldo verificado; no utilizar AppDeploy como enlace público.
 
 ## Solución al error de Cloudflare «Could not route» (2026-10-31)
 
@@ -62,9 +63,9 @@ La primera prueba real falló porque `CLOUDFLARE_ACCOUNT_ID` incluía un espacio
 ## Lanzamiento Content Lab ($10 compra única) — estado real
 
 - **Entrada gratuita:** La ruta `/content-lab/prompts/` con los ocho Master Prompts es **pública intencionalmente**, para que la audiencia los copie y conozca el producto. No almacenar allí prompts premium ni datos privados.
-- **Oferta futura:** Precio definido de **$10 USD de compra única**, editor personal en español e inglés. La invitación pública dice "Próximamente"; **no acepta pagos**, ni activa clientes todavía.
-- **Seguridad actual:** El Content Lab privado sigue limitado a los administradores existentes. Las tablas y Storage usan RLS de propietario; el frontend no crea usuarios desconocidos (`shouldCreateUser:false`). **No prometer acceso comercial hasta implementar entitlements y checkout verificado del servidor**, no desde JavaScript del usuario.
-- **Costos de IA:** Cloudflare Free se comparte. Antes de vender, agregar límite por cliente, alertas de cuota y una política clara de generaciones incluidas; el pago único no debe significar IA ilimitada sin financiación.
+- **Checkout LIVE:** Compra única de **$10 USD** en Stripe a través de Make: https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z. El botón público ya aparece en el freebie. Se activó el webhook Stripe LIVE y el flujo Make de acceso privado y correo de bienvenida; la compra completa y la entrega aún requieren prueba con un comprador real.
+- **Seguridad actual:** Administradores autorizados y compradores con correo verificado y membresía activa. El checkout se vuelve a consultar en Stripe LIVE antes de insertar una membresía privada en Supabase; el Lab no se habilita por JavaScript del navegador ni por la simple redirección de pago. RLS y Storage siguen aislados por propietario.
+- **Costos de IA:** La compra incluye un número finito de créditos de IA y límites diarios por comprador. El servidor protege el saldo y la cuota gratuita compartida; no se promete IA ilimitada.
 - **Bilingüe:** Login inicial disponible ES/EN y cada marca conserva idioma de copy, pero la traducción completa del resto del editor sigue pendiente de implementación y revisión.
 
 ### Inicio de sesión sin salir de la app (OTP en el mismo iPhone)
@@ -104,8 +105,8 @@ Stripe cobra normalmente 2.9% + $0.30 por tarjeta doméstica de EE.UU.; de $10 r
 
 **Stripe no transfiere el dinero automáticamente a Cloudflare.** Para seguir usando IA después de agotar la cuota gratuita compartida será necesario configurar una forma de pago en Workers Paid (la cuenta Workers tiene mínimo de $5/mes, sujeto a condiciones), o utilizar créditos prepagados AI Gateway con Unified Billing. No activar gasto abierto antes de verificar límites.
 
-El pago único compra acceso permanente a las herramientas locales y una cuota **finita** inicial de IA. Los paquetes de créditos adicionales requerirán su propio pago Stripe y entrega verificada mediante Make. No existen todavía productos de recarga ni checkout activo.
+El pago único compra acceso permanente a las herramientas locales y una cuota **finita** inicial de IA. Los paquetes de créditos adicionales requerirán su propio pago Stripe y entrega verificada mediante Make. Los productos de recarga de créditos adicionales aún no están disponibles. El checkout original de $10 ya está activo en Stripe vía Make.
 
-**QA antes de abrir ventas:** probar una compra real, Stripe→Make→Supabase→correo→OTP iPhone, dos compradores aislados, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago sigue desactivado. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado de 50/día NO garantiza que no se consuman las 10k neuronas diarias.
+**QA pendiente después de activar el checkout:** sigue faltando completar una compra real de prueba de extremo a extremo Stripe→Make→Supabase→correo→OTP iPhone, verificar aislamiento de dos compradores, devolución de crédito al fallar la IA, solicitudes paralelas, límite por día y reembolso Stripe. El enlace de pago ya está activo; no afirmar que una compra de prueba se completó cuando no existe evidencia. Consultar uso real de neuronas en Cloudflare Dashboard: nuestro límite interno ponderado de 50/día NO garantiza que no se consuman las 10k neuronas diarias.
 
 **Privacidad adicional:** la reserva de créditos ahora también es una función interna *service_role*; ningún comprador puede invocarla directamente desde el navegador ni modificar su saldo. El backend obtiene el UID/email de una sesión verificada antes de reservar o reembolsar.
