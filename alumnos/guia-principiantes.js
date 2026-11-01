@@ -8,7 +8,7 @@ function header(content,kicker,title,description){
 const folders=[
  ['00_IDEA','Qué ofrezco, para quién y el objetivo de mi web.'],
  ['01_TEXTOS','Titular, descripción, preguntas frecuentes y texto del botón.'],
- ['02_FOTOS','Imágenes separadas: HERO, PRODUCTO y DETALLE.'],
+ ['02_FOTOS','Guarda cada foto por separado; en Casa Brownie usamos hero estático, seis sabores y dos regalos.'],
  ['03_PROMPTS','Instrucciones de ChatGPT que dieron buen resultado.'],
  ['04_DISENO','Colores, letras y referencias aprobadas.'],
  ['05_WEB','Enlace público y versión revisada de mi página.'],
@@ -16,10 +16,10 @@ const folders=[
  ['07_GASTOS','Costos y renovaciones si algún día compro un servicio.']
 ];
 export function renderWebBasics(content,go){
- header(content,'02 / ENTENDER PARA CONSTRUIR','Tu web tiene una parte visible y otra que trabaja detrás.','Conocer la diferencia te ayuda a elegir solo las herramientas que necesitas. No requiere aprender programación.');
+ header(content,'02 / ENTENDER PARA CONSTRUIR','Tu web tiene una parte visible y otra que trabaja detrás.','Mira qué se ve y qué pasa por detrás. Vamos a entenderlo con Casa Brownie antes de conectar herramientas que todavía no necesitamos.');
  const grid=node('div','mi-structure-grid');
  [
-  ['Frontend · la parte visible','Es lo que cualquier persona ve: fotografías, título, menú, colores, botones y diseño para teléfono.','En Casa Brownie, el frontend muestra la foto, la información del producto y «Conoce el proyecto».'],
+  ['Frontend · la parte visible','Es lo que cualquier persona ve: fotografías, título, menú, colores, botones y diseño para teléfono.','Mira Casa Brownie: la portada pregunta «¿Qué llevo de regalo?» y el botón «Descubrir sabores» te lleva al catálogo.'],
   ['Backend · los procesos internos','Es lo que ocurre cuando hay que guardar datos, confirmar un pago, proteger una cuenta o enviar un mensaje automático.','Más adelante, Stripe puede verificar el pago, Make organizar el paso siguiente y Gmail enviar el correo.']
  ].forEach(([title,body,example])=>{
   const card=node('article','mi-structure-card');card.append(node('h4',null,title),node('p',null,body),node('small',null,example));grid.append(card);
