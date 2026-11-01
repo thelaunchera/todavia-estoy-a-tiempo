@@ -17,7 +17,7 @@ test('20 editorial previews are unique interiors and preserve exact editor layou
  assert.ok(gallery.includes('onChoose(layout.name)'));
  assert.ok(gallery.includes('boxPosition(layout.image)'));
  assert.ok(gallery.includes('boxPosition(layout.type)'));
- assert.ok(gallery.includes('fg-variant-'+ 'index'));
+ assert.ok(gallery.includes("'fg-variant-'+index"));
  assert.ok(css.includes('.fg-variant-19'));
  assert.ok(css.includes('.fg-sheet-backdrop'));
  assert.ok(!gallery.includes('clase-retrato-laptop-real-2026.jpg'));
