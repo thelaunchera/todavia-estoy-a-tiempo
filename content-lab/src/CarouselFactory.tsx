@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { api } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
@@ -451,13 +452,22 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
+  const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:920px)').matches);
+  useEffect(()=>{
+    const query=window.matchMedia('(max-width:920px)');
+    const update=()=>{setMobileViewport(query.matches);if(!query.matches)setMobilePreviewOpen(false)};
+    update();query.addEventListener('change',update);
+    return()=>query.removeEventListener('change',update);
+  },[]);
   useEffect(()=>{
     if(!mobilePreviewOpen)return;
     const onEscape=(event:KeyboardEvent)=>{
       if(event.key==='Escape')setMobilePreviewOpen(false);
     };
+    const previousOverflow=document.body.style.overflow;
+    document.body.style.overflow='hidden';
     document.addEventListener('keydown',onEscape);
-    return()=>document.removeEventListener('keydown',onEscape);
+    return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener('keydown',onEscape)};
   },[mobilePreviewOpen]);
   useEffect(()=>{setMobilePreviewOpen(false);},[brand.id,post.id]);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
@@ -1137,6 +1147,25 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       setBusy('');
     }
   };
+  const renderPreviewPanel=(sheet:boolean)=>(
+      <aside id={sheet?'factory-mobile-preview':undefined}
+        className={'factory-persistent-preview factory-right'+(sheet?' is-open':'')}
+        role={sheet?'dialog':undefined}
+        aria-modal={sheet?true:undefined}
+        aria-label="Vista previa del diseño que estás editando">
+        <button type="button" className="factory-mobile-preview-close" onClick={()=>setMobilePreviewOpen(false)}
+          aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
+        <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
+        <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
+        {studioTab==='slides'&&<button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit}
+          onClick={()=>{
+            if(style.seamlessEnabled||style.panoramaLayers?.length){setStudioTab('canvas');setTouchEdit(false)}
+            else enableTouch();
+          }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Mover elementos en el lienzo':touchEdit?'✓ Terminar de mover elementos':'👆 Mover fotos y stickers'}</button>}
+        {studioTab==='slides'&&touchEdit&&<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>}
+        {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
+      </aside>
+  );
   return <div className="factory">
     <div className="factory-header">
       <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
@@ -1169,26 +1198,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       {!overview[i]&&<Eye size={18}/>}
       <span>Ver diseño</span><small>{i+1}/{slides.length}</small>
     </button>
-    {mobilePreviewOpen&&<button type="button" className="factory-mobile-preview-backdrop"
-      onClick={()=>setMobilePreviewOpen(false)} aria-label="Cerrar vista previa y volver a editar"/>}
+    {mobileViewport&&mobilePreviewOpen&&createPortal(<>
+      <button type="button" className="factory-mobile-preview-backdrop"
+        onClick={()=>setMobilePreviewOpen(false)} aria-label="Cerrar vista previa y volver a editar"/>
+      {renderPreviewPanel(true)}
+    </>,document.body)}
     <div className="factory-persistent-layout">
-      <aside id="factory-mobile-preview"
-        className={'factory-persistent-preview factory-right'+(mobilePreviewOpen?' is-open':'')}
-        role={mobilePreviewOpen?'dialog':undefined}
-        aria-modal={mobilePreviewOpen?true:undefined}
-        aria-label="Vista previa del diseño que estás editando">
-        <button type="button" className="factory-mobile-preview-close" onClick={()=>setMobilePreviewOpen(false)}
-          aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
-        <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
-        <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
-        {studioTab==='slides'&&<button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit}
-          onClick={()=>{
-            if(style.seamlessEnabled||style.panoramaLayers?.length){setStudioTab('canvas');setTouchEdit(false)}
-            else enableTouch();
-          }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Mover elementos en el lienzo':touchEdit?'✓ Terminar de mover elementos':'👆 Mover fotos y stickers'}</button>}
-        {studioTab==='slides'&&touchEdit&&<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>}
-        {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
-      </aside>
+      {!mobileViewport&&renderPreviewPanel(false)}
       <div className="factory-persistent-content">
     {studioTab==='inspiration'&&<section className="factory-inspiration">
       <div className="factory-step-intro">
