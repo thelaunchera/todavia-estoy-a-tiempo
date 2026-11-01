@@ -1729,3 +1729,13 @@ input::placeholder {
     z-index:51;
   }
 }
+
+
+/* Small, quiet persistence feedback; recovery never covers the canvas. */
+.lab-draft-safety{display:flex;gap:8px;flex-direction:column;align-items:flex-start;margin:8px 0 13px;font-size:11px;color:#456a78}
+.lab-draft-safety>span{border:1px solid #dae5e5;border-radius:9px;background:#fff;padding:7px 10px}
+.lab-draft-recovery{width:100%;max-width:700px;padding:13px;border:1px solid #b6d6df;background:#eef7f9;border-radius:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lab-draft-recovery strong{flex:0 0 100%;font-size:13px;color:#244e60}
+.lab-draft-recovery p{flex:0 0 100%;margin:0;font-size:12px}
+.lab-draft-recovery button{min-height:42px;border-radius:9px;border:1px solid #a9c7d1;background:#fff;padding:9px 12px;color:#2b576c;font-size:11px;font-weight:750}
+.lab-draft-recovery button:first-of-type{background:#264c5d;color:#fff;border-color:#264c5d}
