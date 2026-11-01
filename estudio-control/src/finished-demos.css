@@ -10,7 +10,7 @@
 .finished-demo-image img{height:100%;width:100%;object-fit:cover;object-position:center 40%}
 .finished-demo-card:nth-child(2) .finished-demo-image img{object-position:center 50%}
 .finished-demo-body{padding:22px;display:flex;flex-direction:column;align-items:flex-start}
-.finished-demo-status{display:inline-flex;align-items:center;gap:7px;color:#536f5d;font-size:11px;font-weight:700;margin-bottom:11px}
+.finished-demo-status{display:inline-flex;align-items:center;gap:7px;color:#6b625d;font-size:11px;font-weight:700;margin-bottom:11px}
 .finished-demo-body h3{font:400 33px/1.05 'DM Serif Display',Georgia,serif}
 .finished-demo-category{font-weight:700;color:#3c5265!important;margin:9px 0}
 .finished-demo-body>p{font-size:13px;line-height:1.65;color:#657486}
