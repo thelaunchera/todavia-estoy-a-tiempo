@@ -43,6 +43,7 @@ export type CarouselStyle={
   referenceColor:string;
   targetPlatform:'brand'|SocialPlatform;
   seamlessEnabled:boolean;
+  perSlideBackgrounds:boolean;
   seamlessBackgroundId:FreeBackgroundId;
   seamlessAssetId:string;
   panoramaLayers?:PanoramaLayer[];
@@ -53,7 +54,7 @@ export type CarouselStyle={
 };
 export const DEFAULT_CAROUSEL_STYLE:CarouselStyle={
   mood:'editorial',font:'brand',referenceAssetId:'',
-  accentSource:'brand',referenceColor:'',targetPlatform:'brand',seamlessEnabled:false,seamlessBackgroundId:'brand',seamlessAssetId:'',
+  accentSource:'brand',referenceColor:'',targetPlatform:'brand',seamlessEnabled:false,perSlideBackgrounds:false,seamlessBackgroundId:'brand',seamlessAssetId:'',
   freeCanvas:true,editorialRhythm:false,canvasColor:'#FFFFFF',canvasGradient:''
 };
 export function normalizeCarouselStyle(value:unknown):CarouselStyle{
@@ -66,6 +67,7 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
     referenceColor:typeof v.referenceColor==='string'&&/^#[0-9A-F]{6}$/i.test(v.referenceColor)?v.referenceColor:'',
     targetPlatform:['brand','instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'].includes(String(v.targetPlatform))?v.targetPlatform as CarouselStyle['targetPlatform']:'brand',
     seamlessEnabled:v.seamlessEnabled===true,
+    perSlideBackgrounds:v.perSlideBackgrounds===true,
     seamlessBackgroundId:FREE_BACKGROUNDS.some(b=>b.id===v.seamlessBackgroundId)?v.seamlessBackgroundId as FreeBackgroundId:'soft-gradient',
     seamlessAssetId:typeof v.seamlessAssetId==='string'?v.seamlessAssetId.slice(0,120):'',
     freeCanvas:v.freeCanvas!==false,
