@@ -333,3 +333,60 @@
 .factory-text-overflow p,.factory-text-overflow small{display:block;font-size:11px;line-height:1.5;margin:5px 0 10px}
 .factory-text-overflow button{border:1px solid #c2a278;background:#fff;border-radius:8px;color:#674c2b;padding:10px 12px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
 .factory-text-overflow button:focus-visible{outline:3px solid #7e9cb0;outline-offset:2px}
+
+
+/* A single, live, cross-step preview; editing controls never scroll it away. */
+.factory-persistent-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(290px,350px);
+  gap:18px;
+  align-items:start;
+  min-width:0;
+}
+.factory-persistent-content{min-width:0;grid-column:1;grid-row:1}
+.factory-persistent-preview{grid-column:2;grid-row:1;position:sticky;top:84px;z-index:5;min-width:0;padding:16px}
+.factory-persistent-preview .factory-section{align-items:flex-start}
+.factory-persistent-preview .factory-instagram-preview{margin:6px 0}
+.factory-persistent-preview .factory-swipe-page{flex-basis:90%}
+.factory-persistent-preview .factory-swipe-thumbnails button{width:36px;flex-basis:36px}
+.factory-persistent-content .factory-work{grid-template-columns:minmax(0,1fr)}
+.factory-live-preview-compact{display:none}
+.factory-persistent-preview .factory-touch-toggle{width:100%;margin-top:9px}
+@media(max-width:1180px){
+ .factory-persistent-layout{grid-template-columns:minmax(0,1fr) minmax(275px,310px);gap:12px}
+ .factory-persistent-preview{padding:12px}
+}
+@media(max-width:920px){
+ .factory-persistent-layout{display:block}
+ .factory-persistent-preview{
+   position:sticky;top:66px;z-index:7;
+   max-width:none;width:100%;margin:0 0 13px;padding:10px 12px;
+   border:1px solid #d7e4e4;border-radius:12px;
+   box-shadow:0 4px 16px rgba(23,42,50,.08);background:#fff;
+ }
+ .factory-persistent-preview .factory-section{margin-bottom:8px}
+ .factory-live-preview-compact{display:flex;align-items:center;gap:13px;min-height:135px}
+ .factory-live-preview-thumb{aspect-ratio:4/5;width:104px;max-height:145px;flex:0 0 auto;overflow:hidden;background:#f1f5f5;border-radius:7px;border:1px solid #dfe8ea;display:grid;place-items:center}
+ .factory-live-preview-thumb img{width:100%;height:100%;display:block;object-fit:contain}
+ .factory-live-preview-loading{display:grid;place-items:center;text-align:center;gap:5px;padding:8px;font-size:10px;color:#607882}
+ .factory-live-preview-controls{min-width:0;flex:1;display:flex;flex-direction:column;gap:7px}
+ .factory-live-preview-controls strong{font-size:13px;color:#263e45}
+ .factory-live-preview-controls small{font-size:10px;line-height:1.45;color:#698189}
+ .factory-live-preview-controls>div{display:flex;gap:10px}
+ .factory-live-preview-controls button{width:40px;height:38px;display:grid;place-items:center;border:1px solid #d2e0e3;border-radius:9px;background:#f8faf9;color:#35677a;touch-action:manipulation}
+ .factory-live-preview-controls button:disabled{opacity:.35}
+ .factory-live-preview-desktop{display:none}
+ .factory-persistent-preview .factory-touch-toggle{min-height:35px;margin:7px 0 0;padding:7px 10px;font-size:11px}
+ .factory-persistent-preview .touch-editor-stage{max-height:32vh}
+ .factory-persistent-content{min-width:0}
+ .factory-persistent-content .factory-work{display:block}
+}
+@media(max-width:380px){
+ .factory-live-preview-thumb{width:84px;max-height:112px}
+ .factory-live-preview-compact{min-height:112px;gap:10px}
+ .factory-persistent-preview{padding:9px 10px}
+}
+@media(max-height:560px) and (max-width:920px){
+ /* When the iPhone keyboard is open, keep form fields accessible. */
+ .factory-persistent-preview{position:relative;top:auto}
+}
