@@ -82,7 +82,7 @@ test('eight master prompts remain free and the $10 CTA uses the verified Make/St
  assert.ok(page.includes('id="copyAll"'));
  assert.ok(page.includes('https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'));
  assert.ok(page.includes('Powered by'));
- assert.ok(page.includes('privacy.html')&&page.includes('terms.html')&&page.includes('refunds.html'));
+ assert.ok(page.includes('../privacidad.html')&&page.includes('../terminos.html')&&page.includes('../reembolsos.html'));
  for(let i=1;i<=8;i++)assert.ok(source('public/prompts/matcha-'+String(i).padStart(2,'0')+'.jpg').length>0);
  assert.match(page,/\$10\s*(?:<[^>]+>\s*)?USD/);
  assert.ok(!page.includes('checkout.stripe.com/c/pay'));
