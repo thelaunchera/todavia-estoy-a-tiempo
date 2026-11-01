@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Images, Check, ImagePlus, X} from 'lucide-react';
 import {LAYOUTS, type Layout} from './GridComposer';
 import {brandPalette} from './BrandIdentity';
@@ -49,26 +49,26 @@ const groups:Record<string,Filter[]>={
  * with "anyone / reader"); no original file or editor format is changed.
  */
 const examples=[
- {id:'1TlNJhbCds3BiwDc5MUdyPHFZAZGbBBB5',es:'El espacio lo cambia todo.',en:'Room to feel something.',kEs:'LA NUEVA MIRADA',kEn:'A NEW PERSPECTIVE',subEs:'Luz, calma y una historia propia',subEn:'Light, calm and a point of view'},
- {id:'1Z23k4pYythR48z0zXr01Kj_VOQRS2v5-',es:'MENOS, PERO MEJOR.',en:'LESS. BUT BETTER.',kEs:'DECLARACIÓN / 02',kEn:'THE STATEMENT / 02',subEs:'La belleza de lo esencial',subEn:'The beauty of essentials'},
- {id:'1RpYhHz1nXAe2Hd5H3LYPw5zBJEJsb_4c',es:'Cada detalle cuenta.',en:'The little things matter.',kEs:'ESTUDIO DE TEXTURAS',kEn:'A TEXTURE STUDY',subEs:'Una pausa para mirar de cerca',subEn:'A closer look at the everyday'},
- {id:'16AGoD-nvjYBQdO5GvkI-W5q3PjfIoTCa',es:'Así se siente estar en casa.',en:'The feeling of home.',kEs:'VIDA COTIDIANA',kEn:'EVERYDAY LIVING',subEs:'El lugar donde pasan las cosas buenas',subEn:'Where the good things happen'},
- {id:'17geIi7iUYfYCdQOi_cMskFhid2erYIdk',es:'Orden que inspira.',en:'A little everyday magic.',kEs:'PEQUEÑOS RITUALES',kEn:'SMALL RITUALS',subEs:'Más espacio para disfrutar',subEn:'More room to enjoy'},
- {id:'17YR_MIQ-Qbe6wHqSbNBPadxU1CYp66Ib',es:'Dentro de lo extraordinario.',en:'Inside the extraordinary.',kEs:'NOTAS DE ESTILO',kEn:'NOTES ON STYLE',subEs:'Una perspectiva diferente',subEn:'An unexpected point of view'},
- {id:'1o3c0IWgI1XG1TKtlK7HG0tK7cQKuY7gK',es:'SIN EXCESOS.',en:'NO EXCESS.',kEs:'CONTRASTES',kEn:'HIGH CONTRAST',subEs:'Solo lo que importa',subEn:'Only what matters'},
- {id:'1z6DOLbvV6tE4ZGc67W2-rKOgiao_y5mB',es:'El lujo de la calma.',en:'The luxury of quiet.',kEs:'EDICIÓN SERENA',kEn:'THE QUIET EDIT',subEs:'Deja que el espacio respire',subEn:'Let the room breathe'},
- {id:'1h3NxqdI-jfUrNYw6lVbfmj3iy6Rf9FWh',es:'Un final que se recuerda.',en:'End on a beautiful note.',kEs:'EL ÚLTIMO CAPÍTULO',kEn:'THE FINAL CHAPTER',subEs:'Hay historias que se quedan',subEn:'Some moments stay with us'},
- {id:'1cHABVpf2gfnoJBIOyz2gtr9NGesOwptx',es:'EL COLOR DEL CAMBIO.',en:'A FRESH POINT OF VIEW.',kEs:'NUEVA TEMPORADA',kEn:'NEW SEASON',subEs:'Otra manera de empezar',subEn:'A different kind of beginning'},
- {id:'19y-3eNIkpqSHRyNEHUdfmTOzdbMSmc9B',es:'Casa, en primera página.',en:'Home, on the cover.',kEs:'VOLUMEN 01 / HOGAR',kEn:'VOL. 01 / HOME',subEs:'Ideas para vivir bonito',subEn:'Spaces worth slowing down for'},
- {id:'1f5q0FsrrLIwlg27P-Rv7Co8CZ16f3XoT',es:'Enmarca lo cotidiano.',en:'Frame the everyday.',kEs:'ARQUITECTURA SUAVE',kEn:'SOFT ARCHITECTURE',subEs:'Otra forma de mirar',subEn:'See familiar things differently'},
- {id:'1nX-JAx56c3uMPdI7SKcDslPjT9ZOBwhr',es:'La luz es protagonista.',en:'Let the light in.',kEs:'EN FOCO',kEn:'IN FOCUS',subEs:'El arte de hacer espacio',subEn:'The art of opening up'},
- {id:'1iBFxt-K3XdXkUD2cCChcsqmSoxXPPNxR',es:'Simplemente impecable.',en:'Beautifully considered.',kEs:'OBJETOS Y FORMAS',kEn:'OBJECTS & FORMS',subEs:'Diseñado alrededor de lo real',subEn:'Designed around real life'},
- {id:'1dSrlzSC0f9jf1GF4WU49E7lQxE6mUz8C',es:'HACERLO DIFERENTE.',en:'MAKE IT DIFFERENT.',kEs:'IDEAS EN GRANDE',kEn:'IDEAS AT SCALE',subEs:'Sin pedir permiso',subEn:'No permission needed'},
- {id:'1J7Wu3XWsJ3PBO77jC2-Xw9x50av9kzGV',es:'Hay belleza en la pausa.',en:'Beauty in the pause.',kEs:'ESPACIO NEGATIVO',kEn:'NEGATIVE SPACE',subEs:'Lo que no se ve también habla',subEn:'What you leave out matters'},
- {id:'16NNCKEFEzUpaKwFTcHCVProjpCu-mbfL',es:'Perspectivas que sorprenden.',en:'An unexpected angle.',kEs:'OTRA DIRECCIÓN',kEn:'ANOTHER DIRECTION',subEs:'Un recorrido visual',subEn:'A visual journey'},
- {id:'1kpLBLpYXmZ__HBlo-Je3PgFdoiNCYRL9',es:'Una elegancia tranquila.',en:'Quietly exceptional.',kEs:'UN MOMENTO LENTO',kEn:'A SLOWER MOMENT',subEs:'Lujo sin ruido',subEn:'Luxury without the noise'},
- {id:'1AwKWUrKrc_I4x8T54f62becEpu7U54cF',es:'Rompe con lo esperado.',en:'Break the expected.',kEs:'COLLAGE EDITORIAL',kEn:'EDITORIAL COLLAGE',subEs:'Tu creatividad, a tu manera',subEn:'Creativity on your terms'},
- {id:'1ZBFafrZy1icZ75ZF666ST25zd-srtpU0',es:'Lo mejor empieza aquí.',en:'Something good starts here.',kEs:'UNA HISTORIA ABIERTA',kEn:'AN OPEN STORY',subEs:'Lo que viene también importa',subEn:'The next chapter is yours'}
+ {id:'1TlNJhbCds3BiwDc5MUdyPHFZAZGbBBB5',es:'Casa en calma.',en:'A quieter home.',kEs:'HOGAR / 01',kEn:'HOME / 01',subEs:'Luz natural, nuevas posibilidades',subEn:'Light, space, perspective'},
+ {id:'1Z23k4pYythR48z0zXr01Kj_VOQRS2v5-',es:'MENOS RUIDO.',en:'LESS NOISE.',kEs:'UN MANIFIESTO',kEn:'A STATEMENT',subEs:'La fuerza de lo esencial',subEn:'Only what matters'},
+ {id:'1RpYhHz1nXAe2Hd5H3LYPw5zBJEJsb_4c',es:'En cada detalle.',en:'It's in the details.',kEs:'ESTUDIO DE TEXTURAS',kEn:'TEXTURE STUDY',subEs:'Materiales y luz real',subEn:'Tactile, true to life'},
+ {id:'16AGoD-nvjYBQdO5GvkI-W5q3PjfIoTCa',es:'Aquí sucede la vida.',en:'Life happens here.',kEs:'HABITAR / 04',kEn:'LIVING / 04',subEs:'Espacios para disfrutar',subEn:'Made for everyday living'},
+ {id:'17geIi7iUYfYCdQOi_cMskFhid2erYIdk',es:'Rituales de domingo.',en:'Sunday rituals.',kEs:'PEQUEÑOS RITUALES',kEn:'SMALL RITUALS',subEs:'Orden y bienestar',subEn:'Make room for joy'},
+ {id:'17YR_MIQ-Qbe6wHqSbNBPadxU1CYp66Ib',es:'Otra mirada.',en:'A new perspective.',kEs:'NOTAS DE ESTILO',kEn:'STYLE NOTES',subEs:'El diseño está en lo simple',subEn:'Simple is thoughtful'},
+ {id:'1o3c0IWgI1XG1TKtlK7HG0tK7cQKuY7gK',es:'LIMPIO. CLARO.',en:'CLEAN. CLEAR.',kEs:'ALTO CONTRASTE',kEn:'HIGH CONTRAST',subEs:'Cada superficie importa',subEn:'Every surface matters'},
+ {id:'1z6DOLbvV6tE4ZGc67W2-rKOgiao_y5mB',es:'La belleza de parar.',en:'The quiet details.',kEs:'EDICIÓN SERENA',kEn:'THE QUIET EDIT',subEs:'Calma en cada rincón',subEn:'Comfort in every corner'},
+ {id:'1h3NxqdI-jfUrNYw6lVbfmj3iy6Rf9FWh',es:'Una nueva etapa.',en:'A new chapter.',kEs:'CAPÍTULO FINAL',kEn:'THE FINAL CHAPTER',subEs:'De principio a fin',subEn:'From the beginning'},
+ {id:'1cHABVpf2gfnoJBIOyz2gtr9NGesOwptx',es:'HOGAR, RENOVADO.',en:'HOME, RENEWED.',kEs:'NUEVA TEMPORADA',kEn:'NEW SEASON',subEs:'Otra forma de entrar',subEn:'A warmer welcome'},
+ {id:'19y-3eNIkpqSHRyNEHUdfmTOzdbMSmc9B',es:'La edición hogar.',en:'The home edit.',kEs:'REVISTA / 01',kEn:'JOURNAL / 01',subEs:'Lugares con personalidad',subEn:'Spaces worth exploring'},
+ {id:'1f5q0FsrrLIwlg27P-Rv7Co8CZ16f3XoT',es:'Líneas suaves.',en:'Soft lines.',kEs:'ARQUITECTURA INTERIOR',kEn:'INTERIOR NOTES',subEs:'Arcos, luz, silencio',subEn:'Curves and calm'},
+ {id:'1nX-JAx56c3uMPdI7SKcDslPjT9ZOBwhr',es:'Deja entrar la luz.',en:'Let the light in.',kEs:'EN FOCO',kEn:'IN FOCUS',subEs:'Un rincón a la vez',subEn:'One room at a time'},
+ {id:'1iBFxt-K3XdXkUD2cCChcsqmSoxXPPNxR',es:'Detalles que importan.',en:'Small things matter.',kEs:'OBJETOS Y FORMAS',kEn:'OBJECTS & FORMS',subEs:'Todo tiene su lugar',subEn:'Thoughtfully arranged'},
+ {id:'1dSrlzSC0f9jf1GF4WU49E7lQxE6mUz8C',es:'HAZLO DIFERENTE.',en:'MAKE IT DIFFERENT.',kEs:'DISEÑO EN GRANDE',kEn:'BIG DESIGN',subEs:'Una idea que destaca',subEn:'Make an impression'},
+ {id:'1J7Wu3XWsJ3PBO77jC2-Xw9x50av9kzGV',es:'Menos es más.',en:'Space to breathe.',kEs:'ESPACIO NEGATIVO',kEn:'NEGATIVE SPACE',subEs:'El lujo de lo simple',subEn:'A little less, beautifully'},
+ {id:'16NNCKEFEzUpaKwFTcHCVProjpCu-mbfL',es:'Nueva perspectiva.',en:'A fresh angle.',kEs:'OTRO PUNTO DE VISTA',kEn:'ANOTHER VIEW',subEs:'Cambia la mirada',subEn:'Notice the difference'},
+ {id:'1kpLBLpYXmZ__HBlo-Je3PgFdoiNCYRL9',es:'Calma que se nota.',en:'Quietly beautiful.',kEs:'EDICIÓN LENTA',kEn:'THE SLOW EDIT',subEs:'Sin esfuerzo, sin ruido',subEn:'Subtle by design'},
+ {id:'1AwKWUrKrc_I4x8T54f62becEpu7U54cF',es:'Mira más cerca.',en:'Look closer.',kEs:'COMPOSICIÓN EDITORIAL',kEn:'EDITORIAL STUDY',subEs:'Formas que conectan',subEn:'Details with character'},
+ {id:'1ZBFafrZy1icZ75ZF666ST25zd-srtpU0',es:'Así empieza todo.',en:'It starts here.',kEs:'HISTORIAS DE CASA',kEn:'HOME STORIES',subEs:'Una historia por descubrir',subEn:'The beginning of more'}
 ] as const;
 
 const sourcePhoto=(index:number)=>'https://drive.google.com/thumbnail?id='+examples[index].id+'&sz=w1200';
@@ -76,26 +76,53 @@ const boxPosition=(v:[number,number,number,number]):React.CSSProperties=>({
  left:(v[0]*100)+'%', top:(v[1]*100)+'%', width:(v[2]*100)+'%', height:(v[3]*100)+'%'
 });
 
-function Preview({layout,index,brand,big=false}:{layout:Layout;index:number;brand:Props['brand'];big?:boolean}){
+const sampleCredits=[
+ 'STUDIO 01','FORM / 02','TEXTURES / 03','LIVING / 04','EVERYDAY / 05',
+ 'DETAIL / 06','CONTRAST / 07','PAUSE / 08','CHAPTER / 09','NEW SEASON / 10',
+ 'JOURNAL / 11','ARCH / 12','LIGHT / 13','FORMS / 14','STATEMENT / 15',
+ 'SPACE / 16','ANGLE / 17','QUIET / 18','COMPOSITION / 19','STORY / 20'
+] as const;
+
+// Measurements are taken from the rendered card, not guessed from a desktop viewport.
+// Fit lettering inside its own safe text area when iPhone / language / preview size changes.
+function Preview({layout,index,big=false,locale='es'}:{layout:Layout;index:number;big?:boolean;locale?:'es'|'en'}){
  const example=examples[index];
- const colors=brandPalette(brand);
- const accent=colors[index%Math.max(colors.length,1)]||brand.color||'#B7D6DF';
- const isEnglish=brand.language==='English';
- const isDark=layout.dark||layout.shape==='dark';
- const paper=isDark?'#1B2226':brand.background||'#FAF8F3';
- const ink=isDark?'#FFFFFF':'#1A2829';
- const style={'--fg-accent':accent,backgroundColor:paper,color:ink} as React.CSSProperties;
- return <div className={'fg-preview fg-'+layout.shape+' fg-variant-'+index+(big?' fg-big':'')} style={style} aria-label={'Vista previa editorial de '+layout.name}>
+ const copyRef=useRef<HTMLDivElement>(null);
+ const dark=Boolean(layout.dark||layout.shape==='dark');
+ useEffect(()=>{
+  const wrapper=copyRef.current,headline=wrapper?.querySelector('strong');
+  if(!wrapper||!headline)return;
+  const fit=()=>{
+   headline.style.fontSize='';
+   const initial=parseFloat(getComputedStyle(headline).fontSize)||20;
+   const kicker=wrapper.querySelector('.fg-overline') as HTMLElement|null;
+   const subtitle=wrapper.querySelector('small');
+   const available=Math.max(22,wrapper.clientHeight-(kicker?.offsetHeight||0)-(subtitle?.offsetHeight||0)-14);
+   let font=initial;
+   while(font>10.5&&(headline.scrollHeight>available+1||headline.scrollWidth>wrapper.clientWidth+1)){
+    font-=.65;headline.style.fontSize=font+'px';
+   }
+  };
+  const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(fit):null;
+  observer?.observe(wrapper);
+  const frame=requestAnimationFrame(fit);
+  if(document.fonts?.ready)void document.fonts.ready.then(fit);
+  return()=>{cancelAnimationFrame(frame);observer?.disconnect()};
+ },[index,big,locale]);
+ const ink=dark?'#FFFFFF':'#1D292B';
+ const style={'--fg-accent':'#BED8E9',color:ink} as React.CSSProperties;
+ return <div className={'fg-preview fg-'+layout.shape+' fg-variant-'+index+(big?' fg-big':'')}
+   style={style} aria-label={(locale==='es'?'Composición editorial ':'Editorial composition ')+layout.name}>
   <div className="fg-artwork" aria-hidden="true"><span/><span/><span/></div>
   <div className="fg-preview-photo" style={boxPosition(layout.image)}>
    <img loading={big?'eager':'lazy'} decoding="async" src={sourcePhoto(index)} alt="" onError={event=>{event.currentTarget.style.opacity='0'}}/>
   </div>
-  <div className="fg-preview-copy" style={{...boxPosition(layout.type),textAlign:layout.align||'left'}}>
-   <span className="fg-overline">{isEnglish?example.kEn:example.kEs}</span>
-   <strong>{isEnglish?example.en:example.es}</strong>
-   <small>{isEnglish?example.subEn:example.subEs}</small>
+  <div ref={copyRef} className="fg-preview-copy" style={{...boxPosition(layout.type),textAlign:layout.align||'left'}}>
+   <span className="fg-overline">{locale==='es'?example.kEs:example.kEn}</span>
+   <strong>{locale==='es'?example.es:example.en}</strong>
+   <small>{locale==='es'?example.subEs:example.subEn}</small>
   </div>
-  <span className="fg-brandline">{brand.name||'TU MARCA'}</span>
+  <span className="fg-brandline">{sampleCredits[index]}</span>
   <span className="fg-number">{String(index+1).padStart(2,'0')} / 20</span>
  </div>;
 }
@@ -113,7 +140,7 @@ export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Prop
   <div className="fg-note"><Images size={19}/><span>{en?'These 20 examples feature home interiors, not personal photos. Your images are only added when you choose them in the editor.':'Las 20 vistas usan fotografías de interiores, sin fotos personales. Tus imágenes solo se añaden cuando tú las eliges en el editor.'}</span></div>
   <div className="fg-filterbar" role="group" aria-label={en?'Filter formats':'Filtrar formatos'}>{(Object.keys(groupNames) as Filter[]).map(f=><button type="button" key={f} className={f===filter?'active':''} aria-pressed={f===filter} onClick={()=>{setFilter(f);close()}}>{groupLabel(f)}</button>)}</div>
   <div className="fg-layout"><div className="fg-cards">{filtered.map(({layout,index})=><article key={layout.name} className={'fg-card '+(selected===index?'selected':'')}>
-   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={(en?'View ':'Ver ')+layout.name}><Preview layout={layout} index={index} brand={brand}/></button>
+   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={(en?'View ':'Ver ')+layout.name}><Preview layout={layout} index={index} locale={locale}/></button>
    <div className="fg-card-foot"><div><small>{String(index+1).padStart(2,'0')} / 20</small><strong>{layout.name}</strong><span>{groups[layout.name]?.slice(0,2).map(g=>groupLabel(g)).join(' · ')||'Editorial'}</span></div>
     <button type="button" className="fg-use" onClick={()=>onChoose(layout.name)} aria-label={(en?'Use format ':'Usar formato ')+layout.name}>{en?'Use':'Usar'}</button>
    </div>
@@ -121,7 +148,7 @@ export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Prop
    {selected!==null&&<><button type="button" className="fg-sheet-backdrop" aria-label={en?'Close preview':'Cerrar vista previa'} onClick={close}/><aside className="fg-detail" aria-label={(en?'Format ':'Formato ')+LAYOUTS[selected].name}>
     <div className="fg-detail-top"><span className="eyebrow">{en?'FORMAT PREVIEW':'VISTA DEL FORMATO'}</span><button type="button" onClick={close} aria-label={en?'Close preview':'Cerrar vista'}><X size={19}/></button></div>
     <h2>{LAYOUTS[selected].name}</h2>
-    <Preview big layout={LAYOUTS[selected]} index={selected} brand={brand}/>
+    <Preview big layout={LAYOUTS[selected]} index={selected} locale={locale}/>
     <p>{en?'Choose this format to edit images, text, colors and positions. This is a sample layout.':'Selecciona este formato para editar fotografías, textos, colores y posiciones. La vista es un ejemplo de composición.'}</p>
     <button type="button" className="btn dark" onClick={()=>onChoose(LAYOUTS[selected].name)}><Check size={16}/> {en?'Use this format':'Usar este formato'}</button>
    </aside></>}
