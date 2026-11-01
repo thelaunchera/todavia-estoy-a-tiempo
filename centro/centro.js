@@ -132,7 +132,7 @@ function setCourseActions(){
     el.disabled=false;el.textContent='Abrir mi Estudio para revisar';
     el.onclick=()=>location.assign('../estudio/');
    }else{
-    el.disabled=false;el.textContent='Revisar Content Lab';
+    el.disabled=false;el.textContent='Entrar a mi Lab';
     el.onclick=()=>location.assign('../content-lab/');
    }
    continue;
@@ -424,7 +424,6 @@ function detailState(code){
  return 'Contratación independiente';
 }
 function openProductDetails(code){
- if(code==='content-lab'&&(owner||purchased.has(code))){location.assign('../content-lab/');return;}
  const item=productInformation[code];if(!item)return;
  $('product-details-type').textContent=item.type;
  $('product-details-title').textContent=item.title;
