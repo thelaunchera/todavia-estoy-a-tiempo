@@ -734,6 +734,30 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(slides.map((item,n)=>({...reflowDefaultPhoto(item,rhythm[n]),photoFocus:item.photoFocus||'top'})),normalizeCarouselStyle({...style,editorialRhythm:true}));
     notify('Ritmo editorial aplicado: slides fotográficos, tipográficos y mixtos. Tus fotos y textos siguen editables.');
   };
+  const duplicateSlide=()=>{
+    if(slides.length>=8){notify('Máximo ocho slides por carrusel.');return;}
+    const insertAt=i+1,count=slides.length;
+    const cloned:Slide={...slide,key:'slide-copy-'+crypto.randomUUID(),
+      photoPosition:slide.photoPosition?{...slide.photoPosition}:undefined,
+      stickerIds:[...(slide.stickerIds||[])],
+      stickerPositions:{...slide.stickerPositions}};
+    const next=slides.flatMap((part,n)=>n===i?[part,cloned]:[part]);
+    const mapped=(style.panoramaLayers||[]).flatMap(layer=>{
+      const center=(layer.rect.x+layer.rect.w/2)*count;
+      const owner=Math.max(0,Math.min(count-1,Math.floor(center)));
+      const base={...layer,rect:{...layer.rect,
+        x:(layer.rect.x*count+(owner>=insertAt?1:0))/(count+1),
+        w:layer.rect.w*count/(count+1)}};
+      if(owner!==i)return [base];
+      const inside=layer.rect.x*count>=i-.001&&(layer.rect.x+layer.rect.w)*count<=i+1.001;
+      if(!inside)return [base];
+      return [base,{...base,id:'copy-'+crypto.randomUUID(),name:layer.name+' · copia',
+        rect:{...base.rect,x:base.rect.x+1/(count+1)}}];
+    });
+    setAll(next,normalizeCarouselStyle({...style,panoramaLayers:mapped}));
+    setCurrent(insertAt);
+    notify('Slide duplicado con su fondo, fotos, textos y stickers.');
+  };
   const replace=(patch:Partial<Slide>)=>setAll(slides.map((s,j)=>{
     if(j!==i)return s;
     // A newly chosen photo should not land over the headline by default.
@@ -1300,6 +1324,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <h2>Empieza por la foto. El diseño viene después.</h2>
         <p>Sube o arrastra la imagen principal. Colócala donde quieras; los cortes se ven, pero se hacen al descargar.</p>
         <div className="factory-step-mini-actions">
+          <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=8}>
+            <Copy size={16}/> Duplicar slide {i+1}
+          </button>
           <button type="button" className="btn ghost factory-free-create" onClick={()=>{
             if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
@@ -1505,6 +1532,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
 
           </details>
+          <button type="button" className="btn ghost factory-duplicate-slide" onClick={duplicateSlide}
+            disabled={slides.length>=8}><Copy size={15}/> Duplicar este slide</button>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
 
