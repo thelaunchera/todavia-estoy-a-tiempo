@@ -145,3 +145,20 @@
 .lab-calendar-format-legend .lab-calendar-kind{display:inline-grid;place-items:center;width:21px;
  height:21px;padding:0}
 @media(max-width:600px){.lab-calendar-format-legend{gap:6px 10px;font-size:10px;padding:7px 3px}}
+
+
+/* Every planned entry opens its original editor; schedule remains a separate action. */
+.lab-calendar-agenda-item{margin-bottom:10px;padding:3px;background:#f8faf9;
+ border:1px solid #e2eaea;border-radius:12px;overflow:hidden}
+.lab-calendar-agenda-item .lab-calendar-agenda-post{margin-bottom:0;border:0;border-radius:9px;background:transparent}
+.lab-calendar-agenda-item .lab-calendar-agenda-post:focus-visible{outline:2px solid #2b708a;outline-offset:1px}
+.lab-calendar-agenda-item .lab-calendar-edit-label{display:inline-flex;align-items:center;gap:5px;color:#20556b;
+ font-weight:800;font-size:11px;white-space:nowrap;flex:none}
+.lab-calendar-reschedule{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:0;
+ border-radius:8px;background:#ecf3f5;color:#466d7d;font-size:11px;min-height:32px;cursor:pointer;margin:0 0 5px 60px}
+.lab-calendar-reschedule:hover{background:#dfeef2}
+.lab-calendar-feed>button:focus-visible{outline:3px solid #34718a;outline-offset:2px}
+@media(max-width:650px){
+ .lab-calendar-agenda-item .lab-calendar-edit-label{font-size:10px}
+ .lab-calendar-reschedule{margin-left:6px;width:calc(100% - 12px);justify-content:center;min-height:36px}
+}
