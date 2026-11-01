@@ -16,7 +16,7 @@ test('The paid Lab preserves all eight directions while public freebie requires 
  assert.match(freebie,/id="crear" class="grid" hidden/,'Private editor is hidden by default');
  assert.ok(prompts.includes("name:'Sensory Product Hero'"));
  assert.ok(prompts.includes('matcha campaign photography'));
- assert.ok(prompts.includes('not a contact sheet'));
+ assert.ok(prompts.includes('Do NOT create a contact sheet'));
  assert.ok(prompts.includes('If I have not attached it yet, ask me to upload it BEFORE'));
  assert.ok(prompts.includes('Preserve the real product identity faithfully'));
  assert.ok(prompts.includes('Do not add any overlay headline'));
