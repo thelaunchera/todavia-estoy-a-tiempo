@@ -212,6 +212,7 @@ main{padding-top:8px}
 .matcha-email-form .matcha-send-button{background:#29451c;color:#fff;border:0;border-radius:999px;min-height:49px;font-weight:800;padding:13px 20px}
 .matcha-email-form .matcha-send-button:disabled{opacity:.65;cursor:wait}
 .matcha-email-form .matcha-lead-feedback{margin:0;font-size:12px;color:#526751}
+.matcha-email-form .matcha-lead-feedback:empty{display:none}
 .matcha-email-form small{font-size:11px;color:#68756b;line-height:1.55}
 .matcha-email-form small a{color:#304927;text-underline-offset:2px}
 .matcha-honeypot{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
@@ -293,21 +294,20 @@ main{padding-top:8px}
 <div class="all-products">🌿 <strong>Funciona con cualquier producto:</strong> bebidas, comida, skincare, ropa, velas, accesorios y mucho más.</div>
 <div class="process-cta"><a href="#recibir">Recibir los ocho prompts gratis <span aria-hidden="true">→</span></a></div>
 <section class="matcha-email-optin" id="recibir" aria-labelledby="matcha-email-title">
-<div class="matcha-email-intro"><span class="hero-eyebrow">TU REGALO CREATIVO · GRATIS</span><h2 id="matcha-email-title">Los ocho prompts, directamente a tu correo.</h2>
-<p>No necesitas empezar de cero cada vez que vas a publicar. Te comparto ocho formas de mostrar un mismo producto, con matcha como ejemplo. Elige la que te guste y adáptala a tu marca.</p></div>
+<div class="matcha-email-intro"><span class="hero-eyebrow">TU REGALO CREATIVO · GRATIS</span><h2 id="matcha-email-title">Tus 8 ideas, listas para crear.</h2>
+<p>Recíbelas gratis y adáptalas a tu producto.</p></div>
 <form id="matcha-lead-form" class="matcha-email-form">
 <label for="matcha-email">¿A qué correo te envío las ideas?</label><input id="matcha-email" type="email" name="email" autocomplete="email" maxlength="254" required placeholder="tu@correo.com">
-<label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>Quiero suscribirme al newsletter de The Launch Era para recibir ideas de contenido, recursos y novedades. Puedo darme de baja cuando quiera.</span></label>
+<label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>También quiero recibir ideas y novedades de The Launch Era. Puedo darme de baja cuando quiera.</span></label>
 <div class="matcha-honeypot" aria-hidden="true"><label for="matcha-website">No rellenes esto</label><input tabindex="-1" autocomplete="off" type="text" name="website" id="matcha-website"></div>
 <button class="matcha-send-button" id="matcha-send" type="submit">Enviarme mis 8 ideas gratis <span aria-hidden="true">→</span></button>
-<p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback">Te llegará un correo con un botón que abre tus ocho prompts directamente. Sin contraseñas ni códigos.</p>
-<small>Usaremos tu correo para entregarte el recurso. El newsletter es opcional y solo lo recibirás si lo seleccionas. <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>.</small>
+<p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback"></p>
+<small>Newsletter opcional · <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a></small>
 </form></section>
-<section id="access-placeholder" class="matcha-locked-prompt" aria-labelledby="access-title">
-<span class="hero-eyebrow">LOS PROMPTS COMPLETOS · ACCESO PRIVADO</span>
-<h2 id="access-title">Un regalo que llega a tu correo. 🌿</h2>
-<p>Arriba puedes ver los ejemplos de matcha. Para copiar y personalizar las ocho instrucciones completas, solicita el freebie y confirma tu email. Recibirás un enlace personal para abrirlas.</p>
-<a href="#recibir" class="matcha-send-button matcha-lock-cta">Quiero mis ocho prompts gratis <span aria-hidden="true">→</span></a>
+<section id="access-placeholder" class="matcha-locked-prompt" aria-labelledby="access-title" hidden>
+<h2 id="access-title">Estamos abriendo tus ideas.</h2>
+<p>Revisa tu correo para continuar.</p>
+<a href="#recibir" class="matcha-send-button matcha-lock-cta">Volver al formulario</a>
 </section>
 <div id="crear" class="grid" hidden aria-label="Editor privado de ocho prompts"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
 <label for="brandName">Marca con la que publicarás</label><input id="brandName" maxlength="120" autocomplete="organization" placeholder="Escribe el nombre de tu marca (o déjalo vacío)"><label for="copyLanguage">Idioma de los textos</label><select id="copyLanguage"><option value="es">Español latino</option><option value="en">English (US)</option></select>
@@ -334,8 +334,7 @@ main{padding-top:8px}
 <footer class="site-footer">
   <div class="footer-main"><div><strong>content lab<span>.</span></strong><p>Ideas de diseño para cualquier producto. Un proyecto de The Launch Era.</p></div>
   <nav aria-label="Información legal"><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a><a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a><a href="../reembolsos.html" target="_blank" rel="noopener noreferrer">Reembolsos</a><a href="mailto:hello@thelaunchera.com">Contacto</a></nav></div>
-  <p class="footer-privacy">Esta página muestra fotografías editoriales de ejemplo. Los ocho prompts completos se entregan por enlace privado tras confirmar el correo. Content Lab es un producto de pago. Tu foto permanece en el navegador en esta página; los pagos se procesan de forma segura con Stripe.</p>
-  <div class="footer-bottom"><span>© 2026 The Launch Era. Todos los derechos reservados.</span><a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">Powered by <b>The Launch Era</b></a></div>
+    <div class="footer-bottom"><span>© 2026 The Launch Era. Todos los derechos reservados.</span><a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">Powered by <b>The Launch Era</b></a></div>
 </footer>
 </main><script>
 
@@ -453,7 +452,7 @@ render();
    });
    const result=await response.json().catch(()=>({}));
    if(!response.ok||!result.ok)throw Error(result.error||'No pudimos enviar el enlace.');
-   feedback.textContent='¡Listo! Abre el correo y toca «Abrir mis 8 prompts gratis». Se desbloquearán automáticamente. Revisa promociones o spam si no lo ves. 💛';
+   feedback.textContent='¡Listo! Te enviamos tus 8 ideas. Revisa tu correo. 💛';
    form.querySelector('#matcha-email').readOnly=true;
    button.textContent='Solicitud registrada ✓';
   }catch(err){
@@ -487,6 +486,7 @@ render();
   return data;
  }
  if(action==='unsubscribe'){
+  placeholder.hidden=false;
   placeholder.scrollIntoView({block:'start'});
   title.textContent='Tus preferencias de correo';
   note.textContent='¿Quieres darte de baja del newsletter creativo? Seguirás teniendo acceso al regalo.';
