@@ -817,8 +817,12 @@ function App() {
       }
       const mime=file.type==='image/png'?'image/png':
         file.type==='image/webp'?'image/webp':'image/jpeg';
+      // Shared backgrounds are used on full-size 1080 × 1350 exports.
+      // Do not pre-shrink them to low-quality thumbnails before Storage.
+      // The common optimizer enforces the private 4.85 MB limit safely.
       const optimized=await image.resizeIfNeeded(original,{
-        maxDimension:1500,maxPixels:1800000,quality:0.80,mimeType:mime
+        maxDimension:3000,maxPixels:7_000_000,quality:0.94,mimeType:mime,
+        preserveIfPossible:true,maxBytes:4_850_000
       });
       const {data}=await api.post('/api/background-catalog',{
         name:file.name.replace(/\.(png|jpe?g|webp|heic|heif)$/i,'').replace(/[_-]+/g,' ').trim(),
