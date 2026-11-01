@@ -342,8 +342,8 @@ const productInformation=Object.freeze({
   summary:'Deja de empezar cada post desde cero.',
   price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
   includes:['Edita posts, carruseles, reels e historias.','Usa tus fotos, fondos y stickers.','Organiza tu feed y planifica fechas y horas.'],
-  delivery:'Recibirás tu enlace al Centro de Productos por email. Entra con el correo de tu compra y abre tu Lab.',
-  note:'Fotos con ChatGPT por separado. El calendario te ayuda a planificar; no publica por ti. Si usas la IA integrada, incluye 60 fotos y 30 créditos iniciales, con límites diarios de 10 fotos y 10 créditos.',
+  delivery:'Te enviaremos el acceso al correo de tu compra.',
+  note:'Incluye 60 fotos con IA y 30 créditos iniciales (máximo diario: 10 de cada uno). El calendario no publica automáticamente.',
   checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
  'booking-flow':{
@@ -430,11 +430,11 @@ function openProductDetails(code){
  $('product-details-summary').textContent=item.summary;
  $('product-details-price').textContent=item.price;
  $('product-details-status').textContent=detailState(code);
- $('product-details-for').textContent=item.audience;
+
  $('product-details-delivery').textContent=item.delivery;
  $('product-details-note').textContent=item.note;
  const list=$('product-details-includes');list.replaceChildren();
- for(const title of item.includes){
+ for(const title of item.includes.slice(0,3)){
   const li=document.createElement('li');
   li.textContent=title;list.append(li);
  }
