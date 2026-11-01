@@ -326,3 +326,10 @@
 .factory-review .factory-instagram-preview{max-width:670px;margin:18px auto 22px}
 .factory-review .factory-swipe-page{flex-basis:80%}
 @media(max-width:620px){.factory-swipe-page{flex-basis:92%}.factory-review .factory-swipe-page{flex-basis:92%}.factory-swipe-rail{gap:8px}.factory-swipe-caption{font-size:9px}}
+
+/* Copy overflow can be fixed before export, without deleting any sentences. */
+.factory-text-overflow{margin:10px 0 16px;padding:12px 14px;border:1px solid #ebd2ac;background:#fff8ed;border-radius:10px;color:#61432a}
+.factory-text-overflow strong{font-size:12px;line-height:1.45}
+.factory-text-overflow p,.factory-text-overflow small{display:block;font-size:11px;line-height:1.5;margin:5px 0 10px}
+.factory-text-overflow button{border:1px solid #c2a278;background:#fff;border-radius:8px;color:#674c2b;padding:10px 12px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.factory-text-overflow button:focus-visible{outline:3px solid #7e9cb0;outline-offset:2px}
