@@ -1256,7 +1256,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             <p>No se borra nada: puedes dividirlo para que se lea completo.</p>
             {slides.length<8?<button type="button" onClick={splitDescription}>Dividir sin perder frases <ArrowRight size={14}/></button>:
               <small>Hay ocho slides. Acorta el texto antes de descargar.</small>}
-          </div>
+          </div>}
            <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
