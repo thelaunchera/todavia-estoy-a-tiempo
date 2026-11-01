@@ -3581,3 +3581,19 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
 }
 .class-page-v2 .class-hero-actions .class-student-access-link:hover{background:#e4ebef;border-color:#758fa5}
 @media(max-width:650px){.class-page-v2 .class-hero-actions .class-student-access-link{width:100%;min-height:47px}}
+
+/* Invitación editorial del curso: teléfono como punto de partida, sin marcas de herramientas. */
+.class-page-v2 .class-hero-chips span:first-child{
+  background:#dfeef5;
+  border-color:#b6d0dc;
+  color:#163650;
+  font-weight:750;
+}
+.class-page-v2 .class-journey-bridge{max-width:940px;margin-inline:auto}
+.class-page-v2 .class-journey-bridge span{line-height:1.65}
+@media(max-width:650px){
+  .class-page-v2 .class-hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .class-page-v2 .class-hero-chips span{white-space:normal;max-width:100%;text-align:center}
+  .class-page-v2 .class-hero-intro .class-lede{line-height:1.6}
+  .class-page-v2 .class-journey-bridge{padding-inline:14px}
+}
