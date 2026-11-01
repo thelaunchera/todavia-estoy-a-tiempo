@@ -337,3 +337,33 @@
 .touch-editor-background-stretch-controls button{min-height:40px;font-weight:700}
 .touch-editor-background-stretch-controls small{width:100%;font-size:11px;color:#54707d}
 @media(max-width:650px){.touch-editor-background-stretch-controls button{flex:1 1 40%}}
+
+/* Simplified tactile canvas: two clear modes, no duplicate navigation chrome. */
+.touch-editor-below-canvas-controls,
+.touch-editor-layer-list{display:block;border:1px solid #d5e2e5;border-radius:12px;background:#fff;padding:9px 11px;margin:10px 0}
+.touch-editor-below-canvas-controls>summary,
+.touch-editor-layer-list>summary{font-size:12px;font-weight:750;color:#315665;cursor:pointer;min-height:26px;list-style-position:inside}
+.touch-editor-below-canvas-controls[open]>summary,
+.touch-editor-layer-list[open]>summary{margin-bottom:9px}
+@media(max-width:760px){
+ .panorama-canvas .panorama-guide-legend{font-size:10px;line-height:1.3;padding:4px 2px}
+ .panorama-canvas .touch-editor-navigation{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+   position:sticky;top:0;z-index:9;padding:8px 7px;border-radius:13px;background:#f8faf9;
+   box-shadow:0 2px 7px #263e4412}
+ .panorama-canvas .touch-editor-mode-switch{flex:1;min-width:0;gap:5px;margin:0}
+ .panorama-canvas .touch-editor-mode-switch button{min-height:42px;padding:8px 9px;flex:1;white-space:nowrap;font-size:12px}
+ .panorama-canvas .touch-editor-page-navigation{margin-left:auto}
+ .panorama-canvas .touch-editor-page-navigation button{display:none}
+ .panorama-canvas .touch-editor-page-navigation span{font-size:11px;white-space:nowrap}
+ .panorama-canvas .touch-editor-page-tabs{display:none}
+ .panorama-canvas .touch-editor-navigation-tip{flex:1 0 100%;min-height:0;margin:0;font-size:10px}
+ .panorama-canvas .touch-editor-scroll{margin-top:6px;border-radius:8px}
+ .panorama-canvas .touch-editor-layer-list{margin-top:8px}
+ .panorama-canvas .touch-editor-quick-layers{padding:7px 0}
+ .panorama-canvas .touch-editor-quick-layers>strong{display:none}
+ .panorama-canvas .touch-editor-below-canvas-controls{margin:8px 0}
+ .panorama-canvas .touch-editor-options{gap:6px;padding:9px}
+ .panorama-canvas .touch-editor-options button{min-height:39px}
+ .panorama-canvas .touch-editor-order-controls{display:block;width:100%}
+ .panorama-canvas .touch-editor-order-controls>span{font-size:11px}
+}
