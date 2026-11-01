@@ -1,0 +1,37 @@
+name: Import approved matcha examples into GitHub
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/import-matcha-examples.yml']
+permissions:
+  contents: write
+jobs:
+  import-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import eight user-supplied public examples
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F1d30aae8-822c-4a40-9617-ba4a35e09ebb/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAABb9E2itEzui_h2_drZY33uwyT-6BiCC3nuOWNijwRup&exp=1793509046&osig=AAAAAAAAAAAAAAAAAAAAAAJ7ChRtVDD-2i_1S-od7B_Vlw7dpZ8EqkfypLf4XhH-&signer=media-rpc&token=AAIAAU0AJDFkMzBhYWU4LTgyMmMtNGE0MC05NjE3LWJhNGEzNWUwOWViYgAAAAABoZV4NvAeCact90neeN9_7Xp3z5C9NnXA3MXt7xgfvvkiRvj7Gw&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-01.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-01.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Ffb986897-155c-4089-95c7-7a888f97e937/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAALpt2ggQgyQ_F0D7kHFUjOds6pkIXYl-6RrX_uyC2pVb&exp=1793509250&osig=AAAAAAAAAAAAAAAAAAAAAOJaCXqIuoaWW3xFdlMbOxIxFFATcuNRsvq6G24XwrJt&signer=media-rpc&token=AAIAAU0AJGZiOTg2ODk3LTE1NWMtNDA4OS05NWM3LTdhODg4Zjk3ZTkzNwAAAAABoZV7U9BaWT5xC87f4cDZRyKV8kisi18goTuS4olgJLxURB5h-Q&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-02.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-02.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Fe5f8687e-f852-4a05-9635-54e76481a454/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAAMVTEMscUq5_fnbO2rP2iZIKgMDgH-6EtFlqtji5CAWJ&exp=1793508241&osig=AAAAAAAAAAAAAAAAAAAAACo6LmKUoQOQfqaAdCFVC3dyvqUWv9dcfK1V99zrE5gZ&signer=media-rpc&token=AAIAAU0AJGU1Zjg2ODdlLWY4NTItNGEwNS05NjM1LTU0ZTc2NDgxYTQ1NAAAAAABoZVr7mgZINcyTyPPIZyjuF0Ui7-2JjF5Qgm2FJpjYzJd3fMhxg&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-03.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-03.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F85fdbba0-6b0b-4a58-a403-3813dab62a76/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAABM9HhBciFD8MKAr3A6rjF00UvW3ClHjaYQ9D85VRQti&exp=1793507777&osig=AAAAAAAAAAAAAAAAAAAAACKav-HDxpe3AIoq5xw0jOfRMQKjKtyGT5Ai0nDSZu2Z&signer=media-rpc&token=AAIAAU0AJDg1ZmRiYmEwLTZiMGItNGE1OC1hNDAzLTM4MTNkYWI2MmE3NgAAAAABoZVk2ej5Z1IK6oHjPSJnOJuuO9ueBgDNQC8ssNy8fXkQjqRe3Q&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-04.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-04.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Fbf31b1dc-1782-45e2-a380-5a41d5b03b64/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAAHVnTbjvs8C264BEuh4bbaiC_OIgxeDUuV6lgokXiRaL&exp=1793507328&osig=AAAAAAAAAAAAAAAAAAAAABuGFZfpvmC_3dASS_x_PT-mbpD1Coi1sVA3JsrXu6-t&signer=media-rpc&token=AAIAAU0AJGJmMzFiMWRjLTE3ODItNDVlMi1hMzgwLTVhNDFkNWIwM2I2NAAAAAABoZVeAABtQeKXPW1Y9FVgA9U1Z00qFxr89MbXbquB5CUj9x3g7g&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-05.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-05.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Ff262d549-f9bb-43bd-b49c-fe7c376391b2/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAAGBaWb_CsRMHIV49xCPDafn7BtyTKhWpGpZceRmJgjuT&exp=1793507810&osig=AAAAAAAAAAAAAAAAAAAAAPu2MOPEKCTxVaAKuMfg7V__eUt53AYqAPZrclnq6KMN&signer=media-rpc&token=AAIAAU0AJGYyNjJkNTQ5LWY5YmItNDNiZC1iNDljLWZlN2MzNzYzOTFiMgAAAAABoZVlWtCVXNN9pLdnxx5Vq2dMwS7wq1BWcl-ogiQ3EH8onl6Nhw&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-06.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-06.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F2e822969-d97f-4321-b677-aa8f468e18a0/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAAKK-jLMw9fnJ2nFttFZJBK78RuOpwVezaLJ-2jwvG06O&exp=1793507135&osig=AAAAAAAAAAAAAAAAAAAAAGk0FpvbwjFxMVUmfrEjeTHPC-hKBycl2tYQ8FX4mtY4&signer=media-rpc&token=AAIAAU0AJDJlODIyOTY5LWQ5N2YtNDMyMS1iNjc3LWFhOGY0NjhlMThhMAAAAAABoZVbDhj_5aWsipJZdLs_JDInnEdq3Uhe2ron1JjPnv2UEKHS-A&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-07.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-07.jpg') -gt 1500
+          curl --fail --location --silent --show-error --max-time 45 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F0ac62518-a780-4e88-83f7-4d4ee7375619/watermark:F/width:151?csig=AAAAAAAAAAAAAAAAAAAAABFRQ1zG7397ko7VO3R0iG-jy6vJtIxXFJYU9h1uQYCO&exp=1793506554&osig=AAAAAAAAAAAAAAAAAAAAADNMFL8a88HbvbssltYwj6_NK8ZJ_OlnCtlPXLycTqvd&signer=media-rpc&token=AAIAAU0AJDBhYzYyNTE4LWE3ODAtNGU4OC04M2Y3LTRkNGVlNzM3NTYxOQAAAAABoZVSMJAwY10PqSvMw0ZO8cICLC1A8fAgrs2k90CjJspONeh8YA&x-canva-quality=thumbnail' -o 'content-lab/public/prompts/matcha-08.jpg'
+          test $(wc -c < 'content-lab/public/prompts/matcha-08.jpg') -gt 1500
+      - name: Commit matched image previews to GitHub
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content-lab/public/prompts/matcha-*.jpg
+          git diff --cached --quiet || (git commit -m 'assets(content-lab): add eight matcha composition examples' && git push)
