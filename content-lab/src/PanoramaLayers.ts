@@ -32,6 +32,8 @@ export type PanoramaLayer = {
   color?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   placement?: LayerPlacement;
+  /** Continuous draggable wallpaper, painted behind independent content. */
+  role?:'background';
   locked?:boolean;
   rect: TouchRect;
 };
@@ -64,6 +66,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
+      ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
       ...(item.locked===true?{locked:true}:{}),
       rect: clampPanoramaRect(item.rect),
     }];
@@ -156,9 +159,14 @@ export async function paintPanoramaLayers(
    if(!src)throw Error('Una foto del lienzo todavía está cargando. Espera antes de descargar.');
    const img=new Image();img.src=src;await img.decode();
    if(layer.kind==='photo'){
-    ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h,6));ctx.clip();
-    const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
-    ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
+    if(layer.role==='background'){
+     // Stretch the complete wallpaper; never crop ribbons near its edges.
+     ctx.drawImage(img,-w/2,-h/2,w,h);
+    }else{
+     ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h,6));ctx.clip();
+     const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
+     ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
+    }
    }else{
     const scale=Math.min(w/img.naturalWidth,h/img.naturalHeight);
     const iw=img.naturalWidth*scale,ih=img.naturalHeight*scale;
