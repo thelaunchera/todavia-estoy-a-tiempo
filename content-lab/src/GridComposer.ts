@@ -111,6 +111,32 @@ function geometry(ctx:CanvasRenderingContext2D,layout:Layout,W:number,H:number,p
  }
 }
 
+// A second, oversized typographic plane sits BEHIND the real photo — the same
+// art direction as the gallery, but it uses the buyer's editable headline.
+function paintGhostHeadline(ctx:CanvasRenderingContext2D,layout:Layout,text:string,W:number,H:number){
+ const tokens=(text||'').toLocaleUpperCase().match(/[\\p{L}\\p{N}]{3,}/gu)||[];
+ const word=tokens.find(t=>t.length>=4)||tokens[0];
+ if(!word)return;
+ ctx.save();
+ const vertical=['Editorial Hero','Color Block','Diagonal Composition'].includes(layout.name);
+ let fontSize=Math.round(W*(vertical?.22:.29));
+ ctx.font='900 '+fontSize+'px Arial,sans-serif';
+ const cap=vertical?H*.76:W*1.1;
+ while(ctx.measureText(word).width>cap&&fontSize>Math.round(W*.08)){
+  fontSize=Math.round(fontSize*.92);
+  ctx.font='900 '+fontSize+'px Arial,sans-serif';
+ }
+ ctx.fillStyle=layout.dark?'rgba(255,255,255,.16)':'rgba(101,33,50,.17)';
+ ctx.textBaseline='middle';
+ if(vertical){
+  ctx.translate(W*.04,H*.82);ctx.rotate(-Math.PI/2);ctx.fillText(word,0,0);
+ }else{
+  const y=['Magazine Cover','Typography Poster','Playful Props'].includes(layout.name)?.22:.43;
+  ctx.fillText(word,-W*.025,H*y);
+ }
+ ctx.restore();
+}
+
 async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:number,w:number,h:number,zoom:number,offsetX:number,offsetY:number){
  if(!src)return false;
  const im=new Image();im.src=src;
@@ -145,6 +171,7 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  const dark=fmt.dark,base=fmt.shape==='solid'?accent:fmt.shape==='dark'?'#191919':paper;
  const ink=inkOn(base),secondaryInk=inkOn(paper);
  geometry(ctx,fmt,W,H,paper,accent,ink);
+ paintGhostHeadline(ctx,fmt,tile.headline||'',W,H);
  if(tile.backgroundId&&tile.backgroundId!=='brand')paintFreeBackground(ctx,W,H,tile.backgroundId,accent,paper);
  if(tile.backgroundImageId&&photos.stickerImages?.[tile.backgroundImageId]){
   try{await paintCoverImage(ctx,photos.stickerImages[tile.backgroundImageId],W,H)}catch{/* Keep backup background. */}
