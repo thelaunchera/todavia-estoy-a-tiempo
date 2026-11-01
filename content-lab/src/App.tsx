@@ -577,12 +577,14 @@ function App() {
     setEditor(p => ({ ...p, [key]: val }));
   const startFactory = () => {
     if (!brand) return;
+    setCalendarEditId('');
     editorSessionRef.current++;
     setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel'}));
     navigate('factory');
   };
   const startVertical = (format:'Reel'|'Story'='Reel')=>{
     if(!brand)return;
+    setCalendarEditId('');
     editorSessionRef.current++;
     setEditor(inspectRecovery({...newPost(brand.id),format,title:format==='Reel'?'Portada de Reel':'Historia',
       hook:'',designData:writeCoverDecor('',{...readCoverDecor(''),color:'#FAF8F3',
@@ -598,6 +600,7 @@ function App() {
   };
   const start = (angle = 'Pain point') => {
     if (!brand) return;
+    setCalendarEditId('');
     editorSessionRef.current++;
     setEditor(inspectRecovery({ ...newPost(brand.id), angle,format:'Single post' }));
     setManualOpen(true);
@@ -605,7 +608,8 @@ function App() {
     setAlternatives([]);
     navigate('create');
   };
-  const edit = (post: Post) => {
+  const edit = (post: Post,fromCalendar=false) => {
+    setCalendarEditId(fromCalendar?post.id||'':'');
     editorSessionRef.current++;
     setCurrent(post.brandId);
     setEditor(inspectRecovery({ ...post }));
@@ -628,8 +632,7 @@ function App() {
     const id=item.id.startsWith('post:')?item.id.slice(5):'';
     const saved=posts.find(p=>p.id===id&&p.brandId===brand.id);
     if(!saved){toast('No se encontró este diseño en tu cuenta.');return;}
-    setCalendarEditId(id);
-    edit(saved);
+    edit(saved,true);
   };
   const save = async (candidate?:unknown, automatic=false) => {
     if(saveInFlightRef.current)return false;
@@ -800,7 +803,7 @@ function App() {
     const latest=editorLatestRef.current;
     if(!latest.brandId)return false;
     const ok=await save({...latest,date,time,planningStatus:'planned'});
-    if(ok){toast('Guardado en el calendario. Se publicará manualmente.');navigate('calendar')}
+    if(ok){setCalendarEditId('');setCalendarFocusDate(date);toast('Guardado en el calendario. Se publicará manualmente.');navigate('calendar')}
     return ok;
   };
   const imageLoad = async (id: string):Promise<string|undefined> => {
@@ -1281,6 +1284,13 @@ function App() {
           </div>
         </header>
         <div className="content" data-lab-tab={tab} key={tab}>
+          {calendarEditId&&calendarEditId===editor.id&&['factory','vertical','create'].includes(tab)&&
+            <div className="lab-calendar-editor-return" role="region" aria-label="Volver al calendario">
+              <span>✎ {loginLanguage==='es'?'Editando desde tu calendario':'Editing from your calendar'}</span>
+              <button type="button" disabled={busy==='save'} onClick={()=>void returnFromCalendarEditor()}>
+                <Save size={16}/>{loginLanguage==='es'?'Guardar y volver al calendario':'Save and return to calendar'}
+              </button>
+            </div>}
           {brand&&['factory','vertical','create'].includes(tab)&&account?.email&&
             <QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory}/>}
           {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
@@ -1525,7 +1535,7 @@ function App() {
               onUploadBackground={async file=>upload(file,'background')}
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
-              onOpenCalendar={()=>navigate('calendar')}
+              onOpenCalendar={(date?:string)=>{if(validDate(date||''))setCalendarFocusDate(date!);navigate('calendar')}}
               onOpenStickers={()=>navigate('stickers')}
               initialSelection={gridPref}
               isAdmin={Boolean(aiWallet?.admin)}
