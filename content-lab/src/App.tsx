@@ -564,7 +564,12 @@ function App() {
     setAlternatives([]);
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
-  const save = async (source:Post=editor) => {
+  const save = async (candidate?:Post) => {
+    // React may pass a click event to legacy onClick={save} handlers.
+    // Only a valid saved Post can override the current editor draft.
+    const source:Post=candidate&&typeof candidate.title==='string'&&
+      typeof candidate.format==='string'&&typeof candidate.brandId==='string'
+      ? candidate:editor;
     const draft={...source,title:source.title.trim()||source.hook.trim().slice(0,80)||
       (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
        source.format==='Story'?'Mi historia':'Mi publicación')};
