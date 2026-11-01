@@ -5,12 +5,14 @@ import BackgroundThumbnail from './BackgroundThumbnail';
 import {isBackgroundVisible} from './BackgroundVisibility';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './FreeDecorControls.css';
+import {readDecorPreferences,saveDecorPreferences,rememberDecor,toggleDecorFavorite,decorKey} from './DecorPreferences';
 type Props={
  backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];
  onChange:(next:{backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[]})=>void;
  title?:string;assets?:LibraryAsset[];images?:Record<string,string>;loadImage?:(id:string)=>void;
  onOpenLibrary?:()=>void;onUploadBackground?:(file:File)=>Promise<LibraryAsset|null>;
  defaultTab?:'stickers'|'backgrounds';initiallyExpanded?:boolean;slideNumber?:number;
+ backgroundScope?:'slide'|'all';preferenceScope?:string;
 };
 function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage?:(id:string)=>void}){
  const ref=useRef<HTMLSpanElement>(null);
@@ -48,12 +50,23 @@ export default function FreeDecorControls({
  backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,
  title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground,
  defaultTab='stickers',initiallyExpanded=false,slideNumber,
+ backgroundScope='all',preferenceScope='default',
 }:Props){
  const [tab,setTab]=useState<'stickers'|'backgrounds'>(defaultTab);
  const [backgroundKind,setBackgroundKind]=useState<BackgroundCategory>('all');
  const [expanded,setExpanded]=useState(initiallyExpanded);
  const [group,setGroup]=useState('Todos');
  const [search,setSearch]=useState('');
+ const [resourceFilter,setResourceFilter]=useState<'all'|'favorites'|'recent'>('all');
+ const [prefs,setPrefs]=useState(()=>readDecorPreferences(preferenceScope));
+ useEffect(()=>{setPrefs(readDecorPreferences(preferenceScope));},[preferenceScope]);
+ const updatePrefs=(next:typeof prefs)=>{setPrefs(next);saveDecorPreferences(preferenceScope,next)};
+ const addRecent=(key:string)=>updatePrefs(rememberDecor(prefs,key));
+ const favorite=(key:string)=>updatePrefs(toggleDecorFavorite(prefs,key));
+ const matchesFilter=(key:string)=>resourceFilter==='all'||(resourceFilter==='favorites'
+   ?prefs.favorites.includes(key):prefs.recent.includes(key));
+ const sortRecent=<T,>(items:T[],key:(item:T)=>string)=>resourceFilter==='recent'
+   ?[...items].sort((a,b)=>prefs.recent.indexOf(key(a))-prefs.recent.indexOf(key(b))):items;
  const [feedback,setFeedback]=useState('');
  const uploadRef=useRef<HTMLInputElement>(null);
  const [uploading,setUploading]=useState(false);
@@ -74,18 +87,21 @@ export default function FreeDecorControls({
  const groupFor=(name:string)=>/avatar/i.test(name)?'Avatares':/matcha|coffee|tea|cup/i.test(name)?'Matcha':
    /pilates|reformer|barre|yoga|stretch/i.test(name)?'Pilates':
    /squat|fitness|gym|dumbbell|workout|exercise|lunge|treadmill|plank/i.test(name)?'Ejercicios':'Aesthetic';
- const visible=originals.filter(a=>(group==='Todos'||(a.shared?a.stickerGroup:groupFor(a.name))===group)
-  &&matches(displayAssetName(a)));
- const ownMatches=ownBackgrounds.filter(a=>matches(displayAssetName(a)));
- const studioMatches=studioBackgrounds.filter(a=>
+ const visible=sortRecent(originals.filter(a=>(group==='Todos'||(a.shared?a.stickerGroup:groupFor(a.name))===group)
+  &&matches(displayAssetName(a))&&matchesFilter(decorKey.sticker(a.id))),a=>decorKey.sticker(a.id));
+ const ownMatches=sortRecent(ownBackgrounds.filter(a=>matches(displayAssetName(a))
+  &&matchesFilter(decorKey.imageBackground(a.id))),a=>decorKey.imageBackground(a.id));
+ const studioMatches=sortRecent(studioBackgrounds.filter(a=>
   (backgroundKind==='all'||a.backgroundGroup===BACKGROUND_CATEGORIES.find(cat=>cat.id===backgroundKind)?.label)
-  &&matches(displayAssetName(a)));
- const builtInMatches=FREE_BACKGROUNDS.filter(b=>
-  isBackgroundVisible(b.id)&&belongsToBackgroundCategory(b.id,backgroundKind)&&matches(b.name));
- const changeTab=(next:'stickers'|'backgrounds')=>{setTab(next);setSearch('');setFeedback('')};
+  &&matches(displayAssetName(a))&&matchesFilter(decorKey.imageBackground(a.id))),a=>decorKey.imageBackground(a.id));
+ const builtInMatches=sortRecent(FREE_BACKGROUNDS.filter(b=>
+  isBackgroundVisible(b.id)&&belongsToBackgroundCategory(b.id,backgroundKind)&&matches(b.name)
+  &&matchesFilter(decorKey.freeBackground(b.id))),b=>decorKey.freeBackground(b.id));
+ const changeTab=(next:'stickers'|'backgrounds')=>{setTab(next);setSearch('');setFeedback('');setResourceFilter('all')};
  const changeBackground=(id:FreeBackgroundId,imageId='')=>{
   if(imageId&&!images[imageId])loadImage?.(imageId);
-  setFeedback('');onChange({backgroundId:id,backgroundImageId:imageId});
+  setFeedback('');addRecent(imageId?decorKey.imageBackground(imageId):decorKey.freeBackground(id));
+  onChange({backgroundId:id,backgroundImageId:imageId});
  };
  const removeSticker=(id:string)=>{setFeedback('');onChange({stickerIds:selected.filter(x=>x!==id)})};
  const toggle=(id:string)=>{
@@ -97,6 +113,7 @@ export default function FreeDecorControls({
   setFeedback('');
   if(!images[id])loadImage?.(id);
   // Never resubmit or replace the selected background when changing stickers.
+  addRecent(decorKey.sticker(id));
   onChange({stickerIds:[...selected,id]});
  };
  const upload=async(file?:File)=>{
@@ -116,7 +133,8 @@ export default function FreeDecorControls({
     onClick={()=>setExpanded(value=>!value)}>{expanded?'Cerrar ↑':'Elegir ↓'}</button>
   </div>
   <div className="free-decor-current" aria-label="Recursos seleccionados">
-   <span><strong>Fondo:</strong> {backgroundName}<small> · {slideNumber?'Todo el carrusel':'Este diseño'}</small></span>
+   <span><strong>Fondo:</strong> {backgroundName}<small> · {slideNumber?
+    (backgroundScope==='slide'?'Solo slide '+slideNumber:'Todo el carrusel'):'Este diseño'}</small></span>
    <span><strong>Stickers:</strong> {selected.length}/3{slideNumber?' · Slide '+slideNumber:''}</span>
   </div>
   {expanded&&<div className="free-decor-expanded">
@@ -131,6 +149,14 @@ export default function FreeDecorControls({
      placeholder={tab==='backgrounds'?'Buscar fondos por nombre…':'Buscar stickers por nombre…'}
      value={search} onChange={e=>setSearch(e.target.value)}/>
     {search&&<button type="button" onClick={()=>setSearch('')}>Limpiar</button>}
+   </div>
+   <div className="free-decor-quick-filters" role="group" aria-label="Encontrar recursos guardados">
+     <button type="button" className={resourceFilter==='all'?'active':''}
+       aria-pressed={resourceFilter==='all'} onClick={()=>setResourceFilter('all')}>Todos</button>
+     <button type="button" className={resourceFilter==='favorites'?'active':''}
+       aria-pressed={resourceFilter==='favorites'} onClick={()=>setResourceFilter('favorites')}>★ Favoritos</button>
+     <button type="button" className={resourceFilter==='recent'?'active':''}
+       aria-pressed={resourceFilter==='recent'} onClick={()=>setResourceFilter('recent')}>Recientes</button>
    </div>
    {feedback&&<p className="free-decor-feedback" role="status">{feedback}</p>}
    {tab==='backgrounds'?<div>
@@ -186,7 +212,9 @@ export default function FreeDecorControls({
       <StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
       <small>{displayAssetName(a)}</small></button></div>)}</div>:
      <div className="free-decor-empty">
-      <strong>{originals.length?'No hay stickers con ese filtro.':'Todavía no hay stickers PNG en esta biblioteca.'}</strong>
+      <strong>{resourceFilter==='favorites'&&!visible.length?'Aún no tienes stickers favoritos.':
+        resourceFilter==='recent'&&!visible.length?'Todavía no has usado stickers recientemente.':
+        originals.length?'No hay stickers con ese filtro.':'Todavía no hay stickers PNG en esta biblioteca.'}</strong>
       <p>{originals.length?'Prueba otro nombre o cambia la categoría.':'Cuando se publiquen, aparecerán aquí automáticamente.'}</p>
       {search&&<button type="button" onClick={()=>setSearch('')}>Limpiar búsqueda</button>}
       {onOpenLibrary&&<button type="button" onClick={onOpenLibrary}>Abrir biblioteca de stickers</button>}
@@ -195,7 +223,9 @@ export default function FreeDecorControls({
    <div className="free-decor-footer">
     <small>{tab==='stickers'&&selected.length===3
      ?'3 de 3 stickers. Quita uno si quieres elegir otro.'
-     :tab==='stickers'?'Toca un sticker para añadirlo a tu diseño.':slideNumber?'Elegir un fondo lo aplica a todo el carrusel.':'Elegir un fondo lo aplica a este diseño.'}</small>
+     :tab==='stickers'?'Toca un sticker para añadirlo a tu diseño.':slideNumber
+       ?backgroundScope==='slide'?'El fondo se aplica solo a este slide.':'El fondo se aplica a todo el carrusel.'
+       :'Elegir un fondo lo aplica a este diseño.'}</small>
     {selected.length>0&&tab==='stickers'&&<button type="button" onClick={()=>onChange({stickerIds:[]})}>Quitar stickers</button>}
    </div>
   </div>}
