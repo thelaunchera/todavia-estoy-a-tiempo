@@ -297,3 +297,14 @@
  .brand-grid-tool .bg-column{order:1;display:flex;flex-direction:column}
  .brand-grid-tool .bg-empty{min-height:240px}
 }
+
+/* Calendar planning stays compact next to the selected campaign tile. */
+.bg-compact-plan{background:#fff;border:1px solid #d9e5e3;border-radius:12px;padding:13px;margin:15px 0 4px}
+.bg-compact-plan-title{display:flex;align-items:center;gap:8px;color:#314e56;font-size:12px}
+.bg-compact-plan-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.bg-compact-plan-fields label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:#668087}
+.bg-compact-plan-fields input{width:100%;min-width:0;box-sizing:border-box;min-height:39px;padding:8px;border-radius:8px;border:1px solid #d0e2e0;background:white;font-size:13px;color:#273f47}
+.bg-compact-plan-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-top:12px}
+.bg-compact-plan-footer span{font-size:10px;line-height:1.45;color:#6d8988}
+.bg-compact-plan-footer button{display:flex;gap:5px;align-items:center;border:0;background:#eaf4f5;color:#3e6d7c;border-radius:8px;font-size:11px;font-weight:700;padding:10px;cursor:pointer}
+@media(max-width:600px){.bg-compact-plan{padding:10px}.bg-compact-plan-footer button{width:100%;justify-content:center}}
