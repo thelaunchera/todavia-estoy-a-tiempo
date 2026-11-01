@@ -1339,6 +1339,18 @@ function App() {
               }}>Continuar con lo guardado</button>
             </div>}
           </div>}
+          {!brand && tab === 'home' && (
+            <section className="lab-empty-brand" aria-label={loginLanguage==='es'?'Primeros pasos':'Get started'}>
+              <span className="eyebrow">{loginLanguage==='es'?'EMPIEZA AQUÍ':'START HERE'}</span>
+              <h1>{loginLanguage==='es'?'Vamos a crear tu primer diseño.':'Let’s create your first design.'}</h1>
+              <p>{loginLanguage==='es'
+                ?'Solo necesitamos el nombre y los colores de tu marca. Después podrás subir una foto, diseñar tu publicación y descargarla.'
+                :'Start with your brand name and colors. Then upload a photo, design your first post, and download it.'}</p>
+              <button className="btn dark" type="button" onClick={()=>{setBrandForm(newBrand());navigate('brands')}}>
+                <Plus size={17}/>{loginLanguage==='es'?'Configurar mi marca':'Set up my brand'}
+              </button>
+            </section>
+          )}
           {brand && tab === 'home' && (
             <>
               <section className="lab-home-greeting" aria-label={loginLanguage==='es'?'Bienvenida a tu estudio':'Welcome to your studio'}>
