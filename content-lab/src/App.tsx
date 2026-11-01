@@ -767,7 +767,7 @@ function App() {
       let input: File | Blob = file;
       if (isHeic) {
         try {
-          const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.82 });
+          const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.94 });
           input = Array.isArray(converted) ? converted[0] : converted;
         } catch {
           // Safari can decode some HEIC photos natively, so try native optimization next.
@@ -776,13 +776,19 @@ function App() {
       }
       let prepared;
       try {
+        const preserveOriginal=category==='original'||category==='generated'||category==='reference';
+        const keepMime=['image/png','image/jpeg','image/webp'].includes(input.type)?input.type:'image/jpeg';
         prepared = await image.resizeIfNeeded(input, {
-          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: (category==='sticker'||category==='background')&&file.type==='image/png'?'image/png':'image/jpeg'
+          maxDimension:preserveOriginal?3000:2160,
+          maxPixels:preserveOriginal?7_000_000:4_600_000,
+          quality:preserveOriginal?.94:.88,
+          mimeType:preserveOriginal?keepMime:category==='sticker'&&file.type==='image/png'?'image/png':'image/jpeg',
+          preserveIfPossible:preserveOriginal,maxBytes:4_850_000
         });
       } catch {
         throw new Error('No se pudo convertir esta foto. Prueba la opción de foto compatible de tu iPhone.');
       }
-      if (!prepared.data || prepared.data.length > 3850000) {
+      if (!prepared.data || prepared.data.length > 6_470_000) {
         throw new Error('No se pudo reducir suficientemente la foto. Intenta con otra.');
       }
       const { data } = await api.post('/api/assets', {
