@@ -19,7 +19,7 @@ type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCate
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions;scheduledDate?:string;scheduledTime?:string;planningStatus?:'planned'|'published'};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onOpenCalendar?:()=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean};onOpenPrompts?:()=>void;onOpenCalendar?:(date?:string)=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -90,6 +90,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
   const [chooseExisting,setChooseExisting]=useState(false);
+  const openedCalendarVersion=useRef<number>(-1);
   const [exportSize,setExportSize]=useState<ExportSize>('portrait');
   const [qaNotes,setQaNotes]=useState<string[]>([]);
   const [sessionPhotos,setSessionPhotos]=useState(0);
@@ -183,6 +184,22 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
   useEffect(()=>{api.get('/api/grids').then(({data})=>setGrids(data.grids||[])).catch(showError)},[brand.id]);
+  // Open the original 1 Photo → 9 Posts campaign at the selected calendar tile.
+  useEffect(()=>{
+    const selection=initialSelection;
+    if(!selection?.fromCalendar||!selection.openGridId||selection.brandId!==brand.id||
+       openedCalendarVersion.current===selection.version)return;
+    const saved=grids.find(item=>item.id===selection.openGridId&&item.brandId===brand.id);
+    if(!saved)return;
+    openedCalendarVersion.current=selection.version;
+    const index=Math.min(Math.max(0,selection.openTileIndex??0),Math.max(0,saved.posts.length-1));
+    savedSignature.current[saved.id]=signature(saved);
+    setGrid(saved);setSelected(index);setSourceId(saved.sourceId);
+    setReferenceId(saved.referenceId);setKind(saved.kind);
+    setDesignMode(saved.kind==='preserve'?'editorial':'photo');
+    setBrief(saved.brief);setExpandedEditor(true);
+    setDownloads([]);setReviewed(false);setSaveState('saved');
+  },[initialSelection?.version,grids,brand.id]);
   useEffect(()=>{for(const id of [sourceId,referenceId,brand.logoAssetId||'',grid?.sourceId||'',...(grid?.posts.map(p=>p.assetId)||[]),...(grid?.posts.flatMap(p=>[...(p.stickerIds||[]),...(p.design?.stickerIds||[]),...(p.backgroundImageId?[p.backgroundImageId]:[])])||[])].filter(Boolean))if(!images[id])loadImage(id)},[sourceId,referenceId,grid,images]);
   const update=(change:Partial<Tile>)=>{
     setGrid(g=>g?{...g,posts:g.posts.map((t,i)=>i===selected?{...t,...change}:t)}:g);
@@ -428,6 +445,14 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       notify('Post '+(selected+1)+' descargado sin alterar su diseño.');
     }catch(e){showError(e)}
   };
+  const saveAndReturnToCalendar=async()=>{
+    const latest=gridRef.current;
+    if(!latest)return;
+    try{
+      const saved=await save(latest);
+      onOpenCalendar?.(saved.posts[selected]?.scheduledDate);
+    }catch(error){showError(error)}
+  };
   const openCalendar=()=>{
     flushDraft();
     void saveQueue.current.then(()=>onOpenCalendar?.());
@@ -442,6 +467,15 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     }
   };
   return <div className="brand-grid-tool">
+    {initialSelection?.fromCalendar&&initialSelection.brandId===brand.id&&
+      initialSelection.openGridId===grid?.id&&
+      <div className="bg-calendar-return">
+        <span>✎ Editando el post {selected+1} de tu calendario</span>
+        <button type="button" className="btn dark" disabled={!!busy||saveState==='saving'}
+          onClick={()=>void saveAndReturnToCalendar()}>
+          <Save size={16}/> Guardar y volver al calendario
+        </button>
+      </div>}
     {creditPrompt&&<div className="bg-credit-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)respondCredits(false)}}>
       <div className="bg-credit-dialog" role="dialog" aria-modal="true" aria-labelledby="bg-credit-title">
         <div className="bg-credit-symbol"><Sparkles size={23}/></div>
