@@ -55,6 +55,7 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+const MAX_CAROUSEL_SLIDES=10;
 /** Normal mode clips movable panorama elements to their own slide.
  * Seamless keeps the original full-width geometry for genuine cross-slide cuts. */
 const constrainNormalLayer=<T extends {rect:TouchRect},>(layer:T,count:number):T=>{
@@ -97,7 +98,7 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
   const saved=readCarouselDesign(post.designData||'');
   if(saved.slides){
     const data=saved.slides;
-    if(data.length>=2&&data.length<=8){
+    if(data.length>=2&&data.length<=MAX_CAROUSEL_SLIDES){
       return data.map((s:any, i) => ({
           key: String(s.key || 'slide-' + i),
           eyebrow: String(s.eyebrow || ''),
@@ -142,7 +143,7 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
     result.push(makeSlide(result.length,''));
     result.push(makeSlide(result.length,''));
   }
-  if(result.length<8){
+  if(result.length<MAX_CAROUSEL_SLIDES){
     result.push({...makeSlide(result.length,post.cta.trim()),layout:'closing'});
   }else if(post.cta.trim()){
     result[result.length-1].description=[result[result.length-1].description,post.cta.trim()].filter(Boolean).join('\n');
@@ -461,7 +462,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('style');
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
   const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:920px)').matches);
@@ -756,7 +757,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Ritmo editorial aplicado: slides fotográficos, tipográficos y mixtos. Tus fotos y textos siguen editables.');
   };
   const duplicateSlide=()=>{
-    if(slides.length>=8){notify('Máximo ocho slides por carrusel.');return;}
+    if(slides.length>=MAX_CAROUSEL_SLIDES){notify('Máximo diez slides por carrusel.');return;}
     const insertAt=i+1,count=slides.length;
     const cloned:Slide={...slide,key:'slide-copy-'+crypto.randomUUID(),
       photoPosition:slide.photoPosition?{...slide.photoPosition}:undefined,
@@ -1095,7 +1096,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const splitDescription=()=>{
     const content=slide.description.trim();
     if(content.length<=210)return notify('Este texto cabe mejor en un solo slide.');
-    if(slides.length>=8)return notify('Ya tienes ocho slides. Acorta el texto antes de dividir.');
+    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Puedes usar hasta diez slides. Acorta el texto antes de dividir.');
     const splitPoint=content.lastIndexOf(' ',205);
     const position=splitPoint>95?splitPoint:205;
     const first=content.slice(0,position).trim(),rest=content.slice(position).trim();
@@ -1109,7 +1110,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Dividido en dos slides. Todo el texto se mantiene editable.');
   };
   const insert=()=>{
-    if(slides.length>=8)return notify('Máximo ocho slides.');
+    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Máximo diez slides por carrusel.');
     const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout,
       backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||'',
       backgroundColor:slide.backgroundColor,backgroundGradient:slide.backgroundGradient};
@@ -1442,7 +1443,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <h2>Empieza por la foto. El diseño viene después.</h2>
         <p>Sube o arrastra la imagen principal. Colócala donde quieras; los cortes se ven, pero se hacen al descargar.</p>
         <div className="factory-step-mini-actions">
-          <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=8}>
+          <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=MAX_CAROUSEL_SLIDES}>
             <Copy size={16}/> Duplicar slide {i+1}
           </button>
           <button type="button" className="btn ghost factory-free-create" onClick={()=>{
@@ -1604,7 +1605,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <div className="factory-section"><strong>Texto por slide</strong><span>{slides.length} slides · Editables</span></div>
         <div className="factory-slide-strip">
           {slides.map((s,n)=><button key={s.key} className={'factory-thumbnail '+(n===i?'selected':'')} onClick={()=>setCurrent(n)}><small>{String(n+1).padStart(2,'0')}</small><strong>{s.title||'New slide'}</strong><span>Lienzo libre · editable</span></button>)}
-          {slides.length<8&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
+          {slides.length<MAX_CAROUSEL_SLIDES&&<button className="factory-add" onClick={insert}><Plus size={20}/> Add slide</button>}
         </div>
         <div className="factory-panel">
                   <label>Tipografía principal<select aria-label="Tipografía del carrusel" value={style.font} onChange={e=>setArtStyle({font:e.target.value as CarouselStyle['font']})}>
@@ -1638,8 +1639,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           {slide.description.trim().length>210&&<div className="factory-text-overflow" role="status">
             <strong>Este texto podría quedar cortado en el PNG.</strong>
             <p>No se borra nada: puedes dividirlo para que se lea completo.</p>
-            {slides.length<8?<button type="button" onClick={splitDescription}>Dividir sin perder frases <ArrowRight size={14}/></button>:
-              <small>Hay ocho slides. Acorta el texto antes de descargar.</small>}
+            {slides.length<MAX_CAROUSEL_SLIDES?<button type="button" onClick={splitDescription}>Dividir sin perder frases <ArrowRight size={14}/></button>:
+              <small>Hay diez slides. Acorta el texto antes de descargar.</small>}
           </div>}
            <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
@@ -1658,7 +1659,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
 
           </details>
           <button type="button" className="btn ghost factory-duplicate-slide" onClick={duplicateSlide}
-            disabled={slides.length>=8}><Copy size={15}/> Duplicar este slide</button>
+            disabled={slides.length>=MAX_CAROUSEL_SLIDES}><Copy size={15}/> Duplicar este slide</button>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
         </div>
 
