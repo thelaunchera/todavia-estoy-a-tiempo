@@ -136,7 +136,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
     </>}
     <details className="ps-output"><summary>{en?'Preview full prompt':'Ver prompt completo'} · {compiled.length} {en?'characters':'caracteres'}</summary><div><strong>{en?'Full prompt':'Prompt completo'}</strong></div>
      <textarea aria-label="Prompt final" rows={7} value={compiled} readOnly onFocus={e=>e.currentTarget.select()}/>
-     <small>{en?'We preserve your instructions first. Realism is guidance, not a guarantee; exact logos and faces are best kept as original image layers.':'Tus instrucciones van primero. El realismo es una guía, no una garantía; logos y rostros exactos se conservan mejor como capas originales.'}</small>
+     <small>{selectedKind==='text'?(en?'Adapt the source prompt to your actual business; confirm every claim.':'Personaliza los campos para tu negocio y revisa las afirmaciones antes de publicar.'):en?'We preserve your instructions first. Realism is guidance, not a guarantee; exact logos and faces are best kept as original image layers.':'Tus instrucciones van primero. El realismo no está garantizado; es mejor conservar logos y rostros originales como capas.'}</small>
     </details>
     <label>{en?'Save as':'Nombre para guardar'}<input value={customTitle} onChange={e=>setCustomTitle(e.target.value)} placeholder={en?'My favorite prompt':'Mi prompt favorito'} maxLength={100}/></label>
     <div className="ps-actions">
