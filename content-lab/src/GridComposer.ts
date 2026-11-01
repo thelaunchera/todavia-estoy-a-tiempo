@@ -75,34 +75,43 @@ function drawWrapped(ctx:CanvasRenderingContext2D,value:string,x:number,y:number
 }
 function geometry(ctx:CanvasRenderingContext2D,layout:Layout,W:number,H:number,paper:string,accent:string,ink:string){
  const box=(x:number,y:number,w:number,h:number,color:string)=>{ctx.fillStyle=color;ctx.fillRect(W*x,H*y,W*w,H*h)};
+ // The finished PNG respects the same photo / type zones shown in the gallery.
  box(0,0,1,1,paper);
  switch(layout.shape){
   case 'solid':box(0,0,1,1,accent);break;
   case 'split':box(0,0,.5,1,accent);break;
-  case 'double':box(0,0,.6,1,accent);break;
-  case 'bottomPanel':box(0,.77,1,.23,paper);break;
-  case 'dark':box(0,0,1,1,'#191919');break;
+  case 'double':box(.61,0,.39,1,accent);break;
+  case 'bottomPanel':box(0,.76,1,.24,paper);break;
+  case 'dark':box(0,0,1,1,'#19232a');break;
  }
- const stroke=(x:number,y:number,w:number,h:number)=>{ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.strokeRect(W*x,H*y,W*w,H*h)};
+ // One restrained art-direction accent per format, not Canva-style decorations.
  switch(layout.accent){
-  case 'rule':box(.07,.93,.86,.004,accent);break;
-  case 'corner':box(.05,.07,.22,.008,accent);break;
-  case 'frame':stroke(.06,.06,.88,.88);break;
-  case 'circles':for(const [x,y,r] of [[.13,.68,.12],[.77,.15,.1],[.87,.89,.07]]){ctx.beginPath();ctx.fillStyle=paper;ctx.arc(W*x,H*y,W*r,0,Math.PI*2);ctx.fill()}break;
-  case 'bar':box(0,.08,.08,.77,ink);break;
-  case 'sunburst':ctx.strokeStyle=accent;ctx.lineWidth=2;for(let i=0;i<18;i++){const a=i*Math.PI/9;ctx.beginPath();ctx.moveTo(W*(.5+.18*Math.cos(a)),H*(.58+.18*Math.sin(a)));ctx.lineTo(W*(.5+.27*Math.cos(a)),H*(.58+.27*Math.sin(a)));ctx.stroke()}break;
-  case 'stripe':box(.46,0,.018,1,ink);break;
-  case 'masthead':box(.05,.045,.9,.004,accent);break;
-  case 'arch':ctx.strokeStyle=accent;ctx.lineWidth=12;ctx.beginPath();ctx.ellipse(W*.5,H*.58,W*.38,H*.38,0,Math.PI,0,true);ctx.stroke();break;
-  case 'spotlight':ctx.save();const grad=ctx.createRadialGradient(W*.5,H*.62,W*.05,W*.5,H*.62,W*.65);grad.addColorStop(0,accent);grad.addColorStop(1,'#191919');ctx.fillStyle=grad;ctx.fillRect(0,H*.25,W,H*.75);ctx.restore();break;
-  case 'orbits':ctx.strokeStyle=accent;ctx.lineWidth=4;for(const r of [.25,.34,.43]){ctx.beginPath();ctx.ellipse(W*.55,H*.55,W*r,H*r*.73,0,0,Math.PI*2);ctx.stroke()}break;
-  case 'mega':for(let i=0;i<6;i++)box(.07,.75+i*.025,.84,.006,ink);break;
-  case 'diagonal':ctx.fillStyle=accent;ctx.beginPath();ctx.moveTo(W*.35,0);ctx.lineTo(W,0);ctx.lineTo(0,H);ctx.lineTo(0,H*.6);ctx.closePath();ctx.fill();break;
-  case 'soft':ctx.fillStyle=accent+'88';ctx.beginPath();ctx.ellipse(W*.52,H*.62,W*.39,H*.25,0,0,Math.PI*2);ctx.fill();break;
-  case 'cutout':box(.1,.18,.7,.7,ink);break;
-  case 'pill':ctx.strokeStyle=accent;ctx.lineWidth=5;ctx.beginPath();ctx.roundRect(W*.07,H*.07,W*.86,H*.85,Math.min(W,H)*.035);ctx.stroke();break;
+  case 'rule':box(.08,layout.name==='Macro Texture'?.75:.71,.22,.0015,accent);break;
+  case 'corner':box(.06,.047,.2,.0025,accent);break;
+  case 'frame':box(.07,.075,.3,.0035,ink);break;
+  case 'circles':{
+   ctx.strokeStyle=accent;ctx.lineWidth=Math.max(1,W*.002);ctx.beginPath();
+   ctx.arc(W*.14,H*.79,W*.055,0,Math.PI*2);ctx.stroke();break;
+  }
+  case 'bar':box(.065,.075,.16,.0025,accent);break;
+  case 'sunburst':box(.075,.32,.28,.002,accent);break;
+  case 'stripe':box(.498,0,.0015,1,ink);break;
+  case 'masthead':box(.08,.075,.84,.0015,ink);break;
+  case 'arch':box(.13,.365,.2,.0015,accent);break;
+  case 'spotlight':{
+   const g=ctx.createRadialGradient(W*.5,H*.64,W*.08,W*.5,H*.64,W*.65);
+   g.addColorStop(0,'#2a424b');g.addColorStop(1,'#19232a');
+   ctx.fillStyle=g;ctx.fillRect(0,H*.4,W,H*.46);break;
+  }
+  case 'orbits':box(.08,.715,.24,.0015,accent);break;
+  case 'mega':box(.07,.52,.84,.002,ink);break;
+  case 'diagonal':box(.08,.6,.25,.002,accent);break;
+  case 'soft':box(.4,.095,.2,.0015,accent);break;
+  case 'cutout':box(.612,.18,.0018,.62,accent);break;
+  case 'pill':box(.12,.09,.18,.0015,accent);break;
  }
 }
+
 async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:number,w:number,h:number,zoom:number,offsetX:number,offsetY:number){
  if(!src)return false;
  const im=new Image();im.src=src;
