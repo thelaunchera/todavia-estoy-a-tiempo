@@ -73,7 +73,12 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const accent=/^#[0-9a-f]{6}$/i.test(opts.accent||'')?opts.accent!:brand.color;
- if(opts.usePageBackgrounds){
+ // Library images applied across all slides must keep their original 4:5
+ // framing and full opacity; a 4-slide panoramic crop loses bows and lace.
+ const sharedImageIsBackground=Boolean(opts.assetId&&pages.every(
+   page=>page.backgroundImageId===opts.assetId
+ ));
+ if(opts.usePageBackgrounds||sharedImageIsBackground){
     // Each slide has its own backdrop; panorama layers still span all slides.
     for(let i=0;i<total;i++){
       const page=pages[i];
@@ -108,7 +113,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
      ctx.restore();
    }
  }else paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'brand',accent,brand.background);
- if(!opts.usePageBackgrounds&&opts.assetId&&images[opts.assetId]){
+ if(!opts.usePageBackgrounds&&!sharedImageIsBackground&&opts.assetId&&images[opts.assetId]){
   const im=await load(images[opts.assetId]);const ratio=Math.max(wide.width/im.naturalWidth,H/im.naturalHeight);
   const sw=wide.width/ratio,sh=H/ratio;
   ctx.save();ctx.globalAlpha=.27;
