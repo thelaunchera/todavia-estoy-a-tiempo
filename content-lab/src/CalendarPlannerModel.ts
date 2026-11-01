@@ -49,7 +49,7 @@ export function plannedItems(posts:CalendarPost[],grids:CalendarGrid[],brandId:s
  const fromGrids=grids.filter(g=>g.brandId===brandId).flatMap(g=>
   g.posts.flatMap((p,i)=>validDate(p.scheduledDate||'')?[{
    id:'grid:'+g.id+':'+i,kind:'grid' as const,brandId,
-   title:p.headline||g.title+' · '+(i+1),format:'1 Photo → 9 Posts',
+   title:p.headline||g.title+' · '+(i+1),format:'Post del grid',
    date:p.scheduledDate!,time:validTime(p.scheduledTime||'')?p.scheduledTime!:'09:00',
    status:p.planningStatus==='published'?'published' as const:'planned' as const,
    assetId:p.assetId||'',gridId:g.id,tileIndex:i
