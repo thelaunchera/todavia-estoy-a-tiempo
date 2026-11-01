@@ -4,6 +4,8 @@ import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import ContentCalendar from './ContentCalendar';
+import ScheduleFromEditor from './ScheduleFromEditor';
+import AccountSettings from './AccountSettings';
 import PromptStudio from './PromptStudio';
 import IdeaBank, {type Idea} from './IdeaBank';
 import './PromptStudio.css';
@@ -103,7 +105,7 @@ type Post = {
   designData?: string;
 };
 type Asset = LibraryAsset;
-type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'calendar' | 'prompt-studio' | 'idea-bank' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
+type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'calendar' | 'prompt-studio' | 'idea-bank' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds' | 'settings';
 const angles = [
   'Pain point',
   'Educational',
@@ -115,7 +117,7 @@ const angles = [
 const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'home', title: 'Overview', icon: LayoutDashboard },
   { id: 'create', title: 'Posts · 4:5', icon: WandSparkles },
-  { id: 'vertical', title: 'Reels e historias · 9:16', icon: Film },
+  { id: 'vertical', title: 'Portadas de reels e historias · 9:16', icon: Film },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
   { id: 'calendar', title: 'Calendario editorial', icon: CalendarDays },
@@ -127,13 +129,14 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'posts', title: 'My content', icon: FolderOpen },
   { id: 'media', title: 'Media library', icon: Images },
   { id: 'formats', title: 'Creative formats', icon: Layers3 },
-  { id: 'brands', title: 'Brand settings', icon: Settings2 },
+  { id: 'brands', title: 'Marcas y estilo', icon: Palette },
+  { id: 'settings', title: 'Ajustes', icon: Settings2 },
 ];
 const navGroups:{title:string;items:Tab[]}[]=[
   {title:'CREAR',items:['home','factory','vertical','create','grid']},
   {title:'TUS RECURSOS',items:['media','backgrounds','stickers','formats']},
   {title:'INSPIRACIÓN',items:['idea-bank','prompt-studio','prompts']},
-  {title:'GUARDAR Y ORGANIZAR',items:['calendar','posts','brands']},
+  {title:'GUARDAR Y ORGANIZAR',items:['calendar','posts','brands','settings']},
 ];
 const newPost = (brandId: string): Post => ({
   brandId,
@@ -1193,7 +1196,7 @@ function App() {
               <div className="lab-create-choices">
                 <button type="button" onClick={()=>{createMenuRef.current!.open=false;start()}}>{loginLanguage==='es'?'Post · 4:5':'Post · 4:5'}</button>
                 <button type="button" onClick={()=>{createMenuRef.current!.open=false;startFactory()}}>{loginLanguage==='es'?'Carrusel · 4:5':'Carousel · 4:5'}</button>
-                <button type="button" onClick={()=>{createMenuRef.current!.open=false;startVertical('Reel')}}>Reel · 9:16</button>
+                <button type="button" onClick={()=>{createMenuRef.current!.open=false;startVertical('Reel')}}>Portada de reel · 9:16</button>
                 <button type="button" onClick={()=>{createMenuRef.current!.open=false;startVertical('Story')}}>{loginLanguage==='es'?'Historia · 9:16':'Story · 9:16'}</button>
               </div>
             </details>
@@ -2060,7 +2063,7 @@ function App() {
           when the page content or browser controls resize. */}
       {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
                 {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
-                    {id:'vertical',label:'Reels',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
+                    {id:'vertical',label:'Portadas',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
                     {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
                   .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
                     className={tab===item.id?'active':''} onClick={()=>item.id==='factory'
