@@ -129,10 +129,10 @@ test('new buyers get an isolated neutral brand, never admin seed brands',()=>{
  assert.ok(c.includes("content-lab-credit-change"));
 });
 
-test('approved freebie restores the full-bleed dark editorial matcha hero and carousel',()=>{
+test('approved freebie keeps matcha carousel and compact photo-first hero on mobile',()=>{
  const page=source('public/prompts/index.html');
  for(const required of [
-  'Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.',
+  'Una foto.<br><em>Ocho ideas.</em>',
   'editorial-hero hero-with-carousel',
   'id="hero-featured"',
   'id="hero-prev"',
@@ -150,5 +150,11 @@ test('approved freebie restores the full-bleed dark editorial matcha hero and ca
  ])assert.ok(page.includes(required),required);
  for(let i=1;i<=8;i++)assert.ok(page.includes('matcha-'+String(i).padStart(2,'0')+'.jpg'));
  assert.ok(page.includes('object-fit:cover'));
+ assert.ok(page.includes('Hero móvil editorial compacto'),'Diseño móvil compacto activado');
+ assert.ok(page.includes('grid-template-areas:"matcha-photo" "matcha-copy"'),'Foto separada del copy');
+ assert.ok(page.includes('height:clamp(210px,58vw,295px)'),'Altura de foto limitada');
+ assert.ok(page.includes('min-height:0'),'El hero móvil no se fuerza a una tarjeta larga');
+ assert.ok(page.includes('top:50%'),'Las flechas se mantienen sobre la foto');
+
  assert.ok(page.includes('Funciona con cualquier producto'));
 });
