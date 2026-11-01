@@ -5,6 +5,7 @@ import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
 import { assetCategory, displayAssetName, type LibraryAsset } from './MediaAsset';
 import './PanoramaEditor.css';
+import type {StickerCopyResult} from './CarouselStickerCopy';
 
 type Point = {x: number; y: number};
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
   onAddLayer: (kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>void;
+  onCopySticker?:(id:string,targetIndex:number)=>StickerCopyResult;
   onUndo:()=>void;onRedo:()=>void;canUndo:boolean;canRedo:boolean;
   onAdd: (assetId: string, point: Point) => void;
   onRemove: (id: string) => void;
@@ -24,7 +26,7 @@ type Props = {
 };
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
-  onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry,
+  onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [libraryOpen,setLibraryOpen]=useState(false);
@@ -123,6 +125,7 @@ export default function PanoramaEditor({
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} ratio={count * 1080 / 1350}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
+         onCopySticker={onCopySticker}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
       <details className="panorama-text-manager"><summary>Textos del carrusel ({textElements.length}) · borrar</summary>
         <p>Los textos se eliminan aquí; las fotos y stickers se borran desde el lienzo o su lista.</p>
