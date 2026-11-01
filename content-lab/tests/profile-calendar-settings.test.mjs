@@ -31,7 +31,7 @@ test('Month view visibly distinguishes reel cover from video editing',()=>{
  const calendar=read('ContentCalendar.tsx'),model=read('CalendarPlannerModel.ts');
  const app=read('App.tsx'),vertical=read('VerticalStudio.tsx');
  assert.ok(model.includes("return 'reel-cover'"));
- assert.ok(model.includes("reel-cover:'Portada reel'"));
+ assert.ok(model.includes("'reel-cover':'Portada reel'"));
  assert.ok(calendar.includes('contentKindShort(p.format)'));
  assert.ok(calendar.includes('contentKindLabel(p.format,locale)'));
  assert.ok(calendar.includes('lab-calendar-format-legend'));
