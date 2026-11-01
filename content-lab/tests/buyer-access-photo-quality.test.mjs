@@ -17,8 +17,8 @@ test('High quality uploads are preserved instead of flattened to 1.8MP at 76% JP
 });
 test('Grid editor preview is sharp and PNG-based, while export stays genuine resolution',()=>{
  const editor=read('../src/GridVisualEditor.tsx'),grid=read('../src/BrandGrid.tsx');
- assert.ok(editor.includes('previewCanvas.width=720'));
- assert.ok(editor.includes("previewCanvas.toDataURL('image/png')"));
+ assert.ok(editor.includes('thumbnail.width=720'));
+ assert.ok(editor.includes("thumbnail.toDataURL('image/png')"));
  assert.ok(!editor.includes("canvas.toDataURL('image/jpeg',.72)"));
  assert.ok(grid.includes("a.href=canvas.toDataURL('image/png')"));
 });
