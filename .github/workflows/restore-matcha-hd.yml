@@ -1,0 +1,57 @@
+name: Restaurar originales HD de matcha
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/restore-matcha-hd.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Descargar ocho originales de alta resolución
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/8f31515d-e503-4b32-bed2-ac74b67ea227.jpg' -o content-lab/public/prompts/matcha-01.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/6b6b0b66-a318-4458-b914-c54dbb8e604b.jpg' -o content-lab/public/prompts/matcha-02.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/0f02df89-9891-4925-9f15-7ba322b01029.jpg' -o content-lab/public/prompts/matcha-03.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/85440345-3b6b-46b9-8d3c-ff7c488a1df4.jpg' -o content-lab/public/prompts/matcha-04.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/e006bf16-a27d-4054-ab9b-66aa1ddc141d.jpg' -o content-lab/public/prompts/matcha-05.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/5bd5a2a9-8fbe-40bd-bd3e-dba453b13b22.jpg' -o content-lab/public/prompts/matcha-06.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/5647834c-962c-481c-b56b-4e1ea312fc4c.jpg' -o content-lab/public/prompts/matcha-07.jpg
+          curl --fail --show-error --silent --location --retry 3 --max-time 60 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/16a108fe-815e-436b-b885-b491f963fdf6.jpg' -o content-lab/public/prompts/matcha-08.jpg
+          python3 - <<'PY'
+          from pathlib import Path
+          from struct import unpack
+          for p in sorted(Path('content-lab/public/prompts').glob('matcha-??.jpg')):
+              data=p.read_bytes()
+              if len(data)<100000 or not data.startswith(b'\\xff\\xd8'):
+                  raise SystemExit(f'Original HD inválido: {p}, {len(data)} bytes')
+              print(p, len(data), 'bytes')
+          PY
+      - name: Guardar originales en GitHub para servirlos desde Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content-lab/public/prompts/matcha-??.jpg
+          if git diff --cached --quiet; then
+            echo 'Los ocho originales ya están guardados.'
+            exit 0
+          fi
+          git commit -m 'fix(content-lab): restore eight full-resolution matcha originals'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          echo 'No se pudo publicar originales por cambios concurrentes' >&2
+          exit 1
