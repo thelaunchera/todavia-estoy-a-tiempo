@@ -46,14 +46,20 @@
 .fg-artwork{position:absolute;z-index:1;inset:0;pointer-events:none}
 .fg-artwork span{display:block;position:absolute}
 
-/* 01: the reference in architectural form: vertical lettering behind a hero image. */
-.fg-variant-0{background:#fff;color:#581b2b}
-.fg-variant-0 .fg-preview-backtype span{writing-mode:vertical-rl;transform:rotate(180deg);left:-2%;
- top:9%;font-size:25cqw;letter-spacing:-.05em;color:#5b1929}
-.fg-variant-0 .fg-preview-photo{clip-path:polygon(12% 0,100% 0,100% 100%,0 100%,0 20%)}
-.fg-variant-0 .fg-preview-copy strong{font:900 8.3cqw/.92 'Arial Black',Arial,sans-serif;
- letter-spacing:-.06em;text-transform:uppercase;color:#581b2b}
-.fg-variant-0 .fg-overline{color:#581b2b}
+/* 01: a single strong photo and a deliberately separate editorial headline.
+   No vertical ghost word or decorative label may overlap the real copy. */
+.fg-variant-0{background:#fffdfa;color:#552333}
+.fg-variant-0 .fg-preview-backtype{display:none}
+.fg-variant-0 .fg-preview-photo{clip-path:none;border-radius:1px;box-shadow:none}
+.fg-variant-0 .fg-preview-photo img{object-position:50% 50%;filter:saturate(.91) contrast(1.03)}
+.fg-variant-0 .fg-preview-copy{justify-content:center;gap:3px;overflow:hidden}
+.fg-variant-0 .fg-overline{font:800 2cqw/1.15 'Futura',Arial,sans-serif;
+ letter-spacing:.16em;color:#7b4350}
+.fg-variant-0 .fg-preview-copy strong{font:900 8.4cqw/.96 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.065em;text-transform:uppercase;color:#552333;text-wrap:balance}
+.fg-variant-0 .fg-preview-copy small{font:500 2.4cqw/1.25 'Futura',Arial,sans-serif;color:#54545a}
+.fg-variant-0 .fg-brandline{color:#6c4f58}
+.fg-variant-0 .fg-number{color:#7c8183}
 
 /* 02: campaign poster, giant lettering behind the lower-right image. */
 .fg-variant-1{background:#ebe8dd;color:#142328}
