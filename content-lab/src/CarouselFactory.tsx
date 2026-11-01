@@ -484,7 +484,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(!part.title.trim())result.push('Slide '+(n+1)+': falta el titular.');
     if(part.title.length>(part.layout==='split'?95:part.layout==='cover'?115:155))result.push('Slide '+(n+1)+': titular largo, revisa la vista previa.');
     if(['photo','split'].includes(part.layout)&&!part.assetId)result.push('Slide '+(n+1)+': diseño fotográfico sin foto.');
-    if(part.description.length>260)result.push('Slide '+(n+1)+': texto secundario demasiado largo.');
+    if(part.description.length>210)result.push('Slide '+(n+1)+': texto de apoyo largo; podría quedar cortado en el PNG. Usa «Dividir texto».');
     return result;
   });
   const renderAllSlides=async()=>{
@@ -501,20 +501,40 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);setOverview([]);
   };
+  const previewCache=useRef<Map<string,string>>(new Map());
   const buildOverview=async()=>{
     const previews:string[]=[];
-    const all=await renderAllSlides();
-    for(let n=0;n<all.length;n++){
-      const canvas=all[n];
+    const independent=!style.seamlessEnabled&&!(style.panoramaLayers||[]).length;
+    const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
+    if(independent&&required.some(id=>id&&!images[id]))
+      throw Error('Una imagen todavía está cargando. Intenta previsualizar de nuevo.');
+    // Individual slides do not share panorama layers: regenerate only changed
+    // slides, while preserving the same 1080×1350 renderer as the final export.
+    const all=independent?null:await renderAllSlides();
+    for(let n=0;n<slides.length;n++){
+      const key=independent?JSON.stringify({
+        index:n,total:slides.length,slide:slides[n],style,brand,
+        loaded:required.map(id=>Boolean(!id||images[id]))
+      }):'';
+      const cached=independent?previewCache.current.get(key):undefined;
+      if(cached){previews.push(cached);continue;}
+      const canvas=independent
+        ? await drawSlide(slides[n],n,slides.length,brand,images,style)
+        : all![n];
       const thumb=document.createElement('canvas');thumb.width=900;thumb.height=1125;
       const context=thumb.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
-      context.imageSmoothingEnabled=true;
-      context.imageSmoothingQuality='high';
+      context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
       context.drawImage(canvas,0,0,thumb.width,thumb.height);
-      // PNG lossless, same fully composited source as the 1080 × 1350 export.
-      previews.push(thumb.toDataURL('image/png'));
+      const png=thumb.toDataURL('image/png');
+      previews.push(png);
+      if(independent)previewCache.current.set(key,png);
       thumb.width=1;thumb.height=1;
       canvas.width=1;canvas.height=1;
+    }
+    while(previewCache.current.size>20){
+      const oldest=previewCache.current.keys().next().value;
+      if(oldest===undefined)break;
+      previewCache.current.delete(oldest);
     }
     return previews;
   };
@@ -833,6 +853,22 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       notify(uploaded.length===1?'Foto añadida. Tócala para moverla o cambiar tamaño.':uploaded.length+' fotos añadidas al carrusel.');
     }
   };
+  const splitDescription=()=>{
+    const content=slide.description.trim();
+    if(content.length<=210)return notify('Este texto cabe mejor en un solo slide.');
+    if(slides.length>=8)return notify('Ya tienes ocho slides. Acorta el texto antes de dividir.');
+    const splitPoint=content.lastIndexOf(' ',205);
+    const position=splitPoint>95?splitPoint:205;
+    const first=content.slice(0,position).trim(),rest=content.slice(position).trim();
+    if(!rest)return;
+    const newSlide:Slide={...makeSlide(slides.length,''),
+      key:'slide-'+crypto.randomUUID(),description:rest,layout:'statement',
+      backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||'',
+      backgroundColor:slide.backgroundColor,backgroundGradient:slide.backgroundGradient};
+    setAll([...slides.slice(0,i),{...slide,description:first},newSlide,...slides.slice(i+1)]);
+    setCurrent(i+1);
+    notify('Dividido en dos slides. Todo el texto se mantiene editable.');
+  };
   const insert=()=>{
     if(slides.length>=8)return notify('Máximo ocho slides.');
     const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout,
@@ -970,6 +1006,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }catch(e){showError(e)}finally{setBusy('');}
   };
   const exportAll=async()=>{
+    if(slides.some(item=>item.description.trim().length>210||item.title.trim().length>155)&&
+      !window.confirm('Hay textos largos que podrían cortarse en el PNG. ¿Exportar de todas formas?'))return;
     setBusy('all');
     try{
       const result:{name:string,url:string}[]=[];
@@ -1213,6 +1251,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             <span className="factory-title-font-example" style={{fontFamily:carouselFontFamily(slide.titleFont||style.font,brand.headingFont)}}>{slide.title.slice(0,64)||'Your story starts here.'}</span>
           </div>
           <label>Texto de apoyo</label><textarea rows={3} value={slide.description} maxLength={1000} onChange={e=>replace({description:e.target.value})} placeholder="Add a short explanation or 3 lines of practical advice."/>
+          {slide.description.trim().length>210&&<div className="factory-text-overflow" role="status">
+            <strong>Este texto podría quedar cortado en el PNG.</strong>
+            <p>No se borra nada: puedes dividirlo para que se lea completo.</p>
+            {slides.length<8?<button type="button" onClick={splitDescription}>Dividir sin perder frases <ArrowRight size={14}/></button>:
+              <small>Hay ocho slides. Acorta el texto antes de descargar.</small>}
+          </div>
            <label>Acento de este slide (opcional)</label><select aria-label="Color de marca de este slide" value={slide.accentIndex||0} onChange={e=>replace({accentIndex:Number(e.target.value)})}>
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
