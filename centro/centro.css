@@ -339,3 +339,20 @@ body.modal-open{overflow:hidden}
 .lab-compact .product-details-actions{gap:12px}
 .lab-compact .product-details-back{display:none}
 .lab-compact .product-details-cta{width:100%;text-align:center}
+
+/* Checkout summaries: keep the decision short, with full policies one tap away. */
+.product-details-body{padding-top:20px;padding-bottom:10px}
+.product-details-overline{display:none}
+.product-details-summary{margin-bottom:12px;line-height:1.55}
+.product-details-meta{margin-bottom:10px}
+.product-details-section{padding:12px 0}
+.product-details-section h3{font-size:19px;margin-bottom:7px}
+.product-details-section ul{gap:6px}
+.product-details-section li{line-height:1.45}
+.product-details-note{padding:11px 13px;line-height:1.5;margin:5px 0 10px}
+.product-legal-disclosure{padding:10px 13px;margin:7px 0 4px;background:#f5f8f7}
+.product-legal-disclosure summary{cursor:pointer;font-size:12px;font-weight:800;color:#31556a;list-style-position:inside}
+.product-legal-disclosure[open] summary{margin-bottom:9px}
+.product-legal-disclosure p{line-height:1.5;margin:0 0 7px}
+.lab-compact .product-legal-disclosure{padding:10px 13px;background:#f5f8f7;border:1px solid #d7e2e5}
+@media(max-width:690px){.product-details-meta{grid-template-columns:1fr 1fr}.product-details-meta>div{padding:10px}.product-details-meta strong{font-size:11px}.product-details-body{padding:17px 19px 9px}.product-details h2{font-size:32px}.product-details-summary{font-size:13px}.product-details-section{padding:10px 0}.product-details-section h3{font-size:18px}.product-details-actions{padding:10px 19px}.lab-compact .product-details-summary{font-size:17px}}
