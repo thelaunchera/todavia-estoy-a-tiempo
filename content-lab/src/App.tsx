@@ -1283,7 +1283,7 @@ function App() {
                       {loginLanguage==='es'?'Carruseles':'Carousels'}
                     </button>
                     <button type="button" className="lab-greeting-secondary" onClick={()=>startVertical()}>
-                      <Film size={16}/>{loginLanguage==='es'?'Reels e historias':'Reels and Stories'}
+                      <Film size={16}/>{loginLanguage==='es'?'Portadas de reels e historias':'Reel covers and stories'}
                     </button>
                   </div>
                 </div>
@@ -1725,7 +1725,7 @@ function App() {
                 <aside className="visual cover-studio">
                   <div className="cover-studio-heading">
                     <div className="eyebrow">{loginLanguage==='es'?'VISTA PREVIA':'PREVIEW'}</div>
-                    <h3>{editor.format==='Reel'?'Reel':editor.format==='Story'?'Story':loginLanguage==='es'?'Tu diseño':'Your design'}</h3>
+                    <h3>{editor.format==='Reel'?(loginLanguage==='es'?'Portada de reel':'Reel cover'):editor.format==='Story'?(loginLanguage==='es'?'Historia':'Story'):loginLanguage==='es'?'Tu diseño':'Your design'}</h3>
                     <small>Instagram · 1080 × {['Reel','Story'].includes(editor.format)?'1920 · 9:16':'1350 · 4:5'} PNG</small>
                   </div>
                   <FreePostStudio post={editor} brand={brand}
