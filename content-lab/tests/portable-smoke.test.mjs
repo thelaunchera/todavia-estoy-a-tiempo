@@ -152,9 +152,12 @@ test('approved freebie keeps matcha carousel and compact photo-first hero on mob
  assert.ok(page.includes('object-fit:cover'));
  assert.ok(page.includes('Hero móvil editorial compacto'),'Diseño móvil compacto activado');
  assert.ok(page.includes('grid-template-areas:"matcha-photo" "matcha-copy"'),'Foto separada del copy');
- assert.ok(page.includes('height:clamp(210px,58vw,295px)'),'Altura de foto limitada');
+ assert.ok(page.includes('height:clamp(285px,85vw,370px)'),'La foto gana un poco de altura sin volver a ser un póster largo');
+ assert.ok(page.includes('object-fit:contain;object-position:center center'),'Los posts completos conservan sus textos y composición');
  assert.ok(page.includes('min-height:0'),'El hero móvil no se fuerza a una tarjeta larga');
  assert.ok(page.includes('top:50%'),'Las flechas se mantienen sobre la foto');
 
+ assert.ok(page.includes('Tus 8 ideas, listas para crear.'),'El formulario tiene una promesa simple');
+ assert.ok(!page.includes('LOS PROMPTS COMPLETOS · ACCESO PRIVADO'),'La portada no incluye un segundo bloque técnico');
  assert.ok(page.includes('Funciona con cualquier producto'));
 });
