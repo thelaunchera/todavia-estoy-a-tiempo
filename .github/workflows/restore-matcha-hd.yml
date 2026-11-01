@@ -31,7 +31,7 @@ jobs:
           from struct import unpack
           for p in sorted(Path('content-lab/public/prompts').glob('matcha-??.jpg')):
               data=p.read_bytes()
-              if len(data)<100000 or not data.startswith(b'\\xff\\xd8'):
+              if len(data)<100000 or not data.startswith(bytes((255,216))):
                   raise SystemExit(f'Original HD inválido: {p}, {len(data)} bytes')
               print(p, len(data), 'bytes')
           PY
