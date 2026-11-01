@@ -103,29 +103,80 @@ html{scroll-behavior:smooth}
 @media(max-width:880px){.editorial-hero{grid-template-columns:1fr;padding:30px;min-height:unset}.hero-art{height:330px;max-width:520px;width:100%;margin:0 auto}.hero-shot-primary{width:210px;height:310px;right:16%}.hero-shot-secondary{width:151px;height:199px;left:15%}.hero-art-back{right:0}.how-strip{display:block}.how-strip p{margin-top:7px}}
 @media(max-width:550px){main{padding-top:13px}.editorial-hero{border-radius:17px;padding:26px 21px 17px;gap:10px}.editorial-hero h1{font-size:clamp(39px,10vw,55px);letter-spacing:-1.5px;margin:17px 0}.hero-lead{font-size:13px;line-height:1.65;margin-bottom:18px}.hero-eyebrow{font-size:9px;letter-spacing:1.1px}.hero-art{height:251px;max-width:350px}.hero-shot-primary{height:228px;width:169px;right:10%;top:8px}.hero-shot-secondary{height:160px;width:119px;left:8%;bottom:2px;border-width:4px}.hero-image-note{font-size:8px;padding:7px 9px;bottom:10px}.hero-art-back{top:8px;font-size:34px}.how-strip{padding:10px 0 20px}.how-strip strong{font-size:22px}.how-strip p{font-size:12px}.offer{grid-template-columns:1fr!important;gap:20px}.offer-buy{max-width:none}.offer .offer-footnote{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Hero editorial: la referencia elegida. Todo el carrusel de matcha vive dentro del hero. */
+.editorial-hero.hero-with-carousel{display:flex;flex-direction:column;align-items:center;gap:0;background:radial-gradient(circle at 86% 50%,#dce4d0 0%,transparent 46%),linear-gradient(160deg,#f7f5ed 0%,#f2f3e8 100%);padding:clamp(26px,4vw,58px);min-height:0;border-radius:24px;text-align:center;overflow:hidden}
+.hero-with-carousel .hero-copy{width:100%;max-width:840px;margin:0 auto;position:relative;z-index:2}
+.hero-with-carousel .hero-eyebrow{justify-content:center;font-size:11px;color:#425b45;letter-spacing:2px}
+.hero-with-carousel .editorial-hero h1,.hero-with-carousel h1{color:#202923;max-width:840px;font-size:clamp(37px,6.6vw,77px);line-height:1.03;letter-spacing:-1.7px;margin:24px auto 20px}
+.hero-with-carousel h1 em{color:#769455}
+.hero-with-carousel .hero-lead{max-width:630px;margin:0 auto 22px;color:#4e5a4a;line-height:1.68;font-size:clamp(14px,1.9vw,17px)}
+.hero-with-carousel .hero-start{background:#25482f;color:#fff!important;font-size:14px;min-height:53px;padding:16px 32px;box-shadow:0 8px 25px #19372114}
+.hero-with-carousel .hero-carousel{width:min(100%,800px);margin:27px auto 0;position:relative}
+.hero-featured-wrap{height:clamp(310px,48vw,520px);width:100%;position:relative;display:grid;place-items:center;isolation:isolate}
+.hero-featured-wrap:before{content:'';position:absolute;z-index:-1;inset:12% 16% 1%;border-radius:55% 55% 18% 18%;background:linear-gradient(130deg,#93a076,#607b52 62%,#3f5d3d);box-shadow:inset 0 5px 35px #1c43181a}
+.hero-leaf{position:absolute;z-index:-1;width:170px;height:220px;filter:blur(3px);opacity:.45;background:radial-gradient(ellipse at 50% 18%,#4e87412a 2%,transparent 48%);transform:rotate(-35deg)}
+.hero-leaf-left{left:-6%;top:6%}
+.hero-featured-photo{position:relative;width:min(75%,330px);height:100%;max-height:485px;filter:drop-shadow(0 18px 24px #23331d36);border-radius:17px;overflow:hidden;background:#6b8045;box-shadow:0 0 0 5px #f9faf0}
+.hero-featured-photo img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;transition:opacity .38s ease,transform .85s ease;transform:scale(1);image-rendering:auto}
+.hero-featured-photo img.is-changing{opacity:.45;transform:scale(1.015)}
+.hero-photo-marker{position:absolute;bottom:22px;right:clamp(0px,5%,43px);background:#eaf0dcf0;color:#355438;padding:10px 13px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:1.2px;box-shadow:0 3px 13px #152a171c}
+.hero-slider-controls{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:10px;max-width:100%}
+.hero-arrow{display:grid;place-items:center;flex:0 0 38px;height:38px;border:1px solid #dce6d8;border-radius:50%;background:#fff;color:#244430;font-size:29px;line-height:1;box-shadow:0 4px 12px #1f411217}
+.hero-arrow:focus-visible,.hero-thumb:focus-visible,.hero-dot-button:focus-visible{outline:3px solid #4c8f75;outline-offset:3px}
+.hero-thumbnails{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;max-width:calc(100% - 92px);overflow-x:auto;scrollbar-width:none;padding:5px 3px;scroll-snap-type:x mandatory}
+.hero-thumbnails::-webkit-scrollbar{display:none}
+.hero-thumb{flex:0 0 clamp(42px,8.4vw,76px);width:clamp(42px,8.4vw,76px);height:clamp(51px,11.1vw,93px);padding:0;border:2px solid transparent;border-radius:10px;background:#b6c4a2;overflow:hidden;opacity:.65;scroll-snap-align:center;transition:opacity .2s ease,border-color .2s ease,box-shadow .2s ease}
+.hero-thumb.is-active{opacity:1;border-color:#fff;box-shadow:0 0 0 2px #4d7043,0 4px 12px #324d2844}
+.hero-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.hero-pagination{display:flex;align-items:center;justify-content:center;gap:9px;margin:13px 0 0}
+.hero-dot-button{width:8px;height:8px;border:0;border-radius:50%;background:#c4d0b8;padding:0}
+.hero-dot-button.is-active{background:#2d5a38;transform:scale(1.2)}
+.hero-carousel-caption{margin:12px 0 0;color:#586e59;font-size:11px;line-height:1.6}
+.hero-with-carousel .hero-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;gap:10px;width:min(100%,860px);margin-top:23px;padding:16px;border:1px solid #dce7d7;border-radius:20px;background:#e9eddf80;color:#36513d}
+.hero-benefits span{display:flex;justify-content:center;align-items:center;gap:9px;text-transform:uppercase;font-size:10px;font-weight:750;letter-spacing:.7px;line-height:1.5}
+.hero-benefits b{font-size:22px;font-weight:400;line-height:1}
+@media(max-width:700px){.editorial-hero.hero-with-carousel{padding:27px 14px 22px}.hero-with-carousel h1{font-size:clamp(36px,9vw,56px);letter-spacing:-1.3px}.hero-with-carousel .hero-eyebrow{font-size:9px;letter-spacing:1.1px}.hero-with-carousel .hero-lead{font-size:13px}.hero-featured-wrap{height:360px}.hero-featured-photo{width:min(68%,255px);height:335px}.hero-photo-marker{font-size:8px;bottom:10px;right:0}.hero-thumbnails{justify-content:flex-start}.hero-arrow{flex-basis:34px;height:34px}.hero-with-carousel .hero-benefits{padding:13px 8px;gap:6px}.hero-benefits span{font-size:8px;gap:3px;flex-direction:column;text-align:center}.hero-benefits b{font-size:19px}}
+@media(max-width:380px){.hero-with-carousel h1{font-size:36px}.hero-featured-wrap{height:304px}.hero-featured-photo{height:282px}.hero-thumb{flex-basis:43px;width:43px;height:57px}.hero-slider-controls{gap:5px}}
+@media(prefers-reduced-motion:reduce){.hero-featured-photo img,.hero-thumb{transition:none}}
 </style></head><body>
 <header><strong>content lab<i>.</i></strong><a href="../">Volver al inicio del Lab</a></header>
 <main>
-<section class="editorial-hero" aria-labelledby="hero-title">
+<section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
     <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · INSPIRACIÓN EDITORIAL</span>
-    <h1 id="hero-title">Una foto.<br><em>Ocho formas de</em><br>hacerla destacar.</h1>
-    <p class="hero-lead">No necesitas ocho productos ni una sesión de fotos nueva. Descubre cómo presentar <b>cualquier producto</b> con ocho composiciones que se sienten diferentes.</p>
+    <h1 id="hero-title">Con una sola foto,<br><em>explora 8 formas</em><br>de publicarla.</h1>
+    <p class="hero-lead">Descubre cómo mostrar <b>cualquier producto</b> en ocho composiciones visuales diferentes para tus publicaciones. Aquí usamos matcha como ejemplo.</p>
     <a href="#crear" class="hero-start">Crear mis 8 ideas <span aria-hidden="true">↗</span></a>
-    <span class="hero-subline">Explora las instrucciones sin costo. El editor completo Content Lab cuesta $10.</span>
   </div>
-  <div class="hero-art" aria-label="Ejemplo editorial de matcha en tres composiciones">
-    <div class="hero-art-back" aria-hidden="true">ONE PRODUCT<br><i>EIGHT WAYS</i></div>
-    <div class="hero-shot hero-shot-primary"><img src="./matcha-03.jpg" alt="Diseño editorial de matcha con titular protagonista" fetchpriority="high"></div>
-    <div class="hero-shot hero-shot-secondary"><img src="./matcha-06.jpg" alt="Fotografía de matcha desde arriba"></div>
-    <span class="hero-image-note">EJEMPLO VISUAL / MATCHA</span>
-    <span class="hero-counter">01—08</span>
+  <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
+    <div class="hero-featured-wrap">
+      <div class="hero-leaf hero-leaf-left" aria-hidden="true"></div>
+      <div class="hero-featured-photo">
+        <img id="hero-featured" src="./matcha-05.jpg" alt="Ejemplo editorial de matcha, composición 5 de 8" fetchpriority="high" decoding="async">
+      </div>
+      <span class="hero-photo-marker">EJEMPLO: MATCHA</span>
+    </div>
+    <div class="hero-slider-controls">
+      <button class="hero-arrow" id="hero-prev" type="button" aria-label="Composición anterior">‹</button>
+      <div class="hero-thumbnails" aria-label="Elegir composición visual">
+        <button type="button" class="hero-thumb" data-hero-index="0" aria-label="Ver composición 1 de 8" aria-pressed="false"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="1" aria-label="Ver composición 2 de 8" aria-pressed="false"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="2" aria-label="Ver composición 3 de 8" aria-pressed="false"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="3" aria-label="Ver composición 4 de 8" aria-pressed="false"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb is-active" data-hero-index="4" aria-label="Ver composición 5 de 8" aria-pressed="true"><img src="./matcha-05.jpg" alt="" loading="eager" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="5" aria-label="Ver composición 6 de 8" aria-pressed="false"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="6" aria-label="Ver composición 7 de 8" aria-pressed="false"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="7" aria-label="Ver composición 8 de 8" aria-pressed="false"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"></button>
+      </div>
+      <button class="hero-arrow" id="hero-next" type="button" aria-label="Siguiente composición">›</button>
+    </div>
+    <div class="hero-pagination" aria-label="Posición en el carrusel"><button type="button" class="hero-dot-button" data-hero-dot="0" aria-label="Ir a la foto 1 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="1" aria-label="Ir a la foto 2 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="2" aria-label="Ir a la foto 3 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="3" aria-label="Ir a la foto 4 de 8" aria-current="false"></button><button type="button" class="hero-dot-button is-active" data-hero-dot="4" aria-label="Ir a la foto 5 de 8" aria-current="true"></button><button type="button" class="hero-dot-button" data-hero-dot="5" aria-label="Ir a la foto 6 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="6" aria-label="Ir a la foto 7 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="7" aria-label="Ir a la foto 8 de 8" aria-current="false"></button></div>
+    <p class="hero-carousel-caption">Una foto de producto, ocho maneras de presentarla. <b>Prueba las flechas o desliza las imágenes.</b></p>
   </div>
-</section>
-<div class="how-strip" aria-label="Cómo funciona"><strong>Así de sencillo.</strong><p><b>01</b> Describe tu producto. <span>·</span> <b>02</b> Elige un estilo. <span>·</span> <b>03</b> Copia la instrucción y úsala con tu foto.</p></div>
-<section class="matcha-gallery" aria-label="Ejemplos de ocho composiciones creadas para un producto de matcha">
-  <div class="matcha-gallery-head"><div><span class="eyebrow">MIRA LAS 8 COMPOSICIONES</span><h2>El mismo producto. Otra perspectiva.</h2></div><span class="gallery-marker">EL EJEMPLO ES MATCHA · EL TUYO PUEDE SER CUALQUIERA</span></div>
-  <div class="matcha-window"><div class="matcha-track" aria-hidden="true"><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div></div></div><p class="matcha-caption">Ocho estilos reales de composición. Desliza para explorarlos.</p>
+  <div class="hero-benefits" aria-label="Beneficios">
+    <span><b>▤</b> 8 ideas visuales</span><span><b>ϟ</b> Fácil de adaptar</span><span><b>▧</b> Para cualquier producto</span>
+  </div>
 </section>
 <div id="crear" class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
 <label for="brand">Marca con la que publicarás</label><select id="brand"><option value="tle">The Launch Era · English</option><option value="podcast">Todavía estoy a tiempo · Español</option><option value="other">Otra marca</option></select>
@@ -213,4 +264,41 @@ $('brand').onchange=()=>{const v=$('brand').value;$('brandName').value=v==='tle'
 document.querySelectorAll('input[name=kind]').forEach(x=>x.onchange=render);
 $('photo').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>25000000){alert('Foto mayor de 25MB');return}const u=URL.createObjectURL(f),img=$('preview');img.src=u;img.style.display='block';$('fileSymbol').style.display='none';$('fileLabel').textContent=f.name;img.onload=()=>URL.revokeObjectURL(u);img.onerror=()=>{img.style.display='none';$('fileSymbol').style.display='block';alert('La foto HEIC puede requerir conversión para verse, pero los prompts están disponibles')}};
 render();
+
+// Ocho imágenes independientes, sin collages. Pausa al interactuar o solicitar movimiento reducido.
+(() => {
+ const frame=document.getElementById('hero-featured');
+ const container=document.querySelector('.hero-carousel');
+ const thumbnails=Array.from(document.querySelectorAll('[data-hero-index]'));
+ const dots=Array.from(document.querySelectorAll('[data-hero-dot]'));
+ if(!frame||!container||thumbnails.length!==8)return;
+ const sources=thumbnails.map(button=>button.querySelector('img').getAttribute('src'));
+ let current=4,timeout=0;
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+ let paused=false;
+ const paint=index=>{
+   current=(index+sources.length)%sources.length;
+   frame.classList.add('is-changing');
+   frame.src=sources[current];
+   frame.alt='Ejemplo de publicación para cualquier producto: composición '+(current+1)+' de 8, mostrado con matcha';
+   thumbnails.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-pressed',String(i===current));});
+   dots.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-current',String(i===current));});
+   thumbnails[current].scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'nearest',inline:'nearest'});
+   window.clearTimeout(timeout);
+   timeout=window.setTimeout(()=>frame.classList.remove('is-changing'),310);
+ };
+ const next=dir=>paint(current+dir);
+ document.getElementById('hero-prev').addEventListener('click',()=>next(-1));
+ document.getElementById('hero-next').addEventListener('click',()=>next(1));
+ thumbnails.forEach((b,i)=>b.addEventListener('click',()=>paint(i)));
+ dots.forEach((b,i)=>b.addEventListener('click',()=>paint(i)));
+ let startX=0;
+ container.addEventListener('touchstart',e=>{startX=e.touches[0]?.clientX||0},{passive:true});
+ container.addEventListener('touchend',e=>{const dx=(e.changedTouches[0]?.clientX||0)-startX;if(Math.abs(dx)>45)next(dx>0?-1:1)},{passive:true});
+ container.addEventListener('mouseenter',()=>{paused=true});
+ container.addEventListener('mouseleave',()=>{paused=false});
+ container.addEventListener('focusin',()=>{paused=true});
+ container.addEventListener('focusout',e=>{if(!container.contains(e.relatedTarget))paused=false});
+ window.setInterval(()=>{if(!reduced.matches&&!paused&&!document.hidden)next(1)},5400);
+})();
 </script></body></html>
