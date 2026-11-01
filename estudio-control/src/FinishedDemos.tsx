@@ -60,6 +60,28 @@ const finishedDemos:Demo[]=[
   promptsFor:'aftr'
  } ,
  {
+  id:'jaramillo-boutique',
+  title:'Jaramillo Boutique · Fashion Editorial',
+  category:'Boutique de moda femenina · demo de website y selección de looks',
+  description:'Muestra la identidad editorial de una diseñadora de moda colombiana en EE. UU.: jeans colombianos, outfits de noche, colecciones por temporada, selección de tallas y bolsa de favoritos.',
+  image:'https://thelaunchera.github.io/demo-booking-landing-/jaramillo-boutique/assets/hero-model-v2.webp',
+  url:'https://thelaunchera.github.io/demo-booking-landing-/jaramillo-boutique/',
+  source:'https://github.com/thelaunchera/demo-booking-landing-/tree/demo/jaramillo-boutique/demos/jaramillo-boutique',
+  note:'Vista demostrativa de la boutique: la selección de prendas permite consultar interés, pero no procesa pagos. Disponibilidad, precios definitivos y datos de tiendas requieren confirmación.',
+  kind:'other'
+ },
+ {
+  id:'yummm',
+  title:'YUMMM · Coffee, Bakery & Sweets',
+  category:'Cafetería y bakery · demo de tienda creativa',
+  description:'Concepto original con cafetería, cookies, repostería, vitrina de productos y caja interactiva. Incluye selección de productos, cantidades y subtotal de muestra.',
+  image:'https://thelaunchera.github.io/demo-booking-landing-/yummm/images/01.webp',
+  url:'https://thelaunchera.github.io/demo-booking-landing-/yummm/',
+  source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/yummm',
+  note:'Concepto ficticio; el catálogo y los precios son ilustrativos. No se aceptan pedidos ni pagos reales.',
+  kind:'other'
+ },
+ {
   id:'cb-depot',
   title:'CB Depot · Mobile Detailing',
   category:'Proyecto de cliente · web y reservas de detailing',
@@ -93,7 +115,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, CB Depot y Experience Cleaning. Distingue los conceptos de práctica del proyecto real de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
