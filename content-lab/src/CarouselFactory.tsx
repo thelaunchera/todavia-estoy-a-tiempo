@@ -1698,6 +1698,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <h2>Comprueba el resultado antes de compartirlo.</h2>
         <p>Revisa la portada, el ritmo entre slides, la legibilidad y el último mensaje. Después descarga los PNG.</p>
       </div>
+      <details className="factory-review-notes"><summary>Revisión y destino de publicación (opcional)</summary>
       <div className="factory-review-layout">
         <div className="factory-review-check">
           <strong>Revisión final</strong>
@@ -1725,7 +1726,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
 
       </div>
-            {mobileViewport&&<div className="factory-preview-inline">{renderSwipePreview()}</div>}
+      </details>
+      {mobileViewport&&<div className="factory-preview-inline">{renderSwipePreview()}</div>}
       <div className="factory-step-footer">
         <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a tipografía</button>
         <button type="button" className="btn dark" onClick={()=>setStudioTab('download')}>Continuar a descargar <ArrowRight size={16}/></button>
@@ -1738,8 +1740,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <div className="factory-canvas-exports">
         <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales de 1080 × 1350. Sin líneas de edición.</span></div>
-        <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
-        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar mis PNG <Download size={17}/></button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
         <strong><Check size={15}/> {downloads.length} PNG listos</strong>
@@ -1748,7 +1749,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>}
 
       <div className="factory-step-footer">
-        <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a textos</button>
+        <button type="button" className="btn ghost" onClick={()=>setStudioTab('review')}>Volver a vista previa</button>
         <button type="button" className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
       </div>
 
