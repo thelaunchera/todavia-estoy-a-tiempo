@@ -198,15 +198,33 @@ main{padding-top:8px}
 @media(max-width:780px){.editorial-nav nav{display:none}.editorial-nav .nav-back{padding:10px 12px}.editorial-hero.hero-with-carousel{min-height:620px;padding:34px 27px}.hero-with-carousel .hero-copy{width:100%}.hero-with-carousel h1{font-size:clamp(44px,10vw,68px)}.hero-with-carousel .hero-featured-photo:after{background:linear-gradient(180deg,rgba(11,30,11,.88) 0%,rgba(15,38,11,.78) 41%,rgba(19,45,15,.13) 80%)}.hero-with-carousel .hero-featured-photo img{object-position:60% 60%}.hero-with-carousel .hero-lead{max-width:340px}.hero-with-carousel .hero-arrow{top:72%}.hero-with-carousel .hero-carousel-caption{display:none}.editorial-process{grid-template-columns:1fr;padding:45px 5% 15px;gap:4px}.process-art{height:300px}.all-products{border-radius:16px;padding:18px}.process-cta{margin-bottom:45px}}
 @media(max-width:440px){.editorial-nav .brand-link strong{font-size:21px}.editorial-hero.hero-with-carousel{min-height:580px;padding:27px 21px}.hero-with-carousel h1{font-size:clamp(40px,11vw,51px);letter-spacing:-1px;margin:19px 0}.hero-with-carousel .hero-lead{font-size:13px;max-width:300px}.hero-with-carousel .hero-start{padding:13px 18px;font-size:12px;min-height:49px}.process-art{height:260px}.process-art img{border-width:3px}.all-products{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.hero-with-carousel .hero-featured-photo img{transition:none}}
-.editorial-nav .brand-link{cursor:default;text-decoration:none}.editorial-nav{gap:16px}.editorial-nav nav{margin-left:auto}\n</style></head><body>
-<header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#crear">Herramienta gratis</a><a href="#content-lab">Content Lab</a></nav></header>
+.editorial-nav .brand-link{cursor:default;text-decoration:none}.editorial-nav{gap:16px}.editorial-nav nav{margin-left:auto}\n
+/* Captura voluntaria del freebie — sin exponer las marcas internas */
+.matcha-email-optin{scroll-margin-top:24px;margin:22px 0 42px;padding:clamp(24px,4vw,46px);display:grid;grid-template-columns:minmax(0,.96fr) minmax(0,1fr);align-items:center;gap:clamp(20px,5vw,60px);border-radius:26px;background:#ebeee4;border:1px solid #d7e0d0}
+.matcha-email-optin .hero-eyebrow{color:#526d43;font-size:11px;letter-spacing:.13em}
+.matcha-email-intro h2{font:normal clamp(30px,3.5vw,47px)/1.1 'DM Serif Display',Georgia,serif;margin:14px 0 17px;color:#263d1b}
+.matcha-email-intro p{font-size:14px;max-width:45ch;color:#55624e}
+.matcha-email-form{background:#fff;border:1px solid #d6e0d0;padding:clamp(18px,2.6vw,30px);border-radius:22px;display:grid;gap:11px}
+.matcha-email-form>label{font-weight:700;color:#25351f;font-size:13px}
+.matcha-email-form #matcha-email{height:48px;width:100%;padding:0 15px;border:1px solid #b7c6ad;border-radius:12px;background:#fff;font-size:16px}
+.matcha-email-form .matcha-marketing-consent{display:flex;gap:11px;align-items:flex-start;font-weight:400;line-height:1.55;margin:8px 0}
+.matcha-marketing-consent input{flex:none;width:18px;height:18px;margin-top:3px;accent-color:#263d1b}
+.matcha-email-form .matcha-send-button{background:#29451c;color:#fff;border:0;border-radius:999px;min-height:49px;font-weight:800;padding:13px 20px}
+.matcha-email-form .matcha-send-button:disabled{opacity:.65;cursor:wait}
+.matcha-email-form .matcha-lead-feedback{margin:0;font-size:12px;color:#526751}
+.matcha-email-form small{font-size:11px;color:#68756b;line-height:1.55}
+.matcha-email-form small a{color:#304927;text-underline-offset:2px}
+.matcha-honeypot{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+@media(max-width:780px){.matcha-email-optin{grid-template-columns:1fr;padding:20px;border-radius:21px;gap:18px}.matcha-email-intro h2{font-size:34px}.matcha-email-form{padding:18px}.matcha-email-form .matcha-send-button{width:100%}}
+</style></head><body>
+<header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a><a href="#content-lab">Content Lab</a></nav></header>
 <main>
 <section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
     <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · HERRAMIENTA GRATUITA</span>
     <h1 id="hero-title">Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.</h1>
     <p class="hero-lead">Convierte una sola foto en diferentes ideas visuales para tus publicaciones. <b>Matcha es solo nuestro ejemplo.</b></p>
-    <a href="#crear" class="hero-start">Probar la herramienta gratis <span aria-hidden="true">→</span></a>
+    <a href="#recibir" class="hero-start">Recibir mis 8 ideas gratis <span aria-hidden="true">→</span></a>
   </div>
   <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
     <div class="hero-featured-wrap">
@@ -247,17 +265,27 @@ main{padding-top:8px}
   <div class="process-art" aria-label="Tres ejemplos visuales con matcha"><img src="./matcha-02.jpg?v=hd-20261031" alt="Ejemplo matcha con composición tipográfica abstracta" loading="lazy"><img src="./matcha-05.jpg?v=hd-20261031" alt="Ejemplo matcha en composición editorial" loading="lazy"><img src="./matcha-04.jpg?v=hd-20261031" alt="Ejemplo matcha en primer plano" loading="lazy"></div>
 </section>
 <div class="all-products">🌿 <strong>Funciona con cualquier producto:</strong> bebidas, comida, skincare, ropa, velas, accesorios y mucho más.</div>
-<div class="process-cta"><a href="#crear">Probar ahora gratis <span aria-hidden="true">→</span></a></div>
+<div class="process-cta"><a href="#recibir">Recibir las ocho ideas gratis <span aria-hidden="true">→</span></a></div>
+<section class="matcha-email-optin" id="recibir" aria-labelledby="matcha-email-title">
+<div class="matcha-email-intro"><span class="hero-eyebrow">TU REGALO CREATIVO · GRATIS</span><h2 id="matcha-email-title">Te mando las ocho ideas a tu correo.</h2>
+<p>Una foto de tu producto puede convertirse en ocho publicaciones distintas. Te envío el enlace para que lo pruebes con tu propia marca, sin pagar y sin necesidad de crear una cuenta.</p></div>
+<form id="matcha-lead-form" class="matcha-email-form">
+<label for="matcha-email">¿A qué correo te envío las ideas?</label><input id="matcha-email" type="email" name="email" autocomplete="email" maxlength="254" required placeholder="tu@correo.com">
+<label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>También quiero recibir dos correos con ideas para publicar y conocer Content Lab. Es opcional y puedo darme de baja en cualquier momento.</span></label>
+<div class="matcha-honeypot" aria-hidden="true"><label for="matcha-website">No rellenes esto</label><input tabindex="-1" autocomplete="off" type="text" name="website" id="matcha-website"></div>
+<button class="matcha-send-button" id="matcha-send" type="submit">Enviarme mis 8 ideas gratis <span aria-hidden="true">→</span></button>
+<p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback">Te pediremos que confirmes tu correo antes de enviarte el recurso. No solicitamos ninguna contraseña.</p>
+<small>Al enviar aceptas que usemos tu correo para entregarte el recurso. Solo te enviaremos consejos y novedades si marcas la casilla opcional. <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>.</small>
+</form></section>
 <div id="crear" class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
-<label for="brand">Marca con la que publicarás</label><select id="brand"><option value="tle">The Launch Era · English</option><option value="podcast">Todavía estoy a tiempo · Español</option><option value="other">Otra marca</option></select>
-<div class="half"><div><label for="brandName">Nombre de tu marca</label><input id="brandName" value="The Launch Era"></div><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div></div>
+<label for="brandName">Marca con la que publicarás</label><input id="brandName" maxlength="120" autocomplete="organization" placeholder="Escribe el nombre de tu marca (o déjalo vacío)"><label for="copyLanguage">Idioma de los textos</label><select id="copyLanguage"><option value="es">Español latino</option><option value="en">English (US)</option></select>
+<div class="half"><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div><div><label for="headline">Título que quieres en el post</label><input id="headline" placeholder="Texto principal"></div></div>
 <div class="file"><img id="preview" alt="Foto original"><span id="fileSymbol" style="font-size:31px">▧</span><strong id="fileLabel">Elige la foto que quieres usar</strong><small>Tu imagen queda en tu navegador</small><input type="file" id="photo" accept="image/*,.heic,.heif" aria-label="Subir foto original"></div>
 <div class="radio"><label><input type="radio" name="kind" checked value="product"> Foto del producto</label><label><input type="radio" name="kind" value="poster"> Imagen que ya tiene texto</label></div>
-<label for="headline">Título que quieres en el post</label><input id="headline" placeholder="Texto principal">
 <label for="support">Texto que acompaña al título (opcional)</label><textarea id="support" rows="2" placeholder="Información real, sin inventar beneficios"></textarea>
 <details class="advanced"><summary>Personalizar más (opcional)</summary>
 <div class="half"><div><label for="tagline">Frase corta de tu marca</label><input id="tagline"></div><div><label for="details">Otros detalles del post</label><input id="details"></div></div>
-<label for="palette">Colores y estilo de tu marca</label><input id="palette" value="Warm Ivory #FAF8F3, Soft Black #191919, Soft Blue">
+<label for="palette">Colores y estilo de tu marca</label><input id="palette" placeholder="Ej.: verde oliva, crema, editorial minimalista">
 <label for="notes">Algo que quieras evitar</label><textarea id="notes" rows="2" placeholder="Por ejemplo, no añadir objetos ni cambiar el producto"></textarea>
 </details>
 <p class="privacy">🔒 Tu foto se queda en tu dispositivo. Esta página prepara instrucciones, no genera imágenes. Cuando quieras crear una versión, copia su texto y adjunta tu foto en la herramienta de imágenes que uses.</p>
@@ -290,7 +318,7 @@ const layouts=[
 ];
 const $=id=>document.getElementById(id);
 const text=(id,fall)=>$(id).value.trim()||fall;
-const es=()=> $('brand').value==='podcast'||$('brand').value==='other';
+const es=()=> $('copyLanguage').value==='es';
 const build=(i)=>{
  const lang=es()?'Latin American Spanish':'US English';
  const tags=es()?['[TÍTULO]','[TEXTO SECUNDARIO]','[FRASE DE MARCA]','[DETALLES]']:['[MAIN HEADLINE]','[SUPPORTING TEXT]','[TAGLINE]','[DETAILS]'];
@@ -329,7 +357,7 @@ const all=()=>layouts.map((v,i)=>build(i)).join('\n\n'+'-'.repeat(40)+'\n\n');
 async function copyText(v){try{await navigator.clipboard.writeText(v);alert('Copiado ✓')}catch{alert('Selecciona el texto y cópialo manualmente')}}
 $('copyAll').onclick=()=>copyText(all());
 $('saveAll').onclick=()=>{const u=URL.createObjectURL(new Blob([all()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='one-product-eight-compositions.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)};
-$('brand').onchange=()=>{const v=$('brand').value;$('brandName').value=v==='tle'?'The Launch Era':v==='podcast'?'Todavía estoy a tiempo':'';$('palette').value=v==='tle'?'Warm Ivory #FAF8F3, Butter Yellow #F2D85B, Soft Black #191919, Soft Blue':v==='podcast'?'Warm neutrals, soft blush, deep espresso, intimate editorial':' ';render()};
+$('copyLanguage').onchange=render;
 ['brandName','product','headline','support','tagline','details','palette','notes'].forEach(id=>$(id).addEventListener('input',render));
 document.querySelectorAll('input[name=kind]').forEach(x=>x.onchange=render);
 $('photo').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>25000000){alert('Foto mayor de 25MB');return}const u=URL.createObjectURL(f),img=$('preview');img.src=u;img.style.display='block';$('fileSymbol').style.display='none';$('fileLabel').textContent=f.name;img.onload=()=>URL.revokeObjectURL(u);img.onerror=()=>{img.style.display='none';$('fileSymbol').style.display='block';alert('La foto HEIC puede requerir conversión para verse, pero los prompts están disponibles')}};
@@ -371,5 +399,40 @@ render();
  container.addEventListener('focusin',()=>{paused=true});
  container.addEventListener('focusout',e=>{if(!container.contains(e.relatedTarget))paused=false});
  window.setInterval(()=>{if(!reduced.matches&&!paused&&!document.hidden)next(1)},5400);
+})();
+
+/* Solo el formulario envía el correo y consentimiento. La foto no sale del navegador. */
+(function(){
+ const form=document.getElementById('matcha-lead-form');
+ if(!form)return;
+ const feedback=document.getElementById('matcha-lead-feedback');
+ const button=document.getElementById('matcha-send');
+ const startedAt=Date.now();
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!form.reportValidity())return;
+  button.disabled=true;button.textContent='Preparando tu correo…';feedback.textContent='Registrando tu solicitud…';
+  try{
+   const response=await fetch('https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-matcha-freebie?action=subscribe',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+     email:document.getElementById('matcha-email').value.trim(),
+     brand_name:document.getElementById('brandName').value.trim(),
+     product_name:document.getElementById('product').value.trim(),
+     marketing_opt_in:document.getElementById('matcha-marketing').checked,
+     website:document.getElementById('matcha-website').value,
+     started_at:startedAt
+    })
+   });
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||!result.ok)throw Error(result.error||'No pudimos enviar el enlace.');
+   feedback.textContent='¡Gracias! Revisa tu correo para confirmar y recibir las ocho ideas. Si ya lo pediste, revisa también promociones y spam. 💛';
+   form.querySelector('#matcha-email').readOnly=true;
+   button.textContent='Solicitud registrada ✓';
+  }catch(err){
+   feedback.textContent=err&&err.message?err.message:'No pudimos registrar tu correo. Inténtalo de nuevo.';
+   button.disabled=false;button.textContent='Volver a intentar';
+  }
+ });
 })();
 </script></body></html>
