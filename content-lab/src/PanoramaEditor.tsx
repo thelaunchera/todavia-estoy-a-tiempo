@@ -10,6 +10,7 @@ import type {StickerCopyResult} from './CarouselStickerCopy';
 type Point = {x: number; y: number};
 type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
+  canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void;
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
@@ -29,6 +30,7 @@ type Props = {
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,
+  canExtendBackground,onExtendBackground,focusLayerId,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [libraryOpen,setLibraryOpen]=useState(false);
@@ -81,6 +83,9 @@ export default function PanoramaEditor({
         <Upload size={19}/>{uploading?'Subiendo fotos…':'Subir foto'}
       </button>
       <button type="button" onClick={()=>setLibraryOpen(v=>!v)}><ImagePlus size={17}/>{libraryOpen?'Ocultar biblioteca':'Mis fotos'}</button>
+      {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-stretch-background" onClick={onExtendBackground}>
+        🎀 Estirar fondo entre slides
+      </button>}
       <button type="button" onClick={()=>onAddLayer('text')}><Type size={17}/> Añadir texto</button>
       <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(v=>!v)} aria-expanded={moreTools}>
         {moreTools?'Menos opciones':'Más opciones'}
@@ -126,6 +131,7 @@ export default function PanoramaEditor({
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} ratio={count * 1080 / 1350}
+        focusLayerId={focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
