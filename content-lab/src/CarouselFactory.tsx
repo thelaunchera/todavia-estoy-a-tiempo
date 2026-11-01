@@ -424,6 +424,10 @@ async function photoAspectFromFile(file:File):Promise<number>{
  try{return await photoAspectFromSource(src);}finally{URL.revokeObjectURL(src);}
 }
 
+const canvasToPngBlob=(canvas:HTMLCanvasElement)=>new Promise<Blob>((resolve,reject)=>{
+  canvas.toBlob(blob=>blob&&blob.type==='image/png'
+    ?resolve(blob):reject(Error('No se pudo preparar el PNG en calidad original.')),'image/png');
+});
 const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
@@ -446,6 +450,15 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [touchEdit,setTouchEdit]=useState(false);
   const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const downloadUrlsRef=useRef<string[]>([]);
+  const exportRunRef=useRef(0);
+  const clearDownloads=()=>{
+    exportRunRef.current++;
+    downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));
+    downloadUrlsRef.current=[];
+    setDownloads([]);
+  };
+  useEffect(()=>()=>{downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));downloadUrlsRef.current=[];},[]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
   const [historyVersion,setHistoryVersion]=useState(0);
@@ -464,7 +477,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const decoded=readCarouselDesign(snapshot);
     const first=decoded.slides?.[0] as {title?:string}|undefined;
     onChange({...post,designData:snapshot,hook:first?.title||''});
-    setDownloads([]);setOverview([]);setHistoryVersion(n=>n+1);
+    clearDownloads();setOverview([]);setHistoryVersion(n=>n+1);
   };
   const [idea,setIdea]=useState('');
   const [imagePrompt,setImagePrompt]=useState('');
@@ -476,7 +489,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overviewError,setOverviewError]=useState('');
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
   // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
@@ -543,7 +556,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     recordHistory(post.designData||encodeCarouselDesign(slides,style));
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
-    setDownloads([]);setOverview([]);
+    clearDownloads();setOverview([]);
   };
   const previewCache=useRef<Map<string,string>>(new Map());
   const buildOverview=async()=>{
@@ -868,7 +881,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
     onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
       designData:encodeCarouselDesign(nextSlides,nextStyle)});
-    setDownloads([]);setOverview([]);
+    clearDownloads();setOverview([]);
   };
   const addPanoramaAsset=(id:string,point:{x:number;y:number})=>{
     const asset=ownedAssets.find(a=>a.id===id);
@@ -1019,7 +1032,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         backgroundId,backgroundImageId,backgroundColor:slide.backgroundColor,
         backgroundGradient:slide.backgroundGradient}));
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
-      setCurrent(0);setDownloads([]);
+      setCurrent(0);clearDownloads();
       setStudioTab('style');
       notify('Tu carrusel está preparado. Elige un fondo o cambia cualquier texto.');
     }catch(e){showError(e)}finally{setBusy('');}
@@ -1041,15 +1054,37 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       notify('Nueva imagen creada; el archivo original permanece intacto.');
     }catch(e){showError(e)}finally{setBusy('');}
   };
+  const ensureSourceImages=()=>{
+    const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
+    required.push(...(style.panoramaLayers||[])
+      .filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
+    if(style.seamlessEnabled)required.push(style.seamlessAssetId);
+    if(required.some(id=>id&&!images[id]))
+      throw Error('Todavía hay fotografías o stickers cargando. Inténtalo de nuevo.');
+  };
+  const independentExport=()=>!style.seamlessEnabled&&!(style.panoramaLayers||[]).length;
   const exportOne=async(n=i)=>{
+    if(busy)return;
     setBusy('export');
     try{
-      const canvas=(await renderAllSlides())[n];
-      const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download=filename(post,n);a.click();
-      notify('Slide '+(n+1)+' descargado como PNG individual.');
+      ensureSourceImages();
+      const pages=independentExport()?null:await renderAllSlides();
+      const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style);
+      try{
+        const blob=await canvasToPngBlob(canvas);
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download=filename(post,n);a.click();
+        // Keep the object URL alive until Safari has started the file download.
+        window.setTimeout(()=>URL.revokeObjectURL(url),90_000);
+      }finally{
+        if(pages)pages.forEach(page=>{page.width=1;page.height=1});
+        else{canvas.width=1;canvas.height=1}
+      }
+      notify('Slide '+(n+1)+' descargado como PNG 1080 × 1350.');
     }catch(e){showError(e)}finally{setBusy('');}
   };
   const exportAll=async()=>{
+    if(busy)return;
     const notes=await inspectImageQuality();
     setImageQualityNotes(notes);
     const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
@@ -1058,16 +1093,37 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
       '¿Exportar de todas formas?'))return;
     setBusy('all');
+    const token=exportRunRef.current+1;
+    exportRunRef.current=token;
+    const result:{name:string,url:string}[]=[];
+    let pages:HTMLCanvasElement[]|null=null;
     try{
-      const result:{name:string,url:string}[]=[];
-      const all=await renderAllSlides();
-      for(let n=0;n<all.length;n++){
-        const canvas=all[n];
-        result.push({name:filename(post,n),url:canvas.toDataURL('image/png')});
+      ensureSourceImages();
+      if(!independentExport())pages=await renderAllSlides();
+      // Ordinary carousels export one slide at a time. This avoids holding
+      // eight uncompressed 1080×1350 canvases in mobile Safari memory.
+      for(let n=0;n<slides.length;n++){
+        const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style);
+        try{
+          const blob=await canvasToPngBlob(canvas);
+          result.push({name:filename(post,n),url:URL.createObjectURL(blob)});
+        }finally{canvas.width=1;canvas.height=1}
       }
+      if(exportRunRef.current!==token){
+        result.forEach(item=>URL.revokeObjectURL(item.url));
+        return;
+      }
+      clearDownloads();
+      downloadUrlsRef.current=result.map(item=>item.url);
       setDownloads(result);
-      notify('Los PNG están listos para descargarlos uno por uno.');
-    }catch(e){showError(e)}finally{setBusy('');}
+      notify('PNG nítidos preparados. Descárgalos individualmente.');
+    }catch(e){
+      result.forEach(item=>URL.revokeObjectURL(item.url));
+      showError(e);
+    }finally{
+      pages?.forEach(page=>{page.width=1;page.height=1});
+      setBusy('');
+    }
   };
   return <div className="factory">
     <div className="factory-header">
