@@ -14,6 +14,29 @@ type Props = {
  locale?:'es'|'en';
 };
 type Filter='all'|'portrait'|'product'|'type'|'minimal'|'story';
+const formatNamesEs:Record<string,string>={
+  "Editorial Hero": "Portada editorial",
+  "Bold Typography": "Tipografía protagonista",
+  "Macro Texture": "Texturas de cerca",
+  "Lifestyle Scene": "Escena de hogar",
+  "Playful Props": "Composición dinámica",
+  "Hands-on Editorial": "Editorial en columnas",
+  "High Contrast": "Alto contraste",
+  "Minimal Premium": "Minimalismo premium",
+  "Campaign Finale": "Cierre de campaña",
+  "Color Block": "Bloques de color",
+  "Magazine Cover": "Portada de revista",
+  "Arch Frame": "Marco en arco",
+  "Product Spotlight": "Foto protagonista",
+  "Floating Product": "Composición flotante",
+  "Typography Poster": "Póster tipográfico",
+  "Negative Space": "Espacio negativo",
+  "Diagonal Composition": "Composición diagonal",
+  "Soft Luxury": "Lujo sereno",
+  "Graphic Cutout": "Recorte editorial",
+  "Story Card": "Historia visual"
+};
+
 const groupNames:Record<Filter,string>={
  all:'Todos',portrait:'Fotografía',product:'Detalles',type:'Tipografía',minimal:'Espacios',story:'Historias'
 };
@@ -76,12 +99,7 @@ const boxPosition=(v:[number,number,number,number]):React.CSSProperties=>({
  left:(v[0]*100)+'%', top:(v[1]*100)+'%', width:(v[2]*100)+'%', height:(v[3]*100)+'%'
 });
 
-const sampleCredits=[
- 'STUDIO 01','FORM / 02','TEXTURES / 03','LIVING / 04','EVERYDAY / 05',
- 'DETAIL / 06','CONTRAST / 07','PAUSE / 08','CHAPTER / 09','NEW SEASON / 10',
- 'JOURNAL / 11','ARCH / 12','LIGHT / 13','FORMS / 14','STATEMENT / 15',
- 'SPACE / 16','ANGLE / 17','QUIET / 18','COMPOSITION / 19','STORY / 20'
-] as const;
+const sampleCredits=[["ESTUDIO 01","STUDIO 01"],["FORMA / 02","FORM / 02"],["TEXTURAS / 03","TEXTURES / 03"],["HABITAR / 04","LIVING / 04"],["RITUALES / 05","EVERYDAY / 05"],["DETALLE / 06","DETAIL / 06"],["CONTRASTE / 07","CONTRAST / 07"],["PAUSA / 08","PAUSE / 08"],["CAPÍTULO / 09","CHAPTER / 09"],["TEMPORADA / 10","SEASON / 10"],["REVISTA / 11","JOURNAL / 11"],["ARCO / 12","ARCH / 12"],["LUZ / 13","LIGHT / 13"],["FORMAS / 14","FORMS / 14"],["PÓSTER / 15","POSTER / 15"],["ESPACIO / 16","SPACE / 16"],["ÁNGULO / 17","ANGLE / 17"],["SERENO / 18","QUIET / 18"],["COMPOSICIÓN / 19","COMPOSITION / 19"],["HISTORIA / 20","STORY / 20"]] as const;
 
 // Measurements are taken from the rendered card, not guessed from a desktop viewport.
 // Fit lettering inside its own safe text area when iPhone / language / preview size changes.
@@ -122,7 +140,7 @@ function Preview({layout,index,big=false,locale='es'}:{layout:Layout;index:numbe
    <strong>{locale==='es'?example.es:example.en}</strong>
    <small>{locale==='es'?example.subEs:example.subEn}</small>
   </div>
-  <span className="fg-brandline">{sampleCredits[index]}</span>
+  <span className="fg-brandline">{sampleCredits[index][locale==='es'?0:1]}</span>
   <span className="fg-number">{String(index+1).padStart(2,'0')} / 20</span>
  </div>;
 }
@@ -131,6 +149,7 @@ export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Prop
  const en=locale==='en';
  const enGroups:Record<Filter,string>={all:'All',portrait:'Photography',product:'Details',type:'Typography',minimal:'Spaces',story:'Stories'};
  const groupLabel=(id:Filter)=>en?enGroups[id]:groupNames[id];
+ const formatLabel=(name:string)=>en?name:formatNamesEs[name]||name;
  const [filter,setFilter]=useState<Filter>('all');
  const [selected,setSelected]=useState<number|null>(null);
  const filtered=LAYOUTS.map((layout,index)=>({layout,index})).filter(x=>filter==='all'||groups[x.layout.name]?.includes(filter));
@@ -140,14 +159,14 @@ export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Prop
   <div className="fg-note"><Images size={19}/><span>{en?'These 20 examples feature home interiors, not personal photos. Your images are only added when you choose them in the editor.':'Las 20 vistas usan fotografías de interiores, sin fotos personales. Tus imágenes solo se añaden cuando tú las eliges en el editor.'}</span></div>
   <div className="fg-filterbar" role="group" aria-label={en?'Filter formats':'Filtrar formatos'}>{(Object.keys(groupNames) as Filter[]).map(f=><button type="button" key={f} className={f===filter?'active':''} aria-pressed={f===filter} onClick={()=>{setFilter(f);close()}}>{groupLabel(f)}</button>)}</div>
   <div className="fg-layout"><div className="fg-cards">{filtered.map(({layout,index})=><article key={layout.name} className={'fg-card '+(selected===index?'selected':'')}>
-   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={(en?'View ':'Ver ')+layout.name}><Preview layout={layout} index={index} locale={locale}/></button>
-   <div className="fg-card-foot"><div><small>{String(index+1).padStart(2,'0')} / 20</small><strong>{layout.name}</strong><span>{groups[layout.name]?.slice(0,2).map(g=>groupLabel(g)).join(' · ')||'Editorial'}</span></div>
-    <button type="button" className="fg-use" onClick={()=>onChoose(layout.name)} aria-label={(en?'Use format ':'Usar formato ')+layout.name}>{en?'Use':'Usar'}</button>
+   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={(en?'View ':'Ver ')+formatLabel(layout.name)}><Preview layout={layout} index={index} locale={locale}/></button>
+   <div className="fg-card-foot"><div><small>{String(index+1).padStart(2,'0')} / 20</small><strong>{formatLabel(layout.name)}</strong><span>{groups[layout.name]?.slice(0,2).map(g=>groupLabel(g)).join(' · ')||'Editorial'}</span></div>
+    <button type="button" className="fg-use" onClick={()=>onChoose(layout.name)} aria-label={(en?'Use format ':'Usar formato ')+formatLabel(layout.name)}>{en?'Use':'Usar'}</button>
    </div>
   </article>)}</div>
-   {selected!==null&&<><button type="button" className="fg-sheet-backdrop" aria-label={en?'Close preview':'Cerrar vista previa'} onClick={close}/><aside className="fg-detail" aria-label={(en?'Format ':'Formato ')+LAYOUTS[selected].name}>
+   {selected!==null&&<><button type="button" className="fg-sheet-backdrop" aria-label={en?'Close preview':'Cerrar vista previa'} onClick={close}/><aside className="fg-detail" aria-label={(en?'Format ':'Formato ')+formatLabel(LAYOUTS[selected].name)}>
     <div className="fg-detail-top"><span className="eyebrow">{en?'FORMAT PREVIEW':'VISTA DEL FORMATO'}</span><button type="button" onClick={close} aria-label={en?'Close preview':'Cerrar vista'}><X size={19}/></button></div>
-    <h2>{LAYOUTS[selected].name}</h2>
+    <h2>{formatLabel(LAYOUTS[selected].name)}</h2>
     <Preview big layout={LAYOUTS[selected]} index={selected} locale={locale}/>
     <p>{en?'Choose this format to edit images, text, colors and positions. This is a sample layout.':'Selecciona este formato para editar fotografías, textos, colores y posiciones. La vista es un ejemplo de composición.'}</p>
     <button type="button" className="btn dark" onClick={()=>onChoose(LAYOUTS[selected].name)}><Check size={16}/> {en?'Use this format':'Usar este formato'}</button>
