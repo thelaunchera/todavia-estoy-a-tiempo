@@ -64,9 +64,30 @@ export default function PanoramaEditor({
     return()=>document.removeEventListener('keydown',onKey);
   },[onUndo,onRedo,canUndo,canRedo]);
   const input = useRef<HTMLInputElement>(null);
-  const available = assets.filter(a => displayAssetName(a).toLowerCase().includes(filter.toLowerCase())).slice(0, 70);
-  useEffect(() => { available.slice(0, 12).forEach(a => { if (!images[a.id]) loadImage(a.id); }); },
-    [available.map(a => a.id).join('|')]);
+  // Keep personal uploads first; shared packs remain searchable below them.
+  const available = assets.filter(a => displayAssetName(a).toLowerCase().includes(filter.toLowerCase()))
+    .sort((a,b)=>Number(!(a.brandId===brandId&&!a.shared))-Number(!(b.brandId===brandId&&!b.shared)))
+    .slice(0,120);
+  const libraryIds=available.map(a=>a.id).join('|');
+  useEffect(()=>{
+    if(!libraryOpen)return;
+    const pane=containerRef.current?.querySelector('.panorama-assets');
+    if(!pane)return;
+    if(typeof IntersectionObserver==='undefined'){
+      available.slice(0,24).forEach(asset=>{if(!images[asset.id])loadImage(asset.id)});
+      return;
+    }
+    const observer=new IntersectionObserver(entries=>{
+      for(const item of entries){
+        if(!item.isIntersecting)continue;
+        const id=(item.target as HTMLElement).dataset.libraryAsset;
+        if(id&&!images[id])loadImage(id);
+        observer.unobserve(item.target);
+      }
+    },{root:pane,rootMargin:'160px'});
+    pane.querySelectorAll('[data-library-asset]').forEach(node=>observer.observe(node));
+    return()=>observer.disconnect();
+  },[libraryIds,libraryOpen]);
   useEffect(() => {
     if (!expanded) return;
     const previous = document.body.style.overflow;
@@ -212,6 +233,7 @@ export default function PanoramaEditor({
         {available.map(asset=><article key={asset.id} className="panorama-asset">
           <button type="button" className="panorama-asset-drag"
             title={'Arrastrar '+displayAssetName(asset)}
+            data-library-asset={asset.id}
             draggable={!!images[asset.id]}
             onFocus={()=>{if(!images[asset.id])loadImage(asset.id)}}
             onPointerEnter={()=>{if(!images[asset.id])loadImage(asset.id)}}
