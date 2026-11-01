@@ -24,7 +24,8 @@ test('Background selection preserves stickers and tells the user what is current
  assert.ok(picker.includes('Todo el carrusel'));
  assert.ok(picker.includes('Stickers:'));
  assert.ok(picker.includes("selected=stickerIds.slice(0,3)"));
- assert.ok(factory.includes('slideNumber={i+1} onChange={updateDecoration}'));
+ assert.ok(factory.includes('slideNumber={i+1} slideCount={slides.length}'));
+ assert.ok(factory.includes('onCopySticker={copySticker} onChange={updateDecoration}'));
 });
 
 test('Both galleries support accessible search, no-match guidance and lazy original background previews',()=>{
