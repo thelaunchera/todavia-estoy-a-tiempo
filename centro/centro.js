@@ -120,6 +120,12 @@ function setCourseActions(){
  for(const code of ['web-class','content-lab']){
   const el=$('action-'+code),state=$('status-'+code);
   const has=purchased.has(code),open=code==='content-lab'&&has?true:!!releases[code];
+  if(code==='content-lab'&&!owner&&!has){
+   state.textContent='DISPONIBLE · $10 PAGO ÚNICO';
+   el.disabled=false;el.textContent='Quiero mi Content Lab';
+   el.onclick=()=>location.assign('https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z');
+   continue;
+  }
   if(owner){
    state.textContent='VISTA ADMINISTRATIVA';
    if(code==='web-class'){
@@ -328,11 +334,13 @@ const productInformation=Object.freeze({
   note:'La clase sigue en preparación. La lista de espera no es una compra y el acceso permanece cerrado.'
  },
  'content-lab':{
-  title:'Content Lab',type:'HERRAMIENTA DIGITAL',summary:'Un espacio personal para crear y editar contenido visual con tus referencias y tu identidad de marca.',
-  price:'$10 USD · pago único',audience:'Personas que necesitan crear publicaciones y piezas visuales sin empezar cada diseño desde cero.',
-  includes:['Estudio privado para organizar marcas y proyectos.','Edición de composiciones y exportación de PNG sin gastar créditos de IA.','Cuota inicial finita: 60 fotos IA y 30 créditos creativos.','Límites diarios de 10 fotos IA y 10 créditos creativos, sujetos a disponibilidad del proveedor.'],
-  delivery:'Una compra verificada activa el acceso con el correo del checkout. Recibirás un enlace a este Centro de Productos, solicitarás un código por email y abrirás Content Lab desde tu biblioteca personal.',
-  note:'ChatGPT se utiliza por separado para generar nuevas escenas fotográficas; Content Lab organiza, edita y planifica los posts. No promete IA ilimitada ni publicación automática.'
+  title:'Content Lab',type:'TU ESPACIO CREATIVO',
+  summary:'Deja de empezar cada post desde cero.',
+  price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
+  includes:['Edita posts, carruseles, reels e historias.','Usa tus fotos, fondos y stickers.','Organiza tu feed y planifica fechas y horas.'],
+  delivery:'Después de comprar, recibirás el enlace por email. Entra con el correo de tu compra y abre tu Lab.',
+  note:'Fotos con ChatGPT por separado. El calendario te ayuda a planificar; no publica por ti. Si usas la IA integrada, incluye 60 fotos y 30 créditos iniciales, con límites diarios de 10 fotos y 10 créditos.',
+  checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
  'booking-flow':{
   title:'Booking Automation + Command Center',type:'SERVICIO · RESERVAS',summary:'Una página de reservas conectada a un centro privado para tener las solicitudes y los próximos pasos organizados.',
@@ -402,6 +410,7 @@ const productInformation=Object.freeze({
 const productDialog=$('product-details');
 const productButton=$('product-details-checkout');
 function detailState(code){
+ if(code==='content-lab')return owner?'Tu acceso de administración':purchased.has(code)?'Listo para entrar':'Disponible ahora';
  if(code==='web-class'||code==='content-lab'){
   if(owner)return 'Vista de administración';
   const has=purchased.has(code),open=code==='content-lab'&&has?true:releases[code]===true;
@@ -426,18 +435,20 @@ function openProductDetails(code){
   li.textContent=title;list.append(li);
  }
  const disabled=$('product-details-unavailable');
- const accessControlled=code==='web-class'||code==='content-lab';
+ productDialog.classList.toggle('lab-compact',code==='content-lab');
+ const accessControlled=code==='web-class';
  if(accessControlled){
   productButton.hidden=true;
   disabled.hidden=false;
   disabled.textContent=releases[code]?'Consulta la disponibilidad antes de comprar':'Venta y acceso pendientes de habilitación';
  }else{
-  const url=new URL(item.checkout,location.href);
-  const approved=url.origin===location.origin||url.origin==='https://thelaunchera.com';
+  const labAccess=code==='content-lab'&&(owner||purchased.has(code));
+  const url=new URL(labAccess?'../content-lab/':item.checkout,location.href);
+  const approved=url.origin===location.origin||url.origin==='https://thelaunchera.com'||(code==='content-lab'&&url.href==='https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z');
   productButton.hidden=!approved;disabled.hidden=approved;
   if(approved){
    productButton.href=url.href;
-   productButton.textContent=item.cta||'Ver opciones y continuar';
+   productButton.textContent=code==='content-lab'?(labAccess?'Entrar a mi Lab':'Quiero mi Content Lab · $10'):(item.cta||'Ver opciones y continuar');
    productButton.target=url.origin===location.origin?'_self':'_blank';
    productButton.rel='noopener noreferrer';
   }else disabled.textContent='Destino de compra no disponible';
