@@ -31,6 +31,7 @@ const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
  for(let i=0;i<count;i++){
   const c=document.createElement('canvas');c.width=W;c.height=H;
   const ctx=c.getContext('2d');if(!ctx)throw Error('No se pudo cortar el carrusel.');
+  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(wide,i*W,0,W,H,0,0,W,H);output.push(c);
  }
  return output;
@@ -68,6 +69,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  if(pages.length<2||pages.length>8)throw Error('El carrusel seamless necesita entre 2 y 8 slides.');
  const total=pages.length,wide=document.createElement('canvas');wide.width=total*W;wide.height=H;
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
+ ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const accent=/^#[0-9a-f]{6}$/i.test(opts.accent||'')?opts.accent!:brand.color;
  if(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')){
    const a=opts.canvasColor||'#FFFFFF',b=opts.canvasGradient;
