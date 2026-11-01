@@ -128,3 +128,26 @@ test('new buyers get an isolated neutral brand, never admin seed brands',()=>{
  assert.ok(c.includes("path==='/api/ai-wallet'"));
  assert.ok(c.includes("content-lab-credit-change"));
 });
+
+test('approved freebie uses the matcha editorial hero and accessible animated carousel',()=>{
+ const page=source('public/prompts/index.html');
+ for(const required of [
+  'Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.',
+  'editorial-hero hero-with-carousel',
+  'id="hero-featured"',
+  'id="hero-prev"',
+  'id="hero-next"',
+  'id="como-funciona"',
+  'class="editorial-process"',
+  'class="process-art"',
+  'class="all-products"',
+  'class="process-cta"',
+  'id="crear"',
+  'window.matchMedia',
+  'prefers-reduced-motion: reduce',
+  'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
+ ])assert.ok(page.includes(required),required);
+ for(let i=1;i<=8;i++)assert.ok(page.includes('matcha-'+String(i).padStart(2,'0')+'.jpg'));
+ assert.ok(page.includes('object-fit:cover'));
+ assert.ok(page.includes('Funciona con cualquier producto'));
+});
