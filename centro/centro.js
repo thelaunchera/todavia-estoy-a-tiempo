@@ -8,6 +8,8 @@ const REMEMBER_KEY='podcast_class_remember_24h_v1';
 const TAB_KEY='podcast_class_tab_24h_v1';
 const STUDIO_KEY='podcast_studio_password_login_deadline_v1';
 const DAY=24*60*60*1000;
+const ACTIVITY_PREFIX='tle-product-last-activity-v1:';
+let lastMarkedAt=0;
 let profile=null,owner=false,ready=false,recovery=false,pending=false,pendingOtpEmail='';
 let purchased=new Set(),releases={'web-class':false,'content-lab':false};
 const releaseLinks={'web-class':'../alumnos/','content-lab':'../content-lab/'};
@@ -19,9 +21,29 @@ function record(storage,key){
   return value&&typeof value.userId==='string'&&Number.isFinite(value.expiresAt)?value:null;
  }catch{return null;}
 }
+function lastActivity(userId){
+ try{const raw=localStorage.getItem(ACTIVITY_PREFIX+userId);return raw===null?null:Number(raw)}catch{return null}
+}
+function idleExpired(userId){
+ const last=lastActivity(userId),now=Date.now();
+ return last!==null&&(!Number.isFinite(last)||last>now+120000||now-last>=DAY);
+}
+function noteActivity(userId,force=false){
+ if(!userId||idleExpired(userId))return false;
+ const now=Date.now();
+ if(!force&&now-lastMarkedAt<30000)return true;
+ try{localStorage.setItem(ACTIVITY_PREFIX+userId,String(now))}catch{}
+ const local=record(localStorage,REMEMBER_KEY),tab=record(sessionStorage,TAB_KEY);
+ try{
+  if(local?.userId===userId)localStorage.setItem(REMEMBER_KEY,JSON.stringify({...local,expiresAt:now+DAY}));
+  if(tab?.userId===userId)sessionStorage.setItem(TAB_KEY,JSON.stringify({...tab,expiresAt:now+DAY}));
+ }catch{}
+ lastMarkedAt=now;
+ return true;
+}
 function validMarker(userId){
  const marks=[record(sessionStorage,TAB_KEY),record(localStorage,REMEMBER_KEY)];
- return marks.some(x=>x&&x.userId===userId&&x.expiresAt>Date.now());
+ return !idleExpired(userId)&&marks.some(x=>x&&x.userId===userId&&x.expiresAt>Date.now());
 }
 function validStudioMarker(userId){const x=record(localStorage,STUDIO_KEY);return x?.userId===userId&&x.expiresAt>Date.now();}
 function clearMarkers(){
@@ -32,6 +54,7 @@ function storeMarker(userId,remember){
  try{
   clearMarkers();
   (remember?localStorage:sessionStorage).setItem(remember?REMEMBER_KEY:TAB_KEY,v);
+  noteActivity(userId,true);
   return true;
  }catch{return false;}
 }
@@ -158,10 +181,23 @@ async function refresh(){
  const {data:{user},error}=await db.auth.getUser();
  if(error||!user){resetState();return;}
  const admin=await isOwner(user.id);
- if(!validMarker(user.id)&&!(admin&&validStudioMarker(user.id))){
+ if(idleExpired(user.id)){
   resetState();clearMarkers();
   await db.auth.signOut({scope:'local'});
   return;
+ }
+ if(!validMarker(user.id)&&!(admin&&validStudioMarker(user.id))){
+  // Buyers coming from Content Lab already have a verified Supabase session
+  // and a shared 24-hour idle clock; do not demand another code on entry.
+  const {data:labBuyer}=lastActivity(user.id)!==null
+   ? await db.from('content_lab_memberships').select('id').eq('buyer_email',(user.email||'').toLowerCase()).eq('status','active').maybeSingle()
+   : {data:null};
+  if(!labBuyer){
+   resetState();clearMarkers();
+   await db.auth.signOut({scope:'local'});
+   return;
+  }
+  storeMarker(user.id,true);
  }
  profile=user;owner=admin;ready=false;
  const [orders,flags,labMembership]=await Promise.all([
@@ -177,7 +213,7 @@ async function refresh(){
  purchased=new Set((orders.data||[]).map(x=>x.product_code));
  if(labMembership.data)purchased.add('content-lab');
  for(const item of flags.data||[])if(Object.hasOwn(releases,item.product_code))releases[item.product_code]=item.access_enabled===true;
- ready=true;updateNav();setCourseActions();renderOwnerLibrary();showModal(false);
+ ready=true;noteActivity(user.id,true);updateNav();setCourseActions();renderOwnerLibrary();showModal(false);
 }
 $('open-access').addEventListener('click',()=>{mode('otp');showModal(true);});
 $('hero-account').addEventListener('click',()=>{
@@ -269,6 +305,12 @@ db.auth.onAuthStateChange((event)=>{
 document.addEventListener('visibilitychange',()=>{
  if(!document.hidden&&profile)void refresh();
 });
+for(const event of ['pointerdown','touchstart','keydown','input','scroll']){
+ document.addEventListener(event,()=>{
+  if(!profile)return;
+  if(!noteActivity(profile.id)){void refresh();}
+ },{passive:true,capture:true});
+}
 window.setInterval(()=>{
  if(profile&&!validMarker(profile.id)&&!(owner&&validStudioMarker(profile.id))){
   clearMarkers();db.auth.signOut({scope:'local'}).then(resetState);
