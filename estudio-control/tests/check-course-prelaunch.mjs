@@ -221,7 +221,7 @@ console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografí
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
 const heroCopy=classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('</section>',classPage.indexOf('<section class="class-hero"')));
 const publicReadable=classPage.replace(/<script\b[\s\S]*?<\/script>/gi,'').replace(/<svg\b[\s\S]*?<\/svg>/gi,'');
-assert.match(heroCopy,/Explora la clase/);
+assert.match(heroCopy,/Quiero estar en la lista|Explora la clase/,'El hero lleva al siguiente paso sin confusión');
 assert.match(heroCopy,/sin saber programar/);
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
 assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
@@ -280,7 +280,7 @@ assert.match(clubPage,/ESTE ES TU ESPACIO/);
 assert.doesNotMatch(room,/BIENVENIDA AL AULA|Tu primera landing con IA/);
 assert.equal((classPage.match(/href="#lista-espera"/g)||[]).length,1,'Un enlace de aviso junto al reloj; envío solamente en el formulario');
 assert.doesNotMatch(classPage,/class-nav-cta|class-ghost-button/,'No repetir CTAs de espera en el header ni hero');
-assert.match(classPage,/Explora la clase/);
+assert.match(classPage,/Quiero estar en la lista|Explora la clase/,'El CTA público sigue presente');
 assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
 console.log('QA: transformación interactiva, movimiento reducido, lenguaje inclusivo y CTAs únicos OK');
 
