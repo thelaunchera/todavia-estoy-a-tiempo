@@ -25,6 +25,6 @@ test('Overlapping objects can be explicitly selected and only the active one mov
  assert.match(canvas,/if\(selected!==layer\.id\)\{setSelected\(layer\.id\);return;\}/);
  assert.match(canvas,/onClick=\{\(\)=>selectFromList\(layer\.id\)\}/);
  assert.match(canvas,/zIndex:active\?8:z/);
- assert.match(canvas,/pointerEvents:pageCount>1/);
+ assert.match(canvas,/pointerEvents:layer\.locked\|\|pageCount>1/);
  assert.match(css,/\.touch-editor-quick-layers/);
 });
