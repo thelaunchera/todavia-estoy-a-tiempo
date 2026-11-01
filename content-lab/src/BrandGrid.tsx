@@ -198,7 +198,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     setGrid(saved);setSelected(index);setSourceId(saved.sourceId);
     setReferenceId(saved.referenceId);setKind(saved.kind);
     setDesignMode(saved.kind==='preserve'?'editorial':'photo');
-    setBrief(saved.brief);setExpandedEditor(true);
+    setBrief(saved.brief);setExpandedEditor(false);
     setDownloads([]);setReviewed(false);setSaveState('saved');
   },[initialSelection?.version,grids,brand.id]);
   useEffect(()=>{
@@ -425,7 +425,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   };
   const gridPending=grid?.posts.filter(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])).length||0;
   const tile=grid?.posts[selected];
-  const isExpress=Boolean(grid?.kind==='preserve'&&grid?.concept?.startsWith('1 Photo → 9 Posts'));
+  const isExpress=Boolean(grid&&grid.posts.length===9);
   const currentPrompt=grid?onePhotoNinePrompt(selected,{
     product:quickProduct.trim()||grid.brief||grid.title,
     brandName:brand.name,headline:tile?.headline,support:tile?.subtext,
@@ -486,11 +486,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
       </div>
     </div>}
-    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una foto. Hasta nueve diseños editables con tus imágenes y textos.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
+    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>Visualiza <em>tu grid.</em></h1><p>Organiza hasta nueve imágenes hechas fuera del Lab. Mira cómo quedarán juntas en Instagram.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
     <section className="bg-express" aria-label="Crear nueve publicaciones con una foto">
       <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
-        <h2>Una foto. Nueve ideas para tu feed.</h2>
-        <p>Prepara tu campaña aquí, crea cada imagen en ChatGPT con los prompts del freebie y vuelve para organizar tu feed y elegir cuándo publicarlas.</p></div>
+        <h2>Tu feed antes de publicar.</h2>
+        <p>Elige un producto y empieza tu cuadrícula. Crea imágenes en ChatGPT con nuestros prompts, súbelas a cada espacio y organiza su publicación.</p></div>
         <span className="bg-express-free">Gratis dentro del Lab</span>
       </div>
       <div className="bg-express-content">
@@ -510,7 +510,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button type="button" className="btn dark bg-express-create" onClick={createQuickNine} disabled={!sourceId||!quickProduct.trim()||!!busy||!!uploading}>
           {busy==='quick-nine'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>}
-          Preparar mis 9 ideas <ArrowRight size={17}/>
+          Crear mi grid de 9 espacios <ArrowRight size={17}/>
         </button>
       </div>
       <details className="bg-express-extras"><summary>¿Quieres añadir más dirección creativa? (opcional)</summary>
@@ -518,10 +518,10 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <textarea rows={2} value={quickNotes} maxLength={850} onChange={e=>setQuickNotes(e.target.value)} placeholder="Ej. luz de mañana, superficies naturales, sombra suave; mantener etiquetas exactas"/>
         </label>
       </details>
-      <p className="bg-express-tip"><Check size={15}/> Las nueve ideas son una guía visual, no nueve fotos generadas. ChatGPT crea las imágenes; el Lab las guarda, organiza y planifica.</p>
+      <p className="bg-express-tip"><Check size={15}/> El Lab no genera imágenes ni edita reels: aquí puedes visualizar tu cuadrícula, subir fotos terminadas y asignar día y hora.</p>
     </section>
     <div className="bg-layout"><div className="bg-column">
-      {isAdmin&&<details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas de propietaria · referencias, IA y dirección artística</summary>
+      {false&&<details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas de propietaria · referencias, IA y dirección artística</summary>
       <div className="bg-advanced-config-content"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
         <div className="bg-uploads">
           <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'01 · Foto original *'}</strong><small>Persona o producto que debemos conservar</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
@@ -604,14 +604,14 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </button>
       </div>}
 
-      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Preparar mis 9 ideas». Verás diseños editables que puedes preparar y descargar sin gastar créditos.</p></div>:isExpress&&!expandedEditor?<>
+      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Así se verá tu grid de Instagram.</h3><p>Arriba crea un grid vacío. Después añade tus imágenes terminadas, cambia el orden y revisa la composición.</p></div>:isExpress&&!expandedEditor?<>
         <section className="bg-compact-campaign" aria-label="Nueve ideas para tus posts">
           <div className="bg-compact-campaign-head">
-            <div><span className="eyebrow">TU CAMPAÑA · 9 IDEAS DIFERENTES</span>
+            <div><span className="eyebrow">VISTA PREVIA · GRID 3 × 3</span>
               <h2>{grid.title}</h2>
-              <p>Elige una composición. Los recuadros son ideas, <strong>no imágenes generadas</strong>.</p>
+              <p>Vista real de tus nueve publicaciones. Toca cualquier casilla para subir o sustituir una foto.</p>
             </div>
-            <span className="bg-compact-progress">{grid.posts.filter(p=>p.assetId).length}/9 imágenes listas</span>
+            <span className="bg-compact-progress">{grid.posts.filter(p=>p.assetId).length}/9 imágenes cargadas</span>
           </div>
           <div className="bg-compact-nine" role="group" aria-label="Seleccionar una de las nueve composiciones">
             {grid.posts.map((p,i)=><button type="button" key={i}
@@ -695,8 +695,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </button>)}</div>
         {isExpress&&<section className="bg-chatgpt-workflow" aria-label="Crear fotografías con los nueve prompts de ChatGPT">
           <div className="bg-chatgpt-heading"><div><span className="eyebrow">PASO 2 · CREA TU IMAGEN REAL</span>
-            <h3>Los 8 prompts del freebie + 1 nuevo</h3>
-            <p>Como las fotos de matcha: fotografía de producto realista, encuadres distintos y estilo editorial. Elige un post para ver su instrucción.</p></div>
+            <h3>9 direcciones creativas para ChatGPT</h3>
+            <p>Prompts completos: una sola imagen por resultado, producto fiel a tu foto original, sin collages y con composición editorial distinta.</p></div>
             <a href="prompts/" target="_blank" rel="noopener noreferrer">Ver el freebie original</a>
           </div>
           <div className="bg-prompt-tiles">{ONE_PHOTO_NINE.map((entry,n)=><button key={entry.name} type="button"
