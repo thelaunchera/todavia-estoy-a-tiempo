@@ -49,11 +49,11 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:demoRebuildPrompts['casa-brownie'][0].prompt
  },
  '06':{
-  tabs:['Demo oficial SIN VIDEO https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','URL de práctica del estudiante en AppDeploy','Vista móvil estrecha y escritorio','ChatGPT con capturas reales'],
-  actions:['Abre la URL en el teléfono y recorre toda la página.','Toma capturas reales de título, foto y botón antes de corregir.','Pega las capturas en ChatGPT, aplica solo dos correcciones y vuelve a probar.'],
-  savedPoint:'Guarda fotos 06_ANTES_MOVIL.png y la URL de versión inicial para comparar.',
-  finish:'Termina con capturas antes/después y la navegación móvil verificada.',
-  readyPrompt:'Analiza estas capturas REALES de Casa Brownie en teléfono y escritorio [ADJUNTOS]. Señala solo problemas observables de legibilidad, foto recortada, contraste, botón o desbordamiento horizontal. Propón dos correcciones concretas para aplicar con AppDeploy, manteniendo contenido y marca. No inventes resultados de pruebas.'
+  tabs:['URL pública de la práctica de Casa Brownie','Safari o Chrome en el teléfono real','https://cometweb.io/tools/responsive abierto en otra pestaña del mismo teléfono','ChatGPT y AppDeploy disponibles según la cuenta'],
+  actions:['En el celular, abre la URL real de AppDeploy y toca el menú, los enlaces y el botón. Comprueba texto legible y ausencia de movimiento horizontal.','Sin usar computadora, abre otra pestaña y entra en cometweb.io/tools/responsive. Pega solo una URL pública y selecciona vistas de 360 px (móvil), 768 px (tablet) y 1280 px (computadora).','Explica que son simulaciones de anchura, no pruebas en todos los dispositivos físicos. Si la URL no se puede mostrar, no marques el resultado como aprobado.','Toma capturas de dos problemas concretos, anota el ancho y pide ajustes puntuales con ChatGPT + AppDeploy. Solo usa QA automático si el plugin realmente lo permite.','Repite la comparación y vuelve a probar los botones con el dedo en tu teléfono real; guarda antes/después y anota lo que todavía falta revisar.'],
+  savedPoint:'Guarda 06_ANTES_MOVIL.png, 06_TABLET_PREVIEW.png, 06_ESCRITORIO_PREVIEW.png y la URL pública inicial para comparar sin computadora.',
+  finish:'Termina con capturas antes/después, menú y CTA probados en un teléfono real y vistas de referencia de móvil, tablet y escritorio, sin prometer cobertura universal.',
+  readyPrompt:'Tengo esta web pública en AppDeploy [URL]. Quiero revisarla desde mi teléfono, sin computadora. Comprueba únicamente lo que permitan tus herramientas y mis capturas. Si tienes QA de AppDeploy disponible, verifica vistas de 360, 390, 768 y 1280 píxeles e incluye evidencia; si no, explícame cómo usar un verificador responsive gratuito desde Safari o Chrome. Señala hasta dos problemas observables de recorte, lectura, contraste, CTA, menú o desbordamiento. Mantén marca, fotos y textos. No inventes pruebas ni afirmes compatibilidad universal.'
  },
  '07':{
   tabs:['Web ficticia Casa Brownie: sin cobros','Stripe en modo de prueba, con datos privados ocultos','Make con Gmail (escenario desactivado)','Tabla clara: cuentas/planes gratuitos, comisiones por venta y disponibilidad de plugins según plan','Guía de conexiones del Studio','Aula → Materiales → Make gratis y Contraseñas'],
