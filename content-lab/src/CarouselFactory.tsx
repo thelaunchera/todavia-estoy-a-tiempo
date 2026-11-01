@@ -1210,15 +1210,24 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     try{
       const {data}=await api.post('/api/ideas',{brandId:brand.id,topic:idea,format:'Carousel',angle:post.angle||'Educational',platform:socialDestination});
       const updated:Post={...post,...data,format:'Carousel',brandId:brand.id,designData:''};
-      const backgroundId=slide.backgroundId||style.seamlessBackgroundId||'brand';
-      const backgroundImageId=slide.backgroundImageId||style.seamlessAssetId||'';
-      const generated=parseSlides(updated,brand).map(item=>({...item,
-        backgroundId,backgroundImageId,backgroundColor:slide.backgroundColor,
-        backgroundGradient:slide.backgroundGradient}));
+      // AI writes the copy, not the user's visual design. Preserve each slide's
+      // chosen wallpaper, photo, stickers and precise touch placements.
+      const generated=parseSlides(updated,brand).map((item,index)=>{
+        const previous=slides[index];
+        return previous?{...item,
+          backgroundId:previous.backgroundId||'brand',
+          backgroundImageId:previous.backgroundImageId||'',
+          backgroundColor:previous.backgroundColor,
+          backgroundGradient:previous.backgroundGradient,
+          assetId:previous.assetId,photoPosition:previous.photoPosition,
+          stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions,
+          frameStyle:previous.frameStyle,
+        }:item;
+      });
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
       setCurrent(0);clearDownloads();
-      setStudioTab('style');
-      notify('Tu carrusel está preparado. Elige un fondo o cambia cualquier texto.');
+      setStudioTab('slides');
+      notify('Textos listos para revisar. Tus fotos, fondos y stickers siguen en su sitio.');
     }catch(e){showError(e)}finally{setBusy('');}
   };
   const createImage=async()=>{
