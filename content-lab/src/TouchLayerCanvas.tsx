@@ -73,7 +73,7 @@ export default function TouchLayerCanvas({
     if(!viewport||!canvas)return;
     const width=canvas.getBoundingClientRect().width/pageCount;
     viewport.scrollTo({left:Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,
-      (next+.5)*width-viewport.clientWidth/2)),behavior:'smooth'});
+      (next+.5)*width-viewport.clientWidth/2)),behavior:'auto'});
   };
   const syncPageFromScroll=()=>{
     if(pageCount<=1)return;
@@ -297,20 +297,11 @@ export default function TouchLayerCanvas({
           className={index===activePage?'active':''}
           onClick={()=>goToPage(index)}>{index+1}</button>)}
       </div>
-      {interactionMode==='edit'&&<div className="touch-editor-quick-layers" role="group"
-        aria-label="Elegir foto o sticker incluso si están superpuestos">
-        <strong>Elige un elemento para moverlo:</strong>
-        <div>{layers.map(layer=><button type="button" key={layer.id}
-          className={selected===layer.id?'selected':''} aria-pressed={selected===layer.id}
-          onClick={()=>selectFromList(layer.id)}>
-          {layer.kind==='photo'?'📷':layer.kind==='sticker'?'🎀':layer.kind==='text'?'T':'▧'} {layer.name}
-        </button>)}</div>
-      </div>}
       <p className="touch-editor-navigation-tip">{interactionMode==='navigate'
         ?'Desliza con el dedo o usa las flechas. Las fotos y los stickers no se moverán.'
         :'Elige una capa arriba o tócala una vez. Después arrástrala; las demás quedan protegidas.'}</p>
     </div>}
-    {chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
+    {pageCount===1&&chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
       <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
         <Trash2 size={15}/> Borrar
@@ -421,6 +412,23 @@ export default function TouchLayerCanvas({
         </div>}
       </div>
     </div>
+    {pageCount>1&&interactionMode==='edit'&&<div className="touch-editor-below-canvas-controls">
+      {interactionMode==='edit'&&<div className="touch-editor-quick-layers" role="group"
+        aria-label="Elegir foto o sticker incluso si están superpuestos">
+        <strong>Elige un elemento para moverlo:</strong>
+        <div>{layers.map(layer=><button type="button" key={layer.id}
+          className={selected===layer.id?'selected':''} aria-pressed={selected===layer.id}
+          onClick={()=>selectFromList(layer.id)}>
+          {layer.kind==='photo'?'📷':layer.kind==='sticker'?'🎀':layer.kind==='text'?'T':'▧'} {layer.name}
+        </button>)}</div>
+      </div>}
+    </div>}
+    {pageCount>1&&chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
+      <span>{chosen.name}</span>
+      <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
+        <Trash2 size={15}/> Borrar
+      </button>
+    </div>}
     <p className="touch-editor-help">{pageCount>1
       ?interactionMode==='navigate'?'Desliza el lienzo o usa las flechas para pasar de slide sin mover stickers.':
         'Primero elige una capa; después arrástrala. Usa las flechas para pasar de slide.'
