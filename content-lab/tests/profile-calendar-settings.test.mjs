@@ -24,7 +24,7 @@ test('All editors can save finished design with a chosen date and hour into cale
  assert.ok(action.includes('type="date"'));
  assert.ok(action.includes('type="time"'));
  assert.ok(app.includes("save({...latest,date,time,planningStatus:'planned'})"));
- assert.ok(app.includes("if(ok){toast('Guardado en el calendario."));
+ assert.ok(app.includes("if(ok){setCalendarEditId('');setCalendarFocusDate(date);toast('Guardado en el calendario."));
 });
 
 test('Month view visibly distinguishes reel cover from video editing',()=>{
