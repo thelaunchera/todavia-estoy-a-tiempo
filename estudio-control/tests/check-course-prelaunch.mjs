@@ -24,6 +24,12 @@ const classPos=home.indexOf('<section class="learning-section" id="aprender"');
 assert.ok(matchaPos>0&&classPos>matchaPos,'Freebie de matcha antes de la clase en el podcast');
 assert.equal((home.match(/id="matcha-gratis"/g)||[]).length,1,'El freebie no se duplica');
 assert.match(home,/href="content-lab\/prompts\/#recibir"[^>]*aria-label="Abrir el freebie gratuito de matcha"/,'El botón lleva directamente a solicitar los prompts privados, no a la clase');
+assert.match(home,/src="content-lab\\/prompts\\/matcha-01\\.jpg\\?v=hd-20261031"/,'La tarjeta Matcha usa la fotografía HD original, no un banco de imágenes');
+assert.ok(read('content-lab/public/prompts/index.html').includes('matcha-01.jpg'),'La imagen del Matcha es la misma usada en el freebie');
+const matchaStyles=read('styles-redesign.css');
+assert.match(matchaStyles,/Original high-resolution Matcha artwork/,'La tarjeta Matcha tiene un diseño editorial actualizado');
+assert.match(matchaStyles,/grid-template-columns:minmax\\(0,40%\\) minmax\\(0,1fr\\)/,'La fotografía Matcha conserva espacio visible en móviles');
+
 
 assert.match(classPage,/id="course-waitlist-form"/);
 assert.match(classPage,/id="course-waitlist-consent"/);
@@ -78,6 +84,8 @@ assert.match(classPage,/<h1 id="class-title">Tu primera web <em>con IA\.<\/em><\
 assert.match(classPage,/esa idea que tienes guardada merece/i,'El hero parte de una idea real del alumno');
 assert.match(classPage,/Lista de espera abierta/,'Lista de espera sin compra habilitada');
 assert.match(classPage,/href="#lista-espera">Quiero estar en la lista/,'El CTA principal lleva a la lista sin checkout');
+assert.match(classPage,/<div class="class-hero-actions"[^>]*>[\\s\\S]*?class-primary-button[^>]*href="#lista-espera"[\\s\\S]*?class-campaign-notify-link[^>]*href="#recorrido"[\\s\\S]*?<\\/div>/,'Los dos CTA están agrupados en una fila responsive');
+
 assert.match(classPage,/¿Y si solo tienes <em>tu celular\?<\/em>/,'El bloque de requisitos incluye a quienes solo tienen teléfono');
 assert.doesNotMatch(home.match(/<section class="learning-section"[\s\S]*?<\/section>/)?.[0]||'',/ChatGPT|AppDeploy|TinyFish|GSC Wizard|Stripe|Gmail|Make/,'El teaser público tampoco revela herramientas');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
@@ -85,6 +93,9 @@ assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'S
 assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
 assert.match(classPage,/src="\.\.\/assets\/clase-hero-retrato-real-2026\.jpg"/,'Se publica la foto independiente de laptop en el hero');
 assert.match(newStyles,/class-hero-grid/,'El layout del hero tiene estilos responsivos');
+assert.match(newStyles,/Hero · keep both actions inside a single layout/,'Los CTA comparten un layout que evita colisiones');
+assert.match(newStyles,/grid-template-columns:minmax\\(0,1fr\\)!important;gap:11px!important/,'En móviles los CTA se apilan con separación');
+
 assert.match(classPage,/role="tablist"/);
 assert.match(classPage,/role="tabpanel"/);
 assert.match(classPage,/id="class-copy-prompt"/);
