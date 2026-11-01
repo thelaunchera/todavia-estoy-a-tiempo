@@ -42,7 +42,8 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
  const visible=originals.filter(a=>group==='Todos'||(a.shared?a.stickerGroup:groupFor(a.name))===group);
  const toggle=(id:string)=>{
   if(!images[id])loadImage?.(id);
-  onChange({backgroundId,backgroundImageId,stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
+  // Keep the existing background untouched when adding or removing stickers.
+  onChange({stickerIds:selected.includes(id)?selected.filter(x=>x!==id):[...selected,id].slice(-3)})
  };
  return <section className="free-decor-controls" aria-label="Stickers y fondos">
   <div className="free-decor-header"><div><strong>✦ {title}</strong><p>Stickers y fondos a tu gusto, sin ocupar toda la pantalla.</p></div>
@@ -80,7 +81,7 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
     {visible.length?<div className="free-decor-stickers">{visible.map(a=><div key={a.id} className="free-decor-sticker-cell"><button type="button" aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''} onClick={()=>toggle(a.id)}><StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/><small>{displayAssetName(a)}</small></button></div>)}</div>:
     <div className="free-decor-empty"><strong>Aquí aparecerán tus stickers PNG originales.</strong><p>No se mostrarán emojis de relleno. Cuando la administradora publique la colección, aparecerá aquí automáticamente.</p>{onOpenLibrary&&<button type="button" onClick={onOpenLibrary}>Abrir biblioteca de stickers</button>}</div>}
    </>}
-  <div className="free-decor-footer"><small>Máximo 3 stickers por slide. Las fotografías originales no se modifican.</small>{selected.length>0&&<button type="button" onClick={()=>onChange({backgroundId,backgroundImageId,stickerIds:[]})}>Quitar stickers</button>}</div>
+  <div className="free-decor-footer"><small>Máximo 3 stickers por slide. Las fotografías originales no se modifican.</small>{selected.length>0&&<button type="button" onClick={()=>onChange({stickerIds:[]})}>Quitar stickers</button>}</div>
   </div>}
  </section>
 }
