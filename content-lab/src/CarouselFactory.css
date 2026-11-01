@@ -453,3 +453,48 @@
  border-color:#327b94;background:#e0f0f6;color:#194e65;
  box-shadow:inset 0 0 0 1px #327b94
 }
+
+/* Distinct creation modes with editorial, touch-friendly affordances. */
+.factory-format-switch{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 14px}
+.factory-format-switch button{display:flex;align-items:center;gap:10px;min-width:0;text-align:left;
+ border:1px solid #d3e0e1;background:#fff;border-radius:14px;padding:12px 13px;min-height:73px;
+ color:#243f47;cursor:pointer}
+.factory-format-switch button.active{border:2px solid #245769;background:#edf6f7;padding:11px 12px}
+.factory-format-switch .factory-mode-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;
+ border-radius:11px;background:#e7eeec;font-size:19px;font-weight:800;color:#2d6275;letter-spacing:-3px}
+.factory-format-switch button.active .factory-mode-icon{background:#d1e6eb}
+.factory-format-switch button>span:last-child{display:grid;gap:4px;min-width:0}
+.factory-format-switch strong{font-size:14px;line-height:1.1}
+.factory-format-switch small{font-size:11px;color:#55727b;line-height:1.35}
+.factory-preview-edit{display:none}
+@media(max-width:920px){
+ .factory-header{margin-bottom:10px;gap:8px}
+ .factory-header p{display:none}
+ .factory-header h1{font-size:24px;margin:1px 0}
+ .factory-format-switch{position:relative;gap:8px;margin:7px 0 10px}
+ .factory-format-switch button{min-height:64px;padding:9px;gap:6px;border-radius:12px}
+ .factory-format-switch button.active{padding:8px}
+ .factory-format-switch .factory-mode-icon{width:31px;height:31px;font-size:16px}
+ .factory-format-switch strong{font-size:13px}
+ .factory-format-switch small{font-size:10px}
+ /* One lightweight tool rail instead of a tall step wizard. */
+ .factory-design-flow{display:none!important}
+ .factory-studio-tabs.factory-cata-nav{margin:7px 0!important;padding:0!important}
+ .factory-step-rail{overflow-x:auto;scrollbar-width:none}
+ .factory-step-rail::-webkit-scrollbar{display:none}
+ .factory-step-rail button{white-space:nowrap}
+ /* Preview = a clean Instagram-sized swipe, not an editor nested in another editor. */
+ .factory-persistent-preview.is-open{bottom:calc(12px + env(safe-area-inset-bottom,0px));
+   max-height:calc(100dvh - 85px);border-radius:22px;padding:12px}
+ .factory-persistent-preview.is-open .factory-swipe-caption{font-size:10px;margin:5px 2px 9px}
+ .factory-persistent-preview.is-open .factory-swipe-rail{gap:8px;padding:3px 5%;scrollbar-width:none}
+ .factory-persistent-preview.is-open .factory-swipe-page{flex:0 0 90%;box-shadow:none}
+ .factory-persistent-preview.is-open .factory-swipe-navigation,
+ .factory-persistent-preview.is-open .factory-swipe-thumbnails{display:none}
+ .factory-preview-edit{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+   background:#203a45;color:#fff;border:0;border-radius:12px;min-height:47px;margin-top:10px;
+   font-size:13px;font-weight:750}
+ .factory-mobile-preview-trigger{position:relative;top:auto;z-index:3;min-height:39px;margin:4px 0 8px auto}
+ .factory-mobile-preview-close{font-size:12px}
+}
+@media(max-width:390px){.factory-format-switch .factory-mode-icon{display:none}}
