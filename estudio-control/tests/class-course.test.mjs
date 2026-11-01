@@ -153,7 +153,10 @@ test('los guiones del alumno parten del acceso comprado, no de la lista de esper
  const prompts=classLessons.map(lesson=>lesson.prompt).join(' ');
  assert.match(intro.beats[0].say,/Ya estás dentro del aula/);
  assert.match(intro.beats.map(beat=>beat.say).join(' '),/ChatGPT Plus/);
-  assert.ok(intro.beats.some(beat=>beat.label==='Una inversión con intención'),'El guion explica la herramienta como inversión consciente');
+ assert.match(intro.beats.map(beat=>beat.say).join(' '),/gratis/);
+ assert.ok(intro.beats.some(beat=>beat.label==='Empezar gratis y decidir si necesitas Plus'),'El guion enseña el inicio con herramientas Free y deja Plus como opción');
+ assert.match(intro.beats.map(beat=>beat.say).join(' '),/plugins/);
+ assert.match(intro.beats.map(beat=>beat.say).join(' '),/no una (cantidad|cuota) que todos tengan garantizada/);
  assert.match(intro.beats[0].say,/teléfono/);
  assert.match(intro.beats[0].say,/Casa Brownie/);
  assert.match(recordingStarts['00'].readyPrompt,/Casa Brownie/);
@@ -162,6 +165,25 @@ test('los guiones del alumno parten del acceso comprado, no de la lista de esper
  assert.doesNotMatch(spoken,/\blanding\b/i);
 });
 
+
+test('primero se enseñan límites gratuitos, planificación personal y ventas sin promesas',()=>{
+ const spoken=classLessons.flatMap(l=>l.beats.map(b=>b.say)).join(' ');
+ const student=readFileSync('../alumnos/guia-principiantes.js','utf8');
+ const guide=readFileSync('GUIA-DE-VOZ-CLASE-01.md','utf8');
+ const connector=readFileSync('src/ConnectorsLesson.tsx','utf8');
+ assert.match(spoken,/hasta tres webs en un día/);
+ assert.match(spoken,/por la mañana/);
+ assert.match(spoken,/por la tarde/);
+ assert.match(spoken,/Free/);
+ assert.match(spoken,/Plus es una buena opción, no una obligación/);
+ assert.match(spoken,/plugin/);
+ assert.match(spoken,/no es una garantía|no es una cantidad|no una cuota|no una promesa/);
+ assert.match(spoken,/ventas/);
+ assert.match(student,/ChatGPT gratis/);
+ assert.match(student,/Stripe cobra comisiones/);
+ assert.match(connector,/plan Free/);
+ assert.match(guide,/gratis primero/i);
+});
 
 test('Studio muestra Casa Brownie sin video y con video como demos distintos',()=>{
  const library=readFileSync('src/FinishedDemos.tsx','utf8');
