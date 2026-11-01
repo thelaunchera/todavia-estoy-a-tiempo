@@ -331,12 +331,8 @@
       const wantsEpisodeNotes = kind === 'guide' && form.querySelector('input[name="newsletter"]')?.checked === true;
       const url = publicUrl(kind === 'guide' ? config.freeGuideEndpoint : config.helpEndpoint);
       if (!url) {
-        status.textContent = 'Este formulario no está disponible todavía. Puedes escribirnos directamente.';
+        status.textContent = 'El formulario no está disponible ahora. Inténtalo más tarde.';
         status.classList.add('is-error');
-        const link = document.createElement('a');
-        link.href = 'mailto:hello@thelaunchera.com';
-        link.textContent = ' Escribir por correo';
-        status.append(link);
         return;
       }
       if (form.querySelector('[name="website"]')?.value) return;
@@ -381,13 +377,9 @@
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
       } catch (error) {
         status.textContent = kind === 'guide'
-          ? 'No pudimos confirmar el envío de la guía. Inténtalo otra vez o escríbenos.'
-          : 'No pudimos confirmar la consulta. Inténtalo de nuevo o escríbenos directamente.';
+          ? 'No pudimos confirmar el envío de la guía. Inténtalo otra vez.'
+          : 'No pudimos confirmar la consulta. Inténtalo de nuevo.';
         status.classList.add('is-error');
-        const link = document.createElement('a');
-        link.href = 'mailto:hello@thelaunchera.com';
-        link.textContent = ' Abrir correo';
-        status.append(link);
       } finally {
         submit.disabled = false;
         submit.textContent = buttonText;
@@ -580,6 +572,14 @@
     helpPanel.addEventListener('keydown', event => {
       if (event.key === 'Escape') setHelpOpen(false);
     });
+    // Direct contact links from any landing open the actual form, not a closed section.
+    const openLinkedHelp = () => {
+      if (window.location.hash === '#ayuda' || window.location.hash === '#help-form') {
+        setHelpOpen(true);
+      }
+    };
+    openLinkedHelp();
+    window.addEventListener('hashchange', openLinkedHelp);
   }
 
   const progress = document.querySelector('.scroll-progress');
