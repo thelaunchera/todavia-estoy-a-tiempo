@@ -5,8 +5,8 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('Quick 9-post grid starts with distinct concepts, not nine invented photo previews',()=>{
  const s=read('src/BrandGrid.tsx');
  assert.ok(s.includes("isExpress&&!expandedEditor"));
- assert.ok(s.includes("Los recuadros son ideas,"));
- assert.ok(s.includes("no imágenes generadas"));
+ assert.ok(s.includes("VISTA PREVIA · GRID 3 × 3"));
+ assert.ok(s.includes("El Lab no genera imágenes"));
  assert.ok(s.includes("ONE_PHOTO_NINE[i].short"));
  assert.ok(s.includes("p.assetId&&images[p.assetId]?<img"));
  assert.ok(s.includes("index===0?quickMessage.trim()"));
@@ -19,7 +19,7 @@ test('Only selected post shows generation, import, preview and download controls
  assert.ok(s.includes('bg-compact-real-preview'));
  assert.ok(s.includes('bg-compact-prompt-details'));
  assert.ok(s.includes('bg-compact-advanced-link'));
- assert.ok(s.includes('setExpandedEditor(true)'));
+ assert.ok(s.includes('movePost(-1)')&&s.includes('movePost(1)'));
  assert.ok(s.includes("setExpandedEditor(false)"));
 });
 test('Image imports preserve the source and target the post selected at upload start',()=>{
