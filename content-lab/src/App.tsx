@@ -420,7 +420,7 @@ function App() {
     const closeOnEscape=(e:KeyboardEvent)=>{
       if(e.key==='Escape'&&createMenuRef.current?.open){
         createMenuRef.current.open=false;
-        createMenuRef.current.querySelector('summary')?.focus();
+        createMenuRef.current.querySelector<HTMLElement>('summary')?.focus();
       }
     };
     document.addEventListener('pointerdown',closeOutside);
