@@ -18,7 +18,7 @@ export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;fram
 export type Layout={name:string;image:[number,number,number,number];type:[number,number,number,number];accent:string;shape:string;align?:CanvasTextAlign;dark?:boolean};
 export const LAYOUTS:Layout[]=[
  // Photo-first editorial geometries. Saved format names and order are stable.
- {name:'Editorial Hero',image:[0.38,0.04,0.6,0.898],type:[0.055,0.27,0.3,0.46],accent:'rule',shape:'flat'},
+ {name:'Editorial Hero',image:[0.06,0.045,0.88,0.675],type:[0.085,0.765,0.83,0.155],accent:'none',shape:'flat'},
  {name:'Bold Typography',image:[0.27,0.4,0.7,0.538],type:[0.06,0.07,0.88,0.26],accent:'frame',shape:'solid'},
  {name:'Macro Texture',image:[0,0,1,0.74],type:[0.07,0.79,0.86,0.14],accent:'rule',shape:'bottomPanel'},
  {name:'Lifestyle Scene',image:[0.06,0.055,0.88,0.74],type:[0.08,0.83,0.84,0.1],accent:'corner',shape:'paper'},
@@ -114,6 +114,8 @@ function geometry(ctx:CanvasRenderingContext2D,layout:Layout,W:number,H:number,p
 // A second, oversized typographic plane sits BEHIND the real photo — the same
 // art direction as the gallery, but it uses the buyer's editable headline.
 function paintGhostHeadline(ctx:CanvasRenderingContext2D,layout:Layout,text:string,W:number,H:number){
+ // Editorial Hero has one clear headline below its photograph; no repeated giant type.
+ if(layout.name==='Editorial Hero')return;
  const tokens=(text||'').toLocaleUpperCase().match(/[\p{L}\p{N}]{3,}/gu)||[];
  const word=tokens.find(t=>t.length>=4)||tokens[0];
  if(!word)return;
