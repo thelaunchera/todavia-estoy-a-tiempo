@@ -127,3 +127,80 @@
  .touch-editor-size-toolbar button{flex:1;min-height:44px}
  .touch-editor-size-range{flex:1 1 100%}
 }
+
+
+/* Touch-first canvas: safe navigation is distinct from deliberate layer movement. */
+.panorama-canvas .touch-editor-navigation{
+ display:grid;gap:9px;margin:0 0 10px;padding:10px;
+ background:#fff;border:1px solid #d3e2e7;border-radius:12px;min-width:0
+}
+.touch-editor-mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.touch-editor-mode-switch button{
+ min-width:0;min-height:45px;border-radius:9px;padding:8px 7px;
+ border:1px solid #cbdde2;background:#f5f8f8;color:#3d6572;
+ font-size:12px;font-weight:750;touch-action:manipulation
+}
+.touch-editor-mode-switch button.active{
+ background:#244654;border-color:#244654;color:#fff
+}
+.touch-editor-page-navigation{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.touch-editor-page-navigation button{
+ min-width:49px;min-height:44px;border-radius:10px;border:1px solid #a9c9d4;
+ background:#e9f5f7;color:#1e5269;font-size:30px;line-height:1;font-weight:700;
+ touch-action:manipulation
+}
+.touch-editor-page-navigation button:disabled{opacity:.32}
+.touch-editor-page-navigation span{font-size:12px;font-weight:800;color:#254a59}
+.touch-editor-page-tabs{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.touch-editor-page-tabs button{
+ flex:0 0 34px;height:34px;border:1px solid #d5e4e9;border-radius:9px;
+ background:#f6f9fa;color:#4a6a79;font-size:12px;font-weight:700;
+ touch-action:manipulation
+}
+.touch-editor-page-tabs button.active{
+ background:#dcecf5;color:#174e6c;border-color:#528eaa
+}
+.touch-editor-quick-layers{display:grid;gap:6px;min-width:0}
+.touch-editor-quick-layers>strong{font-size:11px;color:#385b6b}
+.touch-editor-quick-layers>div{
+ display:flex;overflow-x:auto;gap:7px;max-width:100%;padding:1px 0 6px;
+ overscroll-behavior-x:contain;scrollbar-width:thin
+}
+.touch-editor-quick-layers button{
+ flex:0 0 auto;max-width:190px;min-height:40px;
+ padding:7px 11px;border:1px solid #c9dce2;border-radius:10px;
+ background:#f5f9fa;color:#355d6e;font-size:11px;font-weight:700;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;touch-action:manipulation
+}
+.touch-editor-quick-layers button.selected{
+ border-color:#357d9c;background:#d8eff7;color:#124f6d
+}
+.touch-editor-navigation-tip{font-size:11px;line-height:1.4;color:#587887;margin:0}
+.touch-editor-navigation-mode .touch-editor-scroll{
+ touch-action:pan-x pan-y;overflow-x:auto;-webkit-overflow-scrolling:touch
+}
+.touch-editor-navigation-mode .touch-editor-stage{
+ touch-action:pan-x pan-y
+}
+.touch-editor-navigation-mode .touch-editor-layer{
+ pointer-events:none!important;touch-action:pan-x pan-y;cursor:default
+}
+.touch-editor-edit-mode .touch-editor-layer.active{
+ z-index:8!important;
+ outline:2px dashed #3692b6;outline-offset:1px
+}
+.touch-editor-edit-mode .touch-editor-layer:not(.active){cursor:pointer}
+.touch-editor-navigation-mode .touch-editor-actionbar{display:none}
+.panorama-canvas .touch-editor-actionbar-compact{
+ flex-direction:row;align-items:center;padding:7px 9px;margin-bottom:8px
+}
+.panorama-canvas .touch-editor-actionbar-compact .touch-editor-delete-primary{
+ width:auto;min-height:36px;padding:7px 12px;font-size:12px
+}
+@media(max-width:600px){
+ .panorama-canvas .touch-editor-navigation{padding:8px}
+ .touch-editor-mode-switch button{min-height:44px;font-size:11px}
+ .touch-editor-quick-layers button{min-height:44px}
+ .panorama-canvas .touch-editor-actionbar-compact{flex-direction:row}
+ .panorama-canvas .touch-editor-actionbar-compact .touch-editor-delete-primary{width:auto}
+}
