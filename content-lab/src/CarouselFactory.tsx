@@ -1299,6 +1299,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       <div className="factory-background-main">
         <div className="factory-background-main-head">
           <strong>Elige dónde aplicar el fondo</strong>
+          <div className="factory-background-slide-picker" aria-label="Elegir slide para cambiar su fondo">
+            <span>Selecciona el slide:</span>
+            <div>{slides.map((item,n)=><button key={item.key} type="button"
+              className={n===i?'active':''} aria-pressed={n===i}
+              onClick={()=>setCurrent(n)}>Slide {n+1}</button>)}</div>
+          </div>
           <p>Un fondo distinto en cada slide, o el mismo para todo el carrusel.</p>
           <div className="factory-background-scope" role="group" aria-label="Dónde aplicar el fondo elegido">
             <button type="button" className={backgroundScope==='slide'?'active':''}
