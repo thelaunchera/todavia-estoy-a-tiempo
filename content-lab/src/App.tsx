@@ -1121,7 +1121,9 @@ function App() {
         <div className="switchwrap">
           <button className="switch" onClick={() => setSwitcher(v => !v)}>
             <span className="brand-avatar" style={{ background: brand?.color }}>
-              {brand?.name[0] || '+'}
+              {brand?.logoAssetId&&images[brand.logoAssetId]
+                ?<img src={images[brand.logoAssetId]} alt=""/>
+                :brand?.name[0] || '+'}
             </span>
             <span>
               <strong>{brand?.name || t('Select a brand')}</strong>
@@ -1185,7 +1187,9 @@ function App() {
             className="signout"
             onClick={() => auth.signOut().then(() => setAccount(null))}
           >
-            <span className="person">D</span>
+            <span className="person">{profilePhotoId&&images[profilePhotoId]
+              ?<img className="lab-account-avatar" src={images[profilePhotoId]} alt=""/>
+              :(account.email||'U')[0].toUpperCase()}</span>
             <span>
               <strong>{t('My private workspace')}</strong>
               <small>{account.email}</small>
@@ -1849,6 +1853,11 @@ function App() {
                onUpload={()=>navigate('media')}
                onChoose={format=>{setGridPref(p=>({version:p.version+1,brandId:brand.id,format}));navigate('grid')}}/>
            )}
+           {tab==='settings'&&<AccountSettings email={account.email||''}
+             locale={loginLanguage}
+             avatarSrc={profilePhotoId?images[profilePhotoId]:undefined}
+             onUpload={uploadProfilePhoto} onClear={clearProfilePhoto}
+             onBrands={()=>navigate('brands')}/>}
            {tab === 'brands' && (
             <>
               <div className="pageheading">
@@ -2068,6 +2077,10 @@ function App() {
             </>
           )}
         </div>
+        {brand&&['factory','vertical','create'].includes(tab)&&
+          <ScheduleFromEditor key={editor.id||editor.brandId+':'+editor.format}
+            locale={loginLanguage} format={editor.format}
+            date={editor.date} time={editor.time} onSchedule={planEditor}/>}
         <input
           ref={uploadRef}
           type="file"
