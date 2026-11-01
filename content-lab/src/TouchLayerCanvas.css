@@ -226,3 +226,62 @@
 .touch-editor-copy-feedback{
  color:#2b5a69;font-size:11px;font-weight:650;line-height:1.4
 }
+
+
+/* Text stays directly manipulable on the artboard, with readable mobile options. */
+.touch-editor-layer.text{cursor:move}
+.touch-editor-layer.text .touch-editor-free-text{
+ width:100%;height:100%;overflow:hidden;
+ text-align:left;white-space:pre-wrap;
+ overflow-wrap:break-word;
+ pointer-events:none;user-select:none;-webkit-user-select:none
+}
+.touch-editor-text-guide{flex:0 0 100%;margin:2px 0 0;font-size:11px;line-height:1.45;color:#466879}
+.touch-editor-text-presets{
+ display:flex;flex:1 1 100%;gap:9px;min-width:0
+}
+.touch-editor-text-presets button{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+ flex:1 1 0;min-height:53px;
+ border:1px solid #bed4dc;border-radius:10px;background:#fff;color:#264958;
+ touch-action:manipulation
+}
+.touch-editor-text-presets button:first-child strong{
+ font-family:'Archivo Black',Impact,'Arial Black',sans-serif;
+ font-size:17px;line-height:1
+}
+.touch-editor-text-presets button small{font-size:10px;color:#637b86}
+.touch-editor-text-presets button[aria-pressed=true]{
+ background:#e3f2f7;border-color:#45879f
+}
+.touch-editor-text-position{
+ display:flex;flex:1 1 100%;align-items:center;flex-wrap:wrap;gap:7px
+}
+.touch-editor-text-position strong{
+ flex:0 0 100%;font-size:11px;color:#3f6876
+}
+.touch-editor-text-position button{
+ flex:1 1 66px;min-height:42px;touch-action:manipulation;
+ border:1px solid #c5dbe1;background:#fff;color:#2b596b;border-radius:9px;font-weight:700
+}
+.touch-editor-text-palette{
+ flex:1 1 100%;display:flex;align-items:center;flex-wrap:wrap;gap:9px
+}
+.touch-editor-text-palette button{
+ width:39px;height:39px;flex:0 0 39px;padding:0;
+ border:2px solid #b5cbd4;border-radius:50%;
+ box-shadow:0 1px 4px rgba(10,32,43,.12);
+ touch-action:manipulation
+}
+.touch-editor-text-palette button[aria-pressed=true]{
+ outline:2px solid #246d8e;outline-offset:2px
+}
+.touch-editor-type-settings select{
+ min-height:41px;max-width:100%;border:1px solid #cbdfe3;border-radius:9px;background:#fff;color:#284651
+}
+@media(max-width:620px){
+ .touch-editor-text-presets button{min-height:50px}
+ .touch-editor-text-position button{min-height:44px}
+ .touch-editor-options .touch-editor-type-settings{max-width:100%;min-width:0}
+ .touch-editor-type-settings label{flex-wrap:wrap}
+}
