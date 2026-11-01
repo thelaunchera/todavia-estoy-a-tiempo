@@ -68,6 +68,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [quickMessage,setQuickMessage]=useState('');
   const [quickNotes,setQuickNotes]=useState('');
   const [copiedPrompt,setCopiedPrompt]=useState(false);
+  const [expandedEditor,setExpandedEditor]=useState(false);
   const [chosenFormat,setChosenFormat]=useState('');
   const [referenceFocus,setReferenceFocus]=useState<string[]>(['palette','lighting','composition']);
   useEffect(()=>{
@@ -75,7 +76,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     setSourceId(initialSelection.sourceId||'');
     setReferenceId(initialSelection.referenceId||brand.referenceAssetId||'');
     setChosenFormat(initialSelection.format||'');
-    setGrid(null);setSelected(0);setDownloads([]);
+    setGrid(null);setSelected(0);setDownloads([]);setExpandedEditor(false);
   },[initialSelection?.version]);
   const [designPreset,setDesignPreset]=useState<'reference'|EditorialPreset>('reference');
   const [kind,setKind]=useState('portrait');const [brief,setBrief]=useState('');
@@ -177,7 +178,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     flushDraft();
     const ownChoice=initialSelection?.brandId===brand.id?initialSelection:null;
     setSourceId(ownChoice?.sourceId||'');setReferenceId(ownChoice?.referenceId||brand.referenceAssetId||'');setChosenFormat(ownChoice?.format||'');
-    setGrid(null);setSelected(0);setQuickProduct('');setQuickMessage('');setQuickNotes('');
+    setGrid(null);setSelected(0);setExpandedEditor(false);setQuickProduct('');setQuickMessage('');setQuickNotes('');
     setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
@@ -225,7 +226,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       const presets:EditorialPreset[]=['portrait','split','typographic','portrait','split','annotated','magazine','magazine','portrait'];
       const backgrounds:EditorialDesign['background'][]=['photo','ivory','gradient','photo','ivory','photo','ivory','gradient','photo'];
       const posts:Tile[]=ONE_PHOTO_NINE.map((item,index)=>({
-        index,headline:quickMessage.trim().slice(0,120),subtext:'',caption:'',
+        index,headline:index===0?quickMessage.trim().slice(0,120):'',subtext:'',caption:'',
         scene:item.name+' — '+item.short,assetId:'',
         format:CREATIVE_FORMATS[index%CREATIVE_FORMATS.length],
         design:{preset:presets[index],background:backgrounds[index],
@@ -242,20 +243,24 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       });
       const draft=data as Grid;
       savedSignature.current[draft.id]=signature(draft);
-      setGrid(draft);setGrids(prev=>[...prev,draft]);setSelected(0);
+      setGrid(draft);setGrids(prev=>[...prev,draft]);setSelected(0);setExpandedEditor(false);
       setKind('preserve');setDesignMode('editorial');setSaveState('saved');
       setDownloads([]);setQaNotes([]);setReviewed(false);
-      notify('Nueve diseños editables y nueve prompts de ChatGPT preparados, sin gastar créditos.');
+      notify('Nueve ideas diferentes preparadas sin créditos. Selecciona una y crea su imagen en ChatGPT.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const uploadChatGptResult=async(file:File|undefined)=>{
     if(!file||!grid)return;
+    const targetGridId=grid.id,targetIndex=selected;
     setUploading('result');
     try{
       const asset=await onUploadFile(file,'original');
       if(!asset)return;
-      update({assetId:asset.id});
-      notify('Foto de ChatGPT añadida al post '+(selected+1)+'. La foto original sigue guardada.');
+      setGrid(existing=>existing?.id===targetGridId
+        ?{...existing,posts:existing.posts.map((p,i)=>i===targetIndex?{...p,assetId:asset.id}:p)}
+        :existing);
+      setDownloads([]);setReviewed(false);setQaNotes([]);
+      notify('Imagen importada en el post '+(targetIndex+1)+'. La foto original permanece intacta.');
     }catch(e){showError(e)}finally{setUploading('')}
   };
   const checkConnection=async()=>{
@@ -404,6 +409,25 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     palette:[brand.background,brand.color,brand.secondaryColor,...(brand.additionalColors||[])].filter(Boolean).join(', '),
     language:outputLanguage,notes:quickNotes||brand.rules
   }):'';
+  /** Export the exact completed image, without stamping template text over the result. */
+  const downloadCompleted=async()=>{
+    if(!tile?.assetId||!images[tile.assetId])return notify('Primero importa la imagen terminada de ChatGPT.');
+    try{
+      const image=new Image();image.src=images[tile.assetId];
+      await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(Error('No se pudo abrir el resultado'))});
+      const W=EXPORT_SIZES[exportSize].w,H=EXPORT_SIZES[exportSize].h;
+      const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+      const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo exportar PNG.');
+      ctx.fillStyle=brand.background||'#FAF8F3';ctx.fillRect(0,0,W,H);
+      const w=image.naturalWidth||image.width,h=image.naturalHeight||image.height;
+      const scale=Math.min(W/w,H/h),dw=w*scale,dh=h*scale;
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      ctx.drawImage(image,(W-dw)/2,(H-dh)/2,dw,dh);
+      const a=document.createElement('a');a.download='content-lab-post-'+(selected+1)+'-'+W+'x'+H+'.png';
+      a.href=canvas.toDataURL('image/png');a.click();canvas.width=1;canvas.height=1;
+      notify('Post '+(selected+1)+' descargado sin alterar su diseño.');
+    }catch(e){showError(e)}
+  };
   const copyCurrentPrompt=async()=>{
     if(!currentPrompt)return;
     try{
@@ -527,9 +551,74 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div></details>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      {own.length>0&&<details className="bg-box bg-saved-projects"><summary>Mis proyectos guardados ({own.length})</summary><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setExpandedEditor(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></details>}
     </div><div className="bg-results">
-      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Crear mis 9 posts». Verás aquí los diseños y sus prompts listos para ChatGPT, sin gastar créditos internos.</p></div>:<>
+      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Crear mis 9 posts». Verás aquí los diseños y sus prompts listos para ChatGPT, sin gastar créditos internos.</p></div>:isExpress&&!expandedEditor?<>
+        <section className="bg-compact-campaign" aria-label="Nueve ideas para tus posts">
+          <div className="bg-compact-campaign-head">
+            <div><span className="eyebrow">TU CAMPAÑA · 9 IDEAS DIFERENTES</span>
+              <h2>{grid.title}</h2>
+              <p>Elige una composición. Los recuadros son ideas, <strong>no imágenes generadas</strong>.</p>
+            </div>
+            <span className="bg-compact-progress">{grid.posts.filter(p=>p.assetId).length}/9 imágenes listas</span>
+          </div>
+          <div className="bg-compact-nine" role="group" aria-label="Seleccionar una de las nueve composiciones">
+            {grid.posts.map((p,i)=><button type="button" key={i}
+              className={'bg-compact-tile '+(selected===i?'active ':'')+(p.assetId?'complete':'idea')}
+              aria-pressed={selected===i} aria-label={'Post '+(i+1)+': '+ONE_PHOTO_NINE[i].name}
+              onClick={()=>{setSelected(i);setCopiedPrompt(false)}}>
+              {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt={'Resultado real del post '+(i+1)}/>:
+                <><span className="bg-compact-index">{i+1}</span>
+                <strong>{ONE_PHOTO_NINE[i].name}</strong>
+                <small>{ONE_PHOTO_NINE[i].short}</small></>}
+              <span className="bg-compact-tile-status">{p.assetId?'✓ Lista':'Idea '+(i+1)}</span>
+            </button>)}
+          </div>
+        </section>
+        <section className="bg-compact-workspace" aria-label={'Preparar post '+(selected+1)}>
+          <div className="bg-compact-workspace-head">
+            <div><span className="eyebrow">POST {selected+1} DE 9</span>
+              <h3>{ONE_PHOTO_NINE[selected].name}</h3>
+              <p>{ONE_PHOTO_NINE[selected].short}</p></div>
+            <button type="button" className="bg-compact-next" onClick={()=>{setSelected(i=>(i+1)%9);setCopiedPrompt(false)}}>Siguiente <ArrowRight size={15}/></button>
+          </div>
+          {tile?.assetId&&images[tile.assetId]&&<div className="bg-compact-real-preview"><img src={images[tile.assetId]} alt={'Imagen final del post '+(selected+1)}/></div>}
+          {!tile?.assetId&&<p className="bg-compact-awaiting"><ImagePlus size={18}/> Tu foto final aparecerá aquí después de crearla en ChatGPT.</p>}
+          <label className="bg-compact-custom-copy">Texto para esta imagen (opcional)
+            <input value={tile?.headline||''} maxLength={120} placeholder="Déjalo vacío si quieres solo fotografía"
+              onChange={e=>update({headline:e.target.value})}/>
+          </label>
+          <div className="bg-compact-main-actions">
+            <button type="button" className="btn dark" onClick={()=>{void copyCurrentPrompt()}}>
+              <Sparkles size={17}/>{copiedPrompt?'✓ Copiado':'1 · Copiar prompt'}
+            </button>
+            <a className="btn ghost" target="_blank" rel="noopener noreferrer" href="https://chatgpt.com/">
+              2 · Abrir ChatGPT <ArrowRight size={16}/>
+            </a>
+          </div>
+          <p className="bg-compact-help">En ChatGPT pega el prompt y adjunta tu foto original. Genera una sola imagen vertical 4:5, descárgala y súbela aquí.</p>
+          <label className="bg-result-upload bg-compact-import">
+            <Upload size={20}/><span><strong>{uploading==='result'?'Importando…':'3 · Subir imagen creada'}</strong>
+              <small>Se guarda en el post {selected+1}, sin reemplazar la foto original.</small></span>
+            <input type="file" accept="image/*,.heic,.heif" disabled={!!uploading}
+              aria-label={'Subir imagen final para el post '+(selected+1)}
+              onChange={e=>{void uploadChatGptResult(e.target.files?.[0]);e.target.value=''}}/>
+          </label>
+          {tile?.assetId&&<div className="bg-compact-download">
+            <button type="button" className="btn dark" onClick={()=>{void downloadCompleted()}}>
+              <Download size={17}/> Descargar PNG del post {selected+1}
+            </button>
+          </div>}
+          <details className="bg-compact-prompt-details"><summary>Ver instrucciones completas de esta composición</summary>
+            <textarea value={currentPrompt} rows={7} readOnly aria-label="Prompt completo para ChatGPT" onFocus={e=>e.currentTarget.select()}/>
+          </details>
+          <button type="button" className="bg-compact-advanced-link" onClick={()=>setExpandedEditor(true)}>
+            Abrir editor de diseño avanzado <ArrowRight size={14}/>
+          </button>
+        </section>
+        <p className="bg-compact-save-state">{saveState==='saved'?'✓ Proyecto guardado':saveState==='error'?'Error al guardar; revisa tu conexión.':'Guardando cambios…'}</p>
+        </>:<>
+        {isExpress&&<button type="button" className="bg-compact-return" onClick={()=>setExpandedEditor(false)}>← Volver a la vista sencilla</button>}
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
          {saveState==='saved'?'✓ Cambios guardados':saveState==='pending'?'Guardado automático pendiente…':saveState==='saving'?'Guardando cambios…':'No se pudieron guardar los cambios.'}
         </span></div><button className="btn ghost" disabled={busy==='export'} onClick={()=>save(grid).then(()=>notify('Grid guardado')).catch(showError)}><Save size={16}/> {saveState==='error'?'Reintentar':'Guardar ahora'}</button></div>

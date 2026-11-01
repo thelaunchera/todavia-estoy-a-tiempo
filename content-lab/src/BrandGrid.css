@@ -230,3 +230,70 @@
  .bg-prompt-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
  .bg-prompt-tiles button{padding:9px;min-height:65px}.bg-prompt-actions{display:grid;grid-template-columns:1fr 1fr}
  .bg-prompt-actions .btn{padding:11px 8px;font-size:11px}}
+
+/* Compact 1 Photo → 9 Posts. Never render a fabricated result in the feed. */
+.bg-compact-campaign{background:#fff;border:1px solid #e0e8e6;border-radius:16px;padding:18px;margin-bottom:14px}
+.bg-compact-campaign-head{display:flex;align-items:flex-start;justify-content:space-between;gap:11px}
+.bg-compact-campaign-head h2{margin:5px 0 4px;font-size:clamp(18px,2.5vw,27px);line-height:1.13;color:#191919;overflow-wrap:anywhere}
+.bg-compact-campaign-head p{font-size:11px;line-height:1.5;color:#677b7d;margin:0}
+.bg-compact-progress{font-size:10px;background:#eaf1ef;border:1px solid #d6e4df;color:#456c63;border-radius:30px;padding:8px 10px;white-space:nowrap;font-weight:700}
+.bg-compact-nine{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:16px}
+.bg-compact-tile{width:100%;min-width:0;aspect-ratio:4/5;position:relative;overflow:hidden;text-align:left;border:2px solid transparent;border-radius:10px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:16px;background:linear-gradient(135deg,#f7f0df,#dce9e3);color:#283d36}
+.bg-compact-tile:nth-child(3n+2){background:linear-gradient(135deg,#e8f1ed,#f7f7f0);color:#304a51}
+.bg-compact-tile:nth-child(3n){background:linear-gradient(135deg,#283e39,#607a6e);color:#fff}
+.bg-compact-tile:nth-child(5n){background:linear-gradient(135deg,#f7e8d7,#d5dfda);color:#28332e}
+.bg-compact-tile.active{border-color:#367d96;box-shadow:0 0 0 2px #d9edf1}
+.bg-compact-tile:focus-visible{outline:3px solid #367d96;outline-offset:3px}
+.bg-compact-index{font:italic 34px/.9 Georgia,serif;opacity:.46}
+.bg-compact-tile strong{display:block;font-size:clamp(12px,1.25vw,17px);line-height:1.06;letter-spacing:-.2px;max-width:98%;overflow-wrap:anywhere}
+.bg-compact-tile small{font-size:10px;line-height:1.4;max-width:99%}
+.bg-compact-tile img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.bg-compact-tile-status{position:absolute;bottom:9px;left:9px;right:auto;background:rgba(25,32,30,.80);color:white;border-radius:6px;font-size:9px;font-weight:700;padding:5px 8px}
+.bg-compact-workspace{background:#f7faf9;border:1px solid #dce7e5;border-radius:16px;padding:19px}
+.bg-compact-workspace-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.bg-compact-workspace-head h3{font-size:clamp(19px,2.4vw,28px);line-height:1.15;margin:5px 0;color:#233c3c}
+.bg-compact-workspace-head p{font-size:11px;color:#637e7b;margin:0}
+.bg-compact-next{background:#fff;border:1px solid #c9d9d7;border-radius:10px;min-height:39px;display:flex;align-items:center;gap:7px;padding:7px 11px;white-space:nowrap;font-size:11px;font-weight:700;color:#355b61}
+.bg-compact-real-preview{margin:14px auto;max-width:300px;border-radius:12px;overflow:hidden;border:1px solid #d9e2dd}
+.bg-compact-real-preview img{width:100%;height:auto;display:block;max-height:450px;object-fit:contain}
+.bg-compact-awaiting{display:flex;gap:9px;align-items:center;color:#607c80;background:#eaf2f1;border-radius:10px;padding:11px;margin:14px 0 0;font-size:11px;line-height:1.45}
+.bg-compact-awaiting svg{flex:none}
+.bg-compact-custom-copy{font-size:11px;font-weight:700;color:#4d6669;display:grid;gap:6px;margin-top:13px}
+.bg-compact-custom-copy input{background:#fff;border:1px solid #cddad9;padding:11px 12px;font-size:13px;border-radius:9px;width:100%;box-sizing:border-box}
+.bg-compact-main-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.bg-compact-main-actions .btn,.bg-compact-download .btn{display:flex;justify-content:center;align-items:center;gap:8px;min-height:45px;font-size:12px;text-decoration:none;text-align:center}
+.bg-compact-help{color:#647b80;font-size:11px;line-height:1.5;margin:11px 0}
+.bg-compact-import{min-height:68px;margin-top:10px}
+.bg-compact-download{margin-top:11px}
+.bg-compact-prompt-details{margin-top:14px;padding-top:12px;border-top:1px solid #dbe6e4}
+.bg-compact-prompt-details summary{font-size:11px;cursor:pointer;color:#50727c;font-weight:700}
+.bg-compact-prompt-details textarea{margin-top:11px;display:block;box-sizing:border-box;width:100%;font:11px/1.6 ui-monospace,monospace;min-height:130px;resize:vertical;padding:12px;border-radius:9px;border:1px solid #cbdadd;background:#fff;color:#253d47}
+.bg-compact-advanced-link,.bg-compact-return{border:0;background:transparent;color:#49778b;cursor:pointer;font-size:11px;font-weight:700;padding:12px 0 0;display:inline-flex;gap:7px;align-items:center}
+.bg-compact-return{padding:5px 0 18px}
+.bg-compact-save-state{color:#6e8982;font-size:11px;text-align:right;margin:9px 4px 0}
+@media(max-width:650px){
+ .bg-compact-campaign{padding:12px;border-radius:13px}
+ .bg-compact-campaign-head{display:block}
+ .bg-compact-progress{display:inline-block;margin-top:10px}
+ .bg-compact-nine{gap:5px;margin-top:12px}
+ .bg-compact-tile{padding:8px 7px;gap:5px;border-radius:7px}
+ .bg-compact-index{font-size:25px}
+ .bg-compact-tile strong{font-size:10px;line-height:1.1;letter-spacing:-.1px}
+ .bg-compact-tile small{font-size:9px;line-height:1.17}
+ .bg-compact-tile-status{left:5px;bottom:5px;font-size:8px;padding:4px 5px}
+ .bg-compact-workspace{padding:12px}
+ .bg-compact-main-actions{grid-template-columns:1fr 1fr;gap:6px}
+ .bg-compact-main-actions .btn{padding:9px 6px;min-width:0;font-size:10px}
+ .bg-compact-workspace-head h3{font-size:19px}
+ .bg-compact-next{padding:7px 9px}
+}
+
+.bg-saved-projects{padding:0!important}
+.bg-saved-projects>summary{padding:16px 21px;font-size:12px;color:#4d737e;font-weight:700;cursor:pointer}
+.bg-saved-projects>.bg-recent{padding:0 14px 14px;max-height:260px;overflow:auto}
+@media(max-width:800px){
+ .brand-grid-tool .bg-layout{display:flex;flex-direction:column;align-items:stretch}
+ .brand-grid-tool .bg-results{order:0;min-height:0}
+ .brand-grid-tool .bg-column{order:1;display:flex;flex-direction:column}
+ .brand-grid-tool .bg-empty{min-height:240px}
+}
