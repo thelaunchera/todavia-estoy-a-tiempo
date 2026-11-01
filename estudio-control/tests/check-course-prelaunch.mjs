@@ -23,7 +23,7 @@ const matchaPos=home.indexOf('id="matcha-gratis"');
 const classPos=home.indexOf('<section class="learning-section" id="aprender"');
 assert.ok(matchaPos>0&&classPos>matchaPos,'Freebie de matcha antes de la clase en el podcast');
 assert.equal((home.match(/id="matcha-gratis"/g)||[]).length,1,'El freebie no se duplica');
-assert.match(home,/href="content-lab\/prompts\/"[^>]*aria-label="Abrir el freebie gratuito de matcha"/,'El botón del freebie va al landing gratuito, no a la clase');
+assert.match(home,/href="content-lab\/prompts\/#recibir"[^>]*aria-label="Abrir el freebie gratuito de matcha"/,'El botón lleva directamente a solicitar los prompts privados, no a la clase');
 
 assert.match(classPage,/id="course-waitlist-form"/);
 assert.match(classPage,/id="course-waitlist-consent"/);
