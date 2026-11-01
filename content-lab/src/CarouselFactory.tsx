@@ -1381,11 +1381,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
       <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
         {([
-          {id:'inspiration',name:'Inspírate'},
-          {id:'canvas',name:'Foto'},
-          {id:'style',name:'Fondo'},
-          {id:'slides',name:'Texto'},
-          {id:'review',name:'Revisar'},
+          {id:'style',name:'Fondos y stickers'},
+          {id:'canvas',name:'Fotos y diseño'},
+          {id:'slides',name:'Tipografía'},
+          {id:'review',name:'Vista previa'},
+          {id:'download',name:'Descargar'},
         ] as const).map((item,n)=><button key={item.id} type="button" role="tab"
           aria-selected={studioTab===item.id} className={studioTab===item.id?'active':''}
           onClick={()=>setStudioTab(item.id)}>
@@ -1393,9 +1393,19 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           </button>)}
       </div>
       <button type="button" className={'factory-ia-entry'+(studioTab==='ai'?' active':'')}
-        aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>IA</button>
+        aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>Ideas con IA</button>
     </nav>
-    <div className="factory-design-flow"><span>INSPIRACIÓN</span><span>FOTO</span><span>FONDO</span><span>TEXTO</span><span>DETALLES</span></div>
+    <div className="factory-design-flow"><span>FONDOS Y STICKERS</span><span>FOTOS Y DISEÑO</span><span>TIPOGRAFÍA</span><span>VISTA PREVIA</span><span>DESCARGAR</span></div>
+    {(['style','canvas','slides'] as const).includes(studioTab as 'style'|'canvas'|'slides')&&
+      <div className="factory-slide-actions" aria-label="Slides de tu carrusel">
+        <label>Slide
+          <select aria-label="Slide que estás editando" value={i} onChange={e=>setCurrent(Number(e.target.value))}>
+            {slides.map((part,n)=><option key={part.key} value={n}>{n+1} de {slides.length}</option>)}
+          </select>
+        </label>
+        <button type="button" onClick={insert} disabled={slides.length>=MAX_CAROUSEL_SLIDES}
+          aria-label="Añadir una nueva diapositiva después de la actual"><Plus size={17}/> Añadir slide</button>
+      </div>}
     <button type="button" className="factory-mobile-preview-trigger"
       aria-label={'Ver diseño actual, slide '+(i+1)+' de '+slides.length}
       aria-expanded={mobilePreviewOpen} aria-controls="factory-mobile-preview"
@@ -1453,9 +1463,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     {studioTab==='canvas'&&<>
 
       <div className="factory-step-intro">
-        <span className="factory-step-eyebrow">PASO 2 DE 5 · FOTO PROTAGONISTA</span>
-        <h2>Empieza por la foto. El diseño viene después.</h2>
-        <p>Sube o arrastra la imagen principal. Colócala donde quieras; los cortes se ven, pero se hacen al descargar.</p>
+        <span className="factory-step-eyebrow">PASO 2 DE 5 · FOTOS Y DISEÑOS</span>
+        <h2>Ahora coloca tus fotos y diseña.</h2>
+        <p>Sube fotos, arrástralas y ajusta su tamaño directamente sobre el lienzo. En seamless pueden cruzar los cortes.</p>
         <div className="factory-step-mini-actions">
           <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=MAX_CAROUSEL_SLIDES}>
             <Copy size={16}/> Duplicar slide {i+1}
@@ -1485,11 +1495,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
 
-      <div className="factory-step-footer"><span>La foto debe ser la protagonista, no quedar perdida entre elementos.</span><button type="button" className="btn dark" onClick={()=>setStudioTab('style')}>Siguiente: fondo <ArrowRight size={16}/></button></div>
+      <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: tipografía <ArrowRight size={16}/></button></div>
     </>}
     {studioTab==='style'&&<>
           <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
-      <div className="factory-style-title"><div><span className="factory-step-eyebrow">PASO 3 DE 5 · FONDO</span><h2>Elige el fondo que acompañe a tu foto.</h2><p>Usa dos o tres colores que combinen. Blanco, un degradado o cualquiera de los fondos guardados.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
+      <div className="factory-style-title"><div><span className="factory-step-eyebrow">PASO 1 DE 5 · FONDOS Y STICKERS</span><h2>Elige tu fondo y tus stickers.</h2><p>Empieza por el estilo del lienzo. Puedes usar fondos distintos por slide y añadir stickers aquí mismo.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
       <div className="factory-canvas-colors">
         <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
           onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
@@ -1525,7 +1535,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             </button>
           </div>
         </div>
-        <FreeDecorControls title="Elegir fondo" defaultTab="backgrounds" initiallyExpanded
+        <FreeDecorControls title="Fondos y stickers" defaultTab="backgrounds" initiallyExpanded
           backgroundScope={backgroundScope} preferenceScope={brand.id}
           backgroundId={slide.backgroundId||'brand'}
           backgroundImageId={slide.backgroundImageId||''}
@@ -1592,13 +1602,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
             onUploadBackground={onUploadBackground}/>
       </details>
-      <div className="factory-step-footer"><span>El fondo acompaña a la foto, no le roba protagonismo.</span>
-        <button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: textos <ArrowRight size={16}/></button></div>
+      <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Siguiente: fotos y diseños <ArrowRight size={16}/></button></div>
     </>}
     {studioTab==='slides'&&<>
           <div className="factory-work">
       <div className="factory-edit">
-        <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 4 DE 5 · TEXTOS</span>
+        <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 3 DE 5 · TIPOGRAFÍA</span>
           <h2>Una idea clara por slide.</h2><p>Empieza por un título que se entienda al instante. Después añade solo el texto que hace falta.</p></div>
       <details className="factory-type-gallery factory-typography-more">
         <summary>Ver las tipografías antes de elegir · {CAROUSEL_FONTS.length} estilos</summary>
@@ -1680,10 +1689,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
     </div>
 
-      <div className="factory-step-footer"><span>Revisa el gancho, la secuencia y el cierre antes de descargar.</span><button type="button" className="btn dark" onClick={()=>setStudioTab('review')}>Siguiente: revisar <ArrowRight size={16}/></button></div>
+      <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('review')}>Siguiente: vista previa <ArrowRight size={16}/></button></div>
     </>}
     {studioTab==='review'&&<section className="factory-review">
-      <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DETALLES</span>
+      <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 4 DE 5 · VISTA PREVIA</span>
         <h2>Comprueba el resultado antes de compartirlo.</h2>
         <p>Revisa la portada, el ritmo entre slides, la legibilidad y el último mensaje. Después descarga los PNG.</p>
       </div>
