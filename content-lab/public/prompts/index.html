@@ -284,7 +284,7 @@ main{padding-top:8px}
 <label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>Quiero suscribirme al newsletter de The Launch Era para recibir ideas de contenido, recursos y novedades. Puedo darme de baja cuando quiera.</span></label>
 <div class="matcha-honeypot" aria-hidden="true"><label for="matcha-website">No rellenes esto</label><input tabindex="-1" autocomplete="off" type="text" name="website" id="matcha-website"></div>
 <button class="matcha-send-button" id="matcha-send" type="submit">Enviarme mis 8 ideas gratis <span aria-hidden="true">→</span></button>
-<p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback">Confirma tu correo y recibirás el enlace personal para abrir los ocho prompts. No necesitas contraseña.</p>
+<p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback">Te llegará un correo con un botón que abre tus ocho prompts directamente. Sin contraseñas ni códigos.</p>
 <small>Usaremos tu correo para entregarte el recurso. El newsletter es opcional y solo lo recibirás si lo seleccionas. <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>.</small>
 </form></section>
 <section id="access-placeholder" class="matcha-locked-prompt" aria-labelledby="access-title">
@@ -437,7 +437,7 @@ render();
    });
    const result=await response.json().catch(()=>({}));
    if(!response.ok||!result.ok)throw Error(result.error||'No pudimos enviar el enlace.');
-   feedback.textContent='¡Gracias! Revisa tu correo para confirmar y recibir las ocho ideas. Si ya lo pediste, revisa también promociones y spam. 💛';
+   feedback.textContent='¡Listo! Abre el correo y toca «Abrir mis 8 prompts gratis». Se desbloquearán automáticamente. Revisa promociones o spam si no lo ves. 💛';
    form.querySelector('#matcha-email').readOnly=true;
    button.textContent='Solicitud registrada ✓';
   }catch(err){
@@ -447,40 +447,94 @@ render();
  });
 })();
 
-/* La biblioteca NO se entrega en el HTML público: requiere un token emitido tras confirmar el correo. */
-(async function unlockPrivateMatchaPrompts(){
- const found=location.hash.match(/^#access=([a-f0-9]{64})$/i);
- let token=found?found[1]:sessionStorage.getItem('matcha_private_access_v1');
- if(found){
-   sessionStorage.setItem('matcha_private_access_v1',token);
-   history.replaceState(history.state,'',location.pathname+location.search+'#crear');
- }
- if(!token)return;
+/* Enlace privado: confirma el email dentro del landing y muestra las ocho recetas. */
+(async function openPrivateMatchaFromEmail(){
+ const api='https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-matcha-freebie';
+ const match=location.hash.match(/^#(confirm|access|unsubscribe)=([a-f0-9]{64})$/i);
+ const action=match?match[1].toLowerCase():null;
+ const magicToken=match?match[2].toLowerCase():null;
+ if(match)history.replaceState(history.state,'',location.pathname+location.search);
  const placeholder=document.getElementById('access-placeholder');
- placeholder.classList.add('is-loading');
- try{
-  const response=await fetch('https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-matcha-freebie?action=library',{
-   method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({access_token:token})
+ const title=placeholder.querySelector('h2');
+ const note=placeholder.querySelector('p');
+ const requestLink=placeholder.querySelector('a.matcha-lock-cta');
+ const feedback=(heading,detail)=>{
+  placeholder.hidden=false;placeholder.classList.remove('is-loading');
+  title.textContent=heading;note.textContent=detail;requestLink.hidden=false;
+ };
+ async function sendAction(name,payload){
+  const response=await fetch(api+'?action='+name,{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
   });
-  const result=await response.json();
-  if(!response.ok||!result.ok||!Array.isArray(result.layouts)||result.layouts.length!==8||!result.rules)throw Error('access');
-  layouts=result.layouts;privateRules=result.rules;
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.ok)throw new Error(data.error||'No pudimos completar la solicitud.');
+  return data;
+ }
+ if(action==='unsubscribe'){
+  placeholder.scrollIntoView({block:'start'});
+  title.textContent='Tus preferencias de correo';
+  note.textContent='¿Quieres darte de baja del newsletter creativo? Seguirás teniendo acceso al regalo.';
+  requestLink.hidden=true;
+  const cancel=document.createElement('button');
+  cancel.className='matcha-send-button';cancel.type='button';
+  cancel.textContent='Sí, cancelar mi suscripción';
+  placeholder.append(cancel);
+  cancel.onclick=async()=>{
+   cancel.disabled=true;cancel.textContent='Guardando tu preferencia…';
+   try{
+    await sendAction('unsubscribe',{unsubscribe_token:magicToken});
+    title.textContent='Suscripción cancelada ✓';
+    note.textContent='Ya no recibirás mensajes de marketing de este freebie.';
+    cancel.remove();requestLink.hidden=false;requestLink.textContent='Volver al freebie';requestLink.href='#recibir';
+   }catch(error){cancel.disabled=false;cancel.textContent='Volver a intentar';note.textContent=error.message}
+  };
+  return;
+ }
+ let token=action==='access'?magicToken:null;
+ if(action==='confirm'){
+  placeholder.classList.add('is-loading');
+  title.textContent='Abriendo tus ocho prompts…';
+  note.textContent='Estamos comprobando tu correo y preparando tu espacio creativo.';
+  requestLink.hidden=true;
+  try{
+   const data=await sendAction('confirm',{confirm_token:magicToken});
+   token=data.access_token;
+  }catch(error){
+   feedback('No pudimos abrir tu regalo',error.message+' Solicita un enlace nuevo en el formulario.');
+   placeholder.scrollIntoView({block:'start'});return;
+  }
+ }
+ if(!token){
+  try{
+   const saved=JSON.parse(localStorage.getItem('matcha_private_access_v2')||'null');
+   if(saved&&saved.expires>Date.now()&&/^[a-f0-9]{64}$/.test(saved.token))token=saved.token;
+  }catch{}
+ }
+ if(!token)token=sessionStorage.getItem('matcha_private_access_v1');
+ if(!token)return;
+ placeholder.classList.add('is-loading');
+ if(!action){title.textContent='Recuperando tus prompts…';requestLink.hidden=true}
+ try{
+  const data=await sendAction('library',{access_token:token});
+  if(!Array.isArray(data.layouts)||data.layouts.length!==8||!data.rules)throw new Error('La biblioteca no está disponible.');
+  layouts=data.layouts;privateRules=data.rules;
+  sessionStorage.setItem('matcha_private_access_v1',token);
+  try{localStorage.setItem('matcha_private_access_v2',JSON.stringify({token,expires:Date.now()+90*86400000}))}catch{}
   placeholder.hidden=true;
-  const editor=document.getElementById('crear');
-  editor.hidden=false;
+  const editor=document.getElementById('crear');editor.hidden=false;
   document.getElementById('content-lab').hidden=false;
-  const ready=document.createElement('p');ready.className='matcha-access-ready';
-  ready.textContent='✓ Tu correo está confirmado. Personaliza y copia tus ocho prompts. Tu foto nunca sale del navegador.';
-  editor.before(ready);
+  if(!document.querySelector('.matcha-access-ready')){
+   const ready=document.createElement('p');ready.className='matcha-access-ready';
+   ready.textContent='✓ ¡Tus ocho prompts están abiertos! Personalízalos con tu marca. Tu foto se queda en tu dispositivo.';
+   editor.before(ready);
+  }
   render();
   editor.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
  }catch(error){
   sessionStorage.removeItem('matcha_private_access_v1');
-  placeholder.classList.remove('is-loading');
-  const title=placeholder.querySelector('h2');
-  title.textContent='Tu enlace necesita renovarse';
-  placeholder.querySelector('p').textContent='Por seguridad no pudimos abrir los prompts con este enlace. Solicita otro acceso desde tu correo y confirma la nueva solicitud.';
+  try{localStorage.removeItem('matcha_private_access_v2')}catch{}
+  feedback('Tu acceso necesita renovarse','No pudimos comprobar el enlace. Solicita otro correo desde el formulario.');
+  placeholder.scrollIntoView({block:'start'});
  }
 })();
 </script></body></html>
