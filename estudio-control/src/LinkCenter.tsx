@@ -4,6 +4,8 @@ import { api } from './supabase-client';
 import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
+// The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
+export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','tle-experience'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -129,6 +131,10 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
   const [notice,setNotice]=useState('');
   const [issue,setIssue]=useState('');
   const links=useMemo(()=>resolveStudioLinks(entries).filter(x=>showCode || new URL(x.url).hostname!=='github.com'),[entries,showCode]);
+  const recentDemoLinks=useMemo(()=>RECENT_DEMO_KEYS
+    .map(key=>links.find(item=>item.key===key))
+    .filter((item):item is DisplayLink=>!!item&&item.visibility==='demo'&&LINK_PUBLICATION[item.key]==='demo'),
+    [links]);
   const searching=query.trim().length>0;
   const browsing=searching||category!=='todos';
   const shown=links.filter(x=>(!readOnly || shareable(x.visibility)) && (category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
@@ -182,6 +188,27 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
       </div>
       {!readOnly&&<button className="lc-primary" onClick={()=>{setEditor({...blank,isNew:true});setIssue('');}}><Plus size={17}/> Añadir enlace</button>}
     </div>
+    {!searching && category==='todos' && recentDemoLinks.length>0 && <section className="lc-recent-demos" aria-label="Demos nuevos y recientes">
+      <div className="lc-recent-head">
+        <div><span>ACCESOS RÁPIDOS · DEMOS</span><h3>Demos nuevos, a un toque.</h3>
+          <p>Webs de práctica y demostraciones interactivas. Sin pagos ni reservas reales.</p>
+        </div>
+        <button type="button" onClick={()=>{setQuery('demo');setExpanded(true);}}>Ver todos los demos</button>
+      </div>
+      <div className="lc-recent-grid">
+        {recentDemoLinks.map(d=><article className="lc-recent-card" key={d.key}>
+          <span className="lc-recent-demo-mark">DEMO</span>
+          <strong>{d.title}</strong>
+          <small>{d.description}</small>
+          <div className="lc-recent-actions">
+            <a href={d.url} target="_blank" rel="noopener noreferrer">Abrir demo <Globe2 size={15}/></a>
+            <button type="button" onClick={()=>void copy(d.url,d.key+'-shortcut')}>
+              <Copy size={15}/>{copied===d.key+'-shortcut'?'Copiado':'Copiar link'}
+            </button>
+          </div>
+        </article>)}
+      </div>
+    </section>}
     <div className="lc-tools">
       {!readOnly&&<label><input type="checkbox" checked={showCode} onChange={e=>setShowCode(e.target.checked)}/> Mostrar también código de GitHub</label>}
       <div className="lc-search"><Search size={19}/><input aria-label="Buscar enlaces" placeholder="Buscar por producto, demo o nombre…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button onClick={()=>setQuery('')} aria-label="Limpiar búsqueda"><X size={16}/></button>}</div>
