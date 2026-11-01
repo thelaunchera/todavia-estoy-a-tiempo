@@ -39,6 +39,9 @@ test('calendar 1 Photo → 9 Posts opens its exact previously saved tile',()=>{
  assert.ok(grid.includes('savedSignature.current[saved.id]=signature(saved)'));
  assert.ok(grid.includes('setGrid(saved);setSelected(index)'));
  assert.ok(grid.includes('setExpandedEditor(true)'));
+ assert.ok(grid.includes('className="bg-calendar-edit-date"'));
+ assert.ok(grid.includes("update({scheduledDate:e.target.value,scheduledTime:grid?.posts[selected]?.scheduledTime||'09:00'})"));
+ assert.ok(grid.includes('update({scheduledTime:e.target.value})'));
  assert.ok(grid.includes('resultsRef.current?.scrollIntoView'));
  assert.ok(grid.includes('const saveAndReturnToCalendar=async()=>'));
  assert.ok(grid.includes('onOpenCalendar?.(saved.posts[selected]?.scheduledDate)'));
