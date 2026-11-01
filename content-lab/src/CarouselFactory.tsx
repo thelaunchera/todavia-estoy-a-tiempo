@@ -1164,7 +1164,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <button type="button" className="factory-mobile-preview-trigger"
       aria-label={'Ver diseño actual, slide '+(i+1)+' de '+slides.length}
       aria-expanded={mobilePreviewOpen} aria-controls="factory-mobile-preview"
-      onClick={()=>setMobilePreviewOpen(true)}>
+      onClick={()=>{(document.activeElement as HTMLElement|null)?.blur();setMobilePreviewOpen(true)}}>
       {overview[i]&&<img src={overview[i]} alt="" draggable={false}/>}
       {!overview[i]&&<Eye size={18}/>}
       <span>Ver diseño</span><small>{i+1}/{slides.length}</small>
@@ -1180,23 +1180,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" className="factory-mobile-preview-close" onClick={()=>setMobilePreviewOpen(false)}
           aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
         <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
-        <div className="factory-live-preview-compact">
-          <div className="factory-live-preview-thumb">
-            {overview[i]
-              ?<img src={overview[i]} alt={'Vista previa del slide '+(i+1)+' con foto, fondo, textos y stickers'} draggable={false}/>
-              :preview
-                ?<img src={preview} alt={'Vista provisional del slide '+(i+1)} draggable={false}/>
-                :<div className="factory-live-preview-loading"><LoaderCircle className="spin" size={20}/><span>Cargando vista…</span></div>}
-          </div>
-          <div className="factory-live-preview-controls">
-            <strong>Slide {i+1} / {slides.length}</strong>
-            <small>Los fondos y stickers se actualizan aquí al elegirlos.</small>
-            <div>
-              <button type="button" aria-label="Ver slide anterior" disabled={i===0} onClick={()=>setCurrent(v=>Math.max(0,v-1))}><ArrowLeft size={16}/></button>
-              <button type="button" aria-label="Ver slide siguiente" disabled={i===slides.length-1} onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))}><ArrowRight size={16}/></button>
-            </div>
-          </div>
-        </div>
         <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
         {studioTab==='slides'&&<button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit}
           onClick={()=>{
