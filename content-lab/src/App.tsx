@@ -397,6 +397,8 @@ function App() {
     return () => { document.body.style.overflow = previous; };
   }, [menu]);
   const [editor, setEditor] = useState<Post>(newPost(''));
+  const editorSessionRef=useRef(0);
+  const saveInFlightRef=useRef(false);
   const [brandForm, setBrandForm] = useState<Brand | null>(null);
   const [topic, setTopic] = useState('');
   const [manualOpen,setManualOpen]=useState(false);
@@ -531,11 +533,13 @@ function App() {
     setEditor(p => ({ ...p, [key]: val }));
   const startFactory = () => {
     if (!brand) return;
+    editorSessionRef.current++;
     setEditor({...newPost(brand.id),format:'Carousel'});
     navigate('factory');
   };
   const startVertical = (format:'Reel'|'Story'='Reel')=>{
     if(!brand)return;
+    editorSessionRef.current++;
     setEditor({...newPost(brand.id),format,title:format==='Reel'?'Portada de Reel':'Historia',
       hook:'',designData:writeCoverDecor('',{...readCoverDecor(''),color:'#FAF8F3',
         headlineRect:{x:.08,y:.09,w:.84,h:.2},
@@ -550,6 +554,7 @@ function App() {
   };
   const start = (angle = 'Pain point') => {
     if (!brand) return;
+    editorSessionRef.current++;
     setEditor({ ...newPost(brand.id), angle,format:'Single post' });
     setManualOpen(false);
     setTopic('');
@@ -557,6 +562,7 @@ function App() {
     navigate('create');
   };
   const edit = (post: Post) => {
+    editorSessionRef.current++;
     setCurrent(post.brandId);
     setEditor({ ...post });
     setManualOpen(true);
@@ -565,8 +571,7 @@ function App() {
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
   const save = async (candidate?:unknown) => {
-    // React may pass a click event to legacy onClick={save} handlers.
-    // Only a genuine Post may override the latest editor draft.
+    if(saveInFlightRef.current)return;
     const possible=candidate&&typeof candidate==='object'?candidate as Partial<Post>:null;
     const source:Post=possible&&typeof possible.title==='string'&&
       typeof possible.format==='string'&&typeof possible.brandId==='string'
@@ -574,23 +579,32 @@ function App() {
     const draft={...source,title:source.title.trim()||source.hook.trim().slice(0,80)||
       (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
        source.format==='Story'?'Mi historia':'Mi publicación')};
+    const session=editorSessionRef.current;
+    const snapshot=JSON.stringify(source);
+    saveInFlightRef.current=true;
     setBusy('save');
     try {
       const { data } = source.id
         ? await api.put('/api/posts/' + source.id, draft)
         : await api.post('/api/posts', draft);
-      setPosts(prev =>
-        source.id
-          ? prev.map(x => (x.id === source.id ? data : x))
-          : [data, ...prev]
-      );
-      setEditor(data);
+      setPosts(prev =>source.id
+        ? prev.map(x => (x.id === source.id ? data : x))
+        : [data, ...prev]);
+      // A delayed server response must never discard newer edits or replace a
+      // different draft opened while Save was running.
+      setEditor(current=>{
+        if(editorSessionRef.current!==session||current.brandId!==source.brandId||
+           current.format!==source.format||current.id!==source.id)return current;
+        if(JSON.stringify(current)===snapshot)return data as Post;
+        return {...current,id:data.id,updatedAt:data.updatedAt};
+      });
       toast(source.format==='Carousel'
-        ? 'Carrusel guardado ✓ Lo encuentras en Mis publicaciones y puedes volver a editarlo.'
+        ? 'Carrusel guardado ✓ Puedes seguir editando y guardarlo de nuevo.'
         : 'Guardado en tu biblioteca ✓');
     } catch (e) {
       err(e);
     } finally {
+      saveInFlightRef.current=false;
       setBusy('');
     }
   };
@@ -1008,6 +1022,7 @@ function App() {
                 <button
                   key={b.id}
                   onClick={() => {
+                    editorSessionRef.current++;
                     setCurrent(b.id);
                     setEditor(newPost(b.id));
                     setSwitcher(false);
