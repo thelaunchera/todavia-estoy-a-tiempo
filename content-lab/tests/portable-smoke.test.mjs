@@ -129,15 +129,15 @@ test('new buyers get an isolated neutral brand, never admin seed brands',()=>{
  assert.ok(c.includes("content-lab-credit-change"));
 });
 
-test('approved freebie uses the airy matcha hero and accessible user-controlled carousel',()=>{
+test('approved freebie restores the full-bleed dark editorial matcha hero and carousel',()=>{
  const page=source('public/prompts/index.html');
  for(const required of [
-  'Una foto.<br><em>Ocho ideas</em><br>para tu producto.',
+  'Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.',
   'editorial-hero hero-with-carousel',
   'id="hero-featured"',
   'id="hero-prev"',
   'id="hero-next"',
-  'photos/8004561/pexels-photo-8004561.jpeg',
+  'matcha-05.jpg?v=hd-20261031',
   'id="como-funciona"',
   'class="editorial-process"',
   'class="process-art"',
