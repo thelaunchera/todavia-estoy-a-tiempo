@@ -40,7 +40,7 @@ test('Real ChatGPT guidance keeps user photos private until manually attached an
  assert.ok(grid.includes('navigator.clipboard.writeText(currentPrompt)'));
  assert.ok(grid.includes('El Content Lab no envía fotos a ChatGPT automáticamente.'));
  assert.ok(grid.includes("onUploadFile(file,'original')"));
- assert.ok(grid.includes('update({assetId:asset.id})'));
+ assert.ok(grid.includes('i===targetIndex?{...p,assetId:asset.id}'));
  assert.ok(grid.includes("photo:(tile.assetId&&images[tile.assetId])"));
  assert.ok(grid.includes('thumb.toDataURL(\'image/png\')'));
  assert.ok(grid.includes('<details className="bg-box bg-advanced-config">'));
