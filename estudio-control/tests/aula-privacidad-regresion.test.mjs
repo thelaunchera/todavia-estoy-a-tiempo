@@ -123,7 +123,7 @@ test('Centro de productos independiente, seguro y incluido en la publicación',(
  assert.match(centerJs,/if\(!open\)/);
  assert.match(centerJs,/const has=purchased\.has\(code\),open=/);
  assert.doesNotMatch(center,/href="[^"]*\/centro\/checkout/);
- assert.match(room,/href="\.\.\/centro\/"/);
+ assert.doesNotMatch(room,/href="\.\.\/centro\/"/,'El Aula permanece independiente del Centro de Productos');
  assert.match(workflow,/cp -R assets productos clases alumnos centro _podcast_pages\//);
  assert.match(workflow,/node --check centro\/centro.js/);
  assert.match(workflow,/test -s _podcast_pages\/centro\/index.html/);
