@@ -31,8 +31,20 @@ Enseñar sin hacer sentir al alumno que necesita saber programación antes de em
 - **07** Pagos y automatizaciones como demostración separada, solo pruebas y reglas seguras; **Casa Brownie no cobra ni recibe pedidos reales**.
 - **08** Revisar y compartir una primera web con capturas, enlaces y pendientes claros. El hero de video se muestra únicamente como bono.
 
+## Filosofía de acceso y organización: gratis primero
+
+**Enseñamos a comenzar aprovechando las opciones gratuitas**, no vendemos ChatGPT Plus como requisito. ChatGPT Free sirve para pensar el concepto, generar textos y experimentar con imágenes dentro de sus límites. AppDeploy ofrece un plan Free con créditos compartidos entre aplicaciones; consulta https://appdeploy.ai/faq antes de grabar. Plus en ChatGPT es una opción para trabajar con límites más amplios y menos interrupciones, **no una compra obligatoria para la preparación**.
+
+**Experiencia personal de Dailin (en primera persona)**: «Yo he podido crear hasta tres webs en un día cuando planifico antes. Por la mañana preparo las fotos de marca, los textos y las secciones; por la tarde construyo y pruebo las páginas». No convertirlo en un derecho universal ni en un límite fijo de tres por día: depende de créditos, disponibilidad de imágenes, plugins, calidad de materiales y complejidad de la web. Si ChatGPT Free llega al límite, guardar progreso y seguir cuando se restablezca.
+
+**Qué es un plugin**: un puente entre ChatGPT y otro servicio. En Plugins (barra lateral o Configuración → Plugins) buscamos AppDeploy, Google/Gmail, Make y Stripe; comprobamos si cada uno está disponible para la cuenta, revisamos permisos y conectamos solo si procede. **Abrir una cuenta gratuita en una herramienta no garantiza que el plugin funcione gratis desde ChatGPT Free**. La documentación oficial advierte restricciones de plugins y extensiones en Free/Go. Enseñar alternativas compatibles o explicar el requisito real sin ocultarlo. No mezclar estas tres cosas: plan de ChatGPT, plan del servicio externo y permiso de conexión.
+
+**Costos honestos**: Gmail personal puede ser gratuito; Make tiene un plan Free con créditos; AppDeploy tiene Free con créditos; Stripe permite comenzar sin mensualidad estándar pero cobra comisiones cuando procesa pagos; ChatGPT Plus es de pago si se elige. Comprobar la página oficial y los límites de la cuenta antes de grabar o publicar materiales.
+
+**Ventas posibles, no garantizadas**: «Aprender a crear webs, mejorar la presencia digital y automatizar procesos puede convertirse en ingresos cuando hay una oferta real, personas interesadas, promoción y buen seguimiento. No es algo que pase de un día para otro». No decir que una web o un plugin «trae ventas» automáticamente. Casa Brownie es demo educativa y no recibe pedidos.
+
 ## La promesa que sí se puede cumplir
-«Vas a entender cómo pasar de una idea a una primera web que puedas revisar y compartir, usando prompts, fotos, AppDeploy y pruebas reales, sin tener que escribir código». No prometas resultados idénticos en un clic ni cero costos: la disponibilidad y los planes de herramientas pueden variar.
+«Vas a entender cómo pasar de una idea a una primera web que puedas revisar y compartir, usando prompts, fotos, AppDeploy y pruebas reales, sin tener que escribir código». No prometas resultados idénticos en un clic, tres webs garantizadas cada día, compatibilidad de plugins en todas las cuentas gratis ni ingresos rápidos. La disponibilidad y los planes de herramientas pueden variar.
 
 ## Consistencia de Studio, aula, PDF, soporte y comunicaciones
 - **Studio privado**: Qué decir / Qué mostrar / Qué comprobar / Qué guardar. Guion 00–08 como fuente de voz; prompts exactos de construcción en «Casa Brownie → Prompts por sección».
