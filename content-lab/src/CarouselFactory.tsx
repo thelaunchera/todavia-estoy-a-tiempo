@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { api } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
-  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X
+  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy
 } from 'lucide-react';
 import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
