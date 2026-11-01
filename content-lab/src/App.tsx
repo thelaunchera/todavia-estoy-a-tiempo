@@ -984,7 +984,7 @@ function App() {
     if (!file) return null;
     // The administrator's background/sticker uploads are intentionally shared.
     // Every buyer upload still goes to owner-only RLS tables and private Storage.
-    if(aiWallet?.admin&&category==='background')return publishSharedBackground(file);
+    if(aiWallet?.admin&&category==='background'&&!forcePrivate)return publishSharedBackground(file);
     if(aiWallet?.admin&&category==='sticker'&&!forcePrivate)return publishSharedSticker(file,'Aesthetic');
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
@@ -1571,7 +1571,7 @@ function App() {
           {brand && tab === 'grid' && (gridPref.fromCalendar && gridPref.openGridId ?
             <BrandGrid
               locale={loginLanguage}
-              onUploadBackground={async file=>upload(file,'background')}
+              onUploadBackground={async file=>upload(file,'background',true,brand.id,true)}
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
               onOpenCalendar={(date?:string)=>{if(validDate(date||''))setCalendarFocusDate(date!);navigate('calendar')}}
