@@ -10,7 +10,7 @@ const headers=[
  ['inicio','Empieza aquí','Primero entiende lo que vas a construir.'],
  ['funciona','Cómo funciona mi web','Distingue el diseño de los procesos internos.'],
  ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
- ['prompts','12 prompts para copiar','Pide lo que necesitas y revisa el resultado.'],
+ ['prompts','Biblioteca de prompts','Incluye el bonus para diseñar desde tu celular.'],
  ['mara','Mara · mi guía web','Prepara tu proyecto privado y empieza.'],
  ['make','Make gratis','Escenarios con Gmail, paso a paso.'],
  ['conectores','Comandos de conectores','Cada servicio explicado sin programación.'],
@@ -110,7 +110,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const headline=app.querySelector('.mi-header h2');
   const intro=app.querySelector('.mi-header p');
   if(headline) headline.textContent=view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
-  if(intro) intro.textContent=view==='prompts'?'12 prompts para copiar, adaptar y usar mientras construyes tu propia página.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
+  if(intro) intro.textContent=view==='prompts'?'Prompts para copiar, adaptar y usar, incluyendo un bonus para quienes trabajan desde el teléfono.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
   const activeGroup=materialGroups.find(group=>group.views.includes(view));
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.group===activeGroup?.id?'page':'false'));
   subtabs.replaceChildren();
@@ -157,15 +157,18 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
  function renderPrompts(){
-  section('02 / BIBLIOTECA PARA COPIAR','Pídele a ChatGPT lo que realmente necesitas.','Elige el paso que estás trabajando, cambia los textos entre [corchetes] y toca «Copiar prompt». No compartas contraseñas ni datos privados.');
+  section('02 / BIBLIOTECA PARA COPIAR','Pídele a ChatGPT lo que realmente necesitas.','Empieza por los 12 prompts de la clase o usa los bonus para crear y revisar tu web desde el celular. Cambia lo que está entre [corchetes] y toca «Copiar prompt». Nunca compartas contraseñas ni datos privados.');
+  const mobileBonus=Array.isArray(EXTRAS.mobile_first_prompts)?EXTRAS.mobile_first_prompts.filter(item=>Array.isArray(item)&&item.length===3&&item.every(v=>typeof v==='string')):[];
+  const catalog=[...PROMPTS,...mobileBonus];
+  if(mobileBonus.length){const note=el('p','mi-mobile-bonus-note',`BONUS MÓVIL · ${mobileBonus.length} prompts para diseñar desde iPhone o Android · prueba a 375 px`);content.append(note);}
   const filter=el('div','mi-filter');filter.innerHTML='<label for="mi-prompt-search">Busca un tema</label><input id="mi-prompt-search" type="search" placeholder="Ej.: fotos, móvil, botón, entrega" autocomplete="off" />';content.append(filter);
   const list=el('div','mi-prompt-list');content.append(list);
   function draw(term=''){
    list.replaceChildren();
-   PROMPTS.forEach(([title,desc,prompt],i)=>{
+   catalog.forEach(([title,desc,prompt],i)=>{
     if(![title,desc,prompt].join(' ').toLowerCase().includes(term.toLowerCase()))return;
-    const card=el('details','mi-prompt');
-    card.innerHTML='<summary><span class="mi-prompt-number">'+String(i+1).padStart(2,'0')+'</span><span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+esc(desc)+'</small></span><span class="mi-plus" aria-hidden="true">+</span></summary><div class="mi-prompt-body"><p class="mi-prompt-text">'+esc(prompt)+'</p><button type="button" class="mi-copy">Copiar prompt</button><p class="mi-copy-state" role="status"></p></div>';
+    const card=el('details',i>=PROMPTS.length?'mi-prompt mi-prompt-mobile':'mi-prompt');
+    card.innerHTML='<summary><span class="mi-prompt-number">'+(i>=PROMPTS.length?'M'+(i-PROMPTS.length+1):String(i+1).padStart(2,'0'))+'</span><span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+esc(desc)+'</small></span><span class="mi-plus" aria-hidden="true">+</span></summary><div class="mi-prompt-body"><p class="mi-prompt-text">'+esc(prompt)+'</p><button type="button" class="mi-copy">Copiar prompt</button><p class="mi-copy-state" role="status"></p></div>';
     card.querySelector('.mi-copy').addEventListener('click',()=>void copyPrompt(prompt,card));
     list.append(card);
    });
