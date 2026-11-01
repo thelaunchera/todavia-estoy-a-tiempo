@@ -8,7 +8,7 @@ test('Calendar-driven grid replaces one-product photo/reference form',()=>{
  assert.ok(app.includes('<LiveFeedGrid brand={brand} posts={posts}'));
  assert.ok(!feed.includes('onUploadFile'),'the new grid must not ask users to upload product and reference photos');
  assert.ok(!feed.includes('quickProduct'),'the new grid is not a fixed nine-photo AI campaign');
- assert.ok(feed.includes('plannedItems'));
+ assert.ok(model.includes('plannedItems'));
  assert.ok(model.includes("item.status==='published'"));
  assert.ok(model.includes("item.status==='planned'"));
 });
