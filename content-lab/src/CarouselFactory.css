@@ -436,3 +436,20 @@
 @media(max-width:390px){
  .factory-background-scope button{font-size:11px;padding:8px 6px}
 }
+
+
+.factory-background-slide-picker{min-width:0;margin:10px 0 6px}
+.factory-background-slide-picker>span{font-size:11px;font-weight:700;color:#4b6976}
+.factory-background-slide-picker>div{
+ display:flex;align-items:center;gap:7px;overflow-x:auto;
+ padding:7px 1px 9px;overscroll-behavior-x:contain;scrollbar-width:thin
+}
+.factory-background-slide-picker button{
+ flex:0 0 auto;min-height:43px;padding:8px 13px;
+ border:1px solid #cbdde2;border-radius:10px;background:#fff;
+ font-size:11px;font-weight:750;color:#4a6b78;touch-action:manipulation
+}
+.factory-background-slide-picker button.active{
+ border-color:#327b94;background:#e0f0f6;color:#194e65;
+ box-shadow:inset 0 0 0 1px #327b94
+}
