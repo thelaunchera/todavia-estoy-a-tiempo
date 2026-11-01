@@ -140,9 +140,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title'){
    if(patch.text!==undefined)onTitle(patch.text);
-   const {text:unused,...styling}=patch;
+   const {text:unused,rect:nextRect,...styling}=patch;
    void unused;
-   if(Object.keys(styling).length)update({...decor,headlineStyle:{...decor.headlineStyle,...styling}});
+   if(Object.keys(styling).length||nextRect)update({...decor,
+     ...(nextRect?{headlineRect:clampRect(nextRect)}:{}),
+     headlineStyle:{...decor.headlineStyle,...styling}});
    return;
   }
   update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,...patch}:l)});
