@@ -34,7 +34,7 @@ export const clampFreePhotoRect=(r:TouchRect):TouchRect=>{
 };
 /** Panorama layers may bleed beyond an edge; keep a small grab area reachable. */
 export const clampPanoramaRect=(r:TouchRect,minWidth=.055/8):TouchRect=>{
- const w=Math.max(minWidth,Math.min(2,safeNumber(r.w,.15)));
+ const w=Math.max(minWidth,Math.min(3,safeNumber(r.w,.15)));
  const h=Math.max(.055,Math.min(3,safeNumber(r.h,.15)));
  return {x:Math.max(-w+minWidth,Math.min(1-minWidth,safeNumber(r.x,.4))),
   y:Math.max(-h+.025,Math.min(.975,safeNumber(r.y,.4))),w,h,
