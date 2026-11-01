@@ -145,7 +145,9 @@ export default function TouchLayerCanvas({
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     e.preventDefault();e.stopPropagation();
-    if(selected!==layer.id){setSelected(layer.id);return;}
+    // In edit mode the first touch selects AND starts moving the object.
+    // Navigation mode still protects all layers during swipe gestures.
+    if(selected!==layer.id)setSelected(layer.id);
     const bounds = stage.current?.getBoundingClientRect();
     if (!bounds) return;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -287,7 +289,7 @@ export default function TouchLayerCanvas({
     (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
-      Grid de {pageCount} slides siempre visible · la división ocurre al descargar
+      {pageCount} slides · líneas azules = corte al descargar
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
     {pageCount>1&&<div className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
@@ -296,11 +298,11 @@ export default function TouchLayerCanvas({
           aria-pressed={interactionMode==='navigate'}
           onClick={()=>{setInteractionMode('navigate');setSelected('');setCropping(false);
             gesture.current=null;pointers.current.clear();window.cancelAnimationFrame(autoPanFrame.current)}}>
-          Deslizar slides
+          <span aria-hidden="true">↔</span> Deslizar
         </button>
         <button type="button" className={interactionMode==='edit'?'active':''}
           aria-pressed={interactionMode==='edit'} onClick={()=>setInteractionMode('edit')}>
-          Editar elementos
+          <span aria-hidden="true">✋</span> Editar
         </button>
       </div>
       <div className="touch-editor-page-navigation">
@@ -317,8 +319,8 @@ export default function TouchLayerCanvas({
           onClick={()=>goToPage(index)}>{index+1}</button>)}
       </div>
       <p className="touch-editor-navigation-tip">{interactionMode==='navigate'
-        ?'Desliza con el dedo o usa las flechas. Las fotos y los stickers no se moverán.'
-        :'Elige una capa arriba o tócala una vez. Después arrástrala; las demás quedan protegidas.'}</p>
+        ?'Desliza para cambiar de slide. Nada se moverá.'
+        :'Toca y arrastra cualquier elemento. Usa el tirador para cambiar su tamaño.'}</p>
     </div>}
     {pageCount===1&&chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
@@ -433,7 +435,8 @@ export default function TouchLayerCanvas({
         </div>}
       </div>
     </div>
-    {pageCount>1&&interactionMode==='edit'&&<div className="touch-editor-below-canvas-controls">
+    {pageCount>1&&interactionMode==='edit'&&<details className="touch-editor-below-canvas-controls">
+      <summary>Capas · elegir elemento si se superponen</summary>
       {interactionMode==='edit'&&<div className="touch-editor-quick-layers" role="group"
         aria-label="Elegir foto o sticker incluso si están superpuestos">
         <strong>Elige un elemento para moverlo:</strong>
@@ -443,7 +446,7 @@ export default function TouchLayerCanvas({
           {layer.kind==='photo'?'📷':layer.kind==='sticker'?'🎀':layer.kind==='text'?'T':'▧'} {layer.name}
         </button>)}</div>
       </div>}
-    </div>}
+    </details>}
     {pageCount>1&&chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
       <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
@@ -585,8 +588,8 @@ export default function TouchLayerCanvas({
       </div>}
       </>}
     </div>}
-    {pageCount > 1 && onRemove && <div className="touch-editor-layer-list" aria-label="Elementos del carrusel">
-      <strong>Fotos y stickers ({layers.length})</strong>
+    {pageCount > 1 && onRemove && <details className="touch-editor-layer-list" aria-label="Elementos del carrusel">
+      <summary>Ver todos los elementos ({layers.length})</summary>
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
         <button type="button" className={selected === layer.id ? 'selected' : ''}
           onClick={() => selectFromList(layer.id)} aria-pressed={selected === layer.id}
@@ -597,6 +600,6 @@ export default function TouchLayerCanvas({
           aria-label={'Borrar ' + layer.name} disabled={!!layer.locked} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
       </div>)}</div>
       {!layers.length && <p>Añade fotos o stickers al lienzo para editarlos aquí.</p>}
-    </div>}
+    </details>}
   </div>;
 }
