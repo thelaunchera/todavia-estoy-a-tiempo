@@ -207,8 +207,16 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        <p className="recording-ready-prompt">{recordingStart.readyPrompt}</p>
       </div>
       </details>
+      <details className="class-extra class-start-details"><summary>Tu voz en toda la clase · Guía rápida</summary>
+       <div className="recording-start-card">
+        <p><b>Tu estilo:</b> español latino natural, una explicación a la vez y un ejemplo real en pantalla. Inspiración didáctica cercana, sin copiar la voz de otra creadora.</p>
+        <ol><li>Empieza por una duda que el alumno reconozca.</li><li>Di qué vamos a hacer y por qué sirve.</li><li>Señala dónde tocar y muestra el cambio.</li><li>Prueba el botón o la sección antes de avanzar.</li><li>Cierra diciendo qué guardar y cuál es el próximo paso.</li></ol>
+        <p>En Casa Brownie construimos desde cero en AppDeploy. El resultado de referencia siempre es la versión con <b>foto estática</b>; el video va solo en el bono.</p>
+        <p><a href="https://github.com/thelaunchera/todavia-estoy-a-tiempo/blob/main/estudio-control/GUIA-DE-VOZ-CLASE-01.md" target="_blank" rel="noopener noreferrer">Abrir la guía editorial completa <ExternalLink size={13}/></a></p>
+       </div>
+      </details>
       <div className="class-scene-head">
-       <div><h4>Guion para grabar</h4><p>La frase que dices y la pantalla que enseñas, escena por escena.</p></div>
+       <div><h4>Guion para grabar</h4><p>Qué dices, dónde tocas y cómo comprobarlo, escena por escena, con una sola voz de principio a fin.</p></div>
        <div className="class-segment">
         <button type="button" onClick={()=>setMode('scene')} className={mode==='scene'?'active':''}>Una escena</button>
         <button type="button" onClick={()=>setMode('overview')} className={mode==='overview'?'active':''}>Guion completo</button>
