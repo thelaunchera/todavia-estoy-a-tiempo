@@ -16,6 +16,8 @@ const GROUPS: {id:Category; title:string; intro:string}[] = [
   {id:'lab',title:'Content Lab',intro:'Editor creativo, prompts, herramientas y archivos'}
 ];
 export const STUDIO_LINKS:BaseLink[] = [
+  {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
+  {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
   {key:'tle-app-info',title:'Cleaning App · Información',url:'https://thelaunchera.com/cleaning-web-app/',category:'thelaunchera',visibility:'publico',description:'Página del producto principal'},
   {key:'tle-app',title:'Cleaning App · Entrar',url:'https://app.thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Acceso a la aplicación para clientes'},
@@ -70,6 +72,7 @@ export const STUDIO_LINKS:BaseLink[] = [
 ];
 export type PublicationState = 'publicado' | 'demo' | 'produccion' | 'revision' | 'interno';
 export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
+  'lab-landing':'publicado','product-hub':'publicado',
   'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
   'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
   'tle-ai-booking':'revision','tle-bundle':'revision','tle-website-auto':'revision','tle-va':'revision',
@@ -83,7 +86,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'lab-editor':'produccion','lab-prompts':'publicado','lab-brand-board':'publicado'
 };
 export const PUBLICATION_LABELS:Record<PublicationState,string> = {
-  publicado:'Publicado en GitHub', demo:'Demo publicada', produccion:'En producción', revision:'Revisar antes de vender', interno:'Acceso interno'
+  publicado:'Página publicada', demo:'Demo publicada', produccion:'En producción', revision:'Revisar antes de vender', interno:'Acceso interno'
 };
 
 const shareable = (v:Visibility) => v==='publico' || v==='demo';
@@ -118,13 +121,14 @@ export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
 export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:StudioEntry[];onChanged:()=>Promise<unknown>;readOnly?:boolean}) {
   const [category,setCategory]=useState<Category|'todos'>('todos');
   const [query,setQuery]=useState('');
+  const [showCode,setShowCode]=useState(false);
   const [expanded,setExpanded]=useState(false);
   const [editor,setEditor]=useState<(Partial<DisplayLink> & {isNew?:boolean})|null>(null);
   const [busy,setBusy]=useState(false);
   const [copied,setCopied]=useState('');
   const [notice,setNotice]=useState('');
   const [issue,setIssue]=useState('');
-  const links=useMemo(()=>resolveStudioLinks(entries),[entries]);
+  const links=useMemo(()=>resolveStudioLinks(entries).filter(x=>showCode || new URL(x.url).hostname!=='github.com'),[entries,showCode]);
   const searching=query.trim().length>0;
   const browsing=searching||category!=='todos';
   const shown=links.filter(x=>(!readOnly || shareable(x.visibility)) && (category==='todos'||x.category===category) && [x.title,x.description,x.url].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
@@ -174,11 +178,12 @@ export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:S
     <div className="lc-hero">
       <div><span className="lc-kicker"><Link2 size={15}/> TU BIBLIOTECA DE ENLACES</span>
         <h2>Todo en un lugar. <em>Listo para compartir.</em></h2>
-        <p>{readOnly ? 'Modo grabación: solo se muestran enlaces públicos y demos. Los accesos privados están ocultos.' : 'Encuentra el enlace correcto sin buscar entre mensajes. Los enlaces privados y pendientes de revisión no se incluyen al copiar una categoría.'}</p>
+        <p>{readOnly ? 'Modo grabación: solo se muestran enlaces públicos y demos. Los accesos privados están ocultos.' : 'Abre o copia las páginas de tus productos para compartirlas. El código de GitHub queda oculto; puedes consultarlo con el filtro técnico.'}</p>
       </div>
       {!readOnly&&<button className="lc-primary" onClick={()=>{setEditor({...blank,isNew:true});setIssue('');}}><Plus size={17}/> Añadir enlace</button>}
     </div>
     <div className="lc-tools">
+      {!readOnly&&<label><input type="checkbox" checked={showCode} onChange={e=>setShowCode(e.target.checked)}/> Mostrar también código de GitHub</label>}
       <div className="lc-search"><Search size={19}/><input aria-label="Buscar enlaces" placeholder="Buscar por producto, demo o nombre…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button onClick={()=>setQuery('')} aria-label="Limpiar búsqueda"><X size={16}/></button>}</div>
       {browsing&&<button className="lc-bulk" onClick={()=>void copyCategory()}><Copy size={15}/>{copied==='group'?'Copiado':'Copiar enlaces listos'}</button>}
     </div>
