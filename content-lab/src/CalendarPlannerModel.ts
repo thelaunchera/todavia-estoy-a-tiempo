@@ -12,6 +12,21 @@ export type CalendarGrid={
  id:string;brandId:string;title:string;sourceId?:string;
  posts:Array<{headline?:string;assetId?:string;scheduledDate?:string;scheduledTime?:string;planningStatus?:string}>;
 };
+export type ContentKind='carousel'|'single'|'reel-cover'|'story';
+/** Reel is only an image cover in Content Lab, never a video editor or video scheduler. */
+export const contentKind=(format:string):ContentKind=>{
+ const f=(format||'').toLowerCase().trim();
+ if(f.includes('carousel')||f.includes('carrusel'))return 'carousel';
+ if(f==='reel'||f.includes('reel cover')||f.includes('portada de reel'))return 'reel-cover';
+ if(f.includes('story')||f.includes('historia'))return 'story';
+ return 'single';
+};
+export const contentKindLabel=(format:string,locale:'es'|'en'='es')=>{
+ const labels=locale==='es'?{carousel:'Carrusel',single:'Post', 'reel-cover':'Portada reel',story:'Historia'}:
+ {carousel:'Carousel',single:'Post','reel-cover':'Reel cover',story:'Story'};
+ return labels[contentKind(format)];
+};
+export const contentKindShort=(format:string)=>({carousel:'C',single:'P','reel-cover':'R',story:'H'})[contentKind(format)];
 export const validDate=(value:string)=>/^\d{4}-\d{2}-\d{2}$/.test(value)&&
  (()=>{const [y,m,d]=value.split('-').map(Number);const actual=new Date(y,m-1,d);
  return actual.getFullYear()===y&&actual.getMonth()===m-1&&actual.getDate()===d;})();
