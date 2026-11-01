@@ -18,24 +18,24 @@ export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;fram
 export type Layout={name:string;image:[number,number,number,number];type:[number,number,number,number];accent:string;shape:string;align?:CanvasTextAlign;dark?:boolean};
 export const LAYOUTS:Layout[]=[
  // Photo-first editorial geometries. Saved format names and order are stable.
- {name:'Editorial Hero',image:[0.38,0.04,0.6,0.9],type:[0.055,0.27,0.3,0.46],accent:'rule',shape:'flat'},
- {name:'Bold Typography',image:[0.27,0.4,0.7,0.54],type:[0.06,0.07,0.88,0.26],accent:'frame',shape:'solid'},
+ {name:'Editorial Hero',image:[0.38,0.04,0.6,0.898],type:[0.055,0.27,0.3,0.46],accent:'rule',shape:'flat'},
+ {name:'Bold Typography',image:[0.27,0.4,0.7,0.538],type:[0.06,0.07,0.88,0.26],accent:'frame',shape:'solid'},
  {name:'Macro Texture',image:[0,0,1,0.74],type:[0.07,0.79,0.86,0.14],accent:'rule',shape:'bottomPanel'},
  {name:'Lifestyle Scene',image:[0.06,0.055,0.88,0.74],type:[0.08,0.83,0.84,0.1],accent:'corner',shape:'paper'},
  {name:'Playful Props',image:[0.28,0.3,0.68,0.62],type:[0.06,0.06,0.87,0.19],accent:'circles',shape:'split'},
  {name:'Hands-on Editorial',image:[0.04,0.05,0.64,0.88],type:[0.72,0.18,0.24,0.52],accent:'rule',shape:'double'},
- {name:'High Contrast',image:[0.24,0.36,0.74,0.59],type:[0.06,0.08,0.85,0.22],accent:'bar',shape:'solid',dark:true},
+ {name:'High Contrast',image:[0.24,0.36,0.74,0.578],type:[0.06,0.08,0.85,0.22],accent:'bar',shape:'solid',dark:true},
  {name:'Minimal Premium',image:[0.05,0.34,0.9,0.57],type:[0.09,0.075,0.82,0.2],accent:'none',shape:'paper',align:'center'},
- {name:'Campaign Finale',image:[0,0.34,1,0.6],type:[0.07,0.08,0.86,0.21],accent:'sunburst',shape:'dark',dark:true},
- {name:'Color Block',image:[0.47,0.04,0.51,0.9],type:[0.055,0.26,0.38,0.45],accent:'stripe',shape:'split'},
- {name:'Magazine Cover',image:[0.055,0.36,0.89,0.58],type:[0.06,0.09,0.87,0.2],accent:'masthead',shape:'paper'},
+ {name:'Campaign Finale',image:[0,0.34,1,0.598],type:[0.07,0.08,0.86,0.21],accent:'sunburst',shape:'dark',dark:true},
+ {name:'Color Block',image:[0.47,0.04,0.51,0.898],type:[0.055,0.26,0.38,0.45],accent:'stripe',shape:'split'},
+ {name:'Magazine Cover',image:[0.055,0.36,0.89,0.578],type:[0.06,0.09,0.87,0.2],accent:'masthead',shape:'paper'},
  {name:'Arch Frame',image:[0.17,0.35,0.66,0.57],type:[0.11,0.09,0.78,0.18],accent:'arch',shape:'paper',align:'center'},
  {name:'Product Spotlight',image:[0.19,0.37,0.72,0.55],type:[0.05,0.09,0.87,0.19],accent:'spotlight',shape:'dark',dark:true,align:'center'},
  {name:'Floating Product',image:[0.1,0.05,0.82,0.64],type:[0.11,0.74,0.78,0.17],accent:'orbits',shape:'paper'},
- {name:'Typography Poster',image:[0.48,0.54,0.48,0.4],type:[0.055,0.08,0.9,0.35],accent:'mega',shape:'solid'},
+ {name:'Typography Poster',image:[0.48,0.54,0.48,0.398],type:[0.055,0.08,0.9,0.35],accent:'mega',shape:'solid'},
  {name:'Negative Space',image:[0.35,0.4,0.6,0.53],type:[0.07,0.08,0.86,0.23],accent:'none',shape:'paper'},
  {name:'Diagonal Composition',image:[0.43,0.06,0.55,0.69],type:[0.07,0.8,0.85,0.13],accent:'diagonal',shape:'paper'},
- {name:'Soft Luxury',image:[0.15,0.34,0.7,0.6],type:[0.1,0.08,0.8,0.19],accent:'soft',shape:'paper',align:'center'},
+ {name:'Soft Luxury',image:[0.15,0.34,0.7,0.598],type:[0.1,0.08,0.8,0.19],accent:'soft',shape:'paper',align:'center'},
  {name:'Graphic Cutout',image:[0.13,0.16,0.82,0.76],type:[0.05,0.05,0.89,0.09],accent:'cutout',shape:'split'},
  {name:'Story Card',image:[0.03,0.06,0.94,0.75],type:[0.08,0.86,0.84,0.09],accent:'pill',shape:'paper',align:'center'},
 ];
@@ -114,7 +114,7 @@ function geometry(ctx:CanvasRenderingContext2D,layout:Layout,W:number,H:number,p
 // A second, oversized typographic plane sits BEHIND the real photo — the same
 // art direction as the gallery, but it uses the buyer's editable headline.
 function paintGhostHeadline(ctx:CanvasRenderingContext2D,layout:Layout,text:string,W:number,H:number){
- const tokens=(text||'').toLocaleUpperCase().match(/[\\p{L}\\p{N}]{3,}/gu)||[];
+ const tokens=(text||'').toLocaleUpperCase().match(/[\p{L}\p{N}]{3,}/gu)||[];
  const word=tokens.find(t=>t.length>=4)||tokens[0];
  if(!word)return;
  ctx.save();
