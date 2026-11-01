@@ -380,7 +380,7 @@ export default function TouchLayerCanvas({
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
                zIndex:layer.role==='background'?1:active?8:z,
-               pointerEvents:layer.locked||pageCount>1&&(interactionMode==='navigate'||(selected!==''&&!active))?'none':'auto'}}
+               pointerEvents:layer.locked||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
