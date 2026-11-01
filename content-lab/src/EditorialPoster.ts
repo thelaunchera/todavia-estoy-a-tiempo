@@ -64,7 +64,7 @@ export async function renderEditorial(input:{
  headline:string;subtext:string;brandName:string;design:EditorialDesign;
  brandColor:string;paperColor:string;
  safeTop:number;safeBottom:number;
- move?:{imageX?:number;imageY?:number;imageZoom?:number;textX?:number;textY?:number;textScale?:number}
+ move?:{imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number}
 }):Promise<{fit:boolean;contrast:number}>{
  const {canvas,design}=input,ctx=canvas.getContext('2d');
  if(!ctx)throw Error('Canvas no disponible');
@@ -86,11 +86,19 @@ export async function renderEditorial(input:{
  }
  if(input.backgroundImageSrc){try{await paintCoverImage(ctx,input.backgroundImageSrc,W,H)}catch{}}
  const left=q(input.move?.imageX||0,-.55,.55),top=q(input.move?.imageY||0,-.55,.55),zoom=q(input.move?.imageZoom||1,1,3);
- const fullBleed=background==='photo'&&['portrait','annotated','magazine','typographic'].includes(mode);
+ const fullBleed=background==='photo'&&!input.backgroundImageSrc&&['portrait','annotated','magazine','typographic'].includes(mode);
  const framing=mode==='split'?[.40,.07,.56,.86]:mode==='magazine'?[.23,.05,.54,.92]:mode==='typographic'?[.30,.18,.66,.77]:[.04,.08,.92,.86];
+ const frameScale=q(Number(input.move?.frameScale||1),.45,1.7);
+ const frameX=q(Number(input.move?.frameX||0),-.75,.75),frameY=q(Number(input.move?.frameY||0),-.75,.75);
+ const region=fullBleed?[0,0,1,1]:framing;
+ const frameWidth=region[2]*frameScale,frameHeight=region[3]*frameScale;
+ const offsetX=region[0]+(region[2]-frameWidth)/2+frameX;
+ const offsetY=region[1]+(region[3]-frameHeight)/2+frameY;
  if(photo){
-  if(fullBleed)await putPhoto(ctx,photo,0,0,W,H,left,top,zoom);
-  else await putPhoto(ctx,photo,X(framing[0]),Y(framing[1]),X(framing[2]),Y(framing[3]),left,top,zoom);
+  // Move the photo on its own layer; preserve the original bitmap.
+  ctx.save();ctx.beginPath();ctx.rect(0,0,W,H);ctx.clip();
+  await putPhoto(ctx,photo,X(offsetX),Y(offsetY),X(frameWidth),Y(frameHeight),left,top,zoom);
+  ctx.restore();
  }
  if(background==='photo'&&photo){
   const shade=q(Number(design.overlay??.13),0,.75);
