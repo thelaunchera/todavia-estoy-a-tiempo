@@ -1472,8 +1472,14 @@ function App() {
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
-              onUploadPhoto={async file=>upload(file,'original')}
-              onUploadBackground={async file=>upload(file,'background')}
+              onUploadPhoto={async file=>upload(file,'original',false)}
+              onUploadBackground={async file=>upload(file,'background',false)}
+              onRenameAsset={async(asset,name)=>{
+                if(asset.shared||asset.brandId!==brand.id)throw Error('Solo puedes cambiar el nombre de tus archivos propios.');
+                const {data}=await api.put('/api/assets/'+asset.id,{displayName:name});
+                setAssets(previous=>previous.map(item=>item.id===asset.id?data as Asset:item));
+                toast('Nombre guardado en tu biblioteca.');
+              }}
               initialBackground={backgroundPref.brandId===brand.id?backgroundPref:undefined}
               initialSticker={stickerPref.brandId===brand.id?stickerPref:undefined}
               brand={brand}
