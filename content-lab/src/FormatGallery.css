@@ -1,224 +1,228 @@
-/* Content Lab / Editorial format gallery
-   Twenty independent photo-led art directions, not a generic template catalog.
-   All positions are sourced from GridComposer layouts and have exclusive text space. */
-.fg-root{max-width:1420px;padding-bottom:96px;color:#1d292b}
-.fg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:20px}
-.fg-head h1{font-size:clamp(30px,4vw,50px);line-height:1.12;letter-spacing:-.045em;margin:8px 0 12px}
-.fg-head p{font-size:14px;line-height:1.65;color:#607477;max-width:620px;margin:0}
-.fg-head>.btn{flex-shrink:0;white-space:nowrap}
-.fg-note{display:flex;align-items:center;gap:12px;padding:13px 16px;background:#f4f7f5;
- border:1px solid #e5ece8;border-radius:13px;font-size:12px;line-height:1.6;color:#4e6263}
+/* Creative direction: the user's fashion editorial reference — oversized type
+   interrupted by a dominant subject. Gallery images remain residential interiors,
+   all typography stays editable in the real Grid Composer. */
+.fg-root{max-width:1420px;padding-bottom:100px;color:#232929}
+.fg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:19px}
+.fg-head h1{font-size:clamp(30px,4vw,50px);line-height:1.12;letter-spacing:-.04em;margin:8px 0 12px}
+.fg-head p{max-width:620px;font-size:14px;line-height:1.6;color:#687a7c}
+.fg-head>.btn{flex:none;white-space:nowrap}
+.fg-note{display:flex;align-items:center;gap:10px;padding:12px 15px;background:#f4f6f4;
+ border:1px solid #e4e9e5;border-radius:12px;font-size:12px;line-height:1.5;color:#526d70}
 .fg-note svg{flex:none}
-.fg-filterbar{display:flex;gap:8px;margin:16px 0 22px;padding:0 0 7px;overflow-x:auto;
- -webkit-overflow-scrolling:touch;scrollbar-width:thin}
-.fg-filterbar button{padding:10px 16px;flex:none;min-height:41px;border:1px solid #e1e6e3;
- background:#fff;border-radius:40px;color:#52666a;font-size:12px;font-weight:650;cursor:pointer}
-.fg-filterbar button.active{background:#223841;border-color:#223841;color:#fff}
-.fg-layout{display:flex;align-items:flex-start;gap:22px}
-.fg-cards{min-width:0;flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
-.fg-card{min-width:0;padding:10px;background:#fff;border:1px solid #e1e5e1;border-radius:14px;
- box-shadow:0 2px 12px rgba(29,41,43,.035);transition:border-color .2s,box-shadow .2s}
-.fg-card.selected{border-color:#8eaeb9;box-shadow:0 7px 26px rgba(26,52,60,.1)}
-.fg-imagebutton{display:block;border:none;padding:0;width:100%;background:none;cursor:pointer;
- border-radius:4px;text-align:inherit}
-.fg-imagebutton:focus-visible,.fg-use:focus-visible,.fg-filterbar button:focus-visible,
-.fg-detail button:focus-visible{outline:3px solid #799fae;outline-offset:3px}
-.fg-preview{--fg-accent:#BED8E9;position:relative;aspect-ratio:4/5;width:100%;overflow:hidden;
- background:#faf8f3;color:#1d292b;border-radius:3px;isolation:isolate;container-type:inline-size;
- font-synthesis:none}
-.fg-preview-photo{position:absolute;z-index:1;overflow:hidden;background:#e7e5df;
- border-radius:0;box-shadow:none}
-.fg-preview-photo img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;
- filter:saturate(.86) contrast(1.02)}
-.fg-preview-copy{position:absolute;z-index:3;display:flex;flex-direction:column;justify-content:center;
- align-items:stretch;gap:3px;padding:0;min-width:0;overflow:visible}
-.fg-overline{display:block;font:700 clamp(6px,2cqw,10px)/1.15 'Futura',Arial,sans-serif;
- letter-spacing:.12em;text-transform:uppercase;overflow-wrap:normal}
-.fg-preview-copy strong{display:block;font:400 clamp(13px,7.0cqw,36px)/1.04 Georgia,serif;
+.fg-filterbar{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+ margin:17px 0 24px;padding:0 0 8px}
+.fg-filterbar button{min-height:40px;flex:none;border-radius:30px;border:1px solid #dde6e6;
+ background:#fff;color:#52676a;padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer}
+.fg-filterbar button.active{background:#253741;border-color:#253741;color:#fff}
+.fg-layout{display:flex;align-items:flex-start;gap:20px}
+.fg-cards{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:19px}
+.fg-card{background:#fff;border:1px solid #e0e5e3;border-radius:12px;padding:9px;min-width:0;
+ box-shadow:0 2px 9px #17282a09}
+.fg-card.selected{border-color:#7fa6ae;box-shadow:0 7px 26px #193c4815}
+.fg-imagebutton{display:block;border:0;background:transparent;width:100%;padding:0;text-align:inherit;
+ cursor:pointer;border-radius:3px}
+.fg-filterbar button:focus-visible,.fg-use:focus-visible,.fg-imagebutton:focus-visible,
+.fg-detail button:focus-visible{outline:3px solid #699bac;outline-offset:3px}
+.fg-preview{--fg-maroon:#641f30;position:relative;aspect-ratio:4/5;overflow:hidden;
+ background:#f8f7f2;color:#1d292b;border-radius:2px;isolation:isolate;container-type:inline-size;font-synthesis:none}
+.fg-preview-photo{position:absolute;z-index:2;overflow:hidden;background:#dadbd7;box-shadow:none}
+.fg-preview-photo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+ filter:saturate(.91) contrast(1.04)}
+.fg-preview-backtype{position:absolute;z-index:1;inset:0;pointer-events:none;overflow:hidden}
+.fg-preview-backtype span{position:absolute;top:24%;left:-4%;font:900 28cqw/.79 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.09em;white-space:nowrap;text-transform:uppercase;color:#641f30}
+.fg-preview-copy{position:absolute;z-index:4;display:flex;flex-direction:column;align-items:stretch;
+ justify-content:center;gap:3px;min-width:0;overflow:hidden;padding:0}
+.fg-overline{display:block;font:800 clamp(6px,2cqw,10px)/1.15 'Futura',Arial,sans-serif;
+ letter-spacing:.09em;text-transform:uppercase;overflow-wrap:anywhere}
+.fg-preview-copy strong{display:block;font:600 clamp(13px,7.6cqw,37px)/1.04 Georgia,serif;
  letter-spacing:-.045em;text-wrap:balance;overflow-wrap:normal;hyphens:none}
-.fg-preview-copy small{font:400 clamp(7px,2.35cqw,11px)/1.25 'Futura',Arial,sans-serif;
- opacity:.8;letter-spacing:.012em}
-.fg-brandline,.fg-number{position:absolute;z-index:5;bottom:3.1%;font:700 clamp(6px,2cqw,10px)/1.2
- 'Futura',Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}
-.fg-brandline{left:6.5%;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fg-number{right:6%;opacity:.63;font-weight:500}
-.fg-artwork{position:absolute;inset:0;z-index:2;pointer-events:none}
+.fg-preview-copy small{font:400 clamp(6px,2.5cqw,12px)/1.24 'Futura',Arial,sans-serif;
+ opacity:.85;overflow-wrap:anywhere}
+.fg-brandline,.fg-number{position:absolute;z-index:5;bottom:3%;font:750 clamp(6px,1.9cqw,10px)/1.2
+ 'Futura',Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.fg-brandline{left:6.2%;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg-number{right:6%;opacity:.66;font-weight:600}
+.fg-artwork{position:absolute;z-index:1;inset:0;pointer-events:none}
 .fg-artwork span{display:block;position:absolute}
 
-/* 01 / Full photographic lead + restrained serif caption */
-.fg-preview.fg-variant-0{background:#faf8f3}
-.fg-variant-0 .fg-preview-photo{border-radius:0 0 25% 0}
-.fg-variant-0 .fg-preview-copy strong{font:italic 400 8cqw/1.02 Georgia,serif}
-.fg-variant-0 .fg-artwork span:first-child{height:1px;width:28%;left:8%;top:71%;background:#b7bfb9}
+/* 01: the reference in architectural form: vertical lettering behind a hero image. */
+.fg-variant-0{background:#fff;color:#581b2b}
+.fg-variant-0 .fg-preview-backtype span{writing-mode:vertical-rl;transform:rotate(180deg);left:-2%;
+ top:9%;font-size:25cqw;letter-spacing:-.05em;color:#5b1929}
+.fg-variant-0 .fg-preview-photo{clip-path:polygon(12% 0,100% 0,100% 100%,0 100%,0 20%)}
+.fg-variant-0 .fg-preview-copy strong{font:900 8.3cqw/.92 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.06em;text-transform:uppercase;color:#581b2b}
+.fg-variant-0 .fg-overline{color:#581b2b}
 
-/* 02 / Modern typography and small secondary photograph */
-.fg-preview.fg-variant-1{background:#c7dfe9}
-.fg-variant-1 .fg-preview-copy{justify-content:flex-start}
-.fg-variant-1 .fg-preview-copy strong{font:900 10.3cqw/.92 'Arial Black',Arial,sans-serif;letter-spacing:-.075em}
-.fg-variant-1 .fg-artwork span:first-child{top:7%;left:7%;width:30%;height:3px;background:#223841}
+/* 02: campaign poster, giant lettering behind the lower-right image. */
+.fg-variant-1{background:#ebe8dd;color:#142328}
+.fg-variant-1 .fg-preview-backtype span{top:10%;left:4%;font-size:27cqw;color:#b6a69c;
+ -webkit-text-stroke:1px #514942;color:transparent}
+.fg-variant-1 .fg-preview-copy strong{font:900 11.1cqw/.91 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.085em;text-transform:uppercase}
+.fg-variant-1 .fg-preview-photo{clip-path:polygon(4% 0,100% 0,100% 100%,0 100%)}
 
-/* 03 / A genuine macro image with a dedicated caption strip */
-.fg-preview.fg-variant-2{background:#faf7f0}
-.fg-variant-2 .fg-preview-photo img{object-position:50% 50%;filter:saturate(.8)}
-.fg-variant-2 .fg-preview-copy strong{font:italic 400 7.7cqw/1.06 Georgia,serif}
-.fg-variant-2 .fg-artwork span:first-child{width:18%;height:1px;left:8%;top:75%;background:#758b8e}
+/* 03: a real detail photograph, full-bleed and a bold caption below. */
+.fg-variant-2{background:#f3f1e9}
+.fg-variant-2 .fg-preview-backtype{z-index:3}
+.fg-variant-2 .fg-preview-backtype span{top:6%;left:5%;font-size:22cqw;color:#ffffffc9}
+.fg-variant-2 .fg-preview-copy strong{font:800 8.5cqw/.99 'Futura',Arial,sans-serif}
+.fg-variant-2 .fg-preview-photo img{filter:contrast(1.12) saturate(.82)}
 
-/* 04 / Quiet interior editorial, photo with an off-center paper edge */
-.fg-preview.fg-variant-3{background:#f5f2eb}
-.fg-variant-3 .fg-preview-photo{box-shadow:10px 10px 0 #dce4df}
-.fg-variant-3 .fg-preview-copy strong{font:400 7cqw/1.09 Georgia,serif}
+/* 04: modern interior photography, minimal copy after the image. */
+.fg-variant-3{background:#f8f6f0}
+.fg-variant-3 .fg-preview-backtype span{top:7%;left:4%;font-size:27cqw;
+ color:#fdfcf5;-webkit-text-stroke:1px #a59b8b}
+.fg-variant-3 .fg-preview-copy strong{font:italic 8cqw/1 Georgia,serif}
 
-/* 05 / Modern playful study with one bold shape, not decorative sticker clutter */
-.fg-preview.fg-variant-4{background:linear-gradient(150deg,#c9dfea 0 47%,#f9f6ef 47% 100%)}
-.fg-variant-4 .fg-preview-photo{transform:rotate(-3deg);border:4px solid #fff;box-shadow:0 8px 18px #283e4726}
-.fg-variant-4 .fg-preview-copy strong{font:800 8.4cqw/1.02 'Futura',Arial,sans-serif}
-.fg-variant-4 .fg-artwork span:first-child{top:72%;left:11%;width:11%;aspect-ratio:1;border:1px solid #8cb3c5;border-radius:50%}
+/* 05: graphic campaign, typography interacts with large refrigerator photo. */
+.fg-variant-4{background:#e1e7e3}
+.fg-variant-4 .fg-preview-backtype span{top:22%;left:-3%;color:#223e3d;font-size:28cqw}
+.fg-variant-4 .fg-preview-photo{transform:rotate(-2deg);box-shadow:0 11px 20px #182f302a}
+.fg-variant-4 .fg-preview-copy strong{font:900 9.2cqw/.96 'Arial Black',Arial,sans-serif;letter-spacing:-.075em}
+.fg-variant-4 .fg-artwork span:first-child{left:6%;bottom:10%;width:20%;height:1px;background:#617d77}
 
-/* 06 / Architectural column and narrow contrast type */
-.fg-preview.fg-variant-5{background:linear-gradient(90deg,#f5f2ec 0 61%,#c8dfe7 61% 100%)}
-.fg-variant-5 .fg-preview-photo img{object-position:45% 50%}
-.fg-variant-5 .fg-preview-copy strong{font:400 6.3cqw/1.03 Georgia,serif;letter-spacing:-.04em}
-.fg-variant-5 .fg-overline{font-size:1.65cqw;letter-spacing:.035em}
-.fg-variant-5 .fg-preview-copy small{font-size:1.85cqw}
-.fg-variant-5 .fg-artwork span:first-child{width:2px;height:32%;top:19%;left:61%;background:#2a4850}
+/* 06: architectural split, photographic column and narrow type. */
+.fg-variant-5{background:linear-gradient(90deg,#e7e4db 0 69%,#f5f3eb 69% 100%)}
+.fg-variant-5 .fg-preview-backtype span{left:-8%;top:5%;writing-mode:vertical-rl;
+ font-size:21cqw;color:#697477;opacity:.25}
+.fg-variant-5 .fg-preview-copy strong{font:700 6.8cqw/1.04 Georgia,serif}
+.fg-variant-5 .fg-overline{font-size:1.7cqw;letter-spacing:.02em}
+.fg-variant-5 .fg-preview-copy small{font-size:2cqw}
 
-/* 07 / Deep-ink contrast with monochrome photography */
-.fg-preview.fg-variant-6{background:#19232a;color:#fff}
-.fg-variant-6 .fg-preview-photo img{filter:grayscale(1) contrast(1.16)}
-.fg-variant-6 .fg-preview-copy strong{font:900 9cqw/.94 'Arial Black',Arial,sans-serif;letter-spacing:-.07em}
-.fg-variant-6 .fg-overline{color:#b5d4df}
-.fg-variant-6 .fg-artwork span:first-child{left:7%;top:8%;width:15%;height:2px;background:#bddce8}
+/* 07: black-and-white publication campaign, oversized knockout lettering. */
+.fg-variant-6{background:#182027;color:#fff}
+.fg-variant-6 .fg-preview-photo img{filter:grayscale(1) contrast(1.18)}
+.fg-variant-6 .fg-preview-backtype span{top:24%;left:-8%;font-size:31cqw;color:#758791}
+.fg-variant-6 .fg-preview-copy strong{font:900 10.3cqw/.94 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.07em}
+.fg-variant-6 .fg-overline{color:#d8e5e6}
 
-/* 08 / Negative space as luxury */
-.fg-preview.fg-variant-7{background:#f1efe8}
-.fg-variant-7 .fg-preview-copy strong{font:italic 400 8cqw/1.04 Georgia,serif}
-.fg-variant-7 .fg-preview-photo img{filter:saturate(.62)}
-.fg-variant-7 .fg-artwork span:first-child{left:42%;top:10%;width:16%;height:1px;background:#a9afa7}
+/* 08: quiet luxury but still photo-first. */
+.fg-variant-7{background:#f0ede5;color:#29342f}
+.fg-variant-7 .fg-preview-backtype span{top:18%;left:4%;font:italic 400 28cqw/1 Georgia,serif;
+ color:#d0c5b4}
+.fg-variant-7 .fg-preview-copy strong{font:italic 9.0cqw/1.03 Georgia,serif}
 
-/* 09 / Cinematic chapter ending */
-.fg-preview.fg-variant-8{background:#202c32;color:#fff}
-.fg-variant-8 .fg-preview-copy strong{font:400 8.8cqw/1.02 Georgia,serif}
-.fg-variant-8 .fg-preview-photo img{filter:saturate(.77) contrast(1.06)}
-.fg-variant-8 .fg-artwork span:first-child{width:100%;height:13%;bottom:0;left:0;
- background:linear-gradient(transparent,#121b20bd)}
+/* 09: cinematic cover, warm photo across the bottom. */
+.fg-variant-8{background:#1e2a30;color:#fff}
+.fg-variant-8 .fg-preview-backtype span{top:14%;left:-5%;font-size:26cqw;color:#8c9c9e;opacity:.34}
+.fg-variant-8 .fg-preview-photo:after{content:'';position:absolute;inset:70% 0 0;
+ background:linear-gradient(transparent,#111a1c63)}
+.fg-variant-8 .fg-preview-copy strong{font:500 10.4cqw/.96 Georgia,serif}
 
-/* 10 / Editorial split, no cross-column type */
-.fg-preview.fg-variant-9{background:linear-gradient(90deg,#c4dce8 0 50%,#f5f3ee 50% 100%)}
-.fg-variant-9 .fg-preview-copy strong{font:900 7.2cqw/1 'Arial Black',Arial,sans-serif;letter-spacing:-.055em}
-.fg-variant-9 .fg-preview-copy small{font-size:1.9cqw}
-.fg-variant-9 .fg-brandline{max-width:40%}
-.fg-variant-9 .fg-artwork span:first-child{top:0;left:49.5%;width:1px;height:100%;background:#243c4355}
+/* 10: offset image and the extreme left-hand type slab. */
+.fg-variant-9{background:#e6e9e3}
+.fg-variant-9 .fg-preview-backtype span{top:3%;left:-5%;writing-mode:vertical-rl;
+ font-size:22cqw;color:#2d4b51;opacity:.2}
+.fg-variant-9 .fg-preview-copy strong{font:900 9cqw/.95 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.08em}
 
-/* 11 / Magazine cover: dedicated masthead above full image */
-.fg-preview.fg-variant-10{background:#f9f6f0}
-.fg-variant-10 .fg-preview-copy strong{font:700 8.1cqw/.98 Georgia,serif;letter-spacing:-.05em}
-.fg-variant-10 .fg-preview-copy small{font-size:2.1cqw}
-.fg-variant-10 .fg-artwork span:first-child{left:8%;right:8%;top:7%;height:1px;background:#28393d}
+/* 11: fashion-magazine masthead adapted to the home. */
+.fg-variant-10{background:#f7f3eb}
+.fg-variant-10 .fg-preview-backtype span{top:9%;left:5%;font:800 19cqw/.9 Georgia,serif;
+ color:#c1b9a7}
+.fg-variant-10 .fg-preview-copy strong{font:700 9cqw/.93 Georgia,serif;letter-spacing:-.06em}
 
-/* 12 / Restrained arched photograph */
-.fg-preview.fg-variant-11{background:#f6f2e9}
-.fg-variant-11 .fg-preview-photo{border-radius:49% 49% 0 0}
-.fg-variant-11 .fg-preview-copy strong{font:400 7.6cqw/1.05 Georgia,serif}
-.fg-variant-11 .fg-artwork span:first-child{left:13%;top:37%;width:74%;height:53%;
- border:1px solid #b8b4a9;border-radius:49% 49% 0 0}
+/* 12: arch window as foreground visual while oversized type sits behind. */
+.fg-variant-11{background:#ecebe5}
+.fg-variant-11 .fg-preview-backtype span{top:12%;left:-2%;font-size:29cqw;color:#c8c3ba}
+.fg-variant-11 .fg-preview-photo{border-radius:45% 45% 0 0}
+.fg-variant-11 .fg-preview-copy strong{font:italic 8.5cqw/1.03 Georgia,serif}
 
-/* 13 / Focused vignette */
-.fg-preview.fg-variant-12{background:#19232a;color:#fff}
-.fg-variant-12 .fg-preview-photo{border-radius:50%;outline:1px solid #91a8ad;outline-offset:6px}
-.fg-variant-12 .fg-preview-copy strong{font:italic 400 8cqw/1.04 Georgia,serif}
-.fg-variant-12 .fg-brandline{color:#fff}
-.fg-variant-12 .fg-artwork span:first-child{width:12%;height:1px;left:44%;top:9%;background:#bac8c8}
+/* 13: dark editorial gallery */
+.fg-variant-12{background:#1d292f;color:#fff}
+.fg-variant-12 .fg-preview-photo{border-radius:52% 52% 2% 2%}
+.fg-variant-12 .fg-preview-backtype span{top:16%;left:-2%;font-size:25cqw;color:#87a1a9;opacity:.34}
+.fg-variant-12 .fg-preview-copy strong{font:italic 8.7cqw/.99 Georgia,serif}
 
-/* 14 / Floating print with asymmetrical placement */
-.fg-preview.fg-variant-13{background:#f2f0e9}
-.fg-variant-13 .fg-preview-photo{transform:rotate(3deg);border:6px solid #fff;box-shadow:0 12px 19px #1b343b29}
-.fg-variant-13 .fg-preview-copy strong{font:400 7.8cqw/1.03 Georgia,serif}
-.fg-variant-13 .fg-artwork span:first-child{height:1px;width:24%;left:8%;top:70%;background:#788d8c}
+/* 14: product editorial where the actual photo leads, not a fake card. */
+.fg-variant-13{background:#f2efeb}
+.fg-variant-13 .fg-preview-backtype span{top:21%;left:4%;font-size:25cqw;color:#d1b9a2}
+.fg-variant-13 .fg-preview-copy strong{font:700 8cqw/1 Georgia,serif}
 
-/* 15 / Text-first graphic poster */
-.fg-preview.fg-variant-14{background:#c4dce8}
-.fg-variant-14 .fg-preview-copy{justify-content:flex-start}
-.fg-variant-14 .fg-preview-copy strong{font:900 11.1cqw/.93 'Arial Black',Arial,sans-serif;letter-spacing:-.078em}
-.fg-variant-14 .fg-preview-photo img{filter:saturate(.67)}
-.fg-variant-14 .fg-artwork span:first-child{top:7%;left:7%;width:86%;height:1px;background:#213840}
+/* 15: assertive commercial type with one architectural photograph. */
+.fg-variant-14{background:#d8e5e3}
+.fg-variant-14 .fg-preview-backtype span{top:13%;left:-3%;font-size:29cqw;color:#4f7678;opacity:.25}
+.fg-variant-14 .fg-preview-copy strong{font:900 12cqw/.9 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.08em;text-transform:uppercase}
 
-/* 16 / Deliberate breathing room */
-.fg-preview.fg-variant-15{background:#f8f6ef}
-.fg-variant-15 .fg-preview-copy strong{font:italic 400 7.7cqw/1.09 Georgia,serif}
-.fg-variant-15 .fg-preview-photo img{filter:saturate(.65)}
-.fg-variant-15 .fg-artwork span:first-child{left:9%;top:9%;width:12%;height:1px;background:#9aa7a4}
+/* 16: less noise, actual visual hierarchy. */
+.fg-variant-15{background:#fcfaf4}
+.fg-variant-15 .fg-preview-backtype span{left:1%;top:21%;font-size:27cqw;
+ color:transparent;-webkit-text-stroke:1px #baa9a0}
+.fg-variant-15 .fg-preview-copy strong{font:italic 9cqw/1.04 Georgia,serif}
 
-/* 17 / Diagonal layout, clean reading zone */
-.fg-preview.fg-variant-16{background:linear-gradient(135deg,#f9f5ee 0 60%,#d5e6e9 60% 100%)}
-.fg-variant-16 .fg-preview-photo{clip-path:polygon(0 0,100% 0,100% 100%,9% 100%)}
-.fg-variant-16 .fg-preview-copy strong{font:700 8cqw/1.06 'Futura',Arial,sans-serif}
-.fg-variant-16 .fg-artwork span:first-child{left:8%;top:61%;height:1px;width:25%;background:#7c999c}
+/* 17: diagonal documentary crop with vertical title. */
+.fg-variant-16{background:#f4f0e9}
+.fg-variant-16 .fg-preview-backtype span{top:9%;left:-5%;writing-mode:vertical-rl;
+ transform:rotate(180deg);font-size:20cqw;color:#5f2432}
+.fg-variant-16 .fg-preview-photo{clip-path:polygon(14% 0,100% 0,100% 100%,0 100%)}
+.fg-variant-16 .fg-preview-copy strong{font:800 9cqw/1 'Futura',Arial,sans-serif}
 
-/* 18 / Soft luxury with one balanced statement */
-.fg-preview.fg-variant-17{background:#f3efe8}
-.fg-variant-17 .fg-preview-copy strong{font:italic 400 7.8cqw/1.04 Georgia,serif}
-.fg-variant-17 .fg-preview-photo img{filter:saturate(.66)}
-.fg-variant-17 .fg-artwork span:first-child{width:21%;height:1px;top:10%;left:39.5%;background:#a9aca6}
+/* 18: refined serif editorial with a big photo and short top headline. */
+.fg-variant-17{background:#f3efe8}
+.fg-variant-17 .fg-preview-backtype span{left:2%;top:10%;font:italic 400 30cqw Georgia,serif;
+ color:#b5a9a0;opacity:.6}
+.fg-variant-17 .fg-preview-copy strong{font:italic 9cqw/1 Georgia,serif}
 
-/* 19 / True side-by-side collage, never layered headline across photo */
-.fg-preview.fg-variant-18{background:linear-gradient(90deg,#e1e9e6 0 61%,#faf7f0 61% 100%)}
-.fg-variant-18 .fg-preview-photo{border-radius:0 40% 0 0}
-.fg-variant-18 .fg-preview-copy strong{font:700 6.0cqw/1.05 'Futura',Arial,sans-serif;letter-spacing:-.025em}
-.fg-variant-18 .fg-overline{font-size:1.65cqw;letter-spacing:.05em}
-.fg-variant-18 .fg-preview-copy small{font-size:1.8cqw}
-.fg-variant-18 .fg-artwork span:first-child{left:61%;top:17%;width:1px;height:60%;background:#a9bec1}
+/* 19: art-school cutout, foreground photo hides part of the giant letters. */
+.fg-variant-18{background:#e4dfd8}
+.fg-variant-18 .fg-preview-backtype span{left:-1%;top:37%;font-size:28cqw;color:#6b2332}
+.fg-variant-18 .fg-preview-photo{clip-path:polygon(7% 0,100% 0,100% 100%,0 100%,0 15%)}
+.fg-variant-18 .fg-preview-copy strong{font:900 8cqw/.92 'Arial Black',Arial,sans-serif;
+ letter-spacing:-.055em}
 
-/* 20 / Open-story image and quiet closing typesetting */
-.fg-preview.fg-variant-19{background:#f5f2ec}
-.fg-variant-19 .fg-preview-photo{outline:1px solid #d1d8d1;outline-offset:5px}
-.fg-variant-19 .fg-preview-copy strong{font:400 7.4cqw/1.06 Georgia,serif}
-.fg-variant-19 .fg-artwork span:first-child{top:8%;left:12%;width:18%;height:1px;background:#9aa9a5}
+/* 20: large glossy image with minimal real closing statement. */
+.fg-variant-19{background:#f6f4ed}
+.fg-variant-19 .fg-preview-backtype{z-index:3}
+.fg-variant-19 .fg-preview-backtype span{top:16%;left:-3%;font:900 24cqw/.86 'Arial Black',Arial,sans-serif;
+ color:#ffffffa8}
+.fg-variant-19 .fg-preview-copy strong{font:400 8.8cqw/1.03 Georgia,serif}
 
-.fg-card-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;
- margin:12px 0 1px;padding:0 2px}
+/* Controls belong outside each image, with no overlay on its artwork. */
+.fg-card-foot{display:flex;align-items:center;justify-content:space-between;gap:11px;
+ margin:11px 0 2px;padding:0 2px}
 .fg-card-foot>div{min-width:0;display:flex;flex-direction:column;gap:5px}
-.fg-card-foot small{font-size:10px;letter-spacing:.12em;color:#809393}
-.fg-card-foot strong{font-size:14px;font-weight:750;line-height:1.35;color:#253b41}
-.fg-card-foot span{font-size:11px;color:#7c8e90}
-.fg-use{flex-shrink:0;min-width:56px;min-height:39px;padding:8px 11px;
- border:1px solid #cadbde;border-radius:11px;background:#f3f7f7;color:#2d5660;
- font-weight:750;font-size:12px;cursor:pointer}
-.fg-use:hover{background:#e9f0f0}
+.fg-card-foot small{font-size:10px;letter-spacing:.11em;color:#809194}
+.fg-card-foot strong{font-size:14px;line-height:1.3;color:#283e43;font-weight:750}
+.fg-card-foot span{font-size:11px;color:#7a8d90}
+.fg-use{flex:none;min-width:56px;min-height:40px;padding:8px 11px;background:#f5f8f8;
+ border:1px solid #cddde0;border-radius:10px;color:#335962;font-size:12px;font-weight:750;cursor:pointer}
 .fg-sheet-backdrop{display:none}
-.fg-detail{position:sticky;top:86px;width:min(375px,38%);flex:none;padding:18px;background:#fff;
- border:1px solid #dfe7e4;border-radius:15px;box-shadow:0 12px 30px #273c3c11}
-.fg-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.fg-detail-top button{display:grid;place-items:center;width:36px;height:36px;
- background:#f4f6f4;border:none;border-radius:9px;color:#3f5c65}
-.fg-detail h2{font:400 29px/1.12 Georgia,serif;margin:12px 0 15px}
+.fg-detail{position:sticky;top:85px;flex:none;width:min(360px,38%);padding:17px;
+ background:#fff;border:1px solid #dde6e5;border-radius:14px;box-shadow:0 10px 28px #263e4711}
+.fg-detail-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fg-detail-top button{display:grid;place-items:center;width:36px;height:36px;background:#f3f5f3;
+ border:0;border-radius:8px;color:#536b71}
+.fg-detail h2{font:400 28px/1.12 Georgia,serif;margin:10px 0 13px}
 .fg-detail .fg-preview{max-width:295px;margin:0 auto}
-.fg-detail p{font-size:13px;line-height:1.6;color:#627c7d;margin:15px 0}
-.fg-detail>.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px}
-@media(max-width:1180px){.fg-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fg-detail p{font-size:12px;line-height:1.6;color:#647b81;margin:15px 0}
+.fg-detail>.btn{display:flex;justify-content:center;align-items:center;gap:8px;min-height:44px;width:100%}
+@media(max-width:1200px){.fg-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){
  .fg-layout{display:block}
- .fg-sheet-backdrop{display:block;position:fixed;inset:0;z-index:1000;
-  background:#102025a8;border:0;backdrop-filter:blur(3px)}
- .fg-detail{position:fixed;inset:auto 0 0;z-index:1001;width:100%;max-height:92dvh;
-  border-radius:20px 20px 0 0;overflow:auto;overscroll-behavior:contain;
-  padding:18px max(18px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom))
-   max(18px,env(safe-area-inset-left));box-shadow:0 -10px 40px #0003}
- .fg-detail .fg-preview{width:min(100%,285px);max-width:285px}
+ .fg-sheet-backdrop{display:block;position:fixed;inset:0;z-index:1000;border:0;
+  background:#13272db0;backdrop-filter:blur(3px)}
+ .fg-detail{position:fixed;inset:auto 0 0;z-index:1001;width:100%;max-height:92dvh;overflow-y:auto;
+  overscroll-behavior:contain;border-radius:22px 22px 0 0;
+  padding:19px max(18px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom))
+    max(18px,env(safe-area-inset-left))}
+ .fg-detail .fg-preview{max-width:285px;width:min(100%,285px)}
 }
 @media(max-width:580px){
  .fg-root{padding-bottom:105px}
- .fg-head{display:flex;flex-direction:column;gap:12px}
+ .fg-head{flex-direction:column;gap:12px}
  .fg-head h1{font-size:clamp(29px,8vw,40px)}
  .fg-head p{font-size:13px}
  .fg-head>.btn{align-self:flex-start}
  .fg-note{font-size:11px;padding:11px 13px}
- /* iPhone: one large, readable editorial art direction at a time. */
- .fg-cards{grid-template-columns:minmax(0,1fr);gap:17px;max-width:440px;margin-inline:auto}
- .fg-card{padding:9px;border-radius:12px}
+ .fg-cards{grid-template-columns:minmax(0,1fr);gap:17px;max-width:450px;margin-inline:auto}
+ .fg-card{padding:9px}
  .fg-card-foot{margin:12px 1px 3px}
  .fg-card-foot strong{font-size:15px}
- .fg-card-foot span{font-size:11px}
- .fg-use{min-height:42px;min-width:64px;font-size:13px}
+ .fg-use{min-height:42px;min-width:65px;font-size:13px}
  .fg-detail .fg-preview{max-width:285px}
 }
 @media(prefers-reduced-motion:reduce){.fg-card{transition:none}}
