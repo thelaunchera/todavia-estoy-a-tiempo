@@ -18,7 +18,7 @@ const labels={
  none:'Todavía no hay publicaciones guardadas. Crea una o prepara tu campaña de nueve posts.',
  note:'Planificador privado: el contenido se publica manualmente, no automáticamente.',
  zone:'Las horas se muestran según la zona horaria de este dispositivo.',pick:'Selecciona una publicación',
- picture:'Sin foto final',ready:'Con imagen',stats:'Publicaciones este mes',grid:'Crear 9 posts',
+ picture:'Sin foto final',ready:'Con imagen',stats:'Publicaciones este mes',grid:'Ver mi feed 3×3',
  mark:'Marcar como publicado',unmark:'Marcar como pendiente',hint:'El feed es una vista previa: ordenado de la publicación más reciente a la más antigua.',
  day:'Publicaciones del día',noFeed:'Programa tus primeras publicaciones para visualizar el feed.',next:'Mes siguiente',prev:'Mes anterior'},
  en:{name:'Content calendar',description:'Plan posts by day and time, and preview your Instagram-style feed.',
@@ -28,7 +28,7 @@ const labels={
  none:'No saved content yet. Create a post or start a nine-post campaign.',
  note:'Private planner: content is posted manually, not automatically.',
  zone:'Times use this device’s time zone.',pick:'Choose a post',picture:'No final photo',ready:'With image',
- stats:'Posts this month',grid:'Create 9 posts',mark:'Mark published',unmark:'Mark pending',
+ stats:'Posts this month',grid:'View my 3×3 feed',mark:'Mark published',unmark:'Mark pending',
  hint:'Feed preview shows newest scheduled posts first.',day:'Posts on this date',
  noFeed:'Schedule some posts to preview your feed.',next:'Next month',prev:'Previous month'}
 };
