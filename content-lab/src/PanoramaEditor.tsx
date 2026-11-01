@@ -86,7 +86,6 @@ export default function PanoramaEditor({
       {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-stretch-background" onClick={onExtendBackground}>
         🎀 Estirar fondo entre slides
       </button>}
-      <button type="button" onClick={()=>onAddLayer('text')}><Type size={17}/> Añadir texto</button>
       <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(v=>!v)} aria-expanded={moreTools}>
         {moreTools?'Menos opciones':'Más opciones'}
       </button>
