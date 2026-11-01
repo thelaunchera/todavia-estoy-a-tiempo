@@ -388,3 +388,17 @@
  .panorama-canvas .touch-editor-actionbar button{min-height:40px;width:auto}
  .panorama-canvas .touch-editor-fast-actions{margin:6px 0}
 }
+
+/* Separate page editor shows one full 4:5 tile without seamless cut marks. */
+.touch-editor-normal-pages .panorama-cut-guides>div{border:0!important;box-shadow:none!important;
+ background:transparent!important}
+.touch-editor-normal-pages .panorama-cut-guides span{background:#244554e6;border-radius:6px}
+.touch-editor-normal-pages .touch-editor-scroll{scroll-snap-type:x proximity}
+.touch-editor-normal-pages .touch-editor-stage{border-radius:8px}
+.touch-editor-seamless-pages .panorama-cut-guides>div:not(:first-child){border-left:3px dashed #286e9c}
+@media(max-width:760px){
+ .touch-editor-normal-pages .panorama-guide-legend{color:#466574}
+ .touch-editor-normal-pages .touch-editor-scroll{padding:0}
+ .touch-editor-normal-pages .touch-editor-stage{border-radius:12px}
+ .touch-editor-normal-pages .panorama-cut-guides>div{background:transparent!important}
+}
