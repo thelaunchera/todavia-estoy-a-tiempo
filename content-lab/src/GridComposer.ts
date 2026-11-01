@@ -17,26 +17,28 @@ export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safe
 export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number};
 export type Layout={name:string;image:[number,number,number,number];type:[number,number,number,number];accent:string;shape:string;align?:CanvasTextAlign;dark?:boolean};
 export const LAYOUTS:Layout[]=[
- {name:'Editorial Hero',image:[.06,.06,.88,.59],type:[.065,.70,.87,.19],accent:'rule',shape:'flat'},
- {name:'Bold Typography',image:[.53,.53,.39,.31],type:[.07,.17,.83,.35],accent:'frame',shape:'solid'},
- {name:'Macro Texture',image:[0,0,1,.79],type:[.07,.83,.86,.12],accent:'rule',shape:'bottomPanel'},
- {name:'Lifestyle Scene',image:[.08,.13,.84,.61],type:[.08,.81,.84,.12],accent:'corner',shape:'paper'},
- {name:'Playful Props',image:[.24,.34,.54,.45],type:[.06,.12,.88,.22],accent:'circles',shape:'split'},
- {name:'Hands-on Editorial',image:[.05,.09,.54,.81],type:[.62,.25,.34,.5],accent:'rule',shape:'double'},
- {name:'High Contrast',image:[.33,.33,.65,.65],type:[.06,.08,.82,.25],accent:'bar',shape:'solid',dark:true},
- {name:'Minimal Premium',image:[.25,.39,.5,.47],type:[.13,.14,.74,.22],accent:'none',shape:'paper',align:'center'},
- {name:'Campaign Finale',image:[0,.26,1,.74],type:[.07,.1,.86,.23],accent:'sunburst',shape:'dark',dark:true},
- {name:'Color Block',image:[.48,0,.52,1],type:[.07,.24,.36,.53],accent:'stripe',shape:'split'},
- {name:'Magazine Cover',image:[.06,.18,.88,.7],type:[.06,.05,.86,.21],accent:'masthead',shape:'paper'},
- {name:'Arch Frame',image:[.16,.32,.68,.58],type:[.1,.1,.8,.2],accent:'arch',shape:'paper',align:'center'},
- {name:'Product Spotlight',image:[.19,.34,.63,.53],type:[.1,.10,.8,.20],accent:'spotlight',shape:'dark',dark:true,align:'center'},
- {name:'Floating Product',image:[.3,.23,.56,.49],type:[.07,.72,.86,.2],accent:'orbits',shape:'paper'},
- {name:'Typography Poster',image:[.5,.47,.44,.38],type:[.06,.09,.86,.42],accent:'mega',shape:'solid'},
- {name:'Negative Space',image:[.57,.58,.35,.3],type:[.08,.14,.72,.18],accent:'none',shape:'paper'},
- {name:'Diagonal Composition',image:[.52,.08,.43,.45],type:[.07,.62,.65,.27],accent:'diagonal',shape:'paper'},
- {name:'Soft Luxury',image:[.17,.42,.66,.4],type:[.12,.13,.76,.22],accent:'soft',shape:'paper',align:'center'},
- {name:'Graphic Cutout',image:[.11,.27,.54,.65],type:[.58,.12,.36,.44],accent:'cutout',shape:'split'},
- {name:'Story Card',image:[.12,.17,.76,.52],type:[.12,.74,.76,.14],accent:'pill',shape:'paper',align:'center'}
+ // Non-overlapping editorial art direction. These names are saved in customer projects:
+ // keep names and order stable; do not replace them with generic theme labels.
+ {name:'Editorial Hero',image:[.055,.055,.89,.62],type:[.08,.735,.84,.17],accent:'rule',shape:'flat'},
+ {name:'Bold Typography',image:[.55,.56,.36,.29],type:[.07,.13,.85,.36],accent:'frame',shape:'solid'},
+ {name:'Macro Texture',image:[0,.03,1,.70],type:[.08,.775,.84,.15],accent:'rule',shape:'bottomPanel'},
+ {name:'Lifestyle Scene',image:[.06,.075,.88,.63],type:[.10,.76,.80,.16],accent:'corner',shape:'paper'},
+ {name:'Playful Props',image:[.34,.38,.59,.45],type:[.07,.10,.84,.22],accent:'circles',shape:'split'},
+ {name:'Hands-on Editorial',image:[.05,.09,.54,.78],type:[.635,.20,.325,.49],accent:'rule',shape:'double'},
+ {name:'High Contrast',image:[.23,.39,.71,.47],type:[.065,.11,.85,.22],accent:'bar',shape:'solid',dark:true},
+ {name:'Minimal Premium',image:[.22,.43,.56,.35],type:[.14,.14,.72,.19],accent:'none',shape:'paper',align:'center'},
+ {name:'Campaign Finale',image:[0,.35,1,.58],type:[.075,.10,.85,.19],accent:'sunburst',shape:'dark',dark:true},
+ {name:'Color Block',image:[.51,.06,.43,.86],type:[.065,.25,.38,.43],accent:'stripe',shape:'split'},
+ {name:'Magazine Cover',image:[.08,.32,.84,.57],type:[.08,.095,.84,.175],accent:'masthead',shape:'paper'},
+ {name:'Arch Frame',image:[.17,.40,.66,.46],type:[.13,.135,.74,.18],accent:'arch',shape:'paper',align:'center'},
+ {name:'Product Spotlight',image:[.23,.44,.54,.39],type:[.12,.13,.76,.23],accent:'spotlight',shape:'dark',dark:true,align:'center'},
+ {name:'Floating Product',image:[.285,.20,.59,.48],type:[.08,.74,.84,.16],accent:'orbits',shape:'paper'},
+ {name:'Typography Poster',image:[.60,.60,.31,.23],type:[.07,.095,.84,.39],accent:'mega',shape:'solid'},
+ {name:'Negative Space',image:[.59,.62,.32,.23],type:[.09,.12,.78,.20],accent:'none',shape:'paper'},
+ {name:'Diagonal Composition',image:[.51,.08,.41,.48],type:[.08,.63,.78,.23],accent:'diagonal',shape:'paper'},
+ {name:'Soft Luxury',image:[.17,.43,.66,.37],type:[.14,.13,.72,.20],accent:'soft',shape:'paper',align:'center'},
+ {name:'Graphic Cutout',image:[.07,.27,.52,.57],type:[.64,.27,.30,.44],accent:'cutout',shape:'split'},
+ {name:'Story Card',image:[.11,.13,.78,.56],type:[.12,.745,.76,.16],accent:'pill',shape:'paper',align:'center'}
 ];
 type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions};
 type Brand={name:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string};
