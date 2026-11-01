@@ -7,7 +7,7 @@ const css=readFileSync(new URL('../src/TouchLayerCanvas.css',import.meta.url),'u
 test('Panorama enters slide navigation mode instead of accidentally moving overlapping assets',()=>{
  assert.match(canvas,/useState<'navigate'\|'edit'>\(pageCount>1\?'navigate':'edit'\)/);
  assert.match(canvas,/pageCount>1&&interactionMode==='navigate'\)\|\|layer\.locked\)return;/);
- assert.match(canvas,/interactionMode==='navigate'\|\|\(selected!==''&&!active\)/);
+ assert.match(canvas,/pointerEvents:layer\.locked\|\|pageCount>1&&interactionMode==='navigate'/);
  assert.match(css,/\.touch-editor-navigation-mode \.touch-editor-layer\{/);
  assert.match(css,/pointer-events:none!important/);
 });
