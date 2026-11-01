@@ -131,3 +131,23 @@ test('draft flushes on app backgrounding, brand switch and project switch',()=>{
  assert.ok(grid.includes("flushDraft();\n    const ownChoice=initialSelection?.brandId===brand.id"));
  assert.ok(grid.includes("onClick={()=>{flushDraft();setGrid(g);"));
 });
+
+
+test('phone customer can upload their own photo and background and edit all image text layers by touch',()=>{
+ const grid=src('src/BrandGrid.tsx'),editor=src('src/GridVisualEditor.tsx'),
+  photo=src('src/GridComposer.ts'),editorial=src('src/EditorialPoster.ts'),free=src('src/FreePostStudio.tsx'),
+  touch=src('src/TouchLayerCanvas.tsx'),app=src('src/App.tsx');
+ for(const label of ['Subir mi foto','Subir mi fondo','uploadOwnBackground','backgroundImageId:asset.id',
+  "i===targetIndex",'onChange={layout=>update({layout})}'])assert.ok(grid.includes(label),label);
+ for(const label of ['onPointerDown={pointerDown}','onPointerMove={pointerMove}','onPointerUp={pointerEnd}',
+  "next.frameScale=clamp","next.textScale=clamp","next.subtextScale=clamp",
+  "subtextX:clamp","onClick={()=>setLayer('photo')}","onClick={()=>setLayer('text')}",
+  "onClick={()=>setLayer('subtitle')}","setPointerCapture(e.pointerId)"])
+  assert.ok(editor.includes(label),label);
+ for(const key of ['subtextX','subtextY','subtextScale'])assert.ok(photo.includes(key)&&editorial.includes(key),key);
+ assert.ok(editorial.includes('input.backgroundImageSrc'), 'user-selected background must render behind own photo');
+ assert.ok(editorial.includes('frameWidth=region[2]*frameScale'), 'photo pinch must affect PNG image itself');
+ assert.ok(touch.includes('fontSize=Math.round(Math.max(16'), 'pinch grows actual layer type');
+ assert.ok(free.includes('headlineRect:clampRect(nextRect)'), 'main title size/position save atomically');
+ assert.ok(app.includes('locale={loginLanguage}'), 'editor language follows ES or EN selector');
+});
