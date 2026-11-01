@@ -36,6 +36,9 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
+  // Separate browsing the panorama from handling a selected object.
+  const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
+  const [activePage,setActivePage]=useState(0);
   const [cropping, setCropping] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [snapEnabled,setSnapEnabled]=useState(true);
@@ -60,7 +63,33 @@ export default function TouchLayerCanvas({
     resize();const observer=new ResizeObserver(resize);observer.observe(el);
     return()=>observer.disconnect();
   },[pageCount]);
+  const goToPage=(index:number)=>{
+    if(pageCount<=1)return;
+    const viewport=scrollArea.current,canvas=stage.current;
+    const next=Math.max(0,Math.min(pageCount-1,index));
+    setActivePage(next);
+    if(!viewport||!canvas)return;
+    const width=canvas.getBoundingClientRect().width/pageCount;
+    viewport.scrollTo({left:Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,
+      (next+.5)*width-viewport.clientWidth/2)),behavior:'smooth'});
+  };
+  const syncPageFromScroll=()=>{
+    if(pageCount<=1)return;
+    const viewport=scrollArea.current,canvas=stage.current;
+    if(!viewport||!canvas)return;
+    const width=canvas.getBoundingClientRect().width/pageCount;
+    if(width>0)setActivePage(Math.max(0,Math.min(pageCount-1,
+      Math.floor((viewport.scrollLeft+viewport.clientWidth/2)/width))));
+  };
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
+  const selectFromList=(id:string)=>{
+    setInteractionMode('edit');setSelected(id);setCropping(false);
+    const item=layers.find(layer=>layer.id===id);
+    if(item&&pageCount>1){
+      const center=(getRect(item).x+getRect(item).w/2)*pageCount;
+      goToPage(Math.floor(Math.min(pageCount-.01,Math.max(0,center))));
+    }
+  };
   const update = (id: string, next: TouchRect) => {
     const kind=layers.find(layer=>layer.id===id)?.kind||'sticker';
     const rect = clamp(next,kind);
@@ -98,8 +127,9 @@ export default function TouchLayerCanvas({
     autoPanFrame.current=window.requestAnimationFrame(tick);
   };
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
-    e.preventDefault(); e.stopPropagation();
-    setSelected(layer.id);
+    if(pageCount>1&&interactionMode==='navigate')return;
+    e.preventDefault();e.stopPropagation();
+    if(selected!==layer.id){setSelected(layer.id);return;}
     const bounds = stage.current?.getBoundingClientRect();
     if (!bounds) return;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -132,6 +162,7 @@ export default function TouchLayerCanvas({
     startAutoPan();
   };
   const move = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    if(pageCount>1&&interactionMode==='navigate')return;
     const g = gesture.current;
     if (!g || g.id !== layer.id || !pointers.current.has(e.pointerId)) return;
     e.preventDefault();
@@ -164,6 +195,7 @@ export default function TouchLayerCanvas({
     }
   };
   const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    if(pageCount>1&&interactionMode==='navigate')return;
     if (!pointers.current.has(e.pointerId)) return;
     e.preventDefault(); e.stopPropagation();
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* Already released. */ }
@@ -182,7 +214,7 @@ export default function TouchLayerCanvas({
       onCommit(layer.kind, layer.id, draftRef.current[layer.id]);
     }
   };
-  const chosen = layers.find(layer => layer.id === selected);
+  const chosen = pageCount>1&&interactionMode==='navigate'?undefined:layers.find(layer => layer.id === selected);
   const selectedRect = chosen ? getRect(chosen) : undefined;
   const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
     ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight,
@@ -230,7 +262,8 @@ export default function TouchLayerCanvas({
     onRemove(id);
     if (selected === id) setSelected('');
   };
-  return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')}
+  return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
+    (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
       Grid de {pageCount} slides siempre visible · la división ocurre al descargar
