@@ -248,7 +248,7 @@ const pairs:[string,string][]=[
 pairs.push(
  ["Carousel Factory","Crear carruseles"],
  ["Posts · 4:5","Publicaciones · 4:5"],
- ["Portadas de reels e historias · 9:16","Reel covers and stories · 9:16"],
+ ["Reel covers and stories · 9:16","Portadas de reels e historias · 9:16"],
  ["My feed · 3×3","Mi feed · 3×3"],
  ["Content calendar","Calendario editorial"],
  ["Stickers","Stickers"],
@@ -374,7 +374,7 @@ pairs.push(
  ["When do you want to publish this post?","¿Cuándo quieres publicar este post?"],
  ["View calendar and feed","Ver calendario y feed"],
  ["Back to simple view","← Volver a la vista sencilla"],
- ["Format","Formato final"],
+ ["Final format","Formato final"],
  ["Prepare separate PNGs","Preparar PNG separados"],
  ["Quality check","Control de calidad"],
  ["Review grid","Revisar grid"],
