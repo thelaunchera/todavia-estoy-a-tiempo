@@ -3,7 +3,7 @@ import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2 } from 'lucide-react';
-import { panoramaFont,type PanoramaLayer } from './PanoramaLayers';
+import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
 
@@ -24,6 +24,7 @@ type Props = {
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
   onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
+  textPalette?:string[];
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
@@ -35,6 +36,7 @@ type Gesture = {
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
   onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,
+  textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
@@ -386,6 +388,7 @@ export default function TouchLayerCanvas({
             </div>}
             {layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
+              fontWeight:panoramaTextWeight(layer.fontWeight),
               fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
               lineHeight:layer.lineHeight||1.12,
               letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
@@ -470,14 +473,36 @@ export default function TouchLayerCanvas({
           </div>
         </div>}
       {chosen.kind==='text'&&onUpdate&&<div className="touch-editor-type-settings">
+         <p className="touch-editor-text-guide">✍️ Toca el texto para seleccionarlo; después arrástralo donde quieras.</p>
+         <div className="touch-editor-text-presets">
+           <button type="button" aria-pressed={chosen.font==='poster'&&panoramaTextWeight(chosen.fontWeight)===900}
+             onClick={()=>onUpdate(chosen.id,{font:'poster',fontWeight:900,fontSize:Math.max(96,chosen.fontSize||76),lineHeight:1})}>
+             <strong>POSTER</strong><small>Extra Bold</small>
+           </button>
+           <button type="button" aria-pressed={chosen.font!=='poster'&&panoramaTextWeight(chosen.fontWeight)===700}
+             onClick={()=>onUpdate(chosen.id,{font:'sans',fontWeight:700})}>
+             <strong>Bold</strong><small>Clásica</small>
+           </button>
+         </div>
+         <div className="touch-editor-text-position" role="group" aria-label="Posición del texto en el diseño">
+           <strong>Posición rápida</strong>
+           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.08})}>Arriba</button>
+           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.5-selectedRect!.h/2})}>Centro</button>
+           <button type="button" onClick={()=>commit({x:.5-selectedRect!.w/2,y:.92-selectedRect!.h})}>Abajo</button>
+         </div>
         <label>Texto<textarea rows={2} aria-label="Editar texto libre" value={chosen.text||''}
           onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
         <label>Fuente<select aria-label="Fuente de texto libre" value={chosen.font||'serif'}
           onChange={e=>onUpdate(chosen.id,{font:e.target.value})}>
-          {['serif','sans','prompt','futura','dm serif display','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
-           .map(v=><option key={v} value={v}>{v[0].toUpperCase()+v.slice(1)}</option>)}
+          {['serif','sans','poster','prompt','futura','dm serif display','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
+           .map(v=><option key={v} value={v}>{v==='poster'?'Poster Extra Bold':v[0].toUpperCase()+v.slice(1)}</option>)}
         </select></label>
-        <label>Tamaño <input type="range" min="20" max="240" step="2" value={chosen.fontSize||76}
+        <label>Grosor <select aria-label="Grosor del texto" value={panoramaTextWeight(chosen.fontWeight)}
+           onChange={e=>onUpdate(chosen.id,{fontWeight:Number(e.target.value)})}>
+           <option value={400}>Normal</option><option value={700}>Bold</option>
+           <option value={800}>Muy bold</option><option value={900}>Extra bold</option>
+         </select></label>
+         <label>Tamaño <input type="range" min="20" max="240" step="2" value={chosen.fontSize||76}
           onChange={e=>onUpdate(chosen.id,{fontSize:Number(e.target.value)})}/><span>{chosen.fontSize||76}px</span></label>
         <label>Interlineado <input type="range" min=".7" max="2" step=".05" value={chosen.lineHeight||1.12}
           onChange={e=>onUpdate(chosen.id,{lineHeight:Number(e.target.value)})}/></label>
@@ -485,7 +510,13 @@ export default function TouchLayerCanvas({
           onChange={e=>onUpdate(chosen.id,{spacing:Number(e.target.value)})}/></label>
         <label>Color <input type="color" aria-label="Color de texto libre"
           value={chosen.color||'#191919'} onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
-        <label><input type="checkbox" checked={!!chosen.shadow} onChange={e=>onUpdate(chosen.id,{shadow:e.target.checked})}/> Sombra</label>
+        <div className="touch-editor-text-palette" role="group" aria-label="Colores rápidos de texto">
+           {[...new Set(textPalette.filter(hex=>/^#[0-9a-f]{6}$/i.test(hex)))].map(hex=>
+             <button type="button" key={hex} aria-label={'Color '+hex}
+               aria-pressed={(chosen.color||'#191919').toLowerCase()===hex.toLowerCase()}
+               onClick={()=>onUpdate(chosen.id,{color:hex})} style={{background:hex}}/>)}
+         </div>
+         <label><input type="checkbox" checked={!!chosen.shadow} onChange={e=>onUpdate(chosen.id,{shadow:e.target.checked})}/> Sombra</label>
         <label><input type="checkbox" checked={!!chosen.outline} onChange={e=>onUpdate(chosen.id,{outline:e.target.checked})}/> Contorno</label>
       </div>}
       {chosen.kind==='shape'&&onUpdate&&<div className="touch-editor-type-settings">
