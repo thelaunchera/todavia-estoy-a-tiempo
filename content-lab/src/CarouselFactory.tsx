@@ -1495,6 +1495,21 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
 
+      <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
+<details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
+           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
+             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
+             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
+           </details>
+           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
+             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
+           </select>
+          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
+          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
+
+          </details>
+          
+      </details>
       <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: tipografía <ArrowRight size={16}/></button></div>
     </>}
     {studioTab==='style'&&<>
@@ -1669,18 +1684,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
              <option value={0}>Color maestro · {style.accentSource==='reference'?'referencia':palette[0]}</option>
              {palette.slice(1).map((c,index)=><option key={c} value={index+1}>{index===0?'Secundario':'Extra '+index} · {c}</option>)}
            </select>
-          <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
-           <details className="factory-optional-frames"><summary>Marcos fotográficos opcionales</summary>
-             <p className="factory-frame-explain">Estas fotos son de demostración, no se añaden a tus posts. Los marcos son opcionales y no aparecen hasta que los elijas.</p>
-             <div className="factory-frame-modes" role="group" aria-label="Estilos de marcos">{photoFrames.map((f,n)=><button key={f.id} type="button" aria-pressed={(slide.frameStyle||'none')===f.id} className={(slide.frameStyle||'none')===f.id?'selected':''} onClick={()=>replace({frameStyle:f.id})}><span className={'factory-frame-mini '+f.id}><img loading="lazy" src={sampleHomes[n%sampleHomes.length]} alt="" draggable={false}/></span><small>{f.name}</small></button>)}</div>
-           </details>
-           <label>Encuadre de la fotografía</label><select aria-label="Encuadre de foto" value={slide.photoFocus||'center'} onChange={e=>replace({photoFocus:e.target.value as Slide['photoFocus']})}>
-             <option value="top">Rostro arriba · evitar recortes</option><option value="center">Centro</option><option value="bottom">Parte inferior</option>
-           </select>
-          <div className="factory-labelrow"><label>Real photo / screenshot</label><button className="btn ghost" onClick={uploadImage}><Upload size={16}/> Upload</button></div>
-          <select value={slide.assetId} onChange={e=>replace({assetId:e.target.value})}><option value="">Sin foto · solo gráfico</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-
-          </details>
           <button type="button" className="btn ghost factory-duplicate-slide" onClick={duplicateSlide}
             disabled={slides.length>=MAX_CAROUSEL_SLIDES}><Copy size={15}/> Duplicar este slide</button>
           <div className="factory-pagination"><button className="btn ghost" onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={15}/> Previous</button><button className="btn dark" onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next slide <ArrowRight size={15}/></button></div>
@@ -1723,7 +1726,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
 
       </div>
-            <div className="factory-canvas-exports">
+            {mobileViewport&&<div className="factory-preview-inline">{renderSwipePreview()}</div>}
+      <div className="factory-step-footer">
+        <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a tipografía</button>
+        <button type="button" className="btn dark" onClick={()=>setStudioTab('download')}>Continuar a descargar <ArrowRight size={16}/></button>
+      </div>
+    </section>}
+    {studioTab==='download'&&<section className="factory-download-step">
+      <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
+        <h2>Tu carrusel, listo para publicar.</h2>
+        <p>{slides.length} imágenes PNG individuales, de 1080 × 1350. {style.seamlessEnabled?'El seamless se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+      </div>
+      <div className="factory-canvas-exports">
         <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales de 1080 × 1350. Sin líneas de edición.</span></div>
         <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
@@ -1738,6 +1752,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a textos</button>
         <button type="button" className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
       </div>
+
     </section>}
     {studioTab==='ai'&&<section className="factory-assistant-zone">
       <div className="factory-assistant-head"><span className="eyebrow">HERRAMIENTAS IA</span>
