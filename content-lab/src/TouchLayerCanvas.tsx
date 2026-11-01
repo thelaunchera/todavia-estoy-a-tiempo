@@ -5,6 +5,7 @@ import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoR
 import { Trash2 } from 'lucide-react';
 import { panoramaFont,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
+import type {StickerCopyResult} from './CarouselStickerCopy';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
@@ -22,6 +23,7 @@ type Props = {
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
+  onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
@@ -32,10 +34,11 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
+  const [copyFeedback,setCopyFeedback]=useState('');
   // Separate browsing the panorama from handling a selected object.
   const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
   const [activePage,setActivePage]=useState(0);
@@ -54,7 +57,7 @@ export default function TouchLayerCanvas({
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
     pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
-  useEffect(() => { setCropping(false); }, [selected]);
+  useEffect(() => { setCropping(false);setCopyFeedback(''); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   useEffect(()=>{
@@ -436,6 +439,21 @@ export default function TouchLayerCanvas({
       : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
+      {pageCount>1&&chosen.kind==='sticker'&&onCopySticker&&<div className="touch-editor-copy-sticker">
+        <strong>Copiar este sticker a otro slide</strong>
+        <p>Se mantiene el tamaño, la posición y el giro. El original no se mueve.</p>
+        <div className="touch-editor-copy-destinations" role="group" aria-label="Elegir slide para copiar el sticker">
+          {Array.from({length:pageCount},(_,n)=>n).map(n=><button type="button" key={n}
+            onClick={()=>{
+              const status=onCopySticker(chosen.id,n);
+              setCopyFeedback(status==='copied'?'✓ Copiado al slide '+(n+1)+'.':
+                status==='exists'?'El sticker ya está en el slide '+(n+1)+'.':
+                status==='full'?'El slide está lleno o alcanzaste el límite de capas. No se eliminó nada.':
+                'Selecciona otro slide para copiarlo.');
+            }}>Slide {n+1}</button>)}
+        </div>
+        {copyFeedback&&<small className="touch-editor-copy-feedback" role="status">{copyFeedback}</small>}
+      </div>
       {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
         <div className="touch-editor-corner-controls">
           <label htmlFor="corner-radius-control">Redondear esquinas <output>{selectedCornerRadius}%</output></label>
