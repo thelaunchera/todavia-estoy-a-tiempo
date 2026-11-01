@@ -455,7 +455,7 @@ export default function TouchLayerCanvas({
             }}>Slide {n+1}</button>)}
         </div>
         {copyFeedback&&<small className="touch-editor-copy-feedback" role="status">{copyFeedback}</small>}
-      </div>
+      </div>}
       {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
         <div className="touch-editor-corner-controls">
           <label htmlFor="corner-radius-control">Redondear esquinas <output>{selectedCornerRadius}%</output></label>
