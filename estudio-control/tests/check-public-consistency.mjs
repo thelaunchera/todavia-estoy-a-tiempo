@@ -39,15 +39,15 @@ const centerPages=['terminos.html','privacidad.html','reembolsos.html','cancelac
 for(const p of centerPages){
  const doc=read('centro/'+p);
  assert.ok(center.includes('href="./'+p+'"'),'El Centro enlaza la política comercial '+p);
- assert.ok(doc.includes('mailto:hello@thelaunchera.com'),'El documento tiene contacto verificado '+p);
+ assert.ok(doc.includes('href="../index.html#ayuda"'),'El documento enlaza al formulario oficial de ayuda '+p);
  assert.ok(doc.includes('Última actualización: 31 de octubre de 2026'),'Fecha real de la versión '+p);
- assert.ok(doc.includes('href="./contacto.html"'),'Navegación a soporte del negocio '+p);
+ assert.ok(doc.includes('href="../index.html#ayuda"'),'Navegación al formulario de soporte del negocio '+p);
  assert.ok(!doc.includes('sin reembolsos bajo ninguna circunstancia'),'No renunciar a derechos '+p);
 }
 assert.ok(center.includes('class="product-legal-disclosure"'),'La ficha presenta condiciones antes de salir al checkout');
 assert.ok(center.includes('href="./cancelaciones.html"'),'Cancelar suscripciones es fácil de encontrar');
 assert.ok(center.includes('href="./privacidad.html"'),'Privacidad comercial visible');
-assert.ok(center.includes('hello@thelaunchera.com'),'Contacto comercial real');
+assert.ok(center.includes('href="../index.html#ayuda"'),'El Centro enlaza al contacto comercial por formulario');
 assert.ok(center.includes('data-privacy-settings'),'Controles de privacidad accesibles');
 assert.ok(centerScript.includes('service-checkout/?offer='),'Los checkouts existentes conservan sus rutas');
 assert.ok(centerScript.includes("releases={'web-class':false,'content-lab':false}"),'Clase y Lab siguen cerrados por defecto');
@@ -82,7 +82,7 @@ for(const customerRight of ['procesamiento de pagos','alojamiento','entrega de a
  assert.ok(businessPrivacy.includes(customerRight),'Transparencia de privacidad para '+customerRight);
 }
 assert.ok(read('centro/terminos.html').includes('derechos irrenunciables'),'Respetar derechos aplicables del cliente');
-assert.ok(read('centro/contacto.html').includes('mailto:hello@thelaunchera.com'),'Conservar contacto comercial oficial');
+assert.ok(read('centro/contacto.html').includes('hello@thelaunchera.com') && read('centro/contacto.html').includes('href="../index.html#ayuda"'),'Conservar el contacto oficial y el formulario');
 console.log('QA OK: política pública de mínimos datos sin detalles internos.');
 
 
