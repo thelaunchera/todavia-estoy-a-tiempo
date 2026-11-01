@@ -335,58 +335,85 @@
 .factory-text-overflow button:focus-visible{outline:3px solid #7e9cb0;outline-offset:2px}
 
 
-/* A single, live, cross-step preview; editing controls never scroll it away. */
+/* The preview remains beside the editor on wide screens, never above its work area. */
 .factory-persistent-layout{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(290px,350px);
-  gap:18px;
-  align-items:start;
-  min-width:0;
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,350px);
+ gap:18px;align-items:start;min-width:0
 }
 .factory-persistent-content{min-width:0;grid-column:1;grid-row:1}
-.factory-persistent-preview{grid-column:2;grid-row:1;position:sticky;top:84px;z-index:5;min-width:0;padding:16px}
+.factory-persistent-preview{
+ grid-column:2;grid-row:1;position:sticky;top:84px;
+ z-index:5;min-width:0;padding:16px
+}
 .factory-persistent-preview .factory-section{align-items:flex-start}
 .factory-persistent-preview .factory-instagram-preview{margin:6px 0}
 .factory-persistent-preview .factory-swipe-page{flex-basis:90%}
 .factory-persistent-preview .factory-swipe-thumbnails button{width:36px;flex-basis:36px}
 .factory-persistent-content .factory-work{grid-template-columns:minmax(0,1fr)}
-.factory-live-preview-compact{display:none}
 .factory-persistent-preview .factory-touch-toggle{width:100%;margin-top:9px}
+.factory-mobile-preview-trigger,
+.factory-mobile-preview-backdrop,
+.factory-mobile-preview-close{display:none}
+
 @media(max-width:1180px){
  .factory-persistent-layout{grid-template-columns:minmax(0,1fr) minmax(275px,310px);gap:12px}
  .factory-persistent-preview{padding:12px}
 }
+/* iPhone: only a tiny, always-available preview trigger is sticky. The large
+   design preview opens on demand, so it cannot cover the editor continuously. */
 @media(max-width:920px){
  .factory-persistent-layout{display:block}
- .factory-persistent-preview{
-   position:sticky;top:66px;z-index:7;
-   max-width:none;width:100%;margin:0 0 13px;padding:10px 12px;
-   border:1px solid #d7e4e4;border-radius:12px;
-   box-shadow:0 4px 16px rgba(23,42,50,.08);background:#fff;
- }
- .factory-persistent-preview .factory-section{margin-bottom:8px}
- .factory-live-preview-compact{display:flex;align-items:center;gap:13px;min-height:135px}
- .factory-live-preview-thumb{aspect-ratio:4/5;width:104px;max-height:145px;flex:0 0 auto;overflow:hidden;background:#f1f5f5;border-radius:7px;border:1px solid #dfe8ea;display:grid;place-items:center}
- .factory-live-preview-thumb img{width:100%;height:100%;display:block;object-fit:contain}
- .factory-live-preview-loading{display:grid;place-items:center;text-align:center;gap:5px;padding:8px;font-size:10px;color:#607882}
- .factory-live-preview-controls{min-width:0;flex:1;display:flex;flex-direction:column;gap:7px}
- .factory-live-preview-controls strong{font-size:13px;color:#263e45}
- .factory-live-preview-controls small{font-size:10px;line-height:1.45;color:#698189}
- .factory-live-preview-controls>div{display:flex;gap:10px}
- .factory-live-preview-controls button{width:40px;height:38px;display:grid;place-items:center;border:1px solid #d2e0e3;border-radius:9px;background:#f8faf9;color:#35677a;touch-action:manipulation}
- .factory-live-preview-controls button:disabled{opacity:.35}
- .factory-live-preview-desktop{display:none}
- .factory-persistent-preview .factory-touch-toggle{min-height:35px;margin:7px 0 0;padding:7px 10px;font-size:11px}
- .factory-persistent-preview .touch-editor-stage{max-height:32vh}
  .factory-persistent-content{min-width:0}
  .factory-persistent-content .factory-work{display:block}
+ .factory-mobile-preview-trigger{
+   display:flex;align-items:center;justify-content:center;gap:7px;
+   position:sticky;top:68px;z-index:14;width:max-content;max-width:190px;
+   min-height:45px;margin:8px 0 12px auto;padding:6px 12px;
+   color:#244857;background:#fff;border:1px solid #c9dcdf;
+   box-shadow:0 3px 13px rgba(20,44,51,.12);border-radius:30px;
+   font-size:12px;font-weight:750;touch-action:manipulation;
+ }
+ .factory-mobile-preview-trigger img{
+   display:block;flex:0 0 auto;width:28px;height:35px;object-fit:cover;
+   border-radius:4px;border:1px solid #e3e9e9
+ }
+ .factory-mobile-preview-trigger small{font-weight:650;color:#64818b;font-size:10px}
+ .factory-mobile-preview-trigger:focus-visible,
+ .factory-mobile-preview-close:focus-visible{outline:3px solid #52819c;outline-offset:2px}
+ .factory-mobile-preview-backdrop{
+   display:block;position:fixed;inset:0;z-index:34;
+   border:0;background:rgba(19,32,38,.35);cursor:pointer
+ }
+ .factory-persistent-preview{display:none}
+ .factory-persistent-preview.is-open{
+   display:block;position:fixed;z-index:35;
+   top:auto;left:8px;right:8px;bottom:calc(76px + env(safe-area-inset-bottom,0px));
+   width:auto;max-width:600px;max-height:min(72dvh,690px);
+   margin:0 auto;padding:14px;
+   overflow-y:auto;overscroll-behavior:contain;
+   background:#fff;border:1px solid #d9e4e7;border-radius:19px;
+   box-shadow:0 12px 45px rgba(8,21,31,.22);
+   -webkit-overflow-scrolling:touch
+ }
+ .factory-mobile-preview-close{
+   display:flex;align-items:center;gap:7px;
+   min-height:40px;min-width:0;margin:0 0 11px auto;padding:8px 13px;
+   border:1px solid #cfdfe1;background:#f4f8f8;color:#254a58;
+   border-radius:10px;font-size:12px;font-weight:700;touch-action:manipulation
+ }
+ .factory-persistent-preview .factory-swipe-page{flex-basis:88%}
+ .factory-persistent-preview .factory-swipe-thumbnails button{width:39px;flex-basis:39px}
+ .factory-persistent-preview .factory-touch-toggle{min-height:38px}
+ .factory-persistent-preview .touch-editor-stage{max-height:40vh}
 }
 @media(max-width:380px){
- .factory-live-preview-thumb{width:84px;max-height:112px}
- .factory-live-preview-compact{min-height:112px;gap:10px}
- .factory-persistent-preview{padding:9px 10px}
+ .factory-mobile-preview-trigger{max-width:165px;padding:5px 9px}
+ .factory-persistent-preview.is-open{padding:10px;max-height:69dvh}
 }
-@media(max-height:560px) and (max-width:920px){
- /* When the iPhone keyboard is open, keep form fields accessible. */
- .factory-persistent-preview{position:relative;top:auto}
+/* Don't park even the small preview button over focused fields or the iOS
+   software keyboard. Users can still tap it again after finishing input. */
+@media(max-width:920px){
+ .factory:has(input:focus,textarea:focus,select:focus) .factory-mobile-preview-trigger{
+   position:relative;top:auto
+ }
 }
