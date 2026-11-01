@@ -37,7 +37,7 @@ export const LAYOUTS:Layout[]=[
  {name:'Diagonal Composition',image:[0.43,0.06,0.55,0.69],type:[0.07,0.8,0.85,0.13],accent:'diagonal',shape:'paper'},
  {name:'Soft Luxury',image:[0.15,0.34,0.7,0.598],type:[0.1,0.08,0.8,0.19],accent:'soft',shape:'paper',align:'center'},
  {name:'Graphic Cutout',image:[0.13,0.16,0.82,0.76],type:[0.05,0.05,0.89,0.09],accent:'cutout',shape:'split'},
- {name:'Story Card',image:[0.03,0.06,0.94,0.75],type:[0.08,0.86,0.84,0.09],accent:'pill',shape:'paper',align:'center'},
+ {name:'Story Card',image:[0.03,0.06,0.94,0.75],type:[0.08,0.83,0.84,0.10],accent:'pill',shape:'paper',align:'center'},
 ];
 type Source={format?:string;headline?:string;subtext?:string;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions};
 type Brand={name:string;color:string;background:string;secondaryColor?:string;headingFont?:string;bodyFont?:string;logoAssetId?:string};
