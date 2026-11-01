@@ -29,12 +29,13 @@ test('Style references are sampled locally and never pasted into carousel slides
  assert.ok(ui.includes('referenceAssetId'));
  assert.ok(ui.includes('No se copia la fotografía'));
 });
-test('Portrait and product photo modes stay distinct with credits confirmed',()=>{
+test('Carousel supports optional AI text, but has no in-app AI photo generation',()=>{
  const ui=src('src/CarouselFactory.tsx');
- assert.ok(ui.includes("imageSubjectType==='portrait'"));
- assert.ok(ui.includes("imageSubjectType==='product'"));
- assert.ok(ui.includes("subjectType:imageSubjectType"));
- assert.ok(ui.includes("window.confirm('Esta foto utilizará 1 crédito"));
- assert.ok(ui.includes("photoFocus"));
+ assert.ok(ui.includes("api.post('/api/ideas'"));
+ assert.ok(ui.includes("studioTab==='ai'"));
+ assert.ok(ui.includes('Ideas para tu carrusel'));
+ assert.ok(!ui.includes("api.post('/api/ai-image'"));
+ assert.ok(!ui.includes('Generar foto · 1 crédito IA'));
+ assert.ok(ui.includes('photoFocus'));
  assert.ok(ui.includes('warnings=slides.flatMap'));
 });
