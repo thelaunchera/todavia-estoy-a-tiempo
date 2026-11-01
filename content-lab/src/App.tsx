@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
+import ContentCalendar from './ContentCalendar';
 import PromptStudio from './PromptStudio';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
@@ -54,6 +55,7 @@ import {
   RotateCcw,
   Palette,
   BookOpen,
+  CalendarDays,
 } from 'lucide-react';
 
 type Brand = {
@@ -92,11 +94,13 @@ type Post = {
   template: string;
   assetId: string;
   date: string;
+  time?: string;
+  planningStatus?: string;
   updatedAt?: string;
   designData?: string;
 };
 type Asset = LibraryAsset;
-type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
+type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'calendar' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
 const angles = [
   'Pain point',
   'Educational',
@@ -111,6 +115,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'vertical', title: 'Reels e historias · 9:16', icon: Film },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
   { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
+  { id: 'calendar', title: 'Calendario editorial', icon: CalendarDays },
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
   { id: 'backgrounds', title: 'Fondos', icon: Palette },
   { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
@@ -124,7 +129,7 @@ const navGroups:{title:string;items:Tab[]}[]=[
   {title:'CREAR',items:['home','factory','vertical','create','grid']},
   {title:'TUS RECURSOS',items:['media','backgrounds','stickers','formats']},
   {title:'INSPIRACIÓN',items:['prompt-studio','prompts']},
-  {title:'GUARDAR Y ORGANIZAR',items:['posts','brands']},
+  {title:'GUARDAR Y ORGANIZAR',items:['calendar','posts','brands']},
 ];
 const newPost = (brandId: string): Post => ({
   brandId,
@@ -140,6 +145,8 @@ const newPost = (brandId: string): Post => ({
   template: 'Editorial',
   assetId: '',
   date: '',
+  time: '09:00',
+  planningStatus:'planned',
   designData: '',
 });
 const newBrand = (): Brand => ({
@@ -999,7 +1006,7 @@ function App() {
             <span className="slash">/</span>
             <strong className="lab-current-page">
               <span className="lab-page-long">{t(nav.find(n => n.id === tab)?.title||'')}</span>
-              <span className="lab-page-short">{tab==='posts'?(loginLanguage==='es'?'Mis posts':'Posts'):t(nav.find(n => n.id === tab)?.title||'')}</span>
+              <span className="lab-page-short">{tab==='posts'?(loginLanguage==='es'?'Mis posts':'Posts'):tab==='calendar'?(loginLanguage==='es'?'Calendario':'Calendar'):t(nav.find(n => n.id === tab)?.title||'')}</span>
             </strong>
           </div>
           <div>
@@ -1240,6 +1247,7 @@ function App() {
               onUploadBackground={async file=>upload(file,'background')}
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
+              onOpenCalendar={()=>navigate('calendar')}
               onOpenStickers={()=>navigate('stickers')}
               initialSelection={gridPref}
               isAdmin={Boolean(aiWallet?.admin)}
@@ -1256,6 +1264,14 @@ function App() {
               notify={toast}
               showError={err}
             />
+          )}
+          {brand && tab === 'calendar' && (
+            <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
+              loadImage={id=>{void imageLoad(id)}}
+              onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
+              onNewPost={()=>start()}
+              onOpenGrid={()=>navigate('grid')}
+              notify={toast} showError={err}/>
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
@@ -1446,7 +1462,16 @@ function App() {
                           onChange={e => change('date', e.target.value)}
                         />
                       </div>
+                      <div>
+                        <label>{loginLanguage==='es'?'Hora prevista':'Planned time'}</label>
+                        <input type="time" value={editor.time||'09:00'}
+                          onChange={e=>change('time',e.target.value)}/>
+                      </div>
                     </div>
+                    <p className="note">{loginLanguage==='es'?'La fecha y hora son para organizar tu calendario. No publican automáticamente.':'Date and time organize your calendar; they do not auto-publish.'}</p>
+                    <button type="button" className="btn ghost wide" onClick={()=>navigate('calendar')}>
+                      <CalendarDays size={16}/>{loginLanguage==='es'?'Ver calendario editorial':'View content calendar'}
+                    </button>
                     <button
                       className="btn dark wide"
                       onClick={save}
@@ -1814,7 +1839,7 @@ function App() {
         />
         {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
           {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
-              {id:'vertical',label:'Reels',icon:Film},{id:'stickers',label:'Stickers',icon:ImagePlus},
+              {id:'vertical',label:'Reels',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
               {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
             .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
               className={tab===item.id?'active':''} onClick={()=>item.id==='factory'?startFactory():item.id==='vertical'?startVertical():navigate(item.id)}>
