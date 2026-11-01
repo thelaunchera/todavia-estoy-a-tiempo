@@ -130,7 +130,7 @@ export default function PanoramaEditor({
       {!available.length && <p>Sube tus fotos para empezar.</p>}
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
-      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} ratio={count * 1080 / 1350}
+      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
         focusLayerId={focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}
