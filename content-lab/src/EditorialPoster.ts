@@ -64,7 +64,7 @@ export async function renderEditorial(input:{
  headline:string;subtext:string;brandName:string;design:EditorialDesign;
  brandColor:string;paperColor:string;
  safeTop:number;safeBottom:number;
- move?:{imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number}
+ move?:{imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number;subtextX?:number;subtextY?:number;subtextScale?:number}
 }):Promise<{fit:boolean;contrast:number}>{
  const {canvas,design}=input,ctx=canvas.getContext('2d');
  if(!ctx)throw Error('Canvas no disponible');
@@ -136,6 +136,9 @@ export async function renderEditorial(input:{
  const fontScale=q(Number(input.move?.textScale||1),.55,1.7);
  const ty=(n:number)=>Y(q(n+textDY,topSafe,bottomSafe-.13));
  const tx=(n:number)=>X(q(n+textDX,.025,.85));
+ const subX=(n:number)=>X(q(n+Number(input.move?.subtextX||0),.02,.94));
+ const subY=(n:number)=>Y(q(n+Number(input.move?.subtextY||0),topSafe,bottomSafe-.035));
+ const subScale=q(Number(input.move?.subtextScale||1),.55,1.7);
  const fg=design.textColor&&/^#[a-f0-9]{6}$/i.test(design.textColor)?design.textColor:(fullBleed&&['portrait','typographic'].includes(mode)?'#FFFFFF':ink);
  const label=String(design.kicker||input.brandName||'').trim().slice(0,55).toUpperCase();
  // All preset-specific typography is still editable through explicit user text controls.
@@ -144,7 +147,7 @@ export async function renderEditorial(input:{
   line(ctx,X(.07),Y(topSafe+.035),X(.30),Y(topSafe+.035),accent);
   paragraph(ctx,label,X(.07),Y(topSafe+.049),X(.6),Y(.06),25,sans,fg,'700');
   fit=paragraph(ctx,title,tx(.07),ty(.30),X(.65),Y(.36),108*fontScale,f,fg,'600');
-  paragraph(ctx,sub,X(.07),Y(.79),X(.64),Y(.095),30,sans,fg,'400');
+  paragraph(ctx,sub,subX(.07),subY(.79),X(.64),Y(.095),30*subScale,sans,fg,'400');
  }else if(mode==='annotated'){
   const black=hex(design.textColor,'#241F1A');
   paragraph(ctx,design.handwritten||title,tx(.06),ty(.11),X(.7),Y(.19),120*fontScale,'"Caveat", cursive',black,'400');
@@ -158,12 +161,12 @@ export async function renderEditorial(input:{
    const y=Y(a[1]+.17),x=i%2===0?X(a[0]+a[2]):X(a[0]);
    line(ctx,x,y,x+(i%2===0?45:-45),y-(i<2?45:-35),accent);
   });
-  if(!blocks.length)paragraph(ctx,sub,X(.07),Y(.82),X(.52),Y(.09),30,sans,black,'400');
+  if(!blocks.length)paragraph(ctx,sub,subX(.07),subY(.82),X(.52),Y(.09),30*subScale,sans,black,'400');
  }else if(mode==='magazine'){
   const black='#161616';
   paragraph(ctx,design.handwritten||'ABOUT',X(.06),Y(topSafe+.015),X(.9),Y(.14),114,'"Cormorant Garamond", Georgia, serif',black,'400','center');
   paragraph(ctx,title,tx(.05),ty(.37),X(.33),Y(.35),64*fontScale,f,black,'600');
-  paragraph(ctx,sub,X(.67),Y(.54),X(.27),Y(.24),26,sans,black,'400');
+  paragraph(ctx,sub,subX(.67),subY(.54),X(.27),Y(.24),26*subScale,sans,black,'400');
   line(ctx,X(.045),Y(.32),X(.27),Y(.32),black);
   line(ctx,X(.72),Y(.46),X(.95),Y(.46),black);
   for(const [i,copy] of (design.callouts||[]).slice(0,2).entries())paragraph(ctx,copy,X(i===0?.055:.735),Y(i===0?.75:.78),X(.21),Y(.12),23,sans,black);
@@ -171,12 +174,12 @@ export async function renderEditorial(input:{
   ctx.fillStyle=ink;ctx.fillRect(X(.045),Y(topSafe+.045),X(.32),3);
   paragraph(ctx,label,X(.05),Y(topSafe+.055),X(.30),Y(.12),25,sans,ink,'700');
   fit=paragraph(ctx,title,tx(.05),ty(.28),X(.35),Y(.38),77*fontScale,f,ink,'600');
-  paragraph(ctx,sub,X(.05),Y(.77),X(.34),Y(.13),23,sans,ink);
+  paragraph(ctx,sub,subX(.05),subY(.77),X(.34),Y(.13),23*subScale,sans,ink);
  }else{
   paragraph(ctx,label,X(.06),Y(topSafe+.03),X(.67),Y(.08),25,sans,fg,'700');
   fit=paragraph(ctx,title,tx(.04),ty(.22),X(.8),Y(.39),146*fontScale,f,fg,'600');
   line(ctx,X(.06),Y(.68),X(.60),Y(.68),accent);
-  paragraph(ctx,sub,X(.06),Y(.75),X(.65),Y(.13),30,sans,fg);
+  paragraph(ctx,sub,subX(.06),subY(.75),X(.65),Y(.13),30*subScale,sans,fg);
  }
  // Tiny discrete brand mark; no fabricated product descriptions or claims.
  const footerY=Y(Math.min(bottomSafe-.012,.935));
