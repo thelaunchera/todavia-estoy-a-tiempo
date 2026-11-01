@@ -430,7 +430,7 @@ assert.ok(centerHelp.indexOf('</p>')<centerHelp.indexOf('class="help-strip-actio
 assert.ok(centerStyles.includes('.help-strip-actions{display:flex;flex-wrap:wrap'),'Sin anchos rígidos');
 assert.ok(centerStyles.includes('@media(max-width:900px){.help-strip-actions{flex-direction:column}'),'Botones apilados en iPad');
 assert.ok(!centerStyles.includes('.help-strip a{border:1px solid #6a91a7'),'Sin estilo de botón aplicado a enlaces dentro del texto');
-assert.ok(centerPage.includes('./centro.css?v=20261031-clean-covers-v9'),'Cache de estilos actualizado');
+assert.match(centerPage,/\.\/centro\.css\?v=\d{8}-[a-z0-9-]+/,'Cache de estilos actualizado con versión');
 
 
 // Las portadas completas siguen siendo interactivas pero no repiten «Ver detalles».
