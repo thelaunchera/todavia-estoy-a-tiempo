@@ -1,4 +1,4 @@
-import {demoRebuildPrompts} from './demo-rebuild-prompts';
+import {demoRebuildPrompts} from './demo-rebuild-prompts.ts';
 /** Preparación de pantalla por video. Un único negocio ficticio: brownies tradicionales. */
 export type RecordingStart = {
   tabs:string[]; actions:string[]; savedPoint:string; finish:string; readyPrompt:string;
