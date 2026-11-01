@@ -197,3 +197,17 @@ test('mobile editing has collapsible libraries, draggable text, collage, snappin
  assert.ok(factory.includes('canvasGradient'));
  assert.ok(factory.includes('backgroundColor'));
 });
+
+test('continuous wallpaper keeps cross-slide width, flat edges and role after autosave',()=>{
+  const count=4;
+  const wallpaper={id:'wallpaper-ribbon',assetId:'blush-lace',name:'Fondo continuo',
+    kind:'photo',role:'background',placement:'behind-text',
+    rect:{x:0,y:0,w:2/count,h:1,cornerRadius:0,angle:0}};
+  const stored=encodeCarouselDesign(Array.from({length:count},(_,i)=>({key:'s'+i,title:''})),
+    {seamlessEnabled:true,perSlideBackgrounds:true,panoramaLayers:[wallpaper]});
+  const decoded=readCarouselDesign(stored);
+  assert.equal(decoded.style.panoramaLayers.length,1);
+  assert.equal(decoded.style.panoramaLayers[0].role,'background');
+  assert.deepEqual(decoded.style.panoramaLayers[0].rect,wallpaper.rect);
+  assert.equal(decoded.style.panoramaLayers[0].rect.w*count,2);
+});
