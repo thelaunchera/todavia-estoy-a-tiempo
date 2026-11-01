@@ -227,84 +227,20 @@ main{padding-top:8px}
 #access-placeholder.is-loading{opacity:.65}
 .matcha-access-ready{font-weight:700;color:#34582b;margin:0 0 19px;background:#e9f2e2;border-radius:12px;padding:13px 20px}
 
-/* 01 Nov: airy editorial hero; button NEVER floats over photo or gallery arrows */
-.editorial-hero.hero-with-carousel{position:relative;display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);align-items:center;gap:clamp(22px,4vw,56px);min-height:0;background:#fbf9f4;border:1px solid #ebe6dc;box-shadow:none;border-radius:22px;padding:clamp(24px,4.5vw,59px);overflow:hidden;text-align:left}
-.hero-with-carousel .hero-copy{position:relative;width:100%;max-width:570px;margin:0;z-index:2;align-self:center}
-.hero-with-carousel .hero-eyebrow{justify-content:flex-start;color:#80715e;letter-spacing:1.45px;font-size:10px}
-.hero-with-carousel .hero-dot{background:#aa9b7c}
-.hero-with-carousel h1{font-size:clamp(40px,4.7vw,67px);line-height:1.05;letter-spacing:-.05em;margin:17px 0 19px;max-width:12ch;color:#282a25}
-.hero-with-carousel h1 em{color:#858064}
-.hero-with-carousel .hero-lead{color:#66685f;max-width:45ch;font-size:clamp(13px,1.25vw,15px);line-height:1.63;margin:0 0 24px}
-.hero-with-carousel .hero-lead b{color:#444d3c}
-.hero-with-carousel .hero-start{position:relative;display:inline-flex;justify-content:center;align-items:center;gap:15px;max-width:100%;white-space:normal;background:#30392f;color:#fff!important;border-radius:999px;min-height:52px;padding:13px 24px;font-size:13px;line-height:1.45;box-shadow:none;z-index:2}
-.hero-with-carousel .hero-start:hover{background:#4a5847}
-.hero-with-carousel .hero-carousel{position:relative;inset:auto;width:100%;max-width:100%;min-width:0;margin:0;z-index:1}
-.hero-with-carousel .hero-featured-wrap{position:relative;inset:auto;height:clamp(320px,35vw,425px);width:100%;display:block;border-radius:15px;overflow:hidden;background:#e9e3db}
-.hero-with-carousel .hero-featured-photo{position:relative;inset:auto;display:block;height:100%;width:100%;max-height:none;border-radius:15px;box-shadow:none;filter:none;background:#e9e3db}
-.hero-with-carousel .hero-featured-photo:after{display:none}
-.hero-with-carousel .hero-featured-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 49%;filter:none;transition:opacity .24s ease}
-.hero-with-carousel .hero-photo-marker{display:none}
-.hero-with-carousel .hero-slider-controls{position:relative;inset:auto;pointer-events:auto;z-index:2;display:flex;gap:14px;justify-content:center;align-items:center;max-width:none;margin:14px 0 0}
-.hero-with-carousel .hero-arrow{position:static;flex:0 0 39px;width:39px;height:39px;transform:none;display:grid;place-items:center;border:1px solid #ddd9cc;border-radius:50%;background:#fff;color:#4c5644;font-size:28px;box-shadow:none}
-.hero-with-carousel .hero-thumbnails{display:none}
-.hero-with-carousel .hero-pagination{position:static;transform:none;display:flex;gap:9px;align-items:center;justify-content:center;margin:10px 0 0;min-height:16px}
-.hero-with-carousel .hero-dot-button{display:block;width:8px;height:8px;background:#cecac1;border:0;border-radius:50%;opacity:1}
-.hero-with-carousel .hero-dot-button.is-active{background:#647156;transform:scale(1.1)}
-.hero-with-carousel .hero-carousel-caption{position:static;color:#77776d;font-size:10px;line-height:1.5;text-align:center;margin:5px 0 0}
-.hero-with-carousel .hero-benefits{display:none}
+/* Preserva el hero editorial original y separa controles/CTA en iPhone. */
 @media(max-width:780px){
- .editorial-hero.hero-with-carousel{display:grid;grid-template-columns:1fr;gap:23px;padding:24px 20px 19px;min-height:0;border-radius:20px}
- .hero-with-carousel .hero-copy{width:100%;max-width:none}
- .hero-with-carousel .hero-eyebrow{font-size:9px;letter-spacing:1.1px}
- .hero-with-carousel h1{font-size:clamp(37px,9vw,50px);margin:13px 0 14px;letter-spacing:-.04em;max-width:12ch}
- .hero-with-carousel .hero-lead{font-size:13px;max-width:48ch;line-height:1.58;margin:0 0 18px}
- .hero-with-carousel .hero-start{display:flex;width:100%;max-width:370px;justify-content:center;min-height:51px;min-width:0;padding:13px 18px;font-size:13px}
- .hero-with-carousel .hero-carousel{position:relative;width:100%;margin:0;inset:auto}
- .hero-with-carousel .hero-featured-wrap{position:relative;inset:auto;height:clamp(250px,74vw,360px);border-radius:14px}
- .hero-with-carousel .hero-featured-photo{position:relative;inset:auto;border-radius:14px}
- .hero-with-carousel .hero-featured-photo img{object-position:center 49%}
- .hero-with-carousel .hero-slider-controls{position:relative;inset:auto;gap:16px;margin-top:12px;justify-content:center;pointer-events:auto}
- .hero-with-carousel .hero-arrow{position:static;top:auto;transform:none;width:40px;height:40px;flex-basis:40px}
- .hero-with-carousel .hero-pagination{position:static;inset:auto;transform:none;margin:6px 0}
- .hero-with-carousel .hero-carousel-caption{display:block;margin:4px 0 0;font-size:10px}
+ .editorial-hero.hero-with-carousel{padding-bottom:118px;min-height:clamp(630px,105vw,760px)}
+ .hero-with-carousel .hero-copy{position:relative;z-index:6}
+ .hero-with-carousel .hero-start{position:relative;z-index:7;max-width:100%;white-space:normal}
+ .hero-with-carousel .hero-arrow{top:auto;bottom:48px;transform:none}
+ .hero-with-carousel #hero-prev{left:18px}
+ .hero-with-carousel #hero-next{right:18px}
+ .hero-with-carousel .hero-pagination{bottom:64px}
 }
-@media(max-width:420px){
- .editorial-hero.hero-with-carousel{padding:21px 17px 16px;gap:20px}
- .hero-with-carousel h1{font-size:clamp(34px,9.4vw,43px)}
- .hero-with-carousel .hero-start{font-size:12px;min-height:49px}
- .hero-with-carousel .hero-featured-wrap{height:clamp(236px,72vw,295px)}
-}
-
-/* Mobile QA: freebie CTA and carousel controls occupy separate tap zones. */
-@media(max-width:780px){
-  .editorial-hero.hero-with-carousel{row-gap:30px;overflow:hidden}
-  .hero-with-carousel .hero-copy{margin:0;padding-bottom:8px}
-  .hero-with-carousel .hero-start{
-    position:relative;z-index:3;box-sizing:border-box;
-    width:min(100%,370px);min-height:52px;
-    margin:0;white-space:normal;line-height:1.4;
-  }
-  .hero-with-carousel .hero-carousel{
-    display:block;position:relative!important;inset:auto!important;
-    margin:0;padding-top:8px;isolation:isolate;
-  }
-  .hero-with-carousel .hero-featured-wrap{position:relative!important;inset:auto!important}
-  .hero-with-carousel .hero-slider-controls{
-    display:flex;position:relative!important;inset:auto!important;
-    justify-content:space-between;gap:16px;
-    margin:18px 0 0!important;min-height:46px;
-    pointer-events:auto;
-  }
-  .hero-with-carousel .hero-arrow{
-    position:static!important;transform:none!important;
-    flex:0 0 46px;width:46px;height:46px;min-width:46px;
-    z-index:2;
-  }
-  .hero-with-carousel .hero-pagination{position:relative!important;inset:auto!important;margin:13px 0 0}
-}
-@media(max-width:390px){
-  .hero-with-carousel .hero-start{width:100%;min-height:52px}
-  .hero-with-carousel .hero-slider-controls{margin-top:16px!important}
+@media(max-width:440px){
+ .editorial-hero.hero-with-carousel{min-height:700px;padding-bottom:126px}
+ .hero-with-carousel .hero-arrow{bottom:43px}
+ .hero-with-carousel .hero-pagination{bottom:64px}
 }
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
@@ -312,17 +248,17 @@ main{padding-top:8px}
 <section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
     <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · HERRAMIENTA GRATUITA</span>
-    <h1 id="hero-title">Una foto.<br><em>Ocho ideas</em><br>para tu producto.</h1>
+    <h1 id="hero-title">Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.</h1>
     <p class="hero-lead">¿Tienes una buena foto de tu producto, pero no sabes cómo convertirla en un post? Aquí tienes ocho ideas para empezar. <b>Matcha es solo el ejemplo; la marca es tuya.</b></p>
-    <a href="#recibir" class="hero-start">Recibir los 8 prompts gratis <span aria-hidden="true">→</span></a>
+    <a href="#recibir" class="hero-start">Recibir mis 8 prompts gratis <span aria-hidden="true">→</span></a>
   </div>
   <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
     <div class="hero-featured-wrap">
       <div class="hero-leaf hero-leaf-left" aria-hidden="true"></div>
       <div class="hero-featured-photo">
-        <img id="hero-featured" src="https://images.pexels.com/photos/8004561/pexels-photo-8004561.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1400" alt="Matcha frío sobre mesa blanca en fotografía editorial luminosa" fetchpriority="high" decoding="async">
+        <img id="hero-featured" src="./matcha-05.jpg?v=hd-20261031" alt="Ejemplo editorial de matcha, composición 5 de 8" fetchpriority="high" decoding="async">
       </div>
-      <span class="hero-photo-marker">MATCHA · FOTO DE REFERENCIA</span>
+      <span class="hero-photo-marker">EJEMPLO · MATCHA</span>
     </div>
     <div class="hero-slider-controls">
       <button class="hero-arrow" id="hero-prev" type="button" aria-label="Composición anterior">‹</button>
@@ -331,14 +267,14 @@ main{padding-top:8px}
         <button type="button" class="hero-thumb" data-hero-index="1" aria-label="Ver composición 2 de 8" aria-pressed="false"><img src="./matcha-02.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
         <button type="button" class="hero-thumb" data-hero-index="2" aria-label="Ver composición 3 de 8" aria-pressed="false"><img src="./matcha-03.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
         <button type="button" class="hero-thumb" data-hero-index="3" aria-label="Ver composición 4 de 8" aria-pressed="false"><img src="./matcha-04.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="4" aria-label="Ver composición 5 de 8" aria-pressed="false"><img src="./matcha-05.jpg?v=hd-20261031" alt="" loading="eager" decoding="async"></button>
+        <button type="button" class="hero-thumb is-active" data-hero-index="4" aria-label="Ver composición 5 de 8" aria-pressed="true"><img src="./matcha-05.jpg?v=hd-20261031" alt="" loading="eager" decoding="async"></button>
         <button type="button" class="hero-thumb" data-hero-index="5" aria-label="Ver composición 6 de 8" aria-pressed="false"><img src="./matcha-06.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
         <button type="button" class="hero-thumb" data-hero-index="6" aria-label="Ver composición 7 de 8" aria-pressed="false"><img src="./matcha-07.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
         <button type="button" class="hero-thumb" data-hero-index="7" aria-label="Ver composición 8 de 8" aria-pressed="false"><img src="./matcha-08.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
       </div>
       <button class="hero-arrow" id="hero-next" type="button" aria-label="Siguiente composición">›</button>
     </div>
-    <div class="hero-pagination" aria-label="Posición en el carrusel"><button type="button" class="hero-dot-button" data-hero-dot="0" aria-label="Ir a la foto 1 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="1" aria-label="Ir a la foto 2 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="2" aria-label="Ir a la foto 3 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="3" aria-label="Ir a la foto 4 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="4" aria-label="Ir a la foto 5 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="5" aria-label="Ir a la foto 6 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="6" aria-label="Ir a la foto 7 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="7" aria-label="Ir a la foto 8 de 8" aria-current="false"></button></div>
+    <div class="hero-pagination" aria-label="Posición en el carrusel"><button type="button" class="hero-dot-button" data-hero-dot="0" aria-label="Ir a la foto 1 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="1" aria-label="Ir a la foto 2 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="2" aria-label="Ir a la foto 3 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="3" aria-label="Ir a la foto 4 de 8" aria-current="false"></button><button type="button" class="hero-dot-button is-active" data-hero-dot="4" aria-label="Ir a la foto 5 de 8" aria-current="true"></button><button type="button" class="hero-dot-button" data-hero-dot="5" aria-label="Ir a la foto 6 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="6" aria-label="Ir a la foto 7 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="7" aria-label="Ir a la foto 8 de 8" aria-current="false"></button></div>
     <p class="hero-carousel-caption">Una foto de producto, ocho maneras de presentarla. <b>Prueba las flechas o desliza las imágenes.</b></p>
   </div>
   <div class="hero-benefits" aria-label="Beneficios">
@@ -462,7 +398,7 @@ render();
  const dots=Array.from(document.querySelectorAll('[data-hero-dot]'));
  if(!frame||!container||thumbnails.length!==8)return;
  const sources=thumbnails.map(button=>button.querySelector('img').getAttribute('src'));
- let current=-1,timeout=0;
+ let current=4,timeout=0;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
  let paused=false;
  const paint=index=>{
@@ -477,7 +413,7 @@ render();
    window.clearTimeout(timeout);
    timeout=window.setTimeout(()=>frame.classList.remove('is-changing'),310);
  };
- const next=dir=>paint(current===-1?(dir>0?0:7):current+dir);
+ const next=dir=>paint(current+dir);
  document.getElementById('hero-prev').addEventListener('click',()=>next(-1));
  document.getElementById('hero-next').addEventListener('click',()=>next(1));
  thumbnails.forEach((b,i)=>b.addEventListener('click',()=>paint(i)));
@@ -489,7 +425,7 @@ render();
  container.addEventListener('mouseleave',()=>{paused=false});
  container.addEventListener('focusin',()=>{paused=true});
  container.addEventListener('focusout',e=>{if(!container.contains(e.relatedTarget))paused=false});
- // No autoplay: la portada no cambia sola; los ocho ejemplos se exploran a voluntad.
+ window.setInterval(()=>{if(!reduced.matches&&!paused&&!document.hidden)next(1)},5400);
 })();
 
 /* Solo el formulario envía el correo y consentimiento. La foto no sale del navegador. */
