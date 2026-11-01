@@ -3,7 +3,6 @@
  */
 export type RecoverablePost={
  id?:string;brandId:string;format:string;designData?:string;updatedAt?:string;
- [field:string]:unknown
 };
 export type LocalDraft={savedAt:number;post:RecoverablePost};
 export const draftFingerprint=(post:RecoverablePost)=>{
