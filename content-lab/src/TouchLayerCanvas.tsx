@@ -360,7 +360,7 @@ export default function TouchLayerCanvas({
           const radius=(r:number,w:number,h:number)=>`${100*r/Math.max(1,w)}% / ${100*r/Math.max(1,h)}%`;
           const outerRadius=layerCornerPixels(rect,fw,fh,100*metrics.radius/Math.max(1,Math.min(fw,fh)));
           const innerRadius=rect.cornerRadius===undefined?metrics.innerRadius:Math.max(0,outerRadius-metrics.inset*.38);
-          const photoWindow:React.CSSProperties=layer.kind==='photo'?{
+          const photoWindow:React.CSSProperties=layer.role==='background'?{left:0,right:0,top:0,bottom:0,borderRadius:'0'}:layer.kind==='photo'?{
             left:100*metrics.inset/fw+'%',right:100*metrics.inset/fw+'%',
             top:100*metrics.inset/fh+'%',bottom:100*metrics.bottom/fh+'%',
             borderRadius:radius(innerRadius,fw-2*metrics.inset,fh-metrics.inset-metrics.bottom),
