@@ -120,6 +120,12 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,wide.width,H);
   ctx.restore();
  }
+ // Paint a stretched wallpaper below photos/stickers across every slide.
+ // In the editor the same wallpaper is a draggable photo layer instead.
+ if(!opts.editorMode){
+  const wallpaper=(opts.layers||[]).filter(layer=>layer.role==='background');
+  if(wallpaper.length)await paintPanoramaLayers(ctx,wide.width,H,wallpaper,images);
+ }
  // Legacy decorative waves are hidden for the new clean design studio.
  if(!opts.freeCanvas){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=accent;
  ctx.beginPath();ctx.moveTo(0,H*.67);
@@ -179,8 +185,8 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   ctx.restore();
  }
  if(!opts.editorMode) {
-  const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
-  const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
+  const behind=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+  const front=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text');
   await paintPanoramaLayers(ctx,wide.width,H,behind,images);
   if(behind.length)await paintSeamlessTypography(ctx,
      opts.usePageBackgrounds?pages:pages.map(p=>({...p,backgroundId:opts.backgroundId,backgroundColor:opts.canvasColor})),
