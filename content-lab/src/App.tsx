@@ -5,6 +5,7 @@ import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import ContentCalendar from './ContentCalendar';
 import PromptStudio from './PromptStudio';
+import IdeaBank, {type Idea} from './IdeaBank';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
 import FreePostStudio from './FreePostStudio';
@@ -102,7 +103,7 @@ type Post = {
   designData?: string;
 };
 type Asset = LibraryAsset;
-type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'calendar' | 'prompt-studio' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
+type Tab = 'home' | 'create' | 'vertical' | 'factory' | 'grid' | 'calendar' | 'prompt-studio' | 'idea-bank' | 'prompts' | 'posts' | 'media' | 'formats' | 'brands' | 'stickers' | 'backgrounds';
 const angles = [
   'Pain point',
   'Educational',
@@ -120,6 +121,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'calendar', title: 'Calendario editorial', icon: CalendarDays },
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
   { id: 'backgrounds', title: 'Fondos', icon: Palette },
+  { id: 'idea-bank', title: 'Banco de ideas + IA', icon: Lightbulb },
   { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
   { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
@@ -130,7 +132,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
 const navGroups:{title:string;items:Tab[]}[]=[
   {title:'CREAR',items:['home','factory','vertical','create','grid']},
   {title:'TUS RECURSOS',items:['media','backgrounds','stickers','formats']},
-  {title:'INSPIRACIÓN',items:['prompt-studio','prompts']},
+  {title:'INSPIRACIÓN',items:['idea-bank','prompt-studio','prompts']},
   {title:'GUARDAR Y ORGANIZAR',items:['calendar','posts','brands']},
 ];
 const newPost = (brandId: string): Post => ({
@@ -1140,7 +1142,7 @@ function App() {
             })}
           </div>)}
         </nav>
-        {aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
+        {false && aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
           <strong>{loginLanguage==='es'?'Créditos de IA · Tu saldo':'AI credits · Your balance'}</strong>
           <p>{aiWallet.photo_remaining??60} {loginLanguage==='es'?'fotos':'photos'} · {aiWallet.creative_remaining??30} {loginLanguage==='es'?'créditos creativos':'creative credits'}</p>
           <small>{loginLanguage==='es'?'10 fotos por día y un máximo de 10 créditos de ideas. Editar y descargar tus PNG no consume créditos.':'10 photos per day and up to 10 idea credits. Editing and downloading PNGs does not use credits.'}</small>
@@ -1418,6 +1420,12 @@ function App() {
                 </div>
               )}
             </>
+          )}
+          {brand && tab === 'idea-bank' && (
+            <IdeaBank brandName={brand.name} audience={brand.audience} language={brand.language} onUse={(idea:Idea)=>{
+              start(idea.angle);
+              setEditor(p=>({...p,title:idea.title,hook:idea.hook,slides:idea.brief}));
+            }}/>
           )}
           {brand && tab === 'prompts' && (
             <section className="panel">
