@@ -15,14 +15,14 @@ type Props={
  loadImage:(id:string)=>void;onOpenStickers:()=>void;notify:(message:string)=>void;
 };
 const labels={
- es:{title:'Portadas para Reels e historias',hint:'Un solo formato vertical. Escribe tu hook, sube una foto o un video y haz tu diseño a tu manera.',
- reel:'Reel',story:'Historia',hook:'Tu hook',place:'Escribe aquí el mensaje principal…',
+ es:{title:'Portadas para Reels e historias',hint:'Diseña portadas para reels o historias. No es un editor de video.',
+ reel:'Portada de reel',story:'Historia',hook:'Tu hook',place:'Escribe aquí el mensaje principal…',
  photo:'Subir foto',video:'Subir video',choose:'Selecciona tu estilo',light:'Editorial claro',full:'Foto completa',dark:'Editorial oscuro',
  cover:'Editar portada',saved:'Guardar portada',videoOnly:'Vista de tu video (solo en este dispositivo)',
  videoHelp:'El video es una vista previa local. Puedes usar un fotograma como portada y descargar el diseño PNG; el video original no se guarda ni se modifica.',
  frame:'Usar fotograma como portada',frameBusy:'Preparando fotograma…',edit:'Fotos, textos, stickers y fondos editables.'},
- en:{title:'Reel & Story Covers',hint:'One vertical format. Write your hook, add a photo or video, and edit the design your way.',
- reel:'Reel',story:'Story',hook:'Your hook',place:'Write your main message here…',
+ en:{title:'Reel & Story Covers',hint:'Design reel covers and stories. This is not a video editor.',
+ reel:'Reel cover',story:'Story',hook:'Your hook',place:'Write your main message here…',
  photo:'Upload photo',video:'Upload video',choose:'Choose a style',light:'Light editorial',full:'Full photo',dark:'Dark editorial',
  cover:'Edit cover',saved:'Save cover',videoOnly:'Your video preview (on this device only)',
  videoHelp:'The video is a local preview. You can turn a frame into an editable PNG cover; the original video is not stored or modified.',
