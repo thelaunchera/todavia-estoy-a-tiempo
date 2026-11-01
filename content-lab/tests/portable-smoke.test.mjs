@@ -77,12 +77,15 @@ test('in-app email OTP is present while access remains restricted to authorized 
  assert.ok(app.includes('setAccount(user)'));
  assert.ok(app.includes('if (!user) {'));
 });
-test('eight master prompts remain public as free launch offer, not a fake live checkout',()=>{
+test('eight master prompts remain free and the $10 CTA uses the verified Make/Stripe checkout',()=>{
  const page=source('public/prompts/index.html');
  assert.ok(page.includes('id="copyAll"'));
- assert.ok(page.includes('Próximamente. Todavía no se aceptan pagos'));
+ assert.ok(page.includes('https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'));
+ assert.ok(page.includes('Powered by'));
+ assert.ok(page.includes('privacy.html')&&page.includes('terms.html')&&page.includes('refunds.html'));
+ for(let i=1;i<=8;i++)assert.ok(source('public/prompts/matcha-'+String(i).padStart(2,'0')+'.jpg').length>0);
  assert.ok(page.includes('$10 USD'));
- assert.ok(!page.includes('stripe.com/checkout'));
+ assert.ok(!page.includes('checkout.stripe.com/c/pay'));
 });
 
 test('paid buyer can access only the email-verified owned account and not seeded podcast brands',()=>{
