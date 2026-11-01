@@ -497,7 +497,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       </div>
     </div>}
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>Visualiza <em>tu grid.</em></h1><p>Organiza hasta nueve imágenes hechas fuera del Lab. Mira cómo quedarán juntas en Instagram.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
-    <section className="bg-express" aria-label="Crear nueve publicaciones con una foto">
+    {!initialSelection?.fromCalendar&&<section className="bg-express" aria-label="Preparar campañas antiguas">
       <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
         <h2>Tu feed antes de publicar.</h2>
         <p>Elige un producto y empieza tu cuadrícula. Crea imágenes en ChatGPT con nuestros prompts, súbelas a cada espacio y organiza su publicación.</p></div>
@@ -529,7 +529,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </label>
       </details>
       <p className="bg-express-tip"><Check size={15}/> El Lab no genera imágenes ni edita reels: aquí puedes visualizar tu cuadrícula, subir fotos terminadas y asignar día y hora.</p>
-    </section>
+    </section>}
     <div className="bg-layout"><div className="bg-column">
       {false&&<details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas de propietaria · referencias, IA y dirección artística</summary>
       <div className="bg-advanced-config-content"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
@@ -690,8 +690,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <details className="bg-compact-prompt-details"><summary>Ver instrucciones completas de esta composición</summary>
             <textarea value={currentPrompt} rows={7} readOnly aria-label="Prompt completo para ChatGPT" onFocus={e=>e.currentTarget.select()}/>
           </details>
-          <button type="button" className="bg-compact-advanced-link" onClick={()=>setExpandedEditor(true)}>
-            Abrir editor de diseño avanzado <ArrowRight size={14}/>
+          <button type="button" className="bg-compact-advanced-link" onClick={()=>onOpenPrompts?.()}>
+            Abrir biblioteca de prompts <ArrowRight size={14}/>
           </button>
         </section>
         <p className="bg-compact-save-state">{saveState==='saved'?'✓ Proyecto guardado':saveState==='error'?'Error al guardar; revisa tu conexión.':'Guardando cambios…'}</p>
