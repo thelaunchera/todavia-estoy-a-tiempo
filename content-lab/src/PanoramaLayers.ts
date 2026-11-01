@@ -32,6 +32,7 @@ export type PanoramaLayer = {
   color?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   placement?: LayerPlacement;
+  locked?:boolean;
   rect: TouchRect;
 };
 
@@ -63,6 +64,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
+      locked:item.locked===true,
       rect: clampPanoramaRect(item.rect),
     }];
   });
