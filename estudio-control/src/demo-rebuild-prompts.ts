@@ -7,22 +7,22 @@ export const demoRebuildPrompts: Record<'casa-brownie'|'crumb', DemoRebuildPromp
       "title": "00 · Inicio desde la página vacía",
       "step": "Preparación",
       "prompt": "En AppDeploy crea un proyecto NUEVO y VACÍO llamado «Casa Brownie · Taller desde cero». ESTA PRIMERA INSTRUCCIÓN CONSTRUYE ÚNICAMENTE EL ESQUELETO, NO LA WEB FINAL. Configura una web de demostración en español, responsive y sin base de datos, con fondo marfil #f7f0e8, cacao #422419, acento rosa cacao, titulares serif editorial y cuerpo DM Sans. Prepara estructura semántica para header, hero con imagen fija, banner, catálogo, regalos, historia, entrega ilustrativa Miami, CTA de prueba y footer, pero por ahora renderiza SOLO el aviso visible «DEMO EDUCATIVA · SIN PEDIDOS NI PAGOS REALES», la marca textual provisional «Casa Brownie» y marcadores discretos de secciones vacías con sus IDs. NO diseñes ni llenes las secciones siguientes, NO pongas fotografías, vídeo, precios, testimonios, formularios, pedidos, carrito funcional o pagos. No edites ni importes el demo oficial; https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video es exclusivamente REFERENCIA para la comparación final. Devuélveme la vista previa de esta estructura básica y espera el siguiente prompt antes de continuar.",
-      "say": "Empezamos por lo que piensa el visitante cuando tiene una visita y no sabe qué llevar. Esa pregunta abre la página; los brownies y el packaging son la respuesta. Es un ejemplo ficticio y vamos a construirlo sin copiar a otra marca.",
-      "show": "Abrir la práctica vacía, mostrar el hero final con el problema real y explicar el recorrido dolor → sabores → regalo → simulación."
+      "say": "Mira, antes de poner fotos bonitas, vamos a crear el espacio donde va a vivir la web. Abro AppDeploy en el proyecto nuevo y pego este primer prompt. Ojo: todavía NO le estamos pidiendo que haga la tienda completa; solo quiero ver el aviso de demostración, el nombre y los espacios vacíos. Así podrás reconocer cada paso de la construcción. Cuando aparezca la vista previa, la guardamos y recién ahí seguimos.",
+      "show": "Abrir AppDeploy en el proyecto nuevo y casi vacío, pegar SOLO el prompt 00, enseñar el aviso DEMO y los marcadores sin fotografías ni catálogo; guardar captura antes de continuar."
     },
     {
       "title": "01 · Identidad y menú",
       "step": "Header",
       "prompt": "Construye solo el header de la app de práctica Casa Brownie. Logo original casita con corazón; nombre Casa Brownie, lema PEQUEÑOS PLACERES · GRANDES MOMENTOS. Aviso DEMO EDUCATIVA · SIN PEDIDOS NI PAGOS REALES. Menú exacto Inicio / Sabores / Nuestra historia / Entrega en Miami, búsqueda de sabores y carrito de demostración temporal con contador. Marfil/cacao, estilo editorial, móvil accesible. No cambies el resto ni la web oficial.",
-      "say": "La identidad viene antes de las fotografías. Le digo cómo quiero el nombre, el símbolo de la casita y el corazón, la paleta y dónde usaremos ese logo. Si no definimos una marca primero, ChatGPT puede cambiarla de una sección a otra.",
-      "show": "Mostrar la marca en la web de referencia y copiar el comando del encabezado."
+      "say": "Ahora sí vamos con la identidad. Fíjate en el nombre Casa Brownie y en el símbolo de la casita con corazón que ya definimos. Pego el siguiente prompt para crear el menú y el encabezado, pero le aclaro que no toque las partes que siguen vacías. Cuando termine, compruebo que Inicio, Sabores, Historia y Entrega tienen su lugar. El truco no es pedirle más cosas, sino pedirle una sola cosa bien.",
+      "show": "Pegar prompt 01 en AppDeploy. Comparar únicamente marca y menú con la referencia estática; abrir el menú móvil y guardar la segunda captura."
     },
     {
       "title": "02 · Hero estático exacto",
       "step": "Portada sin video",
       "prompt": "En la app de práctica monta SOLO el hero sin video. Foto ORIGINAL APROBADA https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp (si ya existe no regeneres). Referencia https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video. Texto EXACTO: eyebrow «PARA CUANDO NO SABES QUÉ LLEVAR», titular de dos líneas «¿Qué llevo de regalo?», párrafo «Quieres llegar con algo que se sienta pensado, no con lo primero que encontraste. Imagina una caja de brownies para compartir, con seis sabores entre los que elegir.» y CTA «Descubrir sabores» enlazado a #brownies. Sigue la secuencia problema cotidiano → producto visible → prueba → invitación; aprende el mecanismo de una referencia comercial sin copiar sus frases o diseño. No inventes testimonios, negocio real, precios, pagos ni entregas. No toques la web oficial. Mantén fotografía protagonista, serif elegante y buena legibilidad móvil/tablet sin grandes espacios vacíos. No agregues video, textos dentro de fotos ni nuevas secciones.",
-      "say": "Antes se describía el producto con «Brownies hechos en casa». Ahora vamos a abrir con una duda cotidiana: «¿Qué llevo de regalo?». El subtítulo responde con una caja de brownies, y el botón lleva a ver los sabores.",
-      "show": "Mostrar la imagen aprobada y el hero de la referencia estática en tablet y teléfono; comprobar texto, foto y CTA.",
+      "say": "Llegó el momento de la portada. Piensa en la persona que llega de visita y se pregunta '¿Qué llevo de regalo?'. Esa va a ser nuestra primera frase, no un título genérico. Vamos a colocar la foto de brownies que ya aprobamos y el botón 'Descubrir sabores'. El video todavía no entra aquí. Reviso en el teléfono que se vea la foto, se lea el título y el botón vaya a la sección correcta.",
+      "show": "Pegar prompt 02, colocar la foto original aprobada y mostrar el hero ESTÁTICO en móvil y escritorio junto a la referencia; probar el enlace #brownies.",
       "photoCommands": [
         {
           "title": "Hero estático · 1 foto",
@@ -34,8 +34,8 @@ export const demoRebuildPrompts: Record<'casa-brownie'|'crumb', DemoRebuildPromp
       "title": "03 · Fotografías de los seis sabores",
       "step": "Fotografía",
       "prompt": "GENERACIÓN DE FOTOGRAFÍAS — NO construyas todavía el catálogo. Para conseguir las 6 fotos de Casa Brownie, NO te pediré «haz seis fotos» en una única solicitud. Voy a enviar los SEIS COMANDOS INDIVIDUALES que aparecen debajo, uno por uno. Para cada comando: genera UNA SOLA foto en un archivo independiente, espera que yo la apruebe y usa la misma dirección de arte en todas. NO hagas collage, grid, moodboard, web ni mezclas de sabores. Después de aprobar los seis archivos, los adjuntaré a AppDeploy y usaré el prompt separado «Banner y catálogo» para construir la sección. Si ya tengo las seis imágenes oficiales, reutilízalas sin regenerarlas.",
-      "say": "Para los sabores no voy a pedir seis imágenes en una sola respuesta. Voy a pedir una foto por sabor, revisar que realmente parezca ese brownie y pasar a la siguiente. Así todas mantienen un estilo parecido y ninguna termina siendo un collage que después no podemos usar.",
-      "show": "Mostrar la lista de seis comandos individuales y copiar el primero. Explicar que se aprueba cada foto antes de continuar.",
+      "say": "Para construir un catálogo bonito, necesitamos fotos separadas. Vamos a crear o reutilizar seis archivos: uno por sabor, cada uno con su textura reconocible. No pido seis fotos juntas porque eso nos daría un collage difícil de usar. Abro el primer prompt de fotografía, reviso el resultado y guardo el archivo. Repetimos lo mismo con los otros sabores y no entramos a AppDeploy con el catálogo hasta tener las seis fotos listas.",
+      "show": "En la pestaña «Crear cada foto», mostrar los seis comandos individuales y los seis archivos aprobados. Este paso prepara imágenes; NO construye todavía el catálogo en AppDeploy.",
       "photoCommands": [
         {
           "title": "Foto 1/6 · Clásico",
@@ -67,15 +67,15 @@ export const demoRebuildPrompts: Record<'casa-brownie'|'crumb', DemoRebuildPromp
       "title": "04 · Banner y catálogo",
       "step": "Seis brownies",
       "prompt": "En Casa Brownie práctica, debajo del hero añade el banner continuo con HECHOS PARA COMPARTIR / UN DETALLE PARA ALGUIEN ESPECIAL / PEQUEÑOS PLACERES, GRANDES MOMENTOS / MIAMI · DEMO EDUCATIVA. Después: título «Un sabor para cada ocasión», subtítulo «SEIS SABORES, UNA DECISIÓN MÁS FÁCIL», guía «¿Clásico o algo diferente? Toca un sabor para conocerlo mejor.» y botón «Elegir mi favorito». Usa las seis fotos APROBADAS, diferentes, y los nombres Clásico, Chocolate con nuez, Dulce de leche, Frambuesa, Oreo, Edición especial. Mostrar tres columnas en desktop/tablet y dos en teléfono; nunca seis en una sola fila comprimida. Cada foto abre ficha modal y carrito ficticio sin checkout. Las seis elecciones son la respuesta al dilema de regalo planteado en el hero.",
-      "say": "Ahora le damos opciones a quien no sabe qué regalar. Los seis sabores y sus fotos hacen que la persona pueda imaginar el detalle sin leer tanto.",
-      "show": "Ir del botón del hero al catálogo, abrir una ficha y confirmar que la bolsa es una simulación."
+      "say": "Ya tenemos las seis fotos, ahora las vamos a enseñar bien. Debajo del hero creamos la banda editorial y la sección 'Un sabor para cada ocasión'. Fíjate cómo cada brownie tiene su propia tarjeta: nombre, fotografía y una forma de verlo mejor. Después toco el botón del hero para comprobar que baja a esta sección. No quiero que invente precios ni compras reales. Primero vemos el resultado y, si está bien, lo guardamos.",
+      "show": "Aplicar prompt 04 en AppDeploy; comprobar la banda, las seis tarjetas con fotos distintas y el enlace «Descubrir sabores». Guardar captura antes del paso 05."
     },
     {
       "title": "05 · Regalos editoriales y banner doble",
       "step": "Regalos",
       "prompt": "Construye SOLO «Una forma bonita de decir pensé en ti.» con texto EXACTO «No quieres llegar con las manos vacías, pero tampoco llevar cualquier cosa. Una caja bonita, brownies para compartir y un gesto que dice mucho sin explicarlo.» y CTA «Conoce la idea». Usa exclusivamente fotos aprobadas separadas: https://thelaunchera.com/demos/casa-brownie/assets/regalo-lazo-rosa.webp y https://thelaunchera.com/demos/casa-brownie/assets/regalos-bolsa-y-cajas.webp. En desktop foto / texto / foto; tablet fotos protagonistas sin huecos, móvil fotos y textos bien centrados. Conserva banda animada de DOS filas, movimientos contrarios y reducción de movimiento. No collages, imágenes duplicadas ni nuevos claims. Esta sección responde al dolor de querer llegar con un regalo presentable.",
-      "say": "Aquí el empaque y las fotos son la solución visual. No vendemos solo chocolate: mostramos una forma de llegar con un detalle bonito, aunque sea una demo.",
-      "show": "Mostrar las dos fotografías reales aprobadas y el texto entre ambas, luego el banner.",
+      "say": "Ahora quiero mostrar algo más que los brownies. Si la persona está buscando un regalo, la caja también forma parte de la decisión. Por eso vamos a colocar las dos fotos aprobadas de los empaques y este mensaje: 'Una forma bonita de decir pensé en ti'. Voy a pegar el prompt de regalos, revisar que no cambie las tarjetas de sabores y ajustar los espacios si hace falta. Mira cómo la página ya empieza a contar una historia.",
+      "show": "Aplicar prompt 05, verificar las dos fotografías de regalos separadas, el texto editorial y la banda. Comparar con referencia estática sin alterar catálogo ni hero.",
       "photoCommands": [
         {
           "title": "Regalos 1/2 · Caja con lazo rosa",
@@ -91,43 +91,43 @@ export const demoRebuildPrompts: Record<'casa-brownie'|'crumb', DemoRebuildPromp
       "title": "06 · Historia y Miami ficticio",
       "step": "Sobre la tienda",
       "prompt": "Añade SOLO la sección Nuestra historia después de regalos: título «A veces, un brownie dice todo.». Primer párrafo «Imagina llegar con una cajita de chocolate a casa de alguien. No hace falta una ocasión especial: solo las ganas de compartir un ratito.» Segundo párrafo «Así nació la idea de Casa Brownie: brownies para regalar, llevar a una visita o disfrutar sin prisa. Una marca de barrio imaginada en Miami, con pequeños gestos como protagonistas.» Mantén «Un detalle pequeño. Un momento grande.», foto de referencia y botón «Conoce la idea». Dirección ficticia «123 Calle del Cacao · Miami, FL», claramente inventada y no visitable. Nunca inventar que existe una tienda real ni reseñas.",
-      "say": "La historia está al servicio de ese gesto de regalar, no de una biografía falsa. Muestra el concepto y avisa que la tienda no existe.",
-      "show": "Mostrar la sección y el rótulo de dirección ficticia; revisar móvil."
+      "say": "Aquí no vamos a inventar la biografía de una empresa que no existe. La historia de Casa Brownie es la idea de llevar un detalle a alguien. Vamos a escribirla de forma sencilla y después mostraremos Miami como un ejemplo, nunca como una cobertura real. Pego el prompt, leo el texto en voz alta y reviso que el aviso de demo siga claro. Si alguien lee la página, debe entender que está viendo un proyecto de clase.",
+      "show": "Aplicar prompt 06. Leer y revisar la historia y la ubicación ilustrativa Miami; verificar texto y disposición en móvil sin afirmar operaciones reales."
     },
     {
       "title": "07 · Entrega local y modales",
       "step": "Entrega ficticia",
       "prompt": "Construye SOLO la sección entrega de Casa Brownie. Bloque claro «De nuestra idea a tu puerta.» con pasos EXACTOS «Elige tu sabor», «Hazlo tuyo», «Visualiza el detalle» y CTA «Crear mi pedido de prueba», que abre solo simulación. Bloque chocolate con foto APROBADA https://thelaunchera.com/demos/casa-brownie/assets/casabrownie-local-pickup.svg y eyebrow «ENTREGA LOCAL · MIAMI · DEMO», título «Un detalle que llega bonito.», párrafo «Ya elegiste el detalle. ¿Cómo llegaría? Este ejemplo muestra cómo se explicaría la entrega local en Miami. No hay zonas, tarifas ni fechas confirmadas.», botón «Cómo sería la entrega» abre modal informativo. Disclaimer «Demostración educativa. No hay repartos ni tienda física.». En tablet FOTO grande a IZQUIERDA y texto a DERECHA, evitando el hueco marrón. En móvil foto arriba y texto centrado. Desktop con fotografía y texto equilibrados. Sin cobros, datos reales, direcciones, tarifas ni horarios inventados.",
-      "say": "La entrega viene después de escoger el regalo. Enseño cómo organizar una experiencia clara, pero no finjo tener repartidores, precios o fechas confirmadas.",
-      "show": "Comparar el panel actualizado en tablet y móvil; comprobar ambos botones y el aviso de demo."
+      "say": "Cuando una persona explora una web, necesita saber qué pasaría después. Aquí vamos a mostrar tres pasos para visualizar un pedido de ejemplo, pero sin recibir pedidos de verdad. Mira la diferencia entre una simulación y una tienda real: podemos tocar los botones y entender el recorrido, pero nunca pedimos una tarjeta ni una dirección. Pego el prompt y reviso esta sección primero en tablet y después en el teléfono.",
+      "show": "Aplicar prompt 07. Comprobar fotografía, disposición tablet/móvil, CTA informativo y avisos de entrega ficticia, sin formularios ni cobro."
     },
     {
       "title": "08 · Carrito de muestra y experiencia",
       "step": "Interacciones simuladas",
       "prompt": "En Casa Brownie implementa únicamente interacciones de muestra: buscar sabor, abrir ficha de cada brownie, seleccionar sabor, agregar/quitar unidades en carrito temporal, abrir/cerrar modales con Escape y gestión de foco, mostrar información de entrega y permitir simular contacto SIN transmisión, correo ni guardado. El CTA final ¿Ya tienes un favorito? Haz la prueba. inicia la experiencia informativa. Aviso permanente DEMO EDUCATIVA · SIN PEDIDOS NI PAGOS REALES. No Stripe, ni Make, ni datos persistentes, ni checkout. Mantener la estructura y las fotografías ya aprobadas de https://thelaunchera.com/demos/casa-brownie/.",
-      "say": "Aquí ya no basta con describir colores: tengo que darle instrucciones sobre cada interacción. Le digo cómo abrir la ficha, agregar o quitar cantidades y cerrar las ventanas. También aclaro que no hay pagos ni datos reales.",
-      "show": "Hacer una prueba visual con la bolsa ficticia, los botones y el cierre con Escape."
+      "say": "Ahora vamos a hacer que los botones respondan. Fíjate cómo toco un sabor, abro su ficha, añado una unidad a la bolsa de muestra y después la quito. Esto no cobra nada ni guarda datos de nadie. Si algo no abre o no se cierra, no sirve aunque esté precioso. En el prompt le indico exactamente cada acción y después la pruebo una por una. Así sabes diferenciar una página que se ve bonita de una que funciona.",
+      "show": "Aplicar prompt 08; abrir ficha, sumar/restar en carrito temporal, cerrar modal y probar Escape y foco con teclado. Confirmar aviso DEMO y ausencia de datos reales."
     },
     {
       "title": "09 · Footer y créditos",
       "step": "Pie de página",
       "prompt": "Replica en el proyecto de práctica el footer de Casa Brownie: marca y enlaces internos, contacto simulado, redes sociales de vista previa que NO llevan a perfiles reales, avisos legales adecuados para una demo, dirección ficticia claramente marcada y enlace Powered by The Launch Era a https://thelaunchera.com/ centrado y discreto al final. Nada de textos legales inventados que aseguren cumplimiento; ninguna compra ni mensaje enviados. Comprueba cierre de modales, navegación y legibilidad del footer a 390px, 820px, 1024px y 1440px.",
-      "say": "Un footer bien hecho también se pide con detalle. Le diré qué enlaces lleva, qué aviso debe tener y dónde aparece Powered by The Launch Era. Nada de políticas genéricas copiadas ni promesas de cumplimiento legal.",
-      "show": "Desplazarse hasta el footer del demo aprobado y señalar el aviso y el crédito."
+      "say": "Ya casi terminamos. Vamos a bajar al pie de página: aquí debe quedar claro quién presenta el ejemplo y cómo funcionan los enlaces. Voy a usar el logo, navegación interna y un aviso de que no hay compras reales. No copiamos políticas de otro negocio ni inventamos un domicilio real. Pego el prompt, pruebo cada enlace y compruebo que el crédito de The Launch Era quede discreto y bien colocado.",
+      "show": "Aplicar prompt 09, navegar hasta el footer en móvil, probar enlaces internos y comprobar aviso educativo, crédito y contacto simulado."
     },
     {
       "title": "10 · Revisión con captura",
       "step": "QA sin rehacer",
       "prompt": "Compara visualmente mi proyecto NUEVO de AppDeploy con la referencia FINAL CON FOTO ESTÁTICA https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video. Usa capturas REALES lado a lado en anchos 390px, 820px, 1024px y 1440px. Revisa y corrige por orden: 1) distribución, proporciones y posición de header y hero; 2) foto fija correcta y tipografía, jerarquía, colores y espaciados; 3) banner, los seis sabores y sus seis archivos individuales; 4) fotografías de regalos, cajas y lazos; 5) historia y sección «Un detalle que llega bonito.» (en tablet imagen a la izquierda, texto a la derecha; en móvil imagen arriba y texto centrado); 6) CTA, navegación, ficha de producto, carrito SIMULADO, foco, modal, aviso DEMO y footer. El objetivo es que se vea lo más fiel posible a la versión estática aprobada, no una plantilla interpretada libremente. Si la herramienta no puede ver la URL, pide capturas de la referencia y compara usando esas capturas; no afirmes una coincidencia visual no comprobada. Devuelve lista concreta de diferencias y corrige SOLO las comprobadas en la práctica, sin reescribir secciones aprobadas ni modificar la web oficial. No añadas video, backend, pedidos o pagos reales.",
-      "say": "La última pasada no es pedir un rediseño: comparo capturas, mensajes, fotos y clicks y corrijo solo las diferencias reales.",
-      "show": "Comparar 390px, 820px y 1440px, incluida la sección de entrega y el carrito ficticio."
+      "say": "Llegó nuestra última revisión. Abro dos pestañas: la web que construimos en AppDeploy y Casa Brownie terminada con foto estática. Vamos a comparar por partes, no solo decir 'se parecen'. Primero portada, después seis sabores, regalos, historia, Miami, botones y pie. Si el título cambia de tamaño o una foto aparece cortada, lo anoto y pido corregir solamente eso. No quiero que una corrección me cambie todo lo que ya aprobamos.",
+      "show": "Tomar y comparar capturas REALES en móvil, tablet y escritorio de AppDeploy vs. ?etapa=sin-video; registrar diferencias verificables, corregir solo la práctica y probar navegación."
     },
     {
       "title": "11 · Bono opcional: video en hero",
       "step": "Después del curso",
       "prompt": "BONO, NO para la primera demostración. Parte de la misma versión aprobada CON FOTO ESTÁTICA y agrega solo un hero de video silencioso: video https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.mp4 con poster https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp; autoplay muted loop playsinline y respaldo estático en caso de error, reducción de movimiento o ahorro de datos. Mantén exactamente la composición, textos, botones, sabores y todas las demás secciones. El resultado de referencia con video es https://thelaunchera.com/demos/casa-brownie/ y sin video es https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video. El clip ya aprobado no necesita regenerarse; verifica derechos antes de reutilización pública. No cambies nada del sitio oficial.",
-      "say": "Este es un bono, no forma parte del primer resultado. Primero les mostré la web con foto quieta; ahora enseño cómo se podría añadir el video sin perder la foto de respaldo. Si el movimiento no queda natural, no hay que fingir que es perfecto.",
-      "show": "Mostrar primero el hero estático y después la versión final con video; no regenerar el clip durante esta explicación."
+      "say": "Y ahora sí, te muestro el extra. La web principal ya la construimos con una foto quieta y así funciona perfectamente. Si quieres dar un paso más, puedes poner un video corto en esa misma zona sin cambiar el resto de la página. Voy a enseñarte el antes y el después, siempre con una foto de respaldo por si el video no carga. Esto es un bono: no necesitas hacerlo para terminar tu primera web.",
+      "show": "Abrir primero la versión con foto fija y después el demo con video, únicamente en el bono. Explicar imagen de respaldo y no regenerar el clip."
     }
   ],
   "crumb": [
