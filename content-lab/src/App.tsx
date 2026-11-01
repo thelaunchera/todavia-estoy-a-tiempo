@@ -791,7 +791,7 @@ function App() {
     }catch(e){err(e);return null}
     finally{setBusy('')}
   };
-  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true): Promise<Asset | null> => {
+  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true, targetBrandId=brand.id): Promise<Asset | null> => {
     if (!file) return null;
     // The administrator's background/sticker uploads are intentionally shared.
     // Every buyer upload still goes to owner-only RLS tables and private Storage.
@@ -816,7 +816,7 @@ function App() {
       }
       let prepared;
       try {
-        const preserveOriginal=category==='original'||category==='generated'||category==='reference';
+        const preserveOriginal=category==='original'||category==='generated'||category==='reference'||category==='logo';
         const keepMime=['image/png','image/jpeg','image/webp'].includes(input.type)?input.type:'image/jpeg';
         prepared = await image.resizeIfNeeded(input, {
           maxDimension:preserveOriginal?3000:2160,
@@ -832,7 +832,7 @@ function App() {
         throw new Error('No se pudo reducir suficientemente la foto. Intenta con otra.');
       }
       const { data } = await api.post('/api/assets', {
-        brandId: brand.id,
+        brandId: targetBrandId,
         name: file.name.replace(/\.(heic|heif)$/i,'.jpg'),
         category,displayName:file.name.replace(/\.(heic|heif|jpe?g|png|webp)$/i,'').replace(/[_-]+/g,' ').slice(0,85),
         mime: prepared.mimeType,
@@ -851,6 +851,24 @@ function App() {
       setBusy('');
       if (uploadRef.current) uploadRef.current.value = '';
     }
+  };
+  const uploadBrandImage = async (file:File|undefined, field:'logoAssetId'|'referenceAssetId') => {
+    if(!file||!brandForm||busy)return;
+    if(!brandForm.name.trim()){toast('Escribe primero el nombre de la marca.');return;}
+    const draft={...brandForm};
+    setBusy('brand-upload');
+    try{
+      let target=draft;
+      if(!target.id){
+        const {data}=await api.post('/api/brands',draft);
+        target=data as Brand;
+        setBrands(prev=>[...prev,target]);
+        setBrandForm({...draft,id:target.id});
+      }
+      const asset=await upload(file,field==='logoAssetId'?'logo':'reference',false,target.id);
+      if(!asset)return;
+      setBrandForm(prev=>prev?{...prev,id:target.id,[field]:asset.id}:prev);
+    }catch(e){err(e);}finally{setBusy('');}
   };
   const copy = async () => {
     try {
@@ -1814,7 +1832,7 @@ function App() {
                     </div>
                     <div className="double">
                       <div><label>{t("Color secundario")}</label><input type="color" value={brandForm.secondaryColor||'#E7D8C9'} onChange={e=>setBrandForm({...brandForm,secondaryColor:e.target.value})}/></div>
-                      <div><label>{t("Logo guardado en biblioteca")}</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">{t("Sin logo")}</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select></div>
+                      <div><label>{t("Logo guardado en biblioteca")}</label><select value={brandForm.logoAssetId||''} onChange={e=>setBrandForm({...brandForm,logoAssetId:e.target.value})}><option value="">{t("Sin logo")}</option>{assets.filter(a=>a.brandId===brandForm.id&&(assetCategory(a)==='logo'||a.id===brandForm.logoAssetId)).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select><label style={{display:'block',marginTop:12}}>{t("Subir logo")}<input type="file" accept="image/*,.heic,.heif" disabled={!!busy} onChange={e=>{void uploadBrandImage(e.target.files?.[0],'logoAssetId');e.target.value='';}}/></label>{brandForm.logoAssetId&&images[brandForm.logoAssetId]&&<img src={images[brandForm.logoAssetId]} alt="Logo de la marca" style={{maxWidth:140,maxHeight:100,objectFit:'contain',marginTop:10}}/>}</div>
                     </div>
                     <div className="double">
                       <div><label>{t("Fuente para títulos")}</label><select value={brandForm.headingFont||'Prompt'} onChange={e=>setBrandForm({...brandForm,headingFont:e.target.value})}>{['Prompt','Georgia','Sans','Futura'].map(f=><option key={f}>{f}</option>)}</select></div>
@@ -1823,7 +1841,9 @@ function App() {
                     <label>{t("Estilo de fotografía")}</label><textarea rows={2} value={brandForm.photoMood||''} onChange={e=>setBrandForm({...brandForm,photoMood:e.target.value})} placeholder="Ej. Fotografías reales, sombras naturales, editorial de producto."/>
                     <label>{t("Nunca generar / modificar")}</label><textarea rows={3} value={brandForm.avoid||''} onChange={e=>setBrandForm({...brandForm,avoid:e.target.value})} placeholder="Ej. No inventar logos, etiquetas, capturas de la App, rostros o precios."/>
                     <label>{t("Referencia de estilo por defecto")}</label><select value={brandForm.referenceAssetId||''} onChange={e=>setBrandForm({...brandForm,referenceAssetId:e.target.value})}><option value="">{t("Sin referencia fija")}</option>{assets.filter(a=>a.brandId===brandForm.id).map(a=><option key={a.id} value={a.id}>{displayAssetName(a)}</option>)}</select>
-                    <small>Sube primero el logo y tus referencias en Media library con esta cuenta activa. Solo se mostrarán archivos de la misma marca.</small>
+                    <label style={{display:'block',marginTop:12}}>{t("Subir foto de referencia")}<input type="file" accept="image/*,.heic,.heif" disabled={!!busy} onChange={e=>{void uploadBrandImage(e.target.files?.[0],'referenceAssetId');e.target.value='';}}/></label>
+                    {brandForm.referenceAssetId&&images[brandForm.referenceAssetId]&&<img src={images[brandForm.referenceAssetId]} alt="Referencia de estilo" style={{maxWidth:220,maxHeight:180,objectFit:'contain',marginTop:10}}/>}
+                    <small>Sube tus archivos aquí o elige uno guardado en esta marca. Toca Guardar perfil para conservar la selección.</small>
                   </div>
                   <div className="formend">
                     <button
@@ -1835,7 +1855,7 @@ function App() {
                     <button
                       className="btn dark"
                       onClick={saveBrand}
-                      disabled={busy === 'brand'}
+                      disabled={!!busy}
                     >
                       <Save size={16} /> {t("Save profile")}
                     </button>
@@ -1902,8 +1922,10 @@ function App() {
             </button>
           </div>
         )}
+        <nav aria-label="Content Lab · Información legal" style={{padding:'18px 20px',display:'flex',gap:18,flexWrap:'wrap',fontSize:12}}><a href="./terminos.html" target="_blank" rel="noopener noreferrer">Términos del Lab</a><a href="./privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a><a href="./reembolsos.html" target="_blank" rel="noopener noreferrer">Reembolsos</a></nav>
       </main>
     </div>
   );
 }
 export default App;
+

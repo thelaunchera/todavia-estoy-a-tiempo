@@ -440,6 +440,12 @@ function openProductDetails(code){
  }
  const disabled=$('product-details-unavailable');
  productDialog.classList.toggle('lab-compact',code==='content-lab');
+ for(const link of productDialog.querySelectorAll('.product-legal-disclosure a')){
+  const original=link.dataset.originalHref||(link.dataset.originalHref=link.getAttribute('href'));
+  const filename=original?.split('/').pop();
+  link.href=code==='content-lab'&&['terminos.html','privacidad.html','reembolsos.html'].includes(filename)?'../content-lab/'+filename:original;
+  link.hidden=code==='content-lab'&&filename==='cancelaciones.html';
+ }
  const accessControlled=code==='web-class';
  if(accessControlled){
   productButton.hidden=true;
