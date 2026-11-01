@@ -61,9 +61,11 @@ test('Text duplication and locks are preserved in post and panorama data',()=>{
 });
 test('First-time guide and mobile touch protections are present and nonblocking',()=>{
  const guide=read('QuickStartGuide.tsx'),css=read('QuickStartGuide.css'),touch=read('TouchLayerCanvas.tsx');
- assert.ok(guide.includes('content-lab:guide-dismissed:v1:'));
- assert.ok(guide.includes('Crear mi carrusel'));
+ assert.ok(guide.includes('content-lab:guide-dismissed:v2:'));
+ assert.ok(guide.includes('Crear mi primera publicación'));
  assert.ok(guide.includes('Guía rápida del Content Lab'));
+ assert.ok(guide.includes('Your first design, made simple.'));
+ assert.ok(guide.includes("mode==='home'"));
  assert.ok(css.includes('@media(max-width:850px)'));
  assert.ok(touch.includes("interactionMode==='navigate'"));
  assert.ok(touch.includes('goToPage(index)'));
