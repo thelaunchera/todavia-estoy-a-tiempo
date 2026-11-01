@@ -91,7 +91,7 @@ export function readCarouselDesign(value:string):{slides:unknown[]|null;style:Ca
   return {slides:null,style:{...DEFAULT_CAROUSEL_STYLE}};
 }
 export function encodeCarouselDesign(slides:unknown[],style:CarouselStyle):string{
-  return JSON.stringify({version:2,slides:slides.slice(0,8),style:normalizeCarouselStyle(style)});
+  return JSON.stringify({version:2,slides:slides.slice(0,10),style:normalizeCarouselStyle(style)});
 }
 const safe=(s:string,fallback:string)=>/^#[0-9a-f]{6}$/i.test(s)?s:fallback;
 const channels=(hex:string)=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
