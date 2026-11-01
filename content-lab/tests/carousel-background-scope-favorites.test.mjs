@@ -21,7 +21,7 @@ test('Seamless final PNG and live canvas use the exact same individual backgroun
  assert.equal((src.match(/usePageBackgrounds:style\.perSlideBackgrounds/g)||[]).length,3);
  assert.ok(style.includes('perSlideBackgrounds:v.perSlideBackgrounds===true'));
  assert.ok(style.includes('perSlideBackgrounds:boolean'));
- assert.ok(seamless.includes('if(opts.usePageBackgrounds){'));
+ assert.ok(seamless.includes('if(opts.usePageBackgrounds||sharedImageIsBackground){'));
  assert.ok(seamless.includes('ctx.translate(i*W,0)'));
  assert.ok(seamless.includes('page.backgroundImageId&&images[page.backgroundImageId]'));
  assert.ok(seamless.includes("page.backgroundId&&page.backgroundId!=='brand'"));
