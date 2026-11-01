@@ -4,6 +4,7 @@ import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import ContentCalendar from './ContentCalendar';
+import {validDate,type PlannedItem} from './CalendarPlannerModel';
 import ScheduleFromEditor from './ScheduleFromEditor';
 import AccountSettings from './AccountSettings';
 import PromptStudio from './PromptStudio';
@@ -394,6 +395,8 @@ function App() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [current, setCurrent] = useState('');
   const [tab, setTab] = useState<Tab>('home');
+  const [calendarEditId,setCalendarEditId]=useState('');
+  const [calendarFocusDate,setCalendarFocusDate]=useState('');
   useEffect(()=>{if(waiting)return;return installLabLocale(loginLanguage)},[loginLanguage,account,waiting,tab]);
   const [menu, setMenu] = useState(false);
   const [switcher, setSwitcher] = useState(false);
@@ -429,7 +432,7 @@ function App() {
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
   const [query, setQuery] = useState('');
-  const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string}>({version:0});
+  const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean}>({version:0});
   const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}>({version:0});
   const [stickerPref,setStickerPref]=useState<{version:number;brandId?:string;id?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
@@ -611,6 +614,23 @@ function App() {
     setAlternatives([]);
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
+  const openCalendarItem=(item:PlannedItem)=>{
+    if(!brand||item.brandId!==brand.id){toast('Esta publicación pertenece a otra marca.');return;}
+    setCalendarFocusDate(item.date);
+    if(item.kind==='grid'){
+      if(!item.gridId||item.tileIndex===undefined){toast('No se encontró el proyecto de esta publicación.');return;}
+      setCalendarEditId('');
+      setGridPref(prev=>({...prev,version:prev.version+1,brandId:brand.id,
+        openGridId:item.gridId,openTileIndex:item.tileIndex,fromCalendar:true}));
+      navigate('grid');
+      return;
+    }
+    const id=item.id.startsWith('post:')?item.id.slice(5):'';
+    const saved=posts.find(p=>p.id===id&&p.brandId===brand.id);
+    if(!saved){toast('No se encontró este diseño en tu cuenta.');return;}
+    setCalendarEditId(id);
+    edit(saved);
+  };
   const save = async (candidate?:unknown, automatic=false) => {
     if(saveInFlightRef.current)return false;
     const possible=candidate&&typeof candidate==='object'?candidate as Partial<Post>:null;
@@ -659,6 +679,29 @@ function App() {
       setBusy('');
       setSavePulse(n=>n+1);
     }
+  };
+  const saveAndReturnToCalendar=async(candidate?:Post)=>{
+    const draft=candidate||editorLatestRef.current;
+    const id=draft.id;
+    const returning=Boolean(id&&calendarEditId===id);
+    const ok=await save(draft);
+    if(ok&&returning){
+      setCalendarEditId('');
+      setCalendarFocusDate(validDate(draft.date||'')?draft.date:'');
+      navigate('calendar');
+    }
+    return ok;
+  };
+  const returnFromCalendarEditor=async()=>{
+    if(saveInFlightRef.current){toast('Se está guardando el diseño. Vuelve a tocar cuando termine.');return;}
+    const draft=editorLatestRef.current;
+    // A previous autosave may be pending. Never discard the latest unsaved work.
+    if(draftFingerprint(draft)!==lastSavedFingerprintRef.current){
+      if(!await save(draft))return;
+    }
+    setCalendarEditId('');
+    setCalendarFocusDate(validDate(draft.date||'')?draft.date:'');
+    navigate('calendar');
   };
   // Persist each edit locally immediately. Debounce writes to the account's
   // private backend, and never replace newer edits with an older response.
@@ -1502,6 +1545,7 @@ function App() {
           )}
           {brand && tab === 'calendar' && (
             <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
+              focusDate={calendarFocusDate} onEditItem={openCalendarItem}
               loadImage={id=>{void imageLoad(id)}}
               onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
               onNewPost={()=>start()}
@@ -1526,7 +1570,7 @@ function App() {
               assets={library}
               images={images}
               onChange={setEditor}
-              onSave={save}
+              onSave={saveAndReturnToCalendar}
               onNewAsset={(asset, src) => {
                 setAssets(prev => [asset, ...prev]);
                 setImages(prev => ({ ...prev, [asset.id]: src }));
@@ -1541,7 +1585,7 @@ function App() {
           )}
           {brand && tab === 'vertical' && (
             <VerticalStudio post={editor} brand={brand} assets={library} images={images}
-              locale={loginLanguage} saving={busy==='save'} onSave={save}
+              locale={loginLanguage} saving={busy==='save'} onSave={saveAndReturnToCalendar}
               onChange={patch=>setEditor(old=>({...old,...patch}))}
               onUploadPhoto={async file=>upload(file,'original',false)}
               onUploadBackground={async file=>upload(file,'background',false)}
@@ -1717,7 +1761,7 @@ function App() {
                     </button>
                     <button
                       className="btn dark wide"
-                      onClick={save}
+                      onClick={()=>{void saveAndReturnToCalendar()}}
                       disabled={busy === 'save'}
                     >
                       <Save size={17} />
