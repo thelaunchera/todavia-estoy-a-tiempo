@@ -5,11 +5,14 @@ const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 
 test('The same live carousel preview is available from every creative step',()=>{
  const src=read('CarouselFactory.tsx');
- const open=src.indexOf('className="factory-persistent-layout"');
- const preview=src.indexOf("className={'factory-persistent-preview factory-right'");
+ const panel=src.indexOf('const renderPreviewPanel=(sheet:boolean)=>');
+ const portal=src.indexOf('mobileViewport&&mobilePreviewOpen&&createPortal');
+ const layout=src.indexOf('className="factory-persistent-layout"');
  const content=src.indexOf('className="factory-persistent-content"');
  const firstStep=src.indexOf("studioTab==='inspiration'&&<section");
- assert.ok(open>0&&preview>open&&content>preview&&firstStep>content);
+ assert.ok(panel>0&&portal>panel&&layout>portal&&content>layout&&firstStep>content);
+ assert.ok(src.includes('renderPreviewPanel(true)'));
+ assert.ok(src.includes('!mobileViewport&&renderPreviewPanel(false)'));
  assert.equal((src.match(/renderSwipePreview\(\)/g)||[]).length,1);
  assert.ok(src.includes('Tu carrusel en vivo'));
  assert.ok(src.includes('className="factory-mobile-preview-trigger"'));
@@ -31,6 +34,9 @@ test('On iPhone the preview does not obstruct editing until explicitly opened',(
  assert.ok(ui.includes("event.key==='Escape'"));
  assert.ok(ui.includes('aria-expanded={mobilePreviewOpen}'));
  assert.ok(ui.includes('aria-controls="factory-mobile-preview"'));
+ assert.ok(ui.includes("import { createPortal } from 'react-dom'"));
+ assert.ok(ui.includes('document.body)}'));
+ assert.ok(ui.includes("document.body.style.overflow='hidden'"));
 });
 
 test('Sticker selection and removing stickers keep the previously chosen background',()=>{
