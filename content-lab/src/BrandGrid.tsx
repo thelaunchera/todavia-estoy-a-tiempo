@@ -455,7 +455,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
       </div>
     </div>}
-    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una foto. Hasta nueve diseños diferentes, con IA opcional y texto editable.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
+    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una foto. Hasta nueve diseños editables con tus imágenes y textos.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
     <section className="bg-express" aria-label="Crear nueve publicaciones con una foto">
       <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
         <h2>Una foto. Nueve ideas para tu feed.</h2>
@@ -490,7 +490,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       <p className="bg-express-tip"><Check size={15}/> Las nueve ideas son una guía visual, no nueve fotos generadas. ChatGPT crea las imágenes; el Lab las guarda, organiza y planifica.</p>
     </section>
     <div className="bg-layout"><div className="bg-column">
-      <details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas · referencias, IA y dirección artística</summary>
+      {isAdmin&&<details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas de propietaria · referencias, IA y dirección artística</summary>
       <div className="bg-advanced-config-content"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
         <div className="bg-uploads">
           <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'01 · Foto original *'}</strong><small>Persona o producto que debemos conservar</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
@@ -554,10 +554,10 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           </div>}
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
-      </div></details>
+      </div></details>}
       {own.length>0&&<details className="bg-box bg-saved-projects"><summary>Mis proyectos guardados ({own.length})</summary><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setExpandedEditor(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></details>}
     </div><div className="bg-results">
-      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Crear mis 9 posts». Verás aquí los diseños y sus prompts listos para ChatGPT, sin gastar créditos internos.</p></div>:isExpress&&!expandedEditor?<>
+      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Preparar mis 9 ideas». Verás diseños editables que puedes preparar y descargar sin gastar créditos.</p></div>:isExpress&&!expandedEditor?<>
         <section className="bg-compact-campaign" aria-label="Nueve ideas para tus posts">
           <div className="bg-compact-campaign-head">
             <div><span className="eyebrow">TU CAMPAÑA · 9 IDEAS DIFERENTES</span>
@@ -669,11 +669,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               onChange={e=>{void uploadChatGptResult(e.target.files?.[0]);e.target.value=''}}/>
           </label>
         </section>}
-        <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
+        {isAdmin&&<div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota de Cloudflare es compartida; este número no representa el saldo real.</div>}
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
            {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
           </select></div>
-        <div className="bg-grid-actions">{!(grid.kind==='preserve'&&grid.posts.every(p=>p.design))&&
+        <div className="bg-grid-actions">{isAdmin&&!(grid.kind==='preserve'&&grid.posts.every(p=>p.design))&&
           <button className="btn dark" disabled={!!busy} onClick={generateAll}>{busy.startsWith('image-')?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>} Generar fotos pendientes</button>}
           {grid.kind==='preserve'&&grid.posts.every(p=>p.design)&&<p className="bg-free-design"><Check size={17}/> Tus nueve diseños usan la foto original. No necesitas generar imágenes con IA.</p>}
           <button className="btn ghost" disabled={!!busy||!reviewed||gridPending>0} onClick={prepare}><Download size={16}/> Preparar PNG separados</button></div>
@@ -735,11 +735,11 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
               onChange={next=>tile.design?update({backgroundImageId:next.backgroundImageId,design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...((next.backgroundImageId||next.backgroundId&&next.backgroundId!=='brand')?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,backgroundImageId:next.backgroundImageId,stickerIds:next.stickerIds})}/>}
           {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId])} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
-          <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
-          <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
+          <p className="bg-note">El texto, las fotos, los fondos y las anotaciones se editan y exportan como PNG, sin generar fotografías con IA dentro del Lab.</p>
+          <div className="bg-post-actions">{isAdmin&&!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
             <button className="btn dark" onClick={()=>download(selected)} disabled={!!busy}><Download size={17}/> Descargar PNG</button></div>
-          <p className="bg-note">Modo editorial: la imagen original no se altera. Modo retrato: la IA crea otra foto, y puede cambiar detalles; comprueba rostro, manos, dedos, pies y fondo antes de publicar.</p>
+          <p className="bg-note">Modo editorial: tu imagen original se conserva. Puedes cambiar la composición y descargar tu diseño.</p>
         </div>
         {downloads.length>0&&<div className="bg-downloads"><h3><Check size={19}/> PNG individuales · {EXPORT_SIZES[exportSize].title}</h3><p>Descarga cada archivo por separado. Sin ZIP ni collages. Composiciones revisadas.</p><div>{downloads.map((v,i)=><a key={i} href={v.url} download={v.name}><Download size={15}/> Post {String(i+1).padStart(2,'0')}.png</a>)}</div></div>}
       </>}
