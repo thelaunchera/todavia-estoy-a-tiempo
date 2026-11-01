@@ -34,9 +34,9 @@ test('Buyer login offers OTP at Product Center but existing classroom password l
  assert.ok(js.includes("const has=purchased.has(code),open=code==='content-lab'&&has?true"));
  assert.ok(js.includes("if(isLab)chip.href='../content-lab/'"));
 });
-test('Access to Lab is scoped to verified membership and Product Center, not an unearned course unlock',()=>{
+test('Lab access requires verified membership without forcing navigation back to the Product Center',()=>{
  const app=read('../src/App.tsx'),js=read('../../centro/centro.js');
- assert.ok(app.includes('href="../centro/"'));
+ assert.ok(!app.includes('href="../centro/"'));
  assert.ok(js.includes("db.from('content_lab_memberships').select('id')"));
  assert.ok(js.includes(".eq('status','active').maybeSingle()"));
  assert.ok(js.includes('Estos productos tienen una compra verificada para tu correo.'));
