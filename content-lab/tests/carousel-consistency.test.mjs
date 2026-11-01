@@ -14,7 +14,8 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(ui.includes('const generated=parseSlides(updated,brand).map'));
  assert.ok(ui.includes('backgroundImageId,backgroundColor:slide.backgroundColor'));
  assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
- assert.ok(ui.includes('const canvas=(await renderAllSlides())[n]'));
+ assert.ok(ui.includes('const canvas=pages?pages[n]:await drawSlide('));
+ assert.ok(ui.includes('canvasToPngBlob(canvas)'));
  assert.ok(ui.includes('overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style))'));
 });
 test('Style references are sampled locally and never pasted into carousel slides',()=>{
