@@ -269,6 +269,45 @@ export default function TouchLayerCanvas({
       Grid de {pageCount} slides siempre visible · la división ocurre al descargar
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
+    {pageCount>1&&<div className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
+      <div className="touch-editor-mode-switch" role="group" aria-label="Modo de interacción">
+        <button type="button" className={interactionMode==='navigate'?'active':''}
+          aria-pressed={interactionMode==='navigate'}
+          onClick={()=>{setInteractionMode('navigate');setSelected('');setCropping(false);
+            gesture.current=null;pointers.current.clear();window.cancelAnimationFrame(autoPanFrame.current)}}>
+          Deslizar slides
+        </button>
+        <button type="button" className={interactionMode==='edit'?'active':''}
+          aria-pressed={interactionMode==='edit'} onClick={()=>setInteractionMode('edit')}>
+          Editar elementos
+        </button>
+      </div>
+      <div className="touch-editor-page-navigation">
+        <button type="button" aria-label="Slide anterior" disabled={activePage===0}
+          onClick={()=>goToPage(activePage-1)}>‹</button>
+        <span>Slide {activePage+1} de {pageCount}</span>
+        <button type="button" aria-label="Slide siguiente" disabled={activePage===pageCount-1}
+          onClick={()=>goToPage(activePage+1)}>›</button>
+      </div>
+      <div className="touch-editor-page-tabs" aria-label="Elegir slide directamente">
+        {Array.from({length:pageCount},(_,index)=><button type="button" key={index}
+          aria-current={index===activePage?'step':undefined}
+          className={index===activePage?'active':''}
+          onClick={()=>goToPage(index)}>{index+1}</button>)}
+      </div>
+      {interactionMode==='edit'&&<div className="touch-editor-quick-layers" role="group"
+        aria-label="Elegir foto o sticker incluso si están superpuestos">
+        <strong>Elige un elemento para moverlo:</strong>
+        <div>{layers.map(layer=><button type="button" key={layer.id}
+          className={selected===layer.id?'selected':''} aria-pressed={selected===layer.id}
+          onClick={()=>selectFromList(layer.id)}>
+          {layer.kind==='photo'?'📷':layer.kind==='sticker'?'🎀':layer.kind==='text'?'T':'▧'} {layer.name}
+        </button>)}</div>
+      </div>}
+      <p className="touch-editor-navigation-tip">{interactionMode==='navigate'
+        ?'Desliza con el dedo o usa las flechas. Las fotos y los stickers no se moverán.'
+        :'Elige una capa arriba o tócala una vez. Después arrástrala; las demás quedan protegidas.'}</p>
+    </div>}
     {chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
       <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
@@ -288,7 +327,8 @@ export default function TouchLayerCanvas({
           <output>{Math.round(selectedRect.w*100)}%</output>
         </label>
       </div>}
-    <div ref={scrollArea} className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
+    <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
+      style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
         onClick={e => { if (e.target === e.currentTarget) { setSelected(''); onEmpty?.(); } }}
@@ -324,7 +364,9 @@ export default function TouchLayerCanvas({
           return <div key={layer.id} data-layer={layer.id}
             className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
-              height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)', zIndex:z}}
+              height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
+               zIndex:active?8:z,
+               pointerEvents:pageCount>1&&(interactionMode==='navigate'||(selected!==''&&!active))?'none':'auto'}}
             tabIndex={0} role="button" aria-label={'Mover ' + layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
@@ -377,7 +419,10 @@ export default function TouchLayerCanvas({
         </div>}
       </div>
     </div>
-    <p className="touch-editor-help">{cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
+    <p className="touch-editor-help">{pageCount>1
+      ?interactionMode==='navigate'?'Desliza el lienzo o usa las flechas para pasar de slide sin mover stickers.':
+        'Primero elige una capa; después arrástrala. Usa las flechas para pasar de slide.'
+      :cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
       : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
@@ -445,7 +490,7 @@ export default function TouchLayerCanvas({
       <strong>Fotos y stickers ({layers.length})</strong>
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
         <button type="button" className={selected === layer.id ? 'selected' : ''}
-          onClick={() => setSelected(layer.id)} aria-pressed={selected === layer.id}
+          onClick={() => selectFromList(layer.id)} aria-pressed={selected === layer.id}
           title={'Seleccionar ' + layer.name}>{layer.kind==='text'?<span className="touch-layer-mini">T</span>:
           layer.kind==='shape'?<span className="touch-layer-mini">▧</span>:
           <img src={layer.src} alt=""/>}<span>{layer.name}</span></button>
