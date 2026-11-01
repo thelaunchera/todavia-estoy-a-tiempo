@@ -417,3 +417,22 @@
    position:relative;top:auto
  }
 }
+
+
+/* Explicit choice prevents one selected background from overwriting other slides. */
+.factory-background-scope{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:7px;margin:13px 0 4px;max-width:460px
+}
+.factory-background-scope button{
+ min-width:0;min-height:44px;padding:9px 11px;
+ font-size:12px;font-weight:750;color:#345a69;
+ border:1px solid #c7dadd;background:#fff;border-radius:11px;
+ touch-action:manipulation
+}
+.factory-background-scope button.active{
+ background:#244b5b;color:#fff;border-color:#244b5b
+}
+@media(max-width:390px){
+ .factory-background-scope button{font-size:11px;padding:8px 6px}
+}
