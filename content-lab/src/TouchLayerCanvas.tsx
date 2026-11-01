@@ -457,7 +457,7 @@ export default function TouchLayerCanvas({
       <strong>{chosen.name}</strong>
       {onToggleLock&&<button type="button" className="touch-editor-lock-button" aria-pressed={!!chosen.locked}
          onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?<><LockKeyholeOpen size={16}/> Desbloquear elemento</>:<><LockKeyhole size={16}/> Bloquear posición</>}</button>}
-      {chosen.locked?<p className="touch-editor-lock-hint">Protegido: desbloquéalo para editar, mover o borrar.</p>:<>}
+      {chosen.locked?<p className="touch-editor-lock-hint">Protegido: desbloquéalo para editar, mover o borrar.</p>:<>
       {pageCount>1&&chosen.kind==='sticker'&&onCopySticker&&<div className="touch-editor-copy-sticker">
         <strong>Copiar este sticker a otro slide</strong>
         <p>Se mantiene el tamaño, la posición y el giro. El original no se mueve.</p>
