@@ -52,3 +52,16 @@ test('Favorites may be toggled without actually adding an asset to a slide',()=>
  assert.doesNotMatch(button,/onChange\(/);
  assert.ok(picker.includes("onChange({stickerIds:[...selected,id]})"));
 });
+
+
+test('Saved bow and lace image backgrounds stay vivid and uncropped on seamless slides',()=>{
+ const seamless=read('SeamlessCarousel.ts');
+ // Each page uses the same full-bleed 1080x1350 portrait painter as the
+ // single-slide export instead of the 4-slide 27% opacity panorama overlay.
+ assert.ok(seamless.includes('const sharedImageIsBackground=Boolean(opts.assetId&&pages.every('));
+ assert.ok(seamless.includes('page=>page.backgroundImageId===opts.assetId'));
+ assert.ok(seamless.includes('if(opts.usePageBackgrounds||sharedImageIsBackground){'));
+ assert.ok(seamless.includes('ctx.translate(i*W,0)'));
+ assert.ok(seamless.includes('ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,W,H)'));
+ assert.ok(seamless.includes('if(!opts.usePageBackgrounds&&!sharedImageIsBackground&&opts.assetId&&images[opts.assetId])'));
+});
