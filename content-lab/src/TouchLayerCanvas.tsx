@@ -234,7 +234,13 @@ export default function TouchLayerCanvas({
     setSnapGuides(null);
     window.cancelAnimationFrame(autoPanFrame.current);
     if (g?.id === layer.id && draftRef.current[layer.id]) {
-      onCommit(layer.kind, layer.id, draftRef.current[layer.id]);
+      const next=draftRef.current[layer.id];
+      // Resizing a text box must resize the actual lettering in the exported PNG,
+      // not just its invisible bounding rectangle.
+      if(layer.kind==='text'&&onUpdate&&Math.abs(next.w-layer.rect.w)>.001){
+        const fontSize=Math.round(Math.max(16,Math.min(420,(layer.fontSize||76)*next.w/Math.max(.001,layer.rect.w))));
+        onUpdate(layer.id,{rect:next,fontSize});
+      }else onCommit(layer.kind,layer.id,next);
     }
   };
   const chosen = pageCount>1&&interactionMode==='navigate'?undefined:layers.find(layer => layer.id === selected);
@@ -406,7 +412,8 @@ export default function TouchLayerCanvas({
             {layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               fontWeight:panoramaTextWeight(layer.fontWeight),
-              fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
+              fontSize:(layer.fontSize||76)*(gesture.current?.id===layer.id
+                ?rect.w/Math.max(.001,layer.rect.w):1)*stageHeight/canvasHeight+'px',
               lineHeight:layer.lineHeight||1.12,
               letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
               color:layer.color||'#191919',
