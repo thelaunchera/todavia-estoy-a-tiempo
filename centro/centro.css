@@ -335,7 +335,7 @@ body.modal-open{overflow:hidden}
 .lab-compact .product-details-section h3{font-size:21px;margin-bottom:10px}
 .lab-compact .product-details-note{font-size:12px;line-height:1.5;padding:0;margin:0 0 8px}
 .lab-compact .product-legal-disclosure{padding:0;background:none;border:0;font-size:12px}
-.lab-compact .product-legal-disclosure>strong,.lab-compact .product-legal-disclosure>p:first-of-type{display:none}
+.lab-compact .product-legal-disclosure>strong{display:none}
 .lab-compact .product-details-actions{gap:12px}
 .lab-compact .product-details-back{display:none}
 .lab-compact .product-details-cta{width:100%;text-align:center}
