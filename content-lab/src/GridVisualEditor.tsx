@@ -21,7 +21,7 @@ const label=(locale:'es'|'en',es:string,en:string)=>locale==='es'?es:en;
 
 export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages,onStickerChange,locale='es'}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
- const [layer,setLayer]=useState<'photo'|'text'|'sticker'>('photo');
+ const [layer,setLayer]=useState<'photo'|'text'|'subtitle'|'sticker'>('photo');
  const [advanced,setAdvanced]=useState(false);
  const pointers=useRef(new Map<number,Point>());
  const gesture=useRef<Gesture|null>(null);
