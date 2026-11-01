@@ -162,6 +162,9 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     crop:normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})}};
   const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo abrir el diseñador de imágenes.');
+  // Always resample source photographs at the best available browser quality.
+  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingQuality='high';
   const {paper,accent,ink:paletteInk,onAccent,muted,outline}=getCarouselPalette(brand,style,slide.accentIndex||0);
   const ink=['night-editorial','night-stars','rust-autumn'].includes(slide.backgroundId||'')?'#FFFFFF':style.freeCanvas?readableColor(slide.backgroundColor||style.canvasColor||'#FFFFFF'):paletteInk;
   const destination=style.targetPlatform==='brand'?preferredPlatform(brand):style.targetPlatform;
