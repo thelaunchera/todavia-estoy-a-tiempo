@@ -220,6 +220,10 @@ async function refresh(){
  if(labMembership.data)purchased.add('content-lab');
  for(const item of flags.data||[])if(Object.hasOwn(releases,item.product_code))releases[item.product_code]=item.access_enabled===true;
  ready=true;noteActivity(user.id,true);updateNav();setCourseActions();renderOwnerLibrary();showModal(false);
+ if(productDialog?.open)productDialog.close();
+ if(new URL(location.href).searchParams.get('product')==='content-lab'&&(owner||purchased.has('content-lab'))){
+  location.replace('../content-lab/');
+ }
 }
 $('open-access').addEventListener('click',()=>{mode('otp');showModal(true);});
 $('hero-account').addEventListener('click',()=>{
@@ -338,7 +342,7 @@ const productInformation=Object.freeze({
   summary:'Deja de empezar cada post desde cero.',
   price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
   includes:['Edita posts, carruseles, reels e historias.','Usa tus fotos, fondos y stickers.','Organiza tu feed y planifica fechas y horas.'],
-  delivery:'Después de comprar, recibirás el enlace por email. Entra con el correo de tu compra y abre tu Lab.',
+  delivery:'Recibirás tu enlace al Centro de Productos por email. Entra con el correo de tu compra y abre tu Lab.',
   note:'Fotos con ChatGPT por separado. El calendario te ayuda a planificar; no publica por ti. Si usas la IA integrada, incluye 60 fotos y 30 créditos iniciales, con límites diarios de 10 fotos y 10 créditos.',
   checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
@@ -420,6 +424,7 @@ function detailState(code){
  return 'Contratación independiente';
 }
 function openProductDetails(code){
+ if(code==='content-lab'&&(owner||purchased.has(code))){location.assign('../content-lab/');return;}
  const item=productInformation[code];if(!item)return;
  $('product-details-type').textContent=item.type;
  $('product-details-title').textContent=item.title;
