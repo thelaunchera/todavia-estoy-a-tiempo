@@ -437,14 +437,14 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
-    {pageCount===1&&layers.some(layer=>layer.kind==='text')&&
-      <div className="touch-editor-post-text-list" aria-label="Seleccionar textos del post">
-        <strong>Editar textos del post</strong>
-        <div>{layers.filter(layer=>layer.kind==='text').map(layer=>
+    {pageCount===1&&(layers.some(layer=>layer.kind==='text')||layers.some(layer=>layer.locked))&&
+      <div className="touch-editor-post-text-list" aria-label="Seleccionar textos y elementos bloqueados">
+        <strong>Editar textos y desbloquear capas</strong>
+        <div>{layers.filter(layer=>layer.kind==='text'||layer.locked).map(layer=>
           <button type="button" key={layer.id}
             aria-pressed={selected===layer.id}
             onClick={()=>selectFromList(layer.id)}>
-            <span aria-hidden="true">T</span> {layer.name}
+            <span aria-hidden="true">{layer.locked?'🔒':layer.kind==='text'?'T':'▧'}</span> {layer.name}
           </button>)}</div>
         <small>Selecciona un texto y cámbialo de sitio, color o tipografía.</small>
       </div>}
