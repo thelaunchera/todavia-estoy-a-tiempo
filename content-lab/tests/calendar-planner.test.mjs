@@ -17,7 +17,7 @@ test('scheduled dates are saved in existing brand-isolated Supabase posts and gr
  const calendar=source('src/ContentCalendar.tsx'),grid=source('src/BrandGrid.tsx');
  assert.ok(calendar.includes("api.put('/api/posts/'+id"));
  assert.ok(calendar.includes("api.put('/api/grids/'+gid"));
- assert.ok(calendar.includes("g.id===gid&&x.brandId===brand.id"));
+ assert.ok(calendar.includes("x.id===gid&&x.brandId===brand.id"));
  assert.ok(calendar.includes("p.brandId===brand.id&&p.id"));
  assert.ok(calendar.includes('scheduledDate:targetDate,scheduledTime:targetTime'));
  assert.ok(grid.includes("scheduledDate?:string;scheduledTime?:string"));
