@@ -674,11 +674,12 @@ function App() {
     return()=>window.clearTimeout(timer);
   },[editor,tab,account?.email,brand?.id,recovery,savePulse]);
   useEffect(()=>{
-    if(!account?.email)return;
+    const email=account?.email;
+    if(!email)return;
     const flush=()=>{
       const candidate=editorLatestRef.current;
       if(candidate.brandId&&draftFingerprint(candidate)!==lastSavedFingerprintRef.current)
-        writeDraftBackup(account.email,candidate);
+        writeDraftBackup(email,candidate);
     };
     window.addEventListener('pagehide',flush);
     return()=>window.removeEventListener('pagehide',flush);
