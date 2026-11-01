@@ -592,6 +592,12 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       initialSelection.openGridId===grid?.id&&
       <div className="bg-calendar-return">
         <span>✎ Editando el post {selected+1} de tu calendario</span>
+        <div className="bg-calendar-edit-date">
+          <label>Día<input type="date" value={grid?.posts[selected]?.scheduledDate||''}
+            onChange={e=>update({scheduledDate:e.target.value,scheduledTime:grid?.posts[selected]?.scheduledTime||'09:00'})}/></label>
+          <label>Hora<input type="time" value={grid?.posts[selected]?.scheduledTime||'09:00'}
+            onChange={e=>update({scheduledTime:e.target.value})}/></label>
+        </div>
         <button type="button" className="btn dark" disabled={!!busy||saveState==='saving'}
           onClick={()=>void saveAndReturnToCalendar()}>
           <Save size={16}/> Guardar y volver al calendario
