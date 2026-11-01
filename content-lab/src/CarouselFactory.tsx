@@ -754,7 +754,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       return [base,{...base,id:'copy-'+crypto.randomUUID(),name:layer.name+' · copia',
         rect:{...base.rect,x:base.rect.x+1/(count+1)}}];
     });
-    setAll(next,normalizeCarouselStyle({...style,panoramaLayers:mapped}));
+    const clonedLocks=(style.lockedLayerIds||[]).flatMap(id=>{
+      const originalPrefixes=['page-photo-'+slide.key,'page-text-'+slide.key,'page-sticker-'+slide.key+'-'];
+      return originalPrefixes.some(prefix=>id===prefix||id.startsWith(prefix))
+        ?[id.replace(slide.key,cloned.key)]:[];
+    });
+    setAll(next,normalizeCarouselStyle({...style,panoramaLayers:mapped,
+      lockedLayerIds:[...(style.lockedLayerIds||[]),...clonedLocks]}));
     setCurrent(insertAt);
     notify('Slide duplicado con su fondo, fotos, textos y stickers.');
   };
