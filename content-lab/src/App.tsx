@@ -411,6 +411,25 @@ function App() {
   const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}>({version:0});
   const [stickerPref,setStickerPref]=useState<{version:number;brandId?:string;id?:string}>({version:0});
   const uploadRef = useRef<HTMLInputElement>(null);
+  const createMenuRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const closeOutside=(e:PointerEvent)=>{
+      if(createMenuRef.current&&!createMenuRef.current.contains(e.target as Node))
+        createMenuRef.current.open=false;
+    };
+    const closeOnEscape=(e:KeyboardEvent)=>{
+      if(e.key==='Escape'&&createMenuRef.current?.open){
+        createMenuRef.current.open=false;
+        createMenuRef.current.querySelector('summary')?.focus();
+      }
+    };
+    document.addEventListener('pointerdown',closeOutside);
+    document.addEventListener('keydown',closeOnEscape);
+    return()=>{
+      document.removeEventListener('pointerdown',closeOutside);
+      document.removeEventListener('keydown',closeOnEscape);
+    };
+  },[]);
   const toast = (s: string) => {
     setNotice(s);
     window.setTimeout(() => setNotice(''), 4500);
@@ -1108,15 +1127,15 @@ function App() {
             <span className="private">
               <LockKeyhole size={13} /> {loginLanguage==='es'?'PRIVADO':'PRIVATE'}
             </span>
-            <details className="lab-create-menu">
+            <details ref={createMenuRef} className="lab-create-menu">
               <summary className="btn dark compact lab-primary-create" aria-label={t('Create content')}>
                 <Plus size={18}/><span>{loginLanguage==='es'?'Crear':'Create'}</span>
               </summary>
               <div className="lab-create-choices">
-                <button onClick={()=>start()}>{loginLanguage==='es'?'Post · 4:5':'Post · 4:5'}</button>
-                <button onClick={startFactory}>{loginLanguage==='es'?'Carrusel · 4:5':'Carousel · 4:5'}</button>
-                <button onClick={()=>startVertical('Reel')}>Reel · 9:16</button>
-                <button onClick={()=>startVertical('Story')}>{loginLanguage==='es'?'Historia · 9:16':'Story · 9:16'}</button>
+                <button type="button" onClick={()=>{createMenuRef.current!.open=false;start()}}>{loginLanguage==='es'?'Post · 4:5':'Post · 4:5'}</button>
+                <button type="button" onClick={()=>{createMenuRef.current!.open=false;startFactory()}}>{loginLanguage==='es'?'Carrusel · 4:5':'Carousel · 4:5'}</button>
+                <button type="button" onClick={()=>{createMenuRef.current!.open=false;startVertical('Reel')}}>Reel · 9:16</button>
+                <button type="button" onClick={()=>{createMenuRef.current!.open=false;startVertical('Story')}}>{loginLanguage==='es'?'Historia · 9:16':'Story · 9:16'}</button>
               </div>
             </details>
           </div>
