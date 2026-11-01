@@ -5,6 +5,7 @@ import BackgroundThumbnail from './BackgroundThumbnail';
 import {isBackgroundVisible} from './BackgroundVisibility';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './FreeDecorControls.css';
+import type {StickerCopyResult} from './CarouselStickerCopy';
 import {readDecorPreferences,saveDecorPreferences,rememberDecor,toggleDecorFavorite,decorKey} from './DecorPreferences';
 type Props={
  backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];
@@ -13,6 +14,7 @@ type Props={
  onOpenLibrary?:()=>void;onUploadBackground?:(file:File)=>Promise<LibraryAsset|null>;
  defaultTab?:'stickers'|'backgrounds';initiallyExpanded?:boolean;slideNumber?:number;
  backgroundScope?:'slide'|'all';preferenceScope?:string;
+ slideCount?:number;onCopySticker?:(id:string,targetIndex:number)=>StickerCopyResult;
 };
 function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage?:(id:string)=>void}){
  const ref=useRef<HTMLSpanElement>(null);
@@ -50,7 +52,7 @@ export default function FreeDecorControls({
  backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,
  title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground,
  defaultTab='stickers',initiallyExpanded=false,slideNumber,
- backgroundScope='all',preferenceScope='default',
+ backgroundScope='all',preferenceScope='default',slideCount=0,onCopySticker,
 }:Props){
  const [tab,setTab]=useState<'stickers'|'backgrounds'>(defaultTab);
  const [backgroundKind,setBackgroundKind]=useState<BackgroundCategory>('all');
@@ -68,6 +70,8 @@ export default function FreeDecorControls({
  const sortRecent=<T,>(items:T[],key:(item:T)=>string)=>resourceFilter==='recent'
    ?[...items].sort((a,b)=>prefs.recent.indexOf(key(a))-prefs.recent.indexOf(key(b))):items;
  const [feedback,setFeedback]=useState('');
+ const [copyStickerId,setCopyStickerId]=useState('');
+ useEffect(()=>{setCopyStickerId('')},[slideNumber]);
  const uploadRef=useRef<HTMLInputElement>(null);
  const [uploading,setUploading]=useState(false);
  const normalizeSearch=(text:string)=>text.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -221,8 +225,27 @@ export default function FreeDecorControls({
       onClick={()=>setGroup(g)}>{g}</button>)}</div>
     {selected.length>0&&<div className="free-decor-selected-stickers"
      aria-label="Stickers seleccionados para este slide"><strong>En este slide</strong>
-     <div>{selected.map(id=><button type="button" key={id} onClick={()=>removeSticker(id)}
-      aria-label={'Quitar '+stickerName(id)}><span>{stickerName(id)}</span><b aria-hidden="true">×</b></button>)}</div>
+     <div className="free-decor-selected-list">{selected.map(id=><div className="free-decor-selected-row" key={id}>
+       <span className="free-decor-selected-name">{stickerName(id)}</span>
+       {onCopySticker&&slideNumber&&slideCount>1&&<button type="button" className="free-decor-copy-toggle"
+         aria-expanded={copyStickerId===id}
+         onClick={()=>{setCopyStickerId(v=>v===id?'':id);setFeedback('')}}>Copiar a…</button>}
+       <button type="button" className="free-decor-selected-remove" onClick={()=>removeSticker(id)}
+         aria-label={'Quitar '+stickerName(id)}><span aria-hidden="true">×</span></button>
+       {copyStickerId===id&&onCopySticker&&slideNumber&&slideCount>1&&
+        <div className="free-decor-copy-destinations" role="group"
+         aria-label={'Copiar '+stickerName(id)+' desde el slide '+slideNumber}>
+          <small>Elige el slide. Mantendrá la misma posición, tamaño y giro.</small>
+          <div>{Array.from({length:slideCount},(_,n)=>n).filter(n=>n!==slideNumber-1).map(n=>
+            <button type="button" key={n} onClick={()=>{
+              const outcome=onCopySticker(id,n);
+              if(outcome==='copied')setFeedback('✓ Copiado al slide '+(n+1)+' en la misma posición.');
+              else if(outcome==='full')setFeedback('El slide '+(n+1)+' ya tiene 3 stickers. No se ha eliminado ninguno.');
+              else if(outcome==='exists')setFeedback('Este sticker ya está en el slide '+(n+1)+'. No hemos movido el original.');
+              else setFeedback('No se pudo copiar. Vuelve a seleccionar el sticker.');
+            }}>Slide {n+1}</button>)}</div>
+        </div>}
+     </div>)}</div>
     </div>}
     {visible.length?<div className="free-decor-stickers">{visible.map(a=>
      <div key={a.id} className="free-decor-sticker-cell"><button type="button"
