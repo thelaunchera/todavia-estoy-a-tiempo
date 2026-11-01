@@ -82,7 +82,7 @@ function editorAction(name,context){
   return vm.runInNewContext('(()=>{'+code+';return invoke;})()',context);
 }
 
-test('dragging a page photo onto a different slide never snaps back when seamless is off',()=>{
+test('normal mode moves photos to another slide without crossing its boundaries',()=>{
   const rect={x:.65,y:.2,w:.25,h:.5};
   const slides=[{key:'one',title:'One',assetId:'photo',layout:'cover'},
     {key:'two',title:'Two',assetId:'',layout:'statement'}];
@@ -93,6 +93,7 @@ test('dragging a page photo onto a different slide never snaps back when seamles
     notify:message=>{throw Error(message)},setAll:(pages,style)=>{saved={pages,style}},
     stripSource:editorAction('stripSource',{slides,photoDefault}),
     promoteSource:editorAction('promoteSource',{clampPanoramaRect}),
+    constrainNormalLayer:editorAction('constrainNormalLayer',{clampPanoramaRect}),
   });
   move('photo','page-photo-one',rect);
   assert.equal(saved.pages[0].assetId,'');
@@ -210,4 +211,17 @@ test('continuous wallpaper keeps cross-slide width, flat edges and role after au
   assert.equal(decoded.style.panoramaLayers[0].role,'background');
   assert.deepEqual(decoded.style.panoramaLayers[0].rect,wallpaper.rect);
   assert.equal(decoded.style.panoramaLayers[0].rect.w*count,2);
+});
+
+test('normal confines free layers to a single slide while seamless saves the full cross-slide geometry',()=>{
+ const pin=editorAction('constrainNormalLayer',{clampPanoramaRect});
+ const layer={id:'photo',kind:'photo',assetId:'real',rect:{x:.38,y:.1,w:.35,h:.8}};
+ const normal=pin(layer,4);
+ const page=Math.floor((normal.rect.x+normal.rect.w/2)*4);
+ assert.ok(normal.rect.x>=page/4-.000001);
+ assert.ok(normal.rect.x+normal.rect.w<=(page+1)/4+.000001);
+ assert.equal(normal.rect.h,.8);
+ // The original image geometry is preserved for seamless mode.
+ assert.equal(layer.rect.x,.38);
+ assert.equal(layer.rect.w,.35);
 });
