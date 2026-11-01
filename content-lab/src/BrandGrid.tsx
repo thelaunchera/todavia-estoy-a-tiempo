@@ -12,6 +12,7 @@ import FreeDecorControls from './FreeDecorControls';
 import type {FreeBackgroundId} from './FreeDesignAssets';
 import type {StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type MediaCategory} from './MediaAsset';
+import {ONE_PHOTO_NINE,onePhotoNinePrompt} from './OnePhotoNinePrompts';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
@@ -22,7 +23,7 @@ type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boo
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
-    photo:(tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId],
+    photo:(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId]),
     original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design,stickerImages:images
   },size)).canvas;
 }
@@ -43,7 +44,13 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     if((!tile.assetId||!images[tile.assetId])&&(!tile.design||!images[grid.sourceId])||(grid.kind==='preserve'&&!images[grid.sourceId])){
       setPreview('');return()=>{on=false};
     }
-    poster(tile,idx,grid,brand,images).then(canvas=>{if(on)setPreview(canvas.toDataURL('image/jpeg',0.7))})
+    poster(tile,idx,grid,brand,images).then(canvas=>{
+      if(!on){canvas.width=1;canvas.height=1;return;}
+      const thumb=document.createElement('canvas');thumb.width=540;thumb.height=Math.round(540*canvas.height/canvas.width);
+      const ctx=thumb.getContext('2d');if(ctx){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+        ctx.drawImage(canvas,0,0,thumb.width,thumb.height);setPreview(thumb.toDataURL('image/png'));}
+      canvas.width=1;canvas.height=1;thumb.width=1;thumb.height=1;
+    })
       .catch(()=>{if(on)setPreview('')});
     return()=>{on=false};
   },[tile.assetId,tile.headline,tile.subtext,tile.format,tile.design,tile.layout,tile.backgroundId,tile.stickerIds,tile.design?.backgroundPattern,tile.design?.stickerIds,idx,grid.kind,grid.sourceId,images,brand.color,brand.background]);
@@ -57,6 +64,10 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
 export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
+  const [quickProduct,setQuickProduct]=useState('');
+  const [quickMessage,setQuickMessage]=useState('');
+  const [quickNotes,setQuickNotes]=useState('');
+  const [copiedPrompt,setCopiedPrompt]=useState(false);
   const [chosenFormat,setChosenFormat]=useState('');
   const [referenceFocus,setReferenceFocus]=useState<string[]>(['palette','lighting','composition']);
   useEffect(()=>{
@@ -166,7 +177,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     flushDraft();
     const ownChoice=initialSelection?.brandId===brand.id?initialSelection:null;
     setSourceId(ownChoice?.sourceId||'');setReferenceId(ownChoice?.referenceId||brand.referenceAssetId||'');setChosenFormat(ownChoice?.format||'');
-    setGrid(null);setSelected(0);
+    setGrid(null);setSelected(0);setQuickProduct('');setQuickMessage('');setQuickNotes('');
     setDownloads([]);setTestPhoto('');setConnection('unknown');setChooseExisting(false);setQaNotes([]);setReviewed(false);
   },[brand.id]);
   const outputLanguage=/todav[ií]a estoy a tiempo/i.test(brand.name)?'Español':/the launch era/i.test(brand.name)?'English':brand.language;
@@ -201,6 +212,51 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         ? 'La IA analizó tu foto y preparó 9 conceptos diferentes. Puedes revisarlos antes de generar fotos.'
         : 'Nueve conceptos listos. El análisis de foto no estuvo disponible; revisa los detalles manualmente.');
     }catch(e){showError(e)}finally{setBusy('')}
+  };
+  /** Instant nine-post editor, without AI charge and without altering the master image. */
+  const createQuickNine=async()=>{
+    if(!sourceId||!library.some(a=>a.id===sourceId&&a.brandId===brand.id))
+      return notify('Primero sube una foto de producto a tu marca.');
+    if(wrongOriginal)return notify('La foto pertenece a otra marca. Vuelve a subirla.');
+    if(!quickProduct.trim())return notify('Escribe qué producto quieres mostrar.');
+    if(busy||uploading)return;
+    setBusy('quick-nine');
+    try{
+      const presets:EditorialPreset[]=['portrait','split','typographic','portrait','split','annotated','magazine','magazine','portrait'];
+      const backgrounds:EditorialDesign['background'][]=['photo','ivory','gradient','photo','ivory','photo','ivory','gradient','photo'];
+      const posts:Tile[]=ONE_PHOTO_NINE.map((item,index)=>({
+        index,headline:quickMessage.trim().slice(0,120),subtext:'',caption:'',
+        scene:item.name+' — '+item.short,assetId:'',
+        format:CREATIVE_FORMATS[index%CREATIVE_FORMATS.length],
+        design:{preset:presets[index],background:backgrounds[index],
+          font:index%3===0?'bold':index%3===1?'elegant':'modern',
+          backgroundColor:brand.background,accentColor:brand.color,
+          kicker:'',handwritten:'',callouts:[],overlay:index%3===0?.12:.08}
+      }));
+      const {data}=await api.post('/api/grids',{
+        brandId:brand.id,sourceId,referenceId:'',
+        kind:'preserve',title:quickProduct.trim()+' · 9 posts',
+        concept:'1 Photo → 9 Posts · 8 prompts del freebie + 1 escena editorial',
+        brief:quickProduct.trim(),planningSource:'template',
+        analysisStatus:'fallback',posts
+      });
+      const draft=data as Grid;
+      savedSignature.current[draft.id]=signature(draft);
+      setGrid(draft);setGrids(prev=>[...prev,draft]);setSelected(0);
+      setKind('preserve');setDesignMode('editorial');setSaveState('saved');
+      setDownloads([]);setQaNotes([]);setReviewed(false);
+      notify('Nueve diseños editables y nueve prompts de ChatGPT preparados, sin gastar créditos.');
+    }catch(e){showError(e)}finally{setBusy('')}
+  };
+  const uploadChatGptResult=async(file:File|undefined)=>{
+    if(!file||!grid)return;
+    setUploading('result');
+    try{
+      const asset=await onUploadFile(file,'original');
+      if(!asset)return;
+      update({assetId:asset.id});
+      notify('Foto de ChatGPT añadida al post '+(selected+1)+'. La foto original sigue guardada.');
+    }catch(e){showError(e)}finally{setUploading('')}
   };
   const checkConnection=async()=>{
     setBusy('connection');setConnection('unknown');
@@ -316,14 +372,14 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
      const hashes:{n:number;value:string}[]=[];
      for(let i=0;i<grid.posts.length;i++){
       const p=grid.posts[i];
-      const image=p.design&&grid.kind==='preserve'?images[grid.sourceId]:p.assetId?images[p.assetId]:null;
+      const image=(p.assetId&&images[p.assetId])||(p.design&&grid.kind==='preserve'?images[grid.sourceId]:null);
       if(!image){pending++;continue;}
       // Reusing the SAME genuine original is intentional in editorial design.
       // Only duplicate generated assets are a QA problem, not the original photo.
       if(p.assetId&&used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo generado.');
       if(p.assetId)used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
-      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design},exportSize);
+      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design,stickerImages:images},exportSize);
       if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
       if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
       if(!(p.design&&grid.kind==='preserve')){
@@ -341,6 +397,22 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   };
   const gridPending=grid?.posts.filter(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])).length||0;
   const tile=grid?.posts[selected];
+  const isExpress=Boolean(grid?.kind==='preserve'&&grid?.concept?.startsWith('1 Photo → 9 Posts'));
+  const currentPrompt=grid?onePhotoNinePrompt(selected,{
+    product:quickProduct.trim()||grid.brief||grid.title,
+    brandName:brand.name,headline:tile?.headline,support:tile?.subtext,
+    palette:[brand.background,brand.color,brand.secondaryColor,...(brand.additionalColors||[])].filter(Boolean).join(', '),
+    language:outputLanguage,notes:quickNotes||brand.rules
+  }):'';
+  const copyCurrentPrompt=async()=>{
+    if(!currentPrompt)return;
+    try{
+      await navigator.clipboard.writeText(currentPrompt);
+      setCopiedPrompt(true);notify('Prompt copiado. Pégalo en ChatGPT y adjunta tu foto original.');
+    }catch{
+      setCopiedPrompt(false);notify('Selecciona el prompt de abajo y cópialo manualmente.');
+    }
+  };
   return <div className="brand-grid-tool">
     {creditPrompt&&<div className="bg-credit-overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)respondCredits(false)}}>
       <div className="bg-credit-dialog" role="dialog" aria-modal="true" aria-labelledby="bg-credit-title">
@@ -356,8 +428,42 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       </div>
     </div>}
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una foto. Hasta nueve diseños diferentes, con IA opcional y texto editable.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
+    <section className="bg-express" aria-label="Crear nueve publicaciones con una foto">
+      <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
+        <h2>Una foto. Nueve publicaciones diferentes.</h2>
+        <p>Tu producto real, nueve composiciones editoriales y los ocho prompts del freebie más una foto de campaña extra. Puedes crear las imágenes finales en ChatGPT.</p></div>
+        <span className="bg-express-free">Gratis dentro del Lab</span>
+      </div>
+      <div className="bg-express-content">
+        <label className="bg-express-photo">
+          {images[sourceId]?<img src={images[sourceId]} alt="Foto original seleccionada"/>:<ImagePlus size={31}/>}
+          <span><strong>{uploading==='source'?'Subiendo foto…':images[sourceId]?'Cambiar foto':'1 · Sube una foto del producto'}</strong>
+            <small>Usaremos esta misma foto sin modificarla</small></span>
+          <input type="file" accept="image/*,.heic,.heif" aria-label="Subir foto principal para nueve posts" disabled={!!uploading} onChange={e=>{void upload(e.target.files?.[0],'source');e.target.value=''}}/>
+        </label>
+        <div className="bg-express-fields">
+          <label>2 · ¿Qué producto es?
+            <input value={quickProduct} maxLength={110} placeholder="Ej. Matcha, perfume, skincare, velas…" onChange={e=>setQuickProduct(e.target.value)}/>
+          </label>
+          <label>Mensaje que quieres mostrar (opcional)
+            <input value={quickMessage} maxLength={120} placeholder="Ej. Made for your slow mornings" onChange={e=>setQuickMessage(e.target.value)}/>
+          </label>
+        </div>
+        <button type="button" className="btn dark bg-express-create" onClick={createQuickNine} disabled={!sourceId||!quickProduct.trim()||!!busy||!!uploading}>
+          {busy==='quick-nine'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>}
+          Crear mis 9 posts <ArrowRight size={17}/>
+        </button>
+      </div>
+      <details className="bg-express-extras"><summary>¿Quieres añadir más dirección creativa? (opcional)</summary>
+        <label>Estilo, ambiente o detalles que quieres conservar
+          <textarea rows={2} value={quickNotes} maxLength={850} onChange={e=>setQuickNotes(e.target.value)} placeholder="Ej. luz de mañana, superficies naturales, sombra suave; mantener etiquetas exactas"/>
+        </label>
+      </details>
+      <p className="bg-express-tip"><Check size={15}/> Los nueve diseños usan tu foto original. Para crear escenas nuevas, copia el prompt de cada composición, abre ChatGPT y adjunta tu foto.</p>
+    </section>
     <div className="bg-layout"><div className="bg-column">
-      <div className="bg-box"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
+      <details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas · referencias, IA y dirección artística</summary>
+      <div className="bg-advanced-config-content"><div className="bg-title"><span>01</span><div><h3>Sube tu foto</h3><p>Directamente desde Fotos o Archivos.</p></div></div>
         <div className="bg-uploads">
           <label className="bg-drop"><div>{images[sourceId]?<img src={images[sourceId]} alt="Foto original"/>:<ImagePlus size={28}/>}</div><strong>{uploading==='source'?'Preparando…':'01 · Foto original *'}</strong><small>Persona o producto que debemos conservar</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'source')}/></label>
           <label className="bg-drop"><div>{images[referenceId]?<img src={images[referenceId]} alt="Referencia"/>:<Palette size={28}/>}</div><strong>{uploading==='reference'?'Preparando…':'02 · Referencia de estilo'}</strong><small>Solo inspira el estilo, no sustituye al sujeto</small><input type="file" accept="image/*,.heic,.heif" onChange={e=>upload(e.target.files?.[0],'reference')}/></label>
@@ -420,20 +526,43 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           </div>}
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
-      </div>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      </div></details>
+      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
-      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Sube una foto para generar nueve ideas visuales originales, cada una como publicación independiente.</p></div>:<>
+      {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Crear mis 9 posts». Verás aquí los diseños y sus prompts listos para ChatGPT, sin gastar créditos internos.</p></div>:<>
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
          {saveState==='saved'?'✓ Cambios guardados':saveState==='pending'?'Guardado automático pendiente…':saveState==='saving'?'Guardando cambios…':'No se pudieron guardar los cambios.'}
         </span></div><button className="btn ghost" disabled={busy==='export'} onClick={()=>save(grid).then(()=>notify('Grid guardado')).catch(showError)}><Save size={16}/> {saveState==='error'?'Reintentar':'Guardar ahora'}</button></div>
         <div className="v2-vision-status" role="status">{grid.analysisStatus==='vision'
          ? '✓ La IA observó la foto principal y la referencia de estilo al preparar los conceptos.'
          : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
-        <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>setSelected(i)} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
+        <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>{setSelected(i);setCopiedPrompt(false)}} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
-          <span className="bg-status">{String(i+1).padStart(2,'0')}/09 · {t.design&&grid.kind==='preserve'?'DISEÑO LISTO':t.assetId?'FOTO GENERADA':'CONCEPTO'}</span>
+          <span className="bg-status">{i+1}/9 · {t.assetId?'FOTO LISTA':t.design&&grid.kind==='preserve'?'DISEÑO EDITABLE':'CONCEPTO'}</span>
         </button>)}</div>
+        {isExpress&&<section className="bg-chatgpt-workflow" aria-label="Crear fotografías con los nueve prompts de ChatGPT">
+          <div className="bg-chatgpt-heading"><div><span className="eyebrow">PASO 2 · CREA TU IMAGEN REAL</span>
+            <h3>Los 8 prompts del freebie + 1 nuevo</h3>
+            <p>Como las fotos de matcha: fotografía de producto realista, encuadres distintos y estilo editorial. Elige un post para ver su instrucción.</p></div>
+            <a href="prompts/" target="_blank" rel="noopener noreferrer">Ver el freebie original</a>
+          </div>
+          <div className="bg-prompt-tiles">{ONE_PHOTO_NINE.map((entry,n)=><button key={entry.name} type="button"
+            className={selected===n?'active':''} aria-pressed={selected===n} onClick={()=>{setSelected(n);setCopiedPrompt(false)}}>
+            <strong>{n+1}. {entry.name}</strong><small>{entry.short}{n===8?' · BONUS':''}</small></button>)}</div>
+          <h4>Prompt del post {selected+1} · {ONE_PHOTO_NINE[selected].name}</h4>
+          <textarea className="bg-prompt-text" rows={6} value={currentPrompt} readOnly aria-label={'Prompt para ChatGPT de la publicación '+(selected+1)} onFocus={e=>e.currentTarget.select()}/>
+          <div className="bg-prompt-actions">
+            <button type="button" className="btn ghost" onClick={()=>{void copyCurrentPrompt()}}><Check size={15}/>{copiedPrompt?'Copiado ✓':'Copiar prompt'}</button>
+            <a className="btn dark" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" onClick={()=>{void copyCurrentPrompt()}}>
+              Abrir ChatGPT <ArrowRight size={16}/>
+            </a>
+          </div>
+          <p className="bg-chatgpt-steps"><strong>En ChatGPT:</strong> pega el prompt, adjunta la foto original y pide una sola imagen 4:5. Guarda esa imagen y vuelve aquí. El Content Lab no envía fotos a ChatGPT automáticamente.</p>
+          <label className="bg-result-upload"><Upload size={20}/><span><strong>{uploading==='result'?'Importando…':'Subir aquí la imagen creada en ChatGPT'}</strong><small>Se coloca en el post {selected+1}, sin sustituir la foto maestra. Puedes seguir editando el PNG.</small></span>
+            <input type="file" accept="image/*,.heic,.heif" aria-label={'Añadir imagen de ChatGPT al post '+(selected+1)} disabled={!!uploading}
+              onChange={e=>{void uploadChatGptResult(e.target.files?.[0]);e.target.value=''}}/>
+          </label>
+        </section>}
         <div className="v2-usage-note"><strong>{sessionPhotos} fotos nuevas generadas en esta sesión.</strong> La cuota Free de Cloudflare es compartida; este número no representa el saldo real. Preparar ideas y analizar referencias también puede usar cuota. La generación múltiple requiere tu confirmación.</div>
         <div className="bg-export-setting"><label htmlFor="grid-export-size">Formato final</label><select id="grid-export-size" value={exportSize} onChange={e=>{setExportSize(e.target.value as ExportSize);setDownloads([]);setQaNotes([]);setReviewed(false)}}>
            {(Object.keys(EXPORT_SIZES) as ExportSize[]).map(k=><option key={k} value={k}>{EXPORT_SIZES[k].title} ({EXPORT_SIZES[k].w} × {EXPORT_SIZES[k].h})</option>)}
@@ -499,7 +628,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               title="Stickers aesthetics & backgrounds"
               assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
               onChange={next=>tile.design?update({backgroundImageId:next.backgroundImageId,design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...((next.backgroundImageId||next.backgroundId&&next.backgroundId!=='brand')?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,backgroundImageId:next.backgroundImageId,stickerIds:next.stickerIds})}/>}
-          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={tile.design&&grid.kind==='preserve'?images[grid.sourceId]:images[tile.assetId]} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId])} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
           <p className="bg-note">El texto, la tipografía, los fondos y las anotaciones se componen como capas editables del PNG. La IA solo crea fotografías si pulsas «Generar este post».</p>
           <div className="bg-post-actions">{!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}

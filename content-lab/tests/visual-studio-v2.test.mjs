@@ -117,7 +117,7 @@ test('editorial original-photo reuse is intentional and cannot trigger duplicate
  const grid=src('src/BrandGrid.tsx');
  assert.ok(grid.includes("if(p.assetId)used.set(p.assetId,i)"));
  assert.ok(grid.includes("if(!(p.design&&grid.kind==='preserve'))"));
- assert.ok(grid.includes("'DISEÑO LISTO'"));
+ assert.ok(grid.includes("'DISEÑO EDITABLE'"));
  assert.ok(grid.includes("bg-free-design"));
  assert.ok(grid.includes("Generar foto con IA (1 crédito)"));
 });

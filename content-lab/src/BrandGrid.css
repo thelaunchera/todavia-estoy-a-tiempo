@@ -179,3 +179,54 @@
 .bg-reference-focus strong{font-size:12px;color:#284d52}.bg-reference-focus>div{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .bg-reference-focus label{font-size:11px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #d6e5e6;border-radius:22px;padding:8px 11px;cursor:pointer;color:#426b73}
 .bg-reference-focus input[type=checkbox]{accent-color:#477d86;margin:0;width:15px;height:15px}.bg-reference-focus small{display:block;font-size:11px;line-height:1.5;color:#758d91}
+
+/* One Photo → Nine Posts: guided, accessible mobile-first product workflow. */
+.bg-express{background:linear-gradient(120deg,#fbfaf5 2%,#eaf3f6 100%);border:1px solid #d7e3e6;border-radius:18px;padding:23px;margin:0 0 20px}
+.bg-express-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.bg-express-heading h2{font-size:clamp(22px,2.7vw,34px);line-height:1.13;letter-spacing:-.7px;margin:7px 0}
+.bg-express-heading p{max-width:780px;line-height:1.6;font-size:12px;color:#57727c;margin:0}
+.bg-express-free{border:1px solid #bfd0d3;background:#fff;padding:7px 10px;border-radius:99px;font-size:10px;font-weight:700;color:#426673;white-space:nowrap}
+.bg-express-content{display:grid;grid-template-columns:minmax(170px,.8fr) minmax(220px,1.4fr) auto;gap:15px;align-items:end;margin-top:19px}
+.bg-express-photo,.bg-result-upload{position:relative;border:1px dashed #97b8c3;border-radius:12px;display:flex;align-items:center;gap:13px;padding:12px;background:#fff;min-height:103px;color:#5b8190;cursor:pointer;min-width:0;overflow:hidden}
+.bg-express-photo>img{width:84px;height:82px;flex-shrink:0;object-fit:contain;border-radius:8px}
+.bg-express-photo>span,.bg-result-upload>span{display:grid;gap:5px;min-width:0;flex:1}
+.bg-express-photo strong,.bg-result-upload strong{font-size:12px;color:#263f49}
+.bg-express-photo small,.bg-result-upload small{color:#65818a;font-size:10px;line-height:1.45}
+.bg-express-photo>input,.bg-result-upload>input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.bg-express-fields{display:grid;grid-template-columns:1fr;gap:9px;min-width:0}
+.bg-express-fields label,.bg-express-extras label{font-size:11px;font-weight:700;color:#425e69;display:grid;gap:5px;margin:0}
+.bg-express-fields input,.bg-express-extras textarea{font-size:13px;min-width:0;padding:11px 12px;border-radius:9px;border:1px solid #c9d9de;background:#fff}
+.bg-express-create{min-height:51px;display:flex;align-items:center;justify-content:center;gap:9px;white-space:nowrap;font-size:12px}
+.bg-express-extras{margin-top:14px;border-top:1px solid #cbdde0;padding-top:11px}
+.bg-express-extras summary{cursor:pointer;color:#506f7b;font-size:11px;font-weight:700}
+.bg-express-extras label{margin-top:12px}
+.bg-express-tip{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;font-size:11px;line-height:1.55;color:#647e87}
+.bg-express-tip svg{flex-shrink:0}
+.bg-advanced-config{padding:0!important}
+.bg-advanced-config>summary{padding:17px 22px;font-size:12px;font-weight:800;color:#3d6272;cursor:pointer}
+.bg-advanced-config-content{padding:4px 22px 22px;border-top:1px solid #e7eeee}
+.bg-chatgpt-workflow{background:#f6f9f8;border:1px solid #dce7e7;border-radius:15px;padding:20px;margin:21px 0}
+.bg-chatgpt-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}
+.bg-chatgpt-heading h3{margin:7px 0;font-size:20px;letter-spacing:-.4px}
+.bg-chatgpt-heading p{margin:0;font-size:11px;color:#6e8389;line-height:1.5}
+.bg-chatgpt-heading a{white-space:nowrap;font-size:11px;color:#40768b;text-decoration:underline}
+.bg-prompt-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:17px 0}
+.bg-prompt-tiles button{background:#fff;border:1px solid #dbe6e8;border-radius:11px;padding:12px 10px;min-width:0;min-height:67px;text-align:left;display:grid;align-content:center;gap:5px;color:#273e49}
+.bg-prompt-tiles button.active{border:2px solid #527f8f;background:#eaf5f7}
+.bg-prompt-tiles strong{font-size:11px;line-height:1.3}
+.bg-prompt-tiles small{font-size:10px;color:#6c8590;line-height:1.35}
+.bg-chatgpt-workflow h4{font-size:12px;margin:12px 0 9px;color:#344e5b}
+.bg-prompt-text{width:100%;box-sizing:border-box;resize:vertical;min-height:135px;border:1px solid #cadadf;color:#304650;background:#fff;border-radius:11px;padding:12px;font:11px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace}
+.bg-prompt-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:13px 0}
+.bg-prompt-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;min-height:43px}
+.bg-chatgpt-steps{font-size:11px;line-height:1.65;color:#597580;margin:12px 0}
+.bg-result-upload{min-height:88px;border-style:solid;background:#fff;margin-top:15px}
+@media(max-width:1050px){.bg-express-content{grid-template-columns:1fr 1.3fr}.bg-express-create{grid-column:1/-1}}
+@media(max-width:650px){.bg-express{padding:15px;margin-bottom:15px}.bg-express-heading{display:block}
+ .bg-express-free{display:inline-block;margin-top:10px}.bg-express-content{grid-template-columns:1fr;gap:11px}
+ .bg-express-create{grid-column:auto;width:100%}.bg-express-photo{min-height:89px}
+ .bg-advanced-config>summary{padding:14px}.bg-advanced-config-content{padding:2px 13px 15px}
+ .bg-chatgpt-workflow{padding:13px}.bg-chatgpt-heading{display:block}.bg-chatgpt-heading a{display:inline-block;margin-top:10px}
+ .bg-prompt-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .bg-prompt-tiles button{padding:9px;min-height:65px}.bg-prompt-actions{display:grid;grid-template-columns:1fr 1fr}
+ .bg-prompt-actions .btn{padding:11px 8px;font-size:11px}}

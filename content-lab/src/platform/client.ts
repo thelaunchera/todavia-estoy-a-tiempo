@@ -206,6 +206,15 @@ export const api={
     }
     if(path==='/api/brands')return {data:await add('brands',payload)};
     if(path==='/api/posts')return {data:await add('posts',payload)};
+    if(path==='/api/grids'){
+      // User-owned, passwordless-authenticated drafts; database RLS enforces ownership.
+      if(!payload?.brandId||!payload?.sourceId||!Array.isArray(payload.posts)||payload.posts.length!==9)
+        throw Error('Se requieren una foto original y nueve publicaciones.');
+      const personalBrands=await list('brands'),personalAssets=await list('assets');
+      if(!personalBrands.some((b:any)=>b.id===payload.brandId)||!personalAssets.some((a:any)=>a.id===payload.sourceId&&a.brandId===payload.brandId))
+        throw Error('La foto debe pertenecer a tu propia marca.');
+      return {data:await add('grids',payload)};
+    }
     if(path==='/api/prompts'){
       const text=String(payload?.text||'').slice(0,4800);
       if(!text.trim())throw Error('El prompt no puede estar vacío.');
