@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
-  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3
+  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X
 } from 'lucide-react';
 import './CarouselFactory.css';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
@@ -449,6 +449,17 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
   const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas');
+  // iPhone preview is a user-opened peek, never a permanent overlay on editing.
+  const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
+  useEffect(()=>{
+    if(!mobilePreviewOpen)return;
+    const onEscape=(event:KeyboardEvent)=>{
+      if(event.key==='Escape')setMobilePreviewOpen(false);
+    };
+    document.addEventListener('keydown',onEscape);
+    return()=>document.removeEventListener('keydown',onEscape);
+  },[mobilePreviewOpen]);
+  useEffect(()=>{setMobilePreviewOpen(false);},[brand.id,post.id]);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
@@ -1150,8 +1161,24 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>IA</button>
     </nav>
     <div className="factory-design-flow"><span>INSPIRACIÓN</span><span>FOTO</span><span>FONDO</span><span>TEXTO</span><span>DETALLES</span></div>
+    <button type="button" className="factory-mobile-preview-trigger"
+      aria-label={'Ver diseño actual, slide '+(i+1)+' de '+slides.length}
+      aria-expanded={mobilePreviewOpen} aria-controls="factory-mobile-preview"
+      onClick={()=>setMobilePreviewOpen(true)}>
+      {overview[i]&&<img src={overview[i]} alt="" draggable={false}/>}
+      {!overview[i]&&<Eye size={18}/>}
+      <span>Ver diseño</span><small>{i+1}/{slides.length}</small>
+    </button>
+    {mobilePreviewOpen&&<button type="button" className="factory-mobile-preview-backdrop"
+      onClick={()=>setMobilePreviewOpen(false)} aria-label="Cerrar vista previa y volver a editar"/>}
     <div className="factory-persistent-layout">
-      <aside className="factory-persistent-preview factory-right" aria-label="Vista previa del diseño que estás editando">
+      <aside id="factory-mobile-preview"
+        className={'factory-persistent-preview factory-right'+(mobilePreviewOpen?' is-open':'')}
+        role={mobilePreviewOpen?'dialog':undefined}
+        aria-modal={mobilePreviewOpen?true:undefined}
+        aria-label="Vista previa del diseño que estás editando">
+        <button type="button" className="factory-mobile-preview-close" onClick={()=>setMobilePreviewOpen(false)}
+          aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
         <div className="factory-section"><strong>Tu carrusel en vivo</strong><span>4:5 · {i+1} de {slides.length}</span></div>
         <div className="factory-live-preview-compact">
           <div className="factory-live-preview-thumb">
