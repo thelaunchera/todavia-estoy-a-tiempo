@@ -287,3 +287,13 @@
  .bg-compact-workspace-head h3{font-size:19px}
  .bg-compact-next{padding:7px 9px}
 }
+
+.bg-saved-projects{padding:0!important}
+.bg-saved-projects>summary{padding:16px 21px;font-size:12px;color:#4d737e;font-weight:700;cursor:pointer}
+.bg-saved-projects>.bg-recent{padding:0 14px 14px;max-height:260px;overflow:auto}
+@media(max-width:800px){
+ .brand-grid-tool .bg-layout{display:flex;flex-direction:column;align-items:stretch}
+ .brand-grid-tool .bg-results{order:0;min-height:0}
+ .brand-grid-tool .bg-column{order:1;display:flex;flex-direction:column}
+ .brand-grid-tool .bg-empty{min-height:240px}
+}
