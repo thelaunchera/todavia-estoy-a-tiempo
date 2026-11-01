@@ -593,7 +593,7 @@ function App() {
     if (!brand) return;
     editorSessionRef.current++;
     setEditor(inspectRecovery({ ...newPost(brand.id), angle,format:'Single post' }));
-    setManualOpen(false);
+    setManualOpen(true);
     setTopic('');
     setAlternatives([]);
     navigate('create');
@@ -1425,6 +1425,7 @@ function App() {
             <IdeaBank brandName={brand.name} audience={brand.audience} language={brand.language} onUse={(idea:Idea)=>{
               start(idea.angle);
               setEditor(p=>({...p,title:idea.title,hook:idea.hook,slides:idea.brief}));
+              setManualOpen(true);
             }}/>
           )}
           {brand && tab === 'prompts' && (
@@ -1528,7 +1529,7 @@ function App() {
                   <section className="panel">
                     <div className="panelhead">
                       <span>01</span>
-                      <h3>{loginLanguage==='es'?'Cuéntale a la IA qué quieres crear':'Tell AI what to create'}</h3>
+                      <h3>{loginLanguage==='es'?'Prepara tu publicación':'Prepare your post'}</h3>
                     </div>
                     <label>{loginLanguage==='es'?'Describe tu idea en tus palabras':'Describe your idea in your words'}</label>
                     <textarea
@@ -1558,8 +1559,8 @@ function App() {
                         </select>
                       </details>
                     </div>
-                    <p className="lab-ai-message">{loginLanguage==='es'?'Escribe como hablas. La IA propondrá el texto usando la voz de tu marca; tú decides qué conservar.':'Write naturally. AI drafts in your brand voice; you decide what to keep.'}</p>
-                    <button
+                    <p className="lab-ai-message">{loginLanguage==='es'?'Escribe con tu voz o empieza con una idea del banco. Puedes editar cada palabra.':'Write in your voice or start with an idea from the bank. You control every word.'}</p>
+                    {aiWallet?.admin&&<button
                       className="btn dark wide"
                       disabled={busy === 'ai'}
                       onClick={generate}
@@ -1572,8 +1573,9 @@ function App() {
                       {busy === 'ai'
                         ? (loginLanguage==='es'?'Creando…':'Creating…')
                         : (loginLanguage==='es'?'Crear con IA · 1 crédito':'Create with AI · 1 credit')}
-                    </button>
-                    <small className="note">{loginLanguage==='es'?'Puedes editar todo antes de guardar. Las fotos con IA se generan por separado.':'Everything is editable before saving. AI photos are generated separately.'}</small>
+                    </button>}
+                    <button className="btn dark wide" type="button" onClick={()=>navigate('idea-bank')}><Lightbulb size={17}/>{loginLanguage==='es'?'Explorar banco de ideas + IA':'Browse AI idea bank'}</button>
+                    <small className="note">{loginLanguage==='es'?'Tu diseño se descarga en PNG. Los prompts del banco se usan en ChatGPT sin gastar créditos del Lab.':'Download your design as PNG. Idea prompts work with ChatGPT without Lab generation credits.'}</small>
                     <button className="btn ghost wide" type="button" onClick={()=>setManualOpen(v=>!v)}>
                       {manualOpen?(loginLanguage==='es'?'Recoger editor':'Collapse editor'):(loginLanguage==='es'?'Editar todo manualmente':'Edit everything manually')}
                     </button>
