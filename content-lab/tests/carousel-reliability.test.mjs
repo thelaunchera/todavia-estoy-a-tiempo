@@ -19,7 +19,7 @@ test('Unchanged slide previews are reused without changing the PNG export pipeli
   assert.ok(factory.includes('const independent=!style.seamlessEnabled'));
   assert.ok(factory.includes('previewCache.current.get(key)'));
   assert.ok(factory.includes('while(previewCache.current.size>20)'));
-  assert.ok(factory.includes('const all=await renderAllSlides()'));
+  assert.ok(factory.includes('const all=independent?null:await renderAllSlides()'));
   assert.ok(factory.includes("thumb.toDataURL('image/png')"));
 });
 
