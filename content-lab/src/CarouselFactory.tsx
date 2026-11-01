@@ -1515,6 +1515,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     {studioTab==='style'&&<>
           <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
       <div className="factory-style-title"><div><span className="factory-step-eyebrow">PASO 1 DE 5 · FONDOS Y STICKERS</span><h2>Elige tu fondo y tus stickers.</h2><p>Empieza por el estilo del lienzo. Puedes usar fondos distintos por slide y añadir stickers aquí mismo.</p></div><span className="factory-style-lock"><Check size={15}/> Lienzo editable</span></div>
+      <details className="factory-bg-color-advanced"><summary>Color sólido o degradado (opcional)</summary>
       <div className="factory-canvas-colors">
         <label>Color del fondo <input type="color" aria-label="Color del fondo del carrusel" value={style.canvasColor}
           onChange={e=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
@@ -1529,6 +1530,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" onClick={()=>setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:''})),
             {...style,canvasColor:'#FFFFFF',canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''})}>Fondo blanco</button>
       </div>
+      </details>
       <div className="factory-background-main">
         <div className="factory-background-main-head">
           <strong>Elige dónde aplicar el fondo</strong>
@@ -1562,10 +1564,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           <button type="button" className="btn dark factory-background-apply" onClick={extendCurrentBackground}>
             <Layers3 size={16}/> 🎀 Estirar este fondo entre slides
           </button>}
-        <button type="button" className="btn ghost factory-background-apply" onClick={backgroundOfAll}>
-          Aplicar el fondo actual a todos los slides
-        </button>
+        
       </div>
+      <details className="factory-style-optional"><summary>Paleta y dirección visual (opcional)</summary>
       <div className="factory-style-controls">
         <label>Dirección visual<select aria-label="Dirección visual del carrusel" value={style.mood} onChange={e=>setArtStyle({mood:e.target.value as CarouselStyle['mood']})}>
           <option value="editorial">Editorial limpio</option><option value="soft">Soft · fondos cálidos</option><option value="bold">Bold · contraste moderno</option><option value="dark">Dark · premium oscuro</option>
@@ -1578,10 +1579,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <div className="factory-style-swatches">{palette.map((c,n)=><span key={n} title={c} style={{background:c}}/>)}<span title="Fondo" style={{background:brand.background}}/><small>Paleta guardada · usa otros tonos por slide cuando quieras</small></div>
 
       </div>
+      </details>
       {referenceReport&&<p className="factory-reference-report" role="status">{referenceReport}</p>}
     </section>
 
-          <section className="seamless-config">
+          {style.seamlessEnabled&&<details className="factory-seamless-settings"><summary>Opciones de fondo continuo (avanzado)</summary>
+<section className="seamless-config">
       <div className="seamless-header"><div><span className="eyebrow">{style.seamlessEnabled?'SEAMLESS · CORTES CONTINUOS':'CARRUSEL NORMAL'}</span><h2>{style.seamlessEnabled?'Una imagen que cruza varias slides.':'Cada slide, independiente.'}</h2><p>{style.seamlessEnabled?'Arrastra tus fotos o fondos a través de las líneas azules. Se cortarán solo al descargar.':'Cada fondo y fotografía se queda dentro de su slide. Para extender imágenes, elige Seamless arriba.'}</p></div></div>
       {style.seamlessEnabled&&<div className="seamless-controls"><label>Background continuo<select value={style.seamlessBackgroundId} onChange={e=>setArtStyle({seamlessBackgroundId:e.target.value as FreeBackgroundId})}>{([
  {title:'✂️ Scrapbook',items:FREE_BACKGROUNDS.filter(b=>isBackgroundVisible(b.id)&&isScrapbookBackground(b.id))},
@@ -1596,7 +1599,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>}
     </section>
 
-      <details className="factory-style-advanced"><summary>Personalizar un slide o añadir stickers</summary>
+      </details>}
+      <details className="factory-style-advanced"><summary>Color especial para este slide (opcional)</summary>
                   {!style.seamlessEnabled&&<details className="factory-slide-colors"><summary>Color o degradado de este slide (opcional)</summary>
             <div><label>Color <input type="color" value={slide.backgroundColor||style.canvasColor}
               onChange={e=>replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:e.target.value})}/></label>
@@ -1610,12 +1614,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             </div>
           </details>}
 
-          <FreeDecorControls title="Añadir stickers" backgroundScope={backgroundScope}
-            preferenceScope={brand.id} backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
-            stickerIds={slide.stickerIds||[]} slideNumber={i+1} slideCount={slides.length}
-          onCopySticker={copySticker} onChange={updateDecoration} assets={ownedAssets}
-            images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
-            onUploadBackground={onUploadBackground}/>
+          
       </details>
       <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('canvas')}>Siguiente: fotos y diseños <ArrowRight size={16}/></button></div>
     </>}
