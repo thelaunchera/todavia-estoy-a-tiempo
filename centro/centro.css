@@ -333,7 +333,7 @@ body.modal-open{overflow:hidden}
 .lab-compact .product-details-meta{margin:16px 0;gap:10px}
 .lab-compact .product-details-section{padding:16px 0}
 .lab-compact .product-details-section h3{font-size:21px;margin-bottom:10px}
-.lab-compact .product-details-note{font-size:12px;line-height:1.5;padding:12px;margin:12px 0}
+.lab-compact .product-details-note{font-size:12px;line-height:1.5;padding:0;margin:0 0 8px}
 .lab-compact .product-legal-disclosure{padding:0;background:none;border:0;font-size:12px}
 .lab-compact .product-legal-disclosure>strong,.lab-compact .product-legal-disclosure>p:first-of-type{display:none}
 .lab-compact .product-details-actions{gap:12px}
@@ -349,7 +349,7 @@ body.modal-open{overflow:hidden}
 .product-details-section h3{font-size:19px;margin-bottom:7px}
 .product-details-section ul{gap:6px}
 .product-details-section li{line-height:1.45}
-.product-details-note{padding:11px 13px;line-height:1.5;margin:5px 0 10px}
+.product-legal-disclosure .product-details-note{padding:0;border:0;border-radius:0;background:transparent;line-height:1.55;margin:0 0 8px;color:#506c7f}
 .product-legal-disclosure{padding:10px 13px;margin:7px 0 4px;background:#f5f8f7}
 .product-legal-disclosure summary{cursor:pointer;font-size:12px;font-weight:800;color:#31556a;list-style-position:inside}
 .product-legal-disclosure[open] summary{margin-bottom:9px}
