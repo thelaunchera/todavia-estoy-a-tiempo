@@ -12,6 +12,7 @@ import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
+import QuickStartGuide from './QuickStartGuide';
 import FreeDecorControls from './FreeDecorControls';
 import {readCoverDecor,writeCoverDecor,type CoverDecor} from './CoverDecor';
 import MediaLibrary from './MediaLibrary';
@@ -1200,6 +1201,8 @@ function App() {
           </div>
         </header>
         <div className="content" data-lab-tab={tab} key={tab}>
+          {brand&&['factory','vertical','create'].includes(tab)&&account?.email&&
+            <QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory}/>}
           {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
             <span role="status" aria-live="polite">
               {draftStatus==='saving'?'Guardando cambios…':
