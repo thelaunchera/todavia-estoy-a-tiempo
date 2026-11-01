@@ -1535,7 +1535,7 @@ function App() {
             </>
           )}
           {brand && tab === 'idea-bank' && (
-            <IdeaBank brandName={brand.name} audience={brand.audience} language={brand.language} onUse={(idea:Idea)=>{
+            <IdeaBank brandName={brand.name} audience={brand.audience} language={brand.language} locale={loginLanguage} onUse={(idea:Idea)=>{
               start(idea.angle);
               setEditor(p=>({...p,title:idea.title,hook:idea.hook,slides:idea.brief}));
               setManualOpen(true);
@@ -1939,7 +1939,7 @@ function App() {
                notify={toast} showError={err}/>
            )}
            {brand && tab === 'formats' && (
-             <FormatGallery brand={brand} assets={library} images={images}
+             <FormatGallery brand={brand} assets={library} images={images} locale={loginLanguage}
                onUpload={()=>navigate('media')}
                onChoose={format=>{setGridPref(p=>({version:p.version+1,brandId:brand.id,format}));navigate('grid')}}/>
            )}
