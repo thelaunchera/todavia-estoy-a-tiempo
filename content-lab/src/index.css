@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 :root {
+  --content-lab-css-ready: 1;
   font-family: 'DM Sans', Arial, sans-serif;
   color: #1d2224;
   background: #f8f8f6;
