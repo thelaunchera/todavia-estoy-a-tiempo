@@ -1928,14 +1928,7 @@ function App() {
           hidden
           onChange={e => upload(e.target.files?.[0])}
         />
-        {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
-          {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
-              {id:'vertical',label:'Reels',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
-              {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
-            .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
-              className={tab===item.id?'active':''} onClick={()=>item.id==='factory'?startFactory():item.id==='vertical'?startVertical():navigate(item.id)}>
-              <item.icon size={21}/><span>{t(item.label)}</span></button>)}
-        </nav>}
+
         {notice && (
           <div className="toast">
             <Check size={18} />
@@ -1947,6 +1940,16 @@ function App() {
         )}
         <nav aria-label="Content Lab · Información legal" style={{padding:'18px 20px',display:'flex',gap:18,flexWrap:'wrap',fontSize:12}}><a href="./terminos.html" target="_blank" rel="noopener noreferrer">Términos del Lab</a><a href="./privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a><a href="./reembolsos.html" target="_blank" rel="noopener noreferrer">Reembolsos</a></nav>
       </main>
+      {/* Keep the dock outside the scrolling main so Safari never re-anchors it
+          when the page content or browser controls resize. */}
+      {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
+                {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
+                    {id:'vertical',label:'Reels',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
+                    {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
+                  .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
+                    className={tab===item.id?'active':''} onClick={()=>item.id==='factory'?startFactory():item.id==='vertical'?startVertical():navigate(item.id)}>
+                    <item.icon size={21}/><span>{t(item.label)}</span></button>)}
+              </nav>}
     </div>
   );
 }
