@@ -1142,11 +1142,7 @@ function App() {
             })}
           </div>)}
         </nav>
-        {false && aiWallet && !aiWallet.admin && <div className="lab-credit-wallet" role="status" aria-live="polite">
-          <strong>{loginLanguage==='es'?'Créditos de IA · Tu saldo':'AI credits · Your balance'}</strong>
-          <p>{aiWallet.photo_remaining??60} {loginLanguage==='es'?'fotos':'photos'} · {aiWallet.creative_remaining??30} {loginLanguage==='es'?'créditos creativos':'creative credits'}</p>
-          <small>{loginLanguage==='es'?'10 fotos por día y un máximo de 10 créditos de ideas. Editar y descargar tus PNG no consume créditos.':'10 photos per day and up to 10 idea credits. Editing and downloading PNGs does not use credits.'}</small>
-        </div>}
+
         <div className="side-footer">
           
           <div className="side-inspo">
