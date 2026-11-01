@@ -24,7 +24,7 @@ const plain=(en:string,es:string,locale:'es'|'en')=>locale==='es'?es:en;
 function uniqueId(){return 'free-'+crypto.randomUUID();}
 function legacyStickers(decor:CoverDecor):PanoramaLayer[]{
  return decor.stickerIds.filter(id=>!decor.layers.some(layer=>layer.assetId===id))
-  .map((id,n)=>({id:'legacy-sticker-'+id,assetId:id,name:'Sticker',kind:'sticker',
+  .map((id,n)=>({id:'legacy-sticker-'+id,assetId:id,name:'Sticker',kind:'sticker',locked:(decor.lockedStickerIds||[]).includes(id),
    rect:decor.stickerPositions[id]||{x:.1+(n*.19),y:.7,w:.18,h:.18}}));
 }
 export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLayer[]{
