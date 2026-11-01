@@ -850,6 +850,39 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),promoteSource(source,rect)]});
     }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect:clampPanoramaRect(rect)}:layer)});
   };
+  const copyPanoramaSticker=(id:string,targetIndex:number):StickerCopyResult=>{
+    if(targetIndex<0||targetIndex>=slides.length)return 'invalid';
+    const source=pageLayers.find(layer=>layer.id===id&&layer.kind==='sticker');
+    if(source&&source.kind==='sticker'&&source.assetId){
+      const output=copyStickerToSlide(slides,source.page,targetIndex,source.assetId);
+      if(output.result==='copied'){
+        setAll(output.slides);
+        notify('Sticker copiado al slide '+(targetIndex+1)+' sin mover el original.');
+      }
+      return output.result;
+    }
+    const global=(style.panoramaLayers||[]).find(layer=>layer.id===id&&layer.kind==='sticker');
+    if(!global||!global.assetId)return 'invalid';
+    const count=slides.length;
+    const center=(global.rect.x+global.rect.w/2)*count;
+    const sourceIndex=Math.max(0,Math.min(count-1,Math.floor(center)));
+    if(sourceIndex===targetIndex)return 'exists';
+    const alreadyOnTarget=slides[targetIndex]?.stickerIds?.includes(global.assetId)||
+      (style.panoramaLayers||[]).some(layer=>layer.kind==='sticker'&&
+        layer.assetId===global.assetId&&Math.max(0,Math.min(count-1,
+        Math.floor((layer.rect.x+layer.rect.w/2)*count)))===targetIndex);
+    if(alreadyOnTarget)return 'exists';
+    if((style.panoramaLayers||[]).length>=24)return 'full';
+    const rect=clampPanoramaRect({
+      ...global.rect,x:global.rect.x+(targetIndex-sourceIndex)/count,
+    },.055/count);
+    setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),{
+      ...global,id:'panorama-'+crypto.randomUUID(),rect,
+      name:global.name+' · slide '+(targetIndex+1),
+    }]});
+    notify('Sticker copiado al slide '+(targetIndex+1)+' con su tamaño y giro.');
+    return 'copied';
+  };
   const updatePanoramaLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
@@ -1278,6 +1311,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       </div>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+       onCopySticker={copyPanoramaSticker}
       onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
       onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
       canUndo={historyVersion>=0&&pastHistory.current.length>0}
