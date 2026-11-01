@@ -6,7 +6,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('Create menu separates post, carousel, reel and story workspaces',()=>{
  const app=read('src/App.tsx');
  assert.ok(app.includes("'vertical' | 'factory'"));
- assert.ok(app.includes('Reels e historias · 9:16'));
+ assert.ok(app.includes('Portadas de reels e historias · 9:16'));
  assert.ok(app.includes('<VerticalStudio'));
  assert.ok(app.includes("startVertical('Reel')"));
  assert.ok(app.includes("startVertical('Story')"));
