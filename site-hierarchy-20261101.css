@@ -70,3 +70,18 @@
  .podcast-hero-v2 .hero-cta .button-light,
  .class-page-v2 .class-hero-actions .class-primary-button {transition:none;}
 }
+
+/* On phones the practical class promise + waitlist precede the portrait. */
+@media(max-width:650px){
+ .class-page-v2 .class-hero-grid{
+   grid-template-columns:minmax(0,1fr)!important;
+   grid-template-areas:"intro" "visual"!important;
+ }
+ .class-page-v2 .class-hero-intro{
+   grid-area:intro!important;
+   padding:clamp(16px,5vw,24px) clamp(18px,5vw,25px) 0;
+ }
+ .class-page-v2 .class-hero-art{grid-area:visual!important;margin-top:22px!important;}
+ .class-page-v2 .class-hero .class-hero-actions{margin-top:16px!important;}
+ .class-page-v2 .class-hero .class-hero-chips{margin-top:14px;}
+}
