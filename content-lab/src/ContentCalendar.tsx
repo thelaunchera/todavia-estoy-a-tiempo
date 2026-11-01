@@ -5,7 +5,7 @@ import {localDate,monthCells,plannedItems,validDate,validTime,contentKind,conten
 import './ContentCalendar.css';
 
 type Props={
- brand:{id:string;name:string};posts:CalendarPost[];images:Record<string,string>;
+ brand:{id:string;name:string};posts:CalendarPost[];images:Record<string,string>;focusDate?:string;
  onPostSaved:(post:CalendarPost)=>void;loadImage:(id:string)=>void;
  onNewPost:()=>void;onOpenGrid:()=>void;onEditItem:(item:PlannedItem)=>void;locale:'es'|'en';
  notify:(value:string)=>void;showError:(error:unknown)=>void;
@@ -38,14 +38,14 @@ const dateLabel=(d:string,language:'es'|'en')=>{
  const [year,month,day]=d.split('-').map(Number);
  return new Intl.DateTimeFormat(language==='es'?'es-US':'en-US',{day:'numeric',month:'short',year:'numeric'}).format(new Date(year,month-1,day));
 };
-export default function ContentCalendar({brand,posts,images,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,locale,notify,showError}:Props){
+export default function ContentCalendar({brand,posts,images,focusDate,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,locale,notify,showError}:Props){
  const lang=labels[locale],today=useMemo(()=>new Date(),[]);
- const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1));
- const [selectedDay,setSelectedDay]=useState(()=>localDate(today));
+ const [month,setMonth]=useState(()=>validDate(focusDate||'')?new Date(Number(focusDate!.slice(0,4)),Number(focusDate!.slice(5,7))-1,1):new Date(today.getFullYear(),today.getMonth(),1));
+ const [selectedDay,setSelectedDay]=useState(()=>validDate(focusDate||'')?focusDate!:localDate(today));
  const [view,setView]=useState<'month'|'feed'>('month');
  const [grids,setGrids]=useState<CalendarGrid[]>([]);
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false);
- const [key,setKey]=useState(''),[date,setDate]=useState(()=>localDate(today)),[time,setTime]=useState('09:00');
+ const [key,setKey]=useState(''),[date,setDate]=useState(()=>validDate(focusDate||'')?focusDate!:localDate(today)),[time,setTime]=useState('09:00');
  const [loadError,setLoadError]=useState('');
  useEffect(()=>{
   let mounted=true;
