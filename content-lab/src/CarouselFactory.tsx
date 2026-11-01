@@ -525,9 +525,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       const context=thumb.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
       context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
       context.drawImage(canvas,0,0,thumb.width,thumb.height);
-      const png=thumb.toDataURL('image/png');
-      previews.push(png);
-      if(independent)previewCache.current.set(key,png);
+      // Lossless Retina preview remains identical to the original renderer.
+      previews.push(thumb.toDataURL('image/png'));
+      if(independent)previewCache.current.set(key,previews[previews.length-1]);
       thumb.width=1;thumb.height=1;
       canvas.width=1;canvas.height=1;
     }
