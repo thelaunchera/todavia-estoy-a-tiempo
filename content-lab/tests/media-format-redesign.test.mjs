@@ -3,14 +3,28 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 const file=(p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('20 previews use real photographic local examples and accurate template positions',()=>{
- const gallery=file('src/FormatGallery.tsx'),composer=file('src/GridComposer.ts');
- assert.ok(gallery.includes("import {LAYOUTS,type Layout}"));
- assert.ok(gallery.includes('const formatPos='));
- assert.ok(gallery.includes('clase-retrato-laptop-real-2026.jpg'));
- assert.ok(gallery.includes('diario-carta-20261027.jpg'));
+test('20 editorial previews are unique interiors and preserve exact editor layout names',()=>{
+ const gallery=file('src/FormatGallery.tsx'),composer=file('src/GridComposer.ts'),css=file('src/FormatGallery.css');
+ const photoIds=[...gallery.matchAll(/\{id:'([^']+)'/g)].map(match=>match[1]);
+ const spanishTitles=[...gallery.matchAll(/,es:'([^']+)'/g)].map(match=>match[1]);
+ const layoutNames=[...composer.matchAll(/\{name:'([^']+)'/g)].map(match=>match[1]);
+ assert.equal(photoIds.length,20);
+ assert.equal(new Set(photoIds).size,20);
+ assert.equal(spanishTitles.length,20);
+ assert.equal(new Set(spanishTitles).size,20);
+ assert.equal(layoutNames.length,20);
+ assert.ok(gallery.includes('LAYOUTS.map((layout,index)'));
  assert.ok(gallery.includes('onChoose(layout.name)'));
- assert.ok(composer.includes("photos.preserve&&photos.original"));
+ assert.ok(gallery.includes('boxPosition(layout.image)'));
+ assert.ok(gallery.includes('boxPosition(layout.type)'));
+ assert.ok(gallery.includes("fg-variant-"));
+ assert.ok(css.includes('.fg-variant-19'));
+ assert.ok(css.includes('.fg-sheet-backdrop'));
+ assert.ok(!gallery.includes('clase-retrato-laptop-real-2026.jpg'));
+ assert.ok(!gallery.includes('diario-carta-20261027.jpg'));
+ assert.ok(!gallery.includes('clase-mostrar-web-2026.webp'));
+ assert.ok(!gallery.includes('ownPhotos'));
+ assert.ok(composer.includes('photos.preserve&&photos.original'));
  assert.ok(composer.includes('const scale=Math.min(ow/im.naturalWidth,oh/im.naturalHeight)'));
 });
 test('private library includes real uploads, rename, category switching and two separate image roles',()=>{
