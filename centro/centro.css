@@ -356,3 +356,18 @@ body.modal-open{overflow:hidden}
 .product-legal-disclosure p{line-height:1.5;margin:0 0 7px}
 .lab-compact .product-legal-disclosure{padding:10px 13px;background:#f5f8f7;border:1px solid #d7e2e5}
 @media(max-width:690px){.product-details-meta{grid-template-columns:1fr 1fr}.product-details-meta>div{padding:10px}.product-details-meta strong{font-size:11px}.product-details-body{padding:17px 19px 9px}.product-details h2{font-size:32px}.product-details-summary{font-size:13px}.product-details-section{padding:10px 0}.product-details-section h3{font-size:18px}.product-details-actions{padding:10px 19px}.lab-compact .product-details-summary{font-size:17px}}
+
+
+/* Product center mobile navigation: no horizontal overflow or clipped sign-out. */
+.center-nav-inner,.center-account{min-width:0}
+.center-nav .brand{flex:0 1 auto;min-width:0}
+.center-nav .brand img{display:block;max-width:100%;height:auto}
+@media(max-width:690px){
+  .center-nav-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;width:calc(100% - 30px)}
+  .center-nav .brand{width:min(100%,190px);overflow:hidden}
+  .center-nav .brand img{width:100%;max-height:55px;object-fit:contain;object-position:left center}
+  .center-account{justify-self:end;max-width:100%}
+  .center-account #account-name{display:none!important}
+  .center-account button{max-width:120px;white-space:normal;text-align:center;line-height:1.2;min-height:40px;padding:7px 10px}
+}
+@media(max-width:380px){.center-nav .brand{width:min(100%,145px)}.center-account button{max-width:108px;font-size:10px}}
