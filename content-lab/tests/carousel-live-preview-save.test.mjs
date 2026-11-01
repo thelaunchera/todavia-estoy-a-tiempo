@@ -27,7 +27,7 @@ test('Saving a carousel uses the latest edited draft without breaking other post
   const factory = read('CarouselFactory.tsx');
   assert.ok(factory.includes('const saveLatest=()=>onSave(latestDraft.current.post);'));
   assert.ok(factory.includes('onClick={saveLatest}'));
-  assert.ok(app.includes('const save = async (candidate?:unknown)'));
+  assert.ok(app.includes('const save = async (candidate?:unknown, automatic=false)'));
   assert.ok(app.includes('typeof possible.brandId'));
   assert.ok(app.includes("post.format==='Carousel'?'factory':'create'"));
 });
