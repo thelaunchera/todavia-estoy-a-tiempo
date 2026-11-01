@@ -13,7 +13,9 @@ test('The same live carousel preview is available from every creative step',()=>
  assert.ok(panel>0&&portal>panel&&layout>portal&&content>layout&&firstStep>content);
  assert.ok(src.includes('renderPreviewPanel(true)'));
  assert.ok(src.includes('!mobileViewport&&renderPreviewPanel(false)'));
- assert.equal((src.match(/renderSwipePreview\(\)/g)||[]).length,1);
+ assert.equal((src.match(/renderSwipePreview\(\)/g)||[]).length,2);
+ assert.ok(src.includes('studioTab===\'review\''));
+ assert.ok(src.includes('factory-preview-inline'));
  assert.ok(src.includes('Vista del carrusel')&&src.includes('Editar slide {i+1}'));
  assert.ok(src.includes('className="factory-mobile-preview-trigger"'));
  assert.ok(src.includes('Ver diseño'));
