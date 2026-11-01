@@ -19,12 +19,12 @@ type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCate
 type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions;scheduledDate?:string;scheduledTime?:string;planningStatus?:'planned'|'published'};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean};onOpenPrompts?:()=>void;onOpenCalendar?:(date?:string)=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean};onOpenPrompts?:()=>void;onOpenCalendar?:(date?:string)=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;locale?:'es'|'en';onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
     photo:(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId]),
-    original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design,stickerImages:images
+    original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design&&!tile.assetId,stickerImages:images
   },size)).canvas;
 }
 async function imageFingerprint(src:string):Promise<string>{
@@ -61,7 +61,7 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenCalendar,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenCalendar,onOpenStickers,onUploadBackground,onUploadFile,locale='es',onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [quickProduct,setQuickProduct]=useState('');
@@ -286,6 +286,24 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       notify('Imagen importada en el post '+(targetIndex+1)+'. La foto original permanece intacta.');
     }catch(e){showError(e)}finally{setUploading('')}
   };
+  const uploadOwnBackground=async(file:File|undefined)=>{
+    if(!file||!grid)return;
+    const targetGridId=grid.id,targetIndex=selected;
+    setUploading('background');
+    try{
+      const asset=await onUploadBackground(file);
+      if(!asset)return;
+      setGrid(existing=>existing?.id===targetGridId?
+        {...existing,posts:existing.posts.map((item,i)=>i===targetIndex?
+          {...item,backgroundImageId:asset.id,backgroundId:'brand',
+            ...(item.design?{design:{...item.design,background:'ivory' as const}}:{})}:item)}:existing);
+      setDownloads([]);setReviewed(false);setQaNotes([]);
+      notify(locale==='es'?'Fondo guardado en esta publicación.':'Background saved for this post.');
+    }catch(e){showError(e)}finally{setUploading('')}
+  };
+  const clearOwnBackground=()=>{
+    update({backgroundImageId:'',backgroundId:'brand'});
+  };
   const checkConnection=async()=>{
     setBusy('connection');setConnection('unknown');
     try{
@@ -407,7 +425,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       if(p.assetId&&used.has(p.assetId))found.push('Posts '+(used.get(p.assetId)!+1)+' y '+(i+1)+': usan el mismo archivo generado.');
       if(p.assetId)used.set(p.assetId,i);
       if(!p.headline?.trim())found.push('Post '+(i+1)+': falta el titular.');
-      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design,stickerImages:images},exportSize);
+      const result=await composeGridPoster(p,i,brand,{photo:image,original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!p.design&&!p.assetId,stickerImages:images},exportSize);
       if(!result.fit)found.push('Post '+(i+1)+': el titular no cabe. Reduce tamaño o palabras.');
       if(result.contrast<3)found.push('Post '+(i+1)+': contrasta poco con el fondo; revisa legibilidad.');
       if(!(p.design&&grid.kind==='preserve')){
@@ -783,7 +801,28 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               </div>
             </>}
           </div>}
-          <label>Formato visual · 20 composiciones diferentes</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
+          <div className="bg-touch-assets" aria-label={locale==='es'?'Tus fotos y fondos':'Your photos and backgrounds'}>
+             <label className="bg-touch-upload">
+               <ImagePlus size={20}/>
+               <span><strong>{locale==='es'?'Subir mi foto':'Upload my photo'}</strong>
+                <small>{locale==='es'?'Cambia solo esta publicación':'Change this post only'}</small></span>
+               <input type="file" accept="image/*,.heic,.heif" disabled={!!uploading}
+                 aria-label={locale==='es'?'Subir mi foto en esta publicación':'Upload my photo to this post'}
+                 onChange={e=>{const file=e.target.files?.[0];e.target.value='';void uploadChatGptResult(file)}}/>
+             </label>
+             <label className="bg-touch-upload">
+               <Palette size={20}/>
+               <span><strong>{locale==='es'?'Subir mi fondo':'Upload my background'}</strong>
+                <small>{locale==='es'?'Tu imagen detrás del diseño':'Your image behind the design'}</small></span>
+               <input type="file" accept="image/*,.heic,.heif" disabled={!!uploading}
+                 aria-label={locale==='es'?'Subir fondo propio para esta publicación':'Upload custom background for this post'}
+                 onChange={e=>{const file=e.target.files?.[0];e.target.value='';void uploadOwnBackground(file)}}/>
+             </label>
+           </div>
+           {tile?.backgroundImageId&&<button type="button" className="bg-touch-clear" onClick={clearOwnBackground}>
+             {locale==='es'?'Quitar fondo personalizado':'Remove custom background'}
+           </button>}
+           <label>Formato visual · 20 composiciones diferentes</label><select value={tile?.format||CREATIVE_FORMATS[selected]} onChange={e=>update({format:e.target.value})}>{CREATIVE_FORMATS.map(f=><option key={f}>{f}</option>)}</select>
           <label>Titular</label><input value={tile?.headline||''} onChange={e=>update({headline:e.target.value})}/>
           <label>Subtítulo</label><input value={tile?.subtext||''} onChange={e=>update({subtext:e.target.value})}/>
           <label>Caption</label><textarea rows={3} value={tile?.caption||''} onChange={e=>update({caption:e.target.value})}/>
@@ -795,7 +834,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               title="Stickers aesthetics & backgrounds"
               assets={assets.filter(a=>a.brandId===brand.id||a.shared)} images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
               onChange={next=>tile.design?update({backgroundImageId:next.backgroundImageId,design:{...tile.design,backgroundPattern:next.backgroundId,stickerIds:next.stickerIds,...((next.backgroundImageId||next.backgroundId&&next.backgroundId!=='brand')?{background:'ivory' as const}:{})}}):update({backgroundId:next.backgroundId,backgroundImageId:next.backgroundImageId,stickerIds:next.stickerIds})}/>}
-          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId])} original={images[grid.sourceId]} preserve={grid.kind==='preserve'} stickerImages={images} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
+          {tile&&<GridVisualEditor tile={tile} index={selected} brand={brand} logo={images[brand.logoAssetId||'']} photo={(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId])} original={images[grid.sourceId]} preserve={grid.kind==='preserve'&&!tile.assetId} stickerImages={images} locale={locale} exportSize={exportSize} onChange={layout=>update({layout})} onStickerChange={stickerPositions=>update({stickerPositions})}/>}
           <p className="bg-note">El texto, las fotos, los fondos y las anotaciones se editan y exportan como PNG, sin generar fotografías con IA dentro del Lab.</p>
           <div className="bg-post-actions">{isAdmin&&!(tile?.design&&grid.kind==='preserve')&&
             <button className="btn ghost" onClick={()=>generate(selected)} disabled={!!busy}>{busy==='image-'+selected?<LoaderCircle size={17} className="spin"/>:<RefreshCw size={17}/>} {tile?.assetId?'Regenerar esta foto (1 crédito)':'Generar foto con IA (1 crédito)'}</button>}
