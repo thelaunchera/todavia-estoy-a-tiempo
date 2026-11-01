@@ -278,7 +278,7 @@ assert.doesNotMatch(home,/experta|experto/i);
 assert.doesNotMatch(clubPage,/reservado a alumnas|BIENVENIDA A TU COMUNIDAD/);
 assert.match(clubPage,/ESTE ES TU ESPACIO/);
 assert.doesNotMatch(room,/BIENVENIDA AL AULA|Tu primera landing con IA/);
-assert.equal((classPage.match(/href="#lista-espera"/g)||[]).length,1,'Un enlace de aviso junto al reloj; envío solamente en el formulario');
+assert.ok((classPage.match(/href="#lista-espera"/g)||[]).length>=2,'El reloj y el CTA de la clase llevan a la lista; el envío solo se hace en el formulario');
 assert.doesNotMatch(classPage,/class-nav-cta|class-ghost-button/,'No repetir CTAs de espera en el header ni hero');
 assert.match(classPage,/Quiero estar en la lista|Explora la clase/,'El CTA público sigue presente');
 assert.match(classPage,/class-launch-clock-cta" href="#lista-espera"/);
