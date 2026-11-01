@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {api} from './platform/client';
 import {ArrowLeft,ArrowRight,CalendarDays,Check,Clock3,ImageIcon,LayoutGrid,Plus,Save} from 'lucide-react';
-import {localDate,monthCells,plannedItems,validDate,validTime,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
+import {localDate,monthCells,plannedItems,validDate,validTime,contentKind,contentKindLabel,contentKindShort,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
 import './ContentCalendar.css';
 
 type Props={
@@ -16,7 +16,7 @@ const labels={
  select:'Elige un post o una idea de 1 Photo → 9 Posts',date:'Día',time:'Hora',save:'Guardar planificación',
  unschedule:'Quitar del calendario',planned:'Planificado',published:'Publicado',empty:'No tienes publicaciones para esta fecha.',
  none:'Todavía no hay publicaciones guardadas. Crea una o prepara tu campaña de nueve posts.',
- note:'Este calendario es tu planificador privado: no publica automáticamente en Instagram ni en otras redes.',
+ note:'Planificador privado: el contenido se publica manualmente, no automáticamente.',
  zone:'Las horas se muestran según la zona horaria de este dispositivo.',pick:'Selecciona una publicación',
  picture:'Sin foto final',ready:'Con imagen',stats:'Publicaciones este mes',grid:'Crear 9 posts',
  mark:'Marcar como publicado',unmark:'Marcar como pendiente',hint:'El feed es una vista previa: ordenado de la publicación más reciente a la más antigua.',
@@ -26,7 +26,7 @@ const labels={
  select:'Choose a post or a 1 Photo → 9 Posts idea',date:'Date',time:'Time',save:'Save plan',
  unschedule:'Remove from calendar',planned:'Planned',published:'Published',empty:'No posts for this date.',
  none:'No saved content yet. Create a post or start a nine-post campaign.',
- note:'This calendar is a private planner: it does not automatically publish to Instagram or other networks.',
+ note:'Private planner: content is posted manually, not automatically.',
  zone:'Times use this device’s time zone.',pick:'Choose a post',picture:'No final photo',ready:'With image',
  stats:'Posts this month',grid:'Create 9 posts',mark:'Mark published',unmark:'Mark pending',
  hint:'Feed preview shows newest scheduled posts first.',day:'Posts on this date',
@@ -57,7 +57,7 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
  },[brand.id]);
  const options=useMemo(()=>[
   ...posts.filter(p=>p.brandId===brand.id&&p.id).map(p=>({
-   key:'post:'+p.id!,title:p.title||p.hook||'Post',date:p.date||'',time:p.time||'09:00'
+   key:'post:'+p.id!,title:(p.title||p.hook||'Post')+' · '+contentKindLabel(p.format||'',locale),date:p.date||'',time:p.time||'09:00'
   })),
   ...grids.filter(g=>g.brandId===brand.id).flatMap(g=>g.posts.map((p,i)=>({
    key:'grid:'+g.id+':'+i,title:(p.headline||g.title)+' · '+(i+1)+' / '+g.posts.length,
@@ -142,8 +142,8 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
         onClick={()=>pickDay(d)}>
         <span className="lab-calendar-day-number">{Number(d.slice(-2))}</span>
         <span className="lab-calendar-day-events">{events.filter(p=>p.date===d).slice(0,2).map(p=>
-         <span className={'lab-calendar-pill '+(p.status==='published'?'published':'')} key={p.id}>
-          <Clock3 size={10}/>{p.time} <span>{p.title}</span></span>)}
+         <span className={'lab-calendar-pill '+contentKind(p.format)+' '+(p.status==='published'?'published':'')} key={p.id} title={contentKindLabel(p.format,locale)+' · '+p.title}>
+          <b className="lab-calendar-kind-short" aria-hidden="true">{contentKindShort(p.format)}</b><span className="lab-calendar-pill-clock">{p.time}</span> <span className="lab-calendar-pill-title">{p.title}</span></span>)}
         </span>
         {events.filter(p=>p.date===d).length>2&&<small className="lab-calendar-more">+{events.filter(p=>p.date===d).length-2}</small>}
        </button>:<div aria-hidden="true" className="lab-calendar-blank" key={'blank-'+i}/>)}
@@ -155,7 +155,7 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
      {selectedEvents.length?selectedEvents.map(p=><button type="button" className={'lab-calendar-agenda-post '+(key===p.id?'active':'')}
       key={p.id} onClick={()=>choose(p.id)}>
       {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt=""/>:<span className="lab-calendar-noimage"><ImageIcon size={19}/></span>}
-      <span><strong>{p.title}</strong><small><Clock3 size={13}/>{p.time} · {p.format}</small></span>
+      <span><strong>{p.title}</strong><small><Clock3 size={13}/>{p.time} · <b className={'lab-calendar-kind '+contentKind(p.format)}>{contentKindLabel(p.format,locale)}</b></small></span>
       <span className={'lab-calendar-state '+p.status}>{p.status==='published'?lang.published:lang.planned}</span>
      </button>):<p className="lab-calendar-empty-day">{lang.empty}</p>}
      <div className="lab-calendar-day-add"><Plus size={15}/>{locale==='es'?'Elige un post abajo para asignarlo a este día.':'Choose a post below to assign it to this date.'}</div>
@@ -166,7 +166,7 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
       className={key===p.id?'selected':''} onClick={()=>{choose(p.id);setSelectedDay(p.date)}}>
       {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt={p.title}/>:<div className="lab-calendar-feed-placeholder">
        <ImageIcon size={24}/><strong>{p.title}</strong><small>{lang.picture}</small></div>}
-      <span>{p.date.slice(8)} · {p.time}</span>
+      <span>{p.date.slice(8)} · {p.time} · {contentKindLabel(p.format,locale)}</span>
      </button>)}</div>:<p className="lab-calendar-feedempty">{lang.noFeed}</p>}
     </section>}
    <section className="lab-calendar-form" aria-label={lang.schedule}>
