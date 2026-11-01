@@ -1118,8 +1118,7 @@ function App() {
                 : 'Sign in with a code without leaving this screen. Each account will have its own photo and content library.'}</p>
             {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
               <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
-                El acceso privado del Lab requiere conectar Supabase antes de iniciar sesión.
-                La biblioteca de Master Prompts ya está disponible aquí, sin subir tus fotos.
+                {loginLanguage==='es'?'El acceso está temporalmente no disponible. Puedes usar los 8 prompts gratuitos mientras tanto.':'Access is temporarily unavailable. You can still use the 8 free prompts.'}
               </p>
             )}
             {loginStage==='email'?(
@@ -1144,12 +1143,13 @@ function App() {
                   {loginLanguage==='es'?'Cambiar correo o solicitar otro código':'Change email or request another code'}
                 </button>
                 <small className="lab-login-hint">{loginLanguage==='es'
-                   ? 'El acceso por código funciona sin abrir Safari cuando el correo incluye un código numérico. Si solo recibes un enlace, la plantilla de correo de Supabase aún debe configurarse.'
-                   : 'Code sign-in stays in this app when the email contains a numeric code. If you only receive a link, the Supabase email template still needs configuration.'}</small>
+                   ? 'Introduce el código recibido por correo. Si no lo ves, revisa también spam y promociones.'
+                   : 'Enter the code we emailed you. If you cannot find it, check spam and promotions.'}</small>
               </form>
             )}
             
             <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
+            <a className="lab-login-purchase" href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer">{loginLanguage==='es'?'¿Aún no lo tienes? Consigue Content Lab por $10':'New here? Get Content Lab for $10'}</a>
             <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal para compras verificadas · Sin contraseña':'Private access for verified purchases · No password'}</small>
           </div>
         </section>
@@ -1317,7 +1317,7 @@ function App() {
               </button>
             </div>}
           {brand&&['factory','vertical','create'].includes(tab)&&account?.email&&
-            <QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory}/>}
+            <QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="editor"/>}
           {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
             <span role="status" aria-live="polite">
               {draftStatus==='saving'?'Guardando cambios…':
@@ -1363,8 +1363,8 @@ function App() {
                     <button type="button" className="lab-greeting-secondary" onClick={startFactory}>
                       {loginLanguage==='es'?'Carruseles':'Carousels'}
                     </button>
-                    <button type="button" className="lab-greeting-secondary" onClick={()=>startVertical()}>
-                      <Film size={16}/>{loginLanguage==='es'?'Portadas de reels e historias':'Reel covers and stories'}
+                    <button type="button" className="lab-greeting-secondary" onClick={()=>navigate('calendar')}>
+                      <CalendarDays size={16}/>{loginLanguage==='es'?'Organizar contenido':'Plan content'}
                     </button>
                   </div>
                 </div>
@@ -1385,7 +1385,8 @@ function App() {
                   </div>
                 </details>}
               </section>
-              <section className="stats">
+              {account?.email&&<QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="home"/>}
+              {mine.length>0&&<section className="stats">
                 {[
                   {
                     label: 'TOTAL PIECES',
@@ -1415,7 +1416,7 @@ function App() {
                     <small>{t(s.detail)}</small>
                   </div>
                 ))}
-              </section>
+              </section>}
               <div className="homegrid">
                 <section className="homeideas">
                   <div className="cardheading">
@@ -2191,17 +2192,20 @@ function App() {
       </main>
       {/* Keep the dock outside the scrolling main so Safari never re-anchors it
           when the page content or browser controls resize. */}
-      {account && <nav className="lab-mobile-dock" aria-label="Navegación rápida de Content Lab">
-                {([{id:'home',label:'Inicio',icon:LayoutDashboard},{id:'factory',label:'Carruseles',icon:Layers3},
-                    {id:'vertical',label:'Portadas',icon:Film},{id:'calendar',label:'Calendario',icon:CalendarDays},
-                    {id:'backgrounds',label:'Fondos',icon:Palette},{id:'posts',label:'Mis posts',icon:FolderOpen}] as const)
-                  .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
-                    className={tab===item.id?'active':''} onClick={()=>item.id==='factory'
+      {account && <nav className="lab-mobile-dock" aria-label={loginLanguage==='es'?'Navegación rápida de Content Lab':'Content Lab quick navigation'}>
+                {([{id:'home',label:loginLanguage==='es'?'Inicio':'Home',icon:LayoutDashboard},
+                  {id:'create',label:loginLanguage==='es'?'Post':'Post',icon:WandSparkles},
+                  {id:'factory',label:loginLanguage==='es'?'Carrusel':'Carousel',icon:Layers3},
+                  {id:'calendar',label:loginLanguage==='es'?'Calendario':'Calendar',icon:CalendarDays},
+                  {id:'posts',label:loginLanguage==='es'?'Mis posts':'My posts',icon:FolderOpen}] as const)
+                  .map(item=><button type="button" key={item.id} aria-label={item.label} aria-current={tab===item.id?'page':undefined}
+                    className={tab===item.id?'active':''}
+                    onClick={()=>item.id==='factory'
                       ?(editor.format==='Carousel'&&editor.brandId===brand?.id?navigate('factory'):startFactory())
-                      :item.id==='vertical'
-                        ?(['Reel','Story'].includes(editor.format)&&editor.brandId===brand?.id?navigate('vertical'):startVertical())
+                      :item.id==='create'
+                        ?(tab==='create'?navigate('create'):start())
                         :navigate(item.id)}>
-                    <item.icon size={21}/><span>{t(item.label)}</span></button>)}
+                    <item.icon size={21}/><span>{item.label}</span></button>)}
               </nav>}
     </div>
   );
