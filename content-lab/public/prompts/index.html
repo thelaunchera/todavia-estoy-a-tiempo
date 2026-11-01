@@ -444,6 +444,20 @@ main{padding-top:8px}
 @media(max-width:380px){
  .hero-with-carousel .hero-carousel{height:clamp(285px,85vw,340px)}
 }
+
+/* Content Lab freebie: guía breve, fotografías protagonistas y formulario directo. */
+@media (min-width: 701px) {
+ .editorial-process { padding-top:clamp(25px,4vw,48px)!important;padding-bottom:clamp(25px,4vw,48px)!important; }
+ .matcha-email-optin{padding-top:clamp(25px,4vw,48px)!important;padding-bottom:clamp(25px,4vw,48px)!important}
+}
+.hero-benefits{gap:8px!important}
+.hero-carousel-caption{max-width:40ch!important}
+.all-products{font-size:clamp(.82rem,1.3vw,.97rem)!important}
+@media(max-width:700px) {
+ .editorial-process{padding-top:25px!important;padding-bottom:26px!important}
+ .all-products{padding:10px 17px!important;line-height:1.5!important}
+ .matcha-email-optin{padding-top:25px!important;padding-bottom:30px!important}
+}
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
@@ -451,7 +465,7 @@ main{padding-top:8px}
   <div class="hero-copy">
     <span class="hero-eyebrow"><span class="hero-dot"></span> 8 IDEAS GRATIS · PARA CUALQUIER PRODUCTO</span>
     <h1 id="hero-title">Una foto.<br><em>Ocho ideas.</em></h1>
-    <p class="hero-lead">Convierte una foto de tu producto en ocho ideas para publicar. <b>Matcha es solo el ejemplo; la marca es tuya.</b></p>
+    <p class="hero-lead">Ocho formas de presentar tu producto. <b>Matcha es solo el ejemplo.</b></p>
     <a href="#recibir" class="hero-start">Recibir mis 8 prompts gratis <span aria-hidden="true">→</span></a>
   </div>
   <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
@@ -477,7 +491,7 @@ main{padding-top:8px}
       <button class="hero-arrow" id="hero-next" type="button" aria-label="Siguiente composición">›</button>
     </div>
     <div class="hero-pagination" aria-label="Posición en el carrusel"><button type="button" class="hero-dot-button" data-hero-dot="0" aria-label="Ir a la foto 1 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="1" aria-label="Ir a la foto 2 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="2" aria-label="Ir a la foto 3 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="3" aria-label="Ir a la foto 4 de 8" aria-current="false"></button><button type="button" class="hero-dot-button is-active" data-hero-dot="4" aria-label="Ir a la foto 5 de 8" aria-current="true"></button><button type="button" class="hero-dot-button" data-hero-dot="5" aria-label="Ir a la foto 6 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="6" aria-label="Ir a la foto 7 de 8" aria-current="false"></button><button type="button" class="hero-dot-button" data-hero-dot="7" aria-label="Ir a la foto 8 de 8" aria-current="false"></button></div>
-    <p class="hero-carousel-caption">Una foto de producto, ocho maneras de presentarla. <b>Prueba las flechas o desliza las imágenes.</b></p>
+    <p class="hero-carousel-caption">Desliza para ver las ocho composiciones.</p>
   </div>
   <div class="hero-benefits" aria-label="Beneficios">
     <span><b>▤</b> 8 ideas visuales</span><span><b>ϟ</b> Fácil de adaptar</span><span><b>▧</b> Para cualquier producto</span>
@@ -487,16 +501,16 @@ main{padding-top:8px}
   <div class="process-copy">
     <span class="eyebrow">ASÍ DE SIMPLE</span>
     <h2 id="process-title">¿Cómo funciona?</h2>
-    <p>Escribe qué producto quieres mostrar y el mensaje de tu publicación. Recibirás ocho instrucciones creativas para copiar y adaptar a tu estilo.</p>
+    <p>Elige tu producto, descubre las ideas y copia la que quieras probar.</p>
     <ol class="process-steps"><li><span>1</span> Cuéntanos qué producto tienes</li><li><span>2</span> Descubre ocho composiciones</li><li><span>3</span> Copia tu favorita y crea tu contenido</li></ol>
   </div>
   <div class="process-art" aria-label="Tres ejemplos visuales con matcha"><img src="./matcha-02.jpg?v=hd-20261031" alt="Ejemplo matcha con composición tipográfica abstracta" loading="lazy"><img src="./matcha-05.jpg?v=hd-20261031" alt="Ejemplo matcha en composición editorial" loading="lazy"><img src="./matcha-04.jpg?v=hd-20261031" alt="Ejemplo matcha en primer plano" loading="lazy"></div>
 </section>
-<div class="all-products">🌿 <strong>Funciona con cualquier producto:</strong> bebidas, comida, skincare, ropa, velas, accesorios y mucho más.</div>
-<div class="process-cta"><a href="#recibir">Recibir los ocho prompts gratis <span aria-hidden="true">→</span></a></div>
+<div class="all-products">Funciona con cualquier producto, no solo con matcha.</div>
+
 <section class="matcha-email-optin" id="recibir" aria-labelledby="matcha-email-title">
 <div class="matcha-email-intro"><span class="hero-eyebrow">TU REGALO CREATIVO · GRATIS</span><h2 id="matcha-email-title">Tus 8 ideas, listas para crear.</h2>
-<p>Recíbelas gratis y adáptalas a tu producto.</p></div>
+<p>Gratis, en tu correo.</p></div>
 <form id="matcha-lead-form" class="matcha-email-form">
 <label for="matcha-email">¿A qué correo te envío las ideas?</label><input id="matcha-email" type="email" name="email" autocomplete="email" maxlength="254" required placeholder="tu@correo.com">
 <label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>También quiero recibir ideas y novedades de The Launch Era. Puedo darme de baja cuando quiera.</span></label>
@@ -527,10 +541,10 @@ main{padding-top:8px}
   <div class="offer-main"><div class="offer-label">TU SIGUIENTE GRAN IDEA EMPIEZA AQUÍ</div>
    <h2>De una idea a un post que destaca.</h2>
    <p>Diseña posts, carruseles y reels en un solo lugar. Tus fondos, fotos y herramientas, siempre a mano.</p>
-   <span class="offer-includes">Incluye 60 fotos con IA y 30 créditos creativos iniciales.*</span>
+   <span class="offer-includes">Organiza tus ideas, diseña publicaciones y planifica tu contenido.</span>
   </div>
   <div class="offer-buy"><strong class="price" aria-label="$10 USD">$10 <small>USD</small></strong><p>Un solo pago</p><a href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer" aria-label="Comprar Content Lab por diez dólares">Quiero mi Content Lab <span aria-hidden="true">↗</span></a><span class="offer-trust">Pago seguro · Acceso personal por email</span></div>
-  <p class="offer-footnote">* Los créditos de IA son limitados y están sujetos a cuotas diarias. <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Ver condiciones</a>.</p>
+  <p class="offer-footnote"><a href="../terminos.html" target="_blank" rel="noopener noreferrer">Ver condiciones</a>.</p>
 </section>
 <footer class="site-footer">
   <div class="footer-main"><div><strong>content lab<span>.</span></strong><p>Ideas de diseño para cualquier producto. Un proyecto de The Launch Era.</p></div>
