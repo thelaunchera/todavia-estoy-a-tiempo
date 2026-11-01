@@ -45,3 +45,24 @@ test('Link Center lives inside the protected Studio and accepts deep links',()=>
   assert.match(studio,/x\.section !== LINK_CENTER_SECTION/);
   assert.match(source,/api\.(?:post|put|delete)\('\/api\/items\/ideas/);
 });
+
+
+test('Latest demo links are visible as shortcuts without duplicating saved Studio records',()=>{
+ const featured=source.match(/RECENT_DEMO_KEYS = \[([^\]]+)\] as const/);
+ assert.ok(featured,'Recent demos must reuse canonical keys');
+ const keys=[...featured[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
+ assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','tle-experience']);
+ const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
+ for(const key of keys){
+  const item=byKey[key];
+  assert.ok(item,'Missing demo record '+key);
+  assert.equal(item.visibility,'demo',key);
+  assert.ok(item.url.startsWith('https://thelaunchera.com/'),key);
+ }
+ assert.ok(!keys.includes('tle-cb-depot'),'Real customer projects must not appear as fictional demos');
+ assert.ok(!keys.includes('pod-studio'),'Private Studio must not be shared');
+ assert.match(source,/RECENT_DEMO_KEYS\s*\.map\(key=>links\.find/);
+ assert.match(source,/const recentDemoLinks=useMemo/);
+ assert.match(source,/Demos nuevos, a un toque/);
+ assert.match(source,/onClick=\{\(\)=>void copy\(d\.url,d\.key\+'-shortcut'\)\}/);
+});
