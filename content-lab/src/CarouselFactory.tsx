@@ -1050,18 +1050,29 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const latest=latestDraft.current;
     const nextSlides=[...latest.slides];
     let nextStyle={...latest.style};
+    let latestAddedId='';
     for(const {asset,point,ratio} of items){
       if(!latest.ownedAssets.some(a=>a.id===asset.id)&&asset.brandId!==brand.id&&!asset.shared)continue;
-      const kind=assetCategory(asset)==='sticker'?'sticker' as const:'photo' as const;
+      const category=assetCategory(asset);
+      const isWallpaper=category==='background'&&latest.style.seamlessEnabled;
+      const kind=category==='sticker'?'sticker' as const:'photo' as const;
       const count=nextSlides.length;
       if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
       const w=.2/count,h=.18;
-      const rect=kind==='photo'?initialPanoramaPhotoRect(ratio||.75,count,point)
-        :{x:point.x-w/2,y:point.y-h/2,w,h};
-      const layer:PanoramaLayer={id:'panorama-'+crypto.randomUUID(),assetId:asset.id,
-        name:displayAssetName(asset),kind,rect:clampPanoramaRect(rect,.055/count)};
+      // Imported background images start as one 4:5 panel. Stretch the edge
+      // across neighboring slide boundaries to make a genuine seamless split.
+      const page=Math.min(count-1,Math.max(0,Math.floor(point.x*count)));
+      const rect=isWallpaper?{x:page/count,y:0,w:1/count,h:1,cornerRadius:0,angle:0}:
+        kind==='photo'?initialPanoramaPhotoRect(ratio||.75,count,point):
+        {x:point.x-w/2,y:point.y-h/2,w,h};
+      latestAddedId='panorama-'+crypto.randomUUID();
+      const layer:PanoramaLayer={id:latestAddedId,assetId:asset.id,
+        name:displayAssetName(asset),kind,
+        ...(isWallpaper?{role:'background' as const,placement:'behind-text' as const}:{}),
+        rect:clampPanoramaRect(rect,.055/count)};
       nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
     }
+    if(latestAddedId)setFocusWallpaperId(latestAddedId);
     recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
     onChange({...latest.post,format:'Carousel',hook:nextSlides[0].title,
       designData:encodeCarouselDesign(nextSlides,nextStyle)});
@@ -1575,10 +1586,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           onCopySticker={copySticker} onChange={updateDecoration}
           assets={ownedAssets} images={images} loadImage={loadImage}
           onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
-        {(!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background'))&&
-          <button type="button" className="btn dark factory-background-apply" onClick={extendCurrentBackground}>
-            <Layers3 size={16}/> 🎀 Estirar este fondo entre slides
-          </button>}
+        {style.seamlessEnabled&&<p className="factory-seamless-hint">Para extender un fondo: abre Fotos y diseño, arrástralo desde Mis elementos y tira de su borde hacia la siguiente slide.</p>}
         
       </div>
       <details className="factory-style-optional"><summary>Paleta y dirección visual (opcional)</summary>
