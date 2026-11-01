@@ -36,23 +36,28 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
  assert.ok(palette.includes('BACKGROUND_CATEGORIES.map'));
  assert.ok(gallery.includes('background-category-heading'));
 });
-test('Factory uses Cata design hacking sequence with IA as a short standalone section',()=>{
+test('Factory uses the five mobile-first creation steps and keeps ideas with IA optional',()=>{
  const studio=read('src/CarouselFactory.tsx');
- assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'ai'>('canvas')"));
+ assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('style')"));
  assert.ok(studio.includes('CREA A TU MANERA'));
  assert.ok(studio.includes('Crear carrusel con IA · 1 crédito'));
- assert.ok(studio.includes('PASO 2 DE 5 · FOTO PROTAGONISTA'));
- assert.ok(studio.includes('PASO 3 DE 5 · FONDO'));
- assert.ok(studio.includes('PASO 4 DE 5 · TEXTOS'));
- assert.ok(studio.includes('PASO 5 DE 5 · DETALLES'));
+ assert.ok(studio.includes('PASO 1 DE 5 · FONDOS Y STICKERS'));
+ assert.ok(studio.includes('PASO 2 DE 5 · FOTOS Y DISEÑOS'));
+ assert.ok(studio.includes('PASO 3 DE 5 · TIPOGRAFÍA'));
+ assert.ok(studio.includes('PASO 4 DE 5 · VISTA PREVIA'));
+ assert.ok(studio.includes('PASO 5 DE 5 · DESCARGAR'));
  assert.ok(!studio.includes('IA opcional'));
- assert.ok(studio.includes("}>IA</button>"));
+ assert.ok(studio.includes('>Ideas con IA</button>'));
+ assert.ok(studio.indexOf("{id:'style',name:'Fondos y stickers'}")<studio.indexOf("{id:'canvas',name:'Fotos y diseño'}"));
+ assert.ok(studio.indexOf("{id:'canvas',name:'Fotos y diseño'}")<studio.indexOf("{id:'slides',name:'Tipografía'}"));
  assert.ok(studio.includes("studioTab==='canvas'"));
  assert.ok(studio.includes("studioTab==='slides'"));
  assert.ok(studio.includes("studioTab==='style'"));
  assert.ok(studio.includes("studioTab==='ai'"));
  assert.ok(studio.includes('factory-assistant-zone'));
  assert.ok(studio.includes('factory-canvas-exports'));
+ assert.ok(studio.includes("studioTab==='download'"));
+ assert.ok(studio.includes('onClick={insert} disabled={slides.length>=MAX_CAROUSEL_SLIDES}'));
  assert.ok(studio.includes('Guardar carrusel'));
 });
 test('Public wallpapers have clear exclusive categories and retired bows remain only for older saves',()=>{
