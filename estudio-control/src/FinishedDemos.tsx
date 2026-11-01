@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ExternalLink, Film, Camera, BookOpen, CheckCircle2, FolderOpen, Copy} from 'lucide-react';
+import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import './finished-demos.css';
@@ -119,14 +119,14 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
-     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:<CheckCircle2 size={14}/>} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
+     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:null} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
      <div className="finished-demo-body">
-       <span className="finished-demo-status"><CheckCircle2 size={14}/> {d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
+       <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
        <div className="finished-demo-actions">
-         <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'} <ExternalLink size={15}/></a>
-         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio <ExternalLink size={14}/></a>
+         <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
+         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        <small>{d.note}</small>
        {d.promptsFor&&<details className="finished-demo-prompts">
