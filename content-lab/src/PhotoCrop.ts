@@ -37,7 +37,7 @@ export function initialPanoramaPhotoRect(
 ) {
   const aspect = Number.isFinite(imageRatio) && imageRatio > 0
     ? Math.max(.2, Math.min(5, imageRatio)) : .75;
-  const count = Math.max(1, Math.min(8, pageCount));
+  const count = Math.max(1, Math.min(10, pageCount));
   const maxPhotoWidth = .88 / count;
   const preferredHeight = aspect <= 1 ? .66 : .52;
   const height = Math.min(preferredHeight, maxPhotoWidth * count * (1080 / 1350) / aspect);
