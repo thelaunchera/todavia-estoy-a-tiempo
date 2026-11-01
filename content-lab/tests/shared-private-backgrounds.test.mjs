@@ -16,7 +16,8 @@ test('Only admin-published materials are shared, never a buyer private upload',(
  assert.ok(client.includes("tab('sticker_catalog')"));
  assert.ok(client.includes("if(!admin)throw Error('Solo la administradora puede publicar fondos"));
  assert.ok(client.includes("if(!admin)throw Error('Solo la administradora puede publicar stickers"));
- assert.ok(app.includes("if(aiWallet?.admin&&category==='background')return publishSharedBackground(file);"));
+ assert.ok(app.includes("if(aiWallet?.admin&&category==='background'&&!forcePrivate)return publishSharedBackground(file);"));
+ assert.ok(app.includes("onUploadBackground={async file=>upload(file,'background',true,brand.id,true)}"));
  assert.ok(app.includes("if(aiWallet?.admin&&category==='sticker'&&!forcePrivate)return publishSharedSticker(file,'Aesthetic');"));
  assert.ok(app.includes("upload(file,'sticker',false,brand.id,true)"));
  assert.ok(app.includes('setAssets(prev=>prev.some(x=>x.id===item.id)?prev:[...prev,item])'));
