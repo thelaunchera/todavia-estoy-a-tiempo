@@ -887,7 +887,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Texto duplicado: conserva el color, la fuente y el tamaño.');
   };
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
-    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
+    if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
@@ -928,7 +928,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     return 'copied';
   };
   const updatePanoramaLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
-    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
+    if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
@@ -951,7 +951,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify(kind==='text'?'Texto añadido: tócalo en el lienzo para editarlo y moverlo.':'Elemento de collage añadido. Arrástralo para colocarlo.');
   };
   const reorderPanoramaLayer=(id:string,action:LayerMove)=>{
-    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
+    if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
     let nextSlides=slides;
     let layers=style.panoramaLayers||[];
@@ -963,7 +963,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setAll(nextSlides,{...style,panoramaLayers:reorderPanoramaLayers(layers,id,action)});
   };
   const removePanoramaLayer=(id:string)=>{
-    if(panoramaLayers.find(layer=>layer.id===id)?.locked)return;
+    if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
     if(source)setAll(stripSource(source));
     else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).filter(layer=>layer.id!==id)});
