@@ -321,3 +321,19 @@
 .touch-editor-lock-hint{padding:10px;font-size:11px;line-height:1.5;color:#536e79;background:#f6f9f9;border-radius:9px}
 .touch-editor-layer-trash:disabled{opacity:.25;cursor:not-allowed}
 .factory-duplicate-slide{margin:10px 0}
+
+/* Full-bleed panorama wallpaper remains behind independently movable stickers. */
+.touch-editor-layer.is-background,
+.touch-editor-layer.is-background.active{border-radius:0;box-shadow:none}
+.touch-editor-layer.is-background .touch-editor-image-window,
+.touch-editor-layer.is-background .touch-editor-image-window img{border-radius:0!important}
+.touch-editor-layer.is-background .touch-editor-resize-wide{
+ position:absolute;right:-10px;top:50%;transform:translateY(-50%);height:72px;width:23px;
+ border:3px solid #fff;border-radius:16px;background:#225e79;
+ box-shadow:0 2px 12px #19333b55;cursor:ew-resize;touch-action:none;
+}
+.touch-editor-background-stretch-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%}
+.touch-editor-background-stretch-controls strong{width:100%;font-size:12px;color:#254c60}
+.touch-editor-background-stretch-controls button{min-height:40px;font-weight:700}
+.touch-editor-background-stretch-controls small{width:100%;font-size:11px;color:#54707d}
+@media(max-width:650px){.touch-editor-background-stretch-controls button{flex:1 1 40%}}
