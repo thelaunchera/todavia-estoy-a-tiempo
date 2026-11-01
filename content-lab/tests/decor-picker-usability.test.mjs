@@ -30,7 +30,7 @@ test('Background selection preserves stickers and tells the user what is current
 test('Both galleries support accessible search, no-match guidance and lazy original background previews',()=>{
  const picker=read('FreeDecorControls.tsx'),css=read('FreeDecorControls.css');
  assert.match(picker,/type="search" aria-label=\{tab==='backgrounds'\?'Buscar fondos':'Buscar stickers'\}/);
- assert.match(picker,/normalizeSearch\(displayAssetName\(a\)\)/);
+ assert.ok(picker.includes('matches(displayAssetName(a))'));
  assert.ok(picker.includes('const builtInMatches='));
  assert.ok(picker.includes('const studioMatches='));
  assert.ok(picker.includes('const ownMatches='));
