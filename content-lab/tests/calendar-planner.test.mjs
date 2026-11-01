@@ -6,7 +6,7 @@ const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('month calendar and feed preview available on both the sidebar and iPhone dock',()=>{
  const app=source('src/App.tsx'),calendar=source('src/ContentCalendar.tsx');
  assert.ok(app.includes("id: 'calendar', title: 'Calendario editorial'"));
- assert.ok(app.includes("items:['calendar','posts','brands']"));
+ assert.ok(app.includes("items:['calendar','posts','brands','settings']"));
  assert.ok(app.includes("{id:'calendar',label:'Calendario',icon:CalendarDays}"));
  assert.ok(app.includes("<ContentCalendar brand={brand} posts={posts} images={images}"));
  assert.ok(calendar.includes("setView('month')"));
@@ -26,8 +26,8 @@ test('scheduled dates are saved in existing brand-isolated Supabase posts and gr
 });
 test('no misleading auto-publish claim and hourly views, local wall-clock times',()=>{
  const calendar=source('src/ContentCalendar.tsx'),model=source('src/CalendarPlannerModel.ts');
- assert.ok(calendar.includes('no publica automáticamente'));
- assert.ok(calendar.includes('does not automatically publish'));
+ assert.ok(calendar.includes('se publica manualmente, no automáticamente'));
+ assert.ok(calendar.includes('content is posted manually, not automatically'));
  assert.ok(calendar.includes("type=\"time\""));
  assert.ok(model.includes("validTime=(value:string)"));
  assert.ok(model.includes("localDate=(value:Date)"));
