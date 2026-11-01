@@ -77,6 +77,13 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
    finally{setSaving(false);}
  }
  function togglePrep(i:number) {setChecked(prev=>prev.includes(i)?prev.filter(x=>x!==i):[...prev,i]);}
+ const chapterNotes=[
+  `VIDEO ${lesson.id} · ${lesson.title}`,
+  `Objetivo: ${lesson.outcome}`,
+  'Prepara: '+recordingStart.tabs.join(' · '),
+  ...lesson.beats.map((beat,i)=>`${i+1}. ${beat.label} · Pantalla: ${beat.show}`),
+  `Prueba o entrega: ${lesson.exercise}`
+ ].join('\n');
  const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; captura desde el teléfono con texto legible; conserva el formato nativo y usa 16:9 solo para montaje cuando no reduzca la lectura; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade tu narración natural y revisa cada clic; valida primero una muestra de voz de 60–90 segundos. El ejemplo de brownies tradicionales es ficticio y no tiene cobros.';
  return <section className="class-room">
   <header className="class-intro">
@@ -250,6 +257,18 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
       </div>
       </details>
       <div className="class-production-state">
+       <div className="class-section-heading"><h4>Notas oficiales actualizadas · Capítulo {lesson.id}</h4><button type="button" onClick={()=>void copy(chapterNotes,'chapter-notes')}><Clipboard size={14}/>{copied==='chapter-notes'?'Notas copiadas':'Copiar notas'}</button></div>
+       <p>Estas notas siguen el guion vigente y cambian con cada capítulo. Tus anotaciones personales se guardan aparte y no se sobrescriben.</p>
+       <details className="class-extra class-start-details"><summary>Ver orden de escenas y pruebas del capítulo</summary>
+        <div className="recording-start-card">
+         <p><b>Resultado:</b> {lesson.outcome}</p>
+         <ol>{lesson.beats.map((beat,i)=><li key={i}><b>{beat.label}:</b> {beat.show}</li>)}</ol>
+         <p><b>Actividad de cierre:</b> {lesson.exercise}</p>
+         <p><a href={CLASS_PLAN} target="_blank" rel="noopener noreferrer">Ver las nueve fichas completas en Notion <ExternalLink size={13}/></a></p>
+        </div>
+       </details>
+      </div>
+      <div className="class-production-state">
        <div className="class-section-heading"><h4>Guarda tu avance</h4><span>No publica nada</span></div>
        <div className="class-form-grid">
         <label>Estado de la lección
@@ -261,7 +280,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
          <input type="url" placeholder="https://youtu.be/... o enlace privado" value={url} onChange={e=>setUrl(e.target.value)}/>
         </label>
        </div>
-       <label className="class-notes-label">Mis notas para repetir tomas o editar
+       <label className="class-notes-label">Mis notas personales para repetir tomas o editar (no se sobrescriben)
         <textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ej.: repetir escena 2, acercar zoom, corregir pronunciación..."/>
        </label>
        <div className="class-save-line"><button className="class-save-button" disabled={saving||!record} type="button" onClick={()=>void save()}><Save size={17}/>{saving?'Guardando…':changed?'Guardar progreso':'Guardar / confirmar'}</button><small role="status">{notice || (changed?'Hay cambios sin guardar':'Progreso sincronizado con el Estudio al guardar.')}</small></div>
