@@ -9,6 +9,16 @@ const roomScript=read('alumnos/curso.js');
 const config=read('clases/course-config.js');
 const workflow=read('.github/workflows/pages.yml');
 assert.match(home,/clases\/primera-landing\.html/,'El podcast enlaza la clase de preparación');
+assert.match(home,/Puedes comenzar con ChatGPT gratis/,'El podcast muestra el punto de partida gratuito');
+assert.match(classPage,/Puedes comenzar con ChatGPT gratis/,'El hero ofrece un comienzo gratuito');
+assert.doesNotMatch(classPage,/(?:tres|3) webs(?: en un día| diarias)?/i,'No se promocionan cifras de productividad');
+assert.doesNotMatch(classPage,/\*Cada herramienta tiene límites propios/,'La letra pequeña de límites no se coloca bajo el hero');
+const freebie=read('content-lab/public/prompts/index.html');
+assert.match(freebie,/Quiero suscribirme al newsletter de The Launch Era/,'Freebie invita al newsletter sin cuotas de correos');
+assert.doesNotMatch(freebie,/recibir dos correos|dos correos más|dos ideas de seguimiento/i,'El newsletter no promete una cantidad cerrada de correos');
+assert.doesNotMatch(freebie,/<option value="tle">|<option value="podcast">/,'Las marcas privadas no figuran en el selector');
+assert.match(freebie,/id="brandName"/,'La marca se escribe a mano');
+
 const matchaPos=home.indexOf('id="matcha-gratis"');
 const classPos=home.indexOf('<section class="learning-section" id="aprender"');
 assert.ok(matchaPos>0&&classPos>matchaPos,'Freebie de matcha antes de la clase en el podcast');
@@ -117,7 +127,7 @@ assert.doesNotMatch(classPage,/no un precio anterior de venta|no una venta anter
 assert.doesNotMatch(classPage,/Supabase|nota interna|borrador de producción/i);
 assert.match(classPage,/¿Qué son los plugins y cuestan dinero\?/,'La FAQ pública debe explicar las conexiones de forma comprensible');
 assert.match(classPage,/AppDeploy, Google\/Gmail, Make y Stripe/,'La FAQ educativa puede nombrar herramientas sin exponer procesos internos');
-assert.match(classPage,/Plus es opcional/,'Plus no es obligatorio para comenzar');
+assert.match(classPage,/No necesitas contratar ChatGPT Plus para comenzar/,'Plus no es obligatorio para comenzar');
 assert.doesNotMatch(classPage,/SUSCRIPCIÓN PARA LA CLASE|Herramienta de IA · \$20 USD\/mes|ChatGPT Plus, que cuesta \$20 USD al mes/,'No se debe presentar Plus como requisito');
 console.log('QA editorial: contenido orientado al alumno sin procesos internos OK');
 
@@ -256,7 +266,7 @@ assert.match(classPage,/data-transform-to="0"/);
 assert.match(classPage,/data-transform-to="100"/);
 assert.match(classPage,/Ejemplo ilustrativo de lo que puedes crear en la clase/,'Se conserva la presentación anterior de la clase');
 assert.doesNotMatch(classPage,/class-production-rhythm|MI FORMA DE TRABAJAR/,'Se retiró el bloque añadido sin autorización');
-assert.match(classPage,/Plus es opcional/,'La información sobre Plus sigue siendo opcional');
+assert.match(classPage,/Plus puede ser una opción más adelante/,'Plus solo se menciona como opción futura');
 assert.match(newExperience,/ideaProgress.addEventListener\('input'/);
 assert.match(newExperience,/reducedMotion.matches \|\| start === target/);
 assert.match(home,/desde el teléfono, paso a paso y sin saber programar/,'Mensaje claro del extra de IA sin jerga técnica');
