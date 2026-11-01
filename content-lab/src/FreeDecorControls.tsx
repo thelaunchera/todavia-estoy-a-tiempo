@@ -76,7 +76,7 @@ export default function FreeDecorControls({backgroundId='brand',backgroundImageI
         <BackgroundThumbnail id={b.id} alt={'Vista previa: '+b.name}/><span>{b.name}</span>
       </button>)}</div></div>:
    <>
-    <div className="free-decor-groups">{['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'].map(g=><button type="button" key={g} className={group===g?'active':''} onClick={()=>setGroup(g)}>{g}</button>)}</div>
+    <div className="free-decor-groups">{['Todos','Inspiración','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'].map(g=><button type="button" key={g} className={group===g?'active':''} onClick={()=>setGroup(g)}>{g}</button>)}</div>
     {visible.length?<div className="free-decor-stickers">{visible.map(a=><div key={a.id} className="free-decor-sticker-cell"><button type="button" aria-pressed={selected.includes(a.id)} className={selected.includes(a.id)?'selected':''} onClick={()=>toggle(a.id)}><StickerThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/><small>{displayAssetName(a)}</small></button></div>)}</div>:
     <div className="free-decor-empty"><strong>Aquí aparecerán tus stickers PNG originales.</strong><p>No se mostrarán emojis de relleno. Cuando la administradora publique la colección, aparecerá aquí automáticamente.</p>{onOpenLibrary&&<button type="button" onClick={onOpenLibrary}>Abrir biblioteca de stickers</button>}</div>}
    </>}

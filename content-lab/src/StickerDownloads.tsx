@@ -9,7 +9,7 @@ type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
  onDelete:(asset:LibraryAsset)=>Promise<void>;
  isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
-const groups=['Todos','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
+const groups=['Todos','Inspiración','Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
  if(/avatar|character|girl|portrait/.test(n))return 'Avatares';

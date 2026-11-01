@@ -705,6 +705,17 @@ function App() {
     const category=assetCategory(asset);
     if(asset.shared&&!aiWallet?.admin)throw Error('Solo la administradora puede borrar recursos compartidos.');
     const name=displayAssetName(asset);
+    if(asset.bundled){
+      if(!window.confirm('¿Quitar «'+name+'» del catálogo de todos los alumnos? Los diseños guardados conservarán el archivo.'))return;
+      try{
+        setBusy('delete-asset');
+        await api.post('/api/hidden-backgrounds',{id:asset.id});
+        const {data}=await api.get('/api/data');
+        setAssets(data.assets||[]);updateHiddenBackgrounds(data.hiddenBackgroundIds||[]);
+        toast('Recurso quitado del catálogo ✓');
+      }catch(e){err(e)}finally{setBusy('')}
+      return;
+    }
     const visibility=asset.shared?'de la biblioteca de TODOS los alumnos':'de tu biblioteca privada';
     if(!window.confirm('¿Eliminar definitivamente '+name+' '+visibility+'?\n\nSi lo usaste en un diseño guardado, podría dejar de verse. Esta acción no se puede deshacer.'))return;
     const endpoint=asset.shared
