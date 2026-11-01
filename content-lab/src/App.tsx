@@ -564,12 +564,13 @@ function App() {
     setAlternatives([]);
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
-  const save = async (candidate?:Post) => {
+  const save = async (candidate?:unknown) => {
     // React may pass a click event to legacy onClick={save} handlers.
-    // Only a valid saved Post can override the current editor draft.
-    const source:Post=candidate&&typeof candidate.title==='string'&&
-      typeof candidate.format==='string'&&typeof candidate.brandId==='string'
-      ? candidate:editor;
+    // Only a genuine Post may override the latest editor draft.
+    const possible=candidate&&typeof candidate==='object'?candidate as Partial<Post>:null;
+    const source:Post=possible&&typeof possible.title==='string'&&
+      typeof possible.format==='string'&&typeof possible.brandId==='string'
+      ? possible as Post:editor;
     const draft={...source,title:source.title.trim()||source.hook.trim().slice(0,80)||
       (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
        source.format==='Story'?'Mi historia':'Mi publicación')};
