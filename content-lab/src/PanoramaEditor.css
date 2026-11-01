@@ -65,3 +65,18 @@
  .panorama-workspace{padding:6px}
  .panorama-heading p{display:none}
 }
+
+/* Portrait canvas dominates a phone screen; tool rail stays compact. */
+@media(max-width:760px){
+ .panorama-editor{border:0;padding:6px;margin:5px 0;background:transparent}
+ .panorama-heading{margin:0 0 5px}
+ .panorama-heading .eyebrow,.panorama-heading h2{display:none}
+ .panorama-heading>.btn{margin:0 0 0 auto;min-height:38px}
+ .panorama-primary-actions{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;
+   padding:4px 0 9px;margin:3px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .panorama-primary-actions button{white-space:nowrap;flex:none;padding:9px 11px;min-height:42px;font-size:11px}
+ .panorama-primary-actions .panorama-more-toggle{margin-left:0}
+ .panorama-workspace{padding:4px;border-radius:10px}
+ .panorama-editor .panorama-export-note{font-size:10px;margin-top:7px}
+ .panorama-text-manager{margin-top:7px;padding:8px}
+}
