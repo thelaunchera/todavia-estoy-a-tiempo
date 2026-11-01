@@ -444,6 +444,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const palette=brandPalette(brand);
   const [current,setCurrent]=useState(0);
   const [backgroundScope,setBackgroundScope]=useState<'slide'|'all'>('slide');
+  const [focusWallpaperId,setFocusWallpaperId]=useState('');
   const carouselRailRef=useRef<HTMLDivElement>(null);
   const [preview,setPreview]=useState('');
   const [panoramaPreview,setPanoramaPreview]=useState('');
@@ -802,6 +803,35 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       notify('Fondo aplicado a los '+slides.length+' slides.');
     }
   };
+  const extendCurrentBackground=()=>{
+    const oldWallpaper=(style.panoramaLayers||[]).find(layer=>layer.role==='background');
+    if(oldWallpaper){
+      if(!images[oldWallpaper.assetId])loadImage(oldWallpaper.assetId);
+      setFocusWallpaperId(oldWallpaper.id);setStudioTab('canvas');
+      notify('Toca el tirador lateral del fondo para extenderlo por los cortes.');
+      return;
+    }
+    const assetId=slide.backgroundImageId||(!style.perSlideBackgrounds?style.seamlessAssetId:'');
+    if(!assetId)return notify('Elige primero un fondo de imagen de la biblioteca para estirarlo entre slides.');
+    if((style.panoramaLayers||[]).length>=24)return notify('El lienzo tiene el máximo de 24 capas.');
+    if(!images[assetId])loadImage(assetId);
+    const id='panorama-wallpaper-'+crypto.randomUUID();
+    const layer:PanoramaLayer={
+      id,assetId,name:'Fondo continuo',kind:'photo',role:'background',
+      placement:'behind-text',
+      rect:{x:i/slides.length,y:0,w:Math.min(2,slides.length-i)/slides.length,h:1,angle:0,cornerRadius:0},
+    };
+    // Replace each identical tiled background; never move stickers or titles.
+    const nextSlides=slides.map(part=>part.backgroundImageId===assetId
+      ?{...part,backgroundId:'brand',backgroundImageId:''}:part);
+    setAll(nextSlides,normalizeCarouselStyle({
+      ...style,seamlessEnabled:true,perSlideBackgrounds:true,
+      seamlessBackgroundId:'brand',seamlessAssetId:'',
+      panoramaLayers:[...(style.panoramaLayers||[]),layer],
+    }));
+    setFocusWallpaperId(id);setStudioTab('canvas');
+    notify('Fondo continuo listo: usa el tirador azul o + Extender 1 slide.');
+  };
   const backgroundOfAll=()=>{
     const backgroundId=slide.backgroundId||'brand',backgroundImageId=slide.backgroundImageId||'';
     setAll(slides.map(part=>({...part,backgroundId,backgroundImageId,
@@ -855,9 +885,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       page:n,sourceField:item.field,placement:'front' as const,
     });})):[]),
   ]);
-  const panoramaLayers=[...pageLayers,...(style.panoramaLayers||[])
+  const savedPanoramaLayers=(style.panoramaLayers||[])
     .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
-    .map(layer=>({...layer,src:images[layer.assetId]||'',locked:layer.locked===true}))];
+    .map(layer=>({...layer,src:images[layer.assetId]||'',locked:layer.locked===true}));
+  // Wallpaper is always selectable behind independently movable stickers.
+  const panoramaLayers=[...savedPanoramaLayers.filter(layer=>layer.role==='background'),
+    ...pageLayers,...savedPanoramaLayers.filter(layer=>layer.role!=='background')];
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -1374,6 +1407,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       </div>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+        onExtendBackground={extendCurrentBackground}
+        canExtendBackground={!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background')}
+        focusLayerId={focusWallpaperId}
        onCopySticker={copyPanoramaSticker} onToggleLock={togglePanoramaLock} onDuplicateText={duplicatePanoramaText}
       onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
       onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
@@ -1433,6 +1469,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           onCopySticker={copySticker} onChange={updateDecoration}
           assets={ownedAssets} images={images} loadImage={loadImage}
           onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
+        {(!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background'))&&
+          <button type="button" className="btn dark factory-background-apply" onClick={extendCurrentBackground}>
+            <Layers3 size={16}/> 🎀 Estirar este fondo entre slides
+          </button>}
         <button type="button" className="btn ghost factory-background-apply" onClick={backgroundOfAll}>
           Aplicar el fondo actual a todos los slides
         </button>
