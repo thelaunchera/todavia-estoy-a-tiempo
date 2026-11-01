@@ -1,0 +1,120 @@
+
+.lab-calendar{max-width:1290px;margin:0 auto;padding-bottom:70px}
+.lab-calendar-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+.lab-calendar-heading h1{font-size:clamp(29px,4vw,49px);line-height:1.1;font-weight:600;letter-spacing:-1.4px;margin:9px 0 8px;color:#191919}
+.lab-calendar-heading p{color:#75858a;font-size:13px;line-height:1.65;margin:0}
+.lab-calendar-heading .btn{min-height:43px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.lab-calendar-disclaimer{display:flex;gap:11px;align-items:center;background:#edf4f5;border:1px solid #d5e4e7;color:#4d6972;border-radius:13px;padding:12px 15px;margin-bottom:19px;font-size:11px;line-height:1.6}
+.lab-calendar-disclaimer svg{flex:none}
+.lab-calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px;flex-wrap:wrap}
+.lab-calendar-view-switch{display:flex;align-items:center;gap:3px;background:#eaf0f0;padding:5px;border-radius:11px}
+.lab-calendar-view-switch button{background:transparent;border:0;border-radius:8px;cursor:pointer;padding:11px 15px;display:flex;align-items:center;gap:8px;font-weight:700;color:#63747c;font-size:12px}
+.lab-calendar-view-switch button.active{background:#fff;box-shadow:0 1px 5px #27363e16;color:#27404b}
+.lab-calendar-month-nav{display:flex;gap:10px;align-items:center;justify-content:center}
+.lab-calendar-month-nav strong{text-transform:capitalize;font-size:17px;min-width:170px;text-align:center;letter-spacing:-.3px}
+.lab-calendar-month-nav button,.lab-calendar-today{cursor:pointer;border:1px solid #dce5e5;background:white;border-radius:9px;display:grid;place-items:center;height:37px;min-width:37px;color:#476475}
+.lab-calendar-today{padding:0 14px;font-size:11px;font-weight:700}
+.lab-calendar-body{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(260px,.9fr);gap:16px;align-items:start}
+.lab-calendar-month,.lab-calendar-agenda,.lab-calendar-form,.lab-calendar-feedview{background:#fff;border:1px solid #e1e9e9;border-radius:16px;overflow:hidden}
+.lab-calendar-weekdays,.lab-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.lab-calendar-weekdays{background:#f7faf9;border-bottom:1px solid #e5eded}
+.lab-calendar-weekdays>span{text-align:center;padding:14px 5px;font-size:11px;font-weight:800;color:#839398}
+.lab-calendar-day,.lab-calendar-blank{position:relative;min-height:107px;min-width:0;background:#fff;border:0;border-right:1px solid #eef1ef;border-bottom:1px solid #eef1ef;text-align:left;padding:8px 6px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.lab-calendar-blank{background:#fbfcfb}
+.lab-calendar-day:nth-child(7n),.lab-calendar-blank:nth-child(7n){border-right:0}
+.lab-calendar-day:hover{background:#f1f8f7}
+.lab-calendar-day.selected{background:#edf5f5;box-shadow:inset 0 0 0 2px #6e9daa}
+.lab-calendar-day-number{display:grid;place-items:center;width:25px;height:25px;font-size:12px;border-radius:9px;color:#354b55;font-weight:700}
+.lab-calendar-day.today .lab-calendar-day-number{background:#253b45;color:white}
+.lab-calendar-day-events{display:grid;gap:4px;min-width:0;width:100%}
+.lab-calendar-pill{max-width:100%;min-width:0;display:flex;align-items:center;gap:3px;font-size:9px;line-height:1.2;border-radius:5px;padding:5px 4px;color:#40606b;background:#e1eff4;white-space:nowrap;overflow:hidden}
+.lab-calendar-pill svg{flex-shrink:0}
+.lab-calendar-pill span{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lab-calendar-pill.published{background:#e7efe2;color:#4b7148}
+.lab-calendar-more{font-size:9px;color:#839da5;padding-left:4px}
+.lab-calendar-agenda{padding:19px;min-height:240px}
+.lab-calendar-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:9px}
+.lab-calendar-panel-heading h2{font-size:20px;margin:6px 0;letter-spacing:-.3px;text-transform:capitalize}
+.lab-calendar-panel-heading>strong{background:#edf4f5;border-radius:24px;color:#517581;padding:6px 10px;font-size:11px}
+.lab-calendar-agenda-post{background:#f8faf9;border:1px solid #e7eded;border-radius:10px;padding:8px;width:100%;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;margin-bottom:8px;min-width:0}
+.lab-calendar-agenda-post.active{border-color:#7fabb7;background:#f0f8fa}
+.lab-calendar-agenda-post>img,.lab-calendar-noimage{width:42px;height:49px;object-fit:cover;border-radius:6px;flex:none}
+.lab-calendar-noimage{display:grid;place-items:center;background:#e8efec;color:#729097}
+.lab-calendar-agenda-post>span:nth-of-type(1):not(.lab-calendar-noimage){flex:1;min-width:0}
+.lab-calendar-agenda-post>span:nth-of-type(2){flex:1;min-width:0}
+.lab-calendar-agenda-post strong{display:block;color:#253c46;font-size:11px;line-height:1.3;overflow-wrap:anywhere}
+.lab-calendar-agenda-post small{display:flex;align-items:center;gap:4px;color:#789099;font-size:10px;margin-top:5px}
+.lab-calendar-state{font-size:9px;padding:5px 7px;border-radius:30px;background:#e6eff1;color:#51737b;white-space:nowrap}
+.lab-calendar-state.published{background:#e5efdf;color:#456940}
+.lab-calendar-empty-day{font-size:12px;color:#819195;line-height:1.6;padding:10px 0}
+.lab-calendar-day-add{display:flex;align-items:center;gap:7px;font-size:10px;color:#65858d;padding-top:15px;line-height:1.45}
+.lab-calendar-day-add svg{flex:none}
+.lab-calendar-feedview{padding:20px}
+.lab-calendar-feedhead{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px}
+.lab-calendar-feedhead h2{font-size:23px;margin:0 0 4px;letter-spacing:-.4px}
+.lab-calendar-feedhead p{font-size:11px;color:#798b8f;margin:0}
+.lab-calendar-feedhead>span{font-size:10px;color:#577a83;background:#eff5f6;padding:8px 11px;border-radius:30px}
+.lab-calendar-feed{max-width:660px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:0 auto}
+.lab-calendar-feed>button{border:2px solid transparent;padding:0;position:relative;aspect-ratio:4/5;background:#f2f4f0;overflow:hidden;cursor:pointer;color:#324d51}
+.lab-calendar-feed>button.selected{border-color:#508698}
+.lab-calendar-feed>button img{width:100%;height:100%;object-fit:cover;display:block}
+.lab-calendar-feed-placeholder{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:12px;gap:8px;background:linear-gradient(135deg,#faf8f3,#dfeae6);box-sizing:border-box}
+.lab-calendar-feed-placeholder strong{font-size:12px;line-height:1.2;max-height:65%;overflow:hidden}
+.lab-calendar-feed-placeholder small{font-size:9px;color:#70898d}
+.lab-calendar-feed>button>span{position:absolute;left:5px;bottom:5px;border-radius:5px;padding:5px 6px;background:#263940db;color:white;font-size:9px}
+.lab-calendar-feedempty{text-align:center;color:#7b8c8e;padding:30px 0;font-size:12px}
+.lab-calendar-form{padding:23px;margin-top:17px}
+.lab-calendar-form-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.lab-calendar-form-heading h2{font-size:22px;margin:7px 0}
+.lab-calendar-form-heading p{font-size:12px;color:#7d9095;margin:0;line-height:1.5}
+.lab-calendar-form-heading>span{white-space:nowrap;background:#edf5f0;color:#547765;padding:8px 11px;border-radius:12px;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700}
+.lab-calendar-form-fields{display:grid;grid-template-columns:minmax(190px,2fr) minmax(128px,1fr) minmax(90px,.65fr);gap:14px;margin-top:23px;align-items:end}
+.lab-calendar-form-fields label{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:700;color:#516b74;min-width:0}
+.lab-calendar-form-fields input,.lab-calendar-form-fields select{min-width:0;width:100%;box-sizing:border-box;height:43px;border-radius:9px;border:1px solid #d0e0e0;background:#fff;padding:9px 10px;color:#23353c;font:12px/1.3 inherit}
+.lab-calendar-form-actions{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lab-calendar-form-actions .btn{display:inline-flex;align-items:center;gap:7px;justify-content:center;min-height:42px}
+.lab-calendar-assigned{grid-column:1/-1;color:#658277;font-size:11px;margin:0}
+.lab-calendar-no-posts{border:1px dashed #cbdde0;background:#f8fbfb;padding:19px;border-radius:11px;margin-top:20px}
+.lab-calendar-no-posts p{color:#668087;font-size:12px}
+.lab-calendar-no-posts>div{display:flex;flex-wrap:wrap;gap:10px}
+.lab-calendar-error{background:#fdf2f2;color:#9a4242;padding:12px;border-radius:9px;font-size:12px}
+.lab-calendar-loading{padding:38px;text-align:center;color:#758a90}
+@media(max-width:1020px){
+ .lab-calendar-body{grid-template-columns:1fr}
+ .lab-calendar-agenda{min-height:0}
+}
+@media(max-width:650px){
+ .lab-calendar{padding-bottom:92px}
+ .lab-calendar-heading{align-items:flex-start;gap:9px}
+ .lab-calendar-heading h1{font-size:29px;letter-spacing:-.7px}
+ .lab-calendar-heading .btn{font-size:10px;min-height:38px;padding:9px 10px}
+ .lab-calendar-disclaimer{font-size:10px;padding:11px}
+ .lab-calendar-toolbar{display:grid;grid-template-columns:1fr auto;gap:9px}
+ .lab-calendar-view-switch{grid-column:1/-1;justify-content:stretch}
+ .lab-calendar-view-switch button{flex:1;justify-content:center}
+ .lab-calendar-month-nav{justify-content:flex-start;gap:5px}
+ .lab-calendar-month-nav strong{min-width:125px;font-size:14px}
+ .lab-calendar-month-nav button{min-width:31px;width:31px;height:35px}
+ .lab-calendar-today{height:35px;padding:0 8px}
+ .lab-calendar-month,.lab-calendar-agenda,.lab-calendar-form{border-radius:12px}
+ .lab-calendar-weekdays>span{padding:10px 0;font-size:10px}
+ .lab-calendar-day,.lab-calendar-blank{min-height:68px;padding:5px 2px;gap:3px}
+ .lab-calendar-day-number{width:21px;height:21px;font-size:11px}
+ .lab-calendar-pill{font-size:8px;justify-content:center;padding:4px 0;line-height:1}
+ .lab-calendar-pill svg,.lab-calendar-pill span{display:none}
+ .lab-calendar-more{display:none}
+ .lab-calendar-agenda{padding:14px}
+ .lab-calendar-form{padding:15px}
+ .lab-calendar-form-heading{display:block}
+ .lab-calendar-form-heading h2{font-size:19px}
+ .lab-calendar-form-heading>span{display:inline-flex;margin-top:10px}
+ .lab-calendar-form-fields{grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+ .lab-calendar-form-picker{grid-column:1/-1}
+ .lab-calendar-form-actions{display:grid;grid-template-columns:1fr}
+ .lab-calendar-form-actions .btn{width:100%}
+ .lab-calendar-feedview{padding:10px}
+ .lab-calendar-feed-placeholder{padding:4px;gap:4px}
+ .lab-calendar-feed-placeholder strong{font-size:9px}
+ .lab-calendar-feed-placeholder small{font-size:8px}
+ .lab-calendar-feedhead>span{display:none}
+}
