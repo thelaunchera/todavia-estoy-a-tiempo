@@ -48,6 +48,7 @@ export type CarouselStyle={
   seamlessBackgroundId:FreeBackgroundId;
   seamlessAssetId:string;
   panoramaLayers?:PanoramaLayer[];
+  lockedLayerIds?:string[];
   freeCanvas:boolean;
   editorialRhythm:boolean;
   canvasColor:string;
@@ -75,7 +76,8 @@ export function normalizeCarouselStyle(value:unknown):CarouselStyle{
     editorialRhythm:v.editorialRhythm===true,
     canvasColor:typeof v.canvasColor==='string'&&/^#[0-9a-f]{6}$/i.test(v.canvasColor)?v.canvasColor:'#FFFFFF',
     canvasGradient:typeof v.canvasGradient==='string'&&/^#[0-9a-f]{6}$/i.test(v.canvasGradient)?v.canvasGradient:'',
-    panoramaLayers:normalizePanoramaLayers(v.panoramaLayers)
+    panoramaLayers:normalizePanoramaLayers(v.panoramaLayers),
+    lockedLayerIds:Array.isArray(v.lockedLayerIds)?v.lockedLayerIds.filter((id:unknown)=>typeof id==='string').slice(0,55):[]
   };
 }
 export function readCarouselDesign(value:string):{slides:unknown[]|null;style:CarouselStyle}{
