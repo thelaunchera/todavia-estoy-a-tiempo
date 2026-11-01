@@ -754,6 +754,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       return [base,{...base,id:'copy-'+crypto.randomUUID(),name:layer.name+' · copia',
         rect:{...base.rect,x:base.rect.x+1/(count+1)}}];
     });
+    if(mapped.length>24){notify('Este carrusel ya utiliza muchas capas. Bloqueamos la duplicación para no perder ningún elemento.');return;}
     const clonedLocks=(style.lockedLayerIds||[]).flatMap(id=>{
       const originalPrefixes=['page-photo-'+slide.key,'page-text-'+slide.key,'page-sticker-'+slide.key+'-'];
       return originalPrefixes.some(prefix=>id===prefix||id.startsWith(prefix))
