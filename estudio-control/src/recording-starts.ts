@@ -1,3 +1,4 @@
+import {demoRebuildPrompts} from './demo-rebuild-prompts';
 /** Preparación de pantalla por video. Un único negocio ficticio: brownies tradicionales. */
 export type RecordingStart = {
   tabs:string[]; actions:string[]; savedPoint:string; finish:string; readyPrompt:string;
@@ -42,10 +43,10 @@ export const recordingStarts:Record<string,RecordingStart>={
  },
  '05':{
   tabs:['Demo aprobada SIN VIDEO: https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','Demo oficial con VIDEO para el bono final (no sobrescribir)','ChatGPT con AppDeploy para el proyecto NUEVO del estudiante, si está disponible','02_FOTOS: hero estático, seis sabores y dos regalos aprobados','03_TEXTOS_DE_WEB','Vista previa de AppDeploy'],
-  actions:['Muestra en Casa Brownie qué es frontend: fotos, textos, colores y botones. Explica por qué esta web no necesita backend propio.','En ChatGPT busca AppDeploy en Plugins, conéctalo y autoriza solo si tu plan lo permite.','Pega el prompt preparado y adjunta los textos y fotos guardados en su carpeta.','Publica la versión de práctica del estudiante con dirección HTTPS distinta de la demo oficial; guárdala en 05_WEB y comprueba botón y móvil. Nunca sobrescribas Casa Brownie del repo.'],
-  savedPoint:'Guarda prompt completo, archivos y URL de la primera versión antes de pedir cambios. Usa historial/rollback de AppDeploy si está disponible.',
-  finish:'Termina cuando tengas una URL pública comprobada y un botón informativo que funcione.',
-  readyPrompt:'Usa AppDeploy para construir una app de PRÁCTICA nueva para Casa Brownie; no edites el demo final del repositorio. Fotos aprobadas [ADJUNTAR HERO, SEIS SABORES Y DOS REGALOS] y textos exactos [PEGAR TEXTOS]. Hero estático con pregunta «¿Qué llevo de regalo?», apoyo sobre llegar con un detalle pensado y CTA «Descubrir sabores». Orden de secciones: header, hero, banda, seis sabores, regalos, historia, entrega ficticia Miami, cierre y footer. Crea solo una sección por mensaje y guarda la versión aprobada. Captura 05A (header/hero/banner/catálogo) y 05B (regalos/historia/entrega/footer). En tablet, foto de entrega grande a la izquierda y textos a la derecha; en móvil, foto arriba y contenido centrado. Sin video hasta el bono. Botones de la experiencia son simulaciones; sin checkout, base de datos, login, formularios de datos o entregas reales. Muestra DEMO · SIN COMPRAS y devuelve URL HTTPS verificada. No inventes precios ni reseñas.'
+  actions:['Abre AppDeploy en el proyecto independiente y casi vacío «Casa Brownie · Taller desde cero»; abre aparte la versión oficial con foto estática solo para comparar.','Pega SOLO el prompt 00 y verifica que aparece el esqueleto básico, sin secciones terminadas; guarda una captura.','Aplica el prompt 01 (identidad/menú), comprueba y guarda. Aplica 02 (hero de foto fija) y comprueba de nuevo.','Prepara las fotografías del paso 03, una imagen por archivo; después ejecuta 04 (banner y seis sabores). Graba esta etapa como 05A.','Graba 05B aplicando sucesivamente 05 (regalos), 06 (historia), 07 (entrega Miami), 08 (interacciones simuladas) y 09 (footer). Guarda capturas en cada paso.','Ejecuta 10: compara capturas de la práctica con la versión oficial SIN video a móvil, tablet y escritorio; corrige diferencias visibles sin modificar la referencia y sin añadir el video.'],
+  savedPoint:'Guardar capturas tras 00, 01, 02, 04, 05–09 y la comparación final 10, con URL propia de AppDeploy y referencia estática en otra pestaña.',
+  finish:'Termina con la página estática completa, el CTA de demostración probado y capturas comparadas con la referencia oficial; no asegurar igualdad visual sin prueba.',
+  readyPrompt:demoRebuildPrompts['casa-brownie'][0].prompt
  },
  '06':{
   tabs:['Demo oficial SIN VIDEO https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video','URL de práctica del estudiante en AppDeploy','Vista móvil estrecha y escritorio','ChatGPT con capturas reales'],
