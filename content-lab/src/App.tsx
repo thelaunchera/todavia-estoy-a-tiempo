@@ -120,7 +120,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Posts · 4:5', icon: WandSparkles },
   { id: 'vertical', title: 'Portadas de reels e historias · 9:16', icon: Film },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
-  { id: 'grid', title: '1 Photo → 9 Posts', icon: Images },
+  { id: 'grid', title: 'Vista del grid · 3×3', icon: Images },
   { id: 'calendar', title: 'Calendario editorial', icon: CalendarDays },
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
   { id: 'backgrounds', title: 'Fondos', icon: Palette },
