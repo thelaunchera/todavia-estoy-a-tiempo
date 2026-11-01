@@ -77,3 +77,18 @@ test('every editorial format reserves separate text and photo space, also on iPh
  assert.ok(gallery.includes('sampleCredits[index]'), 'do not stamp the same placeholder brand on all posters');
  assert.ok(gallery.includes("locale==='es'?example.es:example.en"),'preview follows selected language');
 });
+
+
+test('first creative poster keeps its photo and headline separate in preview and PNG',()=>{
+ const composer=file('src/GridComposer.ts'),css=file('src/FormatGallery.css');
+ const layout=composer.match(/\{name:'Editorial Hero',image:\[([^\]]+)\],type:\[([^\]]+)\]/);
+ assert.ok(layout,'original format remains available to the editor');
+ const bounds=(part)=>part.split(',').map(Number);
+ const photo=bounds(layout[1]),copy=bounds(layout[2]);
+ assert.ok(photo[1]+photo[3]<copy[1],'the headline must be below the photo');
+ assert.ok(photo[2]>=.8,'the photo must remain the hero');
+ assert.match(css,/\.fg-variant-0 \.fg-preview-backtype\{display:none\}/);
+ assert.ok(composer.includes("if(layout.name==='Editorial Hero')return;"),'do not duplicate giant words');
+ assert.ok(composer.includes("const editorialHero=fmt.name==='Editorial Hero'"));
+ assert.ok(composer.includes('if(editorialHero){'),'subtitle must be placed below the first headline');
+});
