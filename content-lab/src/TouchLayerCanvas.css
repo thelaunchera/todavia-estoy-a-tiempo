@@ -306,3 +306,18 @@
  font-family:'Archivo Black',Impact,sans-serif;font-size:18px
 }
 .touch-editor-post-text-list small{font-size:11px;line-height:1.4;color:#68828a}
+
+
+/* Locks protect layers from stray taps, drags and finger-resize gestures. */
+.touch-editor-layer.is-locked{cursor:default;outline:1px dashed rgba(35,78,93,.4)}
+.touch-editor-layer.is-locked .touch-editor-resize{display:none}
+.touch-editor-lock-button,.touch-editor-duplicate-text{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ width:100%;min-height:43px;padding:9px 12px;border:1px solid #bad1d8;
+ border-radius:9px;background:#edf7f9;color:#2d5d6d;font-size:12px;font-weight:750;
+ touch-action:manipulation
+}
+.touch-editor-lock-button[aria-pressed=true]{background:#e1eef1;border-color:#79a7b8}
+.touch-editor-lock-hint{padding:10px;font-size:11px;line-height:1.5;color:#536e79;background:#f6f9f9;border-radius:9px}
+.touch-editor-layer-trash:disabled{opacity:.25;cursor:not-allowed}
+.factory-duplicate-slide{margin:10px 0}
