@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
 import {clearActivity,hasExpiredActivity,lastActivity,recordActivity} from '../SessionActivity';
+import {findBundledDesignAsset,isBundledDesignAsset,bundledDesignAssets,bundledDesignAssetUrl} from '../BundledDesignAssets';
 
 const url=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL||'');
 const key=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY||'');
@@ -40,7 +41,7 @@ const sharedStickers=async()=>{
  const {data,error}=await tab('sticker_catalog')
   .select('id,name,category,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
  if(error)throw Error(error.message);
- return (data||[]).map(stickerRecord);
+ return [...(data||[]).map(stickerRecord),...await includedCatalog('sticker')];
 };
 
 const backgroundRecord=(x:any)=>({
@@ -52,12 +53,16 @@ const sharedBackgrounds=async()=>{
  const {data,error}=await tab('background_catalog')
   .select('id,name,category,mime,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
  if(error)throw Error(error.message);
- return (data||[]).map(backgroundRecord);
+ return [...(data||[]).map(backgroundRecord),...await includedCatalog('background')];
 };
 const hiddenBackgrounds=async()=>{
  const {data,error}=await tab('hidden_backgrounds').select('id');
  if(error)throw Error(error.message);
  return (data||[]).map(x=>x.id as string);
+};
+const includedCatalog=async(category:'sticker'|'background')=>{
+ if(!await auth.getUser())throw Error('Necesitas acceso activo al Content Lab.');
+ return bundledDesignAssets(category,await hiddenBackgrounds());
 };
 const add=async(name:string,payload:any)=>{const me=await current();return unwrap(out(await tab(name).insert({owner_id:me.id,payload}).select('id,payload').single()));};
 const update=async(name:string,id:string,payload:any)=>{
@@ -213,6 +218,15 @@ export const api={
     }
     if(path.startsWith('/api/assets/')){
       const id=decodeURIComponent(path.slice('/api/assets/'.length));
+      const included=findBundledDesignAsset(id);
+      if(included){
+        if(!await auth.getUser())throw Error('Necesitas acceso activo al Content Lab.');
+        const response=await fetch(bundledDesignAssetUrl(included));
+        if(!response.ok)throw Error('No se pudo cargar el recurso incluido. Vuelve a intentarlo.');
+        const file=await response.blob();
+        if(file.size<200||!file.type.startsWith('image/'))throw Error('El recurso incluido no está disponible.');
+        return {data:{mime:included.mime,content:await base64(file)}};
+      }
       if(id.startsWith('shared-background-')){
         const uid=id.slice('shared-background-'.length);
         if(!/^[a-f0-9-]{36}$/i.test(uid))throw Error('Fondo compartido no válido.');
@@ -246,7 +260,7 @@ export const api={
       if(authError)throw Error(authError.message);
       if(!admin)throw Error('Solo la administradora puede quitar fondos incluidos.');
       const id=String(payload?.id||'');
-      if(!FREE_BACKGROUNDS.some(x=>x.id===id))throw Error('Fondo incluido no válido.');
+      if(!FREE_BACKGROUNDS.some(x=>x.id===id)&&!isBundledDesignAsset(id))throw Error('Recurso incluido no válido.');
       const {error}=await tab('hidden_backgrounds').insert({id,hidden_by:me.id});
       if(error&&error.code!=='23505')throw Error(error.message);
       return {data:{hidden:true,id}};

@@ -39,6 +39,6 @@ test('Access to Lab is scoped to verified membership and Product Center, not an 
  assert.ok(app.includes('href="../centro/"'));
  assert.ok(js.includes("db.from('content_lab_memberships').select('id')"));
  assert.ok(js.includes(".eq('status','active').maybeSingle()"));
- assert.ok(js.includes('Para comenzar')||js.includes('Centro de Productos'));
+ assert.ok(js.includes('Estos productos tienen una compra verificada para tu correo.'));
  assert.ok(!js.includes("purchased.add('web-class')"));
 });
