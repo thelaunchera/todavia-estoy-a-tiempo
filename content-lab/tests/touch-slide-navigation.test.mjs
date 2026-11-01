@@ -22,7 +22,8 @@ test('Navigation offers touch swipe, page arrows and explicit slide numbers',()=
 });
 test('Overlapping objects can be explicitly selected and only the active one moves',()=>{
  assert.match(canvas,/const selectFromList=\(id:string\)=>/);
- assert.match(canvas,/if\(selected!==layer\.id\)\{setSelected\(layer\.id\);return;\}/);
+ assert.match(canvas,/if\(selected!==layer\.id\)setSelected\(layer\.id\);/);
+ assert.match(canvas,/e\.currentTarget\.setPointerCapture\(e\.pointerId\)/);
  assert.match(canvas,/onClick=\{\(\)=>selectFromList\(layer\.id\)\}/);
  assert.match(canvas,/zIndex:layer\.role==='background'\?1:active\?8:z/);
  assert.match(canvas,/pointerEvents:layer\.locked\|\|pageCount>1/);
