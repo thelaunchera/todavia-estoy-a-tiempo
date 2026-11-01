@@ -142,7 +142,7 @@ test('approved freebie keeps matcha carousel and compact photo-first hero on mob
   'class="editorial-process"',
   'class="process-art"',
   'class="all-products"',
-  'class="process-cta"',
+  'class="hero-start"',
   'id="crear"',
   'window.matchMedia',
   'prefers-reduced-motion: reduce',
@@ -158,6 +158,8 @@ test('approved freebie keeps matcha carousel and compact photo-first hero on mob
  assert.ok(page.includes('top:50%'),'Las flechas se mantienen sobre la foto');
 
  assert.ok(page.includes('Tus 8 ideas, listas para crear.'),'El formulario tiene una promesa simple');
+ assert.ok(!page.includes('class="process-cta"'),'El CTA duplicado del proceso no debe volver');
+ assert.ok(page.includes('href="#recibir" class="hero-start"'),'El CTA principal sigue apuntando al formulario');
  assert.ok(!page.includes('LOS PROMPTS COMPLETOS · ACCESO PRIVADO'),'La portada no incluye un segundo bloque técnico');
  assert.ok(page.includes('Funciona con cualquier producto'));
 });
