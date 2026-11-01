@@ -139,7 +139,7 @@ function renderOwnerLibrary(){
  for(const title of titles){
   const isLab=title==='Content Lab'&&(owner||purchased.has('content-lab'));
   const chip=document.createElement(isLab?'a':'span');
-  chip.textContent=isLab?'Entrar a Content Lab ↗':title;
+  chip.textContent=isLab?'Entrar a Content Lab':title;
   if(isLab)chip.href='../content-lab/';
   list.append(chip);
  }
