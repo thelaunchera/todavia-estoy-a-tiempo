@@ -222,7 +222,7 @@ console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografí
 const heroCopy=classPage.slice(classPage.indexOf('<section class="class-hero"'),classPage.indexOf('</section>',classPage.indexOf('<section class="class-hero"')));
 const publicReadable=classPage.replace(/<script\b[\s\S]*?<\/script>/gi,'').replace(/<svg\b[\s\S]*?<\/svg>/gi,'');
 assert.match(heroCopy,/Quiero estar en la lista|Explora la clase/,'El hero lleva al siguiente paso sin confusión');
-assert.match(heroCopy,/sin saber programar/);
+assert.match(heroCopy,/sin saber programar/i,'El mensaje para principiantes está presente');
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
 assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
 assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
