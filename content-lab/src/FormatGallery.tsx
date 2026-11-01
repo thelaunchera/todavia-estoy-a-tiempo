@@ -51,7 +51,7 @@ const groups:Record<string,Filter[]>={
 const examples=[
  {id:'1TlNJhbCds3BiwDc5MUdyPHFZAZGbBBB5',es:'Casa en calma.',en:'A quieter home.',kEs:'HOGAR / 01',kEn:'HOME / 01',subEs:'Luz natural, nuevas posibilidades',subEn:'Light, space, perspective'},
  {id:'1Z23k4pYythR48z0zXr01Kj_VOQRS2v5-',es:'MENOS RUIDO.',en:'LESS NOISE.',kEs:'UN MANIFIESTO',kEn:'A STATEMENT',subEs:'La fuerza de lo esencial',subEn:'Only what matters'},
- {id:'1RpYhHz1nXAe2Hd5H3LYPw5zBJEJsb_4c',es:'En cada detalle.',en:'It's in the details.',kEs:'ESTUDIO DE TEXTURAS',kEn:'TEXTURE STUDY',subEs:'Materiales y luz real',subEn:'Tactile, true to life'},
+ {id:'1RpYhHz1nXAe2Hd5H3LYPw5zBJEJsb_4c',es:'En cada detalle.',en:'All in the details.',kEs:'ESTUDIO DE TEXTURAS',kEn:'TEXTURE STUDY',subEs:'Materiales y luz real',subEn:'Tactile, true to life'},
  {id:'16AGoD-nvjYBQdO5GvkI-W5q3PjfIoTCa',es:'Aquí sucede la vida.',en:'Life happens here.',kEs:'HABITAR / 04',kEn:'LIVING / 04',subEs:'Espacios para disfrutar',subEn:'Made for everyday living'},
  {id:'17geIi7iUYfYCdQOi_cMskFhid2erYIdk',es:'Rituales de domingo.',en:'Sunday rituals.',kEs:'PEQUEÑOS RITUALES',kEn:'SMALL RITUALS',subEs:'Orden y bienestar',subEn:'Make room for joy'},
  {id:'17YR_MIQ-Qbe6wHqSbNBPadxU1CYp66Ib',es:'Otra mirada.',en:'A new perspective.',kEs:'NOTAS DE ESTILO',kEn:'STYLE NOTES',subEs:'El diseño está en lo simple',subEn:'Simple is thoughtful'},
