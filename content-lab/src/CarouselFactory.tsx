@@ -823,7 +823,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     };
     // Replace each identical tiled background; never move stickers or titles.
     const nextSlides=slides.map(part=>part.backgroundImageId===assetId
-      ?{...part,backgroundId:'brand',backgroundImageId:''}:part);
+      ?{...part,backgroundId:'brand' as const,backgroundImageId:''}:part);
     setAll(nextSlides,normalizeCarouselStyle({
       ...style,seamlessEnabled:true,perSlideBackgrounds:true,
       seamlessBackgroundId:'brand',seamlessAssetId:'',
