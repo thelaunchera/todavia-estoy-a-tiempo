@@ -35,7 +35,7 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
  const title=post.hook||post.title;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
    font:decor.headlineStyle?.font||brand.headingFont?.toLowerCase()||'serif',
-   fontSize:decor.headlineStyle?.fontSize||84,lineHeight:decor.headlineStyle?.lineHeight||1.12,
+   fontSize:decor.headlineStyle?.fontSize||84,fontWeight:decor.headlineStyle?.fontWeight||700,lineHeight:decor.headlineStyle?.lineHeight||1.12,
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
    shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
@@ -121,10 +121,20 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
   update({...decor,layers:[...decor.layers,
    kind==='text'?{id:uniqueId(),kind:'text',assetId:'',name:'Texto libre',
-     text:plain('Write here','Escribe aquí',locale),font:'serif',fontSize:80,color:'#191919',
+     text:plain('Write here','Escribe aquí',locale),font:'serif',fontSize:80,fontWeight:700,color:'#191919',
      rect:{x:.1,y:.42,w:.8,h:.23}}:
    {id:uniqueId(),kind:'shape',assetId:'',name:'Collage',shape,color:'#F1E5D2',
      rect:{x:.22,y:.43,w:.56,h:shape==='tape'?.08:.32}}]});
+ };
+ const addPosterTitle=()=>{
+  if(decor.layers.length>=22){notify('Máximo 22 elementos por post');return;}
+  update({...decor,layers:[...decor.layers,{
+   id:uniqueId(),kind:'text',assetId:'',name:'Texto póster',font:'poster',fontSize:116,
+   fontWeight:900,color:'#191919',lineHeight:.98,spacing:-1,
+   text:plain('YOUR BIG IDEA','TU GRAN IDEA',locale),
+   rect:{x:.065,y:.36,w:.87,h:.29}
+  }]});
+  notify('Texto póster añadido. Tócalo y arrástralo; puedes cambiar su color.');
  };
  const updateLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
   if(id==='main-title'){
@@ -193,6 +203,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
     <Paintbrush size={17}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
    <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Add text','Añadir texto',locale)}</button>
+   <button type="button" className="free-post-poster-button" onClick={addPosterTitle}><Type size={18}/>{plain('Poster Bold','Texto póster BOLD',locale)}</button>
    <button type="button" onClick={()=>setMediaOpen(v=>!v)}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
    <button type="button" onClick={()=>setBackgroundOpen(v=>!v)}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
    <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}><Undo2 size={17}/></button>
@@ -246,7 +257,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
    <TouchLayerCanvas preview={preview} layers={touchLayers} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
-     onRemove={remove} onReorder={reorder} onDropAsset={addAsset}
+     onRemove={remove} onReorder={reorder} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
   <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
     <button type="button" disabled={busy} onClick={()=>void exportFreePost(post,brand,images)
