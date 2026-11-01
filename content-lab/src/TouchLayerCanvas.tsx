@@ -453,6 +453,14 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
+    {pageCount>1&&chosen&&selectedRect&&!chosen.locked&&<div className="touch-editor-fast-actions">
+      <span title={chosen.name}>{chosen.name}</span>
+      <button type="button" aria-label="Reducir elemento" onClick={()=>resizeSelected(.86)}>−</button>
+      <button type="button" aria-label="Agrandar elemento" onClick={()=>resizeSelected(1.16)}>＋</button>
+      {chosen.role==='background'&&<button type="button" onClick={()=>commit({
+         w:Math.min(1-selectedRect.x,selectedRect.w+1/pageCount),h:1,y:0
+       })}>Estirar fondo ↔</button>}
+    </div>}
     {pageCount===1&&(layers.some(layer=>layer.kind==='text')||layers.some(layer=>layer.locked))&&
       <div className="touch-editor-post-text-list" aria-label="Seleccionar textos y elementos bloqueados">
         <strong>Editar textos y desbloquear capas</strong>
@@ -465,11 +473,12 @@ export default function TouchLayerCanvas({
         <small>Selecciona un texto y cámbialo de sitio, color o tipografía.</small>
       </div>}
     <p className="touch-editor-help">{pageCount>1
-      ?interactionMode==='navigate'?'Desliza el lienzo o usa las flechas para pasar de slide sin mover stickers.':
-        'Primero elige una capa; después arrástrala. Usa las flechas para pasar de slide.'
+      ?interactionMode==='navigate'?'Desliza para cambiar de slide sin mover elementos.':
+        'Toca y arrastra cualquier elemento. Usa ＋ o − para cambiar su tamaño.'
       :cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
       : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
-    {chosen && selectedRect && <div className="touch-editor-options">
+    {chosen && selectedRect && <details className="touch-editor-options" key={chosen.id}>
+      <summary>Más ajustes · {chosen.name}</summary>
       <strong>{chosen.name}</strong>
       {onToggleLock&&<button type="button" className="touch-editor-lock-button" aria-pressed={!!chosen.locked}
          onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?<><LockKeyholeOpen size={16}/> Desbloquear elemento</>:<><LockKeyhole size={16}/> Bloquear posición</>}</button>}
@@ -587,7 +596,7 @@ export default function TouchLayerCanvas({
         <button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer al frente</button>
       </div>}
       </>}
-    </div>}
+    </details>}
     {pageCount > 1 && onRemove && <details className="touch-editor-layer-list" aria-label="Elementos del carrusel">
       <summary>Ver todos los elementos ({layers.length})</summary>
       <div className="touch-editor-layer-items">{layers.map(layer => <div className="touch-editor-layer-item" key={layer.id}>
