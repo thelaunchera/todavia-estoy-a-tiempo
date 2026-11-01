@@ -14,10 +14,13 @@ test('product center covers 4 categories with real project links',()=>{
   assert.ok(linkKeys.includes(p.source),'Missing GitHub source '+p.source+' for '+p.id);
  }
 });
-test('course and lab are not labeled ready to sell',()=>{
- for(const p of products.filter(p=>['course','aula','club','lab'].includes(p.id))){
+test('course stays blocked while Content Lab checkout is live with QA caveat',()=>{
+ for(const p of products.filter(p=>['course','aula','club'].includes(p.id))){
    assert.equal(p.state,'produccion',p.id);
  }
+ assert.equal(products.find(x=>x.id==='lab')?.state,'publicado');
+ assert.match(catalog,/Falta verificar una compra real completa/);
+ assert.match(links,/buy\.stripe\.com\/14AdR8dHp6Dnd8B1IM93y0Z/);
  assert.equal(products.find(x=>x.id==='brand-board')?.state,'interno');
  assert.equal(products.find(x=>x.id==='pod-diary')?.state,'revision');
  assert.equal(products.find(x=>x.id==='pod-workbook')?.state,'revision');
