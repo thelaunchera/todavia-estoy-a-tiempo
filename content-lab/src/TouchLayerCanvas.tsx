@@ -63,8 +63,10 @@ export default function TouchLayerCanvas({
     resize();const observer=new ResizeObserver(resize);observer.observe(el);
     return()=>observer.disconnect();
   },[pageCount]);
-  const goToPage=(index:number)=>{
+  const goToPage=(index:number,keepSelection=false)=>{
     if(pageCount<=1)return;
+    // Changing slides clears the previous selection; the next slide is editable.
+    if(!keepSelection){setSelected('');setCropping(false)}
     const viewport=scrollArea.current,canvas=stage.current;
     const next=Math.max(0,Math.min(pageCount-1,index));
     setActivePage(next);
@@ -87,7 +89,7 @@ export default function TouchLayerCanvas({
     const item=layers.find(layer=>layer.id===id);
     if(item&&pageCount>1){
       const center=(getRect(item).x+getRect(item).w/2)*pageCount;
-      goToPage(Math.floor(Math.min(pageCount-.01,Math.max(0,center))));
+      goToPage(Math.floor(Math.min(pageCount-.01,Math.max(0,center))),true);
     }
   };
   const update = (id: string, next: TouchRect) => {
