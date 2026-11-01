@@ -39,7 +39,7 @@ test('9 posts are planned one-by-one and feed shows actual uploaded photos or bl
  assert.ok(calendar.includes("g.posts.map((p,i)"));
  assert.ok(calendar.includes('p.assetId&&images[p.assetId]'));
  assert.ok(calendar.includes("feed=current.slice().sort"));
- assert.ok(grid.includes('Preparar mis 9 ideas'));
- assert.ok(grid.includes('ChatGPT crea las imágenes'));
+ assert.ok(grid.includes('Crear mi grid de 9 espacios'));
+ assert.ok(grid.includes('Crea imágenes en ChatGPT'));
  assert.ok(grid.includes('Ver calendario y feed'));
 });
