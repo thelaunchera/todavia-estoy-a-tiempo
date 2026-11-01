@@ -1111,11 +1111,25 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   };
   const insert=()=>{
     if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Máximo diez slides por carrusel.');
-    const next={...makeSlide(slides.length,'', ''),key:'slide-'+Date.now(),eyebrow:'',layout:'statement' as Layout,
+    const count=slides.length,at=i+1;
+    const next:Slide={...makeSlide(count,''),key:'slide-'+crypto.randomUUID(),
+      eyebrow:'',title:'',description:'',layout:'statement',
       backgroundId:slide.backgroundId||'brand',backgroundImageId:slide.backgroundImageId||'',
-      backgroundColor:slide.backgroundColor,backgroundGradient:slide.backgroundGradient};
-    setAll([...slides.slice(0,-1),next,...slides.slice(-1)]);
-    setCurrent(slides.length-1);
+      backgroundColor:slide.backgroundColor,backgroundGradient:slide.backgroundGradient,
+      stickerIds:[],stickerPositions:{},assetId:''};
+    // Rebase saved free layers to the new total width without losing a
+    // sticker's position or breaking an existing cross-slide photograph.
+    const mapped=(style.panoramaLayers||[]).map(layer=>{
+      const left=layer.rect.x*count,right=(layer.rect.x+layer.rect.w)*count;
+      const newLeft=left+(left>=at?1:0);
+      const newRight=right+(right>at?1:0);
+      return {...layer,rect:{...layer.rect,x:newLeft/(count+1),
+        w:Math.max(.055/(count+1),(newRight-newLeft)/(count+1))}};
+    });
+    setAll([...slides.slice(0,at),next,...slides.slice(at)],
+      normalizeCarouselStyle({...style,panoramaLayers:mapped}));
+    setCurrent(at);
+    notify('Slide '+(at+1)+' añadido. El fondo anterior sigue, sin copiar fotos ni textos.');
   };
   const remove=()=>{
     if(slides.length<=2)return notify('Necesitas al menos dos slides.');
