@@ -139,15 +139,74 @@ html{scroll-behavior:smooth}
 @media(max-width:700px){.editorial-hero.hero-with-carousel{padding:27px 14px 22px}.hero-with-carousel h1{font-size:clamp(36px,9vw,56px);letter-spacing:-1.3px}.hero-with-carousel .hero-eyebrow{font-size:9px;letter-spacing:1.1px}.hero-with-carousel .hero-lead{font-size:13px}.hero-featured-wrap{height:360px}.hero-featured-photo{width:min(68%,255px);height:335px}.hero-photo-marker{font-size:8px;bottom:10px;right:0}.hero-thumbnails{justify-content:flex-start}.hero-arrow{flex-basis:34px;height:34px}.hero-with-carousel .hero-benefits{padding:13px 8px;gap:6px}.hero-benefits span{font-size:8px;gap:3px;flex-direction:column;text-align:center}.hero-benefits b{font-size:19px}}
 @media(max-width:380px){.hero-with-carousel h1{font-size:36px}.hero-featured-wrap{height:304px}.hero-featured-photo{height:282px}.hero-thumb{flex-basis:43px;width:43px;height:57px}.hero-slider-controls{gap:5px}}
 @media(prefers-reduced-motion:reduce){.hero-featured-photo img,.hero-thumb{transition:none}}
+
+/* 31 Oct 2026: approved matcha editorial landing direction. */
+:root{--forest:#263d18;--olive:#6f8636;--cream:#faf8f2;--lime:#e0e5a0}
+body{background:var(--cream);color:#202821}
+.editorial-nav{max-width:1400px;margin:auto;background:var(--cream);border:0;padding:18px 4%;gap:15px}
+.editorial-nav .brand-link{text-decoration:none;color:#151d17;display:flex;flex-direction:column;gap:0;line-height:1}
+.editorial-nav .brand-link strong{font:700 26px/1 'DM Serif Display',Georgia,serif;letter-spacing:-1px}
+.editorial-nav .brand-link i{color:#67824e}
+.editorial-nav .brand-link small{font-size:8px;letter-spacing:2px;text-align:center;font-weight:800;margin-top:6px}
+.editorial-nav nav{display:flex;gap:30px;align-items:center}
+.editorial-nav nav a{text-decoration:none;color:#23322b;font-size:12px;font-weight:700}
+.editorial-nav .nav-back{background:#273c20;color:#fff;text-decoration:none;padding:12px 18px;border-radius:999px;font-weight:700;font-size:12px}
+main{padding-top:8px}
+.editorial-hero.hero-with-carousel{position:relative;display:block;min-height:clamp(490px,52vw,680px);background:#243817;border-radius:24px;padding:clamp(30px,6vw,80px);text-align:left;isolation:isolate}
+.hero-with-carousel .hero-copy{width:min(60%,680px);max-width:680px;margin:0;z-index:5;position:relative}
+.hero-with-carousel .hero-eyebrow{justify-content:flex-start;color:#f0f1d9;letter-spacing:2px}
+.hero-with-carousel .hero-dot{background:#e6eb9b}
+.hero-with-carousel h1{color:#fff;font-size:clamp(48px,6.3vw,87px);letter-spacing:-2.2px;line-height:1.01;max-width:670px;margin:28px 0 24px}
+.hero-with-carousel h1 em{color:#e0e6a5}
+.hero-with-carousel .hero-lead{margin:0 0 24px;color:#f4f2e6;max-width:390px;font-size:clamp(14px,1.5vw,17px);line-height:1.65}
+.hero-with-carousel .hero-lead b{color:#f5f6c5}
+.hero-with-carousel .hero-start{background:#e2e69d;color:#1b2919!important;box-shadow:none;min-height:56px}
+.hero-with-carousel .hero-start:hover{background:#f1f2c5}
+.hero-with-carousel .hero-carousel{position:absolute;inset:0;width:100%;max-width:none;margin:0;z-index:1}
+.hero-with-carousel .hero-featured-wrap{height:100%;width:100%;display:block;position:absolute;inset:0}
+.hero-with-carousel .hero-featured-wrap:before{display:none}
+.hero-with-carousel .hero-leaf{display:none}
+.hero-with-carousel .hero-featured-photo{position:absolute;inset:0;max-height:none;width:100%;height:100%;border-radius:0;box-shadow:none;filter:none;background:#263d18}
+.hero-with-carousel .hero-featured-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,30,11,.90) 0%,rgba(19,40,12,.76) 33%,rgba(20,41,13,.19) 69%,rgba(15,32,12,.08) 100%);pointer-events:none}
+.hero-with-carousel .hero-featured-photo img{object-fit:cover;object-position:center 44%;transition:opacity .35s ease}
+.hero-with-carousel .hero-photo-marker{display:none}
+.hero-with-carousel .hero-slider-controls{position:absolute;inset:0;pointer-events:none;z-index:4;margin:0;justify-content:space-between}
+.hero-with-carousel .hero-arrow{pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%);border:0;background:#f7f7e0db;color:#20351a;width:44px;height:44px}
+.hero-with-carousel #hero-prev{left:10px}
+.hero-with-carousel #hero-next{right:10px}
+.hero-with-carousel .hero-thumbnails{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);opacity:0;max-width:0;max-height:0;overflow:hidden;pointer-events:none}
+.hero-with-carousel .hero-pagination{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);z-index:5;margin:0}
+.hero-with-carousel .hero-dot-button{width:10px;height:10px;background:#ffffff9c;border:1px solid #fff8}
+.hero-with-carousel .hero-dot-button.is-active{background:#f2f3c8}
+.hero-with-carousel .hero-carousel-caption{position:absolute;right:24px;bottom:15px;color:#f7f8e8b3;font-size:10px;z-index:4;margin:0}
+.hero-with-carousel .hero-benefits{display:none}
+.editorial-process{display:grid;grid-template-columns:1fr 1.1fr;align-items:center;gap:30px;padding:70px 4% 35px}
+.editorial-process h2{font:400 clamp(36px,4vw,57px)/1.12 'DM Serif Display',Georgia,serif;margin:12px 0 18px;color:#1c251d}
+.editorial-process p{max-width:430px;color:#3b483e;font-size:15px;line-height:1.7}
+.process-steps{list-style:none;padding:0;margin:30px 0;display:grid;gap:15px}
+.process-steps li{display:flex;align-items:center;gap:15px;font-weight:700;color:#25332a}
+.process-steps li span{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:50%;background:#506b20;color:#fff}
+.process-art{height:350px;display:flex;align-items:center;justify-content:center;position:relative;padding:12px 0}
+.process-art img{width:33%;height:78%;object-fit:cover;border:4px solid #fff;border-radius:17px;box-shadow:0 14px 24px #24351e2c}
+.process-art img:first-child{transform:rotate(-11deg) translateX(30px)}
+.process-art img:nth-child(2){height:96%;z-index:2;transform:translateY(1px)}
+.process-art img:last-child{transform:rotate(10deg) translateX(-30px)}
+.all-products{margin:15px 1% 0;padding:20px 30px;border-radius:999px;background:#efede3;color:#263321;text-align:center;font-size:13px}
+.process-cta{text-align:center;margin:25px 0 60px}
+.process-cta a{display:inline-flex;justify-content:center;align-items:center;gap:24px;background:#29451c;color:white;padding:17px 38px;border-radius:999px;text-decoration:none;font-size:15px;font-weight:800}
+#crear{scroll-margin-top:20px}
+@media(max-width:780px){.editorial-nav nav{display:none}.editorial-nav .nav-back{padding:10px 12px}.editorial-hero.hero-with-carousel{min-height:620px;padding:34px 27px}.hero-with-carousel .hero-copy{width:100%}.hero-with-carousel h1{font-size:clamp(44px,10vw,68px)}.hero-with-carousel .hero-featured-photo:after{background:linear-gradient(180deg,rgba(11,30,11,.88) 0%,rgba(15,38,11,.78) 41%,rgba(19,45,15,.13) 80%)}.hero-with-carousel .hero-featured-photo img{object-position:60% 60%}.hero-with-carousel .hero-lead{max-width:340px}.hero-with-carousel .hero-arrow{top:72%}.hero-with-carousel .hero-carousel-caption{display:none}.editorial-process{grid-template-columns:1fr;padding:45px 5% 15px;gap:4px}.process-art{height:300px}.all-products{border-radius:16px;padding:18px}.process-cta{margin-bottom:45px}}
+@media(max-width:440px){.editorial-nav .brand-link strong{font-size:21px}.editorial-hero.hero-with-carousel{min-height:580px;padding:27px 21px}.hero-with-carousel h1{font-size:clamp(40px,11vw,51px);letter-spacing:-1px;margin:19px 0}.hero-with-carousel .hero-lead{font-size:13px;max-width:300px}.hero-with-carousel .hero-start{padding:13px 18px;font-size:12px;min-height:49px}.process-art{height:260px}.process-art img{border-width:3px}.all-products{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.hero-with-carousel .hero-featured-photo img{transition:none}}
 </style></head><body>
-<header><strong>content lab<i>.</i></strong><a href="../">Volver al inicio del Lab</a></header>
+<header class="editorial-nav"><a class="brand-link" href="../" aria-label="Content Lab inicio"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></a><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#crear">Herramienta gratis</a><a href="#content-lab">Content Lab</a></nav><a class="nav-back" href="../">← Volver al Lab</a></header>
 <main>
 <section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
-    <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · INSPIRACIÓN EDITORIAL</span>
-    <h1 id="hero-title">Con una sola foto,<br><em>explora 8 formas</em><br>de publicarla.</h1>
-    <p class="hero-lead">Descubre cómo mostrar <b>cualquier producto</b> en ocho composiciones visuales diferentes para tus publicaciones. Aquí usamos matcha como ejemplo.</p>
-    <a href="#crear" class="hero-start">Crear mis 8 ideas <span aria-hidden="true">↗</span></a>
+    <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · HERRAMIENTA GRATUITA</span>
+    <h1 id="hero-title">Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.</h1>
+    <p class="hero-lead">Convierte una sola foto en diferentes ideas visuales para tus publicaciones. <b>Matcha es solo nuestro ejemplo.</b></p>
+    <a href="#crear" class="hero-start">Probar la herramienta gratis <span aria-hidden="true">→</span></a>
   </div>
   <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
     <div class="hero-featured-wrap">
@@ -155,7 +214,7 @@ html{scroll-behavior:smooth}
       <div class="hero-featured-photo">
         <img id="hero-featured" src="./matcha-05.jpg" alt="Ejemplo editorial de matcha, composición 5 de 8" fetchpriority="high" decoding="async">
       </div>
-      <span class="hero-photo-marker">EJEMPLO: MATCHA</span>
+      <span class="hero-photo-marker">EJEMPLO · MATCHA</span>
     </div>
     <div class="hero-slider-controls">
       <button class="hero-arrow" id="hero-prev" type="button" aria-label="Composición anterior">‹</button>
@@ -178,6 +237,17 @@ html{scroll-behavior:smooth}
     <span><b>▤</b> 8 ideas visuales</span><span><b>ϟ</b> Fácil de adaptar</span><span><b>▧</b> Para cualquier producto</span>
   </div>
 </section>
+<section class="editorial-process" id="como-funciona" aria-labelledby="process-title">
+  <div class="process-copy">
+    <span class="eyebrow">ASÍ DE SIMPLE</span>
+    <h2 id="process-title">¿Cómo funciona?</h2>
+    <p>Escribe qué producto quieres mostrar y el mensaje de tu publicación. Recibirás ocho instrucciones creativas para copiar y adaptar a tu estilo.</p>
+    <ol class="process-steps"><li><span>1</span> Cuéntanos qué producto tienes</li><li><span>2</span> Descubre ocho composiciones</li><li><span>3</span> Copia tu favorita y crea tu contenido</li></ol>
+  </div>
+  <div class="process-art" aria-label="Tres ejemplos visuales con matcha"><img src="./matcha-02.jpg" alt="Ejemplo matcha con composición tipográfica abstracta" loading="lazy"><img src="./matcha-05.jpg" alt="Ejemplo matcha en composición editorial" loading="lazy"><img src="./matcha-04.jpg" alt="Ejemplo matcha en primer plano" loading="lazy"></div>
+</section>
+<div class="all-products">🌿 <strong>Funciona con cualquier producto:</strong> bebidas, comida, skincare, ropa, velas, accesorios y mucho más.</div>
+<div class="process-cta"><a href="#crear">Probar ahora gratis <span aria-hidden="true">→</span></a></div>
 <div id="crear" class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
 <label for="brand">Marca con la que publicarás</label><select id="brand"><option value="tle">The Launch Era · English</option><option value="podcast">Todavía estoy a tiempo · Español</option><option value="other">Otra marca</option></select>
 <div class="half"><div><label for="brandName">Nombre de tu marca</label><input id="brandName" value="The Launch Era"></div><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div></div>
