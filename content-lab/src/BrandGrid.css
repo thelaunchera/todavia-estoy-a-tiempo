@@ -321,3 +321,36 @@
 .bg-calendar-edit-date input{box-sizing:border-box;min-height:40px;width:100%;padding:7px 9px;
  background:#fff;color:#264958;border:1px solid #c2d6dc;border-radius:8px;font:inherit}
 @media(max-width:650px){.bg-calendar-edit-date{flex-basis:100%}}
+
+/* True 3x3 Instagram-style preview. Placeholder cards remain deliberately neutral. */
+.bg-compact-campaign{padding:12px!important}
+.bg-compact-nine{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:3px!important;background:#fff;padding:3px;border:1px solid #e5ecea;
+ border-radius:9px;max-width:660px;margin:14px auto 0}
+.bg-compact-tile{position:relative!important;aspect-ratio:3/4!important;
+ min-height:0!important;border:0!important;border-radius:2px!important;
+ padding:0!important;display:flex!important;align-items:center;justify-content:center;
+ overflow:hidden;background:#eef2ef!important;box-shadow:none!important}
+.bg-compact-tile img{height:100%!important;width:100%!important;object-fit:cover!important;
+ border-radius:0!important;display:block}
+.bg-compact-tile.active{box-shadow:inset 0 0 0 4px #276f8a!important;z-index:2}
+.bg-compact-placeholder{display:flex;align-items:center;flex-direction:column;gap:2px;
+ justify-content:center;font-weight:500;font-size:27px;color:#7c979d}
+.bg-compact-placeholder small{font-size:10px;white-space:nowrap;font-weight:700}
+.bg-compact-index{position:absolute!important;top:5px;left:5px;z-index:1;
+ background:#fff9;padding:3px 6px!important;border-radius:5px;font-size:10px}
+.bg-compact-tile-status{position:absolute!important;right:5px;bottom:5px;z-index:1;
+ width:auto!important;padding:3px 6px!important;border-radius:5px;background:#f8fdfde6;
+ font-size:9px!important;line-height:1.1!important;color:#3a6879}
+.bg-grid-preview-note{max-width:660px;margin:8px auto;font-size:10px;line-height:1.45;color:#6b838b}
+.bg-grid-reorder{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:9px auto 13px}
+.bg-grid-reorder>span{font-size:12px;font-weight:800;color:#416577;margin-right:auto}
+.bg-grid-reorder button{font-size:11px;font-weight:750;border:1px solid #c3d9dd;
+ background:#fff;color:#315f70;border-radius:9px;padding:10px 12px;min-height:40px}
+.bg-grid-reorder button:disabled{opacity:.4}
+@media(max-width:650px){
+ .bg-compact-nine{gap:2px!important;padding:2px}
+ .bg-compact-placeholder small{font-size:9px}
+ .bg-grid-reorder>span{width:100%}
+ .bg-grid-reorder button{flex:1}
+}
