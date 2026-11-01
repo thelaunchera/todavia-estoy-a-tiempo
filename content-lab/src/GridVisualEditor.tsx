@@ -22,7 +22,20 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   // A short debounce keeps the result exact while maintaining responsive drag.
   const handle=setTimeout(()=>{
    composeGridPoster(tile,index,brand,{photo,original,logo,preserve,stickerImages,omitStickers:layer==='sticker'},exportSize)
-    .then(({canvas,fit})=>{if(active){setPreview(canvas.toDataURL('image/jpeg',.72));setFit(fit)}})
+    .then(({canvas,fit})=>{
+      if(active){
+        const previewCanvas=document.createElement('canvas');
+        previewCanvas.width=720;previewCanvas.height=Math.round(720*canvas.height/canvas.width);
+        const ctx=previewCanvas.getContext('2d');
+        if(ctx){
+          ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+          ctx.drawImage(canvas,0,0,previewCanvas.width,previewCanvas.height);
+          setPreview(previewCanvas.toDataURL('image/png'));setFit(fit);
+        }
+        previewCanvas.width=1;previewCanvas.height=1;
+      }
+      canvas.width=1;canvas.height=1;
+    })
     .catch(()=>{if(active)setPreview('')});
   },120);
   return()=>{active=false;clearTimeout(handle)};
