@@ -5,7 +5,7 @@ export type CoverDecor={
  backgroundId:FreeBackgroundId;backgroundImageId:string;stickerIds:string[];
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
- headlineStyle?:{font?:string;fontSize?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number};
+ headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number};
  color:string;gradient:string;
 };
 export const blankCoverDecor=():CoverDecor=>({backgroundId:'brand',backgroundImageId:'',
@@ -25,6 +25,7 @@ export function readCoverDecor(data?:string):CoverDecor{
    primaryPhotoRect:p.primaryPhotoRect&&typeof p.primaryPhotoRect==='object'?p.primaryPhotoRect:undefined,
    headlineStyle:p.headlineStyle&&typeof p.headlineStyle==='object'?{
     font:String(p.headlineStyle.font||'serif'),fontSize:Number(p.headlineStyle.fontSize)||82,
+    fontWeight:[400,500,600,700,800,900].includes(Number(p.headlineStyle.fontWeight))?Number(p.headlineStyle.fontWeight):700,
     color:hex(p.headlineStyle.color,'#191919'),shadow:p.headlineStyle.shadow===true,
     outline:p.headlineStyle.outline===true,
     lineHeight:Number(p.headlineStyle.lineHeight)||1.12,spacing:Number(p.headlineStyle.spacing)||0,
