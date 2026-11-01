@@ -8,7 +8,9 @@ test('Carousel final output is native-resolution lossless PNG with high-quality 
   const seamless=read('SeamlessCarousel.ts');
   assert.match(factory,/canvas\.width=1080;canvas\.height=1350/);
   assert.match(factory,/ctx\.imageSmoothingQuality='high'/);
-  assert.match(factory,/canvas\.toDataURL\('image\/png'\)/);
+  assert.match(factory,/canvasToPngBlob\(canvas\)/);
+  assert.match(factory,/canvas\.toBlob\(blob=>/);
+  assert.match(factory,/,'image\/png'\)/);
   assert.match(seamless,/const W=1080,H=1350/);
   assert.match(seamless,/ctx\.imageSmoothingQuality='high'/);
 });
