@@ -1704,3 +1704,27 @@ input::placeholder {
     text-overflow:ellipsis;
   }
 }
+
+/* iPhone: the Create dropdown must not be clipped by the sticky Dashboard header.
+   Keep the page title clipped independently, never the menu-containing header. */
+@media (max-width:850px) {
+  .app-shell .top {
+    overflow:visible;
+    z-index:30;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+  .app-shell .top > div:first-child {
+    min-width:0;
+    overflow:hidden;
+  }
+  .app-shell .top > div:last-child {
+    overflow:visible;
+  }
+  .app-shell .top .lab-create-menu[open] {
+    z-index:50;
+  }
+  .app-shell .top .lab-create-menu[open] .lab-create-choices {
+    z-index:51;
+  }
+}
