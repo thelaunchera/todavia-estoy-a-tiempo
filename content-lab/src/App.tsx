@@ -959,7 +959,7 @@ function App() {
                    : 'Code sign-in stays in this app when the email contains a numeric code. If you only receive a link, the Supabase email template still needs configuration.'}</small>
               </form>
             )}
-            <a href="../centro/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'← Mi Centro de Productos':'← My Product Center'}</a>
+            
             <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
             <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal para compras verificadas · Sin contraseña':'Private access for verified purchases · No password'}</small>
           </div>
@@ -1043,7 +1043,7 @@ function App() {
           <small>{loginLanguage==='es'?'10 fotos por día y un máximo de 10 créditos de ideas. Editar y descargar tus PNG no consume créditos.':'10 photos per day and up to 10 idea credits. Editing and downloading PNGs does not use credits.'}</small>
         </div>}
         <div className="side-footer">
-          <a href="../centro/" className="lab-return-hub" style={{display:'flex',alignItems:'center',gap:9,padding:'12px 14px',borderRadius:9,background:'#e9f3f4',color:'#315463',fontSize:12,fontWeight:700,textDecoration:'none'}}>{loginLanguage==='es'?'← Mi Centro de Productos':'← My Product Center'}</a>
+          
           <div className="side-inspo">
             <Sparkles size={21} />
             <strong>{t('Good content starts with intention.')}</strong>
