@@ -66,13 +66,14 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:"school-demos-code",title:"Demos · Código GitHub",url:"https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Casa Brownie, CRUMB, AFTR y otros demos"},
   {key:"lab-studio-code",title:"Studio · Código GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/estudio-control",category:"lab" as Category,visibility:"interno" as Visibility,description:"Control privado y productos"},
   {key:"lab-qa",title:"Content Lab · Pruebas GitHub",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/actions/workflows/content-lab-ci.yml",category:"lab" as Category,visibility:"interno" as Visibility,description:"Pruebas técnicas; no equivalen a acceso comercial"},
+  {key:"lab-checkout",title:"Content Lab · Comprar acceso $10",url:"https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z",category:"lab" as Category,visibility:"publico" as Visibility,description:"Checkout LIVE de Stripe por Make; entrega automática activada, prueba completa con compra real aún pendiente"},
 ];
 export type PublicationState = 'publicado' | 'demo' | 'produccion' | 'revision' | 'interno';
 export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
   'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
   'tle-ai-booking':'revision','tle-bundle':'revision','tle-website-auto':'revision','tle-va':'revision',
-  'pod-studio':'interno','lab-brand-board-code':'interno',
+  'pod-studio':'interno','lab-brand-board-code':'interno','lab-checkout':'publicado',
   'tle-booking-demo':'demo','tle-experience':'demo','tle-cb-depot':'revision',
   'pod-home':'publicado','pod-spotify':'publicado','pod-ep1':'publicado','pod-ep2':'publicado',
   'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
