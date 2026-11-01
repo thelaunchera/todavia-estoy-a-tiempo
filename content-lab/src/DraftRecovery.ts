@@ -2,7 +2,7 @@
  * Server remains the authoritative source of saved work. No image data is stored.
  */
 export type RecoverablePost={
- id?:string;brandId:string;format:string;designData?:string;updatedAt?:string;
+ id?:string;brandId:string;format:string;designData?:string;updatedAt?:string;createdAt?:string;
 };
 export type LocalDraft={savedAt:number;post:RecoverablePost};
 export const draftFingerprint=(post:RecoverablePost)=>{
