@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
-import { Trash2 } from 'lucide-react';
+import { Trash2, LockKeyhole, LockKeyholeOpen, Copy } from 'lucide-react';
 import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
@@ -11,7 +11,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';
+  placement?: 'behind-text' | 'front';locked?:boolean;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
@@ -21,6 +21,8 @@ type Props = {
   ratio?: number; pageCount?: number; canvasHeight?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
+  onToggleLock?: (id:string,locked:boolean)=>void;
+  onDuplicateText?: (id:string)=>void;
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
   onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
@@ -35,7 +37,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -134,7 +136,7 @@ export default function TouchLayerCanvas({
     autoPanFrame.current=window.requestAnimationFrame(tick);
   };
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
-    if(pageCount>1&&interactionMode==='navigate')return;
+    if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     e.preventDefault();e.stopPropagation();
     if(selected!==layer.id){setSelected(layer.id);return;}
     const bounds = stage.current?.getBoundingClientRect();
@@ -169,7 +171,7 @@ export default function TouchLayerCanvas({
     startAutoPan();
   };
   const move = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
-    if(pageCount>1&&interactionMode==='navigate')return;
+    if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     const g = gesture.current;
     if (!g || g.id !== layer.id || !pointers.current.has(e.pointerId)) return;
     e.preventDefault();
@@ -202,7 +204,7 @@ export default function TouchLayerCanvas({
     }
   };
   const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
-    if(pageCount>1&&interactionMode==='navigate')return;
+    if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     if (!pointers.current.has(e.pointerId)) return;
     e.preventDefault(); e.stopPropagation();
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* Already released. */ }
@@ -360,17 +362,17 @@ export default function TouchLayerCanvas({
             borderRadius:radius(layerCornerPixels(rect,fw,fh),fw,fh),
           };
           return <div key={layer.id} data-layer={layer.id}
-            className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (active && cropping ? ' cropping' : '')}
+            className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
                zIndex:active?8:z,
-               pointerEvents:pageCount>1&&(interactionMode==='navigate'||(selected!==''&&!active))?'none':'auto'}}
-            tabIndex={0} role="button" aria-label={'Mover ' + layer.name} aria-pressed={active}
+               pointerEvents:layer.locked||pageCount>1&&(interactionMode==='navigate'||(selected!==''&&!active))?'none':'auto'}}
+            tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
             onDoubleClick={() => { if (layer.kind === 'photo') { setSelected(layer.id); setCropping(true); } }}
             onKeyDown={e => {
-              if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+              if(layer.locked||!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
               e.preventDefault(); setSelected(layer.id);
               const r = getRect(layer), step = e.shiftKey ? .03 : .01;
               const rect = clamp({...r, x: r.x + (e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0) / pageCount,
@@ -403,7 +405,7 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
             {active && <><span className="touch-editor-outline"/>
-              {!cropping && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
+              {!cropping&&!layer.locked && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
           </div>;
         })}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
@@ -453,6 +455,9 @@ export default function TouchLayerCanvas({
       : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
+      {onToggleLock&&<button type="button" className="touch-editor-lock-button" aria-pressed={!!chosen.locked}
+         onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?<><LockKeyholeOpen size={16}/> Desbloquear elemento</>:<><LockKeyhole size={16}/> Bloquear posición</>}</button>}
+      {chosen.locked?<p className="touch-editor-lock-hint">Protegido: desbloquéalo para editar, mover o borrar.</p>:<>}
       {pageCount>1&&chosen.kind==='sticker'&&onCopySticker&&<div className="touch-editor-copy-sticker">
         <strong>Copiar este sticker a otro slide</strong>
         <p>Se mantiene el tamaño, la posición y el giro. El original no se mueve.</p>
@@ -550,6 +555,7 @@ export default function TouchLayerCanvas({
       {!cropping && <><label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="1"
         value={selectedRect.angle || 0} onChange={e => commit({angle: Number(e.target.value)})}/></label>
         <button type="button" onClick={() => commit({angle: 0})}>Enderezar</button></>}
+      {chosen.kind==='text'&&onDuplicateText&&<button type="button" className="touch-editor-duplicate-text" onClick={()=>onDuplicateText(chosen.id)}><Copy size={15}/> Duplicar texto</button>}
       {onReorder && <div className="touch-editor-order-controls" aria-label="Orden de capas">
         <span>Orden de capas</span>
         <button type="button" onClick={()=>onReorder(chosen.id,'backward')}>Un nivel atrás</button>
@@ -557,6 +563,7 @@ export default function TouchLayerCanvas({
         <button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar al fondo</button>
         <button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer al frente</button>
       </div>}
+      </>}
     </div>}
     {pageCount > 1 && onRemove && <div className="touch-editor-layer-list" aria-label="Elementos del carrusel">
       <strong>Fotos y stickers ({layers.length})</strong>
@@ -567,7 +574,7 @@ export default function TouchLayerCanvas({
           layer.kind==='shape'?<span className="touch-layer-mini">▧</span>:
           <img src={layer.src} alt=""/>}<span>{layer.name}</span></button>
         <button type="button" className="touch-editor-layer-trash" title={'Borrar ' + layer.name}
-          aria-label={'Borrar ' + layer.name} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
+          aria-label={'Borrar ' + layer.name} disabled={!!layer.locked} onClick={() => deleteLayer(layer.id)}><Trash2 size={16}/></button>
       </div>)}</div>
       {!layers.length && <p>Añade fotos o stickers al lienzo para editarlos aquí.</p>}
     </div>}
