@@ -14,7 +14,7 @@ export const EXPORT_SIZES:Record<ExportSize,{w:number;h:number;title:string;safe
   square:{w:1080,h:1080,title:'Square · 1:1',safeTop:0.07,safeBottom:0.075},
   story:{w:1080,h:1920,title:'Story / Reel · 9:16',safeTop:0.14,safeBottom:0.19}
 };
-export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number};
+export type VisualControls={imageX?:number;imageY?:number;imageZoom?:number;frameX?:number;frameY?:number;frameScale?:number;textX?:number;textY?:number;textScale?:number;subtextX?:number;subtextY?:number;subtextScale?:number};
 export type Layout={name:string;image:[number,number,number,number];type:[number,number,number,number];accent:string;shape:string;align?:CanvasTextAlign;dark?:boolean};
 export const LAYOUTS:Layout[]=[
  // Photo-first editorial geometries. Saved format names and order are stable.
@@ -212,7 +212,11 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  ctx.font='bold '+Math.round(19*Math.min(W/1080,H/1350))+'px '+textFont(brand.bodyFont,false);
  ctx.textAlign='left';ctx.fillStyle=fmt.dark?'#ffffff':inkOn(paper);
  ctx.fillText((brand.name||'').toUpperCase().slice(0,35),W*.065,footerY);
- ctx.textAlign='right';ctx.fillText((tile.subtext||'').slice(0,54),W*.935,footerY);
+ ctx.textAlign='right';
+ const subScale=clamp(Number(control.subtextScale||1),.55,1.7);
+ ctx.font='bold '+Math.round(19*subScale*Math.min(W/1080,H/1350))+'px '+textFont(brand.bodyFont,false);
+ ctx.fillText((tile.subtext||'').slice(0,54),clamp(W*(.935+Number(control.subtextX||0)),W*.1,W*.97),
+   clamp(footerY+H*Number(control.subtextY||0),safeTop+25,safeBottom));
  if(photos.logo){
   const im=new Image();im.src=photos.logo;
   try{
