@@ -118,3 +118,23 @@
  .lab-calendar-feed-placeholder small{font-size:8px}
  .lab-calendar-feedhead>span{display:none}
 }
+
+/* Identify format even in narrow month cells; never mistake a reel cover for video. */
+.lab-calendar-kind-short{display:grid;place-items:center;flex:none;width:16px;height:16px;
+ border-radius:4px;color:#254855;background:#fff9;font-size:10px;font-weight:900}
+.lab-calendar-pill.carousel{background:#ddebf3;color:#315f7c}
+.lab-calendar-pill.single{background:#f4ebde;color:#826146}
+.lab-calendar-pill.reel-cover{background:#f0e5f5;color:#75518d}
+.lab-calendar-pill.story{background:#e5f0eb;color:#477862}
+.lab-calendar-kind{padding:3px 6px;border-radius:5px;font-size:10px;font-weight:800;white-space:nowrap}
+.lab-calendar-kind.carousel{background:#ddebf3;color:#315f7c}
+.lab-calendar-kind.single{background:#f4ebde;color:#826146}
+.lab-calendar-kind.reel-cover{background:#f0e5f5;color:#75518d}
+.lab-calendar-kind.story{background:#e5f0eb;color:#477862}
+.lab-calendar-agenda-post small{flex-wrap:wrap}
+@media(max-width:680px){
+ .lab-calendar-pill{padding:3px;gap:2px}
+ .lab-calendar-pill .lab-calendar-kind-short{display:grid;min-width:17px;height:17px}
+ .lab-calendar-pill .lab-calendar-pill-clock,.lab-calendar-pill .lab-calendar-pill-title{display:none}
+ .lab-calendar-agenda-post small .lab-calendar-kind{display:inline-block}
+}
