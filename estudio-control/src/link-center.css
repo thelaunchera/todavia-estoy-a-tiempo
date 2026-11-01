@@ -89,3 +89,39 @@
 .lc-category-tile small{font-weight:750;font-size:11px;color:#3c6d87;margin-top:auto}
 .lc-load-more{display:block;margin:12px auto 0;border:1px solid #cadce6;background:#fff;color:#315b76;border-radius:999px;padding:12px 22px;font-size:12px;font-weight:800}
 @media(max-width:600px){.lc-category-grid{grid-template-columns:1fr;gap:10px}.lc-category-tile{min-height:110px;padding:15px}.lc-category-tile strong{font-size:22px}}
+
+
+/* Quick demo bookmarks share the canonical Studio link entries, never duplicate them. */
+.lc-recent-demos{margin:18px 0 22px;padding:21px;border:1px solid #e1e7e7;background:#fcfcfa;
+  border-radius:19px;color:#223741}
+.lc-recent-head{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:16px}
+.lc-recent-head>div>span{font-size:10px;font-weight:800;letter-spacing:.15em;color:#6c8791}
+.lc-recent-head h3{font:500 clamp(22px,2.5vw,31px)/1.13 'DM Serif Display',Georgia,serif;
+  letter-spacing:-.02em;margin:6px 0}
+.lc-recent-head p{font-size:12px;color:#647a82;line-height:1.5;margin:0}
+.lc-recent-head>button{min-height:40px;border:1px solid #cbd9dd;background:white;color:#2b5260;
+  border-radius:11px;padding:8px 13px;font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer}
+.lc-recent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px}
+.lc-recent-card{min-width:0;display:flex;flex-direction:column;gap:7px;padding:16px 14px;
+  background:white;border:1px solid #e3e8e7;border-radius:13px}
+.lc-recent-demo-mark{font-size:9px;letter-spacing:.14em;font-weight:850;color:#4a7180}
+.lc-recent-card strong{font-size:14px;line-height:1.35;color:#243a44;overflow-wrap:anywhere}
+.lc-recent-card>small{font-size:11px;line-height:1.5;color:#677a7e;flex:1}
+.lc-recent-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}
+.lc-recent-actions a,.lc-recent-actions button{display:inline-flex;align-items:center;justify-content:center;
+ gap:5px;min-height:37px;padding:8px 10px;border-radius:9px;font-size:11px;font-weight:750;
+ text-decoration:none;cursor:pointer}
+.lc-recent-actions a{background:#253e4b;color:#fff;border:1px solid #253e4b}
+.lc-recent-actions button{background:#f7faf9;border:1px solid #d5e2e3;color:#315966}
+.lc-recent-actions :is(a,button):focus-visible,.lc-recent-head>button:focus-visible{
+ outline:3px solid #6e9eaf;outline-offset:2px}
+@media(max-width:650px){
+ .lc-recent-demos{padding:16px;margin:14px 0 18px}
+ .lc-recent-head{align-items:flex-start;flex-direction:column;gap:12px}
+ .lc-recent-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .lc-recent-card{padding:13px 10px}
+ .lc-recent-card strong{font-size:13px}
+ .lc-recent-actions{flex-direction:column}
+ .lc-recent-actions a,.lc-recent-actions button{width:100%;min-height:40px}
+}
+@media(max-width:360px){.lc-recent-grid{grid-template-columns:1fr}}
