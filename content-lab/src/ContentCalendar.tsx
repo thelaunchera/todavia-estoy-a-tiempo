@@ -131,6 +131,12 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
   </div>
   {loading?<p className="lab-calendar-loading">{locale==='es'?'Cargando tus publicaciones…':'Loading your posts…'}</p>:<>
    {loadError&&<p role="alert" className="lab-calendar-error">{loadError}</p>}
+   <div className="lab-calendar-format-legend" aria-label={locale==='es'?'Tipos de publicación':'Content types'}>
+     <span><b className="lab-calendar-kind carousel">C</b>{locale==='es'?'Carrusel':'Carousel'}</span>
+     <span><b className="lab-calendar-kind single">P</b>Post</span>
+     <span><b className="lab-calendar-kind reel-cover">R</b>{locale==='es'?'Portada reel':'Reel cover'}</span>
+     <span><b className="lab-calendar-kind story">H</b>{locale==='es'?'Historia':'Story'}</span>
+   </div>
    {view==='month'?<div className="lab-calendar-body">
     <section className="lab-calendar-month" aria-label={formatMonth}>
      <div className="lab-calendar-weekdays">{weekdays[locale].map((w,i)=><span key={i}>{w}</span>)}</div>
