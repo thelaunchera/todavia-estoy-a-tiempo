@@ -1,7 +1,7 @@
 
 import React,{useEffect,useRef,useState} from 'react';
 import {api} from './platform/client';
-import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,ArrowRight,Palette,LayoutGrid,Camera} from 'lucide-react';
+import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,ArrowRight,Palette,LayoutGrid,Camera,CalendarDays} from 'lucide-react';
 import './BrandGrid.css';
 import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
 import GridVisualEditor from './GridVisualEditor';
@@ -16,10 +16,10 @@ import {ONE_PHOTO_NINE,onePhotoNinePrompt} from './OnePhotoNinePrompts';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions;scheduledDate?:string;scheduledTime?:string;planningStatus?:'planned'|'published'};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
-type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
+type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string};onOpenPrompts?:()=>void;onOpenCalendar?:()=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
 async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
   return (await composeGridPoster(tile,i,brand,{
@@ -61,7 +61,7 @@ function TileThumb({tile,idx,grid,brand,images}:{tile:Tile;idx:number;grid:Grid;
     <small>{tile.assetId?'Preparando vista…':'Foto pendiente'}</small>
   </div>;
 }
-export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
+export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,promptSelection,initialSelection,onOpenPrompts,onOpenCalendar,onOpenStickers,onUploadBackground,onUploadFile,onNewAsset,loadImage,notify,showError}:Props){
   const [sourceId,setSourceId]=useState('');const [referenceId,setReferenceId]=useState('');
   const [designMode,setDesignMode]=useState<'editorial'|'photo'>('editorial');
   const [quickProduct,setQuickProduct]=useState('');
@@ -246,7 +246,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       setGrid(draft);setGrids(prev=>[...prev,draft]);setSelected(0);setExpandedEditor(false);
       setKind('preserve');setDesignMode('editorial');setSaveState('saved');
       setDownloads([]);setQaNotes([]);setReviewed(false);
-      notify('Nueve ideas diferentes preparadas sin créditos. Selecciona una y crea su imagen en ChatGPT.');
+      notify('Nueve ideas para organizar. Las imágenes se crean por separado en ChatGPT.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const uploadChatGptResult=async(file:File|undefined)=>{
@@ -428,6 +428,10 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       notify('Post '+(selected+1)+' descargado sin alterar su diseño.');
     }catch(e){showError(e)}
   };
+  const openCalendar=()=>{
+    flushDraft();
+    void saveQueue.current.then(()=>onOpenCalendar?.());
+  };
   const copyCurrentPrompt=async()=>{
     if(!currentPrompt)return;
     try{
@@ -454,8 +458,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>1 Photo. <em>9 Posts.</em></h1><p>Una foto. Hasta nueve diseños diferentes, con IA opcional y texto editable.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
     <section className="bg-express" aria-label="Crear nueve publicaciones con una foto">
       <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
-        <h2>Una foto. Nueve publicaciones diferentes.</h2>
-        <p>Tu producto real, nueve composiciones editoriales y los ocho prompts del freebie más una foto de campaña extra. Puedes crear las imágenes finales en ChatGPT.</p></div>
+        <h2>Una foto. Nueve ideas para tu feed.</h2>
+        <p>Prepara tu campaña aquí, crea cada imagen en ChatGPT con los prompts del freebie y vuelve para organizar tu feed y elegir cuándo publicarlas.</p></div>
         <span className="bg-express-free">Gratis dentro del Lab</span>
       </div>
       <div className="bg-express-content">
@@ -475,7 +479,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button type="button" className="btn dark bg-express-create" onClick={createQuickNine} disabled={!sourceId||!quickProduct.trim()||!!busy||!!uploading}>
           {busy==='quick-nine'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>}
-          Crear mis 9 posts <ArrowRight size={17}/>
+          Preparar mis 9 ideas <ArrowRight size={17}/>
         </button>
       </div>
       <details className="bg-express-extras"><summary>¿Quieres añadir más dirección creativa? (opcional)</summary>
@@ -483,7 +487,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <textarea rows={2} value={quickNotes} maxLength={850} onChange={e=>setQuickNotes(e.target.value)} placeholder="Ej. luz de mañana, superficies naturales, sombra suave; mantener etiquetas exactas"/>
         </label>
       </details>
-      <p className="bg-express-tip"><Check size={15}/> Los nueve diseños usan tu foto original. Para crear escenas nuevas, copia el prompt de cada composición, abre ChatGPT y adjunta tu foto.</p>
+      <p className="bg-express-tip"><Check size={15}/> Las nueve ideas son una guía visual, no nueve fotos generadas. ChatGPT crea las imágenes; el Lab las guarda, organiza y planifica.</p>
     </section>
     <div className="bg-layout"><div className="bg-column">
       <details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas · referencias, IA y dirección artística</summary>
@@ -588,6 +592,19 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
             <input value={tile?.headline||''} maxLength={120} placeholder="Déjalo vacío si quieres solo fotografía"
               onChange={e=>update({headline:e.target.value})}/>
           </label>
+          <div className="bg-compact-plan">
+            <div className="bg-compact-plan-title"><CalendarDays size={17}/><strong>¿Cuándo quieres publicar este post?</strong></div>
+            <div className="bg-compact-plan-fields">
+              <label>Día<input type="date" value={tile?.scheduledDate||''}
+                onChange={e=>update({scheduledDate:e.target.value,scheduledTime:tile?.scheduledTime||'09:00'})}/></label>
+              <label>Hora<input type="time" value={tile?.scheduledTime||'09:00'}
+                onChange={e=>update({scheduledTime:e.target.value})}/></label>
+            </div>
+            <div className="bg-compact-plan-footer">
+              <span>{tile?.scheduledDate?'✓ Día y hora en tu calendario (se guardan en este proyecto).':'Elige el día y la hora para añadirlo a tu calendario privado.'}</span>
+              <button type="button" onClick={openCalendar}><CalendarDays size={15}/> Ver calendario y feed <ArrowRight size={14}/></button>
+            </div>
+          </div>
           <div className="bg-compact-main-actions">
             <button type="button" className="btn dark" onClick={()=>{void copyCurrentPrompt()}}>
               <Sparkles size={17}/>{copiedPrompt?'✓ Copiado':'1 · Copiar prompt'}
