@@ -1213,21 +1213,41 @@ function App() {
             </div>
           )}
         </div>
-        <nav aria-label="Herramientas del Content Lab">
-          {navGroups.map(group=><div className="lab-nav-group" key={group.title}>
-            <div className="side-label lab-nav-group-title">{t(group.title)}</div>
-            {group.items.map(id=>{
+        <nav aria-label={loginLanguage==='es'?'Herramientas del Content Lab':'Content Lab tools'}>
+          <div className="lab-primary-links">
+            {(['home','create','factory','calendar'] as Tab[]).map(id=>{
               const item=nav.find(entry=>entry.id===id);
               if(!item)return null;
               const Icon=item.icon;
-              return <button type="button" key={item.id}
-                className={tab===item.id?'active':''}
-                onClick={()=>item.id==='vertical'?startVertical():item.id==='factory'?startFactory():item.id==='create'?start():navigate(item.id)}>
-                <Icon size={19} strokeWidth={1.8}/>{t(item.title)}
-                {item.id==='posts'&&<b>{mine.length}</b>}
+              return <button type="button" key={id} className={tab===id?'active':''}
+                aria-current={tab===id?'page':undefined}
+                onClick={()=>id==='create'?start():id==='factory'?startFactory():navigate(id)}>
+                <Icon size={19} strokeWidth={1.8}/>{id==='home'?(loginLanguage==='es'?'Inicio':'Home'):
+                 id==='create'?(loginLanguage==='es'?'Crear publicación':'Create a post'):
+                 id==='factory'?(loginLanguage==='es'?'Crear carrusel':'Create a carousel'):
+                 loginLanguage==='es'?'Organizar contenido':'Plan content'}
               </button>;
             })}
-          </div>)}
+          </div>
+          <details className="lab-more-tools" open={['vertical','grid','stickers','backgrounds','idea-bank','prompt-studio','prompts','posts','media','formats','brands','settings'].includes(tab)?true:undefined}>
+            <summary><span>{loginLanguage==='es'?'Más herramientas':'More tools'}</span><ChevronDown size={17}/></summary>
+            {navGroups.map(group=>{
+              const items=group.items.filter(id=>!(['home','create','factory','calendar'] as Tab[]).includes(id));
+              return items.length?<div className="lab-nav-group" key={group.title}>
+                <div className="side-label lab-nav-group-title">{t(group.title)}</div>
+                {items.map(id=>{
+                  const item=nav.find(entry=>entry.id===id);
+                  if(!item)return null;
+                  const Icon=item.icon;
+                  return <button type="button" key={id} className={tab===id?'active':''}
+                    onClick={()=>id==='vertical'?startVertical():navigate(id)}>
+                    <Icon size={19} strokeWidth={1.8}/>{t(item.title)}
+                    {id==='posts'&&<b>{mine.length}</b>}
+                  </button>;
+                })}
+              </div>:null;
+            })}
+          </details>
         </nav>
 
         <div className="side-footer">
