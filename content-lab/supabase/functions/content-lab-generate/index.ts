@@ -274,7 +274,37 @@ Deno.serve(async request=>{
    const destination=platforms.includes(body.platform)?body.platform:primary;
    const account=clean(b.socialAccounts?.[destination]||(destination==='instagram'?b.handle:''),160);
    const context='Publishing destination: '+destination+'. Adapt the hook, pacing and caption to this platform while respecting brand voice, audience and language. User-provided page or handle: '+account+'. Never claim that an external account is connected or a post has been published.';
-   const obj:any=await cloudflareRequest('Return JSON {title,hook,slides,caption,cta,visual,alternatives}. 3 alternative hooks, five short slide lines. Write ALL public content only in '+lang+'. Brand '+b.name+', audience '+b.audience+', rules '+b.rules+'. '+context+' Topic '+clean(body.topic,900)+'. Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)+'. Never invent product details or testimonials.');
+   const topic=clean(body.topic,900);
+   if(topic.length<8)throw Error('Escribe una idea más concreta para tu carrusel.');
+   // User intent is authoritative. Brand guidance may change voice, never the
+   // product being promoted (e.g. selling cookies is not automation software).
+   const requestedAutomation=/automatiz|automat|automati|workflow|system|sistema|software|crm|app|herramienta|agente|ai agent|inteligencia artificial/i.test(topic);
+   const subjectIsFood=/cookie|galleta|brownie|postre|pastel|tarta|cake|bakery|reposter|dessert/i.test(topic);
+   const scope=[
+     'STRICT CONTENT BRIEF (highest priority): '+JSON.stringify(topic),
+     'Topic above defines WHAT is being sold or explained. Follow it literally. Brand name, audience and rules affect ONLY tone, never replace the subject.',
+     'If user asks how to SELL physical food online, help market that food, explain how people can order, and invite inquiries. Never transform the story into a pitch for automation or business software.',
+     'Do not invent prices, shipping availability, flavors, ingredient claims, discounts, websites, order links, testimonials or customer results.',
+     'No automation, AI, workflows, CRMs, online platforms or systems unless the user explicitly asks for them.',
+     'Make 4-5 connected slide lines: specific hook, problem or desire, practical benefit, clear next step and simple CTA.',
+     'Use natural language and short readable headlines. Do not sound like templates or generic AI.',
+     'Return one valid JSON object only with {title,hook,slides,caption,cta,visual,alternatives}. Use three optional alternative hooks.',
+     'Public copy language: '+lang,
+     'Brand voice '+String(b.name||'')+'. Audience '+String(b.audience||'')+'. Brand rules '+String(b.rules||'')+'.',
+     context,
+     'Format '+clean(body.format,70)+'. Angle '+clean(body.angle,70)
+   ].join('\\n');
+   const hasUnrequestedAutomation=(o:any)=>{
+     if(requestedAutomation||!subjectIsFood)return false;
+     const text=[o?.hook,o?.slides,o?.cta,o?.caption].map(x=>clean(x,4500)).join(' ').toLowerCase();
+     return /automatiz|automat|automati|automate|automation|workflow|crm|software|sistema de ventas|sales system/i.test(text);
+   };
+   let obj:any=await cloudflareRequest(scope);
+   if(hasUnrequestedAutomation(obj)){
+     // Reject irrelevant output and retry inside the same reserved action.
+     obj=await cloudflareRequest(scope+'\\nIMPORTANT RETRY: Your previous answer incorrectly pitched automation. Sell the user-requested food product directly. Do not mention software or systems.');
+   }
+   if(hasUnrequestedAutomation(obj))throw Error('La IA se desvió de tu tema. No se guardó ese texto. Inténtalo con una frase más concreta.');
    return send({title:clean(obj.title,150),hook:clean(obj.hook,500),slides:clean(obj.slides,3500),caption:clean(obj.caption,4500),cta:clean(obj.cta,250),visual:clean(obj.visual,900),alternatives:Array.isArray(obj.alternatives)?obj.alternatives.slice(0,3):[]});
   }
   if(action==='grid-plan'){
