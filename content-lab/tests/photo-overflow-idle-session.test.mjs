@@ -17,7 +17,7 @@ test('Lab session uses 24h since last real activity, not 24h from initial OTP',(
  assert.ok(app.includes('auth.checkIdle()'));
 });
 test('Product Center uses the same activity key and shares the verified Lab session',()=>{
- const center=read('../../centro/centro.js');
+ const center=read('../centro/centro.js');
  assert.ok(center.includes("tle-product-last-activity-v1:"));
  assert.ok(center.includes('now-last>=DAY'));
  assert.ok(center.includes('expiresAt:now+DAY'));
