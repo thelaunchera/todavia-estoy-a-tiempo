@@ -132,7 +132,10 @@ export default function PanoramaEditor({
     const rect=stage.getBoundingClientRect();
     // Stage is the WHOLE horizontally scrollable panorama, including offscreen slides.
     const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
-    if(x>=0&&x<=1&&y>=0&&y<=1){
+    const viewport=containerRef.current?.querySelector('.touch-editor-scroll')?.getBoundingClientRect();
+    if(viewport&&e.clientX>=viewport.left&&e.clientX<=viewport.right&&
+      e.clientY>=viewport.top&&e.clientY<=viewport.bottom&&
+      x>=0&&x<=1&&y>=0&&y<=1){
       onAdd(drag.id,{x,y});setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
     }else setLibraryFeedback('Suelta la imagen sobre el lienzo para colocarla.');
   };
@@ -214,7 +217,10 @@ export default function PanoramaEditor({
             onPointerCancel={()=>{draggingRef.current=null;setGhost(null)}}
             onClick={()=>{
               if(ignoreClick.current===asset.id){ignoreClick.current='';return}
-              onAdd(asset.id,{x:(Math.floor(count/2)+.5)/count,y:.5});
+              const stage=containerRef.current?.querySelector('.touch-editor-stage');
+              const view=containerRef.current?.querySelector('.touch-editor-scroll');
+              const center=stage&&view?(view.scrollLeft+view.clientWidth/2)/stage.getBoundingClientRect().width:(.5/count);
+              onAdd(asset.id,{x:Math.min(.99,Math.max(.01,center)),y:.5});
               setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
             }}>
             {images[asset.id]
@@ -261,5 +267,10 @@ export default function PanoramaEditor({
       </details>
       <small className="panorama-export-note">{count} PNG individuales · 1080 × 1350 cada uno · las líneas de corte y los controles no aparecen en la descarga.</small>
     </div></div>
+    {ghost&&<div className="panorama-drag-ghost" aria-hidden="true"
+      style={{left:ghost.x,top:ghost.y}}>
+      {images[ghost.id]?<img src={images[ghost.id]} alt=""/>:<ImagePlus size={20}/>}
+      <span>Suelta en el lienzo</span>
+    </div>}
   </section>;
 }
