@@ -46,7 +46,7 @@ type Slide = {
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
-  onChange: (next: Post) => void; onSave: () => void;
+  onChange: (next: Post) => void; onSave: (draft?: Post) => void;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
   notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
@@ -111,26 +111,37 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
     return Array.from({length:4},(_,n)=>({...makeSlide(n,''),eyebrow:'',description:'',
       layout:'statement' as Layout,frameStyle:'none' as const,assetId:''}));
   }
-  const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean).slice(0,4);
+  const entries = post.slides.split('\n').map(s => s.replace(/^\s*(?:slide|diapositiva)?\s*\d+\s*[-:.)]\s*/i,'').trim()).filter(Boolean);
   // A genuinely blank draft has no fabricated marketing hook. The editor guides
   // people to write their own instead of shipping generic template copy.
   const title = post.hook.trim();
   const result: Slide[] = [{...makeSlide(0,title,post.assetId),photoFocus:'top'}];
-  entries.forEach((entry,n)=>result.push(makeSlide(n+1,entry)));
+  entries.slice(0,6).forEach((entry,n)=>{
+    const cut=entry.length>165?Math.max(50,entry.lastIndexOf(' ',165)):entry.length;
+    const next=makeSlide(n+1,entry.slice(0,cut).trim());
+    next.description=entry.slice(cut).trim();
+    if(next.description&&next.layout==='steps')next.layout='statement';
+    result.push(next);
+  });
+  if(entries.length>6){
+    const final=result[result.length-1];
+    if(final)final.description=[final.description,...entries.slice(6)].filter(Boolean).join('\n');
+  }
   if(result.length < 3) {
     result.push(makeSlide(result.length,''));
     result.push(makeSlide(result.length,''));
   }
-  result.push({
-    ...makeSlide(result.length,post.cta.trim()),
-    layout:'closing'
-  });
+  if(result.length<8){
+    result.push({...makeSlide(result.length,post.cta.trim()),layout:'closing'});
+  }else if(post.cta.trim()){
+    result[result.length-1].description=[result[result.length-1].description,post.cta.trim()].filter(Boolean).join('\n');
+  }
   return result;
 }
 function fillLines(ctx: CanvasRenderingContext2D,text: string,x: number,y: number,maxW: number,size: number,lines: number,color: string,font='Georgia, serif') {
   const words=text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
   let built:string[]=[];
-  for(let fontSize=size;fontSize>=32;fontSize-=4) {
+  for(let fontSize=size;fontSize>=20;fontSize-=2) {
     ctx.font='bold '+fontSize+'px '+font;
     built=[];let next='';
     words.forEach(word=>{
@@ -423,7 +434,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const destinationAccount=socialAccount(brand,socialDestination);
   const palette=brandPalette(brand);
   const [current,setCurrent]=useState(0);
-  const swipeStart=useRef<{x:number;y:number}|null>(null);
+  const carouselRailRef=useRef<HTMLDivElement>(null);
   const [preview,setPreview]=useState('');
   const [panoramaPreview,setPanoramaPreview]=useState('');
   const [panoramaTextPreview,setPanoramaTextPreview]=useState('');
@@ -459,6 +470,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [imageSubjectType,setImageSubjectType]=useState<'portrait'|'product'>('portrait');
   const [referenceReport,setReferenceReport]=useState('');
   const [overview,setOverview]=useState<string[]>([]);
+  const [overviewError,setOverviewError]=useState('');
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
   useEffect(()=>{setCurrent(0);setTouchEdit(false);setDownloads([]);setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
@@ -489,25 +501,92 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     onChange({...post,format:'Carousel',designData:encodeCarouselDesign(all,nextStyle),hook:all[0].title});
     setDownloads([]);setOverview([]);
   };
-  const previewAll=async()=>{
-    setOverviewBusy(true);setOverview([]);
-    try{
-      const previews:string[]=[];
-      const all=await renderAllSlides();
-      for(let n=0;n<all.length;n++){
-        const canvas=all[n];
-        const thumb=document.createElement('canvas');thumb.width=540;thumb.height=675;
-        const context=thumb.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
-        context.imageSmoothingEnabled=true;
-        context.imageSmoothingQuality='high';
-        context.drawImage(canvas,0,0,thumb.width,thumb.height);
-        // Lossless PNG keeps letter edges crisp, especially on iPhone.
-        previews.push(thumb.toDataURL('image/png'));
-        thumb.width=1;
-      }
-      setOverview(previews);notify('Vista previa completa preparada sin consumir créditos.');
-    }catch(e){showError(e)}finally{setOverviewBusy(false)}
+  const buildOverview=async()=>{
+    const previews:string[]=[];
+    const all=await renderAllSlides();
+    for(let n=0;n<all.length;n++){
+      const canvas=all[n];
+      const thumb=document.createElement('canvas');thumb.width=900;thumb.height=1125;
+      const context=thumb.getContext('2d');if(!context)throw Error('No se pudo preparar la vista previa.');
+      context.imageSmoothingEnabled=true;
+      context.imageSmoothingQuality='high';
+      context.drawImage(canvas,0,0,thumb.width,thumb.height);
+      // PNG lossless, same fully composited source as the 1080 × 1350 export.
+      previews.push(thumb.toDataURL('image/png'));
+      thumb.width=1;thumb.height=1;
+      canvas.width=1;canvas.height=1;
+    }
+    return previews;
   };
+  const previewAll=async()=>{
+    setOverviewBusy(true);setOverviewError('');
+    try{
+      setOverview(await buildOverview());
+      notify('Carrusel completo listo para revisar, sin créditos IA.');
+    }catch(e){setOverviewError(e instanceof Error?e.message:'No se pudo abrir la vista previa.');showError(e)}
+    finally{setOverviewBusy(false)}
+  };
+  useEffect(()=>{
+    if(studioTab!=='slides'&&studioTab!=='review')return;
+    let active=true;
+    const timer=window.setTimeout(()=>{
+      void buildOverview().then(images=>{
+        if(active){setOverview(images);setOverviewError('');}
+      }).catch(e=>{
+        if(active&&!(e instanceof Error&&e.message.includes('todavía está cargando'))){
+          setOverviewError(e instanceof Error?e.message:'No se pudo preparar el carrusel.');
+        }
+      });
+    },420);
+    return()=>{active=false;window.clearTimeout(timer);};
+  },[studioTab,post.designData,images,brand.id,previewRevision]);
+  useEffect(()=>{
+    if(studioTab!=='slides'&&studioTab!=='review')return;
+    const rail=carouselRailRef.current;
+    const first=rail?.children[0] as HTMLElement | undefined;
+    const target=rail?.children[i] as HTMLElement | undefined;
+    if(rail&&first&&target){
+      const left=target.offsetLeft-first.offsetLeft-(rail.clientWidth-target.clientWidth)/2;
+      if(Math.abs(rail.scrollLeft-left)>2)rail.scrollTo({left,behavior:'smooth'});
+    }
+  },[i,studioTab,overview.length]);
+  const syncCarouselScroll=()=>{
+    const rail=carouselRailRef.current;
+    const first=rail?.children[0] as HTMLElement | undefined;
+    if(!rail||!first)return;
+    const center=rail.scrollLeft+rail.clientWidth/2;
+    let selected=i,best=Infinity;
+    Array.from(rail.children).forEach((node,index)=>{
+      const item=node as HTMLElement;
+      const point=item.offsetLeft-first.offsetLeft+item.clientWidth/2;
+      const distance=Math.abs(point-center);
+      if(distance<best){best=distance;selected=index;}
+    });
+    if(selected!==i)setCurrent(selected);
+  };
+  const renderSwipePreview=()=>(
+    <div className="factory-instagram-preview" aria-label="Previsualización completa del carrusel">
+      <div className="factory-swipe-caption"><span>DESLIZA PARA VER EL CARRUSEL</span><strong>{slides.length} diapositivas</strong></div>
+      <div className="factory-swipe-rail" ref={carouselRailRef} onScroll={syncCarouselScroll}>
+        {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
+          {overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
+            <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
+        </div>)}
+      </div>
+      <div className="factory-swipe-navigation">
+        <button type="button" aria-label="Diapositiva anterior" disabled={i===0} onClick={()=>setCurrent(v=>Math.max(0,v-1))}><ArrowLeft size={18}/></button>
+        <span>{i+1} / {slides.length}</span>
+        <button type="button" aria-label="Diapositiva siguiente" disabled={i===slides.length-1} onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))}><ArrowRight size={18}/></button>
+      </div>
+      <div className="factory-swipe-thumbnails">
+        {slides.map((part,n)=><button type="button" key={part.key} className={i===n?'active':''}
+          onClick={()=>setCurrent(n)} aria-label={'Ir a la diapositiva '+(n+1)}>
+          {overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
+        </button>)}
+      </div>
+      {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
+    </div>
+  );
   const setArtStyle=(patch:Partial<CarouselStyle>)=>setAll(slides,normalizeCarouselStyle({...style,...patch}));
   const appliedStickerVersion=useRef(0);
   useEffect(()=>{
@@ -705,6 +784,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   // Uploads may finish after several renders; always merge into the latest draft.
   const latestDraft=useRef({post,slides,style,ownedAssets});
   latestDraft.current={post,slides,style,ownedAssets};
+  const saveLatest=()=>onSave(latestDraft.current.post);
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
     const latest=latestDraft.current;
     const nextSlides=[...latest.slides];
@@ -905,7 +985,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   return <div className="factory">
     <div className="factory-header">
       <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
-      <button className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+      <button className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
     </div>
 
     <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
@@ -1154,16 +1234,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
 
       </div>
       <aside className="factory-right">
-        <div className="factory-section"><strong>Live design preview</strong><span>4:5 · 1080 × 1350</span></div>
+        <div className="factory-section"><strong>Vista previa como carrusel</strong><span>4:5 · PNG 1080 × 1350</span></div>
          <button type="button" className={'factory-touch-toggle'+(touchEdit?' active':'')} aria-pressed={touchEdit} onClick={()=>{
            if(style.seamlessEnabled||style.panoramaLayers?.length){document.querySelector('.panorama-editor')?.scrollIntoView({behavior:'smooth',block:'start'});setTouchEdit(false)}else enableTouch();
          }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Editar en el lienzo panorámico':touchEdit?'✓ Finalizar edición con dedos':'👆 Editar con dedos · mover fotos y stickers'}</button>
         {touchEdit?<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>:
-        <div className="factory-preview" aria-label="Vista previa. Desliza horizontalmente para cambiar slide."
-         onTouchStart={e=>{if(e.touches.length===1)swipeStart.current={x:e.touches[0].clientX,y:e.touches[0].clientY};}}
-         onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.5)setCurrent(v=>Math.max(0,Math.min(slides.length-1,v+(dx<0?1:-1))))}}>
-         {preview?<img src={preview} alt={'Diseño del slide '+(i+1)}/>:<LoaderCircle className="spin"/>}</div>}
-        <div className="factory-previewnav"><button onClick={()=>setCurrent(v=>Math.max(0,v-1))} disabled={i===0}><ArrowLeft size={17}/> Prev</button><strong>{i+1} of {slides.length}</strong><button onClick={()=>setCurrent(v=>Math.min(slides.length-1,v+1))} disabled={i===slides.length-1}>Next <ArrowRight size={17}/></button></div>
+          renderSwipePreview()}
 
         <div className="factory-step-mini-actions">
           <button type="button" className="btn ghost wide" onClick={()=>setStudioTab('canvas')}>Mover elementos en el lienzo</button>
@@ -1206,9 +1282,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <button type="button" className="btn ghost" onClick={previewAll} disabled={!!busy||overviewBusy}>Previsualizar slides</button>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar PNG</button>
       </div>
-      {overview.length>0&&<div className="factory-overview-grid factory-canvas-overview">
-        {overview.map((src,n)=><button type="button" key={n} onClick={()=>{setCurrent(n);setStudioTab('slides')}}><img src={src} alt={'Slide '+(n+1)}/><span>{n+1}/{slides.length}</span></button>)}
-      </div>}
+      {renderSwipePreview()}
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
         <strong><Check size={15}/> {downloads.length} PNG listos</strong>
         <p>Descárgalos individualmente, sin ZIP.</p>
@@ -1217,7 +1291,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
 
       <div className="factory-step-footer">
         <button type="button" className="btn ghost" onClick={()=>setStudioTab('slides')}>Volver a textos</button>
-        <button type="button" className="btn dark" onClick={onSave} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+        <button type="button" className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
       </div>
     </section>}
     {studioTab==='ai'&&<section className="factory-assistant-zone">

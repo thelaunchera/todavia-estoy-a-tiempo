@@ -564,22 +564,24 @@ function App() {
     setAlternatives([]);
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
-  const save = async () => {
-    const draft={...editor,title:editor.title.trim()||editor.hook.trim().slice(0,80)||
-      (editor.format==='Carousel'?'Mi carrusel':editor.format==='Reel'?'Portada de Reel':
-       editor.format==='Story'?'Mi historia':'Mi publicación')};
+  const save = async (source:Post=editor) => {
+    const draft={...source,title:source.title.trim()||source.hook.trim().slice(0,80)||
+      (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
+       source.format==='Story'?'Mi historia':'Mi publicación')};
     setBusy('save');
     try {
-      const { data } = editor.id
-        ? await api.put('/api/posts/' + editor.id, draft)
+      const { data } = source.id
+        ? await api.put('/api/posts/' + source.id, draft)
         : await api.post('/api/posts', draft);
       setPosts(prev =>
-        editor.id
-          ? prev.map(x => (x.id === editor.id ? data : x))
+        source.id
+          ? prev.map(x => (x.id === source.id ? data : x))
           : [data, ...prev]
       );
       setEditor(data);
-      toast('Guardado en tu biblioteca ✓');
+      toast(source.format==='Carousel'
+        ? 'Carrusel guardado ✓ Lo encuentras en Mis publicaciones y puedes volver a editarlo.'
+        : 'Guardado en tu biblioteca ✓');
     } catch (e) {
       err(e);
     } finally {

@@ -304,3 +304,25 @@
 .factory-rhythm-note{padding:9px 12px;background:#f4f8f7;border-radius:9px;margin:10px 0}
 @media(max-width:580px){.factory-rhythm-controls{align-items:stretch;flex-direction:column}
  .factory-rhythm-controls button{width:100%}}
+
+/* Swipeable Instagram-like review. PNG previews come from the exact final renderer. */
+.factory-instagram-preview{margin:13px 0 16px;min-width:0}
+.factory-swipe-caption{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 8px;color:#68818a;font-size:10px;letter-spacing:.08em}
+.factory-swipe-caption strong{font-weight:650;letter-spacing:normal}
+.factory-swipe-rail{display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding:8px 8%;margin:0 -10px}
+.factory-swipe-page{flex:0 0 86%;scroll-snap-align:center;aspect-ratio:4 / 5;background:#f0f3f5;border:1px solid #dfe9e9;border-radius:8px;overflow:hidden;box-shadow:0 5px 15px #22373b17}
+.factory-swipe-page img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.factory-swipe-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;height:100%;font-size:12px;color:#77929c}
+.factory-swipe-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:9px auto;max-width:200px}
+.factory-swipe-navigation button{width:38px;height:38px;display:grid;place-items:center;border:1px solid #d7e4e7;border-radius:50%;background:#fff;color:#3a6d7f}
+.factory-swipe-navigation button:disabled{opacity:.35}
+.factory-swipe-navigation span{font-size:12px;color:#3c6675;font-weight:700}
+.factory-swipe-thumbnails{display:flex;gap:7px;overflow-x:auto;padding:3px 0 10px;scrollbar-width:thin}
+.factory-swipe-thumbnails button{border:2px solid transparent;padding:0;background:#eaf2f4;border-radius:6px;width:48px;flex:0 0 48px;aspect-ratio:4/5;overflow:hidden}
+.factory-swipe-thumbnails button.active{border-color:#53849b}
+.factory-swipe-thumbnails img{width:100%;height:100%;display:block;object-fit:cover}
+.factory-swipe-error{font-size:11px;color:#8d5136;line-height:1.5}
+.factory-swipe-error button{background:transparent;border:0;color:#28677c;text-decoration:underline;cursor:pointer}
+.factory-review .factory-instagram-preview{max-width:670px;margin:18px auto 22px}
+.factory-review .factory-swipe-page{flex-basis:80%}
+@media(max-width:620px){.factory-swipe-page{flex-basis:92%}.factory-review .factory-swipe-page{flex-basis:92%}.factory-swipe-rail{gap:8px}.factory-swipe-caption{font-size:9px}}
