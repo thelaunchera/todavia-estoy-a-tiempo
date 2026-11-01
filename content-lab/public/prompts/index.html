@@ -61,15 +61,73 @@ footer{font-size:11px;color:#829397;margin-top:20px}
 @media(max-width:700px){.offer{grid-template-columns:1fr;padding:22px}.offer a{width:100%}}
 
 @media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:550px){main{padding:23px 14px}.panel{padding:16px}.half{grid-template-columns:1fr}.outputHeader{flex-direction:column}h1{font-size:44px}}
+
+/* Editorial first-screen: inspired by modern creator-led launch pages, not a template stack */
+html{scroll-behavior:smooth}
+.editorial-hero{background:#e9ede2;border-radius:24px;min-height:510px;margin:0 0 25px;padding:clamp(26px,5vw,64px);display:grid;grid-template-columns:minmax(0,1.08fr) minmax(250px,.92fr);gap:30px;position:relative;overflow:hidden;align-items:center}
+.hero-copy{position:relative;z-index:3}
+.hero-eyebrow{font-size:11px;font-weight:800;letter-spacing:1.8px;color:#516a51;display:flex;align-items:center;gap:10px}
+.hero-dot{width:9px;height:9px;background:#a4b66f;border-radius:50%}
+.editorial-hero h1{color:#253629;font:400 clamp(47px,5.2vw,81px)/.99 'DM Serif Display',Georgia,serif;letter-spacing:-2px;margin:22px 0 22px}
+.editorial-hero h1 em{color:#6b854e;font-weight:400}
+.hero-lead{font-size:clamp(14px,1.5vw,17px);color:#425b47;line-height:1.75;max-width:455px;margin:0 0 23px}
+.hero-lead b{color:#243f2b}
+.hero-start{display:inline-flex;align-items:center;gap:16px;color:#fff!important;background:#263d2f;border-radius:999px;padding:16px 24px;text-decoration:none;font-size:13px;font-weight:800}
+.hero-start:hover{background:#415e42}
+.hero-subline{display:block;font-size:11px;color:#73816c;margin-top:13px;max-width:430px;line-height:1.5}
+.hero-art{height:420px;position:relative;min-width:0}
+.hero-art-back{font:700 clamp(28px,4vw,65px)/1 'DM Serif Display',Georgia,serif;position:absolute;top:-9px;right:-48px;text-align:center;color:#a9b89d;opacity:.55;letter-spacing:-2px}
+.hero-art-back i{font-weight:400}
+.hero-shot{overflow:hidden;position:absolute;background:#9ca97e;border:6px solid #f9faf6;border-radius:13px;box-shadow:0 18px 46px rgba(32,54,28,.17)}
+.hero-shot img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-shot-primary{height:360px;width:250px;right:12%;top:8px;transform:rotate(5deg);z-index:2}
+.hero-shot-secondary{height:228px;width:171px;left:3%;bottom:0;transform:rotate(-9deg);z-index:3}
+.hero-image-note{position:absolute;bottom:5px;right:0;z-index:4;background:#253e2e;color:#e6efe0;padding:10px 13px;border-radius:3px;font-size:10px;letter-spacing:1.5px;font-weight:800;transform:rotate(-2deg)}
+.hero-counter{position:absolute;top:12px;left:18px;font:italic 22px Georgia,serif;color:#748d60}
+.how-strip{display:flex;align-items:center;gap:20px;padding:16px 0 25px;margin-bottom:14px;border-bottom:1px solid #d9e5dc}
+.how-strip strong{font:400 26px Georgia,serif;color:#24362d;white-space:nowrap}
+.how-strip p{font-size:13px;line-height:1.5;margin:0;color:#627668}
+.how-strip b{color:#6d9778;font-size:12px}.how-strip span{margin:0 6px;color:#9daa91}
+.offer{grid-template-columns:minmax(0,1fr) minmax(210px,290px);gap:10px 26px;align-items:center;padding:clamp(24px,4vw,45px);background:#24352d}
+.offer h2{font-size:clamp(31px,3.8vw,48px);max-width:550px}
+.offer .offer-main>p{font-size:14px;line-height:1.65;margin:9px 0 18px;max-width:520px}
+.offer .offer-includes{display:inline-block;color:#d1e4d8;font-weight:700;font-size:12px;line-height:1.6}
+.offer-buy{display:flex;flex-direction:column;align-items:stretch;gap:10px;text-align:center}
+.offer-buy .price{font-size:clamp(40px,5vw,58px);font-weight:700;line-height:1}
+.offer-buy .price small{font-size:20px}
+.offer-buy p{margin:0;color:#c7d9cf;font-size:12px}
+.offer-buy a{background:#d0e6d9;justify-content:center;min-height:57px;gap:10px;color:#22372b;font-size:14px}
+.offer-trust{font-size:11px;color:#c5d8cc}
+.offer .offer-footnote{grid-column:1/-1;color:#aabeb2;font-size:11px;line-height:1.55;margin:11px 0 0}
+.offer-footnote a{display:inline!important;background:none!important;color:#d1e7d8!important;padding:0!important;text-decoration:underline!important;font-size:inherit!important}
+@media(max-width:880px){.editorial-hero{grid-template-columns:1fr;padding:30px;min-height:unset}.hero-art{height:330px;max-width:520px;width:100%;margin:0 auto}.hero-shot-primary{width:210px;height:310px;right:16%}.hero-shot-secondary{width:151px;height:199px;left:15%}.hero-art-back{right:0}.how-strip{display:block}.how-strip p{margin-top:7px}}
+@media(max-width:550px){main{padding-top:13px}.editorial-hero{border-radius:17px;padding:26px 21px 17px;gap:10px}.editorial-hero h1{font-size:clamp(39px,10vw,55px);letter-spacing:-1.5px;margin:17px 0}.hero-lead{font-size:13px;line-height:1.65;margin-bottom:18px}.hero-eyebrow{font-size:9px;letter-spacing:1.1px}.hero-art{height:251px;max-width:350px}.hero-shot-primary{height:228px;width:169px;right:10%;top:8px}.hero-shot-secondary{height:160px;width:119px;left:8%;bottom:2px;border-width:4px}.hero-image-note{font-size:8px;padding:7px 9px;bottom:10px}.hero-art-back{top:8px;font-size:34px}.how-strip{padding:10px 0 20px}.how-strip strong{font-size:22px}.how-strip p{font-size:12px}.offer{grid-template-columns:1fr!important;gap:20px}.offer-buy{max-width:none}.offer .offer-footnote{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style></head><body>
 <header><strong>content lab<i>.</i></strong><a href="../">Volver al inicio del Lab</a></header>
-<main><div class="intro"><div class="eyebrow">HERRAMIENTA GRATIS DEL CONTENT LAB</div><h1>Una foto.<br><em>Ocho formas de mostrar tu producto.</em></h1><p>¿Vendes bebidas, comida, ropa, accesorios, skincare, velas o cualquier otro producto? Elige una foto y descubre ocho ideas editoriales para publicarla de formas distintas. No necesitas experiencia en diseño.</p></div>
-<div class="info"><b>¿Cómo funciona?</b> Escribe qué producto quieres mostrar y el mensaje de tu post. Esta herramienta te dará <b>8 instrucciones listas para copiar</b>. Las fotos de matcha son ejemplos de cómo puede verse cada composición; funcionan igual con <b>cualquier producto</b>. Después, usa una instrucción junto a tu propia foto en tu generador de imágenes. Cada diseño se hace por separado, no en collage. <b>Es gratis</b> y la foto no se sube desde esta página.</div>
-<section class="matcha-gallery" aria-label="Ejemplos de ocho composiciones creadas para un producto de matcha">
-  <div class="matcha-gallery-head"><div><span class="eyebrow">ASÍ SE VE EN LA PRÁCTICA</span><h2>Un producto, muchas posibilidades.</h2><p>Usamos matcha como ejemplo. Tú puedes hacerlo con tu propio producto.</p></div><span class="gallery-marker">8 IDEAS · EJEMPLOS REALES</span></div>
-  <div class="matcha-window"><div class="matcha-track" aria-hidden="true"><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div></div></div><p class="matcha-caption">Desliza para explorar las ideas o deja que el banner avance solo. Cada propuesta es individual, nunca un collage.</p>
+<main>
+<section class="editorial-hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · INSPIRACIÓN EDITORIAL</span>
+    <h1 id="hero-title">Una foto.<br><em>Ocho formas de</em><br>hacerla destacar.</h1>
+    <p class="hero-lead">No necesitas ocho productos ni una sesión de fotos nueva. Descubre cómo presentar <b>cualquier producto</b> con ocho composiciones que se sienten diferentes.</p>
+    <a href="#crear" class="hero-start">Crear mis 8 ideas <span aria-hidden="true">↗</span></a>
+    <span class="hero-subline">Explora las instrucciones sin costo. El editor completo Content Lab cuesta $10.</span>
+  </div>
+  <div class="hero-art" aria-label="Ejemplo editorial de matcha en tres composiciones">
+    <div class="hero-art-back" aria-hidden="true">ONE PRODUCT<br><i>EIGHT WAYS</i></div>
+    <div class="hero-shot hero-shot-primary"><img src="./matcha-03.jpg" alt="Diseño editorial de matcha con titular protagonista" fetchpriority="high"></div>
+    <div class="hero-shot hero-shot-secondary"><img src="./matcha-06.jpg" alt="Fotografía de matcha desde arriba"></div>
+    <span class="hero-image-note">EJEMPLO VISUAL / MATCHA</span>
+    <span class="hero-counter">01—08</span>
+  </div>
 </section>
-<div class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
+<div class="how-strip" aria-label="Cómo funciona"><strong>Así de sencillo.</strong><p><b>01</b> Describe tu producto. <span>·</span> <b>02</b> Elige un estilo. <span>·</span> <b>03</b> Copia la instrucción y úsala con tu foto.</p></div>
+<section class="matcha-gallery" aria-label="Ejemplos de ocho composiciones creadas para un producto de matcha">
+  <div class="matcha-gallery-head"><div><span class="eyebrow">MIRA LAS 8 COMPOSICIONES</span><h2>El mismo producto. Otra perspectiva.</h2></div><span class="gallery-marker">EL EJEMPLO ES MATCHA · EL TUYO PUEDE SER CUALQUIERA</span></div>
+  <div class="matcha-window"><div class="matcha-track" aria-hidden="true"><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div><div class="matcha-card"><img src="./matcha-01.jpg" alt="" loading="lazy" decoding="async"><span>01 / 08</span></div><div class="matcha-card"><img src="./matcha-02.jpg" alt="" loading="lazy" decoding="async"><span>02 / 08</span></div><div class="matcha-card"><img src="./matcha-03.jpg" alt="" loading="lazy" decoding="async"><span>03 / 08</span></div><div class="matcha-card"><img src="./matcha-04.jpg" alt="" loading="lazy" decoding="async"><span>04 / 08</span></div><div class="matcha-card"><img src="./matcha-05.jpg" alt="" loading="lazy" decoding="async"><span>05 / 08</span></div><div class="matcha-card"><img src="./matcha-06.jpg" alt="" loading="lazy" decoding="async"><span>06 / 08</span></div><div class="matcha-card"><img src="./matcha-07.jpg" alt="" loading="lazy" decoding="async"><span>07 / 08</span></div><div class="matcha-card"><img src="./matcha-08.jpg" alt="" loading="lazy" decoding="async"><span>08 / 08</span></div></div></div><p class="matcha-caption">Ocho estilos reales de composición. Desliza para explorarlos.</p>
+</section>
+<div id="crear" class="grid"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
 <label for="brand">Marca con la que publicarás</label><select id="brand"><option value="tle">The Launch Era · English</option><option value="podcast">Todavía estoy a tiempo · Español</option><option value="other">Otra marca</option></select>
 <div class="half"><div><label for="brandName">Nombre de tu marca</label><input id="brandName" value="The Launch Era"></div><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div></div>
 <div class="file"><img id="preview" alt="Foto original"><span id="fileSymbol" style="font-size:31px">▧</span><strong id="fileLabel">Elige la foto que quieres usar</strong><small>Tu imagen queda en tu navegador</small><input type="file" id="photo" accept="image/*,.heic,.heif" aria-label="Subir foto original"></div>
@@ -83,19 +141,19 @@ footer{font-size:11px;color:#829397;margin-top:20px}
 </details>
 <p class="privacy">🔒 Tu foto se queda en tu dispositivo. Esta página prepara instrucciones, no genera imágenes. Cuando quieras crear una versión, copia su texto y adjunta tu foto en la herramienta de imágenes que uses.</p>
 </section><section class="panel"><div class="outputHeader"><div><div class="eyebrow">PASO 2 · TUS OCHO IDEAS</div><h2>Inspírate con matcha y crea el tuyo</h2><p class="step-help">Mira el ejemplo de cada composición y copia sus instrucciones. Puedes sustituir el matcha por cualquier producto.</p></div><div class="buttons"><button class="action alt" id="copyAll">Copiar las 8 ideas</button><button class="action" id="saveAll">Descargar instrucciones</button></div></div><div id="output"></div></section></div>
-<section class="offer" aria-label="Content Lab completo"><div>
-  <div class="offer-label">EL SIGUIENTE PASO: TU CONTENT LAB</div>
-  <h2>Tu espacio para crear publicaciones.</h2>
-  <p>Content Lab reúne un editor visual, fondos, plantillas editables y herramientas para crear posts, carruseles y reels en un mismo lugar.</p>
-  <p>La biblioteca gratuita que acabas de usar es solo una pequeña parte del Lab.</p>
-  <p><strong>Tu compra incluye:</strong> 60 fotos con IA y 30 créditos creativos iniciales, con límites diarios. El diseño y la exportación local no consumen créditos de IA.</p>
- </div><div><strong class="price">$10 USD</strong><p>Pago único · acceso personal</p><a href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer" aria-label="Comprar acceso privado a Content Lab por diez dólares">Comprar acceso al Lab</a></div>
- <div class="offer-notice">Compra segura con Stripe. Después del pago, el acceso se asigna al correo usado en la compra y recibirás las instrucciones por email. Incluye créditos iniciales de IA, no uso ilimitado. ¿Necesitas ayuda? <a class="offer-help" href="mailto:hello@thelaunchera.com">Escríbenos</a>.</div>
+<section class="offer" aria-label="Comprar Content Lab">
+  <div class="offer-main"><div class="offer-label">TU SIGUIENTE GRAN IDEA EMPIEZA AQUÍ</div>
+   <h2>De una idea a un post que destaca.</h2>
+   <p>Diseña posts, carruseles y reels en un solo lugar. Tus fondos, fotos y herramientas, siempre a mano.</p>
+   <span class="offer-includes">Incluye 60 fotos con IA y 30 créditos creativos iniciales.*</span>
+  </div>
+  <div class="offer-buy"><strong class="price">$10 <small>USD</small></strong><p>Un solo pago</p><a href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer" aria-label="Comprar Content Lab por diez dólares">Quiero mi Content Lab <span aria-hidden="true">↗</span></a><span class="offer-trust">Pago seguro · Acceso personal por email</span></div>
+  <p class="offer-footnote">* Los créditos de IA son limitados y están sujetos a cuotas diarias. <a href="https://thelaunchera.com/terms.html" target="_blank" rel="noopener noreferrer">Ver condiciones</a>.</p>
 </section>
 <footer class="site-footer">
   <div class="footer-main"><div><strong>content lab<span>.</span></strong><p>Ideas de diseño para cualquier producto. Un proyecto de The Launch Era.</p></div>
   <nav aria-label="Información legal"><a href="https://thelaunchera.com/privacy.html" target="_blank" rel="noopener noreferrer">Privacidad</a><a href="https://thelaunchera.com/terms.html" target="_blank" rel="noopener noreferrer">Términos</a><a href="https://thelaunchera.com/refunds.html" target="_blank" rel="noopener noreferrer">Reembolsos</a><a href="mailto:hello@thelaunchera.com">Contacto</a></nav></div>
-  <p class="footer-privacy">Esta herramienta gratuita prepara textos para copiar. La foto seleccionada se previsualiza únicamente en tu navegador; no se sube a nuestros servidores desde esta página. Para comprar el Lab, el pago se procesa en Stripe y el acceso se vincula a tu correo de compra.</p>
+  <p class="footer-privacy">Esta página ofrece un ejemplo gratuito de instrucciones. Content Lab es un producto de pago. Tu foto permanece en el navegador en esta página; los pagos se procesan de forma segura con Stripe.</p>
   <div class="footer-bottom"><span>© 2026 The Launch Era. Todos los derechos reservados.</span><a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">Powered by <b>The Launch Era</b></a></div>
 </footer>
 </main><script>
