@@ -463,6 +463,16 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     flushDraft();
     void saveQueue.current.then(()=>onOpenCalendar?.());
   };
+  const movePost=(direction:-1|1)=>{
+    if(!grid||busy)return;
+    const next=selected+direction;
+    if(next<0||next>=grid.posts.length)return;
+    const reordered=[...grid.posts];
+    [reordered[selected],reordered[next]]=[reordered[next],reordered[selected]];
+    setGrid(prev=>prev?{...prev,posts:reordered.map((item,index)=>({...item,index}))}:prev);
+    setSelected(next);setDownloads([]);setReviewed(false);
+    notify('Orden actualizado. Las fechas siguen vinculadas a sus publicaciones.');
+  };
   const copyCurrentPrompt=async()=>{
     if(!currentPrompt)return;
     try{
@@ -605,7 +615,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       </div>}
 
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Así se verá tu grid de Instagram.</h3><p>Arriba crea un grid vacío. Después añade tus imágenes terminadas, cambia el orden y revisa la composición.</p></div>:isExpress&&!expandedEditor?<>
-        <section className="bg-compact-campaign" aria-label="Nueve ideas para tus posts">
+        <section className="bg-compact-campaign" aria-label="Vista previa de tu grid de Instagram">
           <div className="bg-compact-campaign-head">
             <div><span className="eyebrow">VISTA PREVIA · GRID 3 × 3</span>
               <h2>{grid.title}</h2>
@@ -613,17 +623,21 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
             </div>
             <span className="bg-compact-progress">{grid.posts.filter(p=>p.assetId).length}/9 imágenes cargadas</span>
           </div>
-          <div className="bg-compact-nine" role="group" aria-label="Seleccionar una de las nueve composiciones">
+          <div className="bg-compact-nine" role="group" aria-label="Vista del grid con nueve publicaciones">
             {grid.posts.map((p,i)=><button type="button" key={i}
               className={'bg-compact-tile '+(selected===i?'active ':'')+(p.assetId?'complete':'idea')}
               aria-pressed={selected===i} aria-label={'Post '+(i+1)+': '+ONE_PHOTO_NINE[i].name}
               onClick={()=>{setSelected(i);setCopiedPrompt(false)}}>
-              {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt={'Resultado real del post '+(i+1)}/>:
+              {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt={'Imagen real del post '+(i+1)}/>:
                 <><span className="bg-compact-index">{i+1}</span>
-                <strong>{ONE_PHOTO_NINE[i].name}</strong>
-                <small>{ONE_PHOTO_NINE[i].short}</small></>}
-              <span className="bg-compact-tile-status">{p.assetId?'✓ Lista':'Idea '+(i+1)}</span>
+                <span className="bg-compact-placeholder">＋<small>Añadir foto</small></span></>}
+              <span className="bg-compact-tile-status">{p.assetId?'✓':'＋ '+(i+1)}</span>
             </button>)}
+          </div>
+          <p className="bg-grid-preview-note">Así se verá aproximadamente tu grid. Las imágenes originales no se recortan ni se modifican.</p>
+          <div className="bg-grid-reorder"><span>Post {selected+1} de 9</span>
+            <button type="button" disabled={selected===0} onClick={()=>movePost(-1)}>← Mover antes</button>
+            <button type="button" disabled={selected===8} onClick={()=>movePost(1)}>Mover después →</button>
           </div>
         </section>
         <section className="bg-compact-workspace" aria-label={'Preparar post '+(selected+1)}>
