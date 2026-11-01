@@ -25,6 +25,25 @@ function StickerThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;
  },[asset.id,Boolean(src),loadImage]);
  return <span ref={ref} className="free-decor-real-preview">{src?<img alt={displayAssetName(asset)} src={src} loading="lazy"/>:<span aria-label="Cargando sticker" className="free-decor-loading"/>}</span>;
 }
+function LibraryBackgroundThumbnail({asset,src,loadImage}:{
+ asset:LibraryAsset;src?:string;loadImage?:(id:string)=>void
+}){
+ const ref=useRef<HTMLSpanElement>(null);
+ useEffect(()=>{
+  if(src||!loadImage)return;
+  const node=ref.current;if(!node)return;
+  if(typeof IntersectionObserver==='undefined'){loadImage(asset.id);return}
+  const observer=new IntersectionObserver(entries=>{
+   if(entries.some(entry=>entry.isIntersecting)){observer.disconnect();loadImage(asset.id)}
+  },{rootMargin:'200px'});
+  observer.observe(node);
+  return()=>observer.disconnect();
+ },[asset.id,Boolean(src),loadImage]);
+ return <span ref={ref} className="free-decor-library-background">
+  {src?<img src={src} alt="" draggable={false} loading="lazy"/>:
+   <span className="free-decor-loading" aria-label={'Cargando '+displayAssetName(asset)}/>}
+ </span>;
+}
 export default function FreeDecorControls({
  backgroundId='brand',backgroundImageId='',stickerIds=[],onChange,
  title='Stickers & Backgrounds',assets=[],images={},loadImage,onOpenLibrary,onUploadBackground,
@@ -125,13 +144,13 @@ export default function FreeDecorControls({
      <div className="free-decor-backgrounds">{ownMatches.map(a=><button type="button" key={a.id}
       aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''}
       onClick={()=>changeBackground('brand',a.id)}>
-      <i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/>
+      <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
       <span>{displayAssetName(a)}</span></button>)}</div></>}
     {studioMatches.length>0&&<><p className="free-decor-label">Fondos del estudio · para todos</p>
      <div className="free-decor-backgrounds">{studioMatches.map(a=><button type="button" key={a.id}
       aria-pressed={backgroundImageId===a.id} className={backgroundImageId===a.id?'selected':''}
       onClick={()=>changeBackground('brand',a.id)}>
-      <i className="free-decor-swatch custom" style={images[a.id]?{backgroundImage:'url('+images[a.id]+')'}:undefined}/>
+      <LibraryBackgroundThumbnail asset={a} src={images[a.id]} loadImage={loadImage}/>
       <span>{displayAssetName(a)}</span></button>)}</div></>}
     <p className="free-decor-label">Fondos incluidos en Content Lab</p>
     <div className="free-decor-background-filters" role="group" aria-label="Categorías de fondos">
