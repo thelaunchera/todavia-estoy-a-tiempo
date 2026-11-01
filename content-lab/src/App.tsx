@@ -767,7 +767,7 @@ function App() {
       let input: File | Blob = file;
       if (isHeic) {
         try {
-          const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.82 });
+          const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.94 });
           input = Array.isArray(converted) ? converted[0] : converted;
         } catch {
           // Safari can decode some HEIC photos natively, so try native optimization next.
@@ -776,13 +776,19 @@ function App() {
       }
       let prepared;
       try {
+        const preserveOriginal=category==='original'||category==='generated'||category==='reference';
+        const keepMime=['image/png','image/jpeg','image/webp'].includes(input.type)?input.type:'image/jpeg';
         prepared = await image.resizeIfNeeded(input, {
-          maxDimension: 1500, maxPixels: 1800000, quality: 0.76, mimeType: (category==='sticker'||category==='background')&&file.type==='image/png'?'image/png':'image/jpeg'
+          maxDimension:preserveOriginal?3000:2160,
+          maxPixels:preserveOriginal?7_000_000:4_600_000,
+          quality:preserveOriginal ? 0.94 : 0.88,
+          mimeType:preserveOriginal?keepMime:(category==='sticker'||category==='background')&&file.type==='image/png'?'image/png':'image/jpeg',
+          preserveIfPossible:preserveOriginal,maxBytes:4_850_000
         });
       } catch {
         throw new Error('No se pudo convertir esta foto. Prueba la opción de foto compatible de tu iPhone.');
       }
-      if (!prepared.data || prepared.data.length > 3850000) {
+      if (!prepared.data || prepared.data.length > 6_470_000) {
         throw new Error('No se pudo reducir suficientemente la foto. Intenta con otra.');
       }
       const { data } = await api.post('/api/assets', {
@@ -895,8 +901,9 @@ function App() {
                    : 'Code sign-in stays in this app when the email contains a numeric code. If you only receive a link, the Supabase email template still needs configuration.'}</small>
               </form>
             )}
+            <a href="../centro/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'← Mi Centro de Productos':'← My Product Center'}</a>
             <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
-            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal protegido · $10 pago único próximamente':'Private access · $10 one-time purchase coming soon'}</small>
+            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal para compras verificadas · Sin contraseña':'Private access for verified purchases · No password'}</small>
           </div>
         </section>
       </div>
@@ -978,6 +985,7 @@ function App() {
           <small>{loginLanguage==='es'?'10 fotos por día y un máximo de 10 créditos de ideas. Editar y descargar tus PNG no consume créditos.':'10 photos per day and up to 10 idea credits. Editing and downloading PNGs does not use credits.'}</small>
         </div>}
         <div className="side-footer">
+          <a href="../centro/" className="lab-return-hub" style={{display:'flex',alignItems:'center',gap:9,padding:'12px 14px',borderRadius:9,background:'#e9f3f4',color:'#315463',fontSize:12,fontWeight:700,textDecoration:'none'}}>{loginLanguage==='es'?'← Mi Centro de Productos':'← My Product Center'}</a>
           <div className="side-inspo">
             <Sparkles size={21} />
             <strong>{t('Good content starts with intention.')}</strong>

@@ -8,7 +8,7 @@ const REMEMBER_KEY='podcast_class_remember_24h_v1';
 const TAB_KEY='podcast_class_tab_24h_v1';
 const STUDIO_KEY='podcast_studio_password_login_deadline_v1';
 const DAY=24*60*60*1000;
-let profile=null,owner=false,ready=false,recovery=false,pending=false;
+let profile=null,owner=false,ready=false,recovery=false,pending=false,pendingOtpEmail='';
 let purchased=new Set(),releases={'web-class':false,'content-lab':false};
 const releaseLinks={'web-class':'../alumnos/','content-lab':'../content-lab/'};
 const friendly={'web-class':'Tu primera web con IA','content-lab':'Content Lab','no-voy-tarde':'No voy tarde','empezar-de-nuevo':'Empezar de nuevo','tle-service':'Servicio TLE'};
@@ -68,10 +68,10 @@ $('access-overlay').addEventListener('keydown',event=>{
  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
 });
 function mode(m){
- for(const type of ['login','register','recover','update'])$('form-'+type).hidden=m!==type;
- $('auth-tabs').hidden=m==='update'||m==='recover';
- document.querySelectorAll('[data-mode]').forEach(b=>{if(b.dataset.mode==='login'||b.dataset.mode==='register')b.setAttribute('aria-pressed',String(b.dataset.mode===m));});
- const copy={login:['Bienvenida de nuevo.','Usa el correo de tu compra y tu contraseña.'],register:['Tu cuenta comienza aquí.','Crea una contraseña con el mismo correo que usaste al comprar.'],recover:['Recupera tu acceso.','Enviaremos un correo con el enlace de recuperación.'],update:['Elige una contraseña nueva.','Tu cuenta estará lista cuando la guardes.']};
+ for(const type of ['otp','otp-verify','login','register','recover','update'])$('form-'+type).hidden=m!==type;
+ $('auth-tabs').hidden=m==='update'||m==='recover'||m==='otp-verify';
+ document.querySelectorAll('[data-mode]').forEach(b=>{if(['login','register','otp'].includes(b.dataset.mode))b.setAttribute('aria-pressed',String(b.dataset.mode===m));});
+ const copy={otp:['Tus productos, en un solo lugar.','Accede con el correo de tu compra, sin contraseña.'], 'otp-verify':['Revisa tu correo.','Introduce el código para abrir tu biblioteca.'],login:['Bienvenida de nuevo.','Usa el correo de tu compra y tu contraseña.'],register:['Tu cuenta comienza aquí.','Crea una contraseña con el mismo correo que usaste al comprar.'],recover:['Recupera tu acceso.','Enviaremos un correo con el enlace de recuperación.'],update:['Elige una contraseña nueva.','Tu cuenta estará lista cuando la guardes.']};
  $('auth-title').textContent=copy[m][0];$('auth-copy').textContent=copy[m][1];
  message('');
  if(!$('access-overlay').hidden){
@@ -96,7 +96,7 @@ async function isOwner(userId){
 function setCourseActions(){
  for(const code of ['web-class','content-lab']){
   const el=$('action-'+code),state=$('status-'+code);
-  const has=purchased.has(code),open=!!releases[code];
+  const has=purchased.has(code),open=code==='content-lab'&&has?true:!!releases[code];
   if(owner){
    state.textContent='VISTA ADMINISTRATIVA';
    if(code==='web-class'){
@@ -136,7 +136,13 @@ function renderOwnerLibrary(){
  if(owner){$('ownership-message').textContent='Vista de administración. Puedes revisar el centro sin activar compras ni accesos.';titles.unshift('Vista de administración');}
  else if(titles.length){$('ownership-message').textContent='Estos productos tienen una compra verificada para tu correo. Los que están en preparación siguen cerrados.';}
  else{$('ownership-message').textContent='Todavía no hay compras verificadas con este correo. Si acabas de comprar, revisa tu confirmación.';}
- for(const title of titles){const chip=document.createElement('span');chip.textContent=title;list.append(chip);}
+ for(const title of titles){
+  const isLab=title==='Content Lab'&&(owner||purchased.has('content-lab'));
+  const chip=document.createElement(isLab?'a':'span');
+  chip.textContent=isLab?'Entrar a Content Lab ↗':title;
+  if(isLab)chip.href='../content-lab/';
+  list.append(chip);
+ }
  if(!titles.length){const chip=document.createElement('span');chip.textContent='Explora el catálogo';list.append(chip);}
 }
 function updateNav(){
@@ -158,28 +164,53 @@ async function refresh(){
   return;
  }
  profile=user;owner=admin;ready=false;
- const [orders,flags]=await Promise.all([
+ const [orders,flags,labMembership]=await Promise.all([
   db.from('podcast_hub_entitlements').select('product_code,status').eq('buyer_email',(user.email||'').toLowerCase()).eq('status','active'),
-  db.from('podcast_hub_releases').select('product_code,access_enabled')
+  db.from('podcast_hub_releases').select('product_code,access_enabled'),
+  db.from('content_lab_memberships').select('id').eq('buyer_email',(user.email||'').toLowerCase()).eq('status','active').maybeSingle()
  ]);
- if(orders.error||flags.error){
+ if(orders.error||flags.error||labMembership.error){
   resetState();
   showModal(true);message('No pudimos verificar tus compras. Intenta de nuevo o solicita ayuda.');
   return;
  }
  purchased=new Set((orders.data||[]).map(x=>x.product_code));
+ if(labMembership.data)purchased.add('content-lab');
  for(const item of flags.data||[])if(Object.hasOwn(releases,item.product_code))releases[item.product_code]=item.access_enabled===true;
  ready=true;updateNav();setCourseActions();renderOwnerLibrary();showModal(false);
 }
-$('open-access').addEventListener('click',()=>{mode('login');showModal(true);});
+$('open-access').addEventListener('click',()=>{mode('otp');showModal(true);});
 $('hero-account').addEventListener('click',()=>{
  if(profile){$('my-library').scrollIntoView({behavior:'smooth'});}
- else{mode('login');showModal(true);}
+ else{mode('otp');showModal(true);}
 });
 $('close-access').addEventListener('click',()=>showModal(false));
 $('close-backdrop').addEventListener('click',()=>showModal(false));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('access-overlay').hidden)showModal(false)});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>mode(b.dataset.mode)));
+$('form-otp').addEventListener('submit',async e=>{
+ e.preventDefault();
+ await runForm(e.currentTarget,async()=>{
+  const email=$('otp-email').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message('Escribe un correo válido.');return;}
+  const {error}=await db.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:location.origin+'/centro/?acceso=1'}});
+  if(error){message('No se pudo enviar el código. Vuelve a intentarlo.');return;}
+  pendingOtpEmail=email;mode('otp-verify');
+  message('Código solicitado. Revisa también Spam o Promociones.');
+ });
+});
+$('form-otp-verify').addEventListener('submit',async e=>{
+ e.preventDefault();
+ await runForm(e.currentTarget,async()=>{
+  if(!pendingOtpEmail){mode('otp');message('Primero introduce tu correo.');return;}
+  const code=$('otp-code').value.trim().replace(/\s/g,'');
+  const {data,error}=await db.auth.verifyOtp({email:pendingOtpEmail,token:code,type:'email'});
+  if(error||!data?.user){message('El código no es válido o expiró. Solicita otro.');return;}
+  if(!storeMarker(data.user.id,true)){await db.auth.signOut({scope:'local'});message('Habilita el almacenamiento de este navegador.');return;}
+  $('otp-code').value='';await refresh();
+ });
+});
+$('otp-back').addEventListener('click',()=>{pendingOtpEmail='';mode('otp');});
 $('form-login').addEventListener('submit',async e=>{
  e.preventDefault();
  await runForm(e.currentTarget,async()=>{
@@ -258,8 +289,8 @@ const productInformation=Object.freeze({
   title:'Content Lab',type:'HERRAMIENTA DIGITAL',summary:'Un espacio personal para crear y editar contenido visual con tus referencias y tu identidad de marca.',
   price:'$10 USD · pago único',audience:'Personas que necesitan crear publicaciones y piezas visuales sin empezar cada diseño desde cero.',
   includes:['Estudio privado para organizar marcas y proyectos.','Edición de composiciones y exportación de PNG sin gastar créditos de IA.','Cuota inicial finita: 60 fotos IA y 30 créditos creativos.','Límites diarios de 10 fotos IA y 10 créditos creativos, sujetos a disponibilidad del proveedor.'],
-  delivery:'Tras el lanzamiento, una compra verificada mediante Make habilitará tu acceso personal; utilizarás el mismo correo del checkout. Tus archivos privados no se comparten con otras cuentas.',
-  note:'No ofrece IA ilimitada. Los créditos adicionales serán una compra separada. La compra y el acceso están pausados durante las pruebas.'
+  delivery:'Una compra verificada activa el acceso con el correo del checkout. Recibirás un enlace a este Centro de Productos, solicitarás un código por email y abrirás Content Lab desde tu biblioteca personal.',
+  note:'ChatGPT se utiliza por separado para generar nuevas escenas fotográficas; Content Lab organiza, edita y planifica los posts. No promete IA ilimitada ni publicación automática.'
  },
  'booking-flow':{
   title:'Booking Automation + Command Center',type:'SERVICIO · RESERVAS',summary:'Una página de reservas conectada a un centro privado para tener las solicitudes y los próximos pasos organizados.',
@@ -331,7 +362,7 @@ const productButton=$('product-details-checkout');
 function detailState(code){
  if(code==='web-class'||code==='content-lab'){
   if(owner)return 'Vista de administración';
-  const has=purchased.has(code),open=releases[code]===true;
+  const has=purchased.has(code),open=code==='content-lab'&&has?true:releases[code]===true;
   return !open?(has?'Compra verificada · en preparación':'Acceso todavía cerrado'):(has?'Adquirido':'No adquirido');
  }
  if(code==='no-voy-tarde'||code==='empezar-de-nuevo')return purchased.has(code)?'Comprado · entrega por correo':'Disponible para conocer';
@@ -380,5 +411,5 @@ productDialog.addEventListener('click',event=>{
 });
 
 resetState();
-if(new URL(location.href).searchParams.has('acceso')){mode('login');showModal(true);}
+if(new URL(location.href).searchParams.has('acceso')||new URL(location.href).searchParams.get('product')==='content-lab'){mode('otp');showModal(true);}
 await refresh();

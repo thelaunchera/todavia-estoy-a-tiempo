@@ -394,18 +394,49 @@ export const api={
   }
 };
 export const image={
-  resizeIfNeeded:async(input:File|Blob,opts:{maxDimension:number;maxPixels:number;quality:number;mimeType:string})=>{
+  resizeIfNeeded:async(input:File|Blob,opts:{maxDimension:number;maxPixels:number;quality:number;mimeType:string;preserveIfPossible?:boolean;maxBytes?:number})=>{
     const url=URL.createObjectURL(input);
     try{
       const img=new Image();img.src=url;await img.decode();
-      const scale=Math.min(1,opts.maxDimension/Math.max(img.naturalWidth,img.naturalHeight),Math.sqrt(opts.maxPixels/(img.naturalWidth*img.naturalHeight)));
+      const originalWidth=img.naturalWidth,originalHeight=img.naturalHeight;
+      const maxBytes=Math.min(opts.maxBytes??4_850_000,4_850_000);
+      if(opts.preserveIfPossible && input.type===opts.mimeType && input.size<=maxBytes &&
+        Math.max(originalWidth,originalHeight)<=opts.maxDimension &&
+        originalWidth*originalHeight<=opts.maxPixels){
+        // Preserve all original source pixels and JPEG/PNG/WebP bytes when safe.
+        return {data:await base64(input),mimeType:opts.mimeType};
+      }
+      const scale=Math.min(1,opts.maxDimension/Math.max(originalWidth,originalHeight),
+        Math.sqrt(opts.maxPixels/(originalWidth*originalHeight)));
       const canvas=document.createElement('canvas');
-      canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
-      canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+      canvas.width=Math.max(1,Math.round(originalWidth*scale));
+      canvas.height=Math.max(1,Math.round(originalHeight*scale));
       const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas no disponible.');
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
       ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('No se pudo comprimir la foto')),opts.mimeType,opts.quality));
-      return {data:await base64(blob),mimeType:opts.mimeType};
+      const compress=async(mime:string,quality:number)=>new Promise<Blob>((resolve,reject)=>
+        canvas.toBlob(b=>b?resolve(b):reject(Error('No se pudo guardar la fotografía')),mime,quality));
+      let mime=opts.mimeType,blob=await compress(mime,opts.quality);
+      // Keep the largest useful image inside the 5MB private-storage limit.
+      for(const quality of [.92,.86,.80,.75]){
+        if(blob.size<=maxBytes)break;
+        if(mime==='image/png')mime='image/jpeg';
+        blob=await compress(mime,quality);
+      }
+      if(blob.size>maxBytes){
+        const ratio=Math.sqrt(maxBytes/blob.size)*.91;
+        const w=Math.max(1,Math.floor(canvas.width*ratio)),h=Math.max(1,Math.floor(canvas.height*ratio));
+        const reduced=document.createElement('canvas');reduced.width=w;reduced.height=h;
+        const c=reduced.getContext('2d');if(!c)throw Error('Canvas no disponible.');
+        c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+        c.drawImage(canvas,0,0,w,h);
+        blob=await new Promise<Blob>((resolve,reject)=>
+          reduced.toBlob(b=>b?resolve(b):reject(Error('No se pudo guardar la fotografía')),'image/jpeg',.86));
+        mime='image/jpeg';reduced.width=1;reduced.height=1;
+      }
+      canvas.width=1;canvas.height=1;
+      if(blob.size>maxBytes)throw Error('Esta fotografía sigue siendo demasiado grande para guardarla sin perder calidad.');
+      return {data:await base64(blob),mimeType:mime};
     }finally{URL.revokeObjectURL(url)}
   }
 };
