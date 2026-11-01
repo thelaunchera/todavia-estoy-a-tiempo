@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import {draftFingerprint,writeDraftBackup,removeDraftBackup,newerUnsavedBackup,type LocalDraft} from './DraftRecovery';
 import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
@@ -399,6 +400,20 @@ function App() {
   const [editor, setEditor] = useState<Post>(newPost(''));
   const editorSessionRef=useRef(0);
   const saveInFlightRef=useRef(false);
+  const lastSavedFingerprintRef=useRef('');
+  const lastAttemptFingerprintRef=useRef('');
+  const editorLatestRef=useRef(editor);
+  editorLatestRef.current=editor;
+  const [savePulse,setSavePulse]=useState(0);
+  const [draftStatus,setDraftStatus]=useState<'saved'|'unsaved'|'saving'|'offline'>('saved');
+  const [recovery,setRecovery]=useState<LocalDraft|null>(null);
+  const inspectRecovery=(candidate:Post)=>{
+    lastSavedFingerprintRef.current=draftFingerprint(candidate);
+    lastAttemptFingerprintRef.current='';
+    setDraftStatus('saved');
+    setRecovery(account?.email?newerUnsavedBackup(account.email,candidate):null);
+    return candidate;
+  };
   const [brandForm, setBrandForm] = useState<Brand | null>(null);
   const [topic, setTopic] = useState('');
   const [manualOpen,setManualOpen]=useState(false);
@@ -553,17 +568,17 @@ function App() {
   const startFactory = () => {
     if (!brand) return;
     editorSessionRef.current++;
-    setEditor({...newPost(brand.id),format:'Carousel'});
+    setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel'}));
     navigate('factory');
   };
   const startVertical = (format:'Reel'|'Story'='Reel')=>{
     if(!brand)return;
     editorSessionRef.current++;
-    setEditor({...newPost(brand.id),format,title:format==='Reel'?'Portada de Reel':'Historia',
+    setEditor(inspectRecovery({...newPost(brand.id),format,title:format==='Reel'?'Portada de Reel':'Historia',
       hook:'',designData:writeCoverDecor('',{...readCoverDecor(''),color:'#FAF8F3',
         headlineRect:{x:.08,y:.09,w:.84,h:.2},
         primaryPhotoRect:{x:.07,y:.33,w:.86,h:.55},
-        headlineStyle:{font:'serif',fontSize:88,color:'#191919',lineHeight:1.1,spacing:0}})});
+        headlineStyle:{font:'serif',fontSize:88,color:'#191919',lineHeight:1.1,spacing:0}})}));
     navigate('vertical');
   };
   const navigate = (id: Tab) => {
@@ -574,7 +589,7 @@ function App() {
   const start = (angle = 'Pain point') => {
     if (!brand) return;
     editorSessionRef.current++;
-    setEditor({ ...newPost(brand.id), angle,format:'Single post' });
+    setEditor(inspectRecovery({ ...newPost(brand.id), angle,format:'Single post' }));
     setManualOpen(false);
     setTopic('');
     setAlternatives([]);
@@ -583,14 +598,14 @@ function App() {
   const edit = (post: Post) => {
     editorSessionRef.current++;
     setCurrent(post.brandId);
-    setEditor({ ...post });
+    setEditor(inspectRecovery({ ...post }));
     setManualOpen(true);
     setTopic('');
     setAlternatives([]);
     navigate(['Reel','Story'].includes(post.format)?'vertical':post.format==='Carousel'?'factory':'create');
   };
-  const save = async (candidate?:unknown) => {
-    if(saveInFlightRef.current)return;
+  const save = async (candidate?:unknown, automatic=false) => {
+    if(saveInFlightRef.current)return false;
     const possible=candidate&&typeof candidate==='object'?candidate as Partial<Post>:null;
     const source:Post=possible&&typeof possible.title==='string'&&
       typeof possible.format==='string'&&typeof possible.brandId==='string'
@@ -617,16 +632,56 @@ function App() {
         if(JSON.stringify(current)===snapshot)return data as Post;
         return {...current,id:data.id,updatedAt:data.updatedAt};
       });
-      toast(source.format==='Carousel'
+      lastSavedFingerprintRef.current=draftFingerprint(source);
+      lastAttemptFingerprintRef.current='';
+      setDraftStatus('saved');
+      if(account?.email&&draftFingerprint(editorLatestRef.current)===draftFingerprint(source)){
+        removeDraftBackup(account.email,source);
+        if(data?.id)removeDraftBackup(account.email,{...source,id:data.id});
+      }
+      if(!automatic)toast(source.format==='Carousel'
         ? 'Carrusel guardado ✓ Puedes seguir editando y guardarlo de nuevo.'
         : 'Guardado en tu biblioteca ✓');
+      return true;
     } catch (e) {
-      err(e);
+      setDraftStatus('offline');
+      if(!automatic)err(e);
+      return false;
     } finally {
       saveInFlightRef.current=false;
       setBusy('');
+      setSavePulse(n=>n+1);
     }
   };
+  // Persist each edit locally immediately. Debounce writes to the account's
+  // private backend, and never replace newer edits with an older response.
+  useEffect(()=>{
+    if(!account?.email||!brand||!['factory','vertical','create'].includes(tab)||
+       !editor.brandId||editor.brandId!==brand.id||recovery)return;
+    const fingerprint=draftFingerprint(editor);
+    if(fingerprint===lastSavedFingerprintRef.current){setDraftStatus('saved');return}
+    writeDraftBackup(account.email,editor);
+    setDraftStatus('unsaved');
+    if(fingerprint===lastAttemptFingerprintRef.current)return;
+    const timer=window.setTimeout(()=>{
+      if(saveInFlightRef.current)return;
+      if(draftFingerprint(editorLatestRef.current)!==fingerprint)return;
+      lastAttemptFingerprintRef.current=fingerprint;
+      setDraftStatus('saving');
+      void save(editor,true);
+    },1800);
+    return()=>window.clearTimeout(timer);
+  },[editor,tab,account?.email,brand?.id,recovery,savePulse]);
+  useEffect(()=>{
+    if(!account?.email)return;
+    const flush=()=>{
+      const candidate=editorLatestRef.current;
+      if(candidate.brandId&&draftFingerprint(candidate)!==lastSavedFingerprintRef.current)
+        writeDraftBackup(account.email,candidate);
+    };
+    window.addEventListener('pagehide',flush);
+    return()=>window.removeEventListener('pagehide',flush);
+  },[account?.email]);
   const remove = async (p: Post) => {
     if (!p.id || !window.confirm('¿Eliminar esta publicación?')) return;
     try {
@@ -1145,6 +1200,27 @@ function App() {
           </div>
         </header>
         <div className="content" data-lab-tab={tab} key={tab}>
+          {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
+            <span role="status" aria-live="polite">
+              {draftStatus==='saving'?'Guardando cambios…':
+               draftStatus==='saved'?'✓ Guardado':
+               draftStatus==='offline'?'Sin conexión · copia local protegida':
+               'Cambios guardados en este dispositivo'}
+            </span>
+            {recovery&&<div className="lab-draft-recovery">
+              <strong>Encontramos cambios recientes que no aparecen en el borrador guardado.</strong>
+              <p>Puedes recuperarlos sin perder el trabajo que hiciste.</p>
+              <button type="button" onClick={()=>{
+                setEditor(recovery.post as Post);
+                setRecovery(null);
+                setDraftStatus('unsaved');
+              }}>Recuperar cambios</button>
+              <button type="button" onClick={()=>{
+                if(account?.email)removeDraftBackup(account.email,recovery.post);
+                setRecovery(null);
+              }}>Continuar con lo guardado</button>
+            </div>}
+          </div>}
           {brand && tab === 'home' && (
             <>
               <section className="lab-home-greeting" aria-label={loginLanguage==='es'?'Bienvenida a tu estudio':'Welcome to your studio'}>
