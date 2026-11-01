@@ -443,7 +443,9 @@ export default function TouchLayerCanvas({
         <strong>Copiar este sticker a otro slide</strong>
         <p>Se mantiene el tamaño, la posición y el giro. El original no se mueve.</p>
         <div className="touch-editor-copy-destinations" role="group" aria-label="Elegir slide para copiar el sticker">
-          {Array.from({length:pageCount},(_,n)=>n).map(n=><button type="button" key={n}
+          {Array.from({length:pageCount},(_,n)=>n)
+            .filter(n=>n!==Math.max(0,Math.min(pageCount-1,Math.floor((selectedRect.x+selectedRect.w/2)*pageCount))))
+            .map(n=><button type="button" key={n}
             onClick={()=>{
               const status=onCopySticker(chosen.id,n);
               setCopyFeedback(status==='copied'?'✓ Copiado al slide '+(n+1)+'.':
