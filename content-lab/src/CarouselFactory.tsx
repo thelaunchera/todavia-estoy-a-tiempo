@@ -53,6 +53,7 @@ type Props = {
   loadImage: (id: string) => void; uploadImage: () => void;
   notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
+  onUploadSticker:(file:File)=>Promise<Asset|null>;
   onRenameAsset:(asset:Asset,name:string)=>Promise<void>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
@@ -445,7 +446,7 @@ const filename=(post:Post,i:number)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-1080x1350.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,onRenameAsset,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
@@ -1105,14 +1106,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       notify(uploaded.length===1?'Foto añadida. Tócala para moverla o cambiar tamaño.':uploaded.length+' fotos añadidas al carrusel.');
     }
   };
-  const uploadPanoramaLibrary=async(files:File[])=>{
+  const uploadPanoramaLibrary=async(files:File[],kind:'photo'|'sticker')=>{
     const originBrand=brand.id;
     let count=0;
     for(const file of files.slice(0,8)){
       if(!file.type.startsWith('image/')&&!/\.(heic|heif|jpe?g|png|webp)$/i.test(file.name)){
         notify('Solo se permiten imágenes PNG, JPG, HEIC o WEBP.');continue;
       }
-      const item=await onUploadPhoto(file);
+      const item=await (kind==='sticker'?onUploadSticker(file):onUploadPhoto(file));
       if(item&&latestDraft.current.post.brandId===originBrand)count++;
     }
     if(count)notify(count===1?'Imagen guardada en la biblioteca. Arrástrala al lienzo cuando quieras.':
