@@ -55,6 +55,15 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
+/** Normal mode clips movable panorama elements to their own slide.
+ * Seamless keeps the original full-width geometry for genuine cross-slide cuts. */
+const constrainNormalLayer=(layer:PanoramaLayer,count:number):PanoramaLayer=>{
+ const n=Math.max(1,count),r=clampPanoramaRect(layer.rect,.055/n);
+ const page=Math.max(0,Math.min(n-1,Math.floor((r.x+r.w/2)*n)));
+ const left=page/n,width=Math.min(r.w,1/n);
+ return {...layer,rect:{...r,w:width,x:Math.max(left,Math.min(left+1/n-width,r.x))}};
+};
+
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
  if(!slide.assetId)return {...slide,layout};
@@ -575,7 +584,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
     if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
-    return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
+    return overlayPanoramaPages(all,style.seamlessEnabled?(style.panoramaLayers||[]):(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length)),images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     recordHistory(post.designData||encodeCarouselDesign(slides,style));
@@ -901,7 +910,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     .map(layer=>({...layer,src:images[layer.assetId]||'',locked:layer.locked===true}));
   // Wallpaper is always selectable behind independently movable stickers.
   const panoramaLayers=[...savedPanoramaLayers.filter(layer=>layer.role==='background'),
-    ...pageLayers,...savedPanoramaLayers.filter(layer=>layer.role!=='background')];
+    ...pageLayers,...savedPanoramaLayers.filter(layer=>layer.role!=='background')].map(layer=>style.seamlessEnabled?layer:constrainNormalLayer(layer,slides.length));
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -943,8 +952,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const source=pageLayers.find(layer=>layer.id===id);
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
-      setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),promoteSource(source,rect)]});
-    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,rect:clampPanoramaRect(rect)}:layer)});
+      const promoted=promoteSource(source,rect);
+      setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),style.seamlessEnabled?promoted:constrainNormalLayer(promoted,slides.length)]});
+    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>{
+      if(layer.id!==id)return layer;
+      const next={...layer,rect:clampPanoramaRect(rect)};
+      return style.seamlessEnabled?next:constrainNormalLayer(next,slides.length);
+    })});
   };
   const copyPanoramaSticker=(id:string,targetIndex:number):StickerCopyResult=>{
     if(targetIndex<0||targetIndex>=slides.length)return 'invalid';
