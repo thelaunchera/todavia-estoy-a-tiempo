@@ -1116,7 +1116,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       const item=await (kind==='sticker'?onUploadSticker(file):onUploadPhoto(file));
       if(item&&latestDraft.current.post.brandId===originBrand)count++;
     }
-    if(count)notify(count===1?'Imagen guardada en la biblioteca. Arrástrala al lienzo cuando quieras.':
+    if(!count)throw Error('No se pudo guardar ninguna imagen. Comprueba el formato y vuelve a intentar.');
+    notify(count===1?'Imagen guardada en la biblioteca. Arrástrala al lienzo cuando quieras.':
       count+' imágenes guardadas en tu biblioteca para arrastrarlas.');
   };
   const splitDescription=()=>{
