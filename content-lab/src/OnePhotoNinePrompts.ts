@@ -47,15 +47,16 @@ export function onePhotoNinePrompt(index:number,opts:OnePhotoPromptOptions):stri
  return [
   'CREATE ONE IMAGE ONLY — '+item.name+' — COMPOSITION '+(i+1)+' OF 9.',
   'I will attach ONE product image. Treat that attached image as the ONLY authoritative product reference. If I have not attached it yet, ask me to upload it BEFORE generating any image.',
-  'Create one stand-alone premium editorial 4:5 social post (1080 × 1350 or the highest available resolution), not a contact sheet, not nine pictures, not a collage.',
+  'Create ONE stand-alone premium editorial 4:5 social image (1080 × 1350 or highest available). Do NOT create a contact sheet, a 3x3 grid, a collage or multiple options. The nine results will be arranged manually in the Content Lab grid preview.',
   'ACTUAL PRODUCT: '+original+'. BRAND: '+brand+'.',
   'Preserve the real product identity faithfully: shape, materials, color, proportions, texture, packaging, logo, labels and print. Do not redesign the product, invent branding, duplicate items or add unsupported claims. If the reference is a finished poster, retain all original printed text and move/resize only.',
-  'ART DIRECTION: '+item.shot+' Aim for the photographic realism and polished editorial variety of a high-end matcha campaign, while adapting to the ACTUAL product shown; do not insert matcha, cups or food unless they are present or appropriate.',
-  'COMPOSITION RULE: '+item.layout,
+  'ART DIRECTION: '+item.shot+' Use a real camera look with the correct lens behavior, believable natural shadows, realistic material micro-texture, truthful contact surfaces and human-scale props. The nine prompts must produce visibly DIFFERENT compositions, never repetitive staged stock photos. Matcha is only a style example, never an item to insert unless present in the reference.',
+  'COMPOSITION RULE: '+item.layout+' Keep subject, headline zone and intentional negative space balanced with distinct hierarchy. Leave all essential subject detail inside mobile-safe edges; do not stretch or distort the real product.',
+  'CAMERA & ENVIRONMENT: Select a plausible 35mm, 50mm, 85mm or macro lens matching this scene; describe camera height, focal plane, directional light and background separation. Composition should be original, aesthetically clean and visibly different from the previous posts.',
   'PALETTE: '+(opts.palette?.trim()||'cohesive premium colors inspired by the real product and brand')+'.',
   'TEXT: '+(headline?'Use this exact headline verbatim: '+headline:'Do not add any overlay headline, fake typography or placeholder text.')+(support?' Supporting copy, exactly: '+support:' No extra small print.')+' Any supplied text is '+language+'. Never invent or translate the exact supplied words.',
   'USER NOTES: '+(opts.notes?.trim()||'Do not add unnecessary decorations.')+'.',
-  'Keep physical reflections, realistic shadows, lens behavior and light falloff believable. Prefer natural texture, considered editorial hierarchy and beautiful negative space. Avoid plastic CGI, fake floating products, weird hands, warped logos, unreadable lettering, exaggerated filters, duplicate objects or generic stock-photo staging.',
+  'QUALITY CONTROL BEFORE RETURNING: verify product identity, true packaging, realistic natural textures, correct number of hands/fingers if any, valid contact shadow, believable perspective and sharp subject details. Reject plastic CGI, fake floating objects, extra fingers, warped logos, nonsensical labels, exaggerated color grading, repeated products or generic stock staging. If the reference is insufficient, request a better photo rather than inventing the product.',
   'Return ONE final 4:5 image only. No explanation.'
  ].join('\n\n');
 }
