@@ -146,28 +146,37 @@ export default function PanoramaEditor({
   return <section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
-      <h2>Sube tus fotos y colócalas.</h2>
-      <p>Desliza entre slides sin mover tus stickers. Cambia a «Editar elementos» para escoger y ajustar una foto o un sticker. Las líneas indican los cortes al descargar.</p>
+      <h2>Arrastra elementos a tu carrusel.</h2>
+      <p>Como en el ejemplo: elige una foto o un sticker de tu biblioteca, arrástralo al lienzo y cambia su tamaño. En seamless puedes cruzar los límites de los slides.</p>
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
     <div className="panorama-primary-actions">
-      <button type="button" className="panorama-add-photo" disabled={uploading} onClick={()=>input.current?.click()}>
-        <Upload size={19}/>{uploading?'Subiendo fotos…':'Subir foto'}
+      <button type="button" className="panorama-add-photo" disabled={uploading}
+        onClick={()=>{setLibraryOpen(true);input.current?.click()}}>
+        <Upload size={18}/> Subir a mi biblioteca
       </button>
-      <button type="button" onClick={()=>setLibraryOpen(v=>!v)}><ImagePlus size={17}/>{libraryOpen?'Ocultar biblioteca':'Mis fotos'}</button>
-      {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-stretch-background" onClick={onExtendBackground}>
-        🎀 Estirar fondo entre slides
-      </button>}
-      <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(v=>!v)} aria-expanded={moreTools}>
-        {moreTools?'Menos opciones':'Más opciones'}
+      <button type="button" className="panorama-toggle-library" aria-expanded={libraryOpen}
+        onClick={()=>setLibraryOpen(open=>!open)}>
+        <ImagePlus size={17}/> {libraryOpen?'Ocultar elementos':'Ver mis elementos'}
       </button>
+      <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(open=>!open)}
+        aria-expanded={moreTools}>{moreTools?'Menos herramientas':'Más herramientas'}</button>
     </div>
-    <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple onChange={e => {
-      const files=[...(e.target.files||[])];e.target.value='';
-      if(files.length)void upload(files,{x:.5/count,y:.5});
-    }}/>
-    {uploadError&&<p className="panorama-error" role="alert">{uploadError}</p>}
+    <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple
+      onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';chooseLibraryFiles(files)}}/>
+    {pendingFiles.length>0&&<div className="panorama-upload-pending" role="group" aria-label="Guardar imágenes con nombre">
+      <label>Nombre de tu imagen
+        <input aria-label="Nombre de la imagen a guardar" value={uploadName} maxLength={85}
+          onChange={e=>setUploadName(e.target.value)} placeholder="Ej. Galletas de chocolate"/>
+      </label>
+      <small>{pendingFiles.length>1?pendingFiles.length+' archivos · el primero llevará este nombre; los demás conservarán el suyo.':'Primero se guarda. Después podrás arrastrarla al carrusel.'}</small>
+      <button type="button" className="panorama-save-upload" disabled={uploading||!cleanAssetName(uploadName)}
+        onClick={()=>void saveToLibrary()}><Check size={15}/>{uploading?'Guardando…':'Guardar en mi biblioteca'}</button>
+      <button type="button" className="panorama-cancel-upload" onClick={()=>setPendingFiles([])}
+        disabled={uploading}>Cancelar</button>
+    </div>}
+    {(uploadError||libraryFeedback)&&<p className="panorama-library-status" role="status">{uploadError||libraryFeedback}</p>}
     {moreTools&&<div className="panorama-quicktools" aria-label="Herramientas adicionales">
       <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Texto libre</button>
       <button type="button" onClick={()=>onAddLayer('shape','paper')}><Shapes size={16}/> Papel</button>
@@ -178,28 +187,61 @@ export default function PanoramaEditor({
       <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
     </div>}
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
-      {libraryOpen&&<aside className="panorama-library">
-      <strong><ImagePlus size={16}/> Tus fotos y stickers</strong>
-      <p>Toca + para añadir. En el móvil usa «Deslizar slides» para navegar y «Editar elementos» para mover únicamente la capa que elijas.</p>
-      <div className="panorama-library-controls"><input aria-label="Buscar fotos del lienzo" placeholder="Buscar en tu biblioteca…" value={filter}
-        onChange={e => setFilter(e.target.value)}/>
-      <button className="btn ghost" type="button" disabled={uploading} onClick={() => input.current?.click()}>
-        <Upload size={15}/> {uploading ? 'Subiendo…' : 'Subir fotos'}
-      </button></div>
-
-      <div className="panorama-assets">{available.map(asset => <button type="button" key={asset.id}
-        draggable={!!images[asset.id]} className="panorama-asset" title={'Añadir ' + displayAssetName(asset)}
-        onFocus={() => { if (!images[asset.id]) loadImage(asset.id); }}
-        onPointerEnter={() => { if (!images[asset.id]) loadImage(asset.id); }}
-        onDragStart={e => {
-          e.dataTransfer.setData('application/x-content-lab-asset', asset.id);
-          e.dataTransfer.effectAllowed = 'copy';
-        }} onClick={() => onAdd(asset.id, {x: .5 / count, y: .5})}>
-        {images[asset.id] ? <img src={images[asset.id]} alt="" draggable={false}/>
-          : <span onClick={() => loadImage(asset.id)}>Cargar foto</span>}
-        <small>{displayAssetName(asset)}</small><b aria-hidden="true">+</b>
-      </button>)}</div>
-      {!available.length && <p>Sube tus fotos para empezar.</p>}
+      {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
+      <div className="panorama-library-heading"><strong>Mis elementos</strong>
+        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small></div>
+      <div className="panorama-library-controls">
+        <input aria-label="Buscar mis imágenes y stickers" placeholder="Buscar por nombre…" value={filter}
+          onChange={e=>setFilter(e.target.value)}/>
+        <button type="button" onClick={()=>input.current?.click()} disabled={uploading}>
+          <Upload size={15}/> Subir
+        </button>
+      </div>
+      <div className="panorama-assets" aria-label="Biblioteca de fotos, fondos y stickers">
+        {available.map(asset=><article key={asset.id} className="panorama-asset">
+          <button type="button" className="panorama-asset-drag"
+            title={'Arrastrar '+displayAssetName(asset)}
+            draggable={!!images[asset.id]}
+            onFocus={()=>{if(!images[asset.id])loadImage(asset.id)}}
+            onPointerEnter={()=>{if(!images[asset.id])loadImage(asset.id)}}
+            onDragStart={e=>{
+              e.dataTransfer.setData('application/x-content-lab-asset',asset.id);
+              e.dataTransfer.effectAllowed='copy';
+            }}
+            onPointerDown={e=>dragStart(e,asset)}
+            onPointerMove={dragMove}
+            onPointerUp={dragEnd}
+            onPointerCancel={()=>{draggingRef.current=null;setGhost(null)}}
+            onClick={()=>{
+              if(ignoreClick.current===asset.id){ignoreClick.current='';return}
+              onAdd(asset.id,{x:(Math.floor(count/2)+.5)/count,y:.5});
+              setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
+            }}>
+            {images[asset.id]
+              ?<img src={images[asset.id]} alt="" draggable={false}/>
+              :<span className="panorama-library-loading">Cargando…</span>}
+            <span className="panorama-asset-add" aria-hidden="true">＋</span>
+          </button>
+          {renameId===asset.id
+            ?<div className="panorama-asset-rename">
+              <input aria-label={'Nuevo nombre para '+displayAssetName(asset)} value={renameName}
+                maxLength={85} onChange={e=>setRenameName(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void saveAssetName(asset)}}}/>
+              <button type="button" aria-label="Guardar nombre" disabled={renaming||!cleanAssetName(renameName)}
+                onClick={()=>void saveAssetName(asset)}><Check size={13}/></button>
+              <button type="button" aria-label="Cancelar nombre" onClick={()=>setRenameId('')}><X size={13}/></button>
+            </div>
+            :<div className="panorama-asset-meta">
+              <small title={displayAssetName(asset)}>{displayAssetName(asset)}</small>
+              {asset.brandId===brandId&&!asset.shared&&
+                <button type="button" aria-label={'Cambiar nombre de '+displayAssetName(asset)}
+                  onClick={()=>{setRenameId(asset.id);setRenameName(displayAssetName(asset))}}>
+                  <Pencil size={13}/>
+                </button>}
+            </div>}
+        </article>)}
+      </div>
+      {!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
