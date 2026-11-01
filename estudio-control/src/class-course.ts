@@ -1,4 +1,4 @@
-import {demoRebuildPrompts} from './demo-rebuild-prompts';
+import {demoRebuildPrompts} from './demo-rebuild-prompts.ts';
 /** Manual de filmación privado. El alumno siempre crea SU propia web. */
 export type ClassBeat = { label: string; say: string; show: string };
 export type ClassLesson = {
