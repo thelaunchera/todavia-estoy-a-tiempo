@@ -1,6 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
+import {clearActivity,hasExpiredActivity,lastActivity,recordActivity} from '../SessionActivity';
 
 const url=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL||'');
 const key=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY||'');
@@ -9,9 +10,22 @@ const sb=createClient(url||'https://not-configured.supabase.co',key||'missing-pu
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 const bucket='content-lab-private';
+let activeUserId='';
+let lastRecordedInteraction=0;
 const requireConfig=()=>{if(!configured)throw Error('Configura VITE_CONTENT_LAB_SUPABASE_URL y VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY en tu entorno.');};
 const out=(r:any)=>{if(r.error)throw Error(r.error.message||'Error de Supabase');return r.data;};
-const current=async()=>{requireConfig();const {data:{user},error}=await sb.auth.getUser();if(error||!user)throw Error('Inicia sesión para continuar.');return user;};
+const current=async()=>{
+ requireConfig();
+ const {data:{user},error}=await sb.auth.getUser();
+ if(error||!user)throw Error('Inicia sesión para continuar.');
+ if(hasExpiredActivity(user.id)){
+  clearActivity(user.id);
+  await sb.auth.signOut();
+  activeUserId='';
+  throw Error('Pasaron 24 horas sin actividad. Solicita un código nuevo para entrar.');
+ }
+ return user;
+};
 const tab=(name:string)=>sb.from('content_lab_'+name);
 const unwrap=(r:any)=>({...r.payload,id:r.id});
 const list=async(name:string):Promise<any[]>=>out(await tab(name).select('id,payload').order('created_at',{ascending:true})).map(unwrap);
@@ -98,13 +112,20 @@ export const auth={
   getUser:async():Promise<{email?:string}|null>=>{
     if(!configured)return null;
     const {data:{user}}=await sb.auth.getUser();
-    if(!user)return null;
+    if(!user){activeUserId='';return null;}
+    if(hasExpiredActivity(user.id)){
+      clearActivity(user.id);
+      await sb.auth.signOut();
+      activeUserId='';
+      return null;
+    }
     const {data:admin}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
-    if(admin)return {email:user.email};
+    if(admin){activeUserId=user.id;if(lastActivity(user.id)===null)recordActivity(user.id);return {email:user.email};}
     if(!user.email)return null;
     // Server-enforced RLS returns only this verified email's active membership.
     const {data:paid}=await sb.from('content_lab_memberships')
       .select('id').eq('buyer_email',user.email.trim().toLowerCase()).eq('status','active').maybeSingle();
+    if(paid){activeUserId=user.id;if(lastActivity(user.id)===null)recordActivity(user.id);}
     return paid?{email:user.email}:null;
   },
   signInWithOtp:async(email:string,preferredLanguage:'es'|'en'='es')=>{
@@ -119,6 +140,7 @@ export const auth={
     if(!/^[0-9]{6,8}$/.test(code))throw Error('Introduce el código numérico que recibiste por correo.');
     const result=out(await sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'}));
     if(!result?.session)throw Error('No se pudo completar el acceso. Solicita un código nuevo.');
+    if(result.user?.id){activeUserId=result.user.id;recordActivity(activeUserId);lastRecordedInteraction=Date.now();}
     return result;
   },
   getPreferredLanguage:async():Promise<'es'|'en'|null>=>{
@@ -131,7 +153,32 @@ export const auth={
     if(!configured)return;
     out(await sb.auth.updateUser({data:{content_lab_language:lang}}));
   },
-  signOut:async()=>{out(await sb.auth.signOut())}
+  /** Record real user activity only, never a background timer. */
+  noteActivity:():boolean=>{
+    if(!activeUserId)return false;
+    if(hasExpiredActivity(activeUserId))return false;
+    const now=Date.now();
+    if(now-lastRecordedInteraction>=30000){
+      recordActivity(activeUserId,now);
+      lastRecordedInteraction=now;
+    }
+    return true;
+  },
+  /** Check first, without resetting the idle clock on a resumed iPhone tab. */
+  checkIdle:async():Promise<boolean>=>{
+    if(!activeUserId)return false;
+    if(!hasExpiredActivity(activeUserId))return true;
+    clearActivity(activeUserId);
+    activeUserId='';
+    await sb.auth.signOut();
+    return false;
+  },
+  signOut:async()=>{
+    const id=activeUserId;
+    activeUserId='';
+    if(id)clearActivity(id);
+    out(await sb.auth.signOut());
+  }
 };
 export const api={
   get:async(path:string):Promise<{data:any}>=>{
