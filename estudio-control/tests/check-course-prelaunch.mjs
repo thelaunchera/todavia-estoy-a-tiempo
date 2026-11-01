@@ -14,7 +14,11 @@ assert.match(classPage,/También desde tu celular/i,'El hero ofrece una vía mó
 assert.doesNotMatch(classPage,/(?:tres|3) webs(?: en un día| diarias)?/i,'No se promocionan cifras de productividad');
 assert.doesNotMatch(classPage,/\*Cada herramienta tiene límites propios/,'La letra pequeña de límites no se coloca bajo el hero');
 const freebie=read('content-lab/public/prompts/index.html');
-assert.match(freebie,/Quiero suscribirme al newsletter de The Launch Era/,'Freebie invita al newsletter sin cuotas de correos');
+assert.match(freebie,/También quiero recibir ideas y novedades de The Launch Era/,'El newsletter tiene consentimiento opcional y breve');
+assert.match(freebie,/id="access-placeholder"[^>]*hidden/,'El panel de acceso no duplica el formulario visible');
+assert.doesNotMatch(freebie,/Sin contraseñas ni códigos|LOS PROMPTS COMPLETOS · ACCESO PRIVADO|Un regalo que llega a tu correo/,'El público no ve explicaciones internas o duplicadas');
+assert.match(freebie,/id="matcha-lead-feedback" class="matcha-lead-feedback"><\/p>/,'El estado aparece cuando hay una respuesta real');
+assert.match(freebie,/if\(action==='unsubscribe'\)\{\s*placeholder.hidden=false;/,'La baja voluntaria se sigue mostrando cuando corresponde');
 assert.doesNotMatch(freebie,/recibir dos correos|dos correos más|dos ideas de seguimiento/i,'El newsletter no promete una cantidad cerrada de correos');
 assert.doesNotMatch(freebie,/<option value="tle">|<option value="podcast">/,'Las marcas privadas no figuran en el selector');
 assert.match(freebie,/id="brandName"/,'La marca se escribe a mano');
