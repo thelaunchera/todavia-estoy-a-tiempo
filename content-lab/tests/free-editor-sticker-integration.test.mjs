@@ -27,7 +27,8 @@ test('All three graphic editors preserve original sticker layers and custom back
  assert.ok(cover.includes('paintPanoramaLayers(ctx,width,height'));
  assert.ok(cover.includes('freePostDimensions(post.format)'));
  assert.ok(cover.includes('<TouchLayerCanvas'));
- assert.ok(assets.includes('onChange({backgroundId,backgroundImageId,stickerIds:'));
+ assert.ok(assets.includes('onChange({stickerIds:'));
+ assert.ok(assets.includes("onChange({backgroundId:'brand',backgroundImageId:"));
 });
 test('Carousel generation and editing work without invoking AI and exports keep stickers',()=>{
  const car=read('src/CarouselFactory.tsx'),overlay=read('src/OriginalStickerOverlays.ts');
