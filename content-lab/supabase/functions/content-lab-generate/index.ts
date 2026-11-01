@@ -202,6 +202,10 @@ Deno.serve(async request=>{
   if(!admin&&!paid)return send({error:'Esta cuenta todavía no tiene una compra verificada de Content Lab.'},403);
   const body=await request.json();const action=clean(body.action,45);
   if(paid&&!admin&&action==='connection-test')return send({error:'El diagnóstico técnico es exclusivo de la propietaria.'},403);
+  // The buyer offer is a prompt-and-ideas bank, not metered generation.
+  // Enforce this on the server before quota reservations or provider calls.
+  if(!admin&&['ai-image','grid-image','grid-plan','ideas'].includes(action))
+    return send({error:'Tu Content Lab incluye el banco de ideas y la edición de PNG. La generación con IA dentro del Lab no forma parte de esta compra.'},403);
   // The RPC authenticates membership and atomically decrements real server-side
   // credits, per-user daily allowance, and the shared platform safety ceiling.
   if(['ai-image','grid-image','grid-plan','ideas','connection-test'].includes(action)){
