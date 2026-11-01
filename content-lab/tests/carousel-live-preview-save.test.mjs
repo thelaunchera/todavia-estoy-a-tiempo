@@ -11,7 +11,7 @@ test('Carousel preview is swipeable and uses high-resolution final export pixels
   assert.ok(factory.includes('factory-swipe-rail'));
   assert.ok(factory.includes('thumb.width=900;thumb.height=1125'));
   assert.ok(factory.includes("previews.push(thumb.toDataURL('image/png'))"));
-  assert.ok(factory.includes('const all=await renderAllSlides();'));
+  assert.ok(factory.includes('const all=independent?null:await renderAllSlides();'));
   assert.ok(styles.includes('scroll-snap-type:x mandatory'));
 });
 
