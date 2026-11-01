@@ -172,3 +172,43 @@
  .class-page-v2 #preguntas .class-faq-panel.is-current,
  .class-page-v2 #incluye .class-material-panel:not([hidden]){animation:none!important;transition:none!important}
 }
+
+/* Contacto de la clase: un único botón hasta que la persona decide escribir. */
+.class-page-v2 .class-contact-compact-inner{flex-wrap:wrap}
+.class-page-v2 .class-contact-intro{flex:1 1 300px;min-width:0}
+.class-page-v2 .class-contact-compact-button{font-family:var(--sans,Arial,sans-serif);border:0;cursor:pointer}
+.class-page-v2 .class-contact-compact-button span{font-size:1.1rem}
+.class-page-v2 .class-contact-panel[hidden]{display:none!important}
+.class-page-v2 .class-contact-panel{flex:0 0 100%;min-width:0;padding:clamp(18px,3vw,36px);
+ border:1px solid #d5e2e8;border-radius:21px;background:#fffdf9;box-shadow:0 13px 33px rgba(21,49,74,.07);
+ animation:classFaqIn .27s ease both}
+.class-page-v2 .class-contact-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;
+ padding-bottom:18px;border-bottom:1px solid #e2eaee;margin-bottom:20px}
+.class-page-v2 .class-contact-panel-head h3{font:400 clamp(1.6rem,3vw,2.2rem)/1.15 var(--serif,Georgia,serif);
+ margin:8px 0 0;color:#1b3a52}
+.class-page-v2 .class-contact-panel-head button{background:transparent;border:0;color:#52718a;
+ font-size:.82rem;font-weight:700;cursor:pointer;min-height:40px;padding:7px 9px}
+.class-page-v2 .class-contact-panel form{display:grid;gap:15px;max-width:760px}
+.class-page-v2 .class-contact-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.class-page-v2 .class-contact-panel label{display:grid;gap:8px;color:#345268;font-size:.81rem;font-weight:750}
+.class-page-v2 .class-contact-panel input:not([type="hidden"]),.class-page-v2 .class-contact-panel select,
+.class-page-v2 .class-contact-panel textarea{display:block;width:100%;box-sizing:border-box;min-height:46px;
+ padding:11px 13px;background:#fff;border:1px solid #c6d7e0;border-radius:11px;color:#1c374b;
+ font:400 .9rem/1.4 var(--sans,Arial,sans-serif)}
+.class-page-v2 .class-contact-panel textarea{min-height:115px;resize:vertical}
+.class-page-v2 .class-contact-panel input:focus-visible,.class-page-v2 .class-contact-panel textarea:focus-visible,
+.class-page-v2 .class-contact-panel select:focus-visible,.class-page-v2 .class-contact-panel button:focus-visible{
+ outline:3px solid #9cc2d6;outline-offset:2px}
+.class-page-v2 .class-contact-panel form>p{font-size:.74rem;line-height:1.55;margin:0;color:#607b8a}
+.class-page-v2 .class-contact-panel a{color:#315f7f}
+.class-page-v2 .class-contact-panel .class-contact-submit{justify-self:start;border:0;border-radius:999px;
+ padding:13px 24px;min-height:47px;color:white;background:#1e455f;cursor:pointer;font-size:.83rem;font-weight:750}
+.class-page-v2 .class-contact-submit:disabled{opacity:.65;cursor:wait}
+.class-page-v2 .class-contact-feedback[data-state="success"]{color:#2f6a52!important;font-weight:700}
+.class-page-v2 .class-contact-feedback[data-state="error"]{color:#9a443b!important;font-weight:700}
+@media(max-width:600px){
+ .class-page-v2 .class-contact-fields{grid-template-columns:1fr}
+ .class-page-v2 .class-contact-panel{padding:18px;border-radius:17px}
+ .class-page-v2 .class-contact-panel .class-contact-submit{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.class-page-v2 .class-contact-panel{animation:none!important}}
