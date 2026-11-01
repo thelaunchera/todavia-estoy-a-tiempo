@@ -36,7 +36,10 @@ test('Autosave runs after debounced edits and offers restore without resetting c
 test('A full carousel slide duplicates with distinct key and retains independent photos/stickers',()=>{
  const source=read('CarouselFactory.tsx');
  assert.ok(source.includes('const duplicateSlide=()=>'));
- assert.ok(source.includes('if(slides.length>=8)'));
+ assert.ok(source.includes('if(slides.length>=MAX_CAROUSEL_SLIDES)'));
+ assert.ok(source.includes('const MAX_CAROUSEL_SLIDES=10;'));
+ assert.ok(source.includes('const insert=()=>'));
+ assert.ok(source.includes('const mapped=(style.panoramaLayers||[]).map(layer=>'));
  assert.ok(source.includes("key:'slide-copy-'+crypto.randomUUID()"));
  assert.ok(source.includes('stickerPositions:{...slide.stickerPositions}'));
  assert.ok(source.includes('const mapped=(style.panoramaLayers||[]).flatMap'));
