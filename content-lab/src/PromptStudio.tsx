@@ -93,7 +93,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
        <strong>{category?(category==='photos'?(en?'Photography':'Fotografía'):PROMPT_CATEGORIES[category]?.[en?1:0]):(en?'Search results':'Resultados')}</strong>
        <small>{shown.length} prompts</small></div>
       <div className="ps-recipe-list ps-recipe-cards">{shown.length?shown.slice(0,limit).map(p=><article className="ps-recipe" key={p.id}>
-       <span className="ps-recipe-index">{p.id.startsWith('drive-')?p.id.split('-').at(-1):p.id}</span>
+       <span className="ps-recipe-index">{p.id.startsWith('drive-')?p.id.split('-').slice(-1)[0]:p.id}</span>
        <div><strong>{p.title[language]}</strong><small>{PROMPT_CATEGORIES[p.category]?.[en?1:0]||p.category}</small>
         <details className="ps-recipe-example"><summary>{en?'Read prompt':'Ver prompt'}</summary><p>{p.body[language]}</p></details></div>
        <button className="ps-recipe-use" type="button" onClick={()=>select(p)}>{en?'Use':'Usar'}</button>
@@ -115,7 +115,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
     <label>{en?'Where should it be?':'¿Dónde quieres la escena?'}<input value={settings.environment} onChange={e=>update('environment',e.target.value)} placeholder={en?'Warm ivory studio, daylight cafe…':'Estudio ivory, cafetería con luz natural…'}/></label>
     </>}
     <label>{en?'Describe what you want (your own prompt)':'Escribe lo que tú quieras (prompt libre)'}
-     <textarea ref={manualRef} rows={4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={selectedKind==='text'?'Adapta las instrucciones a tu negocio y al público.':en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
+     <textarea ref={manualRef} rows={selectedKind==='text'?10:4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={selectedKind==='text'?'Adapta las instrucciones a tu negocio y al público.':en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
     {selectedKind==='photo'&&<><details className="ps-optional-controls"><summary>{en?'More creative settings':'Ajustes de estilo'}</summary><div className="ps-control-grid">
       <label>{en?'Visual mood':'Estilo visual'}<select value={settings.style} onChange={e=>update('style',e.target.value as PromptControls['style'])}>
        {Object.entries({'real-life':en?'Natural':'Natural realista',studio:en?'Studio':'Estudio',editorial:'Editorial',luxury:en?'Luxury':'Lujo',bold:'Bold',minimal:'Minimal'}).map(([v,l])=><option key={v} value={v}>{l}</option>)}
