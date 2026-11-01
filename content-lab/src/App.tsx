@@ -3,6 +3,7 @@ import {draftFingerprint,writeDraftBackup,removeDraftBackup,newerUnsavedBackup,t
 import { api, auth, image } from './platform/client';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
+import LiveFeedGrid from './LiveFeedGrid';
 import ContentCalendar from './ContentCalendar';
 import {validDate,type PlannedItem} from './CalendarPlannerModel';
 import ScheduleFromEditor from './ScheduleFromEditor';
@@ -120,7 +121,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'create', title: 'Posts · 4:5', icon: WandSparkles },
   { id: 'vertical', title: 'Portadas de reels e historias · 9:16', icon: Film },
   { id: 'factory', title: 'Carousel Factory', icon: Layers3 },
-  { id: 'grid', title: 'Vista del grid · 3×3', icon: Images },
+  { id: 'grid', title: 'Mi feed · 3×3', icon: Images },
   { id: 'calendar', title: 'Calendario editorial', icon: CalendarDays },
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
   { id: 'backgrounds', title: 'Fondos', icon: Palette },
@@ -1534,7 +1535,7 @@ function App() {
                 navigate('grid');
               }}/>
           )}
-          {brand && tab === 'grid' && (
+          {brand && tab === 'grid' && (gridPref.fromCalendar && gridPref.openGridId ?
             <BrandGrid
               onUploadBackground={async file=>upload(file,'background')}
               promptSelection={chosenPrompt}
@@ -1555,7 +1556,14 @@ function App() {
               loadImage={imageLoad}
               notify={toast}
               showError={err}
-            />
+            /> : <LiveFeedGrid brand={brand} posts={posts} images={images}
+                locale={loginLanguage} loadImage={id=>{void imageLoad(id)}}
+                onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
+                onOpenEditor={openCalendarItem}
+                onOpenCalendar={(date?:string)=>{if(validDate(date||''))setCalendarFocusDate(date!);navigate('calendar')}}
+                onOpenPrompts={()=>navigate('prompt-studio')}
+                onCreate={()=>start()}
+                notify={toast} showError={err}/>
           )}
           {brand && tab === 'calendar' && (
             <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
