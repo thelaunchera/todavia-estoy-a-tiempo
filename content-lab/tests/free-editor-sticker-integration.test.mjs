@@ -37,7 +37,8 @@ test('Carousel generation and editing work without invoking AI and exports keep 
  assert.ok(car.includes("studioTab==='ai'"));
  assert.ok(!car.includes('IA opcional'));
  assert.ok(car.includes('onUploadBackground={onUploadBackground}'));
- assert.ok(car.includes("if(!window.confirm('Esta foto utilizará 1 crédito de IA."));
+ assert.ok(!car.includes("if(!window.confirm('Esta foto utilizará 1 crédito de IA."));
+ assert.ok(car.includes('Ideas para tu carrusel'));
  assert.ok(car.includes('await paintOriginalStickerImages'));
  assert.ok(overlay.includes('positions:StickerPositions'));
 });
