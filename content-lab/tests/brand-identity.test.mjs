@@ -32,7 +32,7 @@ test('Carousel uses additional colors selectively, keeping a consistent master a
  assert.ok(helper.includes('slideAccentIndex>0'));
  assert.ok(carousel.includes('accentIndex:Number(e.target.value)'));
  assert.ok(carousel.includes('targetPlatform:e.target.value'));
- assert.ok(carousel.includes('Previsualizar slides'));
+ assert.ok(carousel.includes('factory-preview-inline')&&carousel.includes('Continuar a descargar'));
  assert.ok(carousel.includes('onClick={previewAll}'));
  assert.ok(grid.includes('Usar un tono de mi Brand Kit'));
 });
