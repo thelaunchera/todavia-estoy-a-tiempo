@@ -204,12 +204,13 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  }
  // Text is always drawn from EXACT editor strings, never delegated to an image model.
  // Safe areas are respected for Reels/Stories.
- const headlineColor=(fmt.shape==='dark'||(fmt.shape==='solid'&&!dark))?inkOn(fmt.shape==='dark'?'#191919':accent):fmt.shape==='split'&&hx<.5?inkOn(accent):secondaryInk;
+ const editorialHero=fmt.name==='Editorial Hero';
+ const headlineColor=editorialHero?accent:(fmt.shape==='dark'||(fmt.shape==='solid'&&!dark))?inkOn(fmt.shape==='dark'?'#191919':accent):fmt.shape==='split'&&hx<.5?inkOn(accent):secondaryInk;
  const safeTop=metrics.safeTop*H,safeBottom=(1-metrics.safeBottom)*H;
  const capY=clamp(hy*H+ty,safeTop,safeBottom-30);
  const allowedH=Math.max(75,Math.min(hh*H,safeBottom-capY-12));
  const textSize=clamp(Number(control.textScale||1),.55,1.7)*Math.min(W/1080,H/1350)*91;
- const didFit=drawWrapped(ctx,tile.headline||'',clamp(hx*W+tx,W*.03,W*.92),capY,Math.max(80,hw*W-Math.abs(tx)),allowedH,textSize,textFont(brand.headingFont,true),headlineColor,fmt.align||'left');
+ const didFit=drawWrapped(ctx,tile.headline||'',clamp(hx*W+tx,W*.03,W*.92),capY,Math.max(80,hw*W-Math.abs(tx)),allowedH,textSize,editorialHero?(brand.headingFont?textFont(brand.headingFont,false):'Arial Black, Arial, sans-serif'):textFont(brand.headingFont,true),headlineColor,fmt.align||'left');
  const footerY=clamp(H*.952,safeTop+20,safeBottom);
  ctx.font='bold '+Math.round(19*Math.min(W/1080,H/1350))+'px '+textFont(brand.bodyFont,false);
  ctx.textAlign='left';ctx.fillStyle=fmt.dark?'#ffffff':inkOn(paper);
@@ -217,8 +218,16 @@ export async function composeGridPoster(tile:Source,index:number,brand:Brand,pho
  ctx.textAlign='right';
  const subScale=clamp(Number(control.subtextScale||1),.55,1.7);
  ctx.font='bold '+Math.round(19*subScale*Math.min(W/1080,H/1350))+'px '+textFont(brand.bodyFont,false);
- ctx.fillText((tile.subtext||'').slice(0,54),clamp(W*(.935+Number(control.subtextX||0)),W*.1,W*.97),
+ if(editorialHero){
+  // Match the gallery: subtitle is a quiet caption below the headline, not
+  // a second piece of footer text in the opposite corner.
+  ctx.textAlign='left';ctx.font='500 '+Math.round(24*subScale*Math.min(W/1080,H/1350))+'px '+textFont(brand.bodyFont,false);
+  ctx.fillText((tile.subtext||'').slice(0,54),clamp(W*(.085+Number(control.subtextX||0)),W*.07,W*.92),
+    clamp(H*(.905+Number(control.subtextY||0)),safeTop+25,safeBottom));
+ }else{
+  ctx.fillText((tile.subtext||'').slice(0,54),clamp(W*(.935+Number(control.subtextX||0)),W*.1,W*.97),
    clamp(footerY+H*Number(control.subtextY||0),safeTop+25,safeBottom));
+ }
  if(photos.logo){
   const im=new Image();im.src=photos.logo;
   try{
