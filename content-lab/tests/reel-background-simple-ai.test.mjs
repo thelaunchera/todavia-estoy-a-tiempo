@@ -35,6 +35,7 @@ test('Idea bank lets buyers prepare a draft while visual backgrounds remain edit
  assert.ok(app.includes('Crear con IA · 1 crédito'));
  assert.ok(car.includes('Crear carrusel con IA · 1 crédito'));
  assert.ok(car.includes('encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))'));
- assert.ok(car.includes('backgroundId,backgroundImageId,backgroundColor:slide.backgroundColor'));
- assert.ok(car.includes('backgroundId:slide.backgroundId'));
+ assert.ok(car.includes('backgroundImageId:previous.backgroundImageId'));
+ assert.ok(car.includes('backgroundId:previous.backgroundId'));
+ assert.ok(car.includes('stickerIds:previous.stickerIds'));
 });
