@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2} from 'lucide-react';
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintPanoramaLayers,reorderPanoramaLayers,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
-import {clampRect,paintCoverImage,type TouchRect} from './TouchGeometry';
+import {clampRect,clampFreePhotoRect,paintCoverImage,type TouchRect} from './TouchGeometry';
 import {coverPlacement} from './PhotoCrop';
 import TouchLayerCanvas,{type TouchLayer} from './TouchLayerCanvas';
 import FreeDecorControls from './FreeDecorControls';
@@ -138,11 +138,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  };
  const commit=(kind:PanoramaLayer['kind'],id:string,rect:TouchRect)=>{
   if(id==='main-title')update({...decor,headlineRect:clampRect(rect)});
-  else if(id==='main-photo')update({...decor,primaryPhotoRect:clampRect(rect)});
+  else if(id==='main-photo')update({...decor,primaryPhotoRect:clampFreePhotoRect(rect)});
   else if(id.startsWith('legacy-sticker-')){
    const original=id.slice('legacy-sticker-'.length);
    update({...decor,stickerPositions:{...decor.stickerPositions,[original]:clampRect(rect)}});
-  }else update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,rect:clampRect(rect)}:l)});
+  }else update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,rect:kind==='photo'?clampFreePhotoRect(rect):clampRect(rect)}:l)});
  };
  const remove=(id:string)=>{
   if(id==='main-title'){onTitle('');return}

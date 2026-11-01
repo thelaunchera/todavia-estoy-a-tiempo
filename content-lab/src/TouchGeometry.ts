@@ -15,9 +15,26 @@ export const clampRect=(r:TouchRect,minWidth=.055):TouchRect=>{
  const h=Math.max(.055,Math.min(1,safeNumber(r.h,.15)));
  return {x:Math.max(0,Math.min(1-w,safeNumber(r.x,.4))),y:Math.max(0,Math.min(1-h,safeNumber(r.y,.4))),w,h,angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0))),...(r.crop?{crop:normalizeCrop(r.crop)}:{}),...(normalizedCornerRadius(r.cornerRadius)!==undefined?{cornerRadius:normalizedCornerRadius(r.cornerRadius)}:{})};
 };
+/** A single post can crop a photograph beyond the artboard, like a real layout editor.
+ * Keep at least 10% visible so it remains recoverable by touch. This is about
+ * the placement frame, not upscaling the source's pixels.
+ */
+export const clampFreePhotoRect=(r:TouchRect):TouchRect=>{
+ const w=Math.max(.055,Math.min(3,safeNumber(r.w,.5)));
+ const h=Math.max(.055,Math.min(3,safeNumber(r.h,.5)));
+ const visible=.10;
+ return {
+  x:Math.max(-w+visible,Math.min(1-visible,safeNumber(r.x,.2))),
+  y:Math.max(-h+visible,Math.min(1-visible,safeNumber(r.y,.2))),
+  w,h,
+  angle:Math.max(-180,Math.min(180,safeNumber(r.angle,0))),
+  ...(r.crop?{crop:normalizeCrop(r.crop)}:{}),
+  ...(normalizedCornerRadius(r.cornerRadius)!==undefined?{cornerRadius:normalizedCornerRadius(r.cornerRadius)}:{})
+ };
+};
 /** Panorama layers may bleed beyond an edge; keep a small grab area reachable. */
 export const clampPanoramaRect=(r:TouchRect,minWidth=.055/8):TouchRect=>{
- const w=Math.max(minWidth,Math.min(2,safeNumber(r.w,.15)));
+ const w=Math.max(minWidth,Math.min(3,safeNumber(r.w,.15)));
  const h=Math.max(.055,Math.min(3,safeNumber(r.h,.15)));
  return {x:Math.max(-w+minWidth,Math.min(1-minWidth,safeNumber(r.x,.4))),
   y:Math.max(-h+.025,Math.min(.975,safeNumber(r.y,.4))),w,h,

@@ -487,6 +487,35 @@ function App() {
       .catch(err)
       .finally(() => setWaiting(false));
   }, []);
+  // A verified Supabase session survives normal iPhone tab/app closures. Only
+  // 24h without actual interactions requires a new email code.
+  useEffect(()=>{
+    if(!account)return;
+    let checking=false;
+    const logoutWhenIdle=()=>{
+      if(checking)return;
+      checking=true;
+      void auth.checkIdle().then(valid=>{
+        if(!valid){
+          setAccount(null);setAiWallet(null);setLoginStage('email');setLoginCode('');
+          setPosts([]);setImages({});setAssets([]);setBrands([]);
+        }else auth.noteActivity();
+      }).catch(err).finally(()=>{checking=false;});
+    };
+    const interact=()=>{if(!auth.noteActivity())logoutWhenIdle();};
+    const onVisibility=()=>{if(document.visibilityState==='visible')logoutWhenIdle();};
+    const opts={passive:true,capture:true} as AddEventListenerOptions;
+    for(const event of ['pointerdown','touchstart','keydown','input','scroll'])
+      document.addEventListener(event,interact,opts);
+    document.addEventListener('visibilitychange',onVisibility);
+    window.addEventListener('focus',logoutWhenIdle);
+    return()=>{
+      for(const event of ['pointerdown','touchstart','keydown','input','scroll'])
+        document.removeEventListener(event,interact,opts);
+      document.removeEventListener('visibilitychange',onVisibility);
+      window.removeEventListener('focus',logoutWhenIdle);
+    };
+  },[account?.email]);
   const t = (value:string):string=>uiText(value,loginLanguage);
   const brand = brands.find(b => b.id === current) || brands[0];
   const mine = posts.filter(p => p.brandId === brand?.id);

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { TouchRect } from './TouchGeometry';
-import { clampRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
+import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2 } from 'lucide-react';
 import { panoramaFont,type PanoramaLayer } from './PanoramaLayers';
@@ -48,7 +48,8 @@ export default function TouchLayerCanvas({
   const gesture = useRef<Gesture | null>(null);
   const draftRef = useRef(draft);
   draftRef.current = draft;
-  const clamp = (rect: TouchRect) => pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampRect(rect);
+  const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
+    pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
@@ -61,7 +62,8 @@ export default function TouchLayerCanvas({
   },[pageCount]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const update = (id: string, next: TouchRect) => {
-    const rect = clamp(next);
+    const kind=layers.find(layer=>layer.id===id)?.kind||'sticker';
+    const rect = clamp(next,kind);
     draftRef.current = {...draftRef.current, [id]: rect};
     setDraft(draftRef.current);
   };
@@ -188,8 +190,26 @@ export default function TouchLayerCanvas({
     : 0);
   const commit = (patch: Partial<TouchRect>) => {
     if (!chosen || !selectedRect) return;
-    const next = clamp({...selectedRect, ...patch});
+    const next = clamp({...selectedRect, ...patch},chosen.kind);
     update(chosen.id, next); onCommit(chosen.kind, chosen.id, next);
+  };
+  /** Zoom the layer around its own center; position may extend beyond the artboard. */
+  const resizeSelected=(factor:number)=>{
+    if(!chosen||!selectedRect||cropping)return;
+    const width=Math.max(.055,Math.min(3,selectedRect.w*factor));
+    const height=Math.max(.055,Math.min(3,selectedRect.h*factor));
+    const next=clamp({...selectedRect,
+      w:width,h:height,
+      x:selectedRect.x+(selectedRect.w-width)/2,
+      y:selectedRect.y+(selectedRect.h-height)/2,
+    },chosen.kind);
+    update(chosen.id,next);
+    onCommit(chosen.kind,chosen.id,next);
+  };
+  const setSelectedSize=(percent:number)=>{
+    if(!chosen||!selectedRect||cropping||!Number.isFinite(percent))return;
+    const factor=(percent/100)/Math.max(.001,selectedRect.w);
+    resizeSelected(factor);
   };
   const fitWholePhoto = async () => {
     if (!chosen || chosen.kind !== 'photo') return;
@@ -200,7 +220,7 @@ export default function TouchLayerCanvas({
       const current = getRect(chosen);
       const point = {x: current.x + current.w / 2, y: current.y + current.h / 2};
       const next = initialPanoramaPhotoRect(img.naturalWidth / img.naturalHeight, pageCount, point);
-      const rect = clamp({...current, ...next});
+      const rect = clamp({...current, ...next},chosen.kind);
       update(chosen.id, rect); onCommit(chosen.kind, chosen.id, rect);
       setCropping(false);
     } catch { /* Keep the image as-is if its original proportions are unavailable. */ }
@@ -222,6 +242,19 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
+    {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 &&
+      <div className="touch-editor-size-toolbar" role="group" aria-label="Tamaño de la fotografía seleccionada">
+        <span className="touch-editor-size-label">Tamaño de foto</span>
+        <button type="button" onClick={()=>resizeSelected(.85)} aria-label="Reducir foto 15 por ciento">− Reducir</button>
+        <button type="button" className="touch-editor-grow" onClick={()=>resizeSelected(1.2)}
+          aria-label="Agrandar foto 20 por ciento">＋ Agrandar</button>
+        <label className="touch-editor-size-range" htmlFor="touch-photo-size">
+          <input id="touch-photo-size" aria-label="Tamaño de la foto" type="range"
+            min="10" max="300" step="5" value={Math.max(10,Math.min(300,Math.round(selectedRect.w*100/5)*5))}
+            onChange={e=>setSelectedSize(Number(e.target.value))}/>
+          <output>{Math.round(selectedRect.w*100)}%</output>
+        </label>
+      </div>}
     <div ref={scrollArea} className="touch-editor-scroll" style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
@@ -268,7 +301,7 @@ export default function TouchLayerCanvas({
               e.preventDefault(); setSelected(layer.id);
               const r = getRect(layer), step = e.shiftKey ? .03 : .01;
               const rect = clamp({...r, x: r.x + (e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0) / pageCount,
-                y: r.y + (e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0)});
+                y: r.y + (e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0)},layer.kind);
               update(layer.id, rect); onCommit(layer.kind, layer.id, rect);
             }}>
             {layer.kind==='photo'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
@@ -312,7 +345,7 @@ export default function TouchLayerCanvas({
       </div>
     </div>
     <p className="touch-editor-help">{cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
-      : 'Arrastra para mover · usa la esquina o dos dedos para cambiar tamaño · selecciona una foto para encuadrarla.'}</p>
+      : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
     {chosen && selectedRect && <div className="touch-editor-options">
       <strong>{chosen.name}</strong>
       {(chosen.kind==='photo'||chosen.kind==='sticker'||(chosen.kind==='shape'&&chosen.shape!=='circle'))&&
