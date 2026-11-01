@@ -2,11 +2,12 @@ import {useState} from 'react';
 import {Copy,Camera,Film,ExternalLink,ShieldCheck} from 'lucide-react';
 import './casa-brownie-kit.css';
 import CasaBrowniePhotoSteps,{type PhotoShot} from './CasaBrowniePhotoSteps';
+import {demoRebuildPrompts} from './demo-rebuild-prompts';
 
 export const CASA_BROWNIE_KIT_SECTION='clase-01-recursos-visuales';
 type Photo={id:string;title:string;src:string;type:'foto'|'video';provenance?:string;use?:string;studentVisibility?:string};
 type Step={number:number;name:string;where:string;deliverable:string;say:string};
-type Prompt={id:string;title:string;lesson:string;kind:string;description:string;prompt:string};
+type Prompt={id:string;title:string;lesson:string;kind:string;description:string;prompt:string;say?:string;show?:string};
 export type CasaBrownieKitEntry={
  id:string; title:string; section?:string; photos?:Photo[];steps?:Step[];prompts?:Prompt[];photo_shots?:PhotoShot[];photo_workflow?:string[];
  official_url?:string;static_url?:string;practice_app_url?:string;practice_note?:string;warning?:string;bonus_after_main_course?:boolean;
@@ -23,8 +24,13 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
  const [promptFilter,setPromptFilter]=useState('todos');
  const photos=(entry?.photos||[]).filter(p=>p.type==='foto'&&validUrl(p.src));
  const video=(entry?.photos||[]).find(p=>p.type==='video'&&validUrl(p.src));
- const prompts=(entry?.prompts||[]);
- const withoutBonus=prompts.filter(p=>p.lesson!=='bonus');
+ // La clase muestra los prompts de construcción reales y versionados, nunca copias desactualizadas de Supabase.
+ // 03 corresponde a fotografías individuales (pestaña Fotos); 11 es el bono animado.
+ const prompts:Prompt[]=demoRebuildPrompts['casa-brownie'].map(p=>{
+   const id=p.title.slice(0,2);
+   return {id,title:p.title.slice(5),lesson:id==='11'?'bonus':id==='10'?'06':Number(id)<=4?'05A':'05B',kind:id==='03'?'fotografía':'AppDeploy',description:p.step,prompt:p.prompt,say:p.say,show:p.show};
+ });
+ const withoutBonus=prompts.filter(p=>p.lesson!=='bonus' && p.kind==='AppDeploy');
  const visible=promptFilter==='todos'?withoutBonus:withoutBonus.filter(p=>p.lesson===promptFilter);
  async function copy(text:string,key:string){
   try{await navigator.clipboard.writeText(text);setCopied(key);setNotice('Instrucciones copiadas.');}
@@ -67,16 +73,21 @@ export default function CasaBrownieStudioKit({entry}:{entry?:CasaBrownieKitEntry
       <div className="cb-kit-note"><ShieldCheck size={18}/><p>Las seis fotografías de sabores originales ya están aprobadas y guardadas con sus prompts. Úsalas como referencia para explicar el proceso; cada alumno crea las imágenes de su propio negocio.</p></div>
     </>}
     {tab==='prompts'&&<>
-      <p className="cb-kit-small">Copia el prompt correspondiente a la sección que vas a grabar. Haz una sola parte cada vez, toma captura, aprueba y guarda la versión antes de seguir. El proyecto de AppDeploy es nuevo, nunca el demo oficial.</p>
+      <p className="cb-kit-small"><b>Prompts REALES para construir en AppDeploy, no prompts de fotografía.</b> Empieza con 00: solo estructura vacía. Después pega 01 y 02. Las fotografías individuales se preparan en «Crear cada foto» (paso 03). Continúa con 04–09 y termina con 10 para comparar capturas con el resultado aprobado. Un prompt por vez: comprueba, guarda y continúa. Nunca pegues todos juntos.</p>
+      <p className="cb-kit-small"><b>Objetivo visual:</b> reproducir lo más fielmente posible <a href="https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video" target="_blank" rel="noopener noreferrer">Casa Brownie · Foto estática <ExternalLink size={12}/></a>. La referencia no se edita; el proyecto nuevo sí. El video queda exclusivamente para el bono.</p>
       <label className="cb-kit-filter">Mostrar prompts
         <select value={promptFilter} onChange={e=>setPromptFilter(e.target.value)}>
           <option value="todos">Todas las secciones</option>
-          {Array.from(new Set(withoutBonus.map(x=>x.lesson))).map(id=><option value={id} key={id}>Lección {id}</option>)}
+          {Array.from(new Set(withoutBonus.map(x=>x.lesson))).map(id=><option value={id} key={id}>{id==='06'?'06 · Comprobar el resultado':'Grabación '+id}</option>)}
         </select>
       </label>
       <div className="cb-kit-prompts">{visible.map(p=><article key={p.id}>
-        <div className="cb-kit-prompt-title"><div><small>SECCIÓN {p.id} · VIDEO {p.lesson}</small><h4>{p.title}</h4><p>{p.description}</p></div><button type="button" onClick={()=>void copy(p.prompt,p.id)}><Copy size={14}/>{copied===p.id?'Copiado':'Copiar prompt'}</button></div>
-        <p className="cb-kit-prompt-text">{p.prompt}</p></article>)}</div>
+        <div className="cb-kit-prompt-title"><div><small>PASO {p.id} · {p.lesson==='06'?'COMPARAR CAPTURAS':'APPDEPLOY '+p.lesson}</small><h4>{p.title}</h4><p>{p.description}</p></div><button type="button" onClick={()=>void copy(p.prompt,p.id)}><Copy size={14}/>{copied===p.id?'Copiado':'Copiar en AppDeploy'}</button></div>
+        <p className="cb-kit-prompt-text">{p.prompt}</p>
+        {p.say&&<p className="cb-kit-small"><b>Qué decir mientras grabas:</b> {p.say}</p>}
+        {p.show&&<p className="cb-kit-small"><b>Qué mostrar y comprobar:</b> {p.show}</p>}
+       </article>)}</div>
+      <div className="cb-kit-note"><ShieldCheck size={18}/><p><b>Resultado terminado:</b> después del paso 10 abre <a href="https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video" target="_blank" rel="noopener noreferrer">la versión oficial con foto estática</a> y recórrela completa. Muestra tu práctica en otra pestaña: deben coincidir secciones, textos, fotos y comportamiento. No digas que son idénticas sin haberlas comparado realmente.</p></div>
     </>}
     {tab==='bono'&&<div className="cb-kit-bonus">
       <span className="cb-kit-eyebrow">BONO · DESPUÉS DE PUBLICAR LA WEB ESTÁTICA</span>
