@@ -3597,3 +3597,43 @@ body:not(.class-page-v2) .help-section #help-panel[hidden]{
   .class-page-v2 .class-hero-intro .class-lede{line-height:1.6}
   .class-page-v2 .class-journey-bridge{padding-inline:14px}
 }
+
+
+/* Hero · keep both actions inside a single layout so they can never collide.
+   Desktop: paired controls. iPhone: two full-width, independently tappable rows. */
+.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;
+  gap:14px!important;align-items:stretch!important;justify-items:stretch!important;
+  width:100%;max-width:600px;margin:clamp(20px,3vw,28px) auto 0!important;
+  box-sizing:border-box;
+}
+.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > a{
+  display:inline-flex!important;box-sizing:border-box!important;
+  align-items:center!important;justify-content:center!important;
+  width:100%!important;max-width:none!important;min-width:0;
+  min-height:54px!important;height:auto!important;
+  text-align:center!important;white-space:normal!important;
+  line-height:1.35!important;padding:13px 16px!important;
+  margin:0!important;position:static!important;
+  border-radius:999px!important;
+  touch-action:manipulation;
+}
+.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > .class-campaign-notify-link{
+  color:#193a53!important;background:transparent!important;
+  border:1.5px solid #a7bdcc!important;
+  font:650 clamp(.78rem,1.2vw,.9rem)/1.35 var(--sans,Arial,sans-serif)!important;
+  text-decoration:none!important;
+}
+.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > .class-campaign-notify-link:hover{
+  background:#e6edf1!important;color:#17354c!important;
+}
+@media(max-width:700px){
+  .class-page-v2 .class-hero .class-hero-intro > .class-hero-actions{
+    grid-template-columns:minmax(0,1fr)!important;gap:11px!important;
+    width:100%;margin-top:24px!important;
+  }
+  .class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > a{
+    min-height:52px!important;padding:13px 18px!important;
+  }
+}
