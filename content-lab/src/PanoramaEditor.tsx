@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Pencil, Check, X } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
-import { assetCategory, displayAssetName, type LibraryAsset } from './MediaAsset';
+import { assetCategory, displayAssetName, cleanAssetName, type LibraryAsset } from './MediaAsset';
 import './PanoramaEditor.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
 
@@ -11,7 +11,9 @@ type Point = {x: number; y: number};
 type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
-  assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void;
+  assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
+  onUploadToLibrary:(files:File[])=>Promise<void>;
+  onRenameAsset:(asset:LibraryAsset,name:string)=>Promise<void>;
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
   onAddLayer: (kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>void;
@@ -28,12 +30,22 @@ type Props = {
   error: string; onRetry: () => void;
 };
 export default function PanoramaEditor({
-  preview, textOverlay, count, seamless, layers, assets, images, loadImage, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
+  preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,
   canExtendBackground,onExtendBackground,focusLayerId,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [libraryOpen,setLibraryOpen]=useState(false);
+  const [libraryOpen,setLibraryOpen]=useState(true);
+  const containerRef=useRef<HTMLElement>(null);
+  const draggingRef=useRef<{id:string;pointerId:number;startX:number;startY:number;handled:boolean}|null>(null);
+  const ignoreClick=useRef('');
+  const [ghost,setGhost]=useState<{id:string;x:number;y:number}|null>(null);
+  const [pendingFiles,setPendingFiles]=useState<File[]>([]);
+  const [uploadName,setUploadName]=useState('');
+  const [renameId,setRenameId]=useState('');
+  const [renameName,setRenameName]=useState('');
+  const [renaming,setRenaming]=useState(false);
+  const [libraryFeedback,setLibraryFeedback]=useState('');
   const [filter, setFilter] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadError,setUploadError]=useState('');
@@ -51,8 +63,7 @@ export default function PanoramaEditor({
     return()=>document.removeEventListener('keydown',onKey);
   },[onUndo,onRedo,canUndo,canRedo]);
   const input = useRef<HTMLInputElement>(null);
-  const available = assets.filter(a => assetCategory(a) !== 'background' &&
-    displayAssetName(a).toLowerCase().includes(filter.toLowerCase())).slice(0, 36);
+  const available = assets.filter(a => displayAssetName(a).toLowerCase().includes(filter.toLowerCase())).slice(0, 70);
   useEffect(() => { available.slice(0, 12).forEach(a => { if (!images[a.id]) loadImage(a.id); }); },
     [available.map(a => a.id).join('|')]);
   useEffect(() => {
@@ -63,6 +74,68 @@ export default function PanoramaEditor({
     document.addEventListener('keydown', close);
     return () => { document.body.style.overflow = previous; document.removeEventListener('keydown', close); };
   }, [expanded]);
+  const chooseLibraryFiles=(files:File[])=>{
+    if(!files.length)return;
+    setPendingFiles(files.slice(0,8));
+    setUploadName(files[0].name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').slice(0,85));
+    setLibraryOpen(true);
+    setLibraryFeedback('');
+  };
+  const saveToLibrary=async()=>{
+    if(!pendingFiles.length||uploading)return;
+    const safe=cleanAssetName(uploadName);
+    if(!safe){setLibraryFeedback('Pon un nombre para reconocer la imagen.');return}
+    const files=pendingFiles.map((file,index)=>{
+      if(index!==0)return file;
+      const extension=file.name.match(/\.[^.]+$/)?.[0]||'.png';
+      return new File([file],safe+extension,{type:file.type,lastModified:file.lastModified});
+    });
+    setUploading(true);setUploadError('');
+    try{
+      await onUploadToLibrary(files);
+      setPendingFiles([]);setUploadName('');
+      setLibraryFeedback('Guardado ✓ Arrastra la miniatura al lienzo.');
+    }catch(e){
+      setLibraryFeedback(e instanceof Error?e.message:'No se pudo guardar. Inténtalo de nuevo.');
+    }finally{setUploading(false)}
+  };
+  const saveAssetName=async(asset:LibraryAsset)=>{
+    const safe=cleanAssetName(renameName);
+    if(!safe||renaming)return;
+    setRenaming(true);
+    try{await onRenameAsset(asset,safe);setRenameId('');setLibraryFeedback('Nombre actualizado ✓')}
+    catch(e){setLibraryFeedback(e instanceof Error?e.message:'No se pudo renombrar la imagen.')}
+    finally{setRenaming(false)}
+  };
+  const dragStart=(e:React.PointerEvent,asset:LibraryAsset)=>{
+    if(e.pointerType==='mouse')return;
+    draggingRef.current={id:asset.id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,handled:false};
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if(!images[asset.id])loadImage(asset.id);
+  };
+  const dragMove=(e:React.PointerEvent)=>{
+    const drag=draggingRef.current;
+    if(!drag||drag.pointerId!==e.pointerId)return;
+    if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>9){
+      drag.handled=true;setGhost({id:drag.id,x:e.clientX,y:e.clientY});
+    }
+  };
+  const dragEnd=(e:React.PointerEvent)=>{
+    const drag=draggingRef.current;
+    if(!drag||drag.pointerId!==e.pointerId)return;
+    draggingRef.current=null;setGhost(null);
+    if(!drag.handled)return;
+    ignoreClick.current=drag.id;
+    window.setTimeout(()=>{if(ignoreClick.current===drag.id)ignoreClick.current=''},350);
+    const stage=containerRef.current?.querySelector('.touch-editor-stage');
+    if(!stage)return;
+    const rect=stage.getBoundingClientRect();
+    // Stage is the WHOLE horizontally scrollable panorama, including offscreen slides.
+    const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
+    if(x>=0&&x<=1&&y>=0&&y<=1){
+      onAdd(drag.id,{x,y});setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
+    }else setLibraryFeedback('Suelta la imagen sobre el lienzo para colocarla.');
+  };
   const upload = async (files: File[], point: Point) => {
     if(!files.length)return;
     setUploadError('');setUploading(true);
@@ -70,7 +143,7 @@ export default function PanoramaEditor({
     catch(e){setUploadError(e instanceof Error?e.message:'No se pudo subir la foto.');}
     finally { setUploading(false); }
   };
-  return <section className={'panorama-editor' + (expanded ? ' expanded' : '')}
+  return <section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Sube tus fotos y colócalas.</h2>
