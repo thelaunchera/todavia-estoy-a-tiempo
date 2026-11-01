@@ -30,6 +30,8 @@ test('Long copy stays editable and can be divided with a warning before download
   assert.ok(factory.includes('content.slice(position).trim()'));
   assert.ok(factory.includes('...slides.slice(i+1)'));
   assert.ok(factory.includes('Dividir sin perder frases'));
-  assert.ok(factory.includes("window.confirm('Hay textos largos"));
+  assert.ok(factory.includes('const longText=slides.some('));
+  assert.ok(factory.includes("Algunos textos podrían cortarse en el PNG."));
+  assert.ok(factory.includes('window.confirm('));
   assert.ok(css.includes('.factory-text-overflow'));
 });
