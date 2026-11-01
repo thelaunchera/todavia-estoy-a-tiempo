@@ -138,3 +138,10 @@
  .lab-calendar-pill .lab-calendar-pill-clock,.lab-calendar-pill .lab-calendar-pill-title{display:none}
  .lab-calendar-agenda-post small .lab-calendar-kind{display:inline-block}
 }
+
+.lab-calendar-format-legend{display:flex;align-items:center;flex-wrap:wrap;gap:8px 15px;
+ padding:8px 6px 11px;font-size:11px;color:#536f78}
+.lab-calendar-format-legend>span{display:inline-flex;align-items:center;gap:5px}
+.lab-calendar-format-legend .lab-calendar-kind{display:inline-grid;place-items:center;width:21px;
+ height:21px;padding:0}
+@media(max-width:600px){.lab-calendar-format-legend{gap:6px 10px;font-size:10px;padding:7px 3px}}
