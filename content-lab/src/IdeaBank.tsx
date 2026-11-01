@@ -131,7 +131,7 @@ type Props={brandName:string;audience:string;language:string;locale?:'es'|'en';o
 export default function IdeaBank({brandName,audience,language,locale='es',onUse}:Props){
  const en=locale==='en';
  const [category,setCategory]=useState('Todas'),[search,setSearch]=useState(''),[offer,setOffer]=useState(''),[goal,setGoal]=useState('conectar'),[copied,setCopied]=useState('');
- const localIdeas=useMemo(()=>ideas.map((idea,i)=>en?{...idea,...englishIdeas[i],category:englishCategories[idea.category]||idea.category}:idea),[en]);
+ const localIdeas=useMemo(()=>ideas.map((idea,i)=>language==='English'?{...idea,...englishIdeas[i],category:en?englishCategories[idea.category]||idea.category:idea.category}:{...idea,category:en?englishCategories[idea.category]||idea.category:idea.category}),[en,language]);
  const allLabel=en?'All':'Todas';
  const categories=[allLabel,...Array.from(new Set(localIdeas.map(i=>i.category)))];
  const filtered=useMemo(()=>localIdeas.filter(i=>(category===allLabel||!categories.includes(category)||i.category===category)&&(i.title+' '+i.hook+' '+i.brief).toLowerCase().includes(search.toLowerCase())),[localIdeas,category,search,allLabel]);
