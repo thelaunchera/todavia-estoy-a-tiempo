@@ -1,99 +1,212 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {composeGridPoster,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
+import {composeGridPoster,EXPORT_SIZES,LAYOUTS,type ExportSize,type VisualControls} from './GridComposer';
 import type {EditorialDesign} from './EditorialPoster';
 import TouchLayerCanvas from './TouchLayerCanvas';
 import {stickerDefault,clampRect,type StickerPositions} from './TouchGeometry';
+
 type Tile={headline:string;subtext:string;format?:string;layout?:VisualControls;design?:EditorialDesign;stickerIds?:string[];stickerPositions?:StickerPositions};
 type Brand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string;secondaryColor?:string};
 type Props={
  tile:Tile;index:number;brand:Brand;photo?:string;original?:string;logo?:string;preserve:boolean;
  exportSize:ExportSize;onChange:(next:VisualControls)=>void;stickerImages?:Record<string,string>;onStickerChange?:(positions:StickerPositions)=>void;
+ locale?:'es'|'en';
 };
+type Point={x:number;y:number};
+type Gesture={from:VisualControls;layer:'photo'|'text';x:number;y:number;center:Point;distance:number;pinching:boolean;width:number;height:number};
 const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,textX:0,textY:0,textScale:1};
-export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages,onStickerChange}:Props){
+const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,n));
+const distance=(a:Point,b:Point)=>Math.hypot(a.x-b.x,a.y-b.y);
+const center=(a:Point,b:Point):Point=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+const label=(locale:'es'|'en',es:string,en:string)=>locale==='es'?es:en;
+
+export default function GridVisualEditor({tile,index,brand,photo,original,logo,preserve,exportSize,onChange,stickerImages,onStickerChange,locale='es'}:Props){
  const [preview,setPreview]=useState(''),[fit,setFit]=useState(true);
  const [layer,setLayer]=useState<'photo'|'text'|'sticker'>('photo');
  const [advanced,setAdvanced]=useState(false);
- const drag=useRef<{x:number;y:number;from:VisualControls;size:{width:number;height:number}}|null>(null);
+ const pointers=useRef(new Map<number,Point>());
+ const gesture=useRef<Gesture|null>(null);
+ const latest=useRef<VisualControls>({});
+ const raf=useRef(0);
+ const queued=useRef<VisualControls|null>(null);
  const current={...defaults,...(tile.layout||{})};
+ latest.current={...latest.current,...current};
+ const clearGesture=()=>{
+  pointers.current.clear();gesture.current=null;queued.current=null;
+  cancelAnimationFrame(raf.current);raf.current=0;
+ };
+ useEffect(()=>()=>{clearGesture()},[]);
+ useEffect(()=>{clearGesture()},[layer,tile.format,index,exportSize]);
  useEffect(()=>{
   let active=true;
-  // Rendering each 1080px Canvas on every pointer movement locks up iOS.
-  // A short debounce keeps the result exact while maintaining responsive drag.
+  // Canvas exports are throttled separately from the finger gesture.
   const handle=setTimeout(()=>{
    composeGridPoster(tile,index,brand,{photo,original,logo,preserve,stickerImages,omitStickers:layer==='sticker'},exportSize)
     .then(({canvas,fit})=>{
       if(active){
-        const previewCanvas=document.createElement('canvas');
-        previewCanvas.width=720;previewCanvas.height=Math.round(720*canvas.height/canvas.width);
-        const ctx=previewCanvas.getContext('2d');
-        if(ctx){
-          ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-          ctx.drawImage(canvas,0,0,previewCanvas.width,previewCanvas.height);
-          setPreview(previewCanvas.toDataURL('image/png'));setFit(fit);
-        }
-        previewCanvas.width=1;previewCanvas.height=1;
+        const thumbnail=document.createElement('canvas');thumbnail.width=720;
+        thumbnail.height=Math.round(720*canvas.height/canvas.width);
+        const ctx=thumbnail.getContext('2d');
+        if(ctx){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+          ctx.drawImage(canvas,0,0,thumbnail.width,thumbnail.height);
+          setPreview(thumbnail.toDataURL('image/png'));setFit(fit);}
+        thumbnail.width=1;thumbnail.height=1;
       }
       canvas.width=1;canvas.height=1;
-    })
-    .catch(()=>{if(active)setPreview('')});
+    }).catch(()=>{if(active)setPreview('')});
   },120);
   return()=>{active=false;clearTimeout(handle)};
  },[tile,index,brand.color,brand.background,brand.name,brand.headingFont,brand.bodyFont,brand.secondaryColor,photo,original,logo,preserve,exportSize,stickerImages,layer]);
- const set=(key:keyof typeof defaults,value:number)=>onChange({...current,[key]:value});
- const start=(e:React.PointerEvent<HTMLDivElement>)=>{
-  if(!preview)return;
-  drag.current={x:e.clientX,y:e.clientY,from:{...current},size:{width:e.currentTarget.clientWidth,height:e.currentTarget.clientHeight}};
+ const commit=(next:VisualControls)=>{
+  latest.current=next;onChange(next);
+ };
+ const schedule=(next:VisualControls)=>{
+  latest.current=next;queued.current=next;
+  if(raf.current)return;
+  raf.current=requestAnimationFrame(()=>{
+   raf.current=0;
+   if(queued.current){const value=queued.current;queued.current=null;onChange(value);}
+  });
+ };
+ const flush=()=>{
+  if(raf.current){cancelAnimationFrame(raf.current);raf.current=0;}
+  if(queued.current){const value=queued.current;queued.current=null;onChange(value);}
+ };
+ const pointerDown=(e:React.PointerEvent<HTMLDivElement>)=>{
+  if(!preview||layer==='sticker')return;
+  e.preventDefault();
   e.currentTarget.setPointerCapture(e.pointerId);
+  pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const bounds=e.currentTarget.getBoundingClientRect();
+  const points=[...pointers.current.values()];
+  if(points.length===1){
+   gesture.current={from:{...latest.current},layer,x:e.clientX,y:e.clientY,center:{x:e.clientX,y:e.clientY},
+      distance:0,pinching:false,width:bounds.width,height:bounds.height};
+  }else if(points.length===2){
+   // Start a new baseline at the exact moment the second finger lands.
+   const c=center(points[0],points[1]);
+   gesture.current={from:{...latest.current},layer,x:c.x,y:c.y,center:c,distance:Math.max(1,distance(points[0],points[1])),
+      pinching:true,width:bounds.width,height:bounds.height};
+  }
  };
- const move=(e:React.PointerEvent<HTMLDivElement>)=>{
-  if(!drag.current)return;
-  const {x,y,from,size}=drag.current;
-  const dx=(e.clientX-x)/Math.max(1,size.width);
-  const dy=(e.clientY-y)/Math.max(1,size.height);
-  // Dragging Photo moves its visible frame, rather than secretly cropping pixels.
-  if(layer==='photo')onChange({...from,frameX:Math.max(-.75,Math.min(.75,(from.frameX||0)+dx)),frameY:Math.max(-.75,Math.min(.75,(from.frameY||0)+dy))});
-  else onChange({...from,textX:Math.max(-.35,Math.min(.35,(from.textX||0)+dx)),textY:Math.max(-.35,Math.min(.35,(from.textY||0)+dy))});
+ const pointerMove=(e:React.PointerEvent<HTMLDivElement>)=>{
+  if(!gesture.current||!pointers.current.has(e.pointerId))return;
+  e.preventDefault();
+  pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const g=gesture.current,points=[...pointers.current.values()];
+  if(points.length>=2){
+   if(!g.pinching)return;
+   const c=center(points[0],points[1]),factor=distance(points[0],points[1])/Math.max(1,g.distance);
+   const dx=(c.x-g.center.x)/Math.max(1,g.width),dy=(c.y-g.center.y)/Math.max(1,g.height);
+   const next={...g.from};
+   if(g.layer==='photo'){
+    next.frameScale=clamp((g.from.frameScale||1)*factor,.45,1.7);
+    next.frameX=clamp((g.from.frameX||0)+dx,-.75,.75);
+    next.frameY=clamp((g.from.frameY||0)+dy,-.75,.75);
+   }else{
+    next.textScale=clamp((g.from.textScale||1)*factor,.55,1.7);
+    next.textX=clamp((g.from.textX||0)+dx,-.35,.35);
+    next.textY=clamp((g.from.textY||0)+dy,-.35,.35);
+   }
+   schedule(next);return;
+  }
+  if(g.pinching)return;
+  const dx=(e.clientX-g.x)/Math.max(1,g.width),dy=(e.clientY-g.y)/Math.max(1,g.height);
+  if(g.layer==='photo')schedule({...g.from,frameX:clamp((g.from.frameX||0)+dx,-.75,.75),
+    frameY:clamp((g.from.frameY||0)+dy,-.75,.75)});
+  else schedule({...g.from,textX:clamp((g.from.textX||0)+dx,-.35,.35),
+    textY:clamp((g.from.textY||0)+dy,-.35,.35)});
  };
- const number=(id:keyof typeof defaults,label:string,min:number,max:number,step:number)=>(
-  <label className="v2-slider" key={id}>{label}<span>{Math.round((current[id]||0)*100)}%</span>
+ const pointerEnd=(e:React.PointerEvent<HTMLDivElement>)=>{
+  if(!pointers.current.has(e.pointerId))return;
+  if(e.type==='pointercancel')flush();
+  else flush();
+  pointers.current.delete(e.pointerId);
+  try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}
+  const remaining=[...pointers.current.values()];
+  if(remaining.length===1){
+   // Continue a smooth single-finger drag after a two-finger pinch ends.
+   const p=remaining[0];
+   gesture.current={from:{...latest.current},layer:gesture.current?.layer||'photo',
+      x:p.x,y:p.y,center:p,distance:0,pinching:false,
+      width:e.currentTarget.getBoundingClientRect().width,
+      height:e.currentTarget.getBoundingClientRect().height};
+  }else if(!remaining.length)gesture.current=null;
+ };
+ const set=(key:keyof typeof defaults,value:number)=>commit({...current,[key]:value});
+ const increase=(value:number)=>{
+  if(layer==='photo')set('frameScale',clamp(current.frameScale*value,.45,1.7));
+  if(layer==='text')set('textScale',clamp(current.textScale*value,.55,1.7));
+ };
+ const number=(id:keyof typeof defaults,text:string,min:number,max:number,step:number)=>(
+  <label className="v2-slider" key={id}>{text}<span>{Math.round((current[id]||0)*100)}%</span>
    <input type="range" min={min} max={max} step={step} value={current[id]} onChange={e=>set(id,Number(e.target.value))}/>
   </label>
  );
- return <div className="v2-editor" aria-label="Editor de capas">
-  <div className="v2-editor-top"><div><strong>Editor visual · vista real</strong><small>{EXPORT_SIZES[exportSize].title} · {EXPORT_SIZES[exportSize].w} × {EXPORT_SIZES[exportSize].h}</small></div><button className="btn ghost" type="button" onClick={()=>onChange({...defaults})}>Restablecer</button></div>
-  {tile.design&&<p className="v2-hint">Diseño editorial completo: fotografía, ambiente, tipografía y anotaciones se combinan en el PNG. La foto original se mantiene intacta.</p>}
-  <div className="v2-layer-pick" role="group" aria-label="Mover capa">
-   <button className={layer==='photo'?'active':''} onClick={()=>setLayer('photo')} type="button">Mover foto</button>
-   <button className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">Mover titular</button>
-   <button className={layer==='sticker'?'active':''} onClick={()=>setLayer('sticker')} type="button">🎀 Mover stickers</button>
+ const format=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length];
+ const region=layer==='photo'?format.image:format.type;
+ const scale=layer==='photo'?current.frameScale:current.textScale;
+ const guide=layer==='photo'&&!tile.design?{
+    left:clamp(region[0]+(region[2]-region[2]*scale)/2+current.frameX,0,.97)*100+'%',
+    top:clamp(region[1]+(region[3]-region[3]*scale)/2+current.frameY,0,.97)*100+'%',
+    width:clamp(region[2]*scale,.03,1)*100+'%',height:clamp(region[3]*scale,.03,1)*100+'%'
+  }:layer==='text'&&!tile.design?{
+    left:clamp(region[0]+current.textX,0,.97)*100+'%',top:clamp(region[1]+current.textY,0,.97)*100+'%',
+    width:region[2]*100+'%',height:region[3]*100+'%'
+  }:null;
+ return <div className="v2-editor" aria-label={label(locale,'Editor táctil de fotos y textos','Photo and text touch editor')}>
+  <div className="v2-editor-top">
+   <div><strong>{label(locale,'Editor táctil · tu diseño','Touch editor · your design')}</strong>
+    <small>{EXPORT_SIZES[exportSize].title} · {EXPORT_SIZES[exportSize].w} × {EXPORT_SIZES[exportSize].h}</small></div>
+   <button className="btn ghost" type="button" onClick={()=>commit({...defaults})}>{label(locale,'Restablecer','Reset')}</button>
   </div>
-  {layer==='sticker'?<TouchLayerCanvas preview={preview} ratio={EXPORT_SIZES[exportSize].w/EXPORT_SIZES[exportSize].h}
-     layers={(tile.design?.stickerIds||tile.stickerIds||[]).filter(id=>stickerImages?.[id]).map((id,i)=>({id,kind:'sticker' as const,name:'Sticker',src:stickerImages![id],rect:clampRect(tile.stickerPositions?.[id]||stickerDefault(i))}))}
-     onCommit={(_kind,id,rect)=>onStickerChange?.({...tile.stickerPositions,[id]:clampRect(rect)})}/>:
-  <div className="v2-preview-wrap" onPointerDown={start} onPointerMove={move} onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}} style={{aspectRatio:EXPORT_SIZES[exportSize].w+'/'+EXPORT_SIZES[exportSize].h}}>
-   {preview?<img src={preview} alt="Vista previa exacta de la publicación"/>:<div className="v2-preview-placeholder">Selecciona una imagen generada para ver el diseño completo.</div>}
-  </div>}
-  <p className="v2-hint">Arrastra la foto para mover su recuadro o toca «Mover titular» para colocarlo. Los controles permiten agrandar el recuadro y encuadrar la imagen por separado.</p>
+  <div className="v2-layer-pick" role="group" aria-label={label(locale,'Elegir elemento para mover','Choose element to move')}>
+   <button aria-pressed={layer==='photo'} className={layer==='photo'?'active':''} onClick={()=>setLayer('photo')} type="button">{label(locale,'📷 Foto','📷 Photo')}</button>
+   <button aria-pressed={layer==='text'} className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">{label(locale,'T Texto','T Text')}</button>
+   <button aria-pressed={layer==='sticker'} className={layer==='sticker'?'active':''} onClick={()=>setLayer('sticker')} type="button">{label(locale,'✦ Stickers','✦ Stickers')}</button>
+  </div>
+  {layer==='sticker'?<TouchLayerCanvas preview={preview}
+    ratio={EXPORT_SIZES[exportSize].w/EXPORT_SIZES[exportSize].h}
+    layers={(tile.design?.stickerIds||tile.stickerIds||[]).filter(id=>stickerImages?.[id]).map((id,i)=>({
+      id,kind:'sticker' as const,name:'Sticker',src:stickerImages![id],
+      rect:clampRect(tile.stickerPositions?.[id]||stickerDefault(i))}))}
+    onCommit={(_kind,id,rect)=>onStickerChange?.({...tile.stickerPositions,[id]:clampRect(rect)})}/>:
+   <>
+    <p className="v2-touch-hint">{label(locale,
+     '☝️ Arrastra con un dedo para mover. Pellizca con dos dedos para agrandar o reducir.',
+     '☝️ Drag with one finger. Pinch with two fingers to resize.')}</p>
+    <div className="v2-preview-wrap" onPointerDown={pointerDown} onPointerMove={pointerMove}
+      onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
+      style={{aspectRatio:EXPORT_SIZES[exportSize].w+'/'+EXPORT_SIZES[exportSize].h}}
+      aria-label={label(locale,'Lienzo táctil del diseño','Touch design canvas')}>
+     {preview?<img src={preview} alt={label(locale,'Vista previa del PNG','PNG preview')} draggable={false}/>:
+       <div className="v2-preview-placeholder">{label(locale,'Preparando diseño…','Preparing design…')}</div>}
+     {guide&&preview&&<div className="v2-touch-outline" style={guide} aria-hidden="true"/>}
+    </div>
+    <div className="v2-touch-actions" role="group" aria-label={label(locale,'Tamaño del elemento','Element size')}>
+     <span>{layer==='photo'?label(locale,'Tamaño de foto','Photo size'):label(locale,'Tamaño del texto','Text size')}</span>
+     <button type="button" onClick={()=>increase(.88)} aria-label={label(locale,'Reducir','Make smaller')}>−</button>
+     <button type="button" onClick={()=>increase(1.14)} aria-label={label(locale,'Agrandar','Make bigger')}>＋</button>
+    </div>
+   </>}
   <div className="v2-simple-controls">
-   <strong>Controles esenciales</strong>
+   <strong>{label(locale,'Ajustes del diseño','Design controls')}</strong>
    <button type="button" className="v2-toggle-advanced" aria-expanded={advanced} onClick={()=>setAdvanced(v=>!v)}>
-     {advanced?'Ocultar ajustes avanzados':'Mostrar ajustes avanzados'}
+    {advanced?label(locale,'Ocultar ajustes','Hide controls'):label(locale,'Más ajustes','More controls')}
    </button>
   </div>
-  <div className="v2-slider-grid">
-   {number('frameScale','Tamaño de la foto',.45,1.7,.05)}
-   {number('imageZoom','Zoom de foto',1,3,.05)}
-   {number('textScale','Tamaño del titular',.55,1.7,.05)}
-   {advanced&&<>
-     {number('frameX','Recuadro izquierda / derecha',-.75,.75,.01)}
-     {number('frameY','Recuadro arriba / abajo',-.75,.75,.01)}
-     {number('imageX','Recorte horizontal',-.55,.55,.01)}
-     {number('imageY','Recorte vertical',-.55,.55,.01)}
-     {number('textX','Texto horizontal',-.35,.35,.01)}
-     {number('textY','Texto vertical',-.35,.35,.01)}
-   </>}
-  </div>
-  {!fit&&<p role="alert" className="bg-connection-error">Este titular es demasiado largo para la composición. Reduce el tamaño o acorta el texto antes de exportar.</p>}
+  {advanced&&<div className="v2-slider-grid">
+   {number('frameScale',label(locale,'Tamaño de la foto','Photo size'),.45,1.7,.05)}
+   {number('imageZoom',label(locale,'Zoom dentro de la foto','Crop zoom'),1,3,.05)}
+   {number('textScale',label(locale,'Tamaño del titular','Headline size'),.55,1.7,.05)}
+   {number('frameX',label(locale,'Foto horizontal','Photo horizontal'),-.75,.75,.01)}
+   {number('frameY',label(locale,'Foto vertical','Photo vertical'),-.75,.75,.01)}
+   {number('imageX',label(locale,'Recorte horizontal','Crop horizontal'),-.55,.55,.01)}
+   {number('imageY',label(locale,'Recorte vertical','Crop vertical'),-.55,.55,.01)}
+   {number('textX',label(locale,'Texto horizontal','Text horizontal'),-.35,.35,.01)}
+   {number('textY',label(locale,'Texto vertical','Text vertical'),-.35,.35,.01)}
+  </div>}
+  {!fit&&<p role="alert" className="bg-connection-error">{label(locale,
+   'El título no cabe en esta composición. Redúcelo o acorta el texto antes de descargar.',
+   'The headline does not fit. Make it smaller or shorten it before downloading.')}</p>}
  </div>;
 }
