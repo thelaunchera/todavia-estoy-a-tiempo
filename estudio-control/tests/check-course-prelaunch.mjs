@@ -395,7 +395,9 @@ for(const offer of offers){
 }
 assert.match(centerPage,/id="product-details"/,'Diálogo de información con título y precio');
 assert.match(centerScript,/function openProductDetails/,'Detalle antes del checkout');
-assert.match(centerScript,/const accessControlled=code==='web-class'\|\|code==='content-lab'/,'Checkout de clase y Lab permanece bloqueado');
+assert.match(centerScript,/const accessControlled=code==='web-class'/,'La clase sigue en lista de espera, sin checkout');
+assert.match(centerScript,/code==='content-lab'&&\(owner\|\|purchased\.has\(code\)\)/,'Content Lab dirige a acceso solo si ya tiene compra o es administradora');
+assert.match(centerScript,/https:\/\/buy\.stripe\.com\/14AdR8dHp6Dnd8B1IM93y0Z/,'Content Lab muestra su checkout aprobado');
 assert.doesNotMatch(centerPage,/Ver checkout/,'No enviar clientes directamente del catálogo al checkout');
 assert.match(centerStyles,/\.product-details::backdrop/,'Panel accesible para comprar informado');
 console.log('QA: fichas de productos y acceso de preventa protegido OK');
