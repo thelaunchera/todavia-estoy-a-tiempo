@@ -12,7 +12,7 @@ test('The paid Lab preserves all eight directions while public freebie requires 
   assert.ok(!freebie.includes(name),'private prompt name leaked in public freebie: '+name);
   assert.ok(prompts.includes(name),'missing from Lab: '+name);
  }
- assert.match(freebie,/action=library/,'The freebie loads private recipes only after verification');
+ assert.match(freebie,/sendAction\\('library',\\{access_token:token\\}\\)/,'The freebie loads private recipes only after verification');
  assert.match(freebie,/id="crear" class="grid" hidden/,'Private editor is hidden by default');
  assert.ok(prompts.includes("name:'Sensory Product Hero'"));
  assert.ok(prompts.includes('matcha campaign photography'));
