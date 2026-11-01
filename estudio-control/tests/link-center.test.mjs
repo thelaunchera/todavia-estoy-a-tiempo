@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const source = readFileSync(new URL('../src/LinkCenter.tsx', import.meta.url),'utf8');
 const studio = readFileSync(new URL('../src/Studio.tsx',import.meta.url),'utf8');
+const finished = readFileSync(new URL('../src/FinishedDemos.tsx',import.meta.url),'utf8');
 const records=[...source.matchAll(/\{key:'([^']+)',title:'([^']+)',url:'([^']+)',category:'([^']+)',visibility:'([^']+)'/g)]
   .map(x=>({key:x[1],title:x[2],url:x[3],category:x[4],visibility:x[5]}));
 test('Link Center registers distinct categories and usable HTTPS links',()=>{
@@ -51,13 +52,13 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  const featured=source.match(/RECENT_DEMO_KEYS = \[([^\]]+)\] as const/);
  assert.ok(featured,'Recent demos must reuse canonical keys');
  const keys=[...featured[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
- assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','tle-experience']);
+ assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','tle-experience']);
  const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
  for(const key of keys){
   const item=byKey[key];
   assert.ok(item,'Missing demo record '+key);
   assert.equal(item.visibility,'demo',key);
-  assert.ok(item.url.startsWith('https://thelaunchera.com/'),key);
+  assert.ok(item.url.startsWith('https://thelaunchera.com/')||item.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/'),key);
  }
  assert.ok(!keys.includes('tle-cb-depot'),'Real customer projects must not appear as fictional demos');
  assert.ok(!keys.includes('pod-studio'),'Private Studio must not be shared');
@@ -65,4 +66,16 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  assert.match(source,/const recentDemoLinks=useMemo/);
  assert.match(source,/Demos nuevos, a un toque/);
  assert.match(source,/onClick=\{\(\)=>void copy\(d\.url,d\.key\+'-shortcut'\)\}/);
+});
+
+test('Jaramillo Boutique and YUMMM are available as finished demos in Studio',()=>{
+  assert.match(finished,/id:'jaramillo-boutique'/);
+  assert.match(finished,/id:'yummm'/);
+  assert.match(finished,/https:\/\/thelaunchera\.github\.io\/demo-booking-landing-\/jaramillo-boutique\//);
+  assert.match(finished,/https:\/\/thelaunchera\.github\.io\/demo-booking-landing-\/yummm\//);
+  assert.match(finished,/No se aceptan pedidos ni pagos reales/);
+  assert.match(studio,/page === 'demos'/);
+  const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
+  assert.equal(byKey['school-jaramillo'].visibility,'demo');
+  assert.equal(byKey['school-yummm'].visibility,'demo');
 });
