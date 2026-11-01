@@ -81,3 +81,30 @@
  .ps-control-grid{grid-template-columns:1fr 1fr}
  .ps-hero p{line-height:1.45}
 }
+
+/* Compact browsable prompt shelves replace a 135-row scroll. */
+.ps-shelves{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0}
+.ps-shelf{display:flex;align-items:flex-start;flex-direction:column;gap:8px;text-align:left;
+ border:1px solid #d2e1e4;background:linear-gradient(145deg,#fff,#f1f7f7);border-radius:16px;
+ padding:16px;min-height:158px;color:#244450;cursor:pointer}
+.ps-shelf:hover,.ps-shelf:focus-visible{border-color:#6597a7;box-shadow:0 4px 18px #22495717;outline-offset:2px}
+.ps-shelf-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;
+ background:#dcecef;font-size:21px;color:#275f72}
+.ps-shelf strong{font-size:14px;line-height:1.3}
+.ps-shelf small{font-size:11px;color:#657f88;line-height:1.5}
+.ps-shelf-count{font-size:10px;font-weight:800;color:#327086;margin-top:auto}
+.ps-category-back{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 0 15px}
+.ps-category-back button,.ps-load-more{border:1px solid #c8dfe4;background:#eef6f7;border-radius:10px;
+ min-height:41px;padding:9px 13px;font-size:11px;font-weight:800;color:#2d6474;cursor:pointer}
+.ps-category-back strong{font-size:15px;color:#243e4a}
+.ps-category-back small{font-size:11px;color:#73919a}
+.ps-recipe-cards{display:grid;grid-template-columns:1fr;gap:9px}
+.ps-recipe-cards .ps-recipe{margin:0;border-radius:12px}
+.ps-load-more{display:block;width:100%;margin:12px 0 0}
+.ps-recipe-example p{white-space:pre-wrap;line-height:1.55;max-height:220px;overflow:auto}
+@media(max-width:670px){.ps-shelves{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .ps-shelf{min-height:148px;padding:11px;gap:5px}
+ .ps-shelf strong{font-size:12px}.ps-shelf small{font-size:10px}
+ .ps-recipe-cards .ps-recipe{grid-template-columns:24px minmax(0,1fr);gap:7px}
+ .ps-recipe-cards .ps-recipe-use{grid-column:2;justify-self:start;min-width:112px}
+}
