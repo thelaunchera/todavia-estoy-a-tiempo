@@ -230,6 +230,15 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  }
  function renderChecks(){
   section('05 / ANTES DE COMPARTIR','¿Está lista tu página?','Marca una casilla cuando hayas hecho la prueba. Si algo falta, déjalo pendiente y vuelve después.');
+  const phoneGuide=el('details','mi-explain');
+  phoneGuide.innerHTML='<summary><span>📱</span><strong>¿Solo tienes teléfono? Revisa tu web sin computadora</strong><b>+</b></summary>'+
+   '<div><p>Todo este ejercicio se puede hacer desde el navegador de tu celular. Primero comprueba los botones en la web real. Después compara distintos tamaños de pantalla: una vista previa no sustituye probar un dispositivo físico.</p>'+
+   '<ol><li>Abre el enlace público de tu web en Safari o Chrome. Recorre la página y toca el menú y los botones.</li>'+
+   '<li>Abre otra pestaña y entra en <a href="https://cometweb.io/tools/responsive" target="_blank" rel="noopener noreferrer">CometWeb · Revisión de tamaños</a>. Pega el enlace público, elige aproximadamente 360 px (teléfono), 768 px (tablet) y 1280 px (computadora), y toca Preview.</li>'+
+   '<li>Fíjate si se cortan textos o fotos, si algo se sale por los lados o si los botones quedan muy pequeños. Guarda capturas.</li>'+
+   '<li>Regresa a ChatGPT y pide a AppDeploy corregir solo los problemas que encontraste. Si tu cuenta permite pruebas automáticas, solicita también su evidencia. Repite la revisión y vuelve a probar la web real en tu teléfono.</li></ol>'+
+   '<p><strong>Importante:</strong> usa solo páginas públicas en herramientas externas. Si una web bloquea la vista previa, no significa que esté mal: deja esa comprobación pendiente. No marques «todos los dispositivos» como probado.</p></div>';
+  content.append(phoneGuide);
   const count=el('div','mi-check-progress');content.append(count);
   const list=el('div','mi-check-list');content.append(list);
   function update(){const n=CHECKS.filter((x,i)=>checks['check'+i]===true).length;count.innerHTML='<div><span>Comprobaciones hechas</span><strong>'+n+' de '+CHECKS.length+'</strong></div><div class="mi-bar"><i style="width:'+Math.round(n/CHECKS.length*100)+'%"></i></div>'; }
