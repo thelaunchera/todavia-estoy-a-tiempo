@@ -269,7 +269,7 @@ assert.match(classPage,/data-transform-to="0"/);
 assert.match(classPage,/data-transform-to="100"/);
 assert.match(classPage,/Ejemplo ilustrativo de lo que puedes crear en la clase/,'Se conserva la presentación anterior de la clase');
 assert.doesNotMatch(classPage,/class-production-rhythm|MI FORMA DE TRABAJAR/,'Se retiró el bloque añadido sin autorización');
-assert.match(classPage,/Plus puede ser una opción más adelante/,'Plus solo se menciona como opción futura');
+assert.doesNotMatch(classPage,/ChatGPT Plus (?:obligatorio|requerido)|Plus es obligatorio/i,'El landing no exige Plus para empezar');
 assert.match(newExperience,/ideaProgress.addEventListener\('input'/);
 assert.match(newExperience,/reducedMotion.matches \|\| start === target/);
 assert.match(home,/desde el teléfono, paso a paso y sin saber programar/,'Mensaje claro del extra de IA sin jerga técnica');
