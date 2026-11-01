@@ -12,7 +12,7 @@ type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
-  onUploadToLibrary:(files:File[])=>Promise<void>;
+  onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
   onRenameAsset:(asset:LibraryAsset,name:string)=>Promise<void>;
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
@@ -42,6 +42,7 @@ export default function PanoramaEditor({
   const [ghost,setGhost]=useState<{id:string;x:number;y:number}|null>(null);
   const [pendingFiles,setPendingFiles]=useState<File[]>([]);
   const [uploadName,setUploadName]=useState('');
+  const [uploadKind,setUploadKind]=useState<'photo'|'sticker'>('photo');
   const [renameId,setRenameId]=useState('');
   const [renameName,setRenameName]=useState('');
   const [renaming,setRenaming]=useState(false);
@@ -92,7 +93,7 @@ export default function PanoramaEditor({
     });
     setUploading(true);setUploadError('');
     try{
-      await onUploadToLibrary(files);
+      await onUploadToLibrary(files,uploadKind);
       setPendingFiles([]);setUploadName('');
       setLibraryFeedback('Guardado ✓ Arrastra la miniatura al lienzo.');
     }catch(e){
@@ -172,6 +173,13 @@ export default function PanoramaEditor({
       <label>Nombre de tu imagen
         <input aria-label="Nombre de la imagen a guardar" value={uploadName} maxLength={85}
           onChange={e=>setUploadName(e.target.value)} placeholder="Ej. Galletas de chocolate"/>
+      </label>
+      <label className="panorama-kind-label">Tipo de elemento
+        <select aria-label="Guardar imagen como foto o sticker" value={uploadKind}
+          onChange={e=>setUploadKind(e.target.value as 'photo'|'sticker')}>
+          <option value="photo">Foto / imagen</option>
+          <option value="sticker">Sticker PNG</option>
+        </select>
       </label>
       <small>{pendingFiles.length>1?pendingFiles.length+' archivos · el primero llevará este nombre; los demás conservarán el suyo.':'Primero se guarda. Después podrás arrastrarla al carrusel.'}</small>
       <button type="button" className="panorama-save-upload" disabled={uploading||!cleanAssetName(uploadName)}
