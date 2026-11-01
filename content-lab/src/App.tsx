@@ -349,6 +349,7 @@ async function downloadPng(post: Post, brand: Brand, photo?: string) {
 }
 function App() {
   const [account, setAccount] = useState<{ email?: string } | null>(null);
+  const [profilePhotoId,setProfilePhotoId]=useState('');
   const [chosenPrompt,setChosenPrompt]=useState<{version:number;text:string;settings:PromptControls}|null>(null);
   const [aiWallet, setAiWallet] = useState<{
     admin?:boolean;photo_remaining?:number;creative_remaining?:number;
@@ -751,6 +752,14 @@ function App() {
       setBusy('');
     }
   };
+  const planEditor=async(date:string,time:string):Promise<boolean>=>{
+    // Save the final visual design and planning date together, from the editor.
+    const latest=editorLatestRef.current;
+    if(!latest.brandId)return false;
+    const ok=await save({...latest,date,time,planningStatus:'planned'});
+    if(ok){toast('Guardado en el calendario. Se publicará manualmente.');navigate('calendar')}
+    return ok;
+  };
   const imageLoad = async (id: string):Promise<string|undefined> => {
     if (images[id]) return images[id];
     try {
@@ -762,6 +771,25 @@ function App() {
       err(e);
       return undefined;
     }
+  };
+  useEffect(()=>{
+    if(!account?.email){setProfilePhotoId('');return}
+    let live=true;
+    void auth.getProfilePhotoAssetId().then(id=>{if(live)setProfilePhotoId(id)}).catch(()=>{});
+    return()=>{live=false};
+  },[account?.email]);
+  useEffect(()=>{
+    if(profilePhotoId&&!images[profilePhotoId])void imageLoad(profilePhotoId);
+  },[profilePhotoId]);
+  const uploadProfilePhoto=async(file:File):Promise<boolean>=>{
+    if(file.size>20_000_000){toast('Elige una imagen de menos de 20 MB.');return false}
+    const picture=await upload(file,'original',false);
+    if(!picture)return false;
+    try{await auth.setProfilePhotoAssetId(picture.id);setProfilePhotoId(picture.id);return true}
+    catch(e){err(e);return false}
+  };
+  const clearProfilePhoto=async()=>{
+    await auth.setProfilePhotoAssetId('');setProfilePhotoId('');
   };
   useEffect(() => {
     if (tab === 'media')
