@@ -442,6 +442,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const destinationAccount=socialAccount(brand,socialDestination);
   const palette=brandPalette(brand);
   const [current,setCurrent]=useState(0);
+  const [backgroundScope,setBackgroundScope]=useState<'slide'|'all'>('slide');
   const carouselRailRef=useRef<HTMLDivElement>(null);
   const [preview,setPreview]=useState('');
   const [panoramaPreview,setPanoramaPreview]=useState('');
@@ -693,11 +694,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     appliedStickerVersion.current=initialSticker.version;
     const id=initialSticker.id;
     const next=slides.map((slide,i)=>i===0?{
-      ...slide,stickerIds:[...(slide.stickerIds||[]).filter(x=>x!==id),id].slice(-3)
+      ...slide,stickerIds:slide.stickerIds?.includes(id)?slide.stickerIds:
+        (slide.stickerIds||[]).length<3?[...(slide.stickerIds||[]),id]:slide.stickerIds
     }:slide);
     setAll(next);
     if(!images[id])loadImage(id);
-    notify('Sticker original añadido a la portada. Se incluirá en el PNG exportado.');
+    notify((slides[0]?.stickerIds||[]).length>=3&&!slides[0].stickerIds?.includes(id)
+        ?'La portada ya tiene 3 stickers. Quita uno antes de añadir otro.'
+        :'Sticker original añadido a la portada. Se incluirá en el PNG exportado.');
   },[initialSticker?.version,brand.id]);
   const appliedBackgroundVersion=useRef(0);
   useEffect(()=>{
@@ -707,7 +711,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     // and is also used as the seamless panoramic background when enabled.
     const nextSlides=slides.map(s=>({...s,backgroundId:initialBackground.id,
       backgroundImageId:initialBackground.imageAssetId||''}));
-    setAll(nextSlides,normalizeCarouselStyle({...style,seamlessBackgroundId:initialBackground.id,
+    setAll(nextSlides,normalizeCarouselStyle({...style,perSlideBackgrounds:false,seamlessBackgroundId:initialBackground.id,
      seamlessAssetId:initialBackground.imageAssetId||''}));
     if(initialBackground.imageAssetId&&!images[initialBackground.imageAssetId])loadImage(initialBackground.imageAssetId);
     setStudioTab('style');
@@ -740,28 +744,27 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   }));
   const updateDecoration=(next:Partial<Slide>)=>{
     const hasBg=('backgroundImageId' in next)||('backgroundId' in next);
-    const changedBackground=hasBg&&(
-      (next.backgroundImageId||'')!==(slide.backgroundImageId||'')||
-      (next.backgroundId||'brand')!==(slide.backgroundId||'brand'));
-    if(changedBackground){
-      // The visible "Fondo" picker is global. Apply to ALL slides and the
-      // seamless canvas; never silently revert to an older default.
-      const backgroundId=next.backgroundId||'brand';
-      const backgroundImageId=next.backgroundImageId||'';
-      setAll(slides.map((part,index)=>({...part,backgroundId,backgroundImageId,
-        backgroundColor:undefined,backgroundGradient:undefined,
-        ...(index===i?{stickerIds:next.stickerIds??part.stickerIds}:{})
-      })),normalizeCarouselStyle({...style,seamlessBackgroundId:backgroundId,
-         seamlessAssetId:backgroundImageId}));
-      if(backgroundImageId&&!images[backgroundImageId])loadImage(backgroundImageId);
-      notify('Fondo aplicado a todos los slides.');
-    }else replace(next);
+    if(!hasBg){replace(next);return;}
+    const backgroundId=next.backgroundId||'brand',backgroundImageId=next.backgroundImageId||'';
+    if(backgroundImageId&&!images[backgroundImageId])loadImage(backgroundImageId);
+    if(backgroundScope==='slide'){
+      setAll(slides.map((part,index)=>index===i?{...part,backgroundId,backgroundImageId,
+        backgroundColor:undefined,backgroundGradient:undefined}:part),
+        normalizeCarouselStyle({...style,perSlideBackgrounds:true}));
+      notify('Fondo aplicado solo al slide '+(i+1)+'.');
+    }else{
+      setAll(slides.map(part=>({...part,backgroundId,backgroundImageId,
+        backgroundColor:undefined,backgroundGradient:undefined})),
+        normalizeCarouselStyle({...style,perSlideBackgrounds:false,
+          seamlessBackgroundId:backgroundId,seamlessAssetId:backgroundImageId}));
+      notify('Fondo aplicado a los '+slides.length+' slides.');
+    }
   };
   const backgroundOfAll=()=>{
     const backgroundId=slide.backgroundId||'brand',backgroundImageId=slide.backgroundImageId||'';
     setAll(slides.map(part=>({...part,backgroundId,backgroundImageId,
       backgroundColor:undefined,backgroundGradient:undefined})),
-      normalizeCarouselStyle({...style,seamlessBackgroundId:backgroundId,seamlessAssetId:backgroundImageId}));
+      normalizeCarouselStyle({...style,perSlideBackgrounds:false,seamlessBackgroundId:backgroundId,seamlessAssetId:backgroundImageId}));
     notify('Este fondo se aplicó a todas las diapositivas.');
   };
   const enableTouch=()=>{
@@ -1293,10 +1296,21 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       </div>
       <div className="factory-background-main">
         <div className="factory-background-main-head">
-          <strong>Fondo de todo el carrusel</strong>
-          <p>Elige uno de los fondos incluidos, uno del estudio o uno tuyo. Se aplicará a todas las diapositivas y también al PNG.</p>
+          <strong>Elige dónde aplicar el fondo</strong>
+          <p>Un fondo distinto en cada slide, o el mismo para todo el carrusel.</p>
+          <div className="factory-background-scope" role="group" aria-label="Dónde aplicar el fondo elegido">
+            <button type="button" className={backgroundScope==='slide'?'active':''}
+              aria-pressed={backgroundScope==='slide'} onClick={()=>setBackgroundScope('slide')}>
+              Solo slide {i+1}
+            </button>
+            <button type="button" className={backgroundScope==='all'?'active':''}
+              aria-pressed={backgroundScope==='all'} onClick={()=>setBackgroundScope('all')}>
+              Todo el carrusel
+            </button>
+          </div>
         </div>
         <FreeDecorControls title="Elegir fondo" defaultTab="backgrounds" initiallyExpanded
+          backgroundScope={backgroundScope} preferenceScope={brand.id}
           backgroundId={slide.backgroundId||'brand'}
           backgroundImageId={slide.backgroundImageId||''}
           stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration}
@@ -1350,7 +1364,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             </div>
           </details>}
 
-          <FreeDecorControls title="Añadir stickers" backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
+          <FreeDecorControls title="Añadir stickers" backgroundScope={backgroundScope}
+            preferenceScope={brand.id} backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
             stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration} assets={ownedAssets}
             images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
             onUploadBackground={onUploadBackground}/>
