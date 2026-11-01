@@ -23,6 +23,7 @@ import {coverPlacement,normalizeCrop,photoFrameMetrics,initialPanoramaPhotoRect}
 import {overlayPanoramaPages,paintPanoramaLayers,reorderPanoramaLayers,type LayerMove,type PanoramaLayer} from './PanoramaLayers';
 import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,layerCornerPixels,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
+import {copyStickerToSlide,type StickerCopyResult} from './CarouselStickerCopy';
 
 type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -742,6 +743,16 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }
     return {...s,...patch};
   }));
+  const copySticker=(stickerId:string,targetIndex:number):StickerCopyResult=>{
+    const result=copyStickerToSlide(slides,i,targetIndex,stickerId);
+    if(result.result==='copied'){
+      // Source and unrelated slides are untouched, including their backgrounds.
+      setAll(result.slides);
+      if(!images[stickerId])loadImage(stickerId);
+      notify('Sticker copiado al slide '+(targetIndex+1)+' con su posición y tamaño originales.');
+    }
+    return result.result;
+  };
   const updateDecoration=(next:Partial<Slide>)=>{
     const hasBg=('backgroundImageId' in next)||('backgroundId' in next);
     if(!hasBg){replace(next);return;}
@@ -1321,7 +1332,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           backgroundScope={backgroundScope} preferenceScope={brand.id}
           backgroundId={slide.backgroundId||'brand'}
           backgroundImageId={slide.backgroundImageId||''}
-          stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration}
+          stickerIds={slide.stickerIds||[]} slideNumber={i+1} slideCount={slides.length}
+          onCopySticker={copySticker} onChange={updateDecoration}
           assets={ownedAssets} images={images} loadImage={loadImage}
           onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}/>
         <button type="button" className="btn ghost factory-background-apply" onClick={backgroundOfAll}>
@@ -1374,7 +1386,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
 
           <FreeDecorControls title="Añadir stickers" backgroundScope={backgroundScope}
             preferenceScope={brand.id} backgroundId={slide.backgroundId||'brand'} backgroundImageId={slide.backgroundImageId||''}
-            stickerIds={slide.stickerIds||[]} slideNumber={i+1} onChange={updateDecoration} assets={ownedAssets}
+            stickerIds={slide.stickerIds||[]} slideNumber={i+1} slideCount={slides.length}
+          onCopySticker={copySticker} onChange={updateDecoration} assets={ownedAssets}
             images={images} loadImage={loadImage} onOpenLibrary={onOpenStickers}
             onUploadBackground={onUploadBackground}/>
       </details>
