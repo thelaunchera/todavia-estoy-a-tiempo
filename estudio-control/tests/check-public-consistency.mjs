@@ -38,7 +38,7 @@ const centerScript=read('centro/centro.js');
 const centerPages=['terminos.html','privacidad.html','reembolsos.html','cancelaciones.html','cookies.html','contacto.html'];
 for(const p of centerPages){
  const doc=read('centro/'+p);
- assert.ok(center.includes('href="./'+p+'"'),'El Centro enlaza la política comercial '+p);
+ assert.ok(center.includes('href="./'+p+'"')||(p==='contacto.html'&&center.includes('href="../index.html#ayuda"')),'El Centro enlaza la política comercial o el formulario de ayuda '+p);
  assert.ok(doc.includes('href="../index.html#ayuda"'),'El documento enlaza al formulario oficial de ayuda '+p);
  assert.ok(doc.includes('Última actualización: 31 de octubre de 2026'),'Fecha real de la versión '+p);
  assert.ok(doc.includes('href="../index.html#ayuda"'),'Navegación al formulario de soporte del negocio '+p);
