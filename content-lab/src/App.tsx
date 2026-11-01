@@ -594,6 +594,10 @@ function App() {
     navigate('vertical');
   };
   const navigate = (id: Tab) => {
+    // Leaving a calendar-origin edit must not reopen an old project later.
+    if(!['factory','vertical','create'].includes(id))setCalendarEditId('');
+    if(id!=='grid')setGridPref(prev=>prev.fromCalendar
+      ?{...prev,fromCalendar:false,openGridId:undefined,openTileIndex:undefined}:prev);
     setTab(id);
     setMenu(false);
     setSwitcher(false);
