@@ -527,7 +527,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button className="btn ghost wide" disabled={!sourceId||!!busy||!!uploading} onClick={plan}>{busy==='plan'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>} Preparar 9 ideas para mi grid</button><small className="bg-note">Preparar un grid con IA consume 3 créditos creativos. Cada foto generada consume 1 crédito de foto. Las ediciones editoriales y exportaciones sin IA no gastan créditos. Cloudflare también tiene una cuota compartida diaria.</small>
       </div></details>
-      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
+      {own.length>0&&<div className="bg-box"><h3>Tus proyectos</h3><div className="bg-recent">{own.slice().reverse().map(g=><button key={g.id} onClick={()=>{flushDraft();setGrid(g);setSaveState('saved');setSourceId(g.sourceId);setReferenceId(g.referenceId);setKind(g.kind);setDesignMode(g.kind==='preserve'?'editorial':'photo');setBrief(g.brief);setQuickProduct(g.brief||'');setQuickMessage('');setQuickNotes('');setCopiedPrompt(false);setSelected(0);setDownloads([])}}><LayoutGrid size={17}/>{g.title}<ArrowRight size={16}/></button>)}</div></div>}
     </div><div className="bg-results">
       {!grid?<div className="bg-empty"><div className="bg-empty-grid">{Array.from({length:9},(_,i)=><span key={i} style={{background:i%2?brand.background:brand.color}}/>)}</div><h3>Tu próximo feed comienza aquí.</h3><p>Arriba, sube tu producto, escribe qué es y toca «Crear mis 9 posts». Verás aquí los diseños y sus prompts listos para ChatGPT, sin gastar créditos internos.</p></div>:<>
         <div className="bg-result-head"><div><div className="eyebrow">02 · NUEVE POSTS INDEPENDIENTES</div><h2>{grid.title}</h2><p>{grid.concept}</p><span className={'bg-save-state '+saveState} role="status">
@@ -536,7 +536,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         <div className="v2-vision-status" role="status">{grid.analysisStatus==='vision'
          ? '✓ La IA observó la foto principal y la referencia de estilo al preparar los conceptos.'
          : 'Análisis visual no confirmado. El plan usa tu descripción escrita; comprueba el producto antes de generar fotos.'}</div>
-        <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>setSelected(i)} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
+        <div className="bg-feed">{grid.posts.map((t,i)=><button key={i} onClick={()=>{setSelected(i);setCopiedPrompt(false)}} className={'bg-feed-tile '+(selected===i?'active':'')} style={{background:i%3?brand.background:brand.color}}>
           <TileThumb tile={t} idx={i} grid={grid} brand={brand} images={images}/>
           <span className="bg-status">{i+1}/9 · {t.assetId?'FOTO LISTA':t.design&&grid.kind==='preserve'?'DISEÑO EDITABLE':'CONCEPTO'}</span>
         </button>)}</div>
