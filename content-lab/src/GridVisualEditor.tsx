@@ -12,8 +12,8 @@ type Props={
  locale?:'es'|'en';
 };
 type Point={x:number;y:number};
-type Gesture={from:VisualControls;layer:'photo'|'text';x:number;y:number;center:Point;distance:number;pinching:boolean;width:number;height:number};
-const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,textX:0,textY:0,textScale:1};
+type Gesture={from:VisualControls;layer:'photo'|'text'|'subtitle';x:number;y:number;center:Point;distance:number;pinching:boolean;width:number;height:number};
+const defaults={imageX:0,imageY:0,imageZoom:1,frameX:0,frameY:0,frameScale:1,textX:0,textY:0,textScale:1,subtextX:0,subtextY:0,subtextScale:1};
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,n));
 const distance=(a:Point,b:Point)=>Math.hypot(a.x-b.x,a.y-b.y);
 const center=(a:Point,b:Point):Point=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
@@ -102,6 +102,10 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
     next.frameScale=clamp((g.from.frameScale||1)*factor,.45,1.7);
     next.frameX=clamp((g.from.frameX||0)+dx,-.75,.75);
     next.frameY=clamp((g.from.frameY||0)+dy,-.75,.75);
+   }else if(g.layer==='subtitle'){
+    next.subtextScale=clamp((g.from.subtextScale||1)*factor,.55,1.7);
+    next.subtextX=clamp((g.from.subtextX||0)+dx,-.35,.35);
+    next.subtextY=clamp((g.from.subtextY||0)+dy,-.35,.35);
    }else{
     next.textScale=clamp((g.from.textScale||1)*factor,.55,1.7);
     next.textX=clamp((g.from.textX||0)+dx,-.35,.35);
@@ -113,6 +117,9 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   const dx=(e.clientX-g.x)/Math.max(1,g.width),dy=(e.clientY-g.y)/Math.max(1,g.height);
   if(g.layer==='photo')schedule({...g.from,frameX:clamp((g.from.frameX||0)+dx,-.75,.75),
     frameY:clamp((g.from.frameY||0)+dy,-.75,.75)});
+  else if(g.layer==='subtitle')schedule({...g.from,
+    subtextX:clamp((g.from.subtextX||0)+dx,-.35,.35),
+    subtextY:clamp((g.from.subtextY||0)+dy,-.35,.35)});
   else schedule({...g.from,textX:clamp((g.from.textX||0)+dx,-.35,.35),
     textY:clamp((g.from.textY||0)+dy,-.35,.35)});
  };
@@ -136,6 +143,7 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
  const increase=(value:number)=>{
   if(layer==='photo')set('frameScale',clamp(current.frameScale*value,.45,1.7));
   if(layer==='text')set('textScale',clamp(current.textScale*value,.55,1.7));
+  if(layer==='subtitle')set('subtextScale',clamp(current.subtextScale*value,.55,1.7));
  };
  const number=(id:keyof typeof defaults,text:string,min:number,max:number,step:number)=>(
   <label className="v2-slider" key={id}>{text}<span>{Math.round((current[id]||0)*100)}%</span>
@@ -143,14 +151,18 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   </label>
  );
  const format=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length];
- const region=layer==='photo'?format.image:format.type;
- const scale=layer==='photo'?current.frameScale:current.textScale;
+ const region=layer==='photo'?format.image:layer==='subtitle'?[.06,.85,.88,.07]:format.type;
+ const scale=layer==='photo'?current.frameScale:layer==='subtitle'?current.subtextScale:current.textScale;
  const guide=layer==='photo'&&!tile.design?{
     left:clamp(region[0]+(region[2]-region[2]*scale)/2+current.frameX,0,.97)*100+'%',
     top:clamp(region[1]+(region[3]-region[3]*scale)/2+current.frameY,0,.97)*100+'%',
     width:clamp(region[2]*scale,.03,1)*100+'%',height:clamp(region[3]*scale,.03,1)*100+'%'
   }:layer==='text'&&!tile.design?{
     left:clamp(region[0]+current.textX,0,.97)*100+'%',top:clamp(region[1]+current.textY,0,.97)*100+'%',
+    width:region[2]*100+'%',height:region[3]*100+'%'
+  }:layer==='subtitle'&&!tile.design?{
+    left:clamp(region[0]+current.subtextX,0,.97)*100+'%',
+    top:clamp(region[1]+current.subtextY,0,.97)*100+'%',
     width:region[2]*100+'%',height:region[3]*100+'%'
   }:null;
  return <div className="v2-editor" aria-label={label(locale,'Editor táctil de fotos y textos','Photo and text touch editor')}>
@@ -161,7 +173,8 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
   </div>
   <div className="v2-layer-pick" role="group" aria-label={label(locale,'Elegir elemento para mover','Choose element to move')}>
    <button aria-pressed={layer==='photo'} className={layer==='photo'?'active':''} onClick={()=>setLayer('photo')} type="button">{label(locale,'📷 Foto','📷 Photo')}</button>
-   <button aria-pressed={layer==='text'} className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">{label(locale,'T Texto','T Text')}</button>
+   <button aria-pressed={layer==='text'} className={layer==='text'?'active':''} onClick={()=>setLayer('text')} type="button">{label(locale,'T Título','T Title')}</button>
+   <button aria-pressed={layer==='subtitle'} className={layer==='subtitle'?'active':''} onClick={()=>setLayer('subtitle')} type="button">{label(locale,'T Subtítulo','T Subtitle')}</button>
    <button aria-pressed={layer==='sticker'} className={layer==='sticker'?'active':''} onClick={()=>setLayer('sticker')} type="button">{label(locale,'✦ Stickers','✦ Stickers')}</button>
   </div>
   {layer==='sticker'?<TouchLayerCanvas preview={preview}
@@ -198,6 +211,9 @@ export default function GridVisualEditor({tile,index,brand,photo,original,logo,p
    {number('frameScale',label(locale,'Tamaño de la foto','Photo size'),.45,1.7,.05)}
    {number('imageZoom',label(locale,'Zoom dentro de la foto','Crop zoom'),1,3,.05)}
    {number('textScale',label(locale,'Tamaño del titular','Headline size'),.55,1.7,.05)}
+   {number('subtextScale',label(locale,'Tamaño del subtítulo','Subtitle size'),.55,1.7,.05)}
+   {number('subtextX',label(locale,'Subtítulo horizontal','Subtitle horizontal'),-.35,.35,.01)}
+   {number('subtextY',label(locale,'Subtítulo vertical','Subtitle vertical'),-.35,.35,.01)}
    {number('frameX',label(locale,'Foto horizontal','Photo horizontal'),-.75,.75,.01)}
    {number('frameY',label(locale,'Foto vertical','Photo vertical'),-.75,.75,.01)}
    {number('imageX',label(locale,'Recorte horizontal','Crop horizontal'),-.55,.55,.01)}
