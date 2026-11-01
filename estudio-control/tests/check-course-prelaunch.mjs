@@ -468,8 +468,8 @@ console.log('QA: logo oficial, tarjetas sin emojis y botones sin flechas OK');
 // Reuse centerPage and centerStyles loaded above; avoid duplicate const declarations.
 const centerHelp=centerPage.slice(centerPage.indexOf('<section class="help-strip"'),centerPage.indexOf('</section>',centerPage.indexOf('<section class="help-strip"'))+10);
 assert.ok(centerHelp.includes('<div class="help-strip-actions"'),'CTAs fuera del párrafo');
-assert.ok(centerHelp.includes('class="help-strip-secondary" href="./contacto.html"'),'Contacto conserva su destino');
-assert.ok(centerHelp.includes('class="help-strip-primary" href="mailto:hello@thelaunchera.com'),'El correo conserva su destino');
+assert.ok(centerHelp.includes('class="help-strip-secondary" href="../index.html#ayuda"'),'Contacto conserva el destino del formulario');
+assert.ok(centerHelp.includes('class="help-strip-primary" href="../index.html#ayuda"'),'La acción de escribir abre el formulario, no el correo directo');
 assert.ok(centerHelp.indexOf('</p>')<centerHelp.indexOf('class="help-strip-actions"'),'Primero el texto, después los botones');
 assert.ok(centerStyles.includes('.help-strip-actions{display:flex;flex-wrap:wrap'),'Sin anchos rígidos');
 assert.ok(centerStyles.includes('@media(max-width:900px){.help-strip-actions{flex-direction:column}'),'Botones apilados en iPad');
