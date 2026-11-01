@@ -1,0 +1,174 @@
+/* 01 Nov 2026 · Clase: escenas y materiales útiles, sin mockups vacíos.
+   Se carga DESPUÉS de clases.css para mantener este ajuste acotado. */
+.class-page-v2 #recorrido .class-journey-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.4vw,29px);
+  align-items:stretch
+}
+.class-page-v2 #recorrido .class-journey-grid>.class-journey-card,
+.class-page-v2 #recorrido .class-journey-grid>.class-journey-card:nth-child(2){
+  display:flex;flex-direction:column;background:#fffdf8!important;border:1px solid #dce3e7!important;
+  border-radius:20px!important;padding:clamp(17px,2.15vw,26px)!important;
+  box-shadow:0 10px 28px rgba(29,53,78,.055)!important;min-width:0
+}
+.class-page-v2 #recorrido .class-journey-head{display:flex;align-items:center;gap:12px}
+.class-page-v2 #recorrido .class-journey-content{display:flex;flex-direction:column;flex:1;min-width:0}
+.class-page-v2 #recorrido .class-journey-card h3{font-size:clamp(1.48rem,2.5vw,2.3rem)!important;line-height:1.13!important}
+.class-page-v2 #recorrido .class-journey-card p{font-size:clamp(.82rem,1.15vw,.98rem)!important;line-height:1.6!important}
+.class-page-v2 #recorrido .class-journey-photo{position:relative;width:100%;height:clamp(180px,19vw,252px);margin:auto 0 14px;
+  overflow:hidden;border-radius:15px;background:#dce8ea;isolation:isolate}
+.class-page-v2 #recorrido .class-journey-photo>img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;
+  transition:transform .6s cubic-bezier(.25,.7,.2,1)}
+.class-page-v2 #recorrido .class-journey-card:hover .class-journey-photo>img{transform:scale(1.045)}
+.class-page-v2 #recorrido .class-journey-photo:after{content:"";position:absolute;inset:45% 0 0;
+  background:linear-gradient(transparent,rgba(10,27,42,.76));pointer-events:none}
+.class-page-v2 #recorrido .class-journey-photo figcaption{position:absolute;z-index:1;bottom:15px;left:15px;right:12px;
+  display:flex;flex-direction:column;gap:4px;color:#fff;font:600 .79rem/1.4 var(--sans,Arial,sans-serif);
+  text-wrap:balance}
+.class-page-v2 #recorrido .class-journey-photo figcaption span{font-size:.59rem;letter-spacing:.14em;color:#e3f2fa}
+.class-page-v2 #recorrido .class-journey-foot{margin-top:0!important;border-top:1px solid #dce5eb}
+
+/* Muestras honestas de contenido del curso, en lugar de papeles y botones decorativos. */
+.class-page-v2 #incluye .class-materials-workbench{display:block!important;overflow:hidden;border-radius:24px!important}
+.class-page-v2 #incluye .class-material-tabs{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:0!important;padding:9px!important;border-bottom:1px solid #d9e4eb!important;background:#edf3f7!important;
+  border-radius:0!important}
+.class-page-v2 #incluye .class-material-tab{width:100%!important;min-width:0!important;min-height:50px!important;
+  display:flex;justify-content:center;align-items:center;gap:10px;border-radius:12px!important;
+  padding:12px 7px!important;white-space:normal;text-align:center}
+.class-page-v2 #incluye .class-material-tab>span{font-size:.83rem!important}
+.class-page-v2 #incluye .class-material-preview{min-width:0;padding:clamp(19px,3.5vw,44px)!important}
+.class-page-v2 #incluye .class-material-panel[hidden]{display:none!important}
+.class-page-v2 #incluye .class-material-panel:not([hidden]){display:grid!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(225px,.9fr)!important;
+  gap:clamp(22px,4vw,55px)!important;align-items:center!important;animation:classMaterialIn .35s ease both}
+.class-page-v2 #incluye .class-material-description{min-width:0}
+.class-page-v2 #incluye .class-real-preview{position:relative;width:100%;max-width:none!important;min-width:0;
+  min-height:320px;box-sizing:border-box;overflow:hidden;border:1px solid #d6e0e7;
+  border-radius:18px;background:#f7f9f8;box-shadow:0 14px 28px #243b5214;
+  color:#234057;font-family:var(--sans,Arial,sans-serif)}
+.class-page-v2 #incluye .class-real-preview-top{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:17px 20px;border-bottom:1px solid #dbe4e9;font-size:.65rem;font-weight:750;letter-spacing:.1em;color:#5d7a8e}
+.class-page-v2 #incluye .class-real-preview-top span:last-child{white-space:nowrap;letter-spacing:0}
+.class-page-v2 #incluye .class-real-preview--workbook{padding:0 16px 16px;background:#e9f0ef}
+.class-page-v2 #incluye .class-real-preview--workbook .class-real-preview-top{margin:0 -16px 14px}
+.class-page-v2 #incluye .class-real-notes{padding:clamp(16px,3vw,27px);background:#fffef9;border:1px solid #e1e4de;
+  border-left:8px solid #88a7ad;border-radius:8px;box-shadow:4px 9px 21px #35546a1a}
+.class-page-v2 #incluye .class-real-notes-kicker{font-size:.58rem;letter-spacing:.13em;font-weight:800;color:#71919f}
+.class-page-v2 #incluye .class-real-notes h3{font:400 clamp(1.9rem,3vw,2.6rem)/1.1 var(--serif,Georgia,serif);
+  color:#23445a;margin:8px 0 16px}
+.class-page-v2 #incluye .class-real-notes dl{display:grid;gap:10px;margin:0}
+.class-page-v2 #incluye .class-real-notes dl>div{display:grid;grid-template-columns:minmax(90px,.42fr) minmax(0,1fr);
+  gap:10px;padding-bottom:9px;border-bottom:1px solid #e4e9e9}
+.class-page-v2 #incluye .class-real-notes dt{font-size:.73rem;font-weight:750;color:#42627a}
+.class-page-v2 #incluye .class-real-notes dd{font-size:.76rem;color:#546b78;line-height:1.45;margin:0}
+.class-page-v2 #incluye .class-real-note{display:block;margin-top:14px;color:#648596;font-size:.72rem;font-style:italic}
+.class-page-v2 #incluye .class-real-preview--prompts{background:#eef4f8}
+.class-page-v2 #incluye .class-real-prompt{padding:clamp(17px,3vw,27px)}
+.class-page-v2 #incluye .class-real-prompt-categories{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.class-page-v2 #incluye .class-real-prompt-categories span{padding:6px 11px;border:1px solid #d4e0e8;
+  background:white;border-radius:999px;font-size:.68rem;color:#557187}
+.class-page-v2 #incluye .class-real-prompt-categories .is-selected{background:#244967;color:white}
+.class-page-v2 #incluye .class-real-prompt h3{font:400 clamp(1.55rem,2.7vw,2rem)/1.15 var(--serif,Georgia,serif);
+  color:#243f57;margin:0 0 10px}
+.class-page-v2 #incluye .class-real-prompt p{font-size:clamp(.77rem,1.15vw,.88rem);line-height:1.65;color:#4d6578;
+  background:#fff;border-left:3px solid #8eb5cc;padding:13px 15px;border-radius:0 9px 9px 0;margin:0 0 16px}
+.class-page-v2 #incluye .class-real-prompt .class-copy-sample{position:static!important;max-width:100%;min-height:44px}
+.class-page-v2 #incluye .class-real-preview--photo{margin:0;background:#dde9f0}
+.class-page-v2 #incluye .class-real-preview--photo>img{display:block;width:100%;height:320px;object-fit:cover}
+.class-page-v2 #incluye .class-real-preview--photo figcaption{position:absolute;inset:auto 0 0;
+  display:flex;flex-direction:column;gap:6px;padding:50px 22px 20px;color:#fff;
+  background:linear-gradient(transparent,rgba(11,27,42,.85));font-size:.86rem;font-weight:650;line-height:1.5}
+.class-page-v2 #incluye .class-real-preview--photo figcaption span{font-size:.65rem;letter-spacing:.16em;color:#d0e6f5}
+.class-page-v2 #incluye .class-real-preview--checklist{background:#eef3f1}
+.class-page-v2 #incluye .class-real-checklist{padding:17px 21px 20px}
+.class-page-v2 #incluye .class-real-checklist h3{font:400 clamp(1.55rem,2.7vw,2rem)/1.15 var(--serif,Georgia,serif);
+  margin:0 0 5px;color:#294958}
+.class-page-v2 #incluye .class-real-checklist>p{font-size:.76rem;line-height:1.55;color:#587482;margin:0 0 12px}
+.class-page-v2 #incluye .class-real-checklist label{display:flex;align-items:flex-start;gap:10px;min-height:37px;
+  padding:9px 0;border-bottom:1px solid #d7e3df;font-size:.81rem;line-height:1.45;cursor:pointer}
+.class-page-v2 #incluye .class-real-checklist input{accent-color:#347e79;width:17px;height:17px;flex:0 0 auto;margin:0}
+.class-page-v2 #incluye .class-real-checklist small{display:block;font-size:.68rem;color:#6d8585;margin-top:13px}
+
+/* FAQ: el mismo indicador deslizante y panel editorial que TLE, adaptado al podcast. */
+.class-page-v2 #preguntas .class-faq-categories[hidden]{display:none!important}
+.class-page-v2 #preguntas .class-faq-categories{max-width:880px;margin:0 auto 9px;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));position:relative;
+  border-bottom:1px solid #cbd9e1;--faq-index:0}
+.class-page-v2 #preguntas .class-faq-categories button{border:0;min-width:0;min-height:51px;
+  padding:12px 5px 16px;cursor:pointer;color:#647987;background:transparent;font:700 clamp(.76rem,1.5vw,.92rem)/1.35 var(--sans,Arial,sans-serif);
+  transition:color .22s}
+.class-page-v2 #preguntas .class-faq-categories button[aria-selected="true"]{color:#1b3c55}
+.class-page-v2 #preguntas .class-faq-categories button:focus-visible{outline:2px solid #5280a3;outline-offset:-4px;border-radius:8px}
+.class-page-v2 #preguntas .class-faq-indicator{position:absolute;bottom:-1px;left:0;width:33.333333%;height:3px;
+  background:#5280a3;border-radius:5px;transform:translateX(calc(var(--faq-index) * 100%));
+  transition:transform .53s cubic-bezier(.25,.7,.2,1);pointer-events:none}
+.class-page-v2 #preguntas .class-faq{max-width:880px;border-top:0!important}
+.class-page-v2 #preguntas .class-faq-panel[hidden]{display:none!important}
+.class-page-v2 #preguntas .class-faq-panel.is-current{animation:classFaqIn .38s cubic-bezier(.25,.7,.2,1) both}
+.class-page-v2 #preguntas .class-faq details{padding:0!important;border-radius:0!important;
+  border:0!important;border-bottom:1px solid #d4dfe5!important;background:transparent!important}
+.class-page-v2 #preguntas .class-faq details[open]{background:#fffdfa!important}
+.class-page-v2 #preguntas .class-faq summary{font:500 clamp(1.05rem,1.9vw,1.38rem)/1.42 var(--serif,Georgia,serif)!important;
+  padding:21px 58px 21px 12px!important;min-height:65px!important;
+  transition:color .2s ease!important}
+.class-page-v2 #preguntas .class-faq summary:hover{color:#426e8b!important}
+.class-page-v2 #preguntas .class-faq summary:after{content:"+"!important;top:50%!important;right:13px!important;
+  transform:translateY(-50%) rotate(0deg)!important;width:31px!important;height:31px!important;
+  border:1px solid #aac0cd!important;background:transparent!important;color:#234a63!important;
+  transition:transform .25s ease,background .25s ease!important}
+.class-page-v2 #preguntas .class-faq details[open] summary:after{content:"+"!important;
+  transform:translateY(-50%) rotate(45deg)!important;background:#2e607f!important;color:#fff!important}
+.class-page-v2 #preguntas .class-faq-answer{padding-bottom:8px}
+.class-page-v2 #preguntas .class-faq details p{padding:0 54px 21px 12px!important;
+  margin:0!important;max-width:780px!important;font-size:clamp(.85rem,1.3vw,.96rem)!important;
+  line-height:1.75!important}
+.class-page-v2 #preguntas .class-faq-pricing .class-faq-answer--price{padding:0 12px 20px!important}
+.class-page-v2 #preguntas .class-faq-pricing .class-faq-offer-card p{padding:0!important;margin:12px 0!important}
+
+/* Preguntar, sin agregar un segundo formulario visible ni alterar el backend. */
+.class-page-v2 .class-contact-compact{background:#f2f5f4;border-top:1px solid #d9e3e5}
+.class-page-v2 .class-contact-compact-inner{display:flex;justify-content:space-between;gap:24px;
+  align-items:center;padding-top:clamp(26px,4vw,46px);padding-bottom:clamp(26px,4vw,46px)}
+.class-page-v2 .class-contact-compact .class-eyebrow{margin:0 0 9px;color:#54758b}
+.class-page-v2 .class-contact-compact h2{font:400 clamp(1.95rem,3.4vw,2.8rem)/1.13 var(--serif,Georgia,serif);
+  letter-spacing:-.035em;color:#1a3650;margin:0 0 8px}
+.class-page-v2 .class-contact-compact h2 em{color:#7198a9}
+.class-page-v2 .class-contact-compact p:last-child{font-size:.87rem;line-height:1.55;color:#617786;margin:0}
+.class-page-v2 .class-contact-compact-button{display:inline-flex;align-items:center;justify-content:center;gap:17px;
+  flex:0 0 auto;min-height:49px;padding:12px 22px;border-radius:99px;background:#1c3550;
+  color:#fff!important;font-size:.85rem;font-weight:750;text-decoration:none;
+  transition:background .2s,transform .2s}
+.class-page-v2 .class-contact-compact-button:hover{transform:translateY(-2px);background:#365d79}
+.class-page-v2 .class-contact-compact-button:focus-visible{outline:3px solid #76a2b8;outline-offset:3px}
+@keyframes classFaqIn{from{opacity:.15;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes classMaterialIn{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){
+ .class-page-v2 #recorrido .class-journey-grid{grid-template-columns:1fr!important;gap:14px!important}
+ .class-page-v2 #recorrido .class-journey-grid>.class-journey-card{min-height:0!important}
+ .class-page-v2 #recorrido .class-journey-photo{height:210px!important;margin-top:10px}
+ .class-page-v2 #incluye .class-material-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important;padding:6px!important}
+ .class-page-v2 #incluye .class-material-tab{display:flex!important;flex-direction:column;gap:2px;min-height:65px!important;
+   padding:8px 3px!important;font-size:.71rem!important}
+ .class-page-v2 #incluye .class-material-preview{padding:18px!important}
+ .class-page-v2 #incluye .class-material-panel:not([hidden]){grid-template-columns:1fr!important;gap:20px!important}
+ .class-page-v2 #incluye .class-real-preview{min-height:0}
+ .class-page-v2 #incluye .class-material-description{padding:0 2px 7px!important}
+ .class-page-v2 #incluye .class-real-preview--photo>img{height:270px}
+ .class-page-v2 #preguntas .class-faq-categories{margin-bottom:6px}
+ .class-page-v2 #preguntas .class-faq-categories button{font-size:.72rem;min-height:48px}
+ .class-page-v2 #preguntas .class-faq summary{font-size:1.04rem!important;padding:18px 53px 18px 8px!important}
+ .class-page-v2 #preguntas .class-faq details p{padding:0 12px 19px 8px!important}
+ .class-page-v2 .class-contact-compact-inner{display:flex;flex-direction:column;align-items:flex-start;gap:17px}
+ .class-page-v2 .class-contact-compact-button{width:100%}
+}
+@media(min-width:761px) and (max-width:1040px){
+ .class-page-v2 #recorrido .class-journey-photo{height:175px}
+ .class-page-v2 #incluye .class-material-panel:not([hidden]){grid-template-columns:1fr 1fr!important;gap:23px!important}
+ .class-page-v2 #incluye .class-material-preview{padding:22px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .class-page-v2 #recorrido .class-journey-photo>img,
+ .class-page-v2 #preguntas .class-faq-indicator,
+ .class-page-v2 #preguntas .class-faq-panel.is-current,
+ .class-page-v2 #incluye .class-material-panel:not([hidden]){animation:none!important;transition:none!important}
+}
