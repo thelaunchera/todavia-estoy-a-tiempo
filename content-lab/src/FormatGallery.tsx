@@ -11,6 +11,7 @@ type Props = {
  images:Record<string,string>;
  onChoose:(format:string)=>void;
  onUpload:()=>void;
+ locale?:'es'|'en';
 };
 type Filter='all'|'portrait'|'product'|'type'|'minimal'|'story';
 const groupNames:Record<Filter,string>={
@@ -99,27 +100,30 @@ function Preview({layout,index,brand,big=false}:{layout:Layout;index:number;bran
  </div>;
 }
 
-export default function FormatGallery({brand,onChoose,onUpload}:Props){
+export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Props){
+ const en=locale==='en';
+ const enGroups:Record<Filter,string>={all:'All',portrait:'Photography',product:'Details',type:'Typography',minimal:'Spaces',story:'Stories'};
+ const groupLabel=(id:Filter)=>en?enGroups[id]:groupNames[id];
  const [filter,setFilter]=useState<Filter>('all');
  const [selected,setSelected]=useState<number|null>(null);
  const filtered=LAYOUTS.map((layout,index)=>({layout,index})).filter(x=>filter==='all'||groups[x.layout.name]?.includes(filter));
  const close=()=>setSelected(null);
  return <section className="fg-root">
-  <div className="fg-head"><div><span className="eyebrow">BIBLIOTECA CREATIVA · 20 DIRECCIONES EDITORIALES</span><h1>20 formas de contar <em>tu historia.</em></h1><p>Explora composiciones diferentes, inspiradas en el diseño editorial. Elige una y personalízala dentro de tu editor.</p></div><button type="button" className="btn ghost" onClick={onUpload}><ImagePlus size={17}/> Subir mis fotos</button></div>
-  <div className="fg-note"><Images size={19}/><span>Las 20 vistas usan fotografías de interiores, sin fotos personales. Tus imágenes solo se añaden cuando tú las eliges en el editor.</span></div>
-  <div className="fg-filterbar" role="group" aria-label="Filtrar formatos">{(Object.keys(groupNames) as Filter[]).map(f=><button type="button" key={f} className={f===filter?'active':''} aria-pressed={f===filter} onClick={()=>{setFilter(f);close()}}>{groupNames[f]}</button>)}</div>
+  <div className="fg-head"><div><span className="eyebrow">{en?'CREATIVE LIBRARY · 20 EDITORIAL DIRECTIONS':'BIBLIOTECA CREATIVA · 20 DIRECCIONES EDITORIALES'}</span><h1>{en?'20 ways to tell ':'20 formas de contar '}<em>{en?'your story.':'tu historia.'}</em></h1><p>{en?'Explore distinct editorial compositions. Choose one and customize it in your editor.':'Explora composiciones editoriales diferentes. Elige una y personalízala dentro de tu editor.'}</p></div><button type="button" className="btn ghost" onClick={onUpload}><ImagePlus size={17}/> {en?'Upload photos':'Subir mis fotos'}</button></div>
+  <div className="fg-note"><Images size={19}/><span>{en?'These 20 examples feature home interiors, not personal photos. Your images are only added when you choose them in the editor.':'Las 20 vistas usan fotografías de interiores, sin fotos personales. Tus imágenes solo se añaden cuando tú las eliges en el editor.'}</span></div>
+  <div className="fg-filterbar" role="group" aria-label={en?'Filter formats':'Filtrar formatos'}>{(Object.keys(groupNames) as Filter[]).map(f=><button type="button" key={f} className={f===filter?'active':''} aria-pressed={f===filter} onClick={()=>{setFilter(f);close()}}>{groupLabel(f)}</button>)}</div>
   <div className="fg-layout"><div className="fg-cards">{filtered.map(({layout,index})=><article key={layout.name} className={'fg-card '+(selected===index?'selected':'')}>
-   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={'Ver '+layout.name}><Preview layout={layout} index={index} brand={brand}/></button>
-   <div className="fg-card-foot"><div><small>{String(index+1).padStart(2,'0')} / 20</small><strong>{layout.name}</strong><span>{groups[layout.name]?.slice(0,2).map(g=>groupNames[g]).join(' · ')||'Editorial'}</span></div>
-    <button type="button" className="fg-use" onClick={()=>onChoose(layout.name)} aria-label={'Usar formato '+layout.name}>Usar</button>
+   <button type="button" className="fg-imagebutton" onClick={()=>setSelected(index)} aria-label={(en?'View ':'Ver ')+layout.name}><Preview layout={layout} index={index} brand={brand}/></button>
+   <div className="fg-card-foot"><div><small>{String(index+1).padStart(2,'0')} / 20</small><strong>{layout.name}</strong><span>{groups[layout.name]?.slice(0,2).map(g=>groupLabel(g)).join(' · ')||'Editorial'}</span></div>
+    <button type="button" className="fg-use" onClick={()=>onChoose(layout.name)} aria-label={(en?'Use format ':'Usar formato ')+layout.name}>{en?'Use':'Usar'}</button>
    </div>
   </article>)}</div>
-   {selected!==null&&<><button type="button" className="fg-sheet-backdrop" aria-label="Cerrar vista previa" onClick={close}/><aside className="fg-detail" aria-label={'Formato '+LAYOUTS[selected].name}>
-    <div className="fg-detail-top"><span className="eyebrow">VISTA DEL FORMATO</span><button type="button" onClick={close} aria-label="Cerrar vista"><X size={19}/></button></div>
+   {selected!==null&&<><button type="button" className="fg-sheet-backdrop" aria-label={en?'Close preview':'Cerrar vista previa'} onClick={close}/><aside className="fg-detail" aria-label={(en?'Format ':'Formato ')+LAYOUTS[selected].name}>
+    <div className="fg-detail-top"><span className="eyebrow">{en?'FORMAT PREVIEW':'VISTA DEL FORMATO'}</span><button type="button" onClick={close} aria-label={en?'Close preview':'Cerrar vista'}><X size={19}/></button></div>
     <h2>{LAYOUTS[selected].name}</h2>
     <Preview big layout={LAYOUTS[selected]} index={selected} brand={brand}/>
-    <p>Selecciona este formato para editar fotografías, textos, colores y posiciones. La vista es un ejemplo de composición.</p>
-    <button type="button" className="btn dark" onClick={()=>onChoose(LAYOUTS[selected].name)}><Check size={16}/> Usar este formato</button>
+    <p>{en?'Choose this format to edit images, text, colors and positions. This is a sample layout.':'Selecciona este formato para editar fotografías, textos, colores y posiciones. La vista es un ejemplo de composición.'}</p>
+    <button type="button" className="btn dark" onClick={()=>onChoose(LAYOUTS[selected].name)}><Check size={16}/> {en?'Use this format':'Usar este formato'}</button>
    </aside></>}
   </div>
  </section>;
