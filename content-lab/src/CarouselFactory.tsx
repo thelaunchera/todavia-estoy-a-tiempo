@@ -57,11 +57,11 @@ type Props = {
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 /** Normal mode clips movable panorama elements to their own slide.
  * Seamless keeps the original full-width geometry for genuine cross-slide cuts. */
-const constrainNormalLayer=(layer:PanoramaLayer,count:number):PanoramaLayer=>{
+const constrainNormalLayer=<T extends {rect:TouchRect},>(layer:T,count:number):T=>{
  const n=Math.max(1,count),r=clampPanoramaRect(layer.rect,.055/n);
  const page=Math.max(0,Math.min(n-1,Math.floor((r.x+r.w/2)*n)));
  const left=page/n,width=Math.min(r.w,1/n);
- return {...layer,rect:{...r,w:width,x:Math.max(left,Math.min(left+1/n-width,r.x))}};
+ return {...layer,rect:{...r,w:width,x:Math.max(left,Math.min(left+1/n-width,r.x))}} as T;
 };
 
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
