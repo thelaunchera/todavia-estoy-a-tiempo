@@ -94,6 +94,7 @@ const examples=[
  {id:'1ZBFafrZy1icZ75ZF666ST25zd-srtpU0',es:'Así empieza todo.',en:'It starts here.',kEs:'HISTORIAS DE CASA',kEn:'HOME STORIES',subEs:'Una historia por descubrir',subEn:'The beginning of more'}
 ] as const;
 
+const heroWords=[["HOGAR","HOME"],["IMPACTO","IMPACT"],["DETALLE","DETAIL"],["ESPACIO","SPACE"],["ORDEN","ORDER"],["LIMPIO","CLEAN"],["CAMBIO","CHANGE"],["CALMA","CALM"],["NUEVO","NEW"],["HOGAR","HOME"],["INTERIOR","INTERIOR"],["FORMAS","FORM"],["LUZ","LIGHT"],["PERFECTO","PERFECT"],["BRILLA","SHINE"],["MENOS","LESS"],["ÁNGULO","ANGLE"],["SERENO","QUIET"],["MIRADA","LOOK"],["FRESCO","FRESH"]] as const;
 const sourcePhoto=(index:number)=>'https://drive.google.com/thumbnail?id='+examples[index].id+'&sz=w1200';
 const boxPosition=(v:[number,number,number,number]):React.CSSProperties=>({
  left:(v[0]*100)+'%', top:(v[1]*100)+'%', width:(v[2]*100)+'%', height:(v[3]*100)+'%'
@@ -132,6 +133,7 @@ function Preview({layout,index,big=false,locale='es'}:{layout:Layout;index:numbe
  return <div className={'fg-preview fg-'+layout.shape+' fg-variant-'+index+(big?' fg-big':'')}
    style={style} aria-label={(locale==='es'?'Composición editorial ':'Editorial composition ')+layout.name}>
   <div className="fg-artwork" aria-hidden="true"><span/><span/><span/></div>
+  <div className="fg-preview-backtype" aria-hidden="true"><span>{heroWords[index][locale==='es'?0:1]}</span></div>
   <div className="fg-preview-photo" style={boxPosition(layout.image)}>
    <img loading={big?'eager':'lazy'} decoding="async" src={sourcePhoto(index)} alt="" onError={event=>{event.currentTarget.style.opacity='0'}}/>
   </div>
@@ -155,7 +157,7 @@ export default function FormatGallery({brand,onChoose,onUpload,locale='es'}:Prop
  const filtered=LAYOUTS.map((layout,index)=>({layout,index})).filter(x=>filter==='all'||groups[x.layout.name]?.includes(filter));
  const close=()=>setSelected(null);
  return <section className="fg-root">
-  <div className="fg-head"><div><span className="eyebrow">{en?'CREATIVE LIBRARY · 20 EDITORIAL DIRECTIONS':'BIBLIOTECA CREATIVA · 20 DIRECCIONES EDITORIALES'}</span><h1>{en?'20 ways to tell ':'20 formas de contar '}<em>{en?'your story.':'tu historia.'}</em></h1><p>{en?'Explore distinct editorial compositions. Choose one and customize it in your editor.':'Explora composiciones editoriales diferentes. Elige una y personalízala dentro de tu editor.'}</p></div><button type="button" className="btn ghost" onClick={onUpload}><ImagePlus size={17}/> {en?'Upload photos':'Subir mis fotos'}</button></div>
+  <div className="fg-head"><div><span className="eyebrow">{en?'CREATIVE LIBRARY · 20 EDITORIAL DIRECTIONS':'BIBLIOTECA CREATIVA · 20 DIRECCIONES EDITORIALES'}</span><h1>{en?'20 ways to tell ':'20 formas de contar '}<em>{en?'your story.':'tu historia.'}</em></h1><p>{en?'See photo-led, typographic art direction inspired by real campaigns. Pick a format and customize it.':'Explora dirección de arte con fotografía protagonista y tipografía de impacto. Elige un formato y personalízalo.'}</p></div><button type="button" className="btn ghost" onClick={onUpload}><ImagePlus size={17}/> {en?'Upload photos':'Subir mis fotos'}</button></div>
   <div className="fg-note"><Images size={19}/><span>{en?'These 20 examples feature home interiors, not personal photos. Your images are only added when you choose them in the editor.':'Las 20 vistas usan fotografías de interiores, sin fotos personales. Tus imágenes solo se añaden cuando tú las eliges en el editor.'}</span></div>
   <div className="fg-filterbar" role="group" aria-label={en?'Filter formats':'Filtrar formatos'}>{(Object.keys(groupNames) as Filter[]).map(f=><button type="button" key={f} className={f===filter?'active':''} aria-pressed={f===filter} onClick={()=>{setFilter(f);close()}}>{groupLabel(f)}</button>)}</div>
   <div className="fg-layout"><div className="fg-cards">{filtered.map(({layout,index})=><article key={layout.name} className={'fg-card '+(selected===index?'selected':'')}>
