@@ -807,10 +807,11 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setTouchEdit(v=>!v);
   };
   const touchLayers=[
-    ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:{...clampRect(slide.photoPosition),crop:slide.photoPosition.crop||normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})},frameStyle:slide.frameStyle||'none',paper:getCarouselPalette(brand,style).paper,accent:getCarouselPalette(brand,style).accent}]:[]),
-    ...(slide.stickerIds||[]).filter(id=>images[id]).map((id,index)=>({id,kind:'sticker' as const,name:ownedAssets.find(a=>a.id===id)?.displayName||'Sticker',src:images[id],rect:clampRect(slide.stickerPositions?.[id]||stickerDefault(index))}))
+    ...(slide.photoPosition&&slide.assetId&&images[slide.assetId]?[{id:'photo-'+slide.key,kind:'photo' as const,name:'Foto del slide',src:images[slide.assetId],rect:{...clampRect(slide.photoPosition),crop:slide.photoPosition.crop||normalizeCrop({y:slide.photoFocus==='top'?.12:slide.photoFocus==='bottom'?.9:.5})},locked:(style.lockedLayerIds||[]).includes('page-photo-'+slide.key),frameStyle:slide.frameStyle||'none',paper:getCarouselPalette(brand,style).paper,accent:getCarouselPalette(brand,style).accent}]:[]),
+    ...(slide.stickerIds||[]).filter(id=>images[id]).map((id,index)=>({id,kind:'sticker' as const,name:ownedAssets.find(a=>a.id===id)?.displayName||'Sticker',src:images[id],locked:(style.lockedLayerIds||[]).includes('page-sticker-'+slide.key+'-'+id),rect:clampRect(slide.stickerPositions?.[id]||stickerDefault(index))}))
   ];
   const moveTouchLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
+    if(touchLayers.some(layer=>layer.id===id&&layer.locked))return;
     if(kind==='photo')replace({photoPosition:clampRect(rect)});
     else if(kind==='sticker')replace({stickerPositions:{...slide.stickerPositions,[id]:clampRect(rect)}});
   };
@@ -1258,7 +1259,12 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             if(style.seamlessEnabled||style.panoramaLayers?.length){setStudioTab('canvas');setTouchEdit(false)}
             else enableTouch();
           }}>{style.seamlessEnabled||style.panoramaLayers?.length?'Mover elementos en el lienzo':touchEdit?'✓ Terminar de mover elementos':'👆 Mover fotos y stickers'}</button>}
-        {studioTab==='slides'&&touchEdit&&<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}/>}
+        {studioTab==='slides'&&touchEdit&&<TouchLayerCanvas key={slide.key} preview={preview} layers={touchLayers} onCommit={moveTouchLayer}
+          onToggleLock={(id,locked)=>{
+            const key=id==='photo-'+slide.key?'page-photo-'+slide.key:'page-sticker-'+slide.key+'-'+id;
+            setArtStyle({lockedLayerIds:locked?[...new Set([...(style.lockedLayerIds||[]),key])]:
+              (style.lockedLayerIds||[]).filter(x=>x!==key)});
+          }}/>}
         {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
       </aside>
   );
