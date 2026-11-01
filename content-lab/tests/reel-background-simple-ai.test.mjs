@@ -18,9 +18,10 @@ test('Reels and Stories render actual 1080 by 1920 canvases, editable touch rati
 test('The included and admin-shared background picker is directly accessible in Carousel Factory',()=>{
  const car=read('src/CarouselFactory.tsx'),decor=read('src/FreeDecorControls.tsx');
  assert.ok(car.includes('defaultTab="backgrounds" initiallyExpanded'));
- assert.ok(car.includes('Fondo de todo el carrusel'));
+ assert.ok(car.includes('Elige dónde aplicar el fondo'));
+ assert.ok(car.includes("backgroundScope==='all'"),'El selector permite usar un mismo fondo en todos los slides');
  assert.ok(car.includes('backgroundOfAll'));
- assert.ok(car.includes('setAll(slides.map((part,index)=>({...part,backgroundId,backgroundImageId'));
+ assert.ok(car.includes('setAll(slides.map(part=>({...part,backgroundId,backgroundImageId'));
  assert.ok(car.includes('seamlessBackgroundId:backgroundId'));
  assert.ok(decor.includes('Fondos incluidos en Content Lab'));
  assert.ok(decor.includes('studioBackgrounds.filter'));
