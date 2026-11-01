@@ -1570,6 +1570,7 @@ function App() {
           )}
           {brand && tab === 'grid' && (gridPref.fromCalendar && gridPref.openGridId ?
             <BrandGrid
+              locale={loginLanguage}
               onUploadBackground={async file=>upload(file,'background')}
               promptSelection={chosenPrompt}
               onOpenPrompts={()=>navigate('prompt-studio')}
