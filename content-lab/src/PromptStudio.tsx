@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Bookmark,Check,Copy,Search,SlidersHorizontal,ArrowRight,Trash2,Sparkles,FolderHeart} from 'lucide-react';
-import {PROMPT_CATEGORIES,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
+import {PROMPT_CATEGORIES,PROMPT_SHELVES,isPhotoTemplate,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
 import {DEFAULT_CONTROLS,composeCreativePrompt,type PromptControls} from './PromptEngine';
 import {api} from './platform/client';
 type Brand={id:string;name:string;language:string;background:string;rules:string};
@@ -11,7 +11,8 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
  const language=locale,contentLanguage=promptLang(brand.language),en=language==='en';
  const editorRef=useRef<HTMLElement|null>(null),manualRef=useRef<HTMLTextAreaElement|null>(null);
  const moveToEditor=()=>{requestAnimationFrame(()=>{editorRef.current?.scrollIntoView({behavior:'smooth',block:'start'});manualRef.current?.focus({preventScroll:true})})};
- const [query,setQuery]=useState(''),[category,setCategory]=useState('all');
+ const [query,setQuery]=useState(''),[category,setCategory]=useState('');
+ const [limit,setLimit]=useState(6),[selectedKind,setSelectedKind]=useState<'photo'|'text'>('photo');
  const [mode,setMode]=useState<'library'|'saved'>('library'),[expanded,setExpanded]=useState(false);
  const [settings,setSettings]=useState<PromptControls>(DEFAULT_CONTROLS);
  const [manual,setManual]=useState('');
@@ -21,7 +22,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
  const [busy,setBusy]=useState(false),[loadError,setLoadError]=useState('');
  const [copied,setCopied]=useState(false);
  const update=<K extends keyof PromptControls,>(key:K,v:PromptControls[K])=>setSettings(s=>({...s,[key]:v}));
- useEffect(()=>{setSettings({...DEFAULT_CONTROLS,environment:brand.background||''});setManual('');setCategory('all');setMode('library')},[brand.id]);
+ useEffect(()=>{setSettings({...DEFAULT_CONTROLS,environment:brand.background||''});setManual('');setCategory('');setMode('library');setLimit(6);setSelectedKind('photo')},[brand.id]);
  const load=async()=>{
   try{
    setLoadError('');
@@ -33,10 +34,10 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
  useEffect(()=>{void load()},[brand.id]);
  const select=(p:PromptTemplate)=>{
   setManual(fillTemplate(p.body[contentLanguage],{subject:settings.subject,background:settings.environment}));
-  setCustomTitle(p.title[language]);setMode('library');moveToEditor();
+  setCustomTitle(p.title[language]);setSelectedKind(isPhotoTemplate(p.category)?'photo':'text');setMode('library');moveToEditor();
  };
- const compiled=useMemo(()=>composeCreativePrompt({...settings,instruction:manual||settings.instruction},contentLanguage),[settings,manual,contentLanguage]);
- const shown=templates.filter(p=>(category==='all'||p.category===category) &&
+ const compiled=useMemo(()=>selectedKind==='text'?manual:composeCreativePrompt({...settings,instruction:manual||settings.instruction},contentLanguage),[settings,manual,contentLanguage,selectedKind]);
+ const shown=templates.filter(p=>(!category||(category==='photos'?isPhotoTemplate(p.category):p.category===category)) &&
   (p.title[language]+' '+p.body[language]+' '+p.category).toLocaleLowerCase().includes(query.toLocaleLowerCase()));
  const filteredSaved=saved.filter(p=>(p.title+' '+p.text).toLocaleLowerCase().includes(query.toLocaleLowerCase())).sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite));
  const copy=async(t:string)=>{
@@ -62,14 +63,14 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
  };
  const useSaved=(item:Saved)=>{
   if(item.settings)setSettings(item.settings);
-  setManual(item.rawInstruction??item.text);setCustomTitle(item.title);setMode('library');moveToEditor();
+  setManual(item.rawInstruction??item.text);setCustomTitle(item.title);setSelectedKind(item.rawInstruction?.includes('ENCARGO PARA ADAPTAR')?'text':'photo');setMode('library');moveToEditor();
  };
  return <section className="ps-wrap" aria-label="Prompt Studio">
   <header className="ps-hero">
    <div><span className="eyebrow">{en?'PROMPT STUDIO':'ESTUDIO DE PROMPTS'}</span>
-    <h1>{en?'Create your image prompt':'Crea tu prompt para una foto'}</h1>
-    <p>{en?'Write your idea or choose a recipe below. Everything stays editable.':'Escribe tu idea o elige una receta abajo. Siempre podrás editarla.'}</p>
-   </div><div className="ps-count"><strong>30</strong><span>{en?'ideas':'ideas'}</span></div>
+    <h1>{en?'The creative prompt library':'Biblioteca de prompts'}</h1>
+    <p>{en?'Pick a category. Edit, copy and use without long lists.':'Elige una categoría, edita y copia. Todo organizado, sin listas largas.'}</p>
+   </div><div className="ps-count"><strong>{templates.length}</strong><span>{en?'ideas':'ideas'}</span></div>
   </header>
   <div className="ps-tabs" role="group" aria-label="Prompt tabs">
    <button className={mode==='library'?'active':''} onClick={()=>setMode('library')}><BookOpen size={17}/>{en?'Prompt library':'Biblioteca de prompts'}</button>
@@ -78,15 +79,28 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
   <div className="ps-layout">
    <div className="ps-main">
     <div className="ps-search"><Search size={17}/><input aria-label={en?'Search prompts':'Buscar prompts'} placeholder={en?'Find a scene, style or industry…':'Busca una escena, estilo o industria…'} value={query} onChange={e=>setQuery(e.target.value)}/></div>
-    {mode==='library'?<><div className="ps-categories"><button className={category==='all'?'active':''} onClick={()=>setCategory('all')}>{en?'All':'Todos'} · 30</button>
-     {Object.entries(PROMPT_CATEGORIES).map(([id,names])=><button key={id} className={category===id?'active':''} onClick={()=>setCategory(id)}>{names[language==='es'?0:1]}</button>)}
-    </div>
-    <div className="ps-recipe-list">{shown.length?shown.map((p)=><article className="ps-recipe" key={p.id}>
-      <span className="ps-recipe-index">{p.id}</span><div><strong>{p.title[language]}</strong><small>{PROMPT_CATEGORIES[p.category]?.[language==='es'?0:1]||p.category}</small>
-        <details className="ps-recipe-example"><summary>{en?'Read example':'Ver ejemplo'}</summary><p>{p.body[language]}</p></details></div>
-      <button type="button" className="ps-recipe-use" onClick={()=>select(p)}>{en?'Use this idea':'Usar idea'}</button>
-    </article>):<p>{en?'No matching prompts.':'No hay prompts que coincidan.'}</p>}</div>
-    </>:<div className="ps-recipe-list">
+    {mode==='library'?<>
+      {!category&&!query.trim()?<div className="ps-shelves">{PROMPT_SHELVES.map(shelf=>{
+       const count=templates.filter(p=>shelf.id==='photos'?isPhotoTemplate(p.category):p.category===shelf.id).length;
+       return count?<button type="button" key={shelf.id} className="ps-shelf" onClick={()=>{setCategory(shelf.id);setLimit(6)}}>
+        <span className="ps-shelf-symbol">{shelf.icon}</span>
+        <strong>{shelf.id==='photos'?(en?'Photography':'Fotografía'):PROMPT_CATEGORIES[shelf.id]?.[en?1:0]}</strong>
+        <small>{shelf.subtitle[en?1:0]}</small>
+        <span className="ps-shelf-count">{count} prompts · {en?'Open':'Abrir'}</span>
+       </button>:null;
+      })}</div>:<>
+      <div className="ps-category-back"><button type="button" onClick={()=>{setCategory('');setQuery('');setLimit(6)}}>← {en?'Categories':'Categorías'}</button>
+       <strong>{category?(category==='photos'?(en?'Photography':'Fotografía'):PROMPT_CATEGORIES[category]?.[en?1:0]):(en?'Search results':'Resultados')}</strong>
+       <small>{shown.length} prompts</small></div>
+      <div className="ps-recipe-list ps-recipe-cards">{shown.length?shown.slice(0,limit).map(p=><article className="ps-recipe" key={p.id}>
+       <span className="ps-recipe-index">{p.id.startsWith('drive-')?p.id.split('-').at(-1):p.id}</span>
+       <div><strong>{p.title[language]}</strong><small>{PROMPT_CATEGORIES[p.category]?.[en?1:0]||p.category}</small>
+        <details className="ps-recipe-example"><summary>{en?'Read prompt':'Ver prompt'}</summary><p>{p.body[language]}</p></details></div>
+       <button className="ps-recipe-use" type="button" onClick={()=>select(p)}>{en?'Use':'Usar'}</button>
+      </article>):<p>{en?'No results':'No hay resultados'}</p>}</div>
+      {shown.length>limit&&<button type="button" className="ps-load-more" onClick={()=>setLimit(n=>n+6)}>{en?'Show 6 more':'Ver 6 más'} ({shown.length-limit})</button>}
+      </>}
+      </>:<div className="ps-recipe-list">
      {loadError&&<p role="alert">{loadError}<button onClick={load}>↻</button></p>}
      {filteredSaved.length?filteredSaved.map(p=><article className="ps-recipe" key={p.id}>
        <button type="button" className={'ps-fave '+(p.favorite?'active':'')} aria-label={en?'Favorite':'Favorito'} onClick={()=>favorite(p)}><Bookmark size={17}/></button>
@@ -96,12 +110,13 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
     </div>}
    </div>
    <aside className="ps-builder" ref={editorRef} id="prompt-editor" aria-label={en?'Edit prompt':'Editar prompt'}>
-    <div className="ps-builder-header"><Sparkles size={19}/><div><strong>{en?'Edit your idea':'Edita tu idea'}</strong><small>{en?'Choose a recipe below or write your own':'Elige una receta abajo o escribe la tuya'}</small></div></div>
-    <label>{en?'What are we photographing?':'¿Qué vamos a fotografiar?'}<input value={settings.subject} onChange={e=>update('subject',e.target.value)} placeholder={en?'Your real product, portrait or service':'Tu producto, retrato o servicio real'}/></label>
+    <div className="ps-builder-header"><Sparkles size={19}/><div><strong>{selectedKind==='text'?(en?'Personalize your prompt':'Personaliza tu prompt'):(en?'Edit your idea':'Edita tu idea')}</strong><small>{en?'Choose a recipe below or write your own':'Elige una receta abajo o escribe la tuya'}</small></div></div>
+    {selectedKind==='photo'&&<><label>{en?'What are we photographing?':'¿Qué vamos a fotografiar?'}<input value={settings.subject} onChange={e=>update('subject',e.target.value)} placeholder={en?'Your real product, portrait or service':'Tu producto, retrato o servicio real'}/></label>
     <label>{en?'Where should it be?':'¿Dónde quieres la escena?'}<input value={settings.environment} onChange={e=>update('environment',e.target.value)} placeholder={en?'Warm ivory studio, daylight cafe…':'Estudio ivory, cafetería con luz natural…'}/></label>
+    </>}
     <label>{en?'Describe what you want (your own prompt)':'Escribe lo que tú quieras (prompt libre)'}
-     <textarea ref={manualRef} rows={4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
-    <details className="ps-optional-controls"><summary>{en?'More creative settings':'Ajustes de estilo'}</summary><div className="ps-control-grid">
+     <textarea ref={manualRef} rows={4} value={manual} onChange={e=>setManual(e.target.value)} placeholder={selectedKind==='text'?'Adapta las instrucciones a tu negocio y al público.':en?'Describe the photo in your own words. Your instructions always go first.':'Describe la foto con tus palabras. Tus instrucciones siempre van primero.'}/></label>
+    {selectedKind==='photo'&&<><details className="ps-optional-controls"><summary>{en?'More creative settings':'Ajustes de estilo'}</summary><div className="ps-control-grid">
       <label>{en?'Visual mood':'Estilo visual'}<select value={settings.style} onChange={e=>update('style',e.target.value as PromptControls['style'])}>
        {Object.entries({'real-life':en?'Natural':'Natural realista',studio:en?'Studio':'Estudio',editorial:'Editorial',luxury:en?'Luxury':'Lujo',bold:'Bold',minimal:'Minimal'}).map(([v,l])=><option key={v} value={v}>{l}</option>)}
       </select></label>
@@ -118,6 +133,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
     <button className="ps-advanced-toggle" type="button" aria-expanded={expanded} onClick={()=>setExpanded(!expanded)}><SlidersHorizontal size={16}/> {expanded?(en?'Hide advanced':'Ocultar avanzado'):(en?'Advanced / avoid':'Avanzado / evitar')}</button>
     {expanded&&<label>{en?'Avoid (negative instructions)':'Evitar (instrucciones negativas)'}
      <textarea rows={3} value={settings.avoid} onChange={e=>update('avoid',e.target.value)} placeholder={en?'No fake labels, no waxy skin, no distorted hands…':'Sin etiquetas falsas, piel plástica ni manos deformadas…'}/></label>}
+    </>}
     <details className="ps-output"><summary>{en?'Preview full prompt':'Ver prompt completo'} · {compiled.length} {en?'characters':'caracteres'}</summary><div><strong>{en?'Full prompt':'Prompt completo'}</strong></div>
      <textarea aria-label="Prompt final" rows={7} value={compiled} readOnly onFocus={e=>e.currentTarget.select()}/>
      <small>{en?'We preserve your instructions first. Realism is guidance, not a guarantee; exact logos and faces are best kept as original image layers.':'Tus instrucciones van primero. El realismo es una guía, no una garantía; logos y rostros exactos se conservan mejor como capas originales.'}</small>
@@ -126,7 +142,8 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
     <div className="ps-actions">
      <button type="button" className="btn ghost" onClick={()=>copy(compiled)}><Copy size={16}/>{copied?'✓':en?'Copy':'Copiar'}</button>
      <button type="button" className="btn ghost" disabled={busy} onClick={save}><Bookmark size={16}/>{en?'Save':'Guardar'}</button>
-     <button type="button" className="btn dark" onClick={()=>onUse(compiled,{...settings,instruction:manual})}>{en?'Continue to create':'Continuar a crear'}</button>
+     {selectedKind==='photo'?<button type="button" className="btn dark" onClick={()=>onUse(compiled,{...settings,instruction:manual})}>{en?'Continue to create':'Continuar a crear'}</button>
+        :<a className="btn dark" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">{en?'Open ChatGPT':'Abrir ChatGPT'} ↗</a>}
     </div>
    </aside>
   </div>
