@@ -12,11 +12,13 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(ui.includes('encodeCarouselDesign(all,nextStyle)'));
  assert.ok(ui.includes('encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))'));
  assert.ok(ui.includes('const generated=parseSlides(updated,brand).map'));
- assert.ok(ui.includes('backgroundImageId,backgroundColor:slide.backgroundColor'));
+ assert.ok(ui.includes('backgroundImageId:previous.backgroundImageId'));
+ assert.ok(ui.includes('stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions'));
  assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
  assert.ok(ui.includes('const canvas=pages?pages[n]:await drawSlide('));
  assert.ok(ui.includes('canvasToPngBlob(canvas)'));
- assert.ok(ui.includes('overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style))'));
+ assert.ok(ui.includes('constrainNormalLayer(layer,slides.length)'));
+ assert.ok(ui.includes('overlayPanoramaPages(all,style.seamlessEnabled?'));
 });
 test('Style references are sampled locally and never pasted into carousel slides',()=>{
  const helper=src('src/CarouselArtDirection.ts'),ui=src('src/CarouselFactory.tsx');
