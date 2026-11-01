@@ -34,7 +34,8 @@ test('AI vision source and style review are explicit and optional',()=>{
 test('iPhone editing, quality checks and explicit image quota confirmation',()=>{
  const grid=src('src/BrandGrid.tsx'),edit=src('src/GridVisualEditor.tsx');
  for(const txt of ['GridVisualEditor','checkQuality','hamming(','askCredits(','He revisado las nueve imágenes'])assert.ok(grid.includes(txt),txt);
- assert.ok(edit.includes('onPointerMove={move}'));
+ assert.ok(edit.includes('onPointerMove={pointerMove}'));
+ assert.ok(edit.includes('pinching:true'));
  assert.ok(edit.includes("imageZoom"));
  assert.ok(edit.includes("textScale"));
 });
@@ -51,7 +52,9 @@ test('mobile review checkbox uses a real 20px column instead of global 100%-wide
 test('photo frame can be moved and resized separately from crop/zoom',()=>{
  const composer=src('src/GridComposer.ts'),editor=src('src/GridVisualEditor.tsx');
  for(const key of ['frameX','frameY','frameScale']){assert.ok(composer.includes(key));assert.ok(editor.includes(key));}
- assert.ok(editor.includes("if(layer==='photo')onChange({...from,frameX:"));
+ assert.ok(editor.includes("if(g.layer==='photo')schedule({...g.from,frameX:"));
+ assert.ok(editor.includes('next.frameScale=clamp'));
+ assert.ok(editor.includes('next.textScale=clamp'));
  assert.ok(gridSource().includes('Vista previa de diseño'));
  function gridSource(){return src('src/BrandGrid.tsx');}
 });
@@ -110,7 +113,7 @@ test('iPhone editor debounces canvas preview and hides expert controls until nee
  assert.ok(editor.includes('setTimeout(()=>{'));
  assert.ok(editor.includes('},120)'));
  assert.ok(editor.includes('aria-expanded={advanced}'));
- assert.ok(editor.includes('{advanced&&<>'));
+ assert.ok(editor.includes('{advanced&&<div className="v2-slider-grid">'));
 });
 
 test('editorial original-photo reuse is intentional and cannot trigger duplicate image warnings',()=>{
