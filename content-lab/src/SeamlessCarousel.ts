@@ -6,9 +6,9 @@ import {coverPlacement,normalizeCrop} from './PhotoCrop';
 import {paintPanoramaLayers,type PanoramaLayer} from './PanoramaLayers';
 import {carouselFontFamily,readableColor,type CarouselFont} from './CarouselArtDirection';
 import {editorialPlan,type EditorialLayout} from './EditorialRhythm';
-export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string};
+export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;editorialRhythm?:boolean;canvasColor?:string;canvasGradient?:string};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;editorialRhythm?:boolean;canvasColor?:string;canvasGradient?:string;usePageBackgrounds?:boolean};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -44,7 +44,9 @@ export async function paintSeamlessTypography(
  for(const [i,page] of pages.entries()){
   const font=carouselFontFamily(page.titleFont||fontId,brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* Font fallback */}
-  const x=i*W,ink=(backgroundId==='night-editorial'||backgroundId==='night-stars'||backgroundId==='rust-autumn')?'#FFFFFF':(freeCanvas&&backgroundId==='brand'?readableColor(canvasColor):'#191919');
+  const pageBackground=page.backgroundId||backgroundId;
+   const x=i*W,ink=(pageBackground==='night-editorial'||pageBackground==='night-stars'||pageBackground==='rust-autumn')
+     ?'#FFFFFF':freeCanvas&&pageBackground==='brand'?readableColor(page.backgroundColor||canvasColor):'#191919';
   const plan=editorialRhythm?editorialPlan((page.layout||'statement') as EditorialLayout,!!page.assetId,!!page.description.trim()):null;
   if(page.eyebrow){ctx.fillStyle=ink;ctx.textBaseline='top';
    ctx.font='700 25px Arial, sans-serif';ctx.fillText(page.eyebrow.slice(0,45).toUpperCase(),x+(plan?.eyebrow.x??82),plan?.eyebrow.top??95);}
@@ -71,7 +73,28 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const accent=/^#[0-9a-f]{6}$/i.test(opts.accent||'')?opts.accent!:brand.color;
- if(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')){
+ if(opts.usePageBackgrounds){
+    // Each slide has its own backdrop; panorama layers still span all slides.
+    for(let i=0;i<total;i++){
+      const page=pages[i];
+      ctx.save();ctx.translate(i*W,0);
+      if(page.backgroundImageId&&images[page.backgroundImageId]){
+        const im=await load(images[page.backgroundImageId]);
+        const ratio=Math.max(W/im.naturalWidth,H/im.naturalHeight);
+        const sw=W/ratio,sh=H/ratio;
+        ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,W,H);
+      }else if(page.backgroundId&&page.backgroundId!=='brand'){
+        paintFreeBackground(ctx,W,H,page.backgroundId,accent,brand.background);
+      }else{
+        const a=page.backgroundColor||opts.canvasColor||'#FFFFFF';
+        const b=page.backgroundGradient||opts.canvasGradient;
+        if(b){const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,a);g.addColorStop(1,b);
+          ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+        else{ctx.fillStyle=a;ctx.fillRect(0,0,W,H);}
+      }
+      ctx.restore();
+    }
+  }else if(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')){
    const a=opts.canvasColor||'#FFFFFF',b=opts.canvasGradient;
    if(b){const g=ctx.createLinearGradient(0,0,wide.width,H);g.addColorStop(0,a);g.addColorStop(1,b);
      ctx.fillStyle=g;ctx.fillRect(0,0,wide.width,H);}
@@ -85,7 +108,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
      ctx.restore();
    }
  }else paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'brand',accent,brand.background);
- if(opts.assetId&&images[opts.assetId]){
+ if(!opts.usePageBackgrounds&&opts.assetId&&images[opts.assetId]){
   const im=await load(images[opts.assetId]);const ratio=Math.max(wide.width/im.naturalWidth,H/im.naturalHeight);
   const sw=wide.width/ratio,sh=H/ratio;
   ctx.save();ctx.globalAlpha=.27;
@@ -107,7 +130,11 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const font=carouselFontFamily(page.titleFont||opts.font||'brand',brand.headingFont);
   try{await document.fonts?.load('700 90px '+font)}catch{/* use fallback */}
   const plan=opts.editorialRhythm?editorialPlan((page.layout||'statement') as EditorialLayout,!!page.assetId,!!page.description.trim()):null;
-  const dark=opts.backgroundId==='night-editorial'||opts.backgroundId==='night-stars'||opts.backgroundId==='rust-autumn'||(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')&&readableColor(opts.canvasColor||'#FFFFFF')==='#FFFFFF'),ink=dark?'#FFFFFF':'#191919';
+  const pageBackground=opts.usePageBackgrounds?page.backgroundId:opts.backgroundId;
+   const pageColor=opts.usePageBackgrounds?page.backgroundColor||opts.canvasColor:opts.canvasColor;
+   const dark=pageBackground==='night-editorial'||pageBackground==='night-stars'||pageBackground==='rust-autumn'||
+     (opts.freeCanvas&&(!pageBackground||pageBackground==='brand')&&readableColor(pageColor||'#FFFFFF')==='#FFFFFF');
+   const ink=dark?'#FFFFFF':'#191919';
   if(!opts.freeCanvas){
     const grad=ctx.createLinearGradient(x,0,x+W*.88,H*.20);
     grad.addColorStop(0,dark?'rgba(25,25,25,.67)':'rgba(250,248,243,.72)');
@@ -150,7 +177,9 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   const behind=(opts.layers||[]).filter(layer=>layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.placement!=='behind-text');
   await paintPanoramaLayers(ctx,wide.width,H,behind,images);
-  if(behind.length)await paintSeamlessTypography(ctx,pages,brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor,opts.editorialRhythm);
+  if(behind.length)await paintSeamlessTypography(ctx,
+     opts.usePageBackgrounds?pages:pages.map(p=>({...p,backgroundId:opts.backgroundId,backgroundColor:opts.canvasColor})),
+     brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor,opts.editorialRhythm);
   await paintPanoramaLayers(ctx,wide.width,H,front,images);
  }
  return wide;
