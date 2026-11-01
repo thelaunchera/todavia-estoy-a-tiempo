@@ -21,7 +21,8 @@ test('Decorated carousel is saved, previewed and exported without raster AI gene
  assert.ok(app.includes('paintFreeBackground(ctx,1080,1350'));
  assert.ok(app.includes('paintOriginalStickerImages(ctx,1080,1350,slide.stickerIds'));
  assert.ok(app.includes('encodeCarouselDesign(all,nextStyle)'));
- assert.ok(app.includes('const canvas=(await renderAllSlides())[n]'));
+ assert.ok(app.includes('const canvas=pages?pages[n]:await drawSlide('));
+ assert.ok(app.includes('canvasToPngBlob(canvas)'));
 });
 test('Brand Grid editorial and classic formats both render stickers/backgrounds in final PNG',()=>{
  const grid=src('src/BrandGrid.tsx'),composer=src('src/GridComposer.ts'),poster=src('src/EditorialPoster.ts');
