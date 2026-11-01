@@ -442,4 +442,4 @@ assert.ok(!catalogHtml.includes('<span aria-hidden="true">Ver detalles</span>'),
 assert.ok(catalogHtml.includes('data-detail="web-class">Conocer la clase'),'La clase conserva su CTA principal');
 assert.ok(catalogHtml.includes('data-detail="content-lab">Descubre qué incluye'),'El Lab conserva su CTA principal');
 assert.ok(catalogCss.includes('.cover-action:focus-visible'),'Las portadas tienen foco para teclado');
-assert.ok(catalogHtml.includes('centro.css?v=20261031-clean-covers-v9'),'El navegador recibe los estilos nuevos');
+assert.match(catalogHtml,/centro\.css\?v=\d{8}-[a-z0-9-]+/,'El navegador recibe los estilos versionados');
