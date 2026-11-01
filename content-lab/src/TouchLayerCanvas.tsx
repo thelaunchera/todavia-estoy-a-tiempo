@@ -18,7 +18,7 @@ type Props = {
   preview: string; textOverlay?: string; layers: TouchLayer[];
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
-  ratio?: number; pageCount?: number; canvasHeight?: number; onEmpty?: () => void;
+  ratio?: number; pageCount?: number; continuous?:boolean; canvasHeight?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onToggleLock?: (id:string,locked:boolean)=>void;
@@ -37,7 +37,7 @@ type Gesture = {
   pinchDistance?: number; pinchCenter?: [number, number];
 };
 export default function TouchLayerCanvas({
-  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
+  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
   onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
@@ -286,10 +286,11 @@ export default function TouchLayerCanvas({
     if (selected === id) setSelected('');
   };
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
-    (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')}
+    (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')+
+    (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
-      {pageCount} slides · líneas azules = corte al descargar
+      {continuous?`${pageCount} slides · líneas azules = cortes al descargar`:`Carrusel normal · ${pageCount} slides independientes`}
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
     {pageCount>1&&<div className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
@@ -344,7 +345,7 @@ export default function TouchLayerCanvas({
     <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
       style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
-        style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * 230} : {})}}
+        style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * (continuous ? 230 : 320)} : {})}}
         onClick={e => { if (e.target === e.currentTarget) { setSelected(''); onEmpty?.(); } }}
         onDragOver={e => { if (onDropAsset || onDropFiles) { e.preventDefault(); setDragOver(true); } }}
         onDragLeave={() => setDragOver(false)}
