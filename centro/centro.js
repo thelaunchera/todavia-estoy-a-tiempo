@@ -343,7 +343,7 @@ const productInformation=Object.freeze({
   price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
   includes:['Edita posts, carruseles, reels e historias.','Usa tus fotos, fondos y stickers.','Organiza tu feed y planifica fechas y horas.'],
   delivery:'Te enviaremos el acceso al correo de tu compra.',
-  note:'Incluye 60 fotos con IA y 30 créditos iniciales (máximo diario: 10 de cada uno). El calendario no publica automáticamente.',
+  note:'60 fotos con IA y 30 créditos de ideas al comenzar, con un máximo de 10 de cada tipo por día. El calendario no publica automáticamente.',
   checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
  'booking-flow':{
@@ -440,6 +440,7 @@ function openProductDetails(code){
  }
  const disabled=$('product-details-unavailable');
  productDialog.classList.toggle('lab-compact',code==='content-lab');
+ productDialog.querySelector('.product-legal-disclosure').open=false;
  for(const link of productDialog.querySelectorAll('.product-legal-disclosure a')){
   const original=link.dataset.originalHref||(link.dataset.originalHref=link.getAttribute('href'));
   const filename=original?.split('/').pop();
