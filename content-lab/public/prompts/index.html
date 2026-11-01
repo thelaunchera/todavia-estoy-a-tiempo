@@ -243,14 +243,199 @@ main{padding-top:8px}
  .hero-with-carousel .hero-arrow{bottom:43px}
  .hero-with-carousel .hero-pagination{bottom:64px}
 }
+
+/* 01 Nov 2026 · Hero móvil editorial compacto: foto y copy en zonas separadas.
+   No se extiende la imagen de fondo ni se superponen los controles con el CTA. */
+@media (max-width:780px){
+  .editorial-hero.hero-with-carousel{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"matcha-photo" "matcha-copy";
+    gap:0;
+    min-height:0;
+    height:auto;
+    margin:0 0 27px;
+    padding:0;
+    overflow:visible;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    background:transparent;
+    text-align:left;
+    isolation:isolate;
+  }
+  .hero-with-carousel .hero-carousel{
+    grid-area:matcha-photo;
+    display:block;
+    position:relative;
+    inset:auto;
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    height:clamp(210px,58vw,295px);
+    min-height:0;
+    margin:0;
+    overflow:hidden;
+    border-radius:19px;
+    background:#223a20;
+    z-index:1;
+  }
+  .hero-with-carousel .hero-featured-wrap,
+  .hero-with-carousel .hero-featured-photo{
+    position:absolute;
+    inset:0;
+    display:block;
+    width:100%;
+    height:100%;
+    min-height:0;
+    max-height:none;
+    margin:0;
+    border-radius:inherit;
+    overflow:hidden;
+    background:#223a20;
+    box-shadow:none;
+    filter:none;
+  }
+  .hero-with-carousel .hero-featured-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:50% 51%;
+  }
+  .hero-with-carousel .hero-featured-photo:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    display:block;
+    background:linear-gradient(180deg,transparent 50%,rgba(18,37,18,.45) 100%);
+    pointer-events:none;
+  }
+  .hero-with-carousel .hero-copy{
+    grid-area:matcha-copy;
+    position:relative;
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    margin:0;
+    padding:19px 3px 0;
+    z-index:2;
+  }
+  .hero-with-carousel .hero-eyebrow{
+    justify-content:flex-start;
+    font-size:9px;
+    letter-spacing:1px;
+    color:#687654;
+  }
+  .hero-with-carousel .hero-dot{background:#7c8e59}
+  .hero-with-carousel h1{
+    color:#223222;
+    font-size:clamp(33px,8.9vw,44px);
+    line-height:1.04;
+    letter-spacing:-.04em;
+    max-width:100%;
+    margin:11px 0 12px;
+    text-wrap:balance;
+  }
+  .hero-with-carousel h1 em{color:#738951}
+  .hero-with-carousel .hero-lead{
+    color:#4b5b48;
+    font-size:clamp(13px,3.5vw,15px);
+    line-height:1.52;
+    max-width:45ch;
+    margin:0 0 16px;
+  }
+  .hero-with-carousel .hero-lead b{color:#29472b}
+  .hero-with-carousel .hero-start{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    position:relative;
+    width:100%;
+    max-width:370px;
+    min-height:50px;
+    margin:0;
+    padding:12px 18px;
+    border:0;
+    border-radius:999px;
+    background:#244425;
+    color:#fff!important;
+    font-size:13px;
+    line-height:1.4;
+    z-index:2;
+    touch-action:manipulation;
+  }
+  .hero-with-carousel .hero-start:hover{background:#315b32}
+  .hero-with-carousel .hero-slider-controls{
+    position:absolute;
+    inset:0;
+    display:block;
+    margin:0;
+    width:100%;
+    height:100%;
+    max-width:none;
+    min-height:0;
+    z-index:4;
+    pointer-events:none;
+  }
+  .hero-with-carousel .hero-arrow{
+    position:absolute;
+    top:50%;
+    bottom:auto;
+    transform:translateY(-50%);
+    width:42px;
+    height:42px;
+    min-width:42px;
+    flex:0 0 42px;
+    padding:0;
+    border:1px solid #ffffffa8;
+    border-radius:50%;
+    background:#ffffffe0;
+    color:#224021;
+    box-shadow:0 3px 14px #10200c25;
+    pointer-events:auto;
+    touch-action:manipulation;
+  }
+  .hero-with-carousel #hero-prev{left:12px}
+  .hero-with-carousel #hero-next{right:12px}
+  .hero-with-carousel .hero-pagination{
+    display:flex;
+    position:absolute;
+    left:50%;
+    right:auto;
+    top:auto;
+    bottom:12px;
+    width:max-content;
+    min-height:0;
+    margin:0;
+    transform:translateX(-50%);
+    z-index:5;
+    pointer-events:auto;
+  }
+  .hero-with-carousel .hero-dot-button{
+    width:8px;height:8px;min-width:8px;
+    background:#ffffffb8;
+  }
+  .hero-with-carousel .hero-dot-button.is-active{background:#f0eea1}
+  .hero-with-carousel .hero-carousel-caption,
+  .hero-with-carousel .hero-photo-marker{display:none}
+}
+@media (max-width:380px){
+  .hero-with-carousel .hero-carousel{height:220px}
+  .hero-with-carousel h1{font-size:34px}
+  .hero-with-carousel .hero-copy{padding-top:16px}
+}
+
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
 <section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
-    <span class="hero-eyebrow"><span class="hero-dot"></span> CONTENT LAB · HERRAMIENTA GRATUITA</span>
-    <h1 id="hero-title">Una foto.<br><em>Ocho ideas</em><br>para cualquier<br>producto.</h1>
-    <p class="hero-lead">¿Tienes una buena foto de tu producto, pero no sabes cómo convertirla en un post? Aquí tienes ocho ideas para empezar. <b>Matcha es solo el ejemplo; la marca es tuya.</b></p>
+    <span class="hero-eyebrow"><span class="hero-dot"></span> 8 IDEAS GRATIS · PARA CUALQUIER PRODUCTO</span>
+    <h1 id="hero-title">Una foto.<br><em>Ocho ideas.</em></h1>
+    <p class="hero-lead">Convierte una foto de tu producto en ocho ideas para publicar. <b>Matcha es solo el ejemplo; la marca es tuya.</b></p>
     <a href="#recibir" class="hero-start">Recibir mis 8 prompts gratis <span aria-hidden="true">→</span></a>
   </div>
   <div class="hero-carousel" role="region" aria-roledescription="carrusel" aria-label="Ocho ejemplos de publicaciones con el mismo producto">
