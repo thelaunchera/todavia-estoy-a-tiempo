@@ -64,11 +64,12 @@ export default function TouchLayerCanvas({
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false);setCopyFeedback(''); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
+  const focusedWallpaperReady=Boolean(focusLayerId&&layers.some(layer=>layer.id===focusLayerId));
   useEffect(()=>{
-    if(pageCount>1&&focusLayerId&&layers.some(layer=>layer.id===focusLayerId)){
+    if(pageCount>1&&focusLayerId&&focusedWallpaperReady){
       setInteractionMode('edit');setSelected(focusLayerId);
     }
-  },[focusLayerId,pageCount]);
+  },[focusLayerId,pageCount,focusedWallpaperReady]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   useEffect(()=>{
     const el=stage.current;if(!el)return;
@@ -204,8 +205,13 @@ export default function TouchLayerCanvas({
     } else {
       const dx = (e.clientX - g.startX+(scrollArea.current?.scrollLeft||0)-g.scrollLeft) / g.width, dy = (e.clientY - g.startY) / g.height;
       if (g.resize) {
-        const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
-        update(g.id, {...g.start, w: g.start.w * factor, h: layer.role==='background'?g.start.h:g.start.h*factor});
+        if(layer.role==='background'){
+          // Horizontal resizing is independent of height and works in both directions.
+          update(g.id,{...g.start,w:Math.max(1/pageCount,Math.min(1-g.start.x,g.start.w+dx)),h:1,y:0});
+        }else{
+          const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
+          update(g.id, {...g.start, w: g.start.w * factor, h:g.start.h*factor});
+        }
       } else update(g.id, applySmartSnap({...g.start, x: g.start.x + dx, y: g.start.y + dy},g.width,g.height));
     }
   };
