@@ -1828,3 +1828,33 @@ html{scroll-padding-top:96px}
  .creative-freebie-text>p:not(.creative-freebie-label){font-size:13px}
  .creative-freebie-text .creative-freebie-link{display:inline-flex;padding:13px 19px;margin-top:14px}
 }
+
+
+/* 01 Nov: compact Matcha freebie, deliberately secondary to the class */
+.creative-freebie-strip{background:#faf8f3;padding:12px 0 22px}
+.creative-freebie-inner{max-width:1000px;display:grid;grid-template-columns:124px minmax(0,1fr);align-items:center;gap:20px;padding:13px 16px;background:#fcfbf8;border:1px solid #e7e2d8;border-radius:17px;box-shadow:none}
+.creative-freebie-image{display:block;width:124px;height:125px;border-radius:12px;background:#eee8df;overflow:hidden}
+.creative-freebie-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 45%;border-radius:12px}
+.creative-freebie-text{padding:0;min-width:0}
+.creative-freebie-label{font-size:9px;letter-spacing:.13em;color:#827862;margin:0 0 7px;font-weight:800}
+.creative-freebie-text h2{font:normal clamp(23px,2.3vw,30px)/1.14 Georgia,'Times New Roman',serif;max-width:none;letter-spacing:-.025em;color:#2c2b27;margin:0 0 7px}
+.creative-freebie-text h2 em{color:#86785c}
+.creative-freebie-text>p:not(.creative-freebie-label){max-width:65ch;font-size:12px;line-height:1.52;color:#6f7069;margin:0}
+.creative-freebie-text .creative-freebie-link{display:inline-flex;width:max-content;max-width:100%;padding:8px 0;margin:10px 0 0;border:0;border-radius:0;background:none;color:#353d35;font-size:11px;font-weight:800;line-height:1.4;white-space:normal;box-shadow:none;text-align:left;text-decoration:underline;text-underline-offset:4px}
+.creative-freebie-text .creative-freebie-link:hover,.creative-freebie-text .creative-freebie-link:focus-visible{background:none;color:#696947}
+@media(max-width:700px){
+ .creative-freebie-strip{padding:10px 0 17px}
+ .creative-freebie-inner{grid-template-columns:95px minmax(0,1fr);gap:13px;padding:11px;border-radius:15px}
+ .creative-freebie-image{height:122px;width:95px;border-radius:10px}
+ .creative-freebie-image img{border-radius:10px}
+ .creative-freebie-text{padding:0;min-width:0}
+ .creative-freebie-label{font-size:8px;margin-bottom:6px;letter-spacing:.09em}
+ .creative-freebie-text h2{font-size:clamp(18px,4.8vw,24px);line-height:1.13;margin-bottom:6px}
+ .creative-freebie-text>p:not(.creative-freebie-label){font-size:10px;line-height:1.35}
+ .creative-freebie-text .creative-freebie-link{padding:7px 0;margin:6px 0 0;font-size:10px;min-height:28px}
+}
+@media(max-width:370px){
+ .creative-freebie-inner{grid-template-columns:83px minmax(0,1fr);gap:10px}
+ .creative-freebie-image{width:83px;height:120px}
+ .creative-freebie-text h2{font-size:19px}
+}
