@@ -18,6 +18,9 @@ assert.match(freebie,/Quiero suscribirme al newsletter de The Launch Era/,'Freeb
 assert.doesNotMatch(freebie,/recibir dos correos|dos correos más|dos ideas de seguimiento/i,'El newsletter no promete una cantidad cerrada de correos');
 assert.doesNotMatch(freebie,/<option value="tle">|<option value="podcast">/,'Las marcas privadas no figuran en el selector');
 assert.match(freebie,/id="brandName"/,'La marca se escribe a mano');
+assert.match(freebie,/Mobile QA: freebie CTA and carousel controls occupy separate tap zones/,'El freebie separa el CTA de las flechas');
+assert.match(freebie,/hero-with-carousel \.hero-slider-controls\{[\s\S]*?margin:18px 0 0!important/,'El carrusel deja espacio bajo la foto en teléfonos');
+
 
 const matchaPos=home.indexOf('id="matcha-gratis"');
 const classPos=home.indexOf('<section class="learning-section" id="aprender"');
