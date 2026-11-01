@@ -571,7 +571,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     required.push(...(style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
-    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds});
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style)));
     return overlayPanoramaPages(all,style.panoramaLayers||[],images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
@@ -977,7 +977,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         if(style.seamlessEnabled){
           const wide=await drawSeamlessCanvas(slides,brand,images,{backgroundId:style.seamlessBackgroundId,
             assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
-            layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+            layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds});
           const page=document.createElement('canvas');
           page.width=previewPageWidth;page.height=previewPageHeight;
           const previewCtx=page.getContext('2d');
@@ -1013,7 +1013,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         ?part.photoPosition||photoDefault(part.layout):part.photoPosition}));
       if(style.seamlessEnabled)return drawSeamlessCanvas(editable,brand,images,{
         backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
-        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient});
+        accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,editorMode:true,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds});
       const wide=document.createElement('canvas');wide.width=previewPageWidth*slides.length;wide.height=previewPageHeight;
       const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo abrir el lienzo.');
       for(let n=0;n<editable.length;n++){
@@ -1032,7 +1032,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       if(hasBehind){
         const typography=document.createElement('canvas');typography.width=slides.length*1080;typography.height=1350;
         const typeCtx=typography.getContext('2d');if(!typeCtx)throw Error('No se pudo preparar el texto.');
-        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor,style.editorialRhythm);
+        if(style.seamlessEnabled)await paintSeamlessTypography(typeCtx,
+          style.perSlideBackgrounds?slides:slides.map(p=>({...p,backgroundId:style.seamlessBackgroundId,backgroundColor:style.canvasColor})),
+          brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor,style.editorialRhythm);
         else await paintCarouselTypography(typeCtx,slides,brand,style);
         const scaled=document.createElement('canvas');scaled.width=small.width;scaled.height=small.height;
         scaled.getContext('2d')?.drawImage(typography,0,0,scaled.width,scaled.height);
