@@ -1118,7 +1118,7 @@ function App() {
                 : 'Sign in with a code without leaving this screen. Each account will have its own photo and content library.'}</p>
             {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
               <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
-                El editor privado de GitHub aún necesita conectar su propio Supabase y el proveedor de IA.
+                El acceso privado del Lab requiere conectar Supabase antes de iniciar sesión.
                 La biblioteca de Master Prompts ya está disponible aquí, sin subir tus fotos.
               </p>
             )}
@@ -1667,7 +1667,7 @@ function App() {
                       </details>
                     </div>
                     <p className="lab-ai-message">{loginLanguage==='es'?'Escribe con tu voz o empieza con una idea del banco. Puedes editar cada palabra.':'Write in your voice or start with an idea from the bank. You control every word.'}</p>
-                    {aiWallet?.admin&&<button
+                    {false&&<button
                       className="btn dark wide"
                       disabled={busy === 'ai'}
                       onClick={generate}
@@ -1682,7 +1682,7 @@ function App() {
                         : (loginLanguage==='es'?'Crear con IA · 1 crédito':'Create with AI · 1 credit')}
                     </button>}
                     <button className="btn dark wide" type="button" onClick={()=>navigate('idea-bank')}><Lightbulb size={17}/>{loginLanguage==='es'?'Explorar banco de ideas + IA':'Browse AI idea bank'}</button>
-                    <small className="note">{loginLanguage==='es'?'Tu diseño se descarga en PNG. Los prompts del banco se usan en ChatGPT sin gastar créditos del Lab.':'Download your design as PNG. Idea prompts work with ChatGPT without Lab generation credits.'}</small>
+                    <small className="note">{loginLanguage==='es'?'Crea y descarga diseños PNG. Los prompts son para usarlos en herramientas externas como ChatGPT.':'Create and download PNG designs. Prompts are for use in external tools like ChatGPT.'}</small>
                     <button className="btn ghost wide" type="button" onClick={()=>setManualOpen(v=>!v)}>
                       {manualOpen?(loginLanguage==='es'?'Recoger editor':'Collapse editor'):(loginLanguage==='es'?'Editar todo manualmente':'Edit everything manually')}
                     </button>
