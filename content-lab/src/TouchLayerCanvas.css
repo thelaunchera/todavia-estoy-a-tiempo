@@ -367,3 +367,24 @@
  .panorama-canvas .touch-editor-order-controls{display:block;width:100%}
  .panorama-canvas .touch-editor-order-controls>span{font-size:11px}
 }
+
+/* Selection controls behave as a small contextual inspector, not a long form. */
+.touch-editor-fast-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:#fff;
+ border:1px solid #d8e6e7;border-radius:12px;padding:8px;margin:8px 0}
+.touch-editor-fast-actions span{flex:1;min-width:75px;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;font-size:11px;color:#3b6172;font-weight:750}
+.touch-editor-fast-actions button{min-width:42px;min-height:40px;border:1px solid #b9d4dc;border-radius:10px;
+ background:#eef6f8;color:#26576b;font-weight:800;padding:8px 10px}
+.touch-editor-options{display:block!important}
+.touch-editor-options>summary{cursor:pointer;min-height:38px;display:flex;align-items:center;
+ font-size:12px;font-weight:750;color:#305a6b;list-style-position:inside}
+.touch-editor-options:not([open]){padding:4px 10px!important}
+.touch-editor-options[open]>summary{margin-bottom:8px}
+@media(max-width:760px){
+ .panorama-canvas .touch-editor-options{margin-top:7px}
+ .panorama-canvas .touch-editor-help{display:none}
+ .panorama-canvas .touch-editor-actionbar{padding:7px 8px;gap:6px;flex-direction:row;align-items:center}
+ .panorama-canvas .touch-editor-actionbar>span{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .panorama-canvas .touch-editor-actionbar button{min-height:40px;width:auto}
+ .panorama-canvas .touch-editor-fast-actions{margin:6px 0}
+}
