@@ -17,7 +17,7 @@ test('Seamless option survives old designs and is reused by preview and separate
  assert.ok(ui.includes('renderAllSlides'));
  assert.ok(ui.includes('drawSeamlessPages'));
  assert.ok(ui.includes('await renderAllSlides()'));
- assert.ok(ui.includes('seamlessEnabled:e.target.checked'));
+ assert.ok(ui.includes('chooseCarouselMode(true)')&&ui.includes('chooseCarouselMode(false)'));
  assert.ok(ui.includes('1080 × 1350') || ui.includes('1080x1350'));
 });
 test('Real transparent PNG stickers are imported from the curated ZIP and offered individually, no fake emojis',()=>{
