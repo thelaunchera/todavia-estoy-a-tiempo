@@ -895,12 +895,12 @@ function App() {
     }catch(e){err(e);return null}
     finally{setBusy('')}
   };
-  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true, targetBrandId=brand.id): Promise<Asset | null> => {
+  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true, targetBrandId=brand.id, forcePrivate=false): Promise<Asset | null> => {
     if (!file) return null;
     // The administrator's background/sticker uploads are intentionally shared.
     // Every buyer upload still goes to owner-only RLS tables and private Storage.
     if(aiWallet?.admin&&category==='background')return publishSharedBackground(file);
-    if(aiWallet?.admin&&category==='sticker')return publishSharedSticker(file,'Aesthetic');
+    if(aiWallet?.admin&&category==='sticker'&&!forcePrivate)return publishSharedSticker(file,'Aesthetic');
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
       return null;
@@ -1473,6 +1473,7 @@ function App() {
           {brand && tab === 'factory' && (
             <CarouselFactory
               onUploadPhoto={async file=>upload(file,'original',false)}
+              onUploadSticker={async file=>upload(file,'sticker',false,brand.id,true)}
               onUploadBackground={async file=>upload(file,'background',false)}
               onRenameAsset={async(asset,name)=>{
                 if(asset.shared||asset.brandId!==brand.id)throw Error('Solo puedes cambiar el nombre de tus archivos propios.');
