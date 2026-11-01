@@ -26,9 +26,10 @@ test('The included and admin-shared background picker is directly accessible in 
  assert.ok(decor.includes('Fondos incluidos en Content Lab'));
  assert.ok(decor.includes('studioBackgrounds.filter'));
 });
-test('AI prepares a draft from a natural idea while retaining chosen backgrounds',()=>{
+test('Idea bank lets buyers prepare a draft while visual backgrounds remain editable',()=>{
  const app=read('src/App.tsx'),car=read('src/CarouselFactory.tsx');
- assert.ok(app.includes('Cuéntale a la IA qué quieres crear'));
+ assert.ok(app.includes('Prepara tu publicación'));
+ assert.ok(app.includes('Banco de ideas + IA'));
  assert.ok(app.includes('setManualOpen(true)'));
  assert.ok(app.includes('hidden={!manualOpen}'));
  assert.ok(app.includes('Crear con IA · 1 crédito'));
