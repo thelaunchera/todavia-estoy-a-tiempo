@@ -2198,14 +2198,14 @@ function App() {
                   {id:'factory',label:loginLanguage==='es'?'Carrusel':'Carousel',icon:Layers3},
                   {id:'calendar',label:loginLanguage==='es'?'Calendario':'Calendar',icon:CalendarDays},
                   {id:'posts',label:loginLanguage==='es'?'Mis posts':'My posts',icon:FolderOpen}] as const)
-                  .map(item=><button type="button" key={item.id} aria-label={item.label} aria-current={tab===item.id?'page':undefined}
+                  .map(item=><button type="button" key={item.id} aria-label={t(item.label)} aria-current={tab===item.id?'page':undefined}
                     className={tab===item.id?'active':''}
                     onClick={()=>item.id==='factory'
                       ?(editor.format==='Carousel'&&editor.brandId===brand?.id?navigate('factory'):startFactory())
                       :item.id==='create'
                         ?(tab==='create'?navigate('create'):start())
                         :navigate(item.id)}>
-                    <item.icon size={21}/><span>{item.label}</span></button>)}
+                    <item.icon size={21}/><span>{t(item.label)}</span></button>)}
               </nav>}
     </div>
   );
