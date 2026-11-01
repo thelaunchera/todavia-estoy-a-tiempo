@@ -158,6 +158,17 @@ export const auth={
     if(!configured)return;
     out(await sb.auth.updateUser({data:{content_lab_language:lang}}));
   },
+  getProfilePhotoAssetId:async():Promise<string>=>{
+    if(!configured)return '';
+    const {data:{user}}=await sb.auth.getUser();
+    return typeof user?.user_metadata?.content_lab_avatar_asset_id==='string'
+      ?user.user_metadata.content_lab_avatar_asset_id:'';
+  },
+  setProfilePhotoAssetId:async(id:string)=>{
+    requireConfig();
+    // The image lives in the user's existing private Storage and is never public.
+    out(await sb.auth.updateUser({data:{content_lab_avatar_asset_id:id}}));
+  },
   /** Record real user activity only, never a background timer. */
   noteActivity:():boolean=>{
     if(!activeUserId)return false;
