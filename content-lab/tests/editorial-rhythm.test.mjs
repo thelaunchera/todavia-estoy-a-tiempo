@@ -31,7 +31,9 @@ test('export, seamless and draggable text use same shared plan',()=>{
  assert.ok(factory.includes('editorialTextGeometry(part,item.field)'));
  assert.ok(factory.includes('const p=editorialPlan(slide.layout,!!slide.assetId,!!slide.description.trim())'));
  assert.ok(factory.includes('editorialRhythm:style.editorialRhythm'));
- assert.ok(factory.includes('paintSeamlessTypography(typeCtx,slides,brand,style.seamlessBackgroundId,style.font,style.freeCanvas,style.canvasColor,style.editorialRhythm)'));
+ assert.ok(factory.includes('paintSeamlessTypography(typeCtx,'));
+ assert.ok(factory.includes('style.perSlideBackgrounds?slides:slides.map('),'Se mantiene el fondo individual en previsualización');
+ assert.ok(factory.includes('style.font,style.freeCanvas,style.canvasColor,style.editorialRhythm)'));
  assert.ok(seamless.includes('editorialPlan((page.layout||'));
  assert.ok(seamless.includes('opts.editorialRhythm'));
  assert.ok(seamless.includes('return splitIntoPages(wide,pages.length)'));
