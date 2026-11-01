@@ -1,13 +1,13 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {api} from './platform/client';
-import {ArrowLeft,ArrowRight,CalendarDays,Check,Clock3,ImageIcon,LayoutGrid,Plus,Save} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CalendarDays,Check,Clock3,ImageIcon,LayoutGrid,Plus,Save,Pencil} from 'lucide-react';
 import {localDate,monthCells,plannedItems,validDate,validTime,contentKind,contentKindLabel,contentKindShort,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
 import './ContentCalendar.css';
 
 type Props={
  brand:{id:string;name:string};posts:CalendarPost[];images:Record<string,string>;
  onPostSaved:(post:CalendarPost)=>void;loadImage:(id:string)=>void;
- onNewPost:()=>void;onOpenGrid:()=>void;locale:'es'|'en';
+ onNewPost:()=>void;onOpenGrid:()=>void;onEditItem:(item:PlannedItem)=>void;locale:'es'|'en';
  notify:(value:string)=>void;showError:(error:unknown)=>void;
 };
 const labels={
@@ -38,7 +38,7 @@ const dateLabel=(d:string,language:'es'|'en')=>{
  const [year,month,day]=d.split('-').map(Number);
  return new Intl.DateTimeFormat(language==='es'?'es-US':'en-US',{day:'numeric',month:'short',year:'numeric'}).format(new Date(year,month-1,day));
 };
-export default function ContentCalendar({brand,posts,images,onPostSaved,loadImage,onNewPost,onOpenGrid,locale,notify,showError}:Props){
+export default function ContentCalendar({brand,posts,images,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,locale,notify,showError}:Props){
  const lang=labels[locale],today=useMemo(()=>new Date(),[]);
  const [month,setMonth]=useState(()=>new Date(today.getFullYear(),today.getMonth(),1));
  const [selectedDay,setSelectedDay]=useState(()=>localDate(today));
@@ -105,6 +105,7 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
  };
  const chosen=options.find(p=>p.key===key);
  const currentEvent=events.find(p=>p.id===key);
+ const openDesign=(item:PlannedItem)=>onEditItem(item);
  const loadIds=useMemo(()=>[...new Set(events.filter(p=>p.assetId).map(p=>p.assetId))].filter(id=>!images[id]).slice(0,16),[events,images]);
  useEffect(()=>{for(const id of loadIds)loadImage(id)},[loadIds.join('|')]);
  const feed=current.slice().sort((a,b)=>(b.date+' '+b.time).localeCompare(a.date+' '+a.time));
@@ -158,18 +159,23 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
     <section className="lab-calendar-agenda">
      <div className="lab-calendar-panel-heading"><div><span className="eyebrow">{lang.day}</span>
       <h2>{dateLabel(selectedDay,locale)}</h2></div><strong>{selectedEvents.length}</strong></div>
-     {selectedEvents.length?selectedEvents.map(p=><button type="button" className={'lab-calendar-agenda-post '+(key===p.id?'active':'')}
-      key={p.id} onClick={()=>choose(p.id)}>
+     {selectedEvents.length?selectedEvents.map(p=><div className="lab-calendar-agenda-item" key={p.id}>
+     <button type="button" className={'lab-calendar-agenda-post '+(key===p.id?'active':'')}
+      aria-label={(locale==='es'?'Editar ':'Edit ')+p.title} onClick={()=>openDesign(p)}>
       {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt=""/>:<span className="lab-calendar-noimage"><ImageIcon size={19}/></span>}
       <span><strong>{p.title}</strong><small><Clock3 size={13}/>{p.time} · <b className={'lab-calendar-kind '+contentKind(p.format)}>{contentKindLabel(p.format,locale)}</b></small></span>
-      <span className={'lab-calendar-state '+p.status}>{p.status==='published'?lang.published:lang.planned}</span>
-     </button>):<p className="lab-calendar-empty-day">{lang.empty}</p>}
+      <span className="lab-calendar-edit-label"><Pencil size={14}/>{locale==='es'?'Editar':'Edit'}</span>
+     </button>
+     <button type="button" className="lab-calendar-reschedule" onClick={()=>choose(p.id)}>
+       <Clock3 size={13}/>{locale==='es'?'Cambiar fecha':'Change date'}</button>
+    </div>):<p className="lab-calendar-empty-day">{lang.empty}</p>}
      <div className="lab-calendar-day-add"><Plus size={15}/>{locale==='es'?'Elige un post abajo para asignarlo a este día.':'Choose a post below to assign it to this date.'}</div>
     </section>
    </div>:<section className="lab-calendar-feedview">
      <div className="lab-calendar-feedhead"><div><h2>{lang.feed}</h2><p>{lang.hint}</p></div><span>{current.length} {lang.stats.toLowerCase()}</span></div>
      {feed.length?<div className="lab-calendar-feed">{feed.map(p=><button type="button" key={p.id}
-      className={key===p.id?'selected':''} onClick={()=>{choose(p.id);setSelectedDay(p.date)}}>
+      className={key===p.id?'selected':''} aria-label={(locale==='es'?'Editar ':'Edit ')+p.title}
+      onClick={()=>openDesign(p)}>
       {p.assetId&&images[p.assetId]?<img src={images[p.assetId]} alt={p.title}/>:<div className="lab-calendar-feed-placeholder">
        <ImageIcon size={24}/><strong>{p.title}</strong><small>{lang.picture}</small></div>}
       <span>{p.date.slice(8)} · {p.time} · {contentKindLabel(p.format,locale)}</span>
@@ -192,6 +198,7 @@ export default function ContentCalendar({brand,posts,images,onPostSaved,loadImag
       <button type="button" className="btn dark" disabled={!key||saving} onClick={()=>void saveSchedule()}>
        <Save size={16}/>{saving?'…':lang.save}</button>
       {chosen&&validDate(chosen.date)&&<button type="button" className="btn ghost" disabled={saving} onClick={()=>void saveSchedule(true)}>{lang.unschedule}</button>}
+      {currentEvent&&<button type="button" className="btn ghost" disabled={saving} onClick={()=>openDesign(currentEvent)}><Pencil size={15}/>{locale==='es'?'Editar diseño':'Edit design'}</button>}
       {currentEvent&&<button type="button" className="btn ghost" disabled={saving} onClick={()=>void saveSchedule(false,currentEvent.status==='published'?'planned':'published')}>
        {currentEvent.status==='published'?lang.unmark:lang.mark}</button>}
      </div>
