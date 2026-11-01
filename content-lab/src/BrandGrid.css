@@ -354,3 +354,49 @@
  .bg-grid-reorder>span{width:100%}
  .bg-grid-reorder button{flex:1}
 }
+
+
+/* Photo-first, bilingual touch editing for the 20 creative formats. */
+.brand-grid-tool .bg-touch-assets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0 4px}
+.brand-grid-tool .bg-touch-assets label.bg-touch-upload{display:flex;align-items:center;gap:10px;position:relative;
+ padding:13px;border:1px solid #c6d8d8;border-radius:13px;background:#fcfdfa;cursor:pointer;margin:0;
+ min-height:76px;color:#253d44;overflow:hidden}
+.brand-grid-tool .bg-touch-upload svg{flex:none;color:#39778b}
+.brand-grid-tool .bg-touch-upload span{min-width:0;display:grid;gap:4px}
+.brand-grid-tool .bg-touch-upload strong{font-size:13px;color:#253d44}
+.brand-grid-tool .bg-touch-upload small{font-size:11px;line-height:1.35;font-weight:400;color:#677b80}
+.brand-grid-tool .bg-touch-upload input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;
+ cursor:pointer;display:block;z-index:1}
+.brand-grid-tool .bg-touch-upload:focus-within{outline:3px solid #6794a5;outline-offset:2px}
+.brand-grid-tool .bg-touch-upload:has(input:disabled){opacity:.58;pointer-events:none}
+.brand-grid-tool .bg-touch-clear{display:block;margin:6px 0 14px;border:0;background:none;color:#4e6470;
+ font-size:12px;text-decoration:underline;text-underline-offset:3px;min-height:40px}
+.brand-grid-tool .v2-editor{background:#fafbf9;border-color:#dce6e4}
+.brand-grid-tool .v2-layer-pick button{min-height:46px;font-size:13px;cursor:pointer}
+.brand-grid-tool .v2-layer-pick button[aria-pressed=true]{background:#223d47;color:#fff;border-color:#223d47}
+.brand-grid-tool .v2-touch-hint{font-size:12px;line-height:1.55;color:#526e76;text-align:center;margin:10px 0 13px}
+.brand-grid-tool .v2-preview-wrap{position:relative;touch-action:none;overscroll-behavior:contain;
+ -webkit-user-select:none;user-select:none;cursor:grab;overflow:hidden;isolation:isolate}
+.brand-grid-tool .v2-preview-wrap:active{cursor:grabbing}
+.brand-grid-tool .v2-preview-wrap img{-webkit-user-drag:none;pointer-events:none;display:block}
+.brand-grid-tool .v2-touch-outline{position:absolute;z-index:2;border:2px solid #2e8eaa;
+ box-shadow:0 0 0 1px #fff,0 0 0 4px #266e8430;pointer-events:none;border-radius:2px}
+.brand-grid-tool .v2-touch-outline::after{content:'';position:absolute;right:-8px;bottom:-8px;width:17px;height:17px;
+ border:2px solid white;background:#267f9a;border-radius:50%}
+.brand-grid-tool .v2-touch-actions{display:flex;gap:8px;align-items:center;justify-content:center;
+ flex-wrap:wrap;margin:12px 0 4px}
+.brand-grid-tool .v2-touch-actions span{font-size:12px;font-weight:700;color:#395761;margin-right:auto}
+.brand-grid-tool .v2-touch-actions button{min-width:46px;min-height:44px;border-radius:11px;
+ border:1px solid #c9dadf;background:#fff;color:#254553;font-size:23px;font-weight:700;cursor:pointer}
+.brand-grid-tool .v2-simple-controls{display:flex;align-items:center;justify-content:space-between;
+ margin-top:15px;gap:10px}
+.brand-grid-tool .v2-toggle-advanced{border:1px solid #d3e0e3;background:#fff;border-radius:10px;
+ min-height:42px;padding:9px 13px;font-size:12px;font-weight:700;color:#315666}
+@media(max-width:540px){
+ .brand-grid-tool .bg-touch-assets{grid-template-columns:1fr}
+ .brand-grid-tool .bg-touch-assets label.bg-touch-upload{min-height:67px}
+ .brand-grid-tool .v2-layer-pick{gap:6px}
+ .brand-grid-tool .v2-layer-pick button{padding:9px 6px;min-width:0;font-size:12px}
+ .brand-grid-tool .v2-preview-wrap{max-width:100%}
+ .brand-grid-tool .v2-touch-hint{font-size:12px}
+}
