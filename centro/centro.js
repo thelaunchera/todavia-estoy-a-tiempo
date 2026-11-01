@@ -341,9 +341,9 @@ const productInformation=Object.freeze({
   title:'Content Lab',type:'TU ESPACIO CREATIVO',
   summary:'Deja de empezar cada post desde cero.',
   price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
-  includes:['Edita posts, carruseles, reels e historias.','Usa tus fotos, fondos y stickers.','Organiza tu feed y planifica fechas y horas.'],
+  includes:['Crea posts, carruseles y portadas para reels e historias en PNG.','Usa tus fotos, fondos y stickers, con un banco de ideas y prompts para IA.','Organiza tu feed y planifica fechas y horas.'],
   delivery:'Te enviaremos el acceso al correo de tu compra.',
-  note:'60 fotos con IA y 30 créditos de ideas al comenzar, con un máximo de 10 de cada tipo por día. El calendario no publica automáticamente.',
+  note:'Pago único. El banco incluye ideas y prompts para usar con ChatGPT; el Lab no genera fotos con IA ni edita o exporta videos. El calendario organiza fechas, pero no publica automáticamente.',
   checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
  'booking-flow':{
