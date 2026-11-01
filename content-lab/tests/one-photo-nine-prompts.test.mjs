@@ -3,15 +3,17 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('All eight freebie composition directions appear in the paid Lab with a distinct ninth',()=>{
+test('The paid Lab preserves all eight directions while public freebie requires private unlock',()=>{
  const freebie=read('public/prompts/index.html');
  const prompts=read('src/OnePhotoNinePrompts.ts');
  const names=['Asymmetric Editorial','Monumental Center','Type Behind Product','Side-Cropped Close-Up',
   'Offset Negative Space','Diagonal Visual Flow','Vertical Editorial Stack','Magazine Column Split'];
  for(const name of names){
-  assert.ok(freebie.includes(name),'missing from freebie: '+name);
+  assert.ok(!freebie.includes(name),'private prompt name leaked in public freebie: '+name);
   assert.ok(prompts.includes(name),'missing from Lab: '+name);
  }
+ assert.match(freebie,/action=library/,'The freebie loads private recipes only after verification');
+ assert.match(freebie,/id="crear" class="grid" hidden/,'Private editor is hidden by default');
  assert.ok(prompts.includes("name:'Sensory Product Hero'"));
  assert.ok(prompts.includes('matcha campaign photography'));
  assert.ok(prompts.includes('not a contact sheet'));
