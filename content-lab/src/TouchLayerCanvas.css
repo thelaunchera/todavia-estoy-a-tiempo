@@ -204,3 +204,25 @@
  .panorama-canvas .touch-editor-actionbar-compact{flex-direction:row}
  .panorama-canvas .touch-editor-actionbar-compact .touch-editor-delete-primary{width:auto}
 }
+
+
+/* Copy a selected panorama sticker without hiding or shifting the artboard. */
+.touch-editor-copy-sticker{
+ display:grid;gap:7px;padding:11px;margin:10px 0;
+ border:1px solid #d1e2e6;border-radius:11px;background:#f3f9fa
+}
+.touch-editor-copy-sticker>strong{font-size:12px;font-weight:800;color:#244b5b}
+.touch-editor-copy-sticker p{font-size:11px;line-height:1.45;margin:0;color:#52747e}
+.touch-editor-copy-destinations{display:flex;flex-wrap:wrap;gap:7px}
+.touch-editor-copy-destinations button{
+ flex:1 1 68px;min-height:43px;
+ border:1px solid #b9d6dd;border-radius:9px;background:#fff;
+ color:#28586a;padding:7px 10px;font-weight:750;font-size:11px;
+ touch-action:manipulation
+}
+.touch-editor-copy-destinations button:focus-visible{
+ outline:2px solid #4587a1;outline-offset:2px
+}
+.touch-editor-copy-feedback{
+ color:#2b5a69;font-size:11px;font-weight:650;line-height:1.4
+}
