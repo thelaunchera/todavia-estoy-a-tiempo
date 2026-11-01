@@ -7,7 +7,7 @@ test('Quick 9-post grid starts with distinct concepts, not nine invented photo p
  assert.ok(s.includes("isExpress&&!expandedEditor"));
  assert.ok(s.includes("VISTA PREVIA · GRID 3 × 3"));
  assert.ok(s.includes("El Lab no genera imágenes"));
- assert.ok(s.includes("ONE_PHOTO_NINE[i].short"));
+ assert.ok(s.includes("bg-compact-placeholder"));
  assert.ok(s.includes("p.assetId&&images[p.assetId]?<img"));
  assert.ok(s.includes("index===0?quickMessage.trim()"));
 });
