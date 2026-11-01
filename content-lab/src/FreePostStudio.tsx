@@ -237,7 +237,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
      <button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:'',color:'#FFFFFF'})}>
       {plain('White background','Fondo blanco',locale)}</button>
     </div>
-    <FreeDecorControls title={plain('Stickers and backgrounds','Stickers y fondos',locale)}
+    <FreeDecorControls preferenceScope={brand.id} title={plain('Stickers and backgrounds','Stickers y fondos',locale)}
       backgroundId={decor.backgroundId as FreeBackgroundId} backgroundImageId={decor.backgroundImageId}
       stickerIds={decor.stickerIds} assets={assets} images={images} loadImage={loadImage}
       onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
