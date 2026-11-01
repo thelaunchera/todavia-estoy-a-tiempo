@@ -6,7 +6,7 @@ export type CoverDecor={
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
  headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number};
- color:string;gradient:string;
+ color:string;gradient:string;headlineLocked?:boolean;primaryPhotoLocked?:boolean;lockedStickerIds?:string[];
 };
 export const blankCoverDecor=():CoverDecor=>({backgroundId:'brand',backgroundImageId:'',
  stickerIds:[],stickerPositions:{},layers:[],color:'#FFFFFF',gradient:''});
@@ -31,6 +31,8 @@ export function readCoverDecor(data?:string):CoverDecor{
     lineHeight:Number(p.headlineStyle.lineHeight)||1.12,spacing:Number(p.headlineStyle.spacing)||0,
    }:undefined,
    color:hex(p.color,'#FFFFFF'),gradient:hex(p.gradient,''),
+   headlineLocked:p.headlineLocked===true,primaryPhotoLocked:p.primaryPhotoLocked===true,
+   lockedStickerIds:Array.isArray(p.lockedStickerIds)?p.lockedStickerIds.filter((id:unknown)=>typeof id==='string').slice(0,3):[],
   };
  }catch{return blankCoverDecor()}
 }
