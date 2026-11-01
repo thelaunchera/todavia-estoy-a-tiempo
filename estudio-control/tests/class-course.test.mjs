@@ -29,6 +29,26 @@ test('cada video tiene escenas, qué decir, qué mostrar, materiales y un prompt
   assert.match(script,/ESCENA 1/);
  }
 });
+test('revisión móvil apta para alumnos sin computadora y sin promesas de cobertura universal',()=>{
+ const build=classLessons.find(l=>l.id==='05');
+ const mobile=classLessons.find(l=>l.id==='06');
+ const speech=mobile.beats.map(b=>b.say).join(' ');
+ const demo=recordingStarts['06'];
+ const materials=readFileSync('../alumnos/materiales-interactivos.js','utf8');
+ const landing=readFileSync('../clases/primera-landing.html','utf8');
+ assert.match(build.beats.map(b=>b.say).join(' '),/alterna entre dos pestañas/);
+ assert.match(speech,/no necesitas una computadora/);
+ assert.match(speech,/cometweb\.io\/tools\/responsive/);
+ assert.match(speech,/no significa que hayamos comprobado todos los modelos reales/);
+ assert.match(speech,/vuelvo a abrir la web real en mi teléfono/);
+ assert.match(mobile.prompt,/360, 390, 768 y 1280/);
+ assert.match(demo.actions.join(' '),/simulaciones/);
+ assert.match(demo.readyPrompt,/No inventes pruebas/);
+ assert.match(materials,/¿Solo tienes teléfono\? Revisa tu web sin computadora/);
+ assert.match(materials,/cometweb\.io\/tools\/responsive/);
+ assert.match(landing,/¿Y si solo tengo teléfono y no computadora\?/);
+});
+
 test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>{
  const component=readFileSync('src/ClassWeeklyPlan.tsx','utf8');
  const studio=readFileSync('src/Studio.tsx','utf8');
