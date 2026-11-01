@@ -781,6 +781,9 @@ function App() {
   useEffect(()=>{
     if(profilePhotoId&&!images[profilePhotoId])void imageLoad(profilePhotoId);
   },[profilePhotoId]);
+  useEffect(()=>{
+    if(brand?.logoAssetId&&!images[brand.logoAssetId])void imageLoad(brand.logoAssetId);
+  },[brand?.logoAssetId]);
   const uploadProfilePhoto=async(file:File):Promise<boolean>=>{
     if(file.size>20_000_000){toast('Elige una imagen de menos de 20 MB.');return false}
     const picture=await upload(file,'original',false);
