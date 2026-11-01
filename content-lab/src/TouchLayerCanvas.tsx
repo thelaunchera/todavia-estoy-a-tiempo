@@ -11,7 +11,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';locked?:boolean;
+  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
@@ -27,6 +27,7 @@ type Props = {
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
   onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
   textPalette?:string[];
+  focusLayerId?:string;
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
@@ -37,7 +38,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -63,6 +64,11 @@ export default function TouchLayerCanvas({
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false);setCopyFeedback(''); }, [selected]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
+  useEffect(()=>{
+    if(pageCount>1&&focusLayerId&&layers.some(layer=>layer.id===focusLayerId)){
+      setInteractionMode('edit');setSelected(focusLayerId);
+    }
+  },[focusLayerId,pageCount]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   useEffect(()=>{
     const el=stage.current;if(!el)return;
@@ -163,7 +169,7 @@ export default function TouchLayerCanvas({
       id: layer.id, start: rect, startX: e.clientX, startY: e.clientY,
       width: bounds.width, height: bounds.height,
       resize: !!(e.target as HTMLElement).closest('[data-resize-handle]'),
-      crop: cropping && selected === layer.id && layer.kind === 'photo',
+      crop: cropping && selected === layer.id && layer.kind === 'photo' && layer.role!=='background',
       overflowX: Math.max(0, placement.width - frameW),
       overflowY: Math.max(0, placement.height - frameH),
       scrollLeft: scrollArea.current?.scrollLeft||0,
@@ -199,7 +205,7 @@ export default function TouchLayerCanvas({
       const dx = (e.clientX - g.startX+(scrollArea.current?.scrollLeft||0)-g.scrollLeft) / g.width, dy = (e.clientY - g.startY) / g.height;
       if (g.resize) {
         const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
-        update(g.id, {...g.start, w: g.start.w * factor, h: g.start.h * factor});
+        update(g.id, {...g.start, w: g.start.w * factor, h: layer.role==='background'?g.start.h:g.start.h*factor});
       } else update(g.id, applySmartSnap({...g.start, x: g.start.x + dx, y: g.start.y + dy},g.width,g.height));
     }
   };
@@ -347,7 +353,7 @@ export default function TouchLayerCanvas({
           : <div className="touch-editor-loading">Preparando lienzo…</div>}
         {layers.map(layer => {
           const rect = getRect(layer), active = selected === layer.id;
-          const z = pageCount > 1 ? (layer.placement === 'behind-text' ? 2 : 5) : 5;
+          const z = pageCount > 1 ? (layer.role==='background'?1:layer.placement === 'behind-text' ? 2 : 5) : 5;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
@@ -362,10 +368,10 @@ export default function TouchLayerCanvas({
             borderRadius:radius(layerCornerPixels(rect,fw,fh),fw,fh),
           };
           return <div key={layer.id} data-layer={layer.id}
-            className={'touch-editor-layer ' + layer.kind + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
+            className={'touch-editor-layer ' + layer.kind + (layer.role==='background'?' is-background':'') + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
-               zIndex:active?8:z,
+               zIndex:layer.role==='background'?1:active?8:z,
                pointerEvents:layer.locked||pageCount>1&&(interactionMode==='navigate'||(selected!==''&&!active))?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
@@ -379,11 +385,11 @@ export default function TouchLayerCanvas({
                 y: r.y + (e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0)},layer.kind);
               update(layer.id, rect); onCommit(layer.kind, layer.id, rect);
             }}>
-            {layer.kind==='photo'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
+            {layer.kind==='photo'&&layer.role!=='background'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={photoWindow}>
-              <img src={layer.src} alt="" draggable={false} style={layer.kind === 'photo' ? {
+              <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>
@@ -405,7 +411,8 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
             {active && <><span className="touch-editor-outline"/>
-              {!cropping&&!layer.locked && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}</>}
+              {!cropping&&!layer.locked && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
+              {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
         })}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
@@ -543,7 +550,14 @@ export default function TouchLayerCanvas({
         <label>Color <input type="color" value={chosen.color||'#F1E5D2'}
           onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
       </div>}
-      {chosen.kind === 'photo' && <><button type="button" className="touch-editor-fit"
+      {chosen.role==='background' && pageCount>1 && <div className="touch-editor-background-stretch-controls" role="group" aria-label="Estirar fondo a otras diapositivas">
+        <strong>🎀 Fondo continuo · arrastra el tirador lateral para llegar a otra slide</strong>
+        <button type="button" onClick={()=>commit({w:Math.min(1-selectedRect.x,selectedRect.w+1/pageCount),h:1,y:0})}>+ Extender 1 slide</button>
+        <button type="button" onClick={()=>commit({w:Math.max(1/pageCount,selectedRect.w-1/pageCount),h:1,y:0})}>− Reducir 1 slide</button>
+        <button type="button" onClick={()=>commit({x:0,y:0,w:1,h:1})}>Ocupar todo el carrusel</button>
+        <small>La línea punteada marca el corte. El PNG conservará esa misma posición.</small>
+      </div>}
+      {chosen.kind === 'photo' && chosen.role!=='background' && <><button type="button" className="touch-editor-fit"
         onClick={() => { void fitWholePhoto(); }}>Mostrar foto completa</button>
         <button type="button" aria-pressed={cropping}
         onClick={() => setCropping(v => !v)}>{cropping ? '✓ Listo · mover marco' : 'Recortar / encuadrar'}</button>
