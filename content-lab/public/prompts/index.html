@@ -274,6 +274,38 @@ main{padding-top:8px}
  .hero-with-carousel .hero-start{font-size:12px;min-height:49px}
  .hero-with-carousel .hero-featured-wrap{height:clamp(236px,72vw,295px)}
 }
+
+/* Mobile QA: freebie CTA and carousel controls occupy separate tap zones. */
+@media(max-width:780px){
+  .editorial-hero.hero-with-carousel{row-gap:30px;overflow:hidden}
+  .hero-with-carousel .hero-copy{margin:0;padding-bottom:8px}
+  .hero-with-carousel .hero-start{
+    position:relative;z-index:3;box-sizing:border-box;
+    width:min(100%,370px);min-height:52px;
+    margin:0;white-space:normal;line-height:1.4;
+  }
+  .hero-with-carousel .hero-carousel{
+    display:block;position:relative!important;inset:auto!important;
+    margin:0;padding-top:8px;isolation:isolate;
+  }
+  .hero-with-carousel .hero-featured-wrap{position:relative!important;inset:auto!important}
+  .hero-with-carousel .hero-slider-controls{
+    display:flex;position:relative!important;inset:auto!important;
+    justify-content:space-between;gap:16px;
+    margin:18px 0 0!important;min-height:46px;
+    pointer-events:auto;
+  }
+  .hero-with-carousel .hero-arrow{
+    position:static!important;transform:none!important;
+    flex:0 0 46px;width:46px;height:46px;min-width:46px;
+    z-index:2;
+  }
+  .hero-with-carousel .hero-pagination{position:relative!important;inset:auto!important;margin:13px 0 0}
+}
+@media(max-width:390px){
+  .hero-with-carousel .hero-start{width:100%;min-height:52px}
+  .hero-with-carousel .hero-slider-controls{margin-top:16px!important}
+}
 </style></head><body>
 <header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
