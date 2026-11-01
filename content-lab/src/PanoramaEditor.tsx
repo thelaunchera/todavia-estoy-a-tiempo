@@ -68,7 +68,7 @@ export default function PanoramaEditor({
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Sube tus fotos y colócalas.</h2>
-      <p>Arrastra cada imagen, amplíala o muévela entre slides. Las líneas solo indican dónde se separará al descargar.</p>
+      <p>Desliza entre slides sin mover tus stickers. Cambia a «Editar elementos» para escoger y ajustar una foto o un sticker. Las líneas indican los cortes al descargar.</p>
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
@@ -99,7 +99,7 @@ export default function PanoramaEditor({
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&<aside className="panorama-library">
       <strong><ImagePlus size={16}/> Tus fotos y stickers</strong>
-      <p>Arrastra al lienzo o toca + para añadir. En el móvil, desliza el lienzo por el fondo.</p>
+      <p>Toca + para añadir. En el móvil usa «Deslizar slides» para navegar y «Editar elementos» para mover únicamente la capa que elijas.</p>
       <div className="panorama-library-controls"><input aria-label="Buscar fotos del lienzo" placeholder="Buscar en tu biblioteca…" value={filter}
         onChange={e => setFilter(e.target.value)}/>
       <button className="btn ghost" type="button" disabled={uploading} onClick={() => input.current?.click()}>
