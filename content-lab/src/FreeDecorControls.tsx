@@ -116,7 +116,7 @@ export default function FreeDecorControls({
     onClick={()=>setExpanded(value=>!value)}>{expanded?'Cerrar ↑':'Elegir ↓'}</button>
   </div>
   <div className="free-decor-current" aria-label="Recursos seleccionados">
-   <span><strong>Fondo:</strong> {backgroundName}<small> · Todo el carrusel</small></span>
+   <span><strong>Fondo:</strong> {backgroundName}<small> · {slideNumber?'Todo el carrusel':'Este diseño'}</small></span>
    <span><strong>Stickers:</strong> {selected.length}/3{slideNumber?' · Slide '+slideNumber:''}</span>
   </div>
   {expanded&&<div className="free-decor-expanded">
@@ -195,7 +195,7 @@ export default function FreeDecorControls({
    <div className="free-decor-footer">
     <small>{tab==='stickers'&&selected.length===3
      ?'3 de 3 stickers. Quita uno si quieres elegir otro.'
-     :tab==='stickers'?'Toca un sticker para añadirlo al slide actual.':'Elegir un fondo lo aplica a todo el carrusel.'}</small>
+     :tab==='stickers'?'Toca un sticker para añadirlo a tu diseño.':slideNumber?'Elegir un fondo lo aplica a todo el carrusel.':'Elegir un fondo lo aplica a este diseño.'}</small>
     {selected.length>0&&tab==='stickers'&&<button type="button" onClick={()=>onChange({stickerIds:[]})}>Quitar stickers</button>}
    </div>
   </div>}
