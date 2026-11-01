@@ -7,7 +7,8 @@ test('month calendar and feed preview available on both the sidebar and iPhone d
  const app=source('src/App.tsx'),calendar=source('src/ContentCalendar.tsx');
  assert.ok(app.includes("id: 'calendar', title: 'Calendario editorial'"));
  assert.ok(app.includes("items:['calendar','posts','brands','settings']"));
- assert.ok(app.includes("{id:'calendar',label:'Calendario',icon:CalendarDays}"));
+ assert.ok(app.includes("{id:'calendar',label:loginLanguage==='es'?'Calendario':'Calendar',icon:CalendarDays}"));
+ assert.ok(app.includes("loginLanguage==='es'?'Organizar contenido':'Plan content'"));
  assert.ok(app.includes("<ContentCalendar brand={brand} posts={posts} images={images}"));
  assert.ok(calendar.includes("setView('month')"));
  assert.ok(calendar.includes("setView('feed')"));
