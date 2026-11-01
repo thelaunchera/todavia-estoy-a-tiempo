@@ -1272,23 +1272,6 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       notify('Textos listos para revisar. Tus fotos, fondos y stickers siguen en su sitio.');
     }catch(e){showError(e)}finally{setBusy('');}
   };
-  const createImage=async()=>{
-    if(imagePrompt.trim().length<15)return notify('Describe la imagen con más detalle.');
-    if(imageMode==='variation'&&!sourceId)return notify('Selecciona primero una foto de referencia.');
-    if(!window.confirm('Esta foto utilizará 1 crédito de IA. ¿Generar?'))return;
-    setBusy('image');
-    try{
-      const {data}=await api.post('/api/ai-image',{
-        brandId:brand.id,prompt:imagePrompt,mode:imageMode,subjectType:imageSubjectType,
-        assetId:imageMode==='variation'?sourceId:'',
-        referenceId:imageMode==='variation'&&style.referenceAssetId&&style.referenceAssetId!==sourceId?style.referenceAssetId:''
-      });
-      const {content,...asset}=data as Asset & {content:string};
-      onNewAsset(asset,'data:'+data.mime+';base64,'+content);
-      replace({assetId:data.id});
-      notify('Nueva imagen creada; el archivo original permanece intacto.');
-    }catch(e){showError(e)}finally{setBusy('');}
-  };
   const ensureSourceImages=()=>{
     const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
     required.push(...(style.panoramaLayers||[])
@@ -1780,9 +1763,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
 
     </section>}
     {studioTab==='ai'&&<section className="factory-assistant-zone">
-      <div className="factory-assistant-head"><span className="eyebrow">HERRAMIENTAS IA</span>
-        <h2>IA</h2>
-        <p>Crea textos o imágenes con IA. Cada acción indica los créditos antes de generar; editar y descargar el carrusel no consume créditos.</p>
+      <div className="factory-assistant-head"><span className="eyebrow">IDEAS Y TEXTOS</span>
+        <h2>Ideas para tu carrusel</h2>
+        <p>La IA puede preparar los textos. Tú eliges las fotos, fondos y diseño; el Lab no genera imágenes.</p>
       </div>
       <div className="factory-idea factory-assistant-copy">
         <div><div className="eyebrow">CREAR TEXTOS</div><h3>Escribe un carrusel a partir de tu idea.</h3><p>Describe tu tema y genera una propuesta de carrusel. Después podrás editarlo en Textos.</p></div>
@@ -1792,22 +1775,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
             {busy==='copy'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>}
             Generar texto · 1 crédito</button></div>
       </div>
-              <div className="factory-panel factory-ai">
-          <div className="factory-panel-title"><div><div className="eyebrow">CREAR IMÁGENES</div><h3><Sparkles size={18}/> Imágenes con IA</h3></div></div>
-          <p>Crea imágenes nuevas para una publicación o variaciones creativas de una fotografía. No modifica el original.</p>
-          <div className="factory-mode"><button className={imageMode==='new'?'selected':''} onClick={()=>setImageMode('new')}>Imagen nueva</button><button className={imageMode==='variation'?'selected':''} onClick={()=>setImageMode('variation')}>Variación de foto</button></div>
-          <label>¿Qué estás fotografiando?</label><div className="factory-mode">
-             <button type="button" className={imageSubjectType==='portrait'?'selected':''} onClick={()=>setImageSubjectType('portrait')}>Persona / retrato</button>
-             <button type="button" className={imageSubjectType==='product'?'selected':''} onClick={()=>setImageSubjectType('product')}>Producto / objeto</button>
-           </div>
-           {imageMode==='variation'&&<><label>Foto original · sujeto principal</label><select value={sourceId} onChange={e=>setSourceId(e.target.value)}><option value="">Selecciona foto original…</option>{ownedAssets.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select>
-             {style.referenceAssetId&&<small>La segunda referencia guía solamente el estilo. Tu foto original mantiene el papel de sujeto principal.</small>}
-           </>}
-          <label>Descripción de la imagen</label><textarea rows={3} value={imagePrompt} onChange={e=>setImagePrompt(e.target.value)} placeholder="Editorial photo of cookies on a blue table, beautiful morning light, no text or logos…"/>
-          <button className="btn dark wide" onClick={createImage} disabled={!!busy}>{busy==='image'?<LoaderCircle className="spin" size={16}/>:<WandSparkles size={16}/>} Generar foto · 1 crédito IA</button>
-          <small>Las generaciones pueden consumir créditos. No uses variaciones IA de screenshots de la App ni de fotos donde necesites fidelidad exacta de rostros o detalles.</small>
-        </div>
-      <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button>
+              <button type="button" className="btn ghost" onClick={()=>setStudioTab('canvas')}>Volver al lienzo</button>
     </section>}
       </div>
     </div>
