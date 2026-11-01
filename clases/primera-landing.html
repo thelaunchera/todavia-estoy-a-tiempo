@@ -338,10 +338,26 @@
       </div>
     </section>
   </main>
-  <section class="class-contact-compact" aria-labelledby="class-contact-compact-title">
+  <section class="class-contact-compact" id="contacto" aria-labelledby="class-contact-compact-title">
     <div class="shell class-contact-compact-inner">
-      <div><p class="class-eyebrow">¿TE QUEDÓ ALGUNA DUDA?</p><h2 id="class-contact-compact-title">Aquí puedes <em>preguntarme.</em></h2><p>Abre el formulario de contacto solo cuando lo necesites.</p></div>
-      <a class="class-contact-compact-button" href="../index.html#ayuda" aria-label="Abrir el formulario de contacto del podcast">Escríbeme <span aria-hidden="true">↗</span></a>
+      <div class="class-contact-intro"><p class="class-eyebrow">¿TE QUEDÓ ALGUNA DUDA?</p><h2 id="class-contact-compact-title">Aquí puedes <em>preguntarme.</em></h2><p>Si necesitas ayuda, aquí estoy. El formulario permanece recogido hasta que lo abras.</p></div>
+      <button type="button" class="class-contact-compact-button" id="class-contact-toggle" aria-controls="class-contact-panel" aria-expanded="false">Escríbeme <span aria-hidden="true">↗</span></button>
+      <div class="class-contact-panel" id="class-contact-panel" hidden>
+        <div class="class-contact-panel-head"><div><span class="class-mini-caption">CONTACTO</span><h3>Cuéntame qué necesitas.</h3></div><button type="button" id="class-contact-close" aria-label="Cerrar formulario">Cerrar ×</button></div>
+        <form id="class-contact-form" aria-label="Formulario de contacto sobre la clase">
+          <div class="class-contact-fields">
+            <label>Tu nombre<input id="class-contact-name" type="text" name="name" autocomplete="name" maxlength="80" required placeholder="Cómo te llamas"></label>
+            <label>Tu correo<input id="class-contact-email" type="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required placeholder="tu@correo.com"></label>
+          </div>
+          <label>¿Sobre qué necesitas ayuda?<select name="topic" required><option value="" disabled selected>Elige un tema</option><option value="Clase · Tu primera web con IA">La clase o sus materiales</option><option value="Acceso al aula">Acceso al aula</option><option value="Otra consulta">Otra consulta</option></select></label>
+          <label>Tu mensaje<textarea name="message" rows="4" minlength="10" maxlength="2000" required placeholder="Cuéntame qué necesitas..."></textarea></label>
+          <p>Usaremos estos datos únicamente para responder a tu consulta. <a href="../privacidad.html">Privacidad</a>.</p>
+          <input type="hidden" name="resource" value="podcast_help"><input type="hidden" name="source" value="class_landing">
+          <div class="class-contact-hp" hidden><label>No rellenar<input type="text" name="website" autocomplete="off" tabindex="-1"></label></div>
+          <button type="submit" class="class-contact-submit">Enviar mi consulta</button>
+          <p class="class-contact-feedback" id="class-contact-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </div>
     </div>
   </section>
   <footer class="class-footer" id="pie">
@@ -366,6 +382,8 @@
   <script type="module" src="waitlist.js?v=20261028-confirmacion-unica-v4"></script>
   <script defer src="experience.js?v=20261028-idea-transform-v1"></script>
   <script defer src="faq-tabs.js?v=20261101-categories-v1"></script>
+  <script src="../site-config.js?v=20261101-class-contact"></script>
+  <script defer src="contact.js?v=20261101-class-contact-v1"></script>
   <script defer src="countdown.js?v=20261028-flipclock-v1"></script>
 </body>
 </html>
