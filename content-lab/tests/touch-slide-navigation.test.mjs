@@ -13,7 +13,7 @@ test('Panorama enters slide navigation mode instead of accidentally moving overl
 });
 test('Navigation offers touch swipe, page arrows and explicit slide numbers',()=>{
  assert.match(canvas,/onScroll=\{syncPageFromScroll\}/);
- assert.match(canvas,/const goToPage=\(index:number\)=>/);
+ assert.match(canvas,/const goToPage=\(index:number,keepSelection=false\)=>/);
  assert.match(canvas,/viewport\.scrollTo\(/);
  assert.match(canvas,/aria-label="Slide siguiente"/);
  assert.match(canvas,/aria-label="Slide anterior"/);
