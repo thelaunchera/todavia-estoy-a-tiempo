@@ -1791,3 +1791,18 @@ html{scroll-padding-top:96px}
   .header .nav>a{font-size:.72rem}
   .header .nav .nav-cta{padding-inline:12px!important}
 }
+
+/* Podcast: compact editorial invitation to the free Content Lab tool. */
+.creative-freebie-strip{background:#faf8f3;padding:0 0 30px}
+.creative-freebie-inner{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:24px;align-items:center;max-width:1050px;margin-inline:auto;padding:16px 26px;border:1px solid #d8ded6;border-radius:18px;background:#f4f5ed}
+.creative-freebie-image{display:block;overflow:hidden;width:100px;height:96px;border-radius:12px;background:#344821}
+.creative-freebie-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}
+.creative-freebie-text{min-width:0}
+.creative-freebie-label{font-size:10px;letter-spacing:.16em;font-weight:800;color:#5d734a;margin:0 0 7px}
+.creative-freebie-text h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(21px,2.5vw,29px);line-height:1.15;color:#26372a;margin:0 0 5px}
+.creative-freebie-text h2 em{color:#667a50;font-weight:400}
+.creative-freebie-text>p:last-child{font-size:12px;line-height:1.5;color:#58655b;margin:0}
+.creative-freebie-link{display:inline-flex;align-items:center;justify-content:center;gap:11px;white-space:nowrap;border:1px solid #46623a;border-radius:999px;color:#2c4930;text-decoration:none;font-size:12px;font-weight:800;padding:12px 17px;transition:background .2s,color .2s}
+.creative-freebie-link:hover,.creative-freebie-link:focus-visible{background:#2c4930;color:#fff}
+@media(max-width:700px){.creative-freebie-strip{padding:0 0 20px}.creative-freebie-inner{grid-template-columns:75px minmax(0,1fr);gap:13px;padding:13px;border-radius:14px}.creative-freebie-image{width:75px;height:103px}.creative-freebie-label{font-size:8px;letter-spacing:.1em;margin-bottom:5px}.creative-freebie-text h2{font-size:21px}.creative-freebie-text>p:last-child{font-size:11px;line-height:1.45}.creative-freebie-link{grid-column:2;justify-self:start;padding:7px 0;border:0;font-size:11px;color:#2c4930}.creative-freebie-link:hover,.creative-freebie-link:focus-visible{background:none;color:#496d38}}
+@media(prefers-reduced-motion:reduce){.creative-freebie-link{transition:none}}
