@@ -85,3 +85,8 @@
  .class-page-v2 .class-hero .class-hero-actions{margin-top:16px!important;}
  .class-page-v2 .class-hero .class-hero-chips{margin-top:14px;}
 }
+
+/* The first headline and listening action remain readable before reveal animations. */
+.podcast-hero-v2 .hero-content.reveal{
+ opacity:1!important;transform:none!important;visibility:visible!important;
+}
