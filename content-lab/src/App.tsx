@@ -662,8 +662,8 @@ function App() {
     const fingerprint=draftFingerprint(editor);
     if(fingerprint===lastSavedFingerprintRef.current){setDraftStatus('saved');return}
     writeDraftBackup(account.email,editor);
-    setDraftStatus('unsaved');
     if(fingerprint===lastAttemptFingerprintRef.current)return;
+    setDraftStatus('unsaved');
     const timer=window.setTimeout(()=>{
       if(saveInFlightRef.current)return;
       if(draftFingerprint(editorLatestRef.current)!==fingerprint)return;
