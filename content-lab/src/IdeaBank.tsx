@@ -1,4 +1,4 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {BookOpen,Copy,Check,Lightbulb,Sparkles,Search,ArrowRight} from 'lucide-react';
 
 export type Idea={title:string;hook:string;angle:string;brief:string;category:string};
@@ -133,6 +133,7 @@ export default function IdeaBank({brandName,audience,language,locale='es',onUse}
  const [category,setCategory]=useState('Todas'),[search,setSearch]=useState(''),[offer,setOffer]=useState(''),[goal,setGoal]=useState('conectar'),[copied,setCopied]=useState('');
  const localIdeas=useMemo(()=>ideas.map((idea,i)=>language==='English'?{...idea,...englishIdeas[i],category:en?englishCategories[idea.category]||idea.category:idea.category}:{...idea,category:en?englishCategories[idea.category]||idea.category:idea.category}),[en,language]);
  const allLabel=en?'All':'Todas';
+ useEffect(()=>{setCategory(en?'All':'Todas')},[en]);
  const categories=[allLabel,...Array.from(new Set(localIdeas.map(i=>i.category)))];
  const filtered=useMemo(()=>localIdeas.filter(i=>(category===allLabel||!categories.includes(category)||i.category===category)&&(i.title+' '+i.hook+' '+i.brief).toLowerCase().includes(search.toLowerCase())),[localIdeas,category,search,allLabel]);
  const goalEnglish:Record<string,string>={conectar:'build a connection',educar:'educate','mostrar mi producto':'show my product','invitar a comprar sin presión':'invite someone to buy without pressure'};
