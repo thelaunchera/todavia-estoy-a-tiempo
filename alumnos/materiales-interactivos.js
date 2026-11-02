@@ -104,11 +104,12 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    .select('resource_code,title,url,status').eq('course_id',courseId).like('resource_code','pdf_%').order('resource_code');
   if(pdfs?.length){
    const details=el('details','mi-owner-pdfs');
-   const summary=el('summary',null,'Revisar los 5 PDF nuevos en Drive · solo administración');
+   const summary=el('summary',null,t('Revisar los 5 PDF nuevos en Drive · solo administración','Review the 5 draft PDFs on Drive · admin only'));
    const links=el('div','mi-owner-pdf-links');
    for(const pdf of pdfs){
     if(!/^https:\/\//.test(pdf.url||''))continue;
-    const a=el('a',null,pdf.title);
+    const pdfNames={pdf_00:'Start here · PDF',pdf_01:'12 prompts · PDF',pdf_02:'Workbook · PDF',pdf_03:'Landing page guide · PDF',pdf_04:'Launch checklist · PDF'};
+    const a=el('a',null,getLanguage()==='en'?(pdfNames[pdf.resource_code]||'Draft PDF'):pdf.title);
     a.href=pdf.url;a.target='_blank';a.rel='noopener noreferrer';
     links.append(a);
    }
@@ -402,8 +403,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  function renderWorkbook(){
   if(getLanguage()==='en')section('03 / WORKBOOK','One idea at a time.','Write your answers and use them to plan your webpage. Come back anytime.');
   else section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
-  if(ownerPreview){content.append(el('p','mi-note','Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.'));}
-  else{content.append(el('p','mi-note','Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.'));}
+  if(ownerPreview){content.append(el('p','mi-note',t('Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.','This is an admin preview. Students’ private answers are not shown here.'));}
+  else{content.append(el('p','mi-note',t('Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.','Your answers are saved to your account. Do not enter passwords or private customer information.'));}
   const summary=el('div','mi-work-summary');content.append(summary);
   const grid=el('div','mi-workbook-sections');content.append(grid);
   translateWorkbookBlocks(WORKBOOK,getLanguage()).forEach((block,i)=>{
@@ -411,7 +412,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    if(i===0)details.open=true;
    const count=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length;
    details.innerHTML='<summary><span class="mi-prompt-number">'+String(i+1).padStart(2,'0')+'</span><span><strong>'+esc(block.title)+'</strong><small>'+count+(getLanguage()==='en'?' of ':' de ')+block.qs.length+(getLanguage()==='en'?' answers':' respuestas')+'</small></span><span class="mi-plus">+</span></summary><div class="mi-work-body"><p>'+esc(block.sub)+'</p></div>';
-   if(block.example)details.querySelector('.mi-work-body').append(el('p','mi-note','Ejemplo: '+block.example));
+   if(block.example)details.querySelector('.mi-work-body').append(el('p','mi-note',getLanguage()==='en'?'Example: enter accurate details from your own business.':'Ejemplo: '+block.example));
    block.qs.forEach(([key,title,placeholder])=>{
     const field=el('div','mi-field'),label=el('label',null,title),textarea=el('textarea');
     textarea.id='mi-'+key;label.htmlFor=textarea.id;textarea.placeholder=placeholder;textarea.maxLength=600;textarea.rows=2;textarea.value=answers[key]||'';textarea.disabled=ownerPreview;
@@ -450,25 +451,33 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(getLanguage()==='en')section('05 / BEFORE YOU SHARE','Is your webpage ready?','Check each item after you actually test it. Leave incomplete items unchecked.');
   else section('05 / ANTES DE COMPARTIR','¿Está lista tu página?','Marca una casilla cuando hayas hecho la prueba. Si algo falta, déjalo pendiente y vuelve después.');
   const phoneGuide=el('details','mi-explain');
-  phoneGuide.innerHTML='<summary><span>📱</span><strong>¿Solo tienes teléfono? Revisa tu web sin computadora</strong><b>+</b></summary>'+
-   '<div><p>Todo este ejercicio se puede hacer desde el navegador de tu celular. Primero comprueba los botones en la web real. Después compara distintos tamaños de pantalla: una vista previa no sustituye probar un dispositivo físico.</p>'+
-   '<ol><li>Abre el enlace público de tu web en Safari o Chrome. Recorre la página y toca el menú y los botones.</li>'+
-   '<li>Abre otra pestaña y entra en <a href="https://cometweb.io/tools/responsive" target="_blank" rel="noopener noreferrer">CometWeb · Revisión de tamaños</a>. Pega el enlace público, elige aproximadamente 360 px (teléfono), 768 px (tablet) y 1280 px (computadora), y toca Preview.</li>'+
-   '<li>Fíjate si se cortan textos o fotos, si algo se sale por los lados o si los botones quedan muy pequeños. Guarda capturas.</li>'+
-   '<li>Regresa a ChatGPT y pide a AppDeploy corregir solo los problemas que encontraste. Si tu cuenta permite pruebas automáticas, solicita también su evidencia. Repite la revisión y vuelve a probar la web real en tu teléfono.</li></ol>'+
-   '<p><strong>Importante:</strong> usa solo páginas públicas en herramientas externas. Si una web bloquea la vista previa, no significa que esté mal: deja esa comprobación pendiente. No marques «todos los dispositivos» como probado.</p></div>';
+  phoneGuide.innerHTML=getLanguage()==='en'
+   ?'<summary><span>📱</span><strong>Only have a phone? Review your site without a computer</strong><b>+</b></summary>'+
+    '<div><p>You can do this exercise from Safari or Chrome on your phone. First test the actual public website, then compare screen sizes. A preview does not replace testing on a real device.</p>'+
+    '<ol><li>Open the public website in Safari or Chrome. Scroll through the page and tap its buttons and menu.</li>'+
+    '<li>In another tab, open <a href="https://cometweb.io/tools/responsive" target="_blank" rel="noopener noreferrer">CometWeb · Responsive Preview</a>. Paste the PUBLIC website link. Compare 360 px (phone), 768 px (tablet) and 1280 px (desktop) if available.</li>'+
+    '<li>Look for cut-off text and photos, horizontal overflow or tiny buttons. Take screenshots.</li>'+
+    '<li>Use your website-building tool to fix one issue at a time, then retest the real website.</li></ol>'+
+    '<p><strong>Remember:</strong> only paste public pages into third-party preview tools. A blocked preview is not proof of a broken site. Leave any unverified check incomplete.</p></div>'
+   :'<summary><span>📱</span><strong>¿Solo tienes teléfono? Revisa tu web sin computadora</strong><b>+</b></summary>'+
+    '<div><p>Todo este ejercicio se puede hacer desde el navegador de tu celular. Primero comprueba los botones en la web real. Después compara distintos tamaños de pantalla: una vista previa no sustituye probar un dispositivo físico.</p>'+
+    '<ol><li>Abre el enlace público de tu web en Safari o Chrome. Recorre la página y toca el menú y los botones.</li>'+
+    '<li>Abre otra pestaña y entra en <a href="https://cometweb.io/tools/responsive" target="_blank" rel="noopener noreferrer">CometWeb · Revisión de tamaños</a>. Pega el enlace público, elige aproximadamente 360 px (teléfono), 768 px (tablet) y 1280 px (computadora), y toca Preview.</li>'+
+    '<li>Fíjate si se cortan textos o fotos, si algo se sale por los lados o si los botones quedan muy pequeños. Guarda capturas.</li>'+
+    '<li>Regresa a la herramienta que usas para crear la web, corrige un problema por vez y vuelve a probar la página real.</li></ol>'+
+    '<p><strong>Importante:</strong> usa solo páginas públicas en herramientas externas. Si una web bloquea la vista previa, no significa que esté mal: deja esa comprobación pendiente.</p></div>';
   content.append(phoneGuide);
   const count=el('div','mi-check-progress');content.append(count);
   const list=el('div','mi-check-list');content.append(list);
-  function update(){const n=CHECKS.filter((x,i)=>checks['check'+i]===true).length;count.innerHTML='<div><span>Comprobaciones hechas</span><strong>'+n+' de '+CHECKS.length+'</strong></div><div class="mi-bar"><i style="width:'+Math.round(n/CHECKS.length*100)+'%"></i></div>'; }
+  function update(){const n=CHECKS.filter((x,i)=>checks['check'+i]===true).length;count.innerHTML='<div><span>'+t('Comprobaciones hechas','Checks completed')+'</span><strong>'+n+t(' de ',' of ')+CHECKS.length+'</strong></div><div class="mi-bar"><i style="width:'+Math.round(n/CHECKS.length*100)+'%"></i></div>'; }
   CHECKS.map((item,i)=>translateCheckItem(item,i,getLanguage())).forEach((item,i)=>{
    const card=el('article','mi-check');const inp=el('input');inp.type='checkbox';inp.id='mi-check-'+i;inp.checked=checks['check'+i]===true;inp.disabled=ownerPreview;const label=el('label');label.htmlFor=inp.id;
    label.innerHTML='<strong>'+String(i+1).padStart(2,'0')+'. '+esc(item.name)+'</strong><span>'+esc(item.how)+'</span><small>Listo cuando: '+esc(item.done)+'</small>';
    inp.addEventListener('change',()=>{checks['check'+i]=inp.checked;card.classList.toggle('checked',inp.checked);update();queueSave();});
    card.classList.toggle('checked',inp.checked);card.append(inp,label);list.append(card);
   });update();
-  const note=el('p','mi-note','No necesitas terminar todo en un día. Cuando algo no funcione, anota el problema y corrígelo antes de compartir tu enlace.');content.append(note);
-  const actions=el('div','mi-actions');actions.innerHTML='<button class="mi-primary" type="button">Guardar comprobaciones</button><button class="mi-quiet" type="button">Volver a mis lecciones</button>';content.append(actions);
+  const note=el('p','mi-note',t('No necesitas terminar todo en un día. Cuando algo no funcione, anota el problema y corrígelo antes de compartir tu enlace.','You do not need to finish in one day. If something fails, note the problem and fix it before sharing your link.'));content.append(note);
+  const actions=el('div','mi-actions');actions.innerHTML='<button class="mi-primary" type="button">'+t('Guardar comprobaciones','Save checks')+'</button><button class="mi-quiet" type="button">'+t('Volver a mis lecciones','Back to lessons')+'</button>';content.append(actions);
   actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',()=>onGoLessons?.());
  }
