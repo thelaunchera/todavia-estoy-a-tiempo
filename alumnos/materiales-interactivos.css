@@ -278,3 +278,16 @@
 .mi-prompt-more{display:block;width:auto;margin:19px auto;min-height:44px;border-radius:12px;border:1px solid #b7cdd9;padding:10px 21px;background:#edf4f6;color:#2d576f;font:700 12px/1.3 'DM Sans',Arial,sans-serif;cursor:pointer}
 .mi-prompt-more[hidden]{display:none!important}
 @media(max-width:600px){.mi-prompt-searchbar{display:block}.mi-prompt-searchbar label{width:100%}.mi-prompt-count{margin:11px 0}.mi-prompt-categories button{min-height:42px}.mi-prompt-more{width:100%}}
+
+/* Clear prompt workflow and what/when/output notes – ES / EN. */
+.mi-prompt-itinerary{padding:18px 20px;background:#f1f5f7;border:1px solid #d8e4e9;border-radius:16px;margin:0 0 19px}
+.mi-prompt-itinerary strong{display:block;color:#23425d;font-size:15px;line-height:1.35;margin-bottom:7px}
+.mi-prompt-itinerary p{font-size:13px;line-height:1.65;color:#4c677c;margin:0}
+.mi-prompt-guide{background:#f3f7f8;border:1px solid #e0e9ec;border-radius:13px;padding:13px 16px;margin:0 0 15px}
+.mi-prompt-guide p{font-size:13px;line-height:1.65;color:#39576c;margin:0}
+.mi-prompt-guide p+p{margin-top:8px}
+.mi-prompt-guide strong{color:#183b57}
+.mi-prompt-instruction{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:#47657b;margin:15px 0 10px}
+.mi-prompt-label small b{color:#294a60;font-weight:800}
+.mi-prompt-label small{overflow-wrap:anywhere}
+@media(max-width:600px){.mi-prompt-itinerary{padding:16px}.mi-prompt-guide{padding:12px}.mi-prompt>summary{align-items:start}.mi-prompt-label small{font-size:12px}}
