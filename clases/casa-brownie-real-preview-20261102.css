@@ -1,0 +1,32 @@
+/* Casa Brownie: vista de la landing oficial, sin cargar el demo hasta seleccionar Resultado. */
+.class-page-v2 #de-idea-a-web .class-formed-web{overflow:hidden;background:#f7efe8!important}
+.class-page-v2 #de-idea-a-web .class-formed-chrome{display:flex;gap:7px;align-items:center;background:#e9eff3!important;color:#44556b}
+.class-page-v2 #de-idea-a-web .class-formed-chrome>span:nth-child(2){min-width:0;flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.class-page-v2 #de-idea-a-web .class-casa-preview-domain{font-size:clamp(.43rem,1.2vw,.58rem);white-space:nowrap;opacity:.75}
+.class-page-v2 #de-idea-a-web .class-casa-real-preview{height:clamp(325px,55vw,440px);position:relative;overflow:hidden;isolation:isolate;background:#f7f0e8}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback{height:100%;display:grid;grid-template-columns:1.1fr .9fr;position:absolute;inset:0;background:#f7f0e8}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(14px,3.2vw,36px);gap:11px}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy small{font:700 clamp(.48rem,.9vw,.65rem)/1.4 Arial,sans-serif;letter-spacing:.11em;color:#9b735d}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy strong{font:600 clamp(1.6rem,4.1vw,3.1rem)/1.05 Georgia,serif;letter-spacing:-.055em;color:#51352b}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy strong em{color:#a0694d}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy p{font:400 clamp(.7rem,1.6vw,.94rem)/1.5 Arial,sans-serif;color:#67534a;margin:0}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy>span{display:inline-flex;border-radius:999px;background:#543a30;color:#fff;padding:9px 14px;font:bold .68rem Arial,sans-serif}
+.class-page-v2 #de-idea-a-web .class-casa-real-fallback img{display:block;width:100%;height:100%;object-fit:cover}
+.class-page-v2 #de-idea-a-web .class-casa-real-frame{width:100%;height:650px;position:absolute;inset:0;border:0;pointer-events:none;opacity:0;transition:opacity .22s}
+.class-page-v2 #de-idea-a-web .class-casa-real-preview[data-loaded="true"] .class-casa-real-frame{opacity:1}
+.class-page-v2 #de-idea-a-web .class-casa-open-area{width:min(100%,740px);margin:16px auto 0;text-align:center}
+.class-page-v2 #de-idea-a-web .class-casa-open-area[hidden]{display:none!important}
+.class-page-v2 #de-idea-a-web .class-casa-open-button{display:inline-flex;align-items:center;justify-content:center;width:auto;max-width:100%;min-height:50px;background:#203e5b;border:1px solid #203e5b;border-radius:999px;color:#fff!important;text-decoration:none;font:700 clamp(.83rem,2.6vw,.95rem)/1.35 Arial,sans-serif;padding:12px 23px;text-align:center;box-shadow:0 5px 15px #1738541a}
+.class-page-v2 #de-idea-a-web .class-casa-open-button:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.class-page-v2 #de-idea-a-web .class-casa-open-area p{font:.78rem/1.55 Arial,sans-serif;color:#3c5970;margin:9px auto 0;max-width:420px}
+@media(max-width:560px){
+ .class-page-v2 #de-idea-a-web .class-casa-real-preview{height:365px}
+ .class-page-v2 #de-idea-a-web .class-casa-real-fallback{grid-template-columns:1fr 1fr}
+ .class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy{padding:14px 11px;gap:8px}
+ .class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy strong{font-size:clamp(1.35rem,5vw,1.8rem)}
+ .class-page-v2 #de-idea-a-web .class-casa-real-fallback-copy>span{font-size:.55rem;padding:8px}
+ .class-page-v2 #de-idea-a-web .class-casa-real-frame{height:760px}
+ .class-page-v2 #de-idea-a-web .class-casa-preview-domain{display:none}
+ .class-page-v2 #de-idea-a-web .class-casa-open-button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.class-page-v2 #de-idea-a-web .class-casa-real-frame{transition:none}}
