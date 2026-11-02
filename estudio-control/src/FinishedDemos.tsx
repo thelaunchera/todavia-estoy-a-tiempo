@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
+import {solunaPhotos} from './soluna-photos';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
@@ -11,6 +12,7 @@ type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
  promptsFor?:'casa-brownie'|'crumb'|'aftr'|'soluna';
+ photos?:typeof solunaPhotos;
 };
 const finishedDemos:Demo[]=[
  {
@@ -86,11 +88,12 @@ const finishedDemos:Demo[]=[
   id:'soluna-yoga',
   title:'SOLUNA Yoga · Fort Lauderdale',
   category:'Estudio de yoga · lanzamiento y membresías',
-  description:'Landing editorial para un estudio de yoga próximo a abrir en Fort Lauderdale: oferta de bienvenida del 30%, lista de interés y tres planes mensuales de $10, $15 y $25.',
-  image:'https://raw.githubusercontent.com/thelaunchera/demo-booking-landing-/main/demos/soluna-yoga/images/hero.webp',
+  description:'Demo editorial para un estudio de yoga en Fort Lauderdale: hero fotográfico, clases interactivas, bienvenida del 30%, membresías y SOLUNA Shop con matcha y ropa conceptual.',
+  image:solunaPhotos[0].url,
   url:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/soluna-yoga',
-  note:'Concepto ficticio. La lista de espera solo guarda una prueba en el navegador; no hay emails, cobros ni suscripciones reales. Incluye ocho fotografías generadas para mostrar el concepto visual del estudio.',
+  note:'Concepto ficticio: la lista de espera es una simulación local, no se envían emails ni se realizan cobros. Incluye 13 fotos originales individuales, con sus prompts y enlaces.',
+  photos:solunaPhotos,
   kind:'other',
   promptsFor:'soluna'
  },
@@ -120,8 +123,8 @@ const finishedDemos:Demo[]=[
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
  const [copied,setCopied]=useState('');
  const [notice,setNotice]=useState('');
- async function copy(text:string,key:string) {
-   try {await navigator.clipboard.writeText(text);setCopied(key);setNotice('Prompt copiado.');}
+ async function copy(text:string,key:string,kind:'prompt'|'link'='prompt') {
+   try {await navigator.clipboard.writeText(text);setCopied(key);setNotice(kind==='link'?'Enlace de la foto copiado.':'Prompt copiado.');}
    catch {setNotice('Selecciona el texto para copiarlo manualmente.');}
  }
  return <section className="finished-demos" aria-label="Biblioteca de demos terminados">
@@ -142,6 +145,25 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        <small>{d.note}</small>
+       {!!d.photos?.length&&<details className="finished-demo-photos">
+         <summary>Ver fotos individuales <span>{d.photos.length} fotos aprobadas</span></summary>
+         <p>Estas son las fotografías originales del demo, una por archivo. Abre cada foto para verla completa o copia el enlace para reutilizarla en otro proyecto. Los prompts exactos están debajo.</p>
+         <div className="finished-demo-photos-grid">
+           {d.photos.map(photo=><div className="finished-demo-photo-tile" key={photo.key}>
+             <a href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={'Abrir fotografía '+photo.title}>
+               <img src={photo.url} alt={photo.title} loading="lazy" decoding="async"/>
+             </a>
+             <div className="finished-demo-photo-meta">
+               <strong>{photo.title}</strong>
+               <span>{photo.placement}</span>
+               <div className="finished-demo-photo-actions">
+                 <a href={photo.url} target="_blank" rel="noopener noreferrer">Abrir foto</a>
+                 <button type="button" onClick={()=>void copy(photo.url,d.id+'-photo-url-'+photo.key,'link')}>{copied===d.id+'-photo-url-'+photo.key?'Copiado':'Copiar enlace'}</button>
+               </div>
+             </div>
+           </div>)}
+         </div>
+       </details>}
        {d.promptsFor&&<details className="finished-demo-prompts">
          <summary>Prompts para reconstruir desde cero <span>{studioDemoPrompts[d.promptsFor].length} pasos</span></summary>
          <div className="finished-demo-prompt-list">
@@ -149,7 +171,9 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
            <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
              <strong>Cómo pedir fotos sin confundir a ChatGPT</strong>
              <p><b>Fotografía individual:</b> copia UN comando, pide UNA imagen en UN archivo, revisa el resultado y solo después pasa a la siguiente. Nunca solicites seis fotos en un mismo mensaje: puede devolver un collage o mezclar sabores.</p>
-             <p><b>Brand board:</b> ese es el único caso donde pedimos UNA imagen compuesta con 14 escenas. Es una referencia visual; después usamos 14 comandos separados para conseguir archivos individuales utilizables.</p>
+             {d.id==='soluna-yoga'
+               ? <p><b>Colección SOLUNA:</b> 13 fotografías reales del concepto, cada una como archivo independiente. Hero cinematográfico, foto tabletop, estudio, clases, matcha y tres fotografías separadas de ropa. No uses un collage como imagen final.</p>
+               : <p><b>Brand board:</b> cuando el ejercicio lo pida, puedes crear una composición de referencia; las fotografías finales siempre deben generarse y guardarse por separado.</p>}
              <p><b>Para que quede como el demo aprobado:</b> adjunta las fotografías originales de referencia. Un prompt de generación ayuda a mantener el estilo, pero por sí solo no reproduce píxel por píxel una foto anterior.</p>
            </div>
            {studioDemoPrompts[d.promptsFor].map((item,i)=>(
@@ -180,6 +204,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
                      <strong>{photo.title}</strong>
                      <button type="button" onClick={()=>void copy(photo.prompt,d.id+'-photo-'+i+'-'+j)}><Copy size={13}/>{copied===d.id+'-photo-'+i+'-'+j?'Copiado':'Copiar foto'}</button>
                    </div>
+                   {!!photo.imageUrl&&<a href={photo.imageUrl} target="_blank" rel="noopener noreferrer" className="finished-demo-photo-reference"><img src={photo.imageUrl} loading="lazy" decoding="async" alt={'Referencia fotográfica aprobada: '+photo.title}/><span>Abrir foto de referencia</span></a>}
                    <p>{photo.prompt}</p>
                  </div>)}
                </details>}
