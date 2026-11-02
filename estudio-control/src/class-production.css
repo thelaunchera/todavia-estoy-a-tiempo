@@ -122,7 +122,7 @@
 
 
 /* Focused private classroom · keep filming separate from materials and launch. */
-.class-area-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:16px 0 21px}
+.class-area-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0 21px}
 .class-area-nav button{display:flex;justify-content:center;align-items:center;gap:8px;text-align:center;min-height:52px;padding:12px;border-radius:12px;border:1px solid #d8e1e7;background:#fff;color:#536779;font-size:12px;font-weight:750;line-height:1.25}
 .class-area-nav button.active{background:#1b3b53;border-color:#1b3b53;color:#fff;box-shadow:0 7px 16px #1b3b5322}
 .class-area-nav button:focus-visible{outline:3px solid #9ac4dd;outline-offset:2px}
@@ -192,3 +192,27 @@
  .class-module-upload{min-height:43px}
 }
 @media(prefers-reduced-motion:reduce){.class-upload-progress>div{transition:none}}
+
+/* Separación real entre las tomas de la profesora y el recorrido del alumno. */
+.class-student-route{display:grid;gap:16px;margin:18px 0 28px;min-width:0}
+.class-student-route-heading{background:#f7f5f1;border:1px solid #e1e1dc;border-radius:18px;padding:clamp(19px,3vw,29px)}
+.class-student-route-heading h3{font-size:clamp(1.5rem,3vw,2rem);line-height:1.15;margin:13px 0 10px;color:#203850}
+.class-student-route-heading p{font-size:14px;line-height:1.7;max-width:74ch;color:#405b6a}
+.class-student-route-actions{display:flex;gap:11px;flex-wrap:wrap;margin:18px 0}
+.class-student-route-actions a,.class-student-route-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:11px 16px;border-radius:99px;border:1px solid #234862;font-size:12px;font-weight:750;background:#234862;color:#fff;text-decoration:none}
+.class-student-route-actions button{background:#fff;border-color:#c6d4dc;color:#234862}
+.class-student-route-location{background:#e8f0f3;padding:14px 16px;border-radius:12px}
+.class-student-route-list{display:grid;gap:10px}
+.class-student-route-chapter{background:#fff;border:1px solid #dfe5e8;border-radius:14px;overflow:hidden}
+.class-student-route-chapter summary{display:flex;align-items:center;gap:13px;cursor:pointer;list-style:none;padding:14px 18px;min-height:58px}
+.class-student-route-chapter summary::-webkit-details-marker{display:none}
+.class-student-route-chapter summary span{display:grid;place-items:center;background:#eff4f5;color:#456b7f;border-radius:10px;min-width:38px;min-height:38px;font-size:15px}
+.class-student-route-chapter summary strong{font-size:14px;flex:1;line-height:1.4}
+.class-student-route-chapter summary small{font-size:12px;color:#6a8291}
+.class-student-route-chapter summary svg{transition:transform .2s}
+.class-student-route-chapter[open] summary svg{transform:rotate(180deg)}
+.class-student-route-chapter>div{border-top:1px solid #e7ebef;padding:18px 20px}
+.class-student-route-chapter>div p{font-size:13px;line-height:1.7;color:#425d70;margin:0 0 12px}
+.class-student-route-chapter>div button{margin-top:5px;border:1px solid #244964;border-radius:99px;background:#244964;color:#fff;min-height:44px;padding:9px 15px;font-size:12px}
+@media(max-width:650px){.class-student-route-actions>*{flex:1 1 100%}.class-student-route-chapter summary{padding:12px}.class-student-route-chapter summary small{display:none}.class-student-route-chapter>div{padding:15px}}
+@media(prefers-reduced-motion:reduce){.class-student-route-chapter summary svg{transition:none}}
