@@ -93,7 +93,18 @@ function display(panel){
  document.body.classList.toggle('aula-member',panel===course);
  // Nunca mostrar el enlace al Studio antes de verificar el rol owner.
  const ownerNav=$('aula-owner-nav');
- if(ownerNav)ownerNav.hidden=panel!==course||!adminPreview;
+ if(ownerNav){
+  const showOwnerShortcut=panel===course&&adminPreview;
+  ownerNav.hidden=!showOwnerShortcut;
+  // Solo el rol owner verificado crea un enlace navegable al Studio.
+  if(showOwnerShortcut){
+   ownerNav.setAttribute('href','../estudio/');
+   ownerNav.setAttribute('target','_top');
+  }else{
+   ownerNav.removeAttribute('href');
+   ownerNav.removeAttribute('target');
+  }
+ }
  if(panel!==course)closeAulaMenu();
 }
 const aulaTitle=$('aula-active-title');
@@ -391,8 +402,6 @@ async function refreshProductShelf(){
 
 async function showCourse(email,asAdmin=false){
  adminPreview=asAdmin;
- const ownerNav=$('aula-owner-nav');
- if(ownerNav)ownerNav.hidden=!asAdmin;
  if(!asAdmin){
   const {data:entitlement,error:lookupError}=await db.from('podcast_class_access').select('status,revoked_at').eq('course_id',courseId).eq('buyer_email',email).maybeSingle();
   if(lookupError)throw lookupError;
