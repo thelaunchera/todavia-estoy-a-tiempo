@@ -1381,7 +1381,7 @@ function App() {
                 </button>
               </nav>
               <StudentManager />
-              <p className="studio-student-qa-note">La vista del aula se abre en pantalla completa, sin barras duplicadas ni ventanas dentro de ventanas. Regresas aquí desde «Volver a Mi Estudio».</p>
+              <p className="studio-student-qa-note">La vista del aula se abre aquí mismo, usando tu sesión privada del Studio. No requiere comprar ni iniciar sesión en otro navegador. Regresas con «Volver al Studio».</p>
             </section>
           )}
           {page === 'espera' && <WaitlistManager />}
