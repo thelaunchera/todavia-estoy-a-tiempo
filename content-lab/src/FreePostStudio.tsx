@@ -40,10 +40,11 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
    shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,locked:decor.headlineLocked===true,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
- const ordered=[...layers,...legacyStickers(decor),...decor.layers];
- return [...ordered.filter(l=>l.role==='background'||(l.kind!=='text'&&l.placement==='behind-text')),
- ...ordered.filter(l=>l.role!=='background'&&l.kind!=='text'&&l.placement!=='behind-text'),
- ...ordered.filter(l=>l.kind==='text')];
+ // Preserve creation order: user-added images/text remain above older items.
+ // Only a deliberate "Send behind" action places a layer underneath the title.
+ const back=decor.layers.filter(l=>l.role==='background'||l.placement==='behind-text');
+ const front=decor.layers.filter(l=>l.role!=='background'&&l.placement!=='behind-text');
+ return [...back,...layers,...legacyStickers(decor),...front];
 }
 export const freePostDimensions=(format?:string)=>format==='Reel'||format==='Story'?{width:1080,height:1920}:{width:1080,height:1350};
 async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>,width:number,height:number){
