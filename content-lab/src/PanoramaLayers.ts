@@ -190,21 +190,24 @@ export async function overlayPanoramaPages(
   paintTextOnTop?: (ctx:CanvasRenderingContext2D) => Promise<void>,
 ) {
   if (!layers.length) return pages;
-  const wide = document.createElement('canvas');
-  wide.width = pages.length * 1080; wide.height = 1350;
-  const ctx = wide.getContext('2d');
-  if (!ctx) throw Error('No se pudo preparar la descarga.');
-  pages.forEach((page, n) => ctx.drawImage(page, n * 1080, 0));
-  const behind = layers.filter(layer=>layer.placement==='behind-text');
-  const front = layers.filter(layer=>layer.placement!=='behind-text');
-  await paintPanoramaLayers(ctx, wide.width, wide.height, behind, images);
-  if (behind.length && paintTextOnTop) await paintTextOnTop(ctx);
-  await paintPanoramaLayers(ctx, wide.width, wide.height, front, images);
-  return pages.map((_, n) => {
-    const page = document.createElement('canvas'); page.width = 1080; page.height = 1350;
-    const context = page.getContext('2d');
-    if (!context) throw Error('No se pudo cortar el carrusel.');
-    context.drawImage(wide, n * 1080, 0, 1080, 1350, 0, 0, 1080, 1350);
+  const scale=pages[0]?.width/1080||1,fullWidth=pages.length*1080;
+  const wide=document.createElement('canvas');
+  wide.width=fullWidth*scale;wide.height=1350*scale;
+  const ctx=wide.getContext('2d');if(!ctx)throw Error('No se pudo preparar la descarga.');
+  pages.forEach((page,n)=>ctx.drawImage(page,n*1080*scale,0));
+  ctx.save();ctx.scale(scale,scale);
+  const behind=layers.filter(layer=>layer.placement==='behind-text');
+  const front=layers.filter(layer=>layer.placement!=='behind-text');
+  await paintPanoramaLayers(ctx,fullWidth,1350,behind,images);
+  if(behind.length&&paintTextOnTop)await paintTextOnTop(ctx);
+  await paintPanoramaLayers(ctx,fullWidth,1350,front,images);
+  ctx.restore();
+  const result=pages.map((_,n)=>{
+    const page=document.createElement('canvas');page.width=1080*scale;page.height=1350*scale;
+    const context=page.getContext('2d');if(!context)throw Error('No se pudo cortar el carrusel.');
+    context.drawImage(wide,n*1080*scale,0,1080*scale,1350*scale,0,0,page.width,page.height);
     return page;
   });
+  wide.width=1;wide.height=1;
+  return result;
 }
