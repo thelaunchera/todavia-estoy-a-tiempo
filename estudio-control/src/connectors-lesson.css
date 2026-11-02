@@ -61,3 +61,13 @@
 .connectors-folder-grid strong{font-size:.83rem;color:#28486d;overflow-wrap:anywhere}
 .connectors-folder-grid span{font-size:.85rem;line-height:1.5;color:#43566e}
 @media(max-width:650px){.connectors-foundation{grid-template-columns:1fr}.connectors-folder-grid{grid-template-columns:1fr}.connectors-compare,.connectors-organization{padding:16px}}
+
+/* Material docente de apoyo: contenido largo en acordeones, sin confundir con el aula. */
+.connectors-fold{padding:0}
+.connectors-fold>summary{list-style:none;cursor:pointer;padding:19px 22px;min-height:52px;font-weight:750;color:#24425f;line-height:1.4}
+.connectors-fold>summary::-webkit-details-marker{display:none}
+.connectors-fold>summary::after{content:'+';float:right;font-size:20px;font-weight:400;color:#65829a}
+.connectors-fold[open]>summary::after{content:'−'}
+.connectors-fold>div{border-top:1px solid #e1e7eb;padding:4px 20px 20px}
+.connectors-fold:focus-within{border-color:#91b4c6}
+@media(max-width:650px){.connectors-fold>summary{padding:15px}.connectors-fold>div{padding:3px 15px 15px}}
