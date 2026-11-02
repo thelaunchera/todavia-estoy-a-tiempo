@@ -6,7 +6,7 @@ import path from 'node:path';
 const root=process.cwd();
 const ignoreDirs=new Set(['.git','node_modules','dist','.next','_podcast_pages','.cache','coverage','build']);
 const media=/\.(?:png|jpe?g|webp|svg|avif|gif|mp4|m4a|mp3|wav|woff2?)$/i;
-const sources=/\.(?:html|css|scss|js|jsx|ts|tsx|json|jsonc|md|xml|yml|yaml|py|sql|txt)$/i;
+const sources=/\.(?:html|css|scss|js|jsx|ts|tsx|json|jsonc|webmanifest|md|xml|yml|yaml|py|sql|txt)$/i;
 function walk(dir='') {let files=[];for(const d of readdirSync(path.join(root,dir),{withFileTypes:true})){if(d.name.startsWith('.')&&d.isDirectory())continue;const p=path.posix.join(dir,d.name);if(d.isDirectory()){if(!ignoreDirs.has(d.name)) files.push(...walk(p))}else files.push(p)}return files}
 const all=walk();const scan=all.filter(p=>sources.test(p) && !p.endsWith('audit-unused-repo-files.mjs')).map(p=>({path:p,text:readFileSync(path.join(root,p),'utf8')}));
 const isQa=p=>/^(?:\.github\/|scripts\/|supabase\/|.*\/tests?\/)|\.(?:test|spec)\./.test(p);

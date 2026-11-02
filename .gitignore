@@ -1,0 +1,13 @@
+# Generated files are not source assets and should never be committed.
+**/node_modules/
+**/dist/
+**/build/
+_podcast_pages/
+**/.vite/
+**/.cache/
+**/coverage/
+**/playwright-report/
+**/test-results/
+artifacts/
+*.log
+.DS_Store
