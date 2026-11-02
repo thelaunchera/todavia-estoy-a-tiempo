@@ -565,3 +565,21 @@ export async function removeOldClassRecording(path:string):Promise<void>{
  const {error}=await client.storage.from(CLASS_RECORDING_BUCKET).remove([path]);
  if(error)throw error;
 }
+
+export type StudioLabAsset={id:string;name:string;category:'sticker'|'background';url:string};
+export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
+ if(!client)throw Error('Conexión de biblioteca no disponible.');
+ const {data:{user},error:authError}=await client.auth.getUser();
+ if(authError||!user)throw Error('Inicia sesión en Studio para abrir la biblioteca.');
+ const result:StudioLabAsset[]=[];
+ for(const [table,category] of [['content_lab_sticker_catalog','sticker'],['content_lab_background_catalog','background']] as const){
+  const {data,error}=await client.from(table).select('id,name,path').eq('published',true).order('created_at',{ascending:true});
+  if(error)throw Error('No se pudo consultar '+category+': '+error.message);
+  for(const asset of data||[]){
+   if(!asset.path)continue;
+   const {data:signed,error:signError}=await client.storage.from('content-lab-private').createSignedUrl(asset.path,3600);
+   if(!signError&&signed?.signedUrl)result.push({id:asset.id,name:asset.name,category,url:signed.signedUrl});
+  }
+ }
+ return result;
+}
