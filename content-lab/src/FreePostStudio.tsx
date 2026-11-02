@@ -294,17 +294,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     (recentMedia.indexOf(b.id)===-1?999:recentMedia.indexOf(b.id))).slice(0,90);
  const touchLayers:TouchLayer[]=layers.map(l=>({...l,src:images[l.assetId]||''}));
  return <section className={'free-post-studio'+(mediaOpen||backgroundOpen?' with-media':'')} aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
-  <div className="free-post-tools">
-   <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
-   <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
-   {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
-    <Paintbrush size={17}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
-   <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Add text','Añadir texto',locale)}</button>
-   <button type="button" className="free-post-poster-button" onClick={addPosterTitle}><Type size={18}/>{plain('Poster Bold','Texto póster BOLD',locale)}</button>
-   <button type="button" aria-expanded={mediaOpen} onClick={()=>{setMediaOpen(v=>!v);setBackgroundOpen(false)}}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
-   <button type="button" aria-expanded={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false)}}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
-   {decor.layers.some(l=>l.kind==='text'&&['escribe aquí','write here','tu gran idea','your big idea'].includes((l.text||'').trim().toLocaleLowerCase('es')))&&
-    <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>}
+  <div className="free-post-tools" aria-label={plain('Editing tools','Herramientas de edición',locale)}>
+   <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Photos','Fotos',locale)}</button>
+   <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Text','Texto',locale)}</button>
+   <button type="button" aria-expanded={mediaOpen&&mediaTab==='sticker'} onClick={()=>{setMediaTab('sticker');setMediaOpen(true);setBackgroundOpen(false)}}><Layers3 size={17}/>{plain('Stickers','Stickers',locale)}</button>
+   <button type="button" aria-expanded={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false)}}><Paintbrush size={17}/>{plain('Background','Fondo',locale)}</button>
    <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}><Undo2 size={17}/></button>
    <button type="button" disabled={!future.length} onClick={redo} title={plain('Redo','Rehacer',locale)}><Redo2 size={17}/></button>
   </div>
