@@ -79,6 +79,11 @@ jobs:
           node --check clases/countdown.js
           node --check clases/waitlist.js
           node --check alumnos/comunidad.js
+          node --check alumnos/prompt-guide.js
+          node --check alumnos/prompt-english.js
+          node --check alumnos/materiales-interactivos.js
+          node --check alumnos/inspiracion.js
+          node --test alumnos/aula-prompt-bilingual.test.mjs
           node --check centro/centro.js
           node --check centro/interacciones.js
           node estudio-control/tests/check-course-prelaunch.mjs
