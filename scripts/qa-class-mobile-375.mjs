@@ -56,6 +56,21 @@ try {
   }
   for(const key of order)assert(e[key].x>=-2&&e[key].x+e[key].width<=width+2,'Clipped '+key+' at '+width);
   assert(e.cta.height>=48,'CTA too small at '+width);
+  // Result must reveal the official full-page demo, not a decorative mockup.
+  const resultButton=page.locator('#de-idea-a-web [data-transform-to="100"]');
+  await resultButton.scrollIntoViewIfNeeded();
+  await resultButton.click();
+  await page.waitForFunction(()=>{const el=document.querySelector('[data-casa-brownie-open]');return el && !el.hidden;},null,{timeout:10000});
+  const fullLink=page.locator('[data-casa-brownie-open] a');
+  assert.equal(await fullLink.getAttribute('href'),'https://thelaunchera.com/demos/casa-brownie/');
+  assert.equal(await fullLink.getAttribute('target'),'_blank');
+  const preview=page.locator('[data-casa-brownie-frame]');
+  await page.waitForFunction(()=>!!document.querySelector('[data-casa-brownie-frame]')?.getAttribute('src'),null,{timeout:12000});
+  assert.equal(await preview.getAttribute('src'),'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video');
+  await page.screenshot({path:'artifacts/class-mobile/casa-resultado-'+width+'.png',fullPage:false});
+  await page.locator('#de-idea-a-web [data-transform-to="0"]').click();
+  await page.waitForFunction(()=>document.querySelector('[data-casa-brownie-open]')?.hidden===true,null,{timeout:10000});
+  assert((await page.evaluate(()=>document.documentElement.scrollWidth))<=width+2,'After preview overflows mobile at '+width);
   await page.close();
  }
  console.log('PASS: Class landing 320,375,390,430px, no overlap or clipping, photo, readable CTA and launch price.');
