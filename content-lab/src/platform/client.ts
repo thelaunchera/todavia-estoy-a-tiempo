@@ -90,7 +90,7 @@ const seed=async()=>{
   }
   const profiles=[
     {name:'The Launch Era',handle:'@thelaunchera_ai',audience:'Residential cleaning business owners in the USA',voice:'Clear, modern, human and premium',rules:'Public copy US English only. Focus on bookings, clients, quotes, invoices, jobs, follow-ups and cleaning operations. Never invent functionality. Real screenshots stay unaltered.',language:'English',color:'#BED8E9',background:'#FAF8F3'},
-    {name:'Todavía estoy a tiempo',handle:'',audience:'Personas que sienten que van tarde y quieren volver a empezar',voice:'Íntimo, humano, conversacional',rules:'Todo el contenido público en español latino. No inventar episodios, historias personales o detalles íntimos. Mantener las cuentas separadas.',language:'Español',color:'#CDB8A9',background:'#F8EEE8'}
+    {name:'Todavía estoy a tiempo',handle:'',audience:'Personas que sienten que van tarde y quieren volver a empezar',voice:'Íntimo, humano, conversacional',rules:'Todo el contenido público en español. No inventar episodios, historias personales o detalles íntimos. Mantener las cuentas separadas.',language:'Español',color:'#CDB8A9',background:'#F8EEE8'}
   ];
   return out(await tab('brands').insert(profiles.map(payload=>({owner_id:me.id,payload}))).select('id,payload')).map(unwrap);
 };
