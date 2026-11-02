@@ -16,7 +16,7 @@ async function clipboardCopy(value,button){
  }
  button.textContent=copied?'✓ Copied / Copiado':'Select text / Selecciona el texto';
 }
-export async function mountInspiracion(root,{db,courseId,getLanguage=()=> 'es'}={}){
+export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
  root.innerHTML='<p class="inspiration-loading" role="status">Cargando proyectos / Loading projects…</p>';
  const {data,error}=await db.from('podcast_class_learning_assets')
@@ -26,6 +26,7 @@ export async function mountInspiracion(root,{db,courseId,getLanguage=()=> 'es'}=
   return {setLanguage(){}};
  }
  const demos=Array.isArray(data.payload.demos)?data.payload.demos.filter(d=>d&&d.id&&d.title&&safeUrl(d.url)):[];
+ const visibleDemos=()=>adminPreview?demos:demos.filter(d=>d.published!==false);
  let currentId=null,category='all',search='';
  const categoryNames={
   all:['Todas','All'],food:['Repostería y comida','Food & bakery'],
@@ -49,11 +50,33 @@ export async function mountInspiracion(root,{db,courseId,getLanguage=()=> 'es'}=
    '<label>'+enLabel('Buscar un negocio','Search by business',curLang())+
    '<input id="inspiration-search" type="search" value="'+esc(search)+'" placeholder="'+esc(enLabel('Brownie, boutique, yoga…','Brownie, boutique, yoga…',curLang()))+'"></label>';
   root.append(filter);
+  if(adminPreview){
+   const editor=document.createElement('section');editor.className='inspiration-owner-editor';
+   const heading=document.createElement('h3');heading.textContent=enLabel('Elegir demos visibles para alumnos','Choose demos students can see',curLang());
+   const hint=document.createElement('p');hint.textContent=enLabel('Activa los proyectos que quieras enseñar. Los demás permanecen disponibles solo en tu vista del Studio.','Choose which projects students can see. Other projects stay visible only in your Studio preview.',curLang());
+   const options=document.createElement('div');options.className='inspiration-owner-options';
+   const state=document.createElement('p');state.setAttribute('role','status');
+   for(const demo of demos){
+    const label=document.createElement('label');
+    const input=document.createElement('input');input.type='checkbox';input.checked=demo.published!==false;
+    const title=document.createElement('span');title.textContent=demo.title;
+    label.append(input,title);options.append(label);
+    input.addEventListener('change',async()=>{
+     const previous=demo.published;demo.published=input.checked;input.disabled=true;
+     const updated={...data.payload,demos};
+     const {error}=await db.from('podcast_class_learning_assets').update({payload:updated}).eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1');
+     input.disabled=false;
+     if(error){demo.published=previous;input.checked=previous!==false;state.textContent='No se pudo guardar. Vuelve a intentarlo.';}
+     else{state.textContent='Selección guardada. Los alumnos verán los proyectos activados.';}
+    });
+   }
+   editor.append(heading,hint,options,state);root.append(editor);
+  }
   const grid=document.createElement('div');grid.className='inspiration-grid';root.append(grid);
   const count=document.createElement('p');count.className='inspiration-count';root.append(count);
   function paint(){
    grid.replaceChildren();
-   const entries=demos.filter(d=>(category==='all'||d.category===category)&&(!search||[d.title,d.description_es,d.description_en].join(' ').toLowerCase().includes(search.toLowerCase())));
+   const entries=visibleDemos().filter(d=>(category==='all'||d.category===category)&&(!search||[d.title,d.description_es,d.description_en].join(' ').toLowerCase().includes(search.toLowerCase())));
    count.textContent=entries.length+' '+enLabel('proyectos disponibles','projects available',curLang());
    if(!entries.length){grid.innerHTML='<p>'+enLabel('Prueba otra categoría o palabra.','Try a different category or search.',curLang())+'</p>';return;}
    for(const d of entries){
@@ -71,7 +94,7 @@ export async function mountInspiracion(root,{db,courseId,getLanguage=()=> 'es'}=
   paint();
  }
  function showDemo(id){
-  const d=demos.find(x=>x.id===id);if(!d)return showGallery();
+  const d=visibleDemos().find(x=>x.id===id);if(!d)return showGallery();
   currentId=id;root.replaceChildren();
   const nav=document.createElement('div');nav.className='inspiration-demo-nav';
   nav.innerHTML='<button type="button" data-back>'+enLabel('← Atrás a inspiración','← Back to inspiration',curLang())+'</button>'+
