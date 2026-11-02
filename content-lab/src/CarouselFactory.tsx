@@ -950,9 +950,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),cloned]});
     notify('Texto duplicado: conserva el color, la fuente y el tamaño.');
   };
-  const crossesSeam=(rect:TouchRect,count:number)=>Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)/count)
-    .some(cut=>rect.x<cut-.0001&&rect.x+rect.w>cut+.0001);
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
+    const crossesSeam=(r:TouchRect,count:number)=>Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)/count)
+      .some(cut=>r.x<cut-.0001&&r.x+r.w>cut+.0001);
     if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
     // A photo crossing an internal 4:5 cut is a seamless layout even if this
