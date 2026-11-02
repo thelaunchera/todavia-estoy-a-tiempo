@@ -104,7 +104,8 @@ test('Aula: productos por compra separados y Lab cerrado sin pago público',()=>
  assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/);
  assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/);
  assert.doesNotMatch(room,/href="[^"]*(?:content-lab\/(?!prompts\/)|lab\/checkout)/,'El Lab de pago y sus checkouts privados no deben ser enlaces públicos');
- assert.match(course,/catalogo:'Todos los productos'/);
+ assert.match(course,/prompts:'Biblioteca de prompts'/,'El Aula muestra su biblioteca didáctica');
+ assert.match(course,/if\(view==='catalogo'\)view='lecciones'/,'El catálogo comercial no es una vista de Aula');
 });
 
 
