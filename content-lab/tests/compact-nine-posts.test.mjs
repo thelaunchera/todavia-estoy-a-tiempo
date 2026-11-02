@@ -32,7 +32,8 @@ test('Image imports preserve the source and target the post selected at upload s
 test('Original AI-designed image downloads in PNG without re-stamping template headlines',()=>{
  const s=read('src/BrandGrid.tsx');
  const a=s.slice(s.indexOf('const downloadCompleted=async()=>'),s.indexOf('const copyCurrentPrompt=async()=>'));
- assert.ok(a.includes('canvas.toDataURL(\'image/png\')'));
+ assert.ok(a.includes('downloadLosslessPng(canvas'));
+ assert.ok(a.includes('sourceAwareScale([images[tile.assetId]]'));
  assert.ok(a.includes('ctx.drawImage(image'));
  assert.ok(a.includes('Math.min(W/w,H/h)'));
  assert.equal(a.includes('composeGridPoster'),false);
