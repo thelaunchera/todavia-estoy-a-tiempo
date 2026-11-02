@@ -14,7 +14,7 @@ const ids=[
  'dashboard-progress-shell','student-greeting-message','dashboard-progress-empty-title',
  'dashboard-progress-empty-desc','dashboard-next-kicker','dashboard-next-title',
  'dashboard-next-description','dashboard-next-detail','dashboard-tool-lessons',
- 'dashboard-tool-materials','dashboard-tool-community'
+ 'dashboard-tool-materials','dashboard-tool-community','dashboard-greeting-tip','dashboard-hero-continue'
 ];
 const els=new Map(ids.map(id=>[id,new FakeNode()]));
 globalThis.document={
@@ -28,12 +28,15 @@ const node=id=>els.get(id);
 const ready=(code,title='Mi lección')=>({lesson_code:code,title,status:'ready',youtube_video_id:'abcdefghijk',description:'Practica aquí',minutes:12});
 const draft={...ready('09','No publicada'),status:'draft'};
 test('No muestra porcentajes ficticios antes de publicar los videos',()=>{
- renderAulaInicio({lessons:[],done:new Set(),resources:[]});
+ let opened='';
+ renderAulaInicio({lessons:[],done:new Set(),resources:[],onView:x=>opened=x});
  assert.equal(node('dashboard-progress-real').hidden,true);
  assert.equal(node('dashboard-next-title').textContent,'Aquí empieza tu primera web.');
  assert.match(node('dashboard-notices').children[0].children[1].children[1].textContent,/preparación/);
  node('dashboard-next-action').onclick();
- assert.equal(globalThis.helpClicks,1);
+ assert.equal(opened,'prompts');
+ node('dashboard-hero-continue').onclick();
+ assert.equal(opened,'prompts');
 });
 test('No cuenta ni muestra como listo un borrador',()=>{
  let opened=-1;
@@ -53,12 +56,13 @@ test('El avance y el próximo módulo usan el progreso real',()=>{
 });
 test('La vista administrativa no muestra progreso de estudiante',()=>{
  let section='';
- renderAulaInicio({lessons:[draft,ready('01')],done:new Set(),adminPreview:true,resources:[],onView:s=>section=s});
+ let opened=-1;
+ renderAulaInicio({lessons:[draft,ready('01')],done:new Set(),adminPreview:true,resources:[],onView:s=>section=s,onLesson:i=>opened=i});
  assert.equal(node('dashboard-progress-real').hidden,true);
- assert.equal(node('dashboard-progress-empty-title').textContent,'Vista previa privada');
- assert.match(node('dashboard-next-detail').textContent,/1 lista para publicar/);
+ assert.equal(node('dashboard-progress-empty-title').textContent,'Tu proyecto, a tu ritmo.');
+ assert.equal(node('dashboard-next-title').textContent,'Mi lección');
  node('dashboard-next-action').onclick();
- assert.equal(section,'lecciones');
+ assert.equal(opened,1);
 });
 test('Cuando el estudiante termina, lleva al Club de Ideas',()=>{
  let section='';
@@ -66,6 +70,14 @@ test('Cuando el estudiante termina, lleva al Club de Ideas',()=>{
  assert.match(node('dashboard-next-title').textContent,/Terminaste/);
  node('dashboard-next-action').onclick();
  assert.equal(section,'comunidad');
+});
+test('English student experience and accurate class progress',()=>{
+ let action='';
+ renderAulaInicio({lessons:[],done:new Set(),resources:[],language:'en',onView:v=>action=v});
+ assert.equal(node('dashboard-next-title').textContent,'Your first website starts here.');
+ assert.match(node('student-greeting-message').textContent,/Welcome to your creative workspace/);
+ node('dashboard-next-action').onclick();
+ assert.equal(action,'prompts');
 });
 test('La pantalla de inicio y el aviso admin son distintos y la comprobación de permisos sigue obligatoria',()=>{
  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
