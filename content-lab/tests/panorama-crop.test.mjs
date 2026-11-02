@@ -226,11 +226,14 @@ test('normal confines free layers to a single slide while seamless saves the ful
  assert.equal(layer.rect.w,.35);
 });
 
-test('a named personal asset can be dragged from the visible library into a seamless canvas',()=>{
+test('a named personal asset can be opened and dragged from the compact library into a seamless canvas',()=>{
   const editor=readFileSync(new URL('../src/PanoramaEditor.tsx',import.meta.url),'utf8');
   const factory=readFileSync(new URL('../src/CarouselFactory.tsx',import.meta.url),'utf8');
   const app=readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');
-  assert.ok(editor.includes('useState(true)'),'the library starts visible');
+  assert.ok(editor.includes('const [libraryOpen,setLibraryOpen]=useState(false)'),'the canvas starts unobstructed');
+  assert.ok(editor.includes("setLibraryKind('photo')"),'photo drawer opens on demand');
+  assert.ok(editor.includes("setLibraryKind('sticker')"),'sticker drawer opens on demand');
+  assert.ok(editor.includes('panorama-mobile-layer-panel'),'layers remain accessible');
   assert.ok(editor.includes('new File([file],safe+extension'),'users choose an image name before saving');
   assert.ok(editor.includes('onUploadToLibrary(files,uploadKind)'),'upload and insertion are separate actions');
   assert.ok(editor.includes('onRenameAsset(asset,safe)'),'existing private items can be renamed');
