@@ -2,6 +2,7 @@ import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-pr
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
+import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261102-v1';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
@@ -183,6 +184,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const b=el('button',null,meta[1]);b.type='button';b.dataset.view=child;b.setAttribute('aria-current',child===view?'page':'false');b.addEventListener('click',()=>go(child));subtabs.append(b);
   }
   content.replaceChildren();
+  if(getLanguage()==='en'&&!['prompts','cuaderno','revision'].includes(view)){
+   renderEnglishMaterialGuide(content,view,go);
+   translateCurrentMaterial();return;
+  }
   if(view==='inicio')renderStart();
   if(view==='funciona')renderWebBasics(content,go);
   if(view==='organizacion')renderProjectOrder(content);
