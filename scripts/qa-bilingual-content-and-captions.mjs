@@ -34,8 +34,8 @@ for(const p of ['clases/primera-landing.html','clases/primera-landing-en.html'])
  assert.match(body,/class-audio-language-note/,p+' must clearly disclose audio language');
  assert.match(body,/href="#lista-espera"/,p+' must preserve waitlist CTA');
 }
-assert.match(read('clases/primera-landing.html'),/La clase se explica en español latino/);
-assert.match(read('clases/primera-landing-en.html'),/Lessons are taught in Latin American Spanish/);
+assert.match(read('clases/primera-landing.html'),/Audio de las lecciones: español latino|La clase se explica en español latino/);
+assert.match(read('clases/primera-landing-en.html'),/Lesson audio: Latin American Spanish|Lessons are taught in Latin American Spanish/);
 const room=read('alumnos/index.html');
 for(const lang of ['es','en','auto']) assert(room.includes('value="'+lang+'"'), 'Caption option '+lang);
 const player=read('alumnos/curso.js');
