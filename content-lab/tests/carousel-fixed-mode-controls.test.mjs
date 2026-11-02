@@ -23,6 +23,26 @@ test('iPad and iPhone keep a compact Deslizar/Editar switch while scrolling',()=
  assert.ok(css.includes('@media(min-width:761px) and (max-width:1180px)'));
 });
 
+
+test('Fullscreen keeps one persistent touch edit switch and one exit button on iPhone',()=>{
+ const editor=read('src/TouchLayerCanvas.tsx');
+ const canvasCss=read('src/TouchLayerCanvas.css');
+ const panorama=read('src/PanoramaEditor.tsx');
+ const panoramaCss=read('src/PanoramaEditor.css');
+ assert.ok(editor.includes('fullscreen?:boolean'));
+ assert.ok(editor.includes("if(pageCount<=1||fullscreen){setFloatingModeBar(false);return}"));
+ assert.ok(editor.includes("{pageCount>1&&!fullscreen&&<div ref={navigationBar}"));
+ assert.ok(editor.includes("{pageCount>1&&(fullscreen||floatingModeBar)"));
+ assert.ok(editor.includes("(fullscreen?' fullscreen':'')"));
+ assert.ok(panorama.includes('fullscreen={expanded}'));
+ assert.ok(panorama.includes('{!expanded&&<button type="button" className="btn ghost"'));
+ assert.ok(panorama.includes('className="panorama-exit-fixed"'));
+ assert.ok(canvasCss.includes('.touch-editor-floating-mode.fullscreen{'));
+ assert.ok(canvasCss.includes('bottom:calc(102px + env(safe-area-inset-bottom, 0px))'));
+ assert.ok(panoramaCss.includes('.panorama-editor.expanded .panorama-heading{display:none}'));
+ assert.equal(panorama.split('Cerrar vista amplia').length-1,1,'only one exit button text remains');
+});
+
 test('Private Studio seamless carousel retains the same touch-first tools',()=>{
  const studio=read('../estudio-control/src/SeamlessEditor.tsx');
  const route=read('../estudio-control/src/Studio.tsx');
