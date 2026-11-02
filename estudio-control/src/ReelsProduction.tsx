@@ -141,10 +141,10 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
         </section>
 
         <section className="reels-panel">
-          <div className="reels-panel-head"><div><span>02 / QUÉ VIDEOS GRABAR</span><h4>Qué grabar con tu teléfono, paso a paso</h4></div>
+          <div className="reels-panel-head"><div><span>02 / QUÉ VIDEOS GRABAR</span><h4>Instrucciones para grabar cada escena</h4></div>
             <button type="button" onClick={()=>void copy(shots,'shots')} className="reels-copy"><Clipboard size={16}/>{copied==='shots'?'Copiado':'Copiar tomas'}</button></div>
-          <p className="reels-tip">Graba cada escena como un video corto. Sostén el teléfono vertical, busca luz cerca de una ventana y sigue los pasos de abajo. No tienes que salir hablando a cámara.</p>
-          <textarea aria-label="Direcciones de grabación" className="reels-shots-input" rows={10} maxLength={12000} value={shots} onChange={e=>setShots(e.target.value)} />
+          <p className="reels-tip">Cómo hacerlo: Pon el iPhone vertical. Cada línea te dice dónde colocar el teléfono, qué debe verse y qué hacer. Graba un video corto por cada paso. No tienes que hablar frente a la cámara.</p>
+          <textarea aria-label="Instrucciones sencillas para grabar cada escena" className="reels-shots-input" rows={10} maxLength={12000} value={shots} onChange={e=>setShots(e.target.value)} />
           <div className="reels-note">Cuando termines, puedes nombrar el video <strong>{reel.filename}</strong>. Pon el logo pequeño. No necesitas flechas ni inventar resultados.</div>
         </section>
 
