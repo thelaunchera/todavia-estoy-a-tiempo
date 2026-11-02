@@ -3,7 +3,7 @@ import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-e
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
 import {mountInspiracion} from './inspiracion.js?v=20261102-owner-curation-v3';
-import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-v1';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-refresh-v2';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
@@ -555,7 +555,9 @@ async function showCourse(email,asAdmin=false){
   : 'Acceso verificado.',true);
  lessonsUI();
  aulaViewHistory.length=0;
- setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false,track:false});
+ let refreshedSection='';
+  try{refreshedSection=sessionStorage.getItem('tle_aula_refresh_view')||'';sessionStorage.removeItem('tle_aula_refresh_view');}catch{}
+  setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(location.hash==='#prompts'?'prompts':'inicio'),{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage,
