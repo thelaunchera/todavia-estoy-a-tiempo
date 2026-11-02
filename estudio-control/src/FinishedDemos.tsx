@@ -5,16 +5,17 @@ import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
 import {ivoryBloomPhotos} from './ivory-bloom-photos';
 import {ivoryBloomRebuildPrompts} from './ivory-bloom-rebuild-prompts';
+import {additionalDemoPhotos, additionalDemoPrompts, type FinishedDemoPhoto} from './finished-demo-resources';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
- promptsFor?:'casa-brownie'|'crumb'|'aftr'|'soluna'|'ivory-bloom';
- photos?:typeof solunaPhotos;
+ promptsFor?:keyof typeof studioDemoPrompts;
+ photos?:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
  {
@@ -28,6 +29,7 @@ const finishedDemos:Demo[]=[
   note:'Sin video en el hero. Es una vista del mismo demo oficial, no una copia ni una segunda web.',
   kind:'static',
   promptsFor:'casa-brownie'
+  photos:additionalDemoPhotos['casa-brownie'],
  },
  {
   id:'casa-brownie',
@@ -39,6 +41,8 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/casa-brownie',
   note:'Versión con video: reservar para el bono, después de grabar la web con foto estática.',
   kind:'video'
+  photos:additionalDemoPhotos['casa-brownie'],
+  promptsFor:'casa-brownie',
  },
  {
   id:'crumb',
@@ -51,6 +55,7 @@ const finishedDemos:Demo[]=[
   note:'Demo ficticio: no acepta pedidos ni pagos reales.',
   kind:'other',
   promptsFor:'crumb'
+  photos:additionalDemoPhotos['crumb'],
  },
  {
   id:'aftr',
@@ -74,6 +79,8 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/demo/jaramillo-boutique/demos/jaramillo-boutique',
   note:'Vista demostrativa de la boutique: la selección de prendas permite consultar interés, pero no procesa pagos. Disponibilidad, precios definitivos y datos de tiendas requieren confirmación.',
   kind:'other'
+  photos:additionalDemoPhotos['aftr'],
+  promptsFor:'jaramillo-boutique',
  },
  {
   id:'yummm',
@@ -85,6 +92,8 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/yummm',
   note:'Concepto ficticio; el catálogo y los precios son ilustrativos. No se aceptan pedidos ni pagos reales.',
   kind:'other'
+  photos:additionalDemoPhotos['yummm'],
+  promptsFor:'yummm',
  },
  {
   id:'soluna-yoga',
@@ -122,6 +131,8 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/cb-depot-booking',
   note:'Proyecto de cliente real. El formulario puede recibir reservas y solicitudes auténticas: no lo utilices para pruebas ni compartas información privada del cliente.',
   kind:'live'
+  photos:additionalDemoPhotos['cb-depot'],
+  promptsFor:'cb-depot',
  },
  {
   id:'experience-cleaning',
@@ -133,6 +144,8 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/experience-cleaning',
   note:'Demo pública y segura, con información ilustrativa. No crea reservas, no cobra ni modifica datos reales. El Command Center mostrado pertenece a la simulación, no a una cuenta privada.',
   kind:'other'
+  photos:additionalDemoPhotos['experience-cleaning'],
+  promptsFor:'experience-cleaning',
  }
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
@@ -162,7 +175,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
        <small>{d.note}</small>
        {!!d.photos?.length&&<details className="finished-demo-photos">
          <summary>Ver fotos individuales <span>{d.photos.length} fotos aprobadas</span></summary>
-         <p>Estas son las fotografías originales del demo, una por archivo. Abre cada foto para verla completa o copia el enlace para reutilizarla en otro proyecto. Los prompts exactos están debajo.</p>
+         <p>Estas son imágenes de referencia del proyecto, cada una por separado. Puedes abrirlas, copiar su enlace y consultar un prompt orientativo para recrear una foto similar. Los pasos para reconstruir la web están debajo.</p>
          <div className="finished-demo-photos-grid">
            {d.photos.map(photo=><div className="finished-demo-photo-tile" key={photo.key}>
              <a href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={'Abrir fotografía '+photo.title}>
@@ -175,6 +188,11 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
                  <a href={photo.url} target="_blank" rel="noopener noreferrer">Abrir foto</a>
                  <button type="button" onClick={()=>void copy(photo.url,d.id+'-photo-url-'+photo.key,'link')}>{copied===d.id+'-photo-url-'+photo.key?'Copiado':'Copiar enlace'}</button>
                </div>
+               {!!photo.prompt&&<details className="finished-demo-photo-instructions">
+                 <summary>Ver prompt de esta foto</summary>
+                 <p>{photo.prompt}</p>
+                 <button type="button" onClick={()=>void copy(photo.prompt,d.id+'-photo-prompt-'+photo.key)}><Copy size={13}/>{copied===d.id+'-photo-prompt-'+photo.key?'Copiado':'Copiar prompt'}</button>
+               </details>}
              </div>
            </div>)}
          </div>
