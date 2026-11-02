@@ -333,7 +333,7 @@ const productInformation=Object.freeze({
  'web-class':{
   title:'Tu primera web con IA',type:'MASTERCLASS PRÁCTICA',summary:'Aprende a construir tu primera web paso a paso, sin experiencia programando.',
   price:'Oferta de lanzamiento al abrir inscripciones',audience:'Personas que quieren crear una página para su idea o negocio y necesitan instrucciones sencillas, desde cero.',
-  includes:['Lecciones con audio en español latino; subtítulos ES/EN al publicarse las pistas revisadas.','Ejemplo práctico de página y demostraciones de diseño.','Biblioteca de prompts y materiales que acompañan los ejercicios.','Cuaderno, lista de revisión y centro de ayuda del aula.'],
+  includes:['Lecciones con audio en español; subtítulos ES/EN al publicarse las pistas revisadas.','Ejemplo práctico de página y demostraciones de diseño.','Biblioteca de prompts y materiales que acompañan los ejercicios.','Cuaderno, lista de revisión y centro de ayuda del aula.'],
   delivery:'Cuando la clase se lance y tu compra esté verificada, entrarás desde este centro con tu correo y contraseña. Puedes retomar tus lecciones y guardar avances.',
   note:'La clase sigue en preparación. La lista de espera no es una compra y el acceso permanece cerrado.'
  },
