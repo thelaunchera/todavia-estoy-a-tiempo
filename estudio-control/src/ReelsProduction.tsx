@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import {uploadPodcastReelAudio,getPodcastReelAudioUrl} from './supabase-client';
 import { Check, Clipboard, Film, Headphones, Mic2, Save, ShieldCheck } from 'lucide-react';
 import { REELS_NOVIEMBRE, REELS_SECTION } from './reels-plan';
 import './reels-production.css';
@@ -48,6 +49,8 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
   const [shots,setShots] = useState<string>(reel.shots.join('\n'));
   const [notes,setNotes] = useState('');
   const [url,setUrl] = useState('');
+  const [audioPreview,setAudioPreview] = useState('');
+  const [uploading,setUploading] = useState(false);
   const [status,setStatus] = useState<string>('guion listo');
   const [checks,setChecks] = useState<string[]>([]);
   const [busy,setBusy] = useState(false);
@@ -64,6 +67,8 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
     setCopied('');
   },[reel.id,entry?.id,entry?.script,entry?.visual_idea,entry?.notes,entry?.link,entry?.status,entry?.performance_notes]);
 
+  useEffect(()=>{let active=true;setAudioPreview('');if(url.startsWith('https://')){setAudioPreview(url)}else if(url){getPodcastReelAudioUrl(url).then(value=>{if(active)setAudioPreview(value)}).catch(()=>{if(active)setNotice('No se pudo reproducir el audio privado.')})}return()=>{active=false}},[url]);
+  async function chooseAudio(file:File|undefined){if(!file)return;setUploading(true);setNotice('Subiendo audio…');try{const path=await uploadPodcastReelAudio(reel.id,file,()=>{});setUrl(path);setNotice('Audio subido. Pulsa Guardar progreso para asociarlo al reel.')}catch(e){setNotice(e instanceof Error?e.message:'Error al subir audio.')}finally{setUploading(false)}}
   const records = entries.filter(e=>e.section===REELS_SECTION);
   const completed = records.filter(e=>e.status==='aprobado').length;
   const drafted = records.filter(e=>(e.script||'').length>0).length;
@@ -79,7 +84,6 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
   async function save() {
     if (busy) return;
     if (!script.trim()) { setNotice('El guion de voz no puede estar vacío.'); return; }
-    if (!cleanUrl(url)) { setNotice('Utiliza un enlace https válido para el audio, o deja ese campo vacío por ahora.'); return; }
     setBusy(true);setNotice('');
     try {
       const patch = { script:script.trim(),visual_idea:shots.trim(),notes:notes.trim(),link:url.trim(),
@@ -135,10 +139,11 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
           <p className="reels-tip">Texto original para este reel, independiente del audio del episodio. Puedes revisarlo antes de generar tu voz. Copiar no incluye indicaciones ni etiquetas.</p>
           <textarea className="reels-voice-input" aria-label="Guion de voz para ElevenLabs" value={script} onChange={e=>setScript(e.target.value)} rows={7} maxLength={16000} />
           <p className="reels-performance"><Headphones size={16}/><span><strong>Dirección de voz:</strong> {reel.tone}</span></p>
-          <label className="reels-audio-field">Enlace del audio terminado <span>(opcional, cuando lo generes)</span>
-            <input type="url" inputMode="url" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://.../reel-03.mp3" />
+          <label className="reels-audio-field">Subir audio del reel (MP3, M4A, WAV o AAC)
+            <input type="file" accept=".mp3,.m4a,.wav,.aac,audio/*" disabled={uploading||busy} onChange={e=>{void chooseAudio(e.target.files?.[0]);e.target.value=''}}/>
           </label>
-          {url && cleanUrl(url) && <a className="reels-audio-link" href={url} target="_blank" rel="noopener noreferrer">Abrir audio guardado</a>}
+          {uploading&&<p role="status">Subiendo audio privado…</p>}
+          {audioPreview&&<audio controls preload="none" src={audioPreview} style={{width:'100%',marginTop:10}}/>}
         </section>
 
         <section className="reels-panel">
@@ -166,7 +171,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
           </div>
           <div className="reels-savebar">
             <span><ShieldCheck size={16}/> El reel solo se marca como aprobado si tú lo indicas.</span>
-            <button type="button" onClick={()=>void save()} disabled={busy}><Save size={17}/>{busy?'Guardando…':'Guardar progreso'}</button>
+            <button type="button" onClick={()=>void save()} disabled={busy||uploading}><Save size={17}/>{busy?'Guardando…':'Guardar progreso'}</button>
           </div>
           {notice && <p className="reels-notice" role="status">{notice}</p>}
         </section>
