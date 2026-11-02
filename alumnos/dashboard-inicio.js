@@ -74,7 +74,8 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
   addNotice(list,pick(language,'VIDEOS','VIDEOS'),pick(language,'Los videos están en preparación','Videos are being prepared'),
    pick(language,'Mientras tanto, los materiales, prompts y ejemplos se pueden consultar.','Meanwhile, you can review materials, prompts and examples.'));
  }else{
-  addNotice(list,pick(language,'LECCIONES','LESSONS'),ready.length+' '+pick(language,'videos disponibles','videos available'),
+  addNotice(list,pick(language,'LECCIONES','LESSONS'),
+    ready.length+' '+(ready.length===1?pick(language,'video disponible','video available'):pick(language,'videos disponibles','videos available')),
    pick(language,'Tu progreso se guarda al terminar cada lección.','Your progress is saved as you complete each lesson.'));
  }
  addNotice(list,pick(language,'MATERIALES','MATERIALS'),pick(language,'Cuaderno y biblioteca','Workbook & library'),
