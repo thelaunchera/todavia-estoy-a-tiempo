@@ -43,7 +43,7 @@ export function onePhotoNinePrompt(index:number,opts:OnePhotoPromptOptions):stri
  const brand=opts.brandName.trim()||'my brand';
  const headline=opts.headline?.trim()||'';
  const support=opts.support?.trim()||'';
- const language=/español|spanish|es\b/i.test(opts.language||'')?'Latin American Spanish':'US English';
+ const language=/español|spanish|es\b/i.test(opts.language||'')?'Spanish':'US English';
  return [
   'CREATE ONE IMAGE ONLY — '+item.name+' — COMPOSITION '+(i+1)+' OF 9.',
   'I will attach ONE product image. Treat that attached image as the ONLY authoritative product reference. If I have not attached it yet, ask me to upload it BEFORE generating any image.',
