@@ -186,8 +186,8 @@ function setAulaView(view,{scroll=true,track=true}={}){
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
   section.hidden=section.getAttribute('data-aula-panel')!==(view==='prompts'?'materiales':view);
  });
- if(view==='prompts')materialsController?.go('prompts');
- if(view==='materiales')materialsController?.go('inicio');
+ if(view==='prompts')materialsController?.go('prompts',{track:false});
+ if(view==='materiales')materialsController?.go('inicio',{track:false});
  document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
@@ -511,7 +511,9 @@ async function showCourse(email,asAdmin=false){
  setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
-  db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
+  db,user,courseId,adminPreview:asAdmin,
+  onGoLessons:()=>setAulaView('lecciones'),
+  onCloseMaterials:()=>{aulaViewHistory.length=0;setAulaView('inicio',{track:false});}
  }).then(controller=>{
   materialsController=controller||null;
   if(currentAulaView==='prompts')materialsController?.go('prompts');
