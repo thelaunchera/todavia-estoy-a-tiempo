@@ -438,3 +438,34 @@ body.aula-member .aula-entry{display:none!important}
 .lesson-stage .lesson-resources{margin:12px 0 0;background:transparent;border:0;border-bottom:1px solid #8eafc3;border-radius:0;color:#315b74;font:750 12px 'DM Sans',Arial,sans-serif;padding:7px 0;cursor:pointer}
 .lesson-stage .lesson-resources:hover{color:#183d59}
 @media(max-width:540px){.lesson-navigation{display:grid;grid-template-columns:1fr 1.25fr}.lesson-navigation #lesson-prev,.lesson-navigation #lesson-next{min-width:0;padding:12px 9px}.lesson-stage .lesson-guidance{font-size:12px}}
+
+/* Module prompt cards 2026-11-02: student-only, readable on phone and tablet. */
+.lesson-module-prompts{margin:25px 0 23px;padding:23px 0 0;border-top:1px solid #d6dfdf;display:grid;gap:15px}
+.lesson-module-prompts[hidden]{display:none!important}
+.lesson-module-prompts-eyebrow{font-size:.68rem;font-weight:800;letter-spacing:.13em;color:#61778a}
+.lesson-module-prompts-heading h4{font-size:clamp(1.17rem,2.2vw,1.5rem);line-height:1.25;margin:6px 0;color:#172b45}
+.lesson-module-prompts-heading p{margin:4px 0 0;color:#4c5e6c;line-height:1.6;font-size:.91rem;max-width:64ch}
+.lesson-module-prompts-list{display:grid;gap:10px;min-width:0}
+.lesson-prompt-card{border:1px solid #d5dfdf;border-radius:13px;background:#fff;overflow:hidden;min-width:0}
+.lesson-prompt-card[open]{border-color:#b4c9d6;background:#fcfcfa}
+.lesson-prompt-card summary{cursor:pointer;display:flex;align-items:flex-start;gap:12px;padding:15px 17px;list-style:none}
+.lesson-prompt-card summary::-webkit-details-marker{display:none}
+.lesson-prompt-card summary:after{content:"+";margin-left:auto;font-size:1.2rem;color:#607486;line-height:1}
+.lesson-prompt-card[open] summary:after{content:"−"}
+.lesson-prompt-card summary:focus-visible,.lesson-prompt-copy:focus-visible{outline:3px solid #7ba9c7;outline-offset:2px}
+.lesson-prompt-index{flex:0 0 auto;border-radius:7px;padding:6px 7px;background:#e9eef1;color:#34485a;font-size:.73rem;font-weight:750}
+.lesson-prompt-heading{display:grid;gap:5px;min-width:0}
+.lesson-prompt-heading strong{font-size:.94rem;line-height:1.35;color:#1e354b}
+.lesson-prompt-heading small{font-size:.8rem;line-height:1.45;color:#536775;font-weight:450}
+.lesson-prompt-body{border-top:1px solid #edf0ee;padding:16px 17px 18px}
+.lesson-prompt-text{white-space:pre-wrap;overflow-wrap:anywhere;color:#253744;font-size:.87rem;line-height:1.75;margin:0 0 15px}
+.lesson-prompt-copy{border:0;border-radius:9px;background:#172b45;color:#fff;font-weight:700;font-size:.85rem;min-height:43px;padding:9px 18px;cursor:pointer}
+.lesson-prompt-copy:hover{background:#304e6b}
+.lesson-prompt-copy-state{display:block;min-height:1em;margin-top:8px;color:#3b6074;font-size:.77rem}
+@media(max-width:620px){
+ .lesson-module-prompts{margin-top:22px;padding-top:18px}
+ .lesson-prompt-card summary{padding:13px 12px;gap:9px}
+ .lesson-prompt-body{padding:13px}
+ .lesson-prompt-heading strong{font-size:.9rem}
+ .lesson-prompt-copy{width:100%}
+}
