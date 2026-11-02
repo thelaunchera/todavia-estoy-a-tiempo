@@ -840,7 +840,18 @@ if(STUDIO_EMBEDDED_OWNER){
   out.hidden=true;display(null);
   status('No se pudo verificar tu acceso de administradora. Vuelve al Studio y abre el aula otra vez. Si continúa, inicia sesión en el Studio de nuevo.');
  },6500);
- window.parent.postMessage({type:'TLE_OWNER_SESSION_REQUEST'},window.location.origin);
+ // Safari and embedded webviews can load the iframe before React attaches
+ // the Studio message listener. Retry the handshake until it is verified.
+ const requestOwnerSession=()=>{
+  if(studioSessionReady)return;
+  window.parent.postMessage({type:'TLE_OWNER_SESSION_REQUEST'},window.location.origin);
+ };
+ requestOwnerSession();
+ const requestTimer=setInterval(()=>{
+  if(studioSessionReady){clearInterval(requestTimer);return;}
+  requestOwnerSession();
+ },1400);
+ setTimeout(()=>clearInterval(requestTimer),18000);
 }else{
  await refreshAuth();
 }
