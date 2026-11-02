@@ -74,6 +74,7 @@ export function renderStudentWebPath(content,go){
  header(content,'TU RUTA / DE LA IDEA AL ENLACE','Construye TU web, paso a paso.','Casa Brownie es el ejemplo que ves en el video. Aquí trabajarás con tu propio producto o servicio. Haz un paso, comprueba el resultado y después continúa.');
  const intro=node('div','mi-path-intro');
  intro.append(node('strong',null,'Tu objetivo: una página clara que puedas abrir desde tu teléfono y compartir con un enlace.'),node('p',null,'No necesitas programar ni comprar un dominio. Para esta primera web basta con una portada, información real, fotografías, un botón que funcione y un pie de página. Los pagos y automatizaciones son opcionales y se ven después.'));
+ intro.append(node('p',null,'Orden real de la clase: idea y carpeta → 8 prompts gratis → moodboard → fotografías individuales → textos → AppDeploy → revisar y publicar. Primero definimos la imagen de marca, después construimos la página.'));
  content.append(intro);
  const steps=[
   {title:'Define tu negocio y el objetivo de la página',time:'Módulos 00 y 01',
@@ -86,11 +87,16 @@ export function renderStudentWebPath(content,go){
    example:'En el video verás las carpetas de Casa Brownie; tú usa el nombre de tu propio proyecto.',
    save:'Crea las ocho carpetas; no subas contraseñas ni datos privados.',check:'Encuentras una foto y un texto en menos de un minuto.',
    prompt:'Ayúdame a preparar una lista muy sencilla de los archivos que necesito para la web de [NEGOCIO]. Separa textos, fotos, diseño y pruebas. Dime cómo nombrar cada archivo para encontrarlo desde mi teléfono.'},
-  {title:'Elige el estilo y prepara tus fotos',time:'Módulos 02 y 03',
-   actions:['Busca dos o tres páginas de referencia. Observa sus fotografías, el título inicial y la organización móvil; no copies su identidad.','Elige dos o tres colores y el estilo de letra de tu marca.','Guarda una imagen para la portada y las fotografías de cada producto o servicio. Usa imágenes propias o con derechos de uso; si generas imágenes, revisa los límites de tu plan.'],
-   example:'Casa Brownie necesita brownies y cajas de regalo. Un servicio de limpieza necesitará fotos de espacios y resultados auténticos.',
-   save:'Fotografías individuales en 02_FOTOS y colores en 04_DISENO.',check:'Las fotos son coherentes, tienen permiso de uso y no están cortadas.',
-   prompt:'Mi negocio es [NEGOCIO] y mi público es [CLIENTE]. Propón una dirección visual original para una web de una página: tres colores, estilo de fotografía, tipografías y distribución en teléfono. No copies ninguna marca y no inventes fotos que yo no tenga.'},
+  {title:'Moodboard con los 8 Master Prompts gratuitos',time:'Módulo 02 · Primero la dirección visual',
+   actions:['Abre los 8 Master Prompts originales en el freebie gratuito de Content Lab. Si todavía no tienes acceso, usa el flujo de correo del freebie para obtenerlos.','Explora los ocho estilos: Asymmetric Editorial, Monumental Center, Type Behind Product, Side-Cropped Close-Up, Offset Negative Space, Diagonal Visual Flow, Vertical Editorial Stack y Magazine Column Split. Son composiciones, no ocho fotos obligatorias.','Elige dos estilos que tengan sentido para tu negocio. Con ChatGPT y tus referencias crea un moodboard con colores, tipografías, luz, materiales y encuadres.','Decide tres reglas que mantendrás en todas las fotografías y guárdalas. El moodboard orienta el diseño; no es la imagen que se pone entera en el hero.'],
+   example:'Casa Brownie: Offset Negative Space puede orientar una portada con espacio para el texto, y Side-Cropped Close-Up puede destacar la textura de un brownie.',
+   save:'Moodboard en 04_DISENO y estilos seleccionados en 03_PROMPTS.',check:'Sabes explicar cómo quieres que se vea tu marca antes de abrir AppDeploy.',
+   prompt:'Estoy creando mi primera web para [NEGOCIO] dirigida a [CLIENTE]. Tengo acceso a los 8 Master Prompts gratuitos y he elegido [ESTILO 1] y [ESTILO 2] para mi dirección visual. Quiero un moodboard original que defina paleta de 3 colores, dos estilos tipográficos, iluminación, fondos, superficies y composición de la portada. Usa solo las referencias que adjunte y no inventes marca, fotos, etiquetas ni reseñas. Explica cómo esas decisiones servirán a la web, no solo a un post.'},
+  {title:'Fotos principales a partir del moodboard',time:'Módulo 03 · Antes de AppDeploy',
+   actions:['Abre tu moodboard aprobado y la foto real del producto o servicio que quieras mostrar.','Prepara una fotografía principal para la portada, con espacio limpio donde luego pondremos el título; no necesitas usar los ocho estilos ni generar ocho imágenes.','Crea o selecciona fotografías individuales de los productos o servicios que aparecerán en tu web. Si usas ChatGPT, genera una imagen por solicitud y revisa realismo, textura y etiquetas.','Guarda cada foto individual en tu teléfono con nombre claro y en 02_FOTOS. Después pasamos a escribir los textos y construir la web.'],
+   example:'Casa Brownie: hero sin video, seis fotos de sabores y dos regalos; tu negocio solo necesita las fotos de sus propios productos o servicios.',
+   save:'HERO_ESTATICO y fotos individuales en 02_FOTOS.',check:'Fotos coherentes con el moodboard, separadas, bien encuadradas y con permiso de uso.',
+   prompt:'Con mi moodboard aprobado y una imagen de referencia adjunta, prepara UNA foto principal editorial para [NEGOCIO]. Tema: [PRODUCTO/SERVICIO]. Composición de mis 8 Master Prompts: [ESTILO ELEGIDO]. Luz: [LUZ]. Colores: [PALETA]. Fotografía realista, formato horizontal adaptable a móvil, producto fiel a su referencia y espacio libre para añadir el texto en el sitio después. No incluyas letras falsas ni logotipos inventados. Si falta la imagen necesaria, pídemela primero. Entrega una foto, no un collage.'},
   {title:'Escribe el contenido que verá el visitante',time:'Módulo 04',
    actions:['Redacta un título de portada que se entienda en tres segundos: qué ofreces y por qué importa.','Prepara una descripción corta, tus productos o servicios, cómo funciona, preguntas frecuentes y contacto.','Decide el texto del botón principal: Ver servicios, Explorar productos o Solicitar información.'],
    example:'En Casa Brownie aparece «¿Qué llevo de regalo?». Para tu negocio el título debe hablarle a TU cliente.',
@@ -123,6 +129,7 @@ export function renderStudentWebPath(content,go){
   const summary=node('summary');summary.append(node('span','mi-path-number',String(i+1).padStart(2,'0')));
   const label=node('span','mi-path-label');label.append(node('strong',null,step.title),node('small',null,step.time));summary.append(label,node('span','mi-path-plus','+'));card.append(summary);
   const body=node('div','mi-path-body');
+  if(i===2){const link=node('a','mi-path-freebie-link','Abrir mis 8 Master Prompts gratuitos');link.href='https://podcast.thelaunchera.com/content-lab/prompts/';link.target='_blank';link.rel='noopener noreferrer';body.append(link);}
   body.append(node('h4',null,'Dónde tocar y qué hacer'));
   const actions=node('ol');step.actions.forEach(a=>actions.append(node('li',null,a)));body.append(actions);
   const example=node('p','mi-path-example');example.append(node('strong',null,'Mira el ejemplo: '),document.createTextNode(step.example));body.append(example);
