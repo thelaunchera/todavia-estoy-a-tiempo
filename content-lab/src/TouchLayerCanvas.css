@@ -414,3 +414,19 @@
 .touch-editor-inline-size button{flex:1 1 90px;min-height:44px;padding:9px 10px;border:1px solid #b9d0d6;border-radius:9px;background:#fff;color:#285363;font:700 13px 'DM Sans',sans-serif;touch-action:manipulation}
 .touch-editor-inline-size .touch-editor-fit-text{background:#284d5a;color:white;border-color:#284d5a}
 @media(max-width:560px){.touch-editor-inline-tools{padding:10px}.touch-editor-inline-size button{flex:1 1 80px}}
+
+/* Direct-touch single-page editing: no blue grab handle or detached controls. */
+.touch-editor-inline-mode{position:relative;display:block}
+.touch-editor-inline-mode .touch-editor-stage{border-radius:5px;border:0;overflow:hidden;touch-action:pan-y}
+.touch-editor-inline-mode .touch-editor-layer.active{z-index:8}
+.touch-editor-inline-mode .touch-editor-outline{border:1.5px solid #3683a2;box-shadow:none;border-radius:4px;inset:-2px}
+.touch-editor-inline-mode .touch-editor-layer:not(.active) .touch-editor-outline{display:none}
+.touch-editor-inline-mode .touch-editor-layer .touch-editor-resize{display:none!important}
+.touch-editor-inline-mode .touch-editor-free-text{padding:0 1%;overflow:hidden;word-break:normal;overflow-wrap:normal}
+.touch-editor-oncanvas-text{position:absolute;inset:0;z-index:10;width:100%;height:100%;max-width:none;min-width:0;resize:none!important;background:transparent!important;border:1px dashed #277e9d!important;border-radius:2px!important;box-shadow:none!important;padding:0 1%!important;white-space:pre-wrap;overflow-wrap:normal;overflow-y:auto;touch-action:manipulation;-webkit-user-select:text;user-select:text;text-align:left;outline:none}
+.touch-canvas-actionbar{position:absolute;z-index:30;bottom:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 18px);display:flex;justify-content:center;gap:3px;align-items:center;padding:5px;border-radius:14px;background:rgba(25,30,33,.92);box-shadow:0 5px 24px #0004;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);touch-action:manipulation;pointer-events:auto}
+.touch-canvas-actionbar button{display:grid;place-items:center;flex-shrink:0;border:0;border-radius:9px;min-width:38px;min-height:39px;padding:6px 9px;font:700 12px/1.1 'DM Sans',sans-serif;background:transparent;color:#fff;white-space:nowrap;cursor:pointer;touch-action:manipulation}
+.touch-canvas-actionbar button:active,.touch-canvas-actionbar button[aria-pressed=true]{background:rgba(255,255,255,.18)}
+.touch-editor-inline-mode .touch-editor-scroll{overflow:hidden;padding:0}
+.touch-editor-inline-mode .touch-editor-options{margin-top:10px}
+@media(max-width:370px){.touch-canvas-actionbar{gap:0;bottom:8px;padding:4px}.touch-canvas-actionbar button{min-width:34px;min-height:36px;padding:5px 7px;font-size:11px}}
