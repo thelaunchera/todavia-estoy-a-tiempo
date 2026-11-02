@@ -430,3 +430,8 @@
 .touch-editor-inline-mode .touch-editor-scroll{overflow:hidden;padding:0}
 .touch-editor-inline-mode .touch-editor-options{margin-top:10px}
 @media(max-width:370px){.touch-canvas-actionbar{gap:0;bottom:8px;padding:4px}.touch-canvas-actionbar button{min-width:34px;min-height:36px;padding:5px 7px;font-size:11px}}
+
+.touch-editor-quick-layers .touch-layer-real-thumb{width:36px;height:36px;max-width:36px;min-width:36px;border-radius:7px;object-fit:contain;background:#eff2f1;display:block;flex-shrink:0}
+.touch-editor-quick-layers .touch-layer-real-name{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:165px}
+.touch-editor-quick-layers button{display:inline-flex;align-items:center;gap:7px;min-height:47px;text-align:left}
+.touch-editor .touch-editor-fast-actions .touch-editor-cross-slide{background:#294b59;color:white;border-color:#294b59}
