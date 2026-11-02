@@ -1,0 +1,157 @@
+/* Masterclass Motion Editorial v1 · EN/ES only · 2026-11-02
+   Progressive enhancement: all content stays visible without JS.
+   Effects deliberately use opacity/transform, avoiding layout shifts. */
+@keyframes classMotionRise {
+  from { opacity:0; transform:translate3d(0,22px,0); filter:blur(3px); }
+  to { opacity:1; transform:translate3d(0,0,0); filter:blur(0); }
+}
+@keyframes classMotionScene {
+  from { opacity:.35; transform:translate3d(0,22px,0) scale(.975); }
+  to { opacity:1; transform:translate3d(0,0,0) scale(1); }
+}
+@keyframes classMotionReveal {
+  from { opacity:.5; transform:translate3d(0,20px,0); }
+  to { opacity:1; transform:translate3d(0,0,0); }
+}
+@keyframes classMotionSweep {
+  from { background-position:100% center; }
+  to { background-position:-100% center; }
+}
+@keyframes classMotionTicker {
+  to { transform:translate3d(-50%,0,0); }
+}
+@keyframes classMotionGlow {
+  0%,100% { opacity:.36; transform:translate3d(0,0,0); }
+  50% { opacity:.6; transform:translate3d(-9px,7px,0); }
+}
+@keyframes classMotionImage {
+  from { opacity:.45; clip-path:inset(10% 0 0 0 round 5px); }
+  to { opacity:1; clip-path:inset(0 0 0 0 round 5px); }
+}
+.class-page-v2 .class-motion-ribbon {
+  position:relative; overflow:hidden; isolation:isolate;
+  width:100%; min-height:43px; display:flex; align-items:center;
+  background:#183f55; color:#faf8f3;
+  border-top:1px solid rgba(255,255,255,.12);
+  border-bottom:1px solid rgba(11,38,54,.18);
+}
+.class-page-v2 .class-motion-ribbon::before,
+.class-page-v2 .class-motion-ribbon::after {
+  content:""; position:absolute; top:0; bottom:0; z-index:1;
+  width:min(11vw,100px); pointer-events:none;
+}
+.class-page-v2 .class-motion-ribbon::before { left:0; background:linear-gradient(90deg,#183f55,transparent); }
+.class-page-v2 .class-motion-ribbon::after { right:0; background:linear-gradient(270deg,#183f55,transparent); }
+.class-page-v2 .class-motion-ribbon-track {
+  display:flex; width:max-content; flex:none;
+  transform:translate3d(0,0,0);
+}
+.class-page-v2 .class-motion-ribbon-line {
+  display:flex; flex:none; align-items:center;
+  white-space:nowrap; gap:clamp(14px,2.5vw,38px);
+  padding:10px clamp(14px,2.5vw,38px) 10px 0;
+  font:600 .72rem/1.3 Arial,sans-serif;
+  letter-spacing:.15em; text-transform:uppercase;
+}
+.class-page-v2 .class-motion-ribbon-line .class-motion-dot {
+  width:5px; height:5px; flex:none; border-radius:50%; background:#f2d85b;
+}
+@media (prefers-reduced-motion:no-preference) {
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-eyebrow {
+    animation:classMotionRise .7s .04s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > h1 {
+    animation:classMotionRise .82s .11s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-opportunity {
+    animation:classMotionRise .75s .22s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-lede,
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-audio-language-note {
+    animation:classMotionRise .7s .32s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-hero-actions {
+    animation:classMotionRise .72s .39s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-cinema-visual {
+    animation:classMotionScene 1.05s .15s cubic-bezier(.17,.72,.2,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-hero-intro > .class-price-inline {
+    animation:classMotionRise .7s .47s cubic-bezier(.2,.76,.23,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-motion-ribbon-track {
+    animation:classMotionTicker 31s linear infinite;
+  }
+  .class-page-v2.motion-enhanced [data-motion-scene].is-motion-visible {
+    animation:classMotionReveal .95s cubic-bezier(.2,.7,.15,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-journey-card.is-visible .class-journey-photo {
+    animation:classMotionImage .95s cubic-bezier(.2,.72,.2,1) both;
+  }
+  .class-page-v2.motion-enhanced .class-journey-card:nth-child(2).is-visible .class-journey-photo {animation-delay:.10s}
+  .class-page-v2.motion-enhanced .class-journey-card:nth-child(3).is-visible .class-journey-photo {animation-delay:.18s}
+  .class-page-v2.motion-enhanced .class-faq details[open] > .class-faq-answer {
+    animation:classMotionReveal .33s ease-out both;
+  }
+  .class-page-v2.motion-enhanced .class-material-panel:not([hidden]) .class-real-preview {
+    animation:classMotionReveal .38s ease-out both;
+  }
+}
+.class-page-v2 .class-hero .class-primary-button,
+.class-page-v2 .class-casa-open-button,
+.class-page-v2 .class-waitlist-form button[type=submit] {
+  transition:background-color .25s ease,color .25s ease,box-shadow .3s ease,translate .3s ease!important;
+}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  .class-page-v2 .class-hero .class-primary-button:hover,
+  .class-page-v2 .class-casa-open-button:hover,
+  .class-page-v2 .class-waitlist-form button[type=submit]:hover {
+    translate:0 -2px; box-shadow:0 12px 25px rgba(16,51,69,.17);
+  }
+  .class-page-v2 .class-cinema-browser {
+    transition:translate .35s ease,box-shadow .35s ease!important;
+  }
+  .class-page-v2 .class-cinema-browser:hover {
+    translate:0 -5px; box-shadow:0 25px 60px rgba(12,24,32,.27)!important;
+  }
+  .class-page-v2 .class-material-tab {
+    transition:background-color .2s ease,color .2s ease,translate .2s ease!important;
+  }
+  .class-page-v2 .class-material-tab:hover {translate:0 -1px}
+}
+/* Slow, tiny movement in the cinematic visual; never scroll-jack or pin content. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  .class-page-v2.motion-enhanced .class-cinema-visual .class-cinema-film {
+    transform:translate3d(0,var(--class-motion-parallax,0px),0) scale(1.055);
+    will-change:transform;
+  }
+  .class-page-v2.motion-enhanced .class-cinema-visual .class-cinema-film video {
+    animation:classMotionGlow 18s ease-in-out infinite alternate;
+  }
+}
+@media (max-width:700px) {
+  .class-page-v2 .class-motion-ribbon {min-height:36px}
+  .class-page-v2 .class-motion-ribbon-line {
+    padding-top:8px; padding-bottom:8px; font-size:.59rem; letter-spacing:.12em;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .class-page-v2 .class-motion-ribbon-track {animation:none!important;}
+  .class-page-v2 .class-hero-intro > *,
+  .class-page-v2 .class-journey-photo,
+  .class-page-v2 [data-motion-scene],
+  .class-page-v2 .class-material-panel .class-real-preview,
+  .class-page-v2 .class-faq-answer {
+    animation:none!important; transition:none!important; opacity:1!important;
+    filter:none!important; clip-path:none!important;
+  }
+  .class-page-v2 .class-cinema-film {transform:none!important}
+}
+@media print {
+  .class-page-v2 .class-motion-ribbon {display:none!important}
+  .class-page-v2 .class-hero-intro > *,
+  .class-page-v2 [data-motion-scene],
+  .class-page-v2 .class-journey-photo {
+    animation:none!important; opacity:1!important; transform:none!important;
+  }
+}
