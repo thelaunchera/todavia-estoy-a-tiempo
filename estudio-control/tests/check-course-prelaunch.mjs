@@ -91,7 +91,7 @@ assert.match(classPage,/esa idea que tienes guardada merece/i,'El hero parte de 
 assert.match(classPage,/Lista de espera abierta/,'Lista de espera sin compra habilitada');
 assert.match(classPage,/href="#lista-espera">Quiero estar en la lista/,'El CTA principal lleva a la lista sin checkout');
 const heroActionsMarkup=classPage.slice(classPage.indexOf('<div class="class-hero-actions"'),classPage.indexOf('</div>',classPage.indexOf('<div class="class-hero-actions"'))+6);
-assert.ok(heroActionsMarkup.includes('class-primary-button')&&heroActionsMarkup.includes('href="#lista-espera"')&&heroActionsMarkup.includes('class-campaign-notify-link')&&heroActionsMarkup.includes('href="#recorrido"'),'Los dos CTA están agrupados en una fila responsive');
+assert.ok(heroActionsMarkup.includes('class-primary-button')&&heroActionsMarkup.includes('href="#lista-espera"')&&heroActionsMarkup.includes('class-campaign-notify-link')&&heroActionsMarkup.includes('href="#de-idea-a-web"')&&classPage.includes('id="de-idea-a-web"'),'Los dos CTA están agrupados en una fila responsive');
 
 assert.match(classPage,/¿Y si solo tienes <em>tu celular\?<\/em>/,'El bloque de requisitos incluye a quienes solo tienen teléfono');
 assert.doesNotMatch(home.match(/<section class="learning-section"[\s\S]*?<\/section>/)?.[0]||'',/ChatGPT|AppDeploy|TinyFish|GSC Wizard|Stripe|Gmail|Make/,'El teaser público tampoco revela herramientas');
