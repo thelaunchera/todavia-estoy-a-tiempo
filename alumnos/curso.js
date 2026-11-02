@@ -539,12 +539,12 @@ async function showCourse(email,asAdmin=false){
  setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
-  db,user,courseId,adminPreview:asAdmin,
+  db,user,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage,
   onGoLessons:()=>setAulaView('lecciones'),
   onCloseMaterials:()=>{aulaViewHistory.length=0;setAulaView('inicio',{track:false});}
  }).then(controller=>{
   materialsController=controller||null;
-  if(currentAulaView==='prompts')materialsController?.go('prompts');
+  if(currentAulaView==='prompts')materialsController?.go('prompts',{track:false});
  }).catch(()=>{
   const root=$('materiales-interactivos');
   root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
