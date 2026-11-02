@@ -37,7 +37,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const [uploadingId,setUploadingId]=useState<string|null>(null);
  const [uploadProgress,setUploadProgress]=useState(0);
  const [uploadNotice,setUploadNotice]=useState('');
- const [area,setArea]=useState<'grabar'|'recursos'|'plan'>('grabar');
+ const [area,setArea]=useState<'grabar'|'alumno'|'recursos'|'plan'>('grabar');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
  const [status,setStatus]=useState('pendiente');
@@ -134,7 +134,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <div>
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
       <h2>Tu primera web <em>con IA.</em></h2>
-      <p>Aquí grabas una lección a la vez, con el guion y los clics a mano. Los demos terminados, materiales y tareas de lanzamiento tienen su propio espacio.</p>
+      <p><b>Este espacio es solo para ti.</b> Elige un capítulo, prepara lo que mostrarás, graba y guarda el video. Las instrucciones que reciben los alumnos se revisan por separado en «Ruta del alumno».</p>
       <div className="class-intro-tags"><span>9 videos</span><span>{classTotalMinutes} min editados aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
     </div>
     <div className="class-overview">
@@ -146,10 +146,34 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   </header>
   <nav className="class-area-nav" aria-label="Organización de la clase">
     <button type="button" className={area==='grabar'?'active':''} aria-current={area==='grabar'?'page':undefined} onClick={()=>setArea('grabar')}><Video size={16}/> 1. Grabar clase</button>
-    <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><BookOpen size={16}/> 2. Materiales y referencia</button>
-    <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 3. Plan y lanzamiento</button>
+    <button type="button" className={area==='alumno'?'active':''} aria-current={area==='alumno'?'page':undefined} onClick={()=>setArea('alumno')}><BookOpen size={16}/> 2. Ruta del alumno</button>
+     <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><FileText size={16}/> 3. Materiales y herramientas</button>
+    <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 4. Plan y lanzamiento</button>
   </nav>
-  {area==='plan'&&<div className="class-plan-panel">
+  {area==='alumno'&&<section className="class-student-route" aria-label="Ruta del alumno, vista de la profesora">
+    <div className="class-student-route-heading">
+     <span className="class-overline"><BookOpen size={16}/> VISTA DE PROFESORA · NO ES EL AULA PÚBLICA</span>
+     <h3>Lo que tú enseñas. Lo que ellos hacen.</h3>
+     <p>En tus videos reconstruyes Casa Brownie para demostrar el método. Cada estudiante construye <b>su propia web</b> con su marca, sus textos y sus fotografías. No tiene que copiar la web de brownies ni utilizar tus archivos.</p>
+     <div className="class-student-route-actions">
+      <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Revisar Centro de alumnos <ExternalLink size={15}/></a>
+      <button type="button" onClick={()=>setArea('grabar')}><Video size={15}/> Ir a mis guiones de grabación</button>
+     </div>
+     <p className="class-student-route-location"><b>En el aula:</b> Materiales → Crea tu web → «Paso a paso: mi propia web». Allí están los ocho pasos, qué tocar, qué guardar, comprobaciones y prompts con espacios para adaptar a cada negocio.</p>
+    </div>
+    <div className="class-student-route-list">
+     {classLessons.map((chapter,index)=><details key={chapter.id} className="class-student-route-chapter" open={undefined}>
+      <summary><span>{chapter.id}</span><strong>{chapter.title}</strong><small>{chapter.minutes} min</small><ChevronDown size={16}/></summary>
+      <div>
+       <p><b>Tu demostración:</b> {chapter.outcome}</p>
+       <p><b>Actividad del estudiante:</b> {chapter.exercise}</p>
+       <p><b>Al grabar:</b> enseña dónde tocar y deja un resultado visible. Pausa para que completen el ejercicio con sus datos; no des por hecho que han conectado AppDeploy o publicado todavía.</p>
+       <button type="button" onClick={()=>{choose(chapter.id);setArea('grabar');}}>Abrir guion privado del video {String(index+1).padStart(2,'0')}</button>
+      </div>
+     </details>)}
+    </div>
+   </section>}
+   {area==='plan'&&<div className="class-plan-panel">
   <div className="class-funnel-stats" aria-label="Primeras ventas y lista de espera">
     <div><strong>{launchStats?.waitlist ?? '—'}</strong><span>Correos confirmados de la clase</span></div>
     <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
