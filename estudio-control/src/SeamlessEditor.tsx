@@ -1,12 +1,14 @@
 import {useEffect,useRef,useState} from 'react';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string};
-const W=1080,H=1350,KEY='studio-seamless-v1';
+const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1';
 const defaults={count:5,background:'#FAF8F3',items:[] as Item[]};
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
 const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙','🦋','🍒','📌','📎','📝','🧘🏽‍♀️','🏋🏽‍♀️','🍵','💪','👟'];
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
+ const [projectName,setProjectName]=useState('Mi carrusel');
+ const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
@@ -31,6 +33,8 @@ export default function SeamlessEditor(){
  const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e),it=hit(p.x,p.y);setSelected(it?.id||null);if(it){drag.current={id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y};e.currentTarget.setPointerCapture(e.pointerId)}};
  const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{if(!drag.current)return;const p=locate(e),d=drag.current;update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
  const exportSlides=async()=>{setBusy(true);setMessage('Preparando PNG…');try{for(let i=0;i<doc.count;i++){const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');if(!ctx)throw Error('Canvas');await paint(ctx,1,i*W,W);const a=document.createElement('a');a.download='seamless-slide-'+String(i+1).padStart(2,'0')+'.png';a.href=c.toDataURL('image/png');a.click();await new Promise(r=>setTimeout(r,280))}setMessage('Se generaron '+doc.count+' imágenes PNG. Revisa las descargas del navegador.')}catch{setMessage('No se pudo exportar. Inténtalo de nuevo.')}finally{setBusy(false)}};
+ const saveProject=()=>{const name=projectName.trim()||'Mi carrusel';const next=[{id:String(Date.now()),name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects].slice(0,30);try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next);setMessage('Proyecto guardado en este dispositivo.')}catch{setMessage('No hay espacio para guardar. Descarga tus imágenes.')}};
+ const removeProject=(id:string)=>{const next=projects.filter(p=>p.id!==id);localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next)};
  const current=doc.items.find(it=>it.id===selected);
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
@@ -56,6 +60,7 @@ export default function SeamlessEditor(){
    <canvas ref={canvas} onPointerDown={down} onPointerMove={move} onPointerUp={()=>drag.current=null} onPointerCancel={()=>drag.current=null} style={{display:'block',width:'max(100%, 900px)',height:'auto',touchAction:'none',cursor:'grab'}} aria-label="Lienzo continuo del carrusel; toca un elemento para moverlo"/>
   </div>
   <p style={{fontSize:13}}>Para mover una foto, tócala y arrástrala. Para cambiar su tamaño, selecciónala y usa el control «Ancho» de arriba. Desliza horizontalmente sobre el borde gris para ver los demás slides.</p>
+  <div style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><h3 style={{marginTop:0}}>Mis proyectos</h3><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setSelected(null);setMessage('Proyecto abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar</button></div></div>)}</div>}</div>
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Cada slide se exporta a 1080 × 1350 PNG. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
  </section>;
 }
