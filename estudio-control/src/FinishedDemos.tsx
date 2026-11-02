@@ -4,12 +4,13 @@ import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import './finished-demos.css';
 
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts};
+import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
- promptsFor?:'casa-brownie'|'crumb'|'aftr';
+ promptsFor?:'casa-brownie'|'crumb'|'aftr'|'soluna';
 };
 const finishedDemos:Demo[]=[
  {
@@ -82,6 +83,18 @@ const finishedDemos:Demo[]=[
   kind:'other'
  },
  {
+  id:'soluna-yoga',
+  title:'SOLUNA Yoga · Fort Lauderdale',
+  category:'Estudio de yoga · lanzamiento y membresías',
+  description:'Landing editorial para un estudio de yoga próximo a abrir en Fort Lauderdale: oferta de bienvenida del 30%, lista de interés y tres planes mensuales de $10, $15 y $25.',
+  image:'https://soluna-yoga-fort-lauderdale-uc686i.v2.appdeploy.ai/',
+  url:'https://soluna-yoga-fort-lauderdale-uc686i.v2.appdeploy.ai/',
+  source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/soluna-yoga',
+  note:'Concepto ficticio. La lista de espera solo guarda una prueba en el navegador; no hay emails, cobros ni suscripciones reales. Fotografías en preparación.',
+  kind:'other',
+  promptsFor:'soluna'
+ },
+ {
   id:'cb-depot',
   title:'CB Depot · Mobile Detailing',
   category:'Proyecto de cliente · web y reservas de detailing',
@@ -115,7 +128,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, SOLUNA Yoga, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
