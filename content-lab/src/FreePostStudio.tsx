@@ -304,7 +304,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    <button type="button" aria-expanded={mediaOpen} onClick={()=>{setMediaOpen(v=>!v);setBackgroundOpen(false)}}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
    <button type="button" aria-expanded={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false)}}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
    {decor.layers.some(l=>l.kind==='text'&&['escribe aquí','write here','tu gran idea','your big idea'].includes((l.text||'').trim().toLocaleLowerCase('es')))&&
-    <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>
+    <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>}
    <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}><Undo2 size={17}/></button>
    <button type="button" disabled={!future.length} onClick={redo} title={plain('Redo','Rehacer',locale)}><Redo2 size={17}/></button>
   </div>
