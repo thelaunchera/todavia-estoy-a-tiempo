@@ -210,3 +210,35 @@
  .mi-prompt-mobile .mi-copy{width:100%;min-height:50px}
  .mi-prompt-body .mi-prompt-text{font-size:15px;line-height:1.65;white-space:pre-wrap;overflow-wrap:break-word}
 }
+
+
+/* Itinerario del alumno: lectura breve, acciones verificables y prompts propios. */
+.mi-path-intro{border:1px solid #bed5e2;border-radius:16px;background:#eef5f8;padding:19px 21px;margin:0 0 18px;line-height:1.65;color:#234b64}
+.mi-path-intro strong{display:block;font-size:15px;line-height:1.5}
+.mi-path-intro p{margin:8px 0 0;font-size:13px}
+.mi-path-steps{display:grid;gap:12px}
+.mi-path-step{background:#fffdfa;border:1px solid #dae5eb;border-radius:15px;overflow:hidden}
+.mi-path-step>summary{list-style:none;display:flex;gap:14px;align-items:center;padding:17px 20px;cursor:pointer;min-height:72px}
+.mi-path-step>summary::-webkit-details-marker{display:none}
+.mi-path-step[open]{border-color:#b9cfda;box-shadow:0 8px 22px #2148600b}
+.mi-path-number{display:grid;place-items:center;flex:0 0 42px;height:42px;background:#edf4f7;border-radius:12px;color:#3b6c88;font:400 21px 'DM Serif Display',Georgia,serif}
+.mi-path-label{display:grid;gap:4px;flex:1;min-width:0}
+.mi-path-label strong{font-size:14px;line-height:1.45;color:#203e57}
+.mi-path-label small{font-size:12px;color:#668092}
+.mi-path-plus{font-size:20px;color:#7897a9;transition:transform .15s}
+.mi-path-step[open] .mi-path-plus{transform:rotate(45deg)}
+.mi-path-body{padding:18px 22px 22px;border-top:1px solid #e2ebef;font-size:13px;line-height:1.7;color:#3e5d73}
+.mi-path-body h4{margin:0 0 8px;color:#23465d;font-size:14px}
+.mi-path-body ol{padding-left:22px;margin:0 0 15px}
+.mi-path-body li{padding-left:3px;margin-bottom:10px}
+.mi-path-example{border-left:3px solid #a2bbca;padding:9px 0 9px 13px;margin:10px 0;color:#526c7e}
+.mi-path-proof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.mi-path-proof p{background:#eff5f7;border-radius:11px;padding:13px;margin:0;line-height:1.65}
+.mi-path-prompt{background:#f6f7f5;border:1px solid #e0e8e6;border-radius:13px;padding:16px;display:grid;gap:10px;overflow-wrap:anywhere}
+.mi-path-prompt>strong{color:#24455e}
+.mi-path-prompt p{white-space:pre-wrap;font-size:13px;line-height:1.75;margin:0}
+.mi-path-prompt button{justify-self:start;min-height:44px;background:#214762;border:0;border-radius:99px;padding:10px 15px;color:#fff;cursor:pointer;font-weight:750;font-size:12px}
+.mi-path-prompt small{font-size:12px;color:#426e64}
+@media(max-width:650px){.mi-path-proof{grid-template-columns:1fr}.mi-path-step>summary{padding:14px}.mi-path-body{padding:16px 15px}.mi-path-number{flex-basis:36px;height:36px;font-size:18px}.mi-path-intro{padding:16px}}
+@media(prefers-reduced-motion:reduce){.mi-path-plus{transition:none}}
+@media print{.mi-path-step:not([open])>.mi-path-body{display:block}.mi-path-prompt button{display:none}}
