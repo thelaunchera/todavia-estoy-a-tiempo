@@ -117,7 +117,7 @@ export const auth = {
       const derived = await derive(passphrase, unbase64(existing.salt));
       try {
         const plain = await crypto.subtle.decrypt(
-          { name: 'AES-GCM', iv: Uint8Array.from(unbase64(existing.iv)) }, derived, unbase64(existing.ciphertext)
+          { name: 'AES-GCM', iv: Uint8Array.from(unbase64(existing.iv)) }, derived, Uint8Array.from(unbase64(existing.ciphertext))
         );
         const data = JSON.parse(dec.decode(plain)) as Vault;
         if (data.version !== 1 || !data.records || !kinds.every(k => Array.isArray(data.records[k])))
