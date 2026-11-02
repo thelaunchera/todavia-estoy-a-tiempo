@@ -28,6 +28,7 @@ type Props = {
   onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
   textPalette?:string[];
   focusLayerId?:string;
+  inlineTextTools?:boolean;
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
@@ -38,7 +39,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -52,6 +53,7 @@ export default function TouchLayerCanvas({
   const [snapEnabled,setSnapEnabled]=useState(true);
   const [snapGuides,setSnapGuides]=useState<{x?:number;y?:number}|null>(null);
   const [stageHeight,setStageHeight]=useState(540);
+  const quickTextInput = useRef<HTMLTextAreaElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   const autoPanFrame = useRef(0);
@@ -265,7 +267,34 @@ export default function TouchLayerCanvas({
       y:selectedRect.y+(selectedRect.h-height)/2,
     },chosen.kind);
     update(chosen.id,next);
-    onCommit(chosen.kind,chosen.id,next);
+    if(chosen.kind==='text'&&onUpdate){
+      // Resize the actual lettering as well as its box, including in exported PNGs.
+      onUpdate(chosen.id,{rect:next,fontSize:Math.round(Math.max(20,Math.min(240,(chosen.fontSize||76)*next.w/Math.max(.001,selectedRect.w))))});
+    }else onCommit(chosen.kind,chosen.id,next);
+  };
+  const fitSelectedText=()=>{
+    if(!chosen||chosen.kind!=='text'||!selectedRect||!onUpdate)return;
+    const ctx=document.createElement('canvas').getContext('2d');if(!ctx)return;
+    const maxWidth=Math.max(50,selectedRect.w*1080*pageCount-12);
+    const maxHeight=selectedRect.h*canvasHeight-4;
+    const leading=Math.max(.7,Math.min(2,chosen.lineHeight||1.12));
+    let fitted=20;
+    for(let size=Math.min(240,Math.max(20,chosen.fontSize||76));size>=20;size-=2){
+      ctx.font=panoramaTextWeight(chosen.fontWeight)+' '+size+'px '+panoramaFont(chosen.font);
+      let count=0;
+      for(const paragraph of (chosen.text||'').split('\n')){
+        const words=paragraph.split(/\s+/).filter(Boolean);
+        if(!words.length){count++;continue}
+        let line='';
+        for(const word of words){
+          const next=line?line+' '+word:word;
+          if(line&&ctx.measureText(next).width>maxWidth){count++;line=word}else line=next;
+        }
+        count++;
+      }
+      if(count*size*leading<=maxHeight){fitted=size;break}
+    }
+    onUpdate(chosen.id,{fontSize:fitted});
   };
   const setSelectedSize=(percent:number)=>{
     if(!chosen||!selectedRect||cropping||!Number.isFinite(percent))return;
@@ -293,7 +322,8 @@ export default function TouchLayerCanvas({
   };
   return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
     (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')+
-    (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')}
+    (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')+
+    (inlineTextTools?' touch-editor-inline-mode':'')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
       {continuous?`${pageCount} slides · líneas azules = cortes al descargar`:`Carrusel normal · ${pageCount} slides independientes`}
@@ -335,7 +365,7 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
-    {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 &&
+    {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 && !inlineTextTools &&
       <div className="touch-editor-size-toolbar" role="group" aria-label="Tamaño de la fotografía seleccionada">
         <span className="touch-editor-size-label">Tamaño de foto</span>
         <button type="button" onClick={()=>resizeSelected(.85)} aria-label="Reducir foto 15 por ciento">− Reducir</button>
@@ -347,6 +377,22 @@ export default function TouchLayerCanvas({
             onChange={e=>setSelectedSize(Number(e.target.value))}/>
           <output>{Math.round(selectedRect.w*100)}%</output>
         </label>
+      </div>}
+    {inlineTextTools&&pageCount===1&&chosen&&selectedRect&&!chosen.locked&&
+      <div className="touch-editor-inline-tools" aria-label="Editar el elemento seleccionado">
+        {chosen.kind==='text'&&onUpdate&&<label className="touch-editor-inline-text-label">
+          <span>✍️ Editar este texto</span>
+          <textarea ref={quickTextInput} rows={2} value={chosen.text||''}
+            aria-label="Texto seleccionado en el diseño"
+            onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/>
+        </label>}
+        <div className="touch-editor-inline-size" role="group" aria-label="Cambiar tamaño del elemento">
+          <span>{chosen.kind==='text'?'Tamaño de letra y cuadro':'Tamaño del elemento'}</span>
+          <button type="button" aria-label="Reducir tamaño" onClick={()=>resizeSelected(.88)}>− Reducir</button>
+          <button type="button" aria-label="Aumentar tamaño" onClick={()=>resizeSelected(1.12)}>＋ Agrandar</button>
+          {chosen.kind==='text'&&onUpdate&&<button type="button" className="touch-editor-fit-text"
+            onClick={fitSelectedText}>Ajustar texto</button>}
+        </div>
       </div>}
     <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
       style={{'--panorama-pages':pageCount} as React.CSSProperties}>
@@ -391,7 +437,10 @@ export default function TouchLayerCanvas({
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
-            onDoubleClick={() => { if (layer.kind === 'photo') { setSelected(layer.id); setCropping(true); } }}
+            onDoubleClick={() => {
+              if(layer.kind==='photo'){setSelected(layer.id);setCropping(true);}
+              if(layer.kind==='text'&&inlineTextTools){setSelected(layer.id);window.requestAnimationFrame(()=>quickTextInput.current?.focus());}
+            }}
             onKeyDown={e => {
               if(layer.locked||!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
               e.preventDefault(); setSelected(layer.id);
@@ -427,7 +476,7 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
             {active && <><span className="touch-editor-outline"/>
-              {!cropping&&!layer.locked && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
+              {!cropping&&!layer.locked && !inlineTextTools && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
         })}
@@ -484,7 +533,7 @@ export default function TouchLayerCanvas({
       ?interactionMode==='navigate'?'Desliza para cambiar de slide sin mover elementos.':
         'Toca y arrastra cualquier elemento. Usa ＋ o − para cambiar su tamaño.'
       :cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
-      : 'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
+      : inlineTextTools?'Toca el texto o la foto para moverlo. Usa − / ＋ arriba o pellizca con dos dedos para cambiar su tamaño.':'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
     {chosen && selectedRect && <details className="touch-editor-options" key={chosen.id}>
       <summary>Más ajustes · {chosen.name}</summary>
       <strong>{chosen.name}</strong>

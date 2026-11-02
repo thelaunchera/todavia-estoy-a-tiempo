@@ -37,3 +37,10 @@
  font-weight:900;letter-spacing:-.02em;min-height:44px
 }
 .free-post-tools .free-post-poster-button:hover{background:#345d6e;color:#fff}
+
+/* The headline is editable directly above the live canvas, including on iPad. */
+.free-post-direct-copy{display:grid;gap:7px;padding:12px;background:#f5f9fa;border:1px solid #d6e6e8;border-radius:12px}
+.free-post-direct-copy label{font-size:13px;font-weight:750;color:#254957}
+.free-post-direct-copy textarea{display:block;width:100%;min-width:0;min-height:78px;resize:vertical;padding:12px;border-radius:10px;border:1px solid #a9c5cc;background:#fff;color:#191919;font:500 16px/1.45 'DM Sans',sans-serif}
+.free-post-direct-copy textarea:focus{outline:2px solid #50899b;outline-offset:2px}
+.free-post-direct-copy small{font-size:11px;line-height:1.45;color:#526f79}

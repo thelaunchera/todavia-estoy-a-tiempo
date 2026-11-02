@@ -402,3 +402,15 @@
  .touch-editor-normal-pages .touch-editor-stage{border-radius:12px}
  .touch-editor-normal-pages .panorama-cut-guides>div{background:transparent!important}
 }
+
+/* Easy touch mode: no blue corner target blocking or clipping the text. */
+.touch-editor-inline-mode .touch-editor-layer .touch-editor-resize{display:none!important}
+.touch-editor-inline-tools{display:grid;gap:10px;padding:12px;margin:4px 0 10px;background:#f6faf9;border:1px solid #cbdfe2;border-radius:12px}
+.touch-editor-inline-text-label{display:grid;gap:6px;color:#254957;font-size:13px;font-weight:750}
+.touch-editor-inline-text-label textarea{display:block;width:100%;min-height:72px;min-width:0;padding:10px 12px;background:white;color:#191919;border:1px solid #9abdc6;border-radius:9px;resize:vertical;font:500 16px/1.4 'DM Sans',sans-serif}
+.touch-editor-inline-text-label textarea:focus-visible{outline:2px solid #327b96;outline-offset:2px}
+.touch-editor-inline-size{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.touch-editor-inline-size>span{flex:1 1 100%;color:#456775;font-size:12px;font-weight:750}
+.touch-editor-inline-size button{flex:1 1 90px;min-height:44px;padding:9px 10px;border:1px solid #b9d0d6;border-radius:9px;background:#fff;color:#285363;font:700 13px 'DM Sans',sans-serif;touch-action:manipulation}
+.touch-editor-inline-size .touch-editor-fit-text{background:#284d5a;color:white;border-color:#284d5a}
+@media(max-width:560px){.touch-editor-inline-tools{padding:10px}.touch-editor-inline-size button{flex:1 1 80px}}
