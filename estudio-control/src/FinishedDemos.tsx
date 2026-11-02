@@ -87,10 +87,10 @@ const finishedDemos:Demo[]=[
   title:'SOLUNA Yoga · Fort Lauderdale',
   category:'Estudio de yoga · lanzamiento y membresías',
   description:'Landing editorial para un estudio de yoga próximo a abrir en Fort Lauderdale: oferta de bienvenida del 30%, lista de interés y tres planes mensuales de $10, $15 y $25.',
-  image:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22800%22%20height%3D%22520%22%20viewBox%3D%220%200%20800%20520%22%3E%3Crect%20width%3D%22800%22%20height%3D%22520%22%20fill%3D%22%23d9e3d7%22%2F%3E%3Cpath%20d%3D%22M150%20520V250A250%20250%200%200%201%20650%20250V520%22%20fill%3D%22%23e9d6c4%22%2F%3E%3Ccircle%20cx%3D%22435%22%20cy%3D%22228%22%20r%3D%22126%22%20fill%3D%22%23f5e4bd%22%2F%3E%3Cpath%20d%3D%22M0%20440Q400%20350%20800%20460V520H0Z%22%20fill%3D%22%239aaf99%22%2F%3E%3Ctext%20x%3D%22400%22%20y%3D%22450%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2267%22%20text-anchor%3D%22middle%22%20fill%3D%22%23344b3d%22%20letter-spacing%3D%228%22%3ESOLUNA%3C%2Ftext%3E%3Ctext%20x%3D%22400%22%20y%3D%22482%22%20font-family%3D%22Arial%22%20font-size%3D%2217%22%20text-anchor%3D%22middle%22%20fill%3D%22%23344b3d%22%20letter-spacing%3D%225%22%3EYOGA%20STUDIO%3C%2Ftext%3E%3C%2Fsvg%3E',
+  image:'https://raw.githubusercontent.com/thelaunchera/demo-booking-landing-/main/demos/soluna-yoga/images/hero.webp',
   url:'https://soluna-yoga-fort-lauderdale-uc686i.v2.appdeploy.ai/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/soluna-yoga',
-  note:'Concepto ficticio. La lista de espera solo guarda una prueba en el navegador; no hay emails, cobros ni suscripciones reales. Fotografías en preparación.',
+  note:'Concepto ficticio. La lista de espera solo guarda una prueba en el navegador; no hay emails, cobros ni suscripciones reales. Incluye ocho fotografías generadas para mostrar el concepto visual del estudio.',
   kind:'other',
   promptsFor:'soluna'
  },
