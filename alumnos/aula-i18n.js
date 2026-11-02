@@ -34,7 +34,30 @@ const translations=[
  ['#aula-auth-description','Sign in with the email you used to buy the course and your password.'],
  ['#login-form label[for="login-email"]','Email address'],
  ['#login-form label[for="login-password"]','Password'],
- ['#login-form .aula-auth-submit','Enter my class'],
+ ['#login-form .aula-auth-submit > span:first-child','Enter my class'],
+ ['#register-form .aula-auth-submit > span:first-child','Create my account'],
+ ['#reset-email-form .aula-auth-submit > span:first-child','Send recovery link'],
+ ['#new-password-form .aula-auth-submit > span:first-child','Save my password'],
+ ['#register-form .aula-auth-explain','Use your purchase email to create an account and confirm your email.'],
+ ['#register-form label[for="register-email"]','Purchase email'],
+ ['#register-form label[for="register-password"]','Create password'],
+ ['#register-form label[for="register-confirm"]','Confirm password'],
+ ['#reset-email-form .aula-auth-explain','We will email you a password recovery link. Check Spam or Promotions too.'],
+ ['#reset-email-form label[for="reset-email"]','Account email'],
+ ['#reset-email-form .aula-auth-back','← Back to sign in'],
+ ['#new-password-form .aula-auth-explain','Choose a secure new password.'],
+ ['#new-password-form label[for="new-password"]','New password'],
+ ['#new-password-form label[for="new-password-confirm"]','Confirm new password'],
+ ['.aula-password-toggle','Show'],
+ ['#forgot-password-trigger','Forgot password?'],
+ ['.aula-remember span','Remember this device for 24 hours'],
+ ['.aula-auth-bottom > span','Content is available only with a confirmed purchase.'],
+ ['.aula-auth-bottom .support','Need help?'],
+ ['.aula-entry-microcopy','Learn at your pace. Progress saves to your account.'],
+ ['#no-access .eyebrow','ACCESS PENDING'],
+ ['#aula-no-access-title','We cannot confirm your purchase yet.'],
+ ['#no-access > p:not(.eyebrow)','No confirmed purchase was found for this email. Check your purchase email or contact us.'],
+ ['#no-access .support','Help with access'],
  ['#logout','Sign out'],
  ['.aula-rail-workspace','YOUR FIRST AI WEBSITE'],
  ['.aula-navigation .aula-nav-group:first-child','YOUR SPACE'],
@@ -56,6 +79,20 @@ const translations=[
  ['#admin-preview-banner p','Only the owner can review drafts. Students never see this notice.'],
  ['.dashboard-hero .dashboard-overline','MY LEARNING SPACE'],
  ['.dashboard-progress-heading','YOUR JOURNEY'],
+ ['#lesson-unavailable','This video is still being prepared. It will appear here after approval.'],
+ ['#empty-lessons','Lesson videos are being prepared. Meanwhile, explore prompts, materials and finished demos.'],
+ ['.course-captions label','Video subtitles'],
+ ['#course-caption-help','Lessons will be recorded in Latin American Spanish unless an English audio track is supplied. Reviewed subtitles will appear after video publication. You can also change subtitles in YouTube settings.'],
+ ['.lesson-guidance','Watch, practice in your project, then mark this lesson complete.'],
+ ['.lesson-completed','I finished this lesson'],
+ ['.lesson-module-prompts-eyebrow','PRACTICE THIS LESSON'],
+ ['#student-bonus-heading','Unlock your bonus'],
+ ['#assigned-bonuses-heading','Your personal bonuses'],
+ ['.club-aula-hub .club-aula-eyebrow','COURSE COMMUNITY'],
+ ['.club-aula-action-featured .club-aula-action-bottom','Share my progress'],
+ ['.club-aula-action:nth-child(2) .club-aula-action-bottom','Ask my question'],
+ ['.club-aula-action:nth-child(3) .club-aula-action-bottom','Explore projects'],
+ ['.dashboard-setup-heading > p:last-child','Begin with your lesson and prepare tools only when you need them.'],
  ['.dashboard-progress-top > span','Your progress'],
  ['.dashboard-hero-secondary[data-aula-view="prompts"]','Explore prompts'],
  ['.dashboard-hero-secondary[data-aula-view="inspiracion"]','See inspiration'],
@@ -91,12 +128,24 @@ const translations=[
  ['.club-aula-action-featured strong','Share my project'],
  ['.club-aula-action:nth-child(2) strong','Ask a question'],
  ['.club-aula-action:nth-child(3) strong','Explore projects'],
- ['.aula-rail-close','Close menu']
+ ['.aula-rail-close','×']
 ];
 const placeholders=[['#login-email','name@email.com'],['#login-password','Your password']];
 function translateElement(selector,english){
  for(const el of document.querySelectorAll(selector)){
   if(!el.dataset.tleOriginalText)el.dataset.tleOriginalText=el.textContent;
+  if(selector==='#aula-login-title'||selector==='#aula-auth-description'){
+   const mode=document.getElementById('login-panel')?.dataset.authMode||'login';
+   const copies={
+    login:['Qué gusto verte por aquí.','Entra con el correo de tu compra y tu contraseña.','Good to see you here.','Sign in with your purchase email and password.'],
+    register:['Empieza por aquí.','Crea tu cuenta para tener tus lecciones en un solo lugar.','Start here.','Create your account to keep your lessons and materials in one place.'],
+    reset:['Recupera tu acceso.','Te ayudamos a establecer una nueva contraseña.','Recover your access.','We will help you set a new password.'],
+    newPassword:['Crea una nueva contraseña.','Escríbela dos veces para guardarla de forma segura.','Set a new password.','Enter it twice to save it securely.']
+   };
+   const c=copies[mode]||copies.login;
+   const offset=language==='en'?2:0;
+   el.textContent=c[offset+(selector==='#aula-auth-description'?1:0)];continue;
+  }
   if(selector==='#entry-title'){
    el.innerHTML=language==='en'?'Your space to <em>keep creating.</em>':'Tu espacio para <em>seguir creando.</em>';continue;
   }
@@ -106,7 +155,7 @@ function translateElement(selector,english){
    el.replaceChildren();
    el.append(document.createTextNode(language==='en'?'Hello, ':'¡Hola, '));
    const span=document.createElement('span');span.id='student-name';
-   span.textContent=name|| (language==='en'?'welcome':'qué gusto verte');
+   span.textContent=language==='en'&&name==='qué gusto verte'?'welcome':name|| (language==='en'?'welcome':'qué gusto verte');
    el.append(span,document.createTextNode(language==='en'?'! ':'! '));
    const star=document.createElement('span');star.className='dashboard-greeting-spark';
    star.setAttribute('aria-hidden','true');star.textContent=spark;
