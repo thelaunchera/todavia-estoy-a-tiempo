@@ -125,7 +125,8 @@ test('Navegación táctil: Atrás y Cerrar sección nunca cierran la sesión',()
  assert.match(community,/id="club-page-back"/,'La comunidad tiene botón Atrás');
  assert.match(community,/id="club-page-close"/,'La comunidad tiene botón Cerrar');
  assert.match(communityScript,/history\.back\(\)/,'Atrás de comunidad recuerda la vista anterior');
- assert.doesNotMatch(community,/href="\.\.\/estudio\/" id="club-studio-link"/,'El acceso Studio no aparece como link de alumnos');
+ assert.doesNotMatch(community,/href="\.\.\/estudio\/"/,'Ningún enlace al Studio aparece en HTML público de la comunidad');
+ assert.match(communityScript,/adminReturn\.setAttribute\('href','\.\.\/estudio\/'\)/,'Solo la administradora recibe el enlace al Studio');
 });
 
 
