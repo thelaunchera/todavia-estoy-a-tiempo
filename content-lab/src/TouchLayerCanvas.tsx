@@ -501,7 +501,7 @@ export default function TouchLayerCanvas({
           // Every new element stays above earlier ones. Selection must NEVER
           // change stacking order: tapping a photo should not bury its siblings.
           // Background is always the bottom-most layer, independent of locking.
-          const z = layer.role==='background'?1:layer.placement==='behind-text'?2+layerIndex:20+layerIndex;
+          const z = layer.role==='background'?1:layer.placement==='behind-text'?2+(layerIndex/Math.max(1,layers.length)):20+layerIndex;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
