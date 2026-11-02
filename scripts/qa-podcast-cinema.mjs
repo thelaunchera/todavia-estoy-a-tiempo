@@ -61,7 +61,13 @@ try {
     assert(state.cta.bottom<state.visual.top,width+': Spotify CTA should precede the visual on phones');
     assert(state.visual.bottom<state.links.top,width+': course and Lab links must follow the portrait on phones');
   }
-  await page.locator('[data-film-select="2"]').click({force:true});
+  const picker=page.locator('[data-film-select="2"]');
+  const hit=await picker.evaluate(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    return {target:document.elementFromPoint(x,y)?.outerHTML?.slice(0,190),
+      visible:getComputedStyle(el).pointerEvents,hero:document.querySelector('.podcast-film-hero')?.dataset.filmStep};
+  });
+  console.log('PODCAST_CINEMA_TAP_TARGET',width,JSON.stringify(hit));
+  await picker.click();
   const active=await page.evaluate(()=>({step:document.querySelector('.podcast-film-hero')?.dataset.filmStep,
     pressed:[...document.querySelectorAll('[data-film-select]')].map(el=>el.getAttribute('aria-pressed')),
     text:document.querySelector('.podcast-film-scene.is-active strong')?.textContent}));
