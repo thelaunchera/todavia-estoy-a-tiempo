@@ -51,7 +51,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
   const [copied,setCopied] = useState('');
   useEffect(()=>{
     setScript(entry?.script || reel.voice);
-    setShots(entry?.visual_idea || reel.shots.join('\n'));
+    setShots(entry?.visual_idea && !/encuadre|plano cenital|plano editorial|primer plano|vista cenital|direcciones de grabación/i.test(entry.visual_idea) ? entry.visual_idea : reel.shots.join('\n'));
     setNotes(entry?.notes || '');
     setUrl(entry?.link || '');
     setStatus(entry?.status || 'guion listo');
@@ -142,7 +142,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
 
         <section className="reels-panel">
           <div className="reels-panel-head"><div><span>02 / QUÉ VIDEOS GRABAR</span><h4>Instrucciones para grabar cada escena</h4></div>
-            <button type="button" onClick={()=>void copy(shots,'shots')} className="reels-copy"><Clipboard size={16}/>{copied==='shots'?'Copiado':'Copiar tomas'}</button></div>
+            <button type="button" onClick={()=>{setShots(reel.shots.join('\n'));setNotice('Instrucciones nuevas cargadas. Pulsa Guardar progreso para conservarlas.')}} className="reels-copy">Usar instrucciones claras</button><button type="button" onClick={()=>void copy(shots,'shots')} className="reels-copy"><Clipboard size={16}/>{copied==='shots'?'Copiado':'Copiar tomas'}</button></div>
           <p className="reels-tip">Cómo hacerlo: Pon el iPhone vertical. Cada línea te dice dónde colocar el teléfono, qué debe verse y qué hacer. Graba un video corto por cada paso. No tienes que hablar frente a la cámara.</p>
           <textarea aria-label="Instrucciones sencillas para grabar cada escena" className="reels-shots-input" rows={10} maxLength={12000} value={shots} onChange={e=>setShots(e.target.value)} />
           <div className="reels-note">Cuando termines, puedes nombrar el video <strong>{reel.filename}</strong>. Pon el logo pequeño. No necesitas flechas ni inventar resultados.</div>
