@@ -58,6 +58,7 @@ function setAuthMode(mode){
   button.classList.toggle('is-active',on);button.setAttribute('aria-pressed',String(on));
  });
  $('login-panel').dataset.authMode=mode;
+ applyClassroomLanguage();
 }
 document.querySelectorAll('[data-auth-mode]').forEach(button=>button.addEventListener('click',()=>{
  if(!recoveryMode)setAuthMode(button.dataset.authMode);
