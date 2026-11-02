@@ -44,6 +44,8 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
+  const [editingText,setEditingText]=useState('');
+  const [advancedOpen,setAdvancedOpen]=useState(false);
   const [copyFeedback,setCopyFeedback]=useState('');
   // Separate browsing the panorama from handling a selected object.
   const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
@@ -62,16 +64,21 @@ export default function TouchLayerCanvas({
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
-    pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampRect(rect);
+    pageCount>1?clampPanoramaRect(rect,.055/pageCount):inlineTextTools||kind==='photo'?clampFreePhotoRect(rect):clampRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
-  useEffect(() => { setCropping(false);setCopyFeedback(''); }, [selected]);
+  useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false); }, [selected]);
+  useEffect(()=>{if(editingText)window.requestAnimationFrame(()=>quickTextInput.current?.focus());},[editingText]);
+  useEffect(()=>{if(editingText && !layers.some(item=>item.id===editingText))setEditingText('');},[editingText,layers]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
   const focusedWallpaperReady=Boolean(focusLayerId&&layers.some(layer=>layer.id===focusLayerId));
   useEffect(()=>{
-    if(pageCount>1&&focusLayerId&&focusedWallpaperReady){
+    if(focusLayerId&&focusedWallpaperReady){
       setInteractionMode('edit');setSelected(focusLayerId);
+      if(inlineTextTools&&pageCount===1&&layers.some(item=>item.id===focusLayerId&&item.kind==='text')){
+        setEditingText(focusLayerId);
+      }
     }
-  },[focusLayerId,pageCount,focusedWallpaperReady]);
+  },[focusLayerId,pageCount,focusedWallpaperReady,inlineTextTools]);
   useEffect(()=>()=>{window.cancelAnimationFrame(autoPanFrame.current);},[]);
   useEffect(()=>{
     const el=stage.current;if(!el)return;
@@ -144,7 +151,22 @@ export default function TouchLayerCanvas({
     };
     autoPanFrame.current=window.requestAnimationFrame(tick);
   };
+  // Support a pinch even when the second finger lands on another layer or empty space.
+  const addPinchPointer=(e:React.PointerEvent<HTMLDivElement>)=>{
+    const active=gesture.current;
+    if(!inlineTextTools||pageCount!==1||!active||pointers.current.has(e.pointerId)||pointers.current.size!==1)return false;
+    const source=layers.find(item=>item.id===active.id);if(!source)return false;
+    e.preventDefault();e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const [a,b]=[...pointers.current.values()];
+    gesture.current={...active,start:getRect(source),
+      pinchDistance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),
+      pinchCenter:[(a.x+b.x)/2,(a.y+b.y)/2],resize:false,crop:false};
+    return true;
+  };
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
+    if(addPinchPointer(e))return;
     if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     e.preventDefault();e.stopPropagation();
     // In edit mode the first touch selects AND starts moving the object.
@@ -184,7 +206,12 @@ export default function TouchLayerCanvas({
   const move = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     const g = gesture.current;
-    if (!g || g.id !== layer.id || !pointers.current.has(e.pointerId)) return;
+    if (!g || !pointers.current.has(e.pointerId)) return;
+    if(g.id!==layer.id){
+      if(!inlineTextTools)return;
+      const source=layers.find(item=>item.id===g.id);if(!source)return;
+      layer=source;
+    }
     e.preventDefault();
     pointers.current.set(e.pointerId, {x: e.clientX, y: e.clientY});
     if (pointers.current.size >= 2 && g.pinchDistance && g.pinchCenter) {
@@ -222,6 +249,9 @@ export default function TouchLayerCanvas({
   const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     if (!pointers.current.has(e.pointerId)) return;
+    if(inlineTextTools&&gesture.current&&gesture.current.id!==layer.id){
+      const source=layers.find(item=>item.id===gesture.current?.id);if(source)layer=source;
+    }
     e.preventDefault(); e.stopPropagation();
     try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* Already released. */ }
     pointers.current.delete(e.pointerId);
@@ -359,7 +389,7 @@ export default function TouchLayerCanvas({
         ?'Desliza para cambiar de slide. Nada se moverá.'
         :'Toca y arrastra cualquier elemento. Usa el tirador para cambiar su tamaño.'}</p>
     </div>}
-    {pageCount===1&&chosen && onRemove && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
+    {pageCount===1&&chosen && onRemove && !inlineTextTools && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
       <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
         <Trash2 size={15}/> Borrar
@@ -378,27 +408,29 @@ export default function TouchLayerCanvas({
           <output>{Math.round(selectedRect.w*100)}%</output>
         </label>
       </div>}
-    {inlineTextTools&&pageCount===1&&chosen&&selectedRect&&!chosen.locked&&
-      <div className="touch-editor-inline-tools" aria-label="Editar el elemento seleccionado">
-        {chosen.kind==='text'&&onUpdate&&<label className="touch-editor-inline-text-label">
-          <span>✍️ Editar este texto</span>
-          <textarea ref={quickTextInput} rows={2} value={chosen.text||''}
-            aria-label="Texto seleccionado en el diseño"
-            onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/>
-        </label>}
-        <div className="touch-editor-inline-size" role="group" aria-label="Cambiar tamaño del elemento">
-          <span>{chosen.kind==='text'?'Tamaño de letra y cuadro':'Tamaño del elemento'}</span>
-          <button type="button" aria-label="Reducir tamaño" onClick={()=>resizeSelected(.88)}>− Reducir</button>
-          <button type="button" aria-label="Aumentar tamaño" onClick={()=>resizeSelected(1.12)}>＋ Agrandar</button>
-          {chosen.kind==='text'&&onUpdate&&<button type="button" className="touch-editor-fit-text"
-            onClick={fitSelectedText}>Ajustar texto</button>}
-        </div>
-      </div>}
     <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
       style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
         style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * (continuous ? 230 : 320)} : {})}}
-        onClick={e => { if (e.target === e.currentTarget) { setSelected(''); onEmpty?.(); } }}
+        onClick={e => { if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('touch-editor-base')) {
+          setSelected('');setEditingText('');setAdvancedOpen(false);onEmpty?.();
+        } }}
+        onPointerDown={e=>{if(gesture.current)addPinchPointer(e)}}
+        onPointerMove={e=>{
+          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+            const source=layers.find(item=>item.id===gesture.current?.id);if(source)move(e,source);
+          }
+        }}
+        onPointerUp={e=>{
+          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+            const source=layers.find(item=>item.id===gesture.current?.id);if(source)done(e,source);
+          }
+        }}
+        onPointerCancel={e=>{
+          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+            const source=layers.find(item=>item.id===gesture.current?.id);if(source)done(e,source);
+          }
+        }}
         onDragOver={e => { if (onDropAsset || onDropFiles) { e.preventDefault(); setDragOver(true); } }}
         onDragLeave={() => setDragOver(false)}
         onDrop={e => {
@@ -439,7 +471,7 @@ export default function TouchLayerCanvas({
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
             onDoubleClick={() => {
               if(layer.kind==='photo'){setSelected(layer.id);setCropping(true);}
-              if(layer.kind==='text'&&inlineTextTools){setSelected(layer.id);window.requestAnimationFrame(()=>quickTextInput.current?.focus());}
+              if(layer.kind==='text'&&inlineTextTools){setSelected(layer.id);setEditingText(layer.id);}
             }}
             onKeyDown={e => {
               if(layer.locked||!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
@@ -458,7 +490,23 @@ export default function TouchLayerCanvas({
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>
             </div>}
-            {layer.kind==='text'&&<div className="touch-editor-free-text" style={{
+            {layer.kind==='text'&&editingText===layer.id&&inlineTextTools&&active?
+              <textarea ref={quickTextInput} className="touch-editor-oncanvas-text"
+                aria-label="Editar texto directamente sobre el diseño"
+                value={layer.text||''} spellCheck={true}
+                onChange={e=>onUpdate?.(layer.id,{text:e.target.value})}
+                onBlur={()=>setEditingText('')}
+                onPointerDown={e=>e.stopPropagation()}
+                onPointerMove={e=>e.stopPropagation()}
+                onPointerUp={e=>e.stopPropagation()}
+                onKeyDown={e=>e.stopPropagation()}
+                style={{
+                  fontFamily:panoramaFont(layer.font),fontWeight:panoramaTextWeight(layer.fontWeight),
+                  fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
+                  letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
+                  lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
+                }}/>
+              :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               fontWeight:panoramaTextWeight(layer.fontWeight),
               fontSize:(layer.fontSize||76)*(gesture.current?.id===layer.id
@@ -480,6 +528,17 @@ export default function TouchLayerCanvas({
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
         })}
+        {inlineTextTools&&pageCount===1&&chosen&&!chosen.locked&&<div className="touch-canvas-actionbar" role="toolbar"
+          aria-label="Opciones del elemento seleccionado"
+          onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
+          {chosen.kind==='text'&&<button type="button" onClick={()=>setEditingText(chosen.id)}>✎ Texto</button>}
+          <button type="button" aria-label="Reducir elemento" onClick={()=>resizeSelected(.88)}>−</button>
+          <button type="button" aria-label="Agrandar elemento" onClick={()=>resizeSelected(1.12)}>＋</button>
+          {chosen.kind==='text'&&<button type="button" onClick={fitSelectedText}>Ajustar</button>}
+          <button type="button" aria-label="Más opciones del elemento" aria-pressed={advancedOpen}
+            onClick={()=>setAdvancedOpen(v=>!v)}>···</button>
+          {onRemove&&<button type="button" aria-label="Borrar elemento" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={16}/></button>}
+        </div>}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
           alt="" draggable={false} aria-hidden="true"/>}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
@@ -518,7 +577,7 @@ export default function TouchLayerCanvas({
          w:Math.min(1-selectedRect.x,selectedRect.w+1/pageCount),h:1,y:0
        })}>Estirar fondo ↔</button>}
     </div>}
-    {pageCount===1&&(layers.some(layer=>layer.kind==='text')||layers.some(layer=>layer.locked))&&
+    {pageCount===1&&!inlineTextTools&&(layers.some(layer=>layer.kind==='text')||layers.some(layer=>layer.locked))&&
       <div className="touch-editor-post-text-list" aria-label="Seleccionar textos y elementos bloqueados">
         <strong>Editar textos y desbloquear capas</strong>
         <div>{layers.filter(layer=>layer.kind==='text'||layer.locked).map(layer=>
@@ -529,12 +588,12 @@ export default function TouchLayerCanvas({
           </button>)}</div>
         <small>Selecciona un texto y cámbialo de sitio, color o tipografía.</small>
       </div>}
-    <p className="touch-editor-help">{pageCount>1
+    {!inlineTextTools&&<p className="touch-editor-help">{pageCount>1
       ?interactionMode==='navigate'?'Desliza para cambiar de slide sin mover elementos.':
         'Toca y arrastra cualquier elemento. Usa ＋ o − para cambiar su tamaño.'
       :cropping ? 'Arrastra dentro del marco para elegir qué parte de la foto se ve. Usa Zoom para acercar.'
-      : inlineTextTools?'Toca el texto o la foto para moverlo. Usa − / ＋ arriba o pellizca con dos dedos para cambiar su tamaño.':'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>
-    {chosen && selectedRect && <details className="touch-editor-options" key={chosen.id}>
+      : inlineTextTools?'Toca el texto o la foto para moverlo. Usa − / ＋ arriba o pellizca con dos dedos para cambiar su tamaño.':'Toca la foto y usa ＋ Agrandar o dos dedos; puedes ampliarla más allá del borde. Arrastra para mover.'}</p>}
+    {chosen && selectedRect && (!inlineTextTools||advancedOpen) && <details className="touch-editor-options" key={chosen.id} open={inlineTextTools||undefined}>
       <summary>Más ajustes · {chosen.name}</summary>
       <strong>{chosen.name}</strong>
       {onToggleLock&&<button type="button" className="touch-editor-lock-button" aria-pressed={!!chosen.locked}

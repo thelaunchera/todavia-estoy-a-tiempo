@@ -44,3 +44,11 @@
 .free-post-direct-copy textarea{display:block;width:100%;min-width:0;min-height:78px;resize:vertical;padding:12px;border-radius:10px;border:1px solid #a9c5cc;background:#fff;color:#191919;font:500 16px/1.45 'DM Sans',sans-serif}
 .free-post-direct-copy textarea:focus{outline:2px solid #50899b;outline-offset:2px}
 .free-post-direct-copy small{font-size:11px;line-height:1.45;color:#526f79}
+
+/* The artboard takes visual priority; contextual controls appear over it only when selected. */
+.free-post-studio{gap:9px;margin:3px 0}
+.free-post-tools{gap:5px;padding:1px 0 7px}
+.free-post-tools button{min-height:42px;font-size:12px}
+.free-post-under{padding:6px 0 0}
+.free-post-under .free-post-save{background:#f2f6f6;color:#203a44;border:1px solid #b9d1d7}
+.free-post-under button{min-height:43px}

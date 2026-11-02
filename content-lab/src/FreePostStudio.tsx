@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2} from 'lucide-react';
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
-import {paintPanoramaLayers,reorderPanoramaLayers,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
+import {paintPanoramaLayers,reorderPanoramaLayers,panoramaFont,panoramaTextWeight,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
 import {clampRect,clampFreePhotoRect,paintCoverImage,type TouchRect} from './TouchGeometry';
 import {coverPlacement} from './PhotoCrop';
 import TouchLayerCanvas,{type TouchLayer} from './TouchLayerCanvas';
@@ -19,6 +19,7 @@ type Props={
  onUpload:(file:File)=>Promise<LibraryAsset|null>;loadImage:(id:string)=>void;
  onOpenStickers:()=>void;onUploadBackground:(file:File)=>Promise<LibraryAsset|null>;
  notify:(message:string)=>void;locale:'es'|'en';
+ onSave?:()=>void;saving?:boolean;
 };
 const plain=(en:string,es:string,locale:'es'|'en')=>locale==='es'?es:en;
 function uniqueId(){return 'free-'+crypto.randomUUID();}
@@ -32,7 +33,7 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
  if(post.assetId&&post.assetId!==decor.backgroundImageId&&!decor.layers.some(layer=>layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
    locked:decor.primaryPhotoLocked===true,rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
- const title=post.hook||post.title;
+ const title=post.hook;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
    font:decor.headlineStyle?.font||brand.headingFont?.toLowerCase()||'serif',
    fontSize:decor.headlineStyle?.fontSize||84,fontWeight:decor.headlineStyle?.fontWeight||700,lineHeight:decor.headlineStyle?.lineHeight||1.12,
@@ -75,7 +76,7 @@ export async function exportFreePost(post:Post,brand:Brand,images:Record<string,
  a.href=canvas.toDataURL('image/png');a.click();
 }
 export default function FreePostStudio({post,brand,assets,images,onChange,onTitle,onUpload,loadImage,
- onOpenStickers,onUploadBackground,notify,locale}:Props){
+ onOpenStickers,onUploadBackground,notify,locale,onSave,saving=false}:Props){
  const decor=readCoverDecor(post.designData);
  const [preview,setPreview]=useState(''),[error,setError]=useState('');
  const [mediaOpen,setMediaOpen]=useState(false);
@@ -83,6 +84,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const [history,setHistory]=useState<CoverDecor[]>([]);
  const [future,setFuture]=useState<CoverDecor[]>([]);
  const [busy,setBusy]=useState(false);
+ const [focusLayerId,setFocusLayerId]=useState('');
  const photosRef=useRef<HTMLInputElement>(null),backgroundRef=useRef<HTMLInputElement>(null);
  const layers=useMemo(()=>coverLayers(post,brand,decor),[post.designData,post.assetId,post.hook,post.title,brand.headingFont]);
  const needed=[post.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(l=>l.assetId)].filter(Boolean);
@@ -119,31 +121,65 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  };
  const addElement=(kind:'text'|'shape',shape:PanoramaLayer['shape']='paper')=>{
   if(decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
+  const id=uniqueId();setFocusLayerId(id);
   update({...decor,layers:[...decor.layers,
-   kind==='text'?{id:uniqueId(),kind:'text',assetId:'',name:'Texto libre',
+   kind==='text'?{id,kind:'text',assetId:'',name:'Texto libre',
      text:plain('Write here','Escribe aquí',locale),font:'serif',fontSize:80,fontWeight:700,color:'#191919',
      rect:{x:.1,y:.42,w:.8,h:.23}}:
-   {id:uniqueId(),kind:'shape',assetId:'',name:'Collage',shape,color:'#F1E5D2',
+   {id,kind:'shape',assetId:'',name:'Collage',shape,color:'#F1E5D2',
      rect:{x:.22,y:.43,w:.56,h:shape==='tape'?.08:.32}}]});
  };
  const addPosterTitle=()=>{
   if(decor.layers.length>=22){notify('Máximo 22 elementos por post');return;}
+  const id=uniqueId();setFocusLayerId(id);
   update({...decor,layers:[...decor.layers,{
-   id:uniqueId(),kind:'text',assetId:'',name:'Texto póster',font:'poster',fontSize:116,
+   id,kind:'text',assetId:'',name:'Texto póster',font:'poster',fontSize:116,
    fontWeight:900,color:'#191919',lineHeight:.98,spacing:-1,
    text:plain('YOUR BIG IDEA','TU GRAN IDEA',locale),
    rect:{x:.065,y:.36,w:.87,h:.29}
   }]});
   notify('Texto póster añadido. Tócalo y arrástralo; puedes cambiar su color.');
  };
+ const fitNewText=(layer:PanoramaLayer,text:string):Partial<PanoramaLayer>=>{
+   const size=layer.fontSize||76,ratio=freePostDimensions(post.format).height;
+   const current=layer.rect;
+   const ctx=document.createElement('canvas').getContext('2d');
+   if(!ctx)return {text};
+   const width=Math.max(50,current.w*1080-18);
+   const leading=Math.max(.7,Math.min(2,layer.lineHeight||1.12));
+   const maxHeight=Math.max(.16,1-Math.max(0,current.y));
+   let fitSize=size;
+   const countLines=(px:number)=>{
+     ctx.font=panoramaTextWeight(layer.fontWeight)+' '+px+'px '+panoramaFont(layer.font);
+     ctx.letterSpacing=(layer.spacing||0)+'px';
+     let lines=0;
+     for(const paragraph of text.split('\n')){
+       const words=paragraph.split(/\s+/).filter(Boolean);
+       if(!words.length){lines++;continue}
+       let line='';
+       for(const word of words){const next=line?line+' '+word:word;
+         if(line&&ctx.measureText(next).width>width){lines++;line=word}else line=next;}
+       lines++;
+     }
+     return Math.max(1,lines);
+   };
+   while(fitSize>20&&countLines(fitSize)*fitSize*leading+20>maxHeight*ratio)fitSize-=2;
+   const targetH=Math.max(.09,Math.min(1,(countLines(fitSize)*fitSize*leading+22)/ratio));
+   const y=Math.min(Math.max(0,current.y),Math.max(0,1-targetH));
+   return {text,fontSize:fitSize,rect:clampFreePhotoRect({...current,y,h:targetH})};
+ };
  const updateLayer=(id:string,patch:Partial<PanoramaLayer>)=>{
-  if(layers.find(layer=>layer.id===id)?.locked)return;
+  const currentLayer=layers.find(layer=>layer.id===id);
+  if(currentLayer?.locked)return;
+  if(patch.text!==undefined&&currentLayer?.kind==='text'){
+    patch={...fitNewText(currentLayer,patch.text),...patch};
+  }
   if(id==='main-title'){
    if(patch.text!==undefined)onTitle(patch.text);
    const {text:unused,rect:nextRect,...styling}=patch;
    void unused;
    if(Object.keys(styling).length||nextRect)update({...decor,
-     ...(nextRect?{headlineRect:clampRect(nextRect)}:{}),
+     ...(nextRect?{headlineRect:clampFreePhotoRect(nextRect)}:{}),
      headlineStyle:{...decor.headlineStyle,...styling}});
    return;
   }
@@ -151,12 +187,12 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  };
  const commit=(kind:PanoramaLayer['kind'],id:string,rect:TouchRect)=>{
   if(layers.find(layer=>layer.id===id)?.locked)return;
-  if(id==='main-title')update({...decor,headlineRect:clampRect(rect)});
+  if(id==='main-title')update({...decor,headlineRect:clampFreePhotoRect(rect)});
   else if(id==='main-photo')update({...decor,primaryPhotoRect:clampFreePhotoRect(rect)});
   else if(id.startsWith('legacy-sticker-')){
    const original=id.slice('legacy-sticker-'.length);
-   update({...decor,stickerPositions:{...decor.stickerPositions,[original]:clampRect(rect)}});
-  }else update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,rect:kind==='photo'?clampFreePhotoRect(rect):clampRect(rect)}:l)});
+   update({...decor,stickerPositions:{...decor.stickerPositions,[original]:clampFreePhotoRect(rect)}});
+  }else update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,rect:clampFreePhotoRect(rect)}:l)});
  };
  const toggleLock=(id:string,locked:boolean)=>{
   if(id==='main-title'){update({...decor,headlineLocked:locked});return}
@@ -172,7 +208,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   const original=layers.find(layer=>layer.id===id&&layer.kind==='text');
   if(!original)return;
   const clone:PanoramaLayer={...original,id:uniqueId(),locked:false,
-   name:original.name+' · copia',rect:clampRect({...original.rect,x:original.rect.x+.025,y:original.rect.y+.025})};
+   name:original.name+' · copia',rect:clampFreePhotoRect({...original.rect,x:original.rect.x+.025,y:original.rect.y+.025})};
   update({...decor,layers:[...decor.layers,clone]});
   notify('Texto duplicado conservando color, tipografía y tamaño.');
  };
@@ -215,20 +251,6 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const allowed=assets.filter(a=>assetCategory(a)!=='background');
  const touchLayers:TouchLayer[]=layers.map(l=>({...l,src:images[l.assetId]||''}));
  return <section className="free-post-studio" aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
-  <header className="free-post-heading">
-   <span className="eyebrow">{plain('FREE CANVAS','LIENZO LIBRE',locale)}</span>
-   <h3>{plain('Create your own composition','Diseña sin plantillas',locale)}</h3>
-   <p>{plain('Start with your own photo. Add, move, resize and layer photos, text and decorations.',
-      'Usa tu foto de fondo y añade encima otras fotos, textos y stickers. Arrastra y ajusta todo.',locale)}</p>
-  </header>
-  <div className="free-post-direct-copy">
-    <label htmlFor="free-post-cover-copy">{plain('Text on your design','Texto de tu diseño',locale)}</label>
-    <textarea id="free-post-cover-copy" rows={2} value={post.hook||post.title}
-      onChange={e=>onTitle(e.target.value)}
-      placeholder={plain('Write your headline here…','Escribe aquí el texto principal…',locale)}/>
-    <small>{plain('See changes in the design below. Tap other text to edit it beside the canvas.',
-      'Mira los cambios abajo. Toca otro texto para editarlo aquí mismo, junto al diseño.',locale)}</small>
-  </div>
   <div className="free-post-tools">
    <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
    <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
@@ -288,10 +310,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    </div>}
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
-   <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
+   <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools focusLayerId={focusLayerId} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
      onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
   <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
+    {onSave&&<button type="button" className="free-post-save" disabled={saving} onClick={onSave}>{saving?plain('Saving…','Guardando…',locale):plain('Save post','Guardar publicación',locale)}</button>}
     <button type="button" disabled={busy} onClick={()=>void exportFreePost(post,brand,images)
       .then(()=>notify(plain('PNG ready','PNG descargado',locale)))
       .catch(e=>notify(e instanceof Error?e.message:'No se pudo descargar'))}>
