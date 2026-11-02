@@ -867,7 +867,7 @@ function App() {
     }
   }, [tab, current, assets, editor.assetId, editor.designData]);
   useEffect(()=>{
-    if(tab!=='stickers'||!account)return;
+    if(!['stickers','create','vertical','factory','grid'].includes(tab)||!account)return;
     let cancelled=false;
     void api.get('/api/sticker-catalog').then(({data})=>{
       if(cancelled)return;
@@ -877,7 +877,7 @@ function App() {
     return ()=>{cancelled=true};
   },[tab,account?.email]);
   useEffect(()=>{
-    if(tab!=='backgrounds'||!account)return;
+    if(!['backgrounds','create','vertical','factory','grid'].includes(tab)||!account)return;
     let cancelled=false;
     void api.get('/api/background-catalog').then(({data})=>{
       if(cancelled)return;
