@@ -435,3 +435,7 @@
 .touch-editor-quick-layers .touch-layer-real-name{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:165px}
 .touch-editor-quick-layers button{display:inline-flex;align-items:center;gap:7px;min-height:47px;text-align:left}
 .touch-editor .touch-editor-fast-actions .touch-editor-cross-slide{background:#294b59;color:white;border-color:#294b59}
+
+/* In edit mode, permit two fingers on the artboard without Safari taking over pan gestures. */
+.panorama-canvas.touch-editor-edit-mode .touch-editor-stage{touch-action:none}
+.panorama-canvas.touch-editor-navigation-mode .touch-editor-stage{touch-action:pan-x pan-y}
