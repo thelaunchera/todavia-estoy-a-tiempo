@@ -97,8 +97,8 @@ assert.match(classPage,/¿Y si solo tienes <em>tu celular\?<\/em>/,'El bloque de
 assert.doesNotMatch(home.match(/<section class="learning-section"[\s\S]*?<\/section>/)?.[0]||'',/ChatGPT|AppDeploy|TinyFish|GSC Wizard|Stripe|Gmail|Make/,'El teaser público tampoco revela herramientas');
 assert.doesNotMatch(classPage,/Video 0[0-8]|Video 0[0-8] ·|[0-9]{1,3} min(utos)? (editados|aprox)/i,'Lecciones y duraciones internas ocultas');
 assert.doesNotMatch(classPage,/class-route-list|<ol class="class-route-list"/,'Sin catálogo interno de clases');
-assert.match(classPage,/class-hero-image-frame/,'El hero utiliza una imagen editorial propia');
-assert.match(classPage,/src="\.\.\/assets\/clase-hero-retrato-real-2026\.jpg"/,'Se publica la foto independiente de laptop en el hero');
+assert.match(classPage,/class-cinema-visual/,'El hero incluye la escena cinematográfica de Casa Brownie');
+assert.match(classPage,/hero-brownies\\.mp4/,'El video del hero usa el proyecto real de la clase');
 assert.match(newStyles,/class-hero-grid/,'El layout del hero tiene estilos responsivos');
 assert.match(newStyles,/Hero · keep both actions inside a single layout/,'Los CTA comparten un layout que evita colisiones');
 assert.ok(newStyles.includes('grid-template-columns:minmax(0,1fr)!important;gap:11px!important'),'En móviles los CTA se apilan con separación');
@@ -186,8 +186,8 @@ console.log('Club de Ideas: acceso privado, captura, reacciones, comentarios, mo
 
 
 /* UX regression: retrato real, navegación arriba, materiales legibles y footer. */
-assert.match(classPage,/clase-hero-retrato-real-2026\.jpg/);
-assert.match(classPage,/width="1122" height="1402"/);
+assert.match(classPage,/class-cinema-film/,'El hero muestra la secuencia real de Casa Brownie');
+assert.match(classPage,/class-cinema-browser/,'La escena presenta la web que se puede abrir');
 assert.doesNotMatch(classPage,/id="class-floating-top"/,'Sin botón flotante tapando el contenido');
 assert.match(classPage,/class-back-to-top"/);
 assert.match(classPage,/class-transform-arrow[\s\S]*?<svg/);
@@ -198,7 +198,7 @@ assert.match(newStyles,/body\.class-page-v2:has\(#privacy-notice:not\(\[hidden\]
 assert.match(newExperience,/footerBack\?\.addEventListener\('click', event =>/);
 assert.match(newExperience,/window\.scrollTo\(\{top:0/);
 assert.match(newStyles,/Reloj editorial compacto: cifras/,'Cuenta regresiva legible en móvil');
-console.log('QA móvil: retrato original, reloj legible, sin botón flotante, footer contrastado y acceso al inicio OK');
+console.log('QA móvil: hero cinematográfico, reloj legible, sin botón flotante, footer contrastado y acceso al inicio OK');
 
 /* Fotos originales individuales aprobadas para hero, evidencia y podcast (no collage). */
 const podcastCss = read('episodios-destacados.css');
@@ -208,12 +208,12 @@ assert.match(home,/Historias sobre la vida real/);
 assert.match(home,/episode-mini-card-latest/);
 assert.match(home,/episode-previous episode-mini-card/);
 assert.doesNotMatch(home,/class="learning-book-scene"/);
-assert.match(classPage,/assets\/clase-hero-retrato-real-2026\.jpg/);
+assert.match(classPage,/assets\\/hero-brownies\\.webp/,'El poster corresponde al producto real de Casa Brownie');
 assert.match(classPage,/assets\/clase-retrato-laptop-real-2026\.jpg/);
 assert.doesNotMatch(classPage,/class-evidence-board/);
 assert.match(podcastCss,/episodes-compact-v2 \.episode-curated-grid/);
 assert.match(podcastHeroCss,/Podcast · mensaje claro en una mirada/);
-assert.ok(readFileSync('assets/clase-hero-retrato-real-2026.jpg').byteLength>100_000,'Existe el retrato del hero');
+assert.match(classPage,/cinematic-hero-20261102\\.css/,'La hoja del hero cinematográfico está enlazada');
 assert.ok(readFileSync('assets/clase-retrato-laptop-real-2026.jpg').byteLength>100_000,'Existe el retrato de laptop');
 console.log('QA: podcast claro, episodios 01 y 02 compactos y fotos aprobadas independientes OK');
 
@@ -228,12 +228,12 @@ assert.ok(episodeOrderMarkup.indexOf('EPISODIO 01')<episodeOrderMarkup.indexOf('
 assert.ok(episodeOrderMarkup.includes('21aYHKY0kodWEzg1835xcD'),'Ep 01 Spotify real');
 assert.ok(episodeOrderMarkup.includes('6ICSx9E7BVlU8Qi8rFC0s3'),'Ep 02 Spotify real');
 assert.match(episodeOrderJs,/published\.slice\(0, 2\)\.sort\(\(a, b\) => a\.number - b\.number\)/);
-assert.match(newStyles,/class-hero .class-hero-art .class-hero-image-frame img\{/);
+assert.match(classPage,/cinematic-hero-20261102\\.js/,'El video pausa al salir de pantalla');
 assert.match(newStyles,/object-fit:contain!important/);
 assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
-console.log('QA: ep 01 antes de 02, foto hero sin recorte ni tarjeta, tipografía contrastada OK');
+console.log('QA: ep 01 antes de 02, hero cinematográfico y tipografía contrastada OK');
 
 
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
