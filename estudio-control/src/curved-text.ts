@@ -38,7 +38,8 @@ function arcLayout(
   const w=widths[i];
   const halfway=along+w/2;
   const angle=(halfway/total-.5)*theta;
-  const px=radius*Math.sin(angle);
+  // Keep glyph order left-to-right for BOTH bend directions.
+  const px=dir*radius*Math.sin(angle);
   const py=dir*radius*(1-Math.cos(angle));
   glyphs.push({char:letters[i],width:w,px,py,angle});
   const hw=w*scaleX/2;
