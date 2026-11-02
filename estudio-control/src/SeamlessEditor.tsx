@@ -3,7 +3,7 @@ import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useEffect,useRef,useState} from 'react';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number};
-const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1';
+const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
@@ -14,7 +14,11 @@ export default function SeamlessEditor(){
  const [editingText,setEditingText]=useState<number|null>(null);
  const canvasTextRef=useRef<HTMLTextAreaElement>(null);
  useEffect(()=>{if(editingText!==null)requestAnimationFrame(()=>canvasTextRef.current?.focus());},[editingText]);
- const [projectName,setProjectName]=useState('Mi carrusel');
+ const [projectName,setProjectName]=useState(()=>localStorage.getItem(PROJECT_NAME_KEY)||'Mi carrusel');
+ const [activeProjectId,setActiveProjectId]=useState<string|null>(()=>localStorage.getItem(ACTIVE_PROJECT_KEY));
+ const [recentlyDeleted,setRecentlyDeleted]=useState<{item:Item;index:number}|null>(null);
+ useEffect(()=>{try{localStorage.setItem(PROJECT_NAME_KEY,projectName)}catch{}},[projectName]);
+ useEffect(()=>{try{if(activeProjectId)localStorage.setItem(ACTIVE_PROJECT_KEY,activeProjectId);else localStorage.removeItem(ACTIVE_PROJECT_KEY)}catch{}},[activeProjectId]);
  const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
@@ -190,8 +194,51 @@ export default function SeamlessEditor(){
  const color=draft.brand==='tle'?'#191919':'#243348';
  const items:Item[]=draft.slides.map((txt,i)=>({id:++nextId.current,kind:'text',text:txt,textStyle:i===0?'hook':'title',x:i*W+90,y:i===0?310:360,width:900,fontSize:i===0?76:66,color}));
  setDoc({count:4,background:base,backgroundImages:{},items});setSlide(0);setSelected(null);setProjectName(draft.title);setActiveBrief(draft);setMessage('Guion cargado: 4 slides editables. Añade fotografías auténticas antes de exportar.');};
- const saveProject=()=>{const name=projectName.trim()||'Mi carrusel';const next=[{id:String(Date.now()),name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects].slice(0,30);try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next);setMessage('Proyecto guardado en este dispositivo.')}catch{setMessage('No hay espacio para guardar. Descarga tus imágenes.')}};
- const removeProject=(id:string)=>{const next=projects.filter(p=>p.id!==id);localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next)};
+ const saveProject=():boolean=>{
+   const name=projectName.trim()||'Mi carrusel';
+   const id=activeProjectId&&projects.some(p=>p.id===activeProjectId)?activeProjectId:String(Date.now());
+   const next=[{id,name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects.filter(p=>p.id!==id)];
+   try{
+     localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));
+     setProjects(next);setActiveProjectId(id);setProjectName(name);
+     setMessage('Proyecto «'+name+'» guardado en este dispositivo.');return true;
+   }catch{
+     setMessage('No se pudo guardar: falta espacio en este navegador. El diseño permanece abierto; exporta las fotos antes de salir.');return false;
+   }
+ };
+ const startNewProject=()=>{
+   const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
+   if(hasWork&&!saveProject())return;
+   setDoc({...defaults,backgroundImages:{},items:[]});
+   setProjectName('Mi carrusel nuevo');setActiveProjectId(null);setSlide(0);
+   setSelected(null);setEditingText(null);setRecentlyDeleted(null);
+   setActiveBrief(null);setQuickPanel(null);viewport.current?.scrollTo({left:0});
+   setMessage(hasWork?'El carrusel anterior quedó guardado en Mis proyectos. Ya puedes crear uno nuevo.':'Nuevo carrusel vacío. Puedes empezar a diseñar.');
+ };
+ const removeProject=(id:string)=>{
+   const project=projects.find(p=>p.id===id);
+   if(!window.confirm('¿Eliminar el proyecto guardado «'+(project?.name||'')+'»? Esta acción no se puede deshacer.'))return;
+   const next=projects.filter(p=>p.id!==id);
+   try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next);if(activeProjectId===id)setActiveProjectId(null);setMessage('Proyecto guardado eliminado.')}catch{setMessage('No se pudo eliminar el proyecto.')}
+ };
+ const deleteElement=(id:number)=>{
+   const index=doc.items.findIndex(it=>it.id===id);
+   if(index<0)return;
+   setRecentlyDeleted({item:{...doc.items[index]},index});
+   setDoc(d=>({...d,items:d.items.filter(it=>it.id!==id)}));
+   setSelected(null);setEditingText(null);
+   setMessage('Elemento eliminado. Pulsa «Deshacer» para recuperarlo.');
+ };
+ const undoDelete=()=>{
+   if(!recentlyDeleted)return;
+   const {item,index}=recentlyDeleted;
+   setDoc(d=>{const items=[...d.items];items.splice(Math.min(index,items.length),0,item);return {...d,items}});
+   setSelected(item.id);setRecentlyDeleted(null);setMessage('Elemento recuperado.');
+ };
+ const removeSlideBackground=()=>{
+   setDoc(d=>{const backgroundImages={...d.backgroundImages};delete backgroundImages[slide];return {...d,backgroundImages}});
+   setMessage('Foto de fondo quitada del slide '+(slide+1)+'.');
+ };
  const duplicateSelected=()=>{if(selected===null)return;const item=doc.items.find(it=>it.id===selected);if(!item)return;const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{...item,id,x:item.x+55,y:item.y+55}]}));setSelected(id);setMessage('Elemento duplicado. Puedes mover la copia.')};
  const reorderSelected=(position:'front'|'back'|'forward'|'backward')=>{if(selected===null)return;setDoc(d=>{const items=[...d.items];const index=items.findIndex(it=>it.id===selected);if(index<0)return d;const [item]=items.splice(index,1);const target=position==='front'?items.length:position==='back'?0:position==='forward'?Math.min(index+1,items.length):Math.max(index-1,0);items.splice(target,0,item);return {...d,items}})};
  const removeSolidBackground=async()=>{const item=doc.items.find(it=>it.id===selected);if(!item||item.kind!=='image'||!item.src)return;setBusy(true);setMessage('Procesando fondo de color uniforme…');try{const im=await loadImage(item.src);const cv=document.createElement('canvas');const factor=Math.min(1,1600/Math.max(im.width,im.height));cv.width=Math.round(im.width*factor);cv.height=Math.round(im.height*factor);const ctx=cv.getContext('2d',{willReadFrequently:true});if(!ctx)throw Error('canvas');ctx.drawImage(im,0,0,cv.width,cv.height);const data=ctx.getImageData(0,0,cv.width,cv.height);const {width:w,height:h}=cv;const px=data.data;const corners=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];const rgb=[0,1,2].map(channel=>Math.round(corners.reduce((sum,i)=>sum+px[i+channel],0)/4));const visited=new Uint8Array(w*h);const queue=new Int32Array(w*h);let head=0,tail=0;const add=(i:number)=>{if(i<0||i>=w*h||visited[i])return;const p=i*4;const dist=Math.sqrt((px[p]-rgb[0])**2+(px[p+1]-rgb[1])**2+(px[p+2]-rgb[2])**2);if(dist>48)return;visited[i]=1;queue[tail++]=i};for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);px[i*4+3]=0;if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w)}ctx.putImageData(data,0,0);const result=cv.toDataURL('image/png');update(item.id,{src:result});setMessage('Fondo uniforme eliminado. Revisa los bordes; las fotos con fondos complejos necesitan recorte avanzado.')}catch{setMessage('No se pudo quitar el fondo. Prueba con una foto de fondo liso.')}finally{setBusy(false)}};
