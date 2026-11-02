@@ -10,6 +10,8 @@ const hero=html.slice(html.indexOf('<section class="hero dark-paper'),html.index
 assert(hero.includes('podcast-film-hero'),'Cinematic hero missing');
 assert(hero.includes('assets/podcast-hero-dailin-v3.webp'),'Approved host portrait changed');
 assert(hero.includes('Escucha historias que te inspiran'),'Listening promise changed');
+assert(hero.indexOf('podcast-host-portrait')<hero.indexOf('hero-project-links'),'Secondary offers should follow portrait');
+assert(html.includes('podcast-hero-rebalance-20261102.css?v=1'),'Rebalanced mobile stylesheet must load');
 for(const link of ['https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh','clases/primera-landing.html','content-lab/prompts/','content-lab/descubre/']){
  assert(hero.includes(link),'Podcast hero link missing '+link);
 }
@@ -55,7 +57,10 @@ try {
   assert(state.controls.every(v=>v.left>=-2&&v.right<=width+2&&v.height>=30),width+': controls clipped');
   assert(state.title.left>=-10&&state.title.right<=width+10,width+': title clipped');
   assert(state.links.left>=-2&&state.links.right<=width+2,width+': class/prompts links clipped');
-  if(width<=430)assert(state.cta.bottom<state.visual.top,width+': Spotify CTA should precede the visual on phones');
+  if(width<=430){
+    assert(state.cta.bottom<state.visual.top,width+': Spotify CTA should precede the visual on phones');
+    assert(state.visual.bottom<state.links.top,width+': course and Lab links must follow the portrait on phones');
+  }
   await page.locator('[data-film-select="2"]').click({force:true});
   const active=await page.evaluate(()=>({step:document.querySelector('.podcast-film-hero')?.dataset.filmStep,
     pressed:[...document.querySelectorAll('[data-film-select]')].map(el=>el.getAttribute('aria-pressed')),
