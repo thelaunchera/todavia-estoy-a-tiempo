@@ -55,4 +55,20 @@ const freebie=read('content-lab/public/prompts/en/index.html');
 for(const p of ['/content-lab/privacidad-en.html','/content-lab/reembolsos-en.html','/content-lab/terminos-en.html']){
  assert(freebie.includes(p),'Freebie English legal link missing '+p);
 }
+// Podcast freebie keeps the five original reflections, adds a realistic digital idea,
+// and routes ES/EN through the existing Make webhook's recognized 'source' field.
+for(const [page,lang] of [['index.html','es'],['index-en.html','en']]){
+ const html=read(page);
+ assert(html.includes('name="resource" value="cinco_preguntas"'),page+' must retain Make trigger resource');
+ assert(html.includes('name="lang"'),page+' must let people select delivery language');
+ assert(html.includes('value="'+lang+'" selected'),page+' should default to the page language');
+}
+assert(app.includes('podcast_website_en') && app.includes('podcast_website_es'),
+ 'Frontend must preserve Make-compatible source language routing');
+for(const file of ['assets/freebies/5-preguntas-idea-digital-es.pdf','assets/freebies/5-questions-digital-idea-en.pdf']){
+ assert(existsSync(file),'Missing PDF '+file);
+ const buffer=readFileSync(file);
+ assert(buffer.subarray(0,4).toString() === '%PDF','Malformed PDF: '+file);
+}
+
 console.log('Bilingual landing + legal + subtitle contracts: PASS ('+paired.length+' pairs)');
