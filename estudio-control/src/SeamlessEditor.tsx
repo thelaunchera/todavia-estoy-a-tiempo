@@ -5,7 +5,7 @@ import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
@@ -96,7 +96,7 @@ export default function SeamlessEditor(){
      for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}
      ctx.setLineDash([]);
      const chosen=doc.items.find(it=>it.id===selected);
-     if(chosen){
+     if(chosen&&!chosen.locked){
        const b=itemBounds(chosen);ctx.save();
        ctx.strokeStyle='#1677c5';ctx.lineWidth=5;ctx.setLineDash([12,8]);
        ctx.translate(chosen.x+b.w/2,chosen.y+b.h/2);
@@ -108,6 +108,7 @@ export default function SeamlessEditor(){
    };
    void render();return()=>{active=false};
  },[doc,selected,editingText]);
+ const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
  const addPrivateSticker=(url:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id)};
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
@@ -137,6 +138,7 @@ export default function SeamlessEditor(){
     h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width};
  };
  const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{
+    if(it.locked)return false;
    // The hit area must match the wrapped, rotated element that was painted.
    // Otherwise a finger selects the photograph underneath the text.
    const {w,h}=itemBounds(it);
@@ -155,7 +157,7 @@ export default function SeamlessEditor(){
      // Use the element from the first finger, not a possibly stale React
      // selected state. This also works when the other finger lands on blank canvas.
      const id=drag.current?.id??selected;
-     const it=doc.items.find(item=>item.id===id);
+     const it=doc.items.find(item=>item.id===id&&!item.locked);
      if(it){
        const points=[...touches.current.values()];
        pinch.current={id:it.id,distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),
@@ -202,7 +204,7 @@ export default function SeamlessEditor(){
    const touch=e.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
    if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
  };
- const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current||drag.current.pointer!==e.pointerId)return;const d=drag.current;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
+ const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&!it.locked&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current||drag.current.pointer!==e.pointerId)return;const d=drag.current;if(doc.items.find(item=>item.id===d.id)?.locked)return;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
  const up=(e:React.PointerEvent<HTMLCanvasElement>)=>{
   const start=pointerStart.current;
   if(start?.pointer===e.pointerId&&start.id!==null&&touches.current.size===1&&!pinch.current&&
@@ -408,7 +410,7 @@ export default function SeamlessEditor(){
     {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
     {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
     <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
-    <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button></div>
+    <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button><button type="button" style={{...control,background:current.locked?'#DCECF4':'#F2D85B'}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear':'🔒 Bloquear'}</button></div>
     {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy} onClick={()=>void removePhotoBackground()}>Quitar fondo con IA</button>
      {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar foto original</button>}
@@ -422,7 +424,7 @@ export default function SeamlessEditor(){
   {panel==='fondos'&&<div style={{display:'flex',gap:8,overflowX:'auto',padding:'8px 0 18px'}}>{LAB_BACKGROUNDS.map(([name,color])=><button key={name} title={name} onClick={()=>setDoc(d=>({...d,background:color}))} style={{minWidth:96,border:'1px solid #ddd',borderRadius:12,padding:8,background:'white',color:'#191919'}}><span style={{display:'block',height:62,borderRadius:8,background:color,border:'1px solid #ddd'}}/>{name}</button>)}</div>}
   {panel==='stickers'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:18}}>{LAB_STICKERS.map((emoji,i)=><button key={i} aria-label={'Añadir sticker '+emoji} onClick={()=>addSticker(emoji)} style={{...control,fontSize:28}}>{emoji}</button>)}</div>}
   {(panel==='fondos'||panel==='stickers')&&<div style={{margin:'0 0 14px'}}><strong style={{display:'block',marginBottom:8}}>Biblioteca original del Content Lab · {panel==='fondos'?'Fondos':'Stickers'}</strong>{libraryStatus&&<p role="status" style={{fontSize:13}}>{libraryStatus}</p>}<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:10,maxHeight:350,overflowY:'auto',padding:4}}>{privateAssets.filter(asset=>asset.category===(panel==='fondos'?'background':'sticker')).map(asset=><button key={asset.id} type="button" onClick={()=>{setLibraryStatus('Añadiendo imagen…');void keepStudioLabImage(asset.url).then(src=>{panel==='fondos'?setPrivateBackground(src):addPrivateSticker(src);setLibraryStatus('')}).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir la imagen.'))}} style={{border:'1px solid #ddd',background:'white',borderRadius:12,padding:6,color:'#191919',textAlign:'center',cursor:'pointer'}}><img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:86,objectFit:'contain',borderRadius:8}}/><span style={{fontSize:11,display:'block',marginTop:4}}>{asset.name}</span></button>)}{LAB_ASSETS.filter(asset=>asset.category===(panel==='fondos'?'background':'sticker')).map(asset=><button key={asset.id} type="button" onClick={()=>panel==='fondos'?setLabBackground(asset.file):addLabSticker(asset.file)} style={{border:'1px solid #ddd',background:'white',borderRadius:12,padding:6,color:'#191919',textAlign:'center',cursor:'pointer'}}><img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:86,objectFit:'contain',borderRadius:8}}/><span style={{fontSize:11,display:'block',marginTop:4}}>{asset.name}</span></button>)}</div></div>}
-  {panel==='capas'&&<div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:18}}>{doc.items.map(it=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white'}} onClick={()=>setSelected(it.id)}>{it.kind==='image'?'📷 Foto':(it.text||'Texto sin escribir').slice(0,42)}</button>)}</div>}
+  {panel==='capas'&&<div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:18}}>{doc.items.map(it=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white'}} onClick={()=>setSelected(it.id)}>{it.locked?'🔒 ':''}{it.kind==='image'?'📷 Foto':(it.text||'Texto sin escribir').slice(0,42)}</button>)}</div>}
   </details>
   <section aria-label="Navegador de slides" style={{margin:'12px 0',padding:'12px',border:'1px solid #D7DFE2',borderRadius:16,background:'#FAF8F3'}}>
    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}><div><strong style={{fontSize:16}}>Slide {slide+1} de {doc.count}</strong><div style={{fontSize:12,color:'#53636B'}}>Selecciona una lámina para editarla</div></div><div style={{display:'flex',gap:6}}><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide-1)} disabled={slide===0} aria-label="Slide anterior">‹</button><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide+1)} disabled={slide>=doc.count-1} aria-label="Slide siguiente">›</button></div></div>
@@ -436,6 +438,7 @@ export default function SeamlessEditor(){
   </div>}
     {(current||recentlyDeleted)&&<div role="toolbar" aria-label="Edición táctil" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    {current&&<>
+   <button type="button" style={{...control,background:current.locked?'#DCECF4':'#FFF4C4',fontWeight:750}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear elemento':'🔒 Bloquear elemento'}</button>
    {current.kind==='text'&&<button type="button" style={{...control,background:'#191919',color:'white'}} onClick={editOnCanvas}>✎ Editar texto aquí</button>}
    {current.kind==='text'&&<div role="group" aria-label="Curvar texto seleccionado" style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:7,padding:'6px 9px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
     <label style={{fontSize:13,fontWeight:700,display:'flex',alignItems:'center',gap:6}}>Curvar texto
