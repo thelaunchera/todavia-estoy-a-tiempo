@@ -70,7 +70,7 @@
     const url = publicUrl(config.checkoutLinks?.[button.dataset.buy]);
     const ready = config.commerceEnabled === true && url !== null;
     button.disabled = !ready;
-    if (ready) button.textContent = button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $1.99' : 'Comprar mi cuaderno · $3.99';
+    if (ready) button.textContent = document.documentElement.lang === 'en' ? (button.dataset.buy === 'noVoyTarde' ? 'Get my journal · $1.99' : 'Get my workbook · $3.99') : (button.dataset.buy === 'noVoyTarde' ? 'Comprar mi diario · $1.99' : 'Comprar mi cuaderno · $3.99');
     button.addEventListener('click', () => {
       if (ready) window.location.assign(url);
     });
