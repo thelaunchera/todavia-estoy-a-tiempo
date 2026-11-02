@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Pencil, Check, X } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
