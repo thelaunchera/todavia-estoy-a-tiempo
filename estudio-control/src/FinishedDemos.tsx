@@ -14,8 +14,8 @@ const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, solu
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
- promptsFor?:keyof typeof studioDemoPrompts;
- photos?:FinishedDemoPhoto[];
+ promptsFor:keyof typeof studioDemoPrompts;
+ photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
  {
