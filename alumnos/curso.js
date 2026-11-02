@@ -1,9 +1,9 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v6';
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
+import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v7';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
-import {mountInspiracion} from './inspiracion.js?v=20261102-owner-curation-v3';
-import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-refresh-v2';
+import {mountInspiracion} from './inspiracion.js?v=20261102-owner-curation-v4';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-refresh-v3';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
