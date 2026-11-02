@@ -578,6 +578,7 @@ export default function TouchLayerCanvas({
                 borderRadius:layer.shape==='circle'?'50%':radius(layerCornerPixels(rect,fw,fh),fw,fh)}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
+            {active && pageCount===1 && inlineTextTools && onRemove && !layer.locked && <button type="button" aria-label="Quitar elemento" title="Quitar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}} style={{position:'absolute',right:-12,top:-12,zIndex:30,width:30,height:30,borderRadius:'50%',background:'#191919',color:'#fff',border:'2px solid white',fontSize:21,lineHeight:'24px',display:'grid',placeItems:'center',touchAction:'manipulation'}}>×</button>}
             {active && <><span className="touch-editor-outline"/>
               {!cropping&&!layer.locked && !inlineTextTools && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
