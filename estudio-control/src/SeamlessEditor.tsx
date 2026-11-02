@@ -48,7 +48,40 @@ export default function SeamlessEditor(){
   for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';textLines(it).forEach((line,index)=>ctx.fillText(line,x,it.y+index*it.fontSize*1.3))}else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
   ctx.restore();
  };
- useEffect(()=>{let active=true;const render=async()=>{const c=canvas.current;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;c.width=width;c.height=H;await paint(ctx,1,0,width,editingText);if(!active)return;ctx.strokeStyle='rgba(25,25,25,.25)';ctx.setLineDash([12,12]);for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}ctx.setLineDash([]);const chosen=doc.items.find(it=>it.id===selected);if(chosen){const b=itemBounds(chosen);ctx.save();ctx.strokeStyle='#1677c5';ctx.lineWidth=5;ctx.setLineDash([12,8]);ctx.translate(chosen.x+b.w/2,chosen.y+b.h/2);ctx.rotate((chosen.rotation||0)*Math.PI/180);ctx.strokeRect(-b.w/2,-b.h/2,b.w,b.h);ctx.setLineDash([]);ctx.restore()}};void render();return()=>{active=false}},[doc,selected,editingText]);
+ useEffect(()=>{
+   let active=true;
+   const render=async()=>{
+     const visible=canvas.current;if(!visible)return;
+     // Paint in an isolated, display-sized buffer. An older asynchronous image
+     // decode must never overwrite newer edits or make a layer disappear.
+     // The export path still paints at the full 1080 × 1350 per slide.
+     const previewScale=600/W;
+     const buffer=document.createElement('canvas');
+     buffer.width=Math.round(width*previewScale);
+     buffer.height=Math.round(H*previewScale);
+     const background=buffer.getContext('2d');if(!background)return;
+     await paint(background,previewScale,0,width,editingText);
+     if(!active)return;
+     visible.width=buffer.width;visible.height=buffer.height;
+     const ctx=visible.getContext('2d');if(!ctx)return;
+     ctx.drawImage(buffer,0,0);
+     ctx.save();ctx.scale(previewScale,previewScale);
+     ctx.strokeStyle='rgba(25,25,25,.25)';ctx.setLineDash([12,12]);
+     for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}
+     ctx.setLineDash([]);
+     const chosen=doc.items.find(it=>it.id===selected);
+     if(chosen){
+       const b=itemBounds(chosen);ctx.save();
+       ctx.strokeStyle='#1677c5';ctx.lineWidth=5;ctx.setLineDash([12,8]);
+       ctx.translate(chosen.x+b.w/2,chosen.y+b.h/2);
+       ctx.rotate((chosen.rotation||0)*Math.PI/180);
+       ctx.strokeRect(-b.w/2,-b.h/2,b.w,b.h);
+       ctx.setLineDash([]);ctx.restore();
+     }
+     ctx.restore();
+   };
+   void render();return()=>{active=false};
+ },[doc,selected,editingText]);
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
  const addPrivateSticker=(url:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id)};
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
