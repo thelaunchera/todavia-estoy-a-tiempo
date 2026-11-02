@@ -400,7 +400,9 @@ assert.match(studioShell,/src="\.\.\/alumnos\/\?vista=admin&origen=studio"/,'La 
 assert.match(studioShell,/aulaPreviewOpen && !!account && !denied/,'No montar vista del aula sin la sesión privada del Studio');
 assert.match(room,/id="aula-owner-nav"[^>]*hidden/,'El enlace junto al logo permanece oculto hasta verificar la propietaria');
 assert.doesNotMatch(room,/Soy la administradora · Ver aula sin comprar/,'Sin enlaces de administración en el formulario público');
-assert.match(roomScript,/ownerNav.hidden=panel!==course\|\|!adminPreview/,'El enlace privado exige una vista de propietaria validada');
+assert.match(roomScript,/const showOwnerShortcut=panel===course&&adminPreview/,'El enlace privado exige vista de propietaria validada');
+assert.doesNotMatch(room,/href="\.\.\/estudio\//,'La página pública nunca contiene un link navegable al Studio');
+assert.match(roomScript,/ownerNav.setAttribute\('href','\.\.\/estudio\/'\)/,'Solo el rol owner crea el enlace al Studio');
 assert.match(studioShell,/getOwnerClassroomSession/,'El Studio comprueba la sesión de propietaria antes de compartirla');
 assert.match(studioShell,/TLE_OWNER_SESSION_RESPONSE/,'Vista privada recibe sesión por el mismo origen sin URL con tokens');
 assert.match(roomScript,/STUDIO_EMBEDDED_OWNER&&!studioSessionReady/,'El iframe del Studio no presenta el formulario del alumno');
