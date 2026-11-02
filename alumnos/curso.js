@@ -117,6 +117,51 @@ const aulaViews={
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';
+const aulaViewHistory=[];
+let aulaBackButton=null,aulaCloseButton=null;
+function ensureAulaNavigation(){
+ const header=document.querySelector('#aula-layout .aula-main-top');
+ if(!header || aulaBackButton)return;
+ const actions=document.createElement('div');
+ actions.className='aula-section-navigation';
+ aulaBackButton=document.createElement('button');
+ aulaBackButton.id='aula-section-back';
+ aulaBackButton.type='button';
+ aulaBackButton.className='aula-section-nav-button';
+ aulaBackButton.setAttribute('aria-label','Volver a la sección anterior');
+ aulaBackButton.title='Atrás';
+ aulaBackButton.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg><span>Atrás</span>';
+ aulaCloseButton=document.createElement('button');
+ aulaCloseButton.id='aula-section-close';
+ aulaCloseButton.type='button';
+ aulaCloseButton.className='aula-section-nav-button aula-section-nav-close';
+ aulaCloseButton.setAttribute('aria-label','Cerrar esta sección y volver al inicio del aula');
+ aulaCloseButton.title='Cerrar sección';
+ aulaCloseButton.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Cerrar</span>';
+ aulaBackButton.addEventListener('click',()=>{
+  if(document.body.classList.contains('aula-menu-open')){closeAulaMenu();return;}
+  if(aulaViewHistory.length){
+   const previous=aulaViewHistory.pop();
+   setAulaView(previous,{track:false});
+  }else if(currentAulaView!=='inicio'){
+   setAulaView('inicio',{track:false});
+  }
+ });
+ aulaCloseButton.addEventListener('click',()=>{
+  aulaViewHistory.length=0;
+  closeAulaMenu();
+  setAulaView('inicio',{track:false});
+ });
+ actions.append(aulaBackButton,aulaCloseButton);
+ header.querySelector('.aula-main-location')?.insertAdjacentElement('afterend',actions);
+ updateAulaNavigation();
+}
+function updateAulaNavigation(){
+ if(!aulaBackButton||!aulaCloseButton)return;
+ const isHome=currentAulaView==='inicio';
+ aulaBackButton.hidden=isHome&&!aulaViewHistory.length;
+ aulaCloseButton.hidden=isHome;
+}
 function closeAulaMenu(){
  document.body.classList.remove('aula-menu-open');
  aulaBack.hidden=true;
@@ -129,10 +174,14 @@ function openAulaMenu(){
  const active=aulaSidebar.querySelector('.aula-side-link[aria-current="page"]');
  (active||aulaClose).focus({preventScroll:true});
 }
-function setAulaView(view,{scroll=true}={}){
+function setAulaView(view,{scroll=true,track=true}={}){
  // El catálogo comercial pertenece al Centro de Productos, nunca al aula.
  if(view==='catalogo')view='lecciones';
  if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
+ if(track&&view!==currentAulaView&&!course.hidden){
+  aulaViewHistory.push(currentAulaView);
+  if(aulaViewHistory.length>12)aulaViewHistory.shift();
+ }
  currentAulaView=view;
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
   section.hidden=section.getAttribute('data-aula-panel')!==(view==='prompts'?'materiales':view);
@@ -144,6 +193,7 @@ function setAulaView(view,{scroll=true}={}){
   control.setAttribute('aria-current',selected?'page':'false');
  });
  aulaTitle.textContent=aulaViews[view];
+ updateAulaNavigation();
  closeAulaMenu();
  if(scroll&&document.body.classList.contains('aula-member')){
   window.scrollTo({top:0,behavior:'auto'});
@@ -159,8 +209,13 @@ aulaOpen.addEventListener('click',()=>document.body.classList.contains('aula-men
 aulaClose.addEventListener('click',()=>{closeAulaMenu();aulaOpen.focus({preventScroll:true});});
 aulaBack.addEventListener('click',()=>{closeAulaMenu();aulaOpen.focus({preventScroll:true});});
 document.addEventListener('keydown',event=>{
- if(event.key==='Escape'&&document.body.classList.contains('aula-menu-open')){
-  closeAulaMenu();aulaOpen.focus({preventScroll:true});
+ if(event.key!=='Escape')return;
+ if(document.body.classList.contains('aula-menu-open')){
+  closeAulaMenu();aulaOpen.focus({preventScroll:true});return;
+ }
+ if(!course.hidden&&currentAulaView!=='inicio'){
+  aulaViewHistory.length=0;
+  setAulaView('inicio',{track:false});
  }
 });
 
@@ -445,12 +500,15 @@ async function showCourse(email,asAdmin=false){
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
  display(course);
+ ensureAulaNavigation();
  status(asAdmin
   ? hasPartialMaterials
    ? 'Vista privada abierta. Algunas guías o prompts no cargaron; las lecciones siguen disponibles.'
    : 'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.'
   : 'Acceso verificado.',true);
- lessonsUI();setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false});
+ lessonsUI();
+ aulaViewHistory.length=0;
+ setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
