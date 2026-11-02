@@ -250,20 +250,48 @@ async function checkProjectShared(){
  }catch{projectShared=false;}
  bonusState();updateDashboard();
 }
+const CAPTIONS_PREFERENCE='podcast_class_caption_preference_v1';
+const captionPicker=$('course-caption-language');
+function captionPreference(){
+ const selected=captionPicker?.value;
+ return ['es','en','auto'].includes(selected)?selected:'es';
+}
+function displayVideo(item){
+ const box=$('lesson-player');box.replaceChildren();box.hidden=!validVideoId(item.youtube_video_id);
+ const captions=$('course-captions');if(captions)captions.hidden=box.hidden;
+ if(box.hidden)return;
+ const url=new URL('https://www.youtube-nocookie.com/embed/'+encodeURIComponent(item.youtube_video_id));
+ url.searchParams.set('rel','0');
+ const preferred=captionPreference();
+ // This is a caption language preference only. YouTube must actually have the approved
+ // ES/EN tracks for the video's settings to honor the requested language.
+ if(preferred!=='auto'){
+  url.searchParams.set('cc_load_policy','1');
+  url.searchParams.set('cc_lang_pref',preferred);
+ }
+ const frame=document.createElement('iframe');
+ frame.src=url.toString();
+ frame.title='Video '+item.lesson_code+' · '+item.title;
+ frame.loading='lazy';frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+ frame.referrerPolicy='strict-origin-when-cross-origin';frame.allowFullscreen=true;
+ box.appendChild(frame);
+}
+if(captionPicker){
+ let value='es';
+ try{value=localStorage.getItem(CAPTIONS_PREFERENCE)||'es';}catch{}
+ if(['es','en','auto'].includes(value))captionPicker.value=value;
+ captionPicker.addEventListener('change',()=>{
+  try{localStorage.setItem(CAPTIONS_PREFERENCE,captionPreference());}catch{}
+  const item=lessons[selected];
+  if(item)displayVideo(item);
+ });
+}
 function choose(i){
  selected=i;
  const item=lessons[i];
  if(!item)return;
  setAulaView('lecciones');
- const box=$('lesson-player');box.replaceChildren();box.hidden=!validVideoId(item.youtube_video_id);
- if(!box.hidden){
-  const frame=document.createElement('iframe');
-  frame.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(item.youtube_video_id)+'?rel=0';
-  frame.title='Video '+item.lesson_code+' · '+item.title;
-  frame.loading='lazy';frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
-  frame.referrerPolicy='strict-origin-when-cross-origin';frame.allowFullscreen=true;
-  box.appendChild(frame);
- }
+ displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
  $('lesson-title').textContent=item.title;
