@@ -260,6 +260,12 @@ async function init(){
   if(state.owner)studioLink.setAttribute('href','../estudio/');
   else studioLink.removeAttribute('href');
   $('club-admin-banner').hidden=!state.owner;
+  const adminReturn=$('club-admin-return');
+  if(adminReturn){
+   adminReturn.hidden=!state.owner;
+   if(state.owner)adminReturn.setAttribute('href','../estudio/');
+   else adminReturn.removeAttribute('href');
+  }
   if(!state.owner&&!state.courses.includes(courseId)){
    $('club-post-scope').querySelector('[value=curso]').disabled=true;
    $('club-view-scope').querySelector('[value=curso]').disabled=true;
