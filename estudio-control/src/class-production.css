@@ -158,3 +158,37 @@
 .class-reel-gate-action small{color:#6f7881;line-height:1.55;font-size:11px}
 .class-reel-gate-action a{display:flex;align-items:center;gap:7px;align-self:flex-start;font-size:11px;font-weight:700;color:#274d69;text-underline-offset:3px}
 @media(max-width:760px){.class-reel-gate{grid-template-columns:1fr;gap:14px}.class-reel-gate-action{border-left:0;border-top:1px solid #ded4c9;padding:14px 0 0}}
+
+/* Grabaciones privadas por capítulo · noviembre 2026 */
+.class-recording-picker{display:none!important}
+.class-upload-hint,.class-upload-limit{color:#62758a;font-size:11px;line-height:1.55;margin:7px 6px 12px}
+.class-module-entry{display:flex;flex-direction:column;min-width:0;border-bottom:1px solid #e8edf0;padding-bottom:8px;margin-bottom:6px}
+.class-module-entry .class-module{flex:0 0 auto;min-width:0}
+.class-module-upload{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;margin:2px 8px 3px;padding:8px 10px;border:1px solid #adc5d7;border-radius:9px;background:#f1f7fb;color:#214864;font-weight:700;font-size:11px;line-height:1.2;cursor:pointer}
+.class-module-upload:hover,.class-upload-main:hover{background:#dfedf7}
+.class-module-upload:disabled,.class-upload-main:disabled{opacity:.55;cursor:not-allowed}
+.class-upload-status{background:#f8fbfd;border:1px solid #cbdde9;border-radius:17px;padding:clamp(16px,2.2vw,22px);margin-bottom:16px;min-width:0}
+.class-upload-status p{margin:6px 0 0;color:#63788b;font-size:12px;line-height:1.55}
+.class-upload-main{display:flex;align-items:center;justify-content:center;gap:10px;min-height:47px;max-width:100%;width:fit-content;margin-top:14px;padding:11px 16px;background:#e8f3fa;border:1px solid #a9c8dc;border-radius:10px;color:#173f5b;font-size:13px;line-height:1.35;font-weight:700}
+.class-upload-saved{display:flex;align-items:center;flex-wrap:wrap;gap:9px;color:#284f68;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.class-upload-saved>span{flex:1 1 185px;min-width:0}
+.class-upload-saved svg{color:#477b78;flex:none}
+.class-upload-saved button{border:1px solid #a9c8dc;background:#fff;border-radius:9px;min-height:40px;padding:9px 11px;color:#24516d;font-size:11px;font-weight:700}
+.class-upload-progress{height:8px;overflow:hidden;background:#d9e6ed;border-radius:999px;margin-top:14px}
+.class-upload-progress>div{height:100%;max-width:100%;background:#5c94b7;transition:width .2s ease}
+.class-upload-status p.class-upload-notice{color:#264f69;font-weight:650;min-height:0}
+.class-upload-status :is(button,input):focus-visible,.class-module-upload:focus-visible{outline:3px solid #568da9;outline-offset:3px}
+@media(max-width:1180px){
+ .class-module-list{align-items:stretch}
+ .class-module-entry{flex:0 0 202px;min-width:202px;max-width:202px;margin:0;border:1px solid #e6edf1;border-radius:12px;padding:4px}
+ .class-module-entry .class-module{min-width:0;max-width:none;flex:1}
+ .class-module-entry .class-module-upload{margin-top:auto}
+ .class-module-list>.class-upload-hint{display:none}
+}
+@media(max-width:650px){
+ .class-upload-status{padding:16px}
+ .class-upload-main{width:100%;min-height:48px}
+ .class-module-entry{flex-basis:184px;min-width:184px}
+ .class-module-upload{min-height:43px}
+}
+@media(prefers-reduced-motion:reduce){.class-upload-progress>div{transition:none}}
