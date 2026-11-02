@@ -5,6 +5,7 @@ import {Sparkles,Upload,ImagePlus,Download,RefreshCw,Save,Check,LoaderCircle,Arr
 import './BrandGrid.css';
 import {composeGridPoster,LAYOUTS,EXPORT_SIZES,type ExportSize,type VisualControls} from './GridComposer';
 import GridVisualEditor from './GridVisualEditor';
+import {sourceAwareScale,canvasToLosslessPng,downloadLosslessPng} from './ExportQuality';
 import type {PromptControls} from './PromptEngine';
 import {EDITORIAL_PRESETS,type EditorialDesign,type EditorialPreset} from './EditorialPoster';
 import {brandPalette} from './BrandIdentity';
@@ -21,11 +22,11 @@ type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:stri
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean};onOpenPrompts?:()=>void;onOpenCalendar?:(date?:string)=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;locale?:'es'|'en';onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
 export const CREATIVE_FORMATS=LAYOUTS.map(x=>x.name);
-async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait'){
+async function poster(tile:Tile,i:number,grid:Grid,brand:Brand,images:Record<string,string>,size:ExportSize='portrait',pixelScale=1){
   return (await composeGridPoster(tile,i,brand,{
     photo:(tile.assetId&&images[tile.assetId])||((tile.design&&grid.kind==='preserve')?images[grid.sourceId]:images[tile.assetId]),
     original:images[grid.sourceId],logo:images[brand.logoAssetId||''],preserve:grid.kind==='preserve'&&!tile.design&&!tile.assetId,stickerImages:images
-  },size)).canvas;
+  },size,pixelScale)).canvas;
 }
 async function imageFingerprint(src:string):Promise<string>{
  const im=new Image();im.src=src;await new Promise<void>((ok,bad)=>{im.onload=()=>ok();im.onerror=()=>bad(Error('No se puede analizar imagen'))});
@@ -89,6 +90,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
   const [grids,setGrids]=useState<Grid[]>([]);const [grid,setGrid]=useState<Grid|null>(null);
   const [selected,setSelected]=useState(0);const [busy,setBusy]=useState('');
   const [uploading,setUploading]=useState('');const [downloads,setDownloads]=useState<{name:string;url:string}[]>([]);
+  useEffect(()=>()=>{downloads.forEach(file=>{if(file.url.startsWith('blob:'))URL.revokeObjectURL(file.url)})},[downloads]);
   const [chooseExisting,setChooseExisting]=useState(false);
   const openedCalendarVersion=useRef<number>(-1);
   const resultsRef=useRef<HTMLDivElement>(null);
@@ -396,16 +398,27 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     if(!grid)return;
     if(!images[grid.sourceId]&&(!grid.posts[i].assetId||!images[grid.posts[i].assetId]))return notify('Carga primero tu foto principal.');
     if(!grid.posts[i].design&&(!grid.posts[i].assetId||!images[grid.posts[i].assetId]))return notify('Genera primero una foto nueva para este post.');
-    try{const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);
-      const a=document.createElement('a');a.download='brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+EXPORT_SIZES[exportSize].w+'x'+EXPORT_SIZES[exportSize].h+'.png';a.href=c.toDataURL('image/png');a.click();notify('PNG del post '+(i+1)+' descargado.');
+    try{const tile=grid.posts[i],metrics=EXPORT_SIZES[exportSize];
+      const scale=await sourceAwareScale([images[grid.sourceId],images[tile.assetId],images[tile.backgroundImageId||'']],metrics.w,metrics.h);
+      const c=await poster(tile,i,grid,brand,images,exportSize,scale);
+      try{await downloadLosslessPng(c,'brand-grid-post-'+String(i+1).padStart(2,'0'))}
+      finally{c.width=1;c.height=1}
+      notify('PNG HD del post '+(i+1)+' descargado.');
     }catch(e){showError(e)}
   };
   const prepare=async()=>{
     if(!grid)return;
     if(grid.posts.some(p=>!(p.design&&images[grid.sourceId])&&(!p.assetId||!images[p.assetId])))return notify('Faltan algunas fotos o diseños finales por preparar.');
     setBusy('export');
-    try{const files=[];for(let i=0;i<9;i++){const c=await poster(grid.posts[i],i,grid,brand,images,exportSize);files.push({name:'brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+exportSize+'.png',url:c.toDataURL('image/png')})}
-      setDownloads(files);notify('Nueve archivos PNG preparados para descarga individual.');
+    try{const files:{name:string;url:string}[]=[];
+      for(let i=0;i<9;i++){
+       const tile=grid.posts[i],metrics=EXPORT_SIZES[exportSize];
+       const scale=await sourceAwareScale([images[grid.sourceId],images[tile.assetId],images[tile.backgroundImageId||'']],metrics.w,metrics.h);
+       const c=await poster(tile,i,grid,brand,images,exportSize,scale);
+       try{const blob=await canvasToLosslessPng(c);files.push({name:'brand-grid-post-'+String(i+1).padStart(2,'0')+'-'+c.width+'x'+c.height+'.png',url:URL.createObjectURL(blob)})}
+       finally{c.width=1;c.height=1}
+      }
+      setDownloads(files);notify('Nueve archivos PNG HD preparados para descarga individual.');
     }catch(e){showError(e)}finally{setBusy('')}
   };
   const checkQuality=async()=>{
@@ -456,7 +469,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     try{
       const image=new Image();image.src=images[tile.assetId];
       await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(Error('No se pudo abrir el resultado'))});
-      const W=EXPORT_SIZES[exportSize].w,H=EXPORT_SIZES[exportSize].h;
+      const metrics=EXPORT_SIZES[exportSize];
+      const quality=await sourceAwareScale([images[tile.assetId]],metrics.w,metrics.h);
+      const W=metrics.w*quality,H=metrics.h*quality;
       const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
       const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo exportar PNG.');
       ctx.fillStyle=brand.background||'#FAF8F3';ctx.fillRect(0,0,W,H);
@@ -464,8 +479,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
       const scale=Math.min(W/w,H/h),dw=w*scale,dh=h*scale;
       ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
       ctx.drawImage(image,(W-dw)/2,(H-dh)/2,dw,dh);
-      const a=document.createElement('a');a.download='content-lab-post-'+(selected+1)+'-'+W+'x'+H+'.png';
-      a.href=canvas.toDataURL('image/png');a.click();canvas.width=1;canvas.height=1;
+      await downloadLosslessPng(canvas,'content-lab-post-'+(selected+1));canvas.width=1;canvas.height=1;
       notify('Post '+(selected+1)+' descargado sin alterar su diseño.');
     }catch(e){showError(e)}
   };
