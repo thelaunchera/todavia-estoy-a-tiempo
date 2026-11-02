@@ -76,3 +76,9 @@
  .club-back-controls .club-top-link{min-height:42px;padding:10px 11px;font-size:12px}
  .club-top-inner>a:first-child{min-width:0;flex:1 1 auto;max-width:155px}
 }
+
+/* Bilingual community language switch 2026-11-02 */
+.club-language-switch{display:inline-flex;gap:4px;justify-content:center;align-items:center;padding:4px 6px;min-height:41px;border-radius:10px;border:1px solid #cbdce5;background:#fff;color:#315972;font-size:11px}
+.club-language-switch select{appearance:auto;border:0;min-height:29px;background:transparent;color:#315972;font:750 12px/1.1 'DM Sans',Arial,sans-serif}
+.club-language-switch:focus-within{outline:3px solid #83aabe;outline-offset:2px}
+@media(max-width:560px){.club-language-switch{padding:4px}.club-language-switch .club-lang-mark{display:none}.club-language-switch select{font-size:11px;min-width:37px}.club-back-controls{gap:5px}.club-back-controls .club-top-link{padding:8px 9px}}
