@@ -1,0 +1,6 @@
+/* Optional ES/EN selector for the five-questions lead magnet. */
+.free-guide-language-label{display:block;margin:0 0 6px;font:600 13px/1.45 system-ui,sans-serif}
+.free-guide-language-select{box-sizing:border-box;display:block;width:100%;max-width:100%;min-height:48px;margin:0 0 15px;padding:12px 14px;border-radius:12px;border:1px solid #a4b7c7;background:#fff;color:#172840;font:600 15px/1.4 system-ui,sans-serif}
+.free-guide-language-select:focus-visible{outline:3px solid #5e91b0;outline-offset:2px}
+.free-mini-content>p:not(.eyebrow){max-width:48ch;line-height:1.65}
+@media(max-width:600px){.free-guide-language-select{min-height:48px;font-size:16px}}
