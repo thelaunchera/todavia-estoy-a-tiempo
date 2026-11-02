@@ -86,6 +86,9 @@ function status(text,ok=false){message.textContent=text;message.dataset.ok=ok?'t
 function display(panel){
  [login,noAccess,course].forEach(el=>el.hidden=(el!==panel));
  document.body.classList.toggle('aula-member',panel===course);
+ // Nunca mostrar el enlace al Studio antes de verificar el rol owner.
+ const ownerNav=$('aula-owner-nav');
+ if(ownerNav)ownerNav.hidden=panel!==course||!adminPreview;
  if(panel!==course)closeAulaMenu();
 }
 const aulaTitle=$('aula-active-title');
@@ -383,6 +386,8 @@ async function refreshProductShelf(){
 
 async function showCourse(email,asAdmin=false){
  adminPreview=asAdmin;
+ const ownerNav=$('aula-owner-nav');
+ if(ownerNav)ownerNav.hidden=!asAdmin;
  if(!asAdmin){
   const {data:entitlement,error:lookupError}=await db.from('podcast_class_access').select('status,revoked_at').eq('course_id',courseId).eq('buyer_email',email).maybeSingle();
   if(lookupError)throw lookupError;
