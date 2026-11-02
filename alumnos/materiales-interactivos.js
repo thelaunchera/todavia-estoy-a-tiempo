@@ -1,6 +1,7 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v2';
+import {promptGuide} from './prompt-guide.js?v=20261102-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
 import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261102-v1';
 /* Tu primera web con IA · Materiales activos de la clase
@@ -80,6 +81,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   }
  }catch{/* Mantener originales si la consulta adicional no responde */}
  const ownerPreview=adminPreview||!user;
+ const t=(es,en)=>getLanguage()==='en'?en:es;
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
  root.replaceChildren(app);
@@ -169,6 +171,23 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   current=view;
   viewBack.hidden=current==='inicio'&&!materialHistory.length;
   viewClose.setAttribute('aria-label',current==='inicio'?'Cerrar materiales y volver al inicio del aula':'Cerrar este material y volver a la biblioteca');
+  app.querySelector('.mi-eyebrow')?.replaceChildren(document.createTextNode(getLanguage()==='en'?'YOUR FIRST WEBSITE WITH AI / STUDENT MATERIALS':'TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA'));
+  const footerSpans=app.querySelectorAll('.mi-footer span');
+  if(footerSpans[0])footerSpans[0].textContent=t('Un paso claro es mejor que diez pantallas bonitas.','One clear step beats ten pretty screens.');
+  if(footerSpans[1])footerSpans[1].textContent=t('Materiales de Tu primera web con IA · Uso personal','Your First Website With AI · Personal-use materials');
+  const toolbarLabel=tools.querySelector('span');
+  if(toolbarLabel)toolbarLabel.textContent=t('Elige lo que necesitas para tu proyecto.','Choose what you need for your project.');
+  const printButton=tools.querySelector('.mi-print');
+  if(printButton)printButton.textContent=t('Imprimir o guardar en PDF','Print or save as PDF');
+  viewBack.textContent=t('Atrás','Back');
+  viewClose.textContent=t('Cerrar','Close');
+  if(ownerPreview)saveBadge.textContent=t('Vista de administración · no guarda respuestas','Admin preview · answers are not saved');
+  for(const groupButton of tabs.querySelectorAll('button[data-group]')){
+   const group=materialGroups.find(g=>g.id===groupButton.dataset.group);
+   if(group)groupButton.textContent=getLanguage()==='en'?({
+    empezar:'Start here',construir:'Build your website',recursos:'Your resources',publicar:'Before publishing'
+   }[group.id]||group.title):group.title;
+  }
   const headline=app.querySelector('.mi-header h2');
   const intro=app.querySelector('.mi-header p');
   if(headline)headline.textContent=getLanguage()==='en'
@@ -182,7 +201,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   subtabs.replaceChildren();
   for(const child of activeGroup?.views||[]){
    const meta=headers.find(h=>h[0]===child);if(!meta)continue;
-   const b=el('button',null,meta[1]);b.type='button';b.dataset.view=child;b.setAttribute('aria-current',child===view?'page':'false');b.addEventListener('click',()=>go(child));subtabs.append(b);
+   const b=el('button',null,getLanguage()==='en'?({inicio:'Start here',funciona:'How my website works',pasos:'Build step by step',organizacion:'Organize my project',prompts:'Prompt library',mara:'My website guide',make:'Make free tier',conectores:'Connector instructions',seguridad:'Passwords and keys',legal:'Footer and legal pages',cuaderno:'My workbook',ejemplo:'Website example',revision:'Final checklist'}[child]||meta[1]):meta[1]);b.type='button';b.dataset.view=child;b.setAttribute('aria-current',child===view?'page':'false');b.addEventListener('click',()=>go(child));subtabs.append(b);
   }
   content.replaceChildren();
   if(getLanguage()==='en'&&!['prompts','cuaderno','revision'].includes(view)){
@@ -278,20 +297,29 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    return {...p,group,englishTitle:englishTitle(code,p.title)};
   });
   fullCatalog.sort((a,b)=>{
-   const priority={freebie:0,planning:1,design:2,photos:3,build:4,mobile:5,
+   const priority={planning:0,design:1,photos:2,build:3,mobile:4,freebie:5,
     demo_food:6,demo_wellness:7,demo_hospitality:8,demo_fashion:9,demo_services:10,demo_photos:11};
    return (priority[a.group]??99)-(priority[b.group]??99)||(a.position||0)-(b.position||0);
   });
   const filters=[
-   ['all',t('Todos','All')],['freebie','1 Photo · 8 Prompts · 1 Brand'],
-   ['planning',t('Investigación','Research')],['design',t('Marca y mood board','Brand & mood board')],
-   ['photos',t('Fotografías','Photos')],['build',t('Construcción web','Website building')],
-   ['mobile',t('Móvil y QA','Mobile & QA')],['demo_food',t('Demos · Comida','Demos · Food')],
+   ['all',t('Todos los prompts','All prompts')],['planning',t('01 · Investiga el negocio','01 · Research the business')],
+   ['design',t('02 · Marca y moodboard','02 · Brand & mood board')],
+   ['photos',t('03 · Prepara fotografías','03 · Prepare photos')],
+   ['build',t('04 · Construye la web','04 · Build the website')],
+   ['mobile',t('05 · Revisa y publica','05 · Review & publish')],
+   ['freebie',t('Bonus · 1 foto, 8 diseños','Bonus · 1 photo, 8 designs')],
+   ['demo_food',t('Demos · Comida','Demos · Food')],
    ['demo_wellness',t('Demos · Bienestar','Demos · Wellness')],
    ['demo_hospitality',t('Demos · Eventos','Demos · Events')],
    ['demo_photos',t('Fotos de los demos','Demo photo prompts')],
    ['demo_services',t('Demos · Servicios','Demos · Services')]
   ];
+  const itinerary=el('div','mi-prompt-itinerary');
+  itinerary.innerHTML='<strong>'+t('¿Por dónde empiezo?','Where do I begin?')+'</strong><p>'+t(
+   'Sigue las categorías 01 a 05 para crear tu web. El bonus de 8 diseños es para practicar composiciones con una fotografía. Los demos son ejemplos que puedes estudiar sin copiarlos.',
+   'Follow categories 01 through 05 to build your site. Use the 8-design bonus to practice layouts with one photo. Study the demos as references, not templates to copy.'
+  )+'</p>';
+  content.append(itinerary);
   const tools=el('div','mi-prompt-searchbar');
   const label=el('label',null,t('Buscar un prompt','Search prompts'));
   const input=el('input');input.type='search';input.placeholder=t('Ej.: mi negocio, empaques, hero, móvil…','E.g. product, packaging, hero, mobile…');
@@ -330,18 +358,27 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    for(const [i,item] of found.slice(0,limit).entries()){
     const original=localizedPrompt(item.prompt_code,item.body,lang,item.brand||'');
     const title=lang==='en'?item.englishTitle:item.title;
+    const guide=promptGuide(item.prompt_code,lang);
     const card=el('details','mi-prompt');
     const badge=item.group==='freebie'?String(Number(item.prompt_code.slice(-2))).padStart(2,'0'):String(i+1).padStart(2,'0');
     const summary=el('summary');
     summary.innerHTML='<span class="mi-prompt-number">'+esc(badge)+'</span>'+
-      '<span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+esc(item.brand?item.brand+' · '+(item.summary||''):(item.summary||''))+'</small></span>'+
+      '<span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+
+      '<b>'+esc(t('Para qué sirve: ','Use it to: '))+'</b>'+esc(guide.purpose)+'</small></span>'+
       '<span class="mi-plus" aria-hidden="true">+</span>';
     const body=el('div','mi-prompt-body');
+    const guidance=el('div','mi-prompt-guide');
+    const when=el('p','mi-prompt-when');
+    const output=el('p','mi-prompt-output');
+    when.append(el('strong',null,t('Cuándo usarlo: ','When to use it: ')),document.createTextNode(guide.when));
+    output.append(el('strong',null,t('Qué obtendrás: ','What you will get: ')),document.createTextNode(guide.result));
+    guidance.append(when,output);
+    const instruction=el('h4','mi-prompt-instruction',t('Instrucciones para copiar','Instructions to copy'));
     const paragraph=el('p','mi-prompt-text',original);
-    const copy=el('button','mi-copy',t('Copiar prompt','Copy prompt'));copy.type='button';
+    const copy=el('button','mi-copy',t('Copiar instrucciones','Copy instructions'));copy.type='button';
     const state=el('p','mi-copy-state');state.setAttribute('role','status');
     copy.addEventListener('click',()=>void copyPrompt(original,card));
-    body.append(paragraph,copy,state);card.append(summary,body);list.append(card);
+    body.append(guidance,instruction,paragraph,copy,state);card.append(summary,body);list.append(card);
    }
    more.hidden=found.length<=limit;
    if(!found.length)list.append(el('p','mi-note',t('No encontré ese tema. Prueba con otra categoría o palabra.','No results. Try another category or word.')));
