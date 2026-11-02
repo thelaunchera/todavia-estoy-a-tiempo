@@ -22,10 +22,10 @@ Enseñar sin hacer sentir al alumno que necesita saber programación antes de em
 ## Una historia continua, nueve capítulos
 - **00** Presentar destino: Casa Brownie con foto estática, y cómo practicar desde el teléfono.
 - **01** Idea concreta: brownies para una visita; ficha con hechos y pendientes.
-- **02** Tres referencias: aprender organización sin copiar marca.
-- **03** Nueve fotos individuales: hero + seis sabores + dos regalos; revisar y guardar.
+- **02** Abrir los ocho Master Prompts originales gratuitos del freebie → comparar composiciones → elegir dos → crear y guardar el moodboard. Se usan como dirección visual, NO como obligación de generar ocho fotos. https://podcast.thelaunchera.com/content-lab/prompts/
+- **03** Crear fotos desde el moodboard aprobado: hero estático + seis sabores + dos regalos para Casa Brownie. Para el negocio del alumno, solo las fotos necesarias; un archivo por imagen.
 - **04** Textos: problema cotidiano → producto → sabores → regalo → invitación clara.
-- **05A** AppDeploy vacío → prompt 00 estructura → 01 header → 02 hero sin video → 04 catálogo; el 03 es producción fotográfica.
+- **05A** SOLO DESPUÉS del moodboard, las fotos y los textos: AppDeploy vacío → prompt 00 estructura → 01 header → 02 hero sin video → 04 catálogo; el 03 es producción fotográfica.
 - **05B** Prompt 05 regalos → 06 historia → 07 entrega ilustrativa Miami → 08 simulación → 09 footer.
 - **06** Móvil: detectar, corregir y comparar con capturas reales y el prompt 10.
 - **07** Pagos y automatizaciones como demostración separada, solo pruebas y reglas seguras; **Casa Brownie no cobra ni recibe pedidos reales**.
@@ -60,6 +60,24 @@ Referente principal de resultado: https://thelaunchera.com/demos/casa-brownie/?e
 Proyecto para practicar: https://casa-brownie-taller-desde-cero-b37dq5.v2.appdeploy.ai/
 
 No editar ni sobrescribir el demo oficial. No afirmar igualdad visual hasta comparar capturas. No introducir video en lecciones base. No activar pagos, formularios con datos reales o promesas ficticias. Diferenciar costos de la clase de posibles suscripciones externas.
+
+## Cómo grabar con autoridad sin sonar leído ni robótico
+
+- **Experta no significa recitar.** Empieza cada escena con una decisión concreta: «Esta portada necesita espacio porque ahí va el título». Muestra la decisión en la pantalla, haz el cambio y comprueba el resultado.
+- **Por defecto: pistas breves, no párrafos.** En Studio → Grabar clase → Pistas, sin leer verás el problema, la acción y la comprobación. El texto largo es solo respaldo y puede servir para subtítulos/transcripción.
+- **No llenar silencios.** Mientras se carga una foto o haces una operación, puedes parar de hablar. Retoma cuando aparezca algo que valga la pena explicar.
+- **Define una palabra técnica al usarla por primera vez.** «Moodboard es una guía de colores, fotos y sensaciones». «Hero es la portada principal». No hagas una lección abstracta de términos antes de mostrar la pantalla.
+- **Muestra criterio y correcciones.** «Esta foto se ve bonita, pero no deja lugar para el título. Voy a pedir otro encuadre». Eso muestra experiencia más que un discurso perfecto.
+- **Una lección, un logro comprobable.** Cierra con «Guarda este moodboard» o «Comprueba el botón desde tu teléfono», no con llamadas a comprar.
+- **Graba en escenas cortas, con voz propia.** No imitar voces ni tonos de otras creadoras, y no pedir a una voz sintética que finja ser una profesora humana. Si se usa audio traducido o generado, revisarlo para que coincida con cada clic mostrado en la pantalla.
+
+### Ejemplo de entrada natural a la primera práctica visual
+
+«Antes de hacer la web, quiero enseñarte algo que a mí me ahorra muchísimos cambios. Mira estas ocho composiciones que tenemos en el freebie. No vamos a usar todas: vamos a elegir las que funcionan para Casa Brownie, crear nuestro moodboard y después preparar las fotos. Así, cuando abramos AppDeploy, ya sabremos qué queremos construir».
+
+### Ejemplo de corrección enseñable
+
+«Esto salió demasiado lleno para una portada. ¿Ves que no queda espacio para el título? Voy a conservar la foto, pero pedir más aire a la izquierda. Ahora sí nos sirve para la web».
 
 ## Mini plantilla oral
 «Mira esta parte. Aquí queremos que la persona [objetivo]. Por eso voy a [acción exacta]. Lo hago en [herramienta], usando [archivo/prompt]. Ahora lo probamos: [resultado visible]. Si no aparece, revisamos [problema concreto]. Guarda [entregable], porque lo vamos a usar en el siguiente paso».
