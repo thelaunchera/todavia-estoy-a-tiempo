@@ -103,3 +103,12 @@
 .finished-demo-photo-reference span{flex:1;min-width:100px}
 @media(max-width:375px){.finished-demo-photos-grid{gap:8px}.finished-demo-photo-meta{padding:9px}.finished-demo-photo-actions{display:flex;flex-direction:column}.finished-demo-photo-actions a,.finished-demo-photo-actions button{width:100%}}
 @media(prefers-reduced-motion:reduce){.finished-demo-photo-tile img{transition:none!important}}
+
+/* Prompts por fotografía: independientes, legibles y cómodos en móvil. */
+.finished-demo-photo-instructions{width:100%;margin-top:9px;padding-top:9px;border-top:1px solid #e8ede8}
+.finished-demo-photo-instructions summary{cursor:pointer;min-height:38px;display:flex;align-items:center;font-size:11px;font-weight:750;line-height:1.4;color:#2c5545}
+.finished-demo-photo-instructions p{font-size:11px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 10px;color:#425569}
+.finished-demo-photo-instructions button{display:inline-flex;gap:6px;align-items:center;justify-content:center;min-height:40px;width:100%;background:#f5f7f1;color:#23483c;border:1px solid #cdd8cc;border-radius:8px;padding:8px 11px;font-size:11px;font-weight:700;cursor:pointer}
+.finished-demo-photo-instructions :focus-visible{outline:2px solid #476a7c;outline-offset:2px}
+.finished-demo-photos summary,.finished-demo-prompts summary{flex-wrap:wrap;line-height:1.4}
+.finished-demo-photos summary span,.finished-demo-prompts summary span{white-space:normal}
