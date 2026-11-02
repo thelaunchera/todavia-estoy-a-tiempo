@@ -1,0 +1,26 @@
+/* La historia sigue siendo el centro. Clase y prompts son enlaces editoriales secundarios. */
+.podcast-hero-v2 .hero-content{max-width:680px}
+.podcast-hero-v2 #hero-title{max-width:12.9ch;text-wrap:balance;overflow-wrap:normal}
+.podcast-hero-v2 .hero-lede{max-width:47ch}
+.podcast-hero-v2 .hero-project-links{
+  display:flex;align-items:baseline;flex-wrap:wrap;column-gap:17px;row-gap:9px;
+  max-width:540px;margin-top:20px;padding-top:15px;border-top:1px solid rgba(233,240,248,.24);
+  color:#f4f2ed;font:500 clamp(.75rem,1.2vw,.85rem)/1.45 system-ui,sans-serif;
+}
+.podcast-hero-v2 .hero-project-links span{width:100%;color:#d7e3ef;font-size:.76rem;letter-spacing:.02em}
+.podcast-hero-v2 .hero-project-links a{
+  color:#fcf8ee!important;text-decoration:underline;text-decoration-thickness:1px;
+  text-underline-offset:4px;text-decoration-color:#becde2;font-weight:650;
+}
+.podcast-hero-v2 .hero-project-links a:hover{text-decoration-color:#fcf8ee}
+.podcast-hero-v2 .hero-project-links a:focus-visible{outline:3px solid #bed8eb;outline-offset:4px}
+@media(max-width:600px){
+ .podcast-hero-v2 #hero-title{max-width:100%;font-size:clamp(2.22rem,9.2vw,3.28rem)!important;line-height:1.09!important;letter-spacing:-.043em!important}
+ .podcast-hero-v2 .hero-project-links{margin-top:17px;padding-top:12px;gap:8px 15px}
+ .podcast-hero-v2 .hero-project-links span{font-size:.75rem}
+ .podcast-hero-v2 .hero-project-links a{font-size:.82rem}
+}
+@media(max-width:360px){
+ .podcast-hero-v2 #hero-title{font-size:clamp(2rem,9.15vw,2.45rem)!important}
+ .podcast-hero-v2 .hero-project-links a{font-size:.78rem}
+}
