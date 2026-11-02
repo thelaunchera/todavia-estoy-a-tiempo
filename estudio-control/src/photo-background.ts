@@ -84,7 +84,7 @@ export async function cutoutOriginalPhoto(
  // Lazy-load AI only when the user explicitly chooses "Quitar fondo".
  const {removeBackground}=await import('@bg0/browser');
  const result=await removeBackground(original,{
-  model:'lite',quality:'quality',
+  quality:'quality',
   onProgress:({stage,message}:{stage:string;message:string})=>{
    const labels:Record<string,string>={
     preparing:'Preparando la foto…',
