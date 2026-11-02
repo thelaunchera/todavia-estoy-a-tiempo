@@ -4,10 +4,12 @@ on:
     branches: [main]
     paths:
       - 'content-lab/**'
+      - 'estudio-control/src/SeamlessEditor.tsx'
       - '.github/workflows/content-lab-ci.yml'
   pull_request:
     paths:
       - 'content-lab/**'
+      - 'estudio-control/src/SeamlessEditor.tsx'
       - '.github/workflows/content-lab-ci.yml'
   workflow_dispatch:
 permissions:
@@ -36,3 +38,9 @@ jobs:
         working-directory: content-lab
       - name: Verify build output
         run: test -s content-lab/dist/index.html
+      - name: Install Studio dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: estudio-control
+      - name: Build private seamless Studio editor
+        run: npm run build
+        working-directory: estudio-control
