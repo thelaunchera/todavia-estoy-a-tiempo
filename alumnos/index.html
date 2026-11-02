@@ -389,5 +389,32 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=20261102-owner-session-recovery-v13"></script>
+<script>
+/* An independent watchdog catches module import failures and stalled owner handshakes.
+   It never grants classroom access or exposes private materials. */
+(function(){
+ const started=Date.now();
+ function showFailure(){
+  const msg=document.getElementById('room-message');
+  const course=document.getElementById('class-content');
+  const login=document.getElementById('login-panel');
+  if(!msg||!course||!course.hidden||!login||!login.hidden)return;
+  const value=(msg.textContent||'').toLowerCase();
+  if(!/comprobando el acceso privado|conectando con tu studio|abriendo tu aula privada/.test(value))return;
+  msg.textContent='No se pudo completar la conexión privada. Vuelve al Studio y abre el aula otra vez. Si sigue igual, abre el Studio directamente en Safari e inicia sesión.';
+  msg.dataset.ok='false';
+  msg.hidden=false;
+  if(!document.getElementById('aula-retry-link')){
+   const a=document.createElement('a');a.id='aula-retry-link';
+   a.href='../estudio/';a.textContent='Volver al Studio para reintentar';
+   a.style.cssText='display:inline-flex;margin:16px 0 0;padding:12px 18px;border:1px solid #b6cbd7;border-radius:12px;color:#25445c;background:#fff;font-weight:700';
+   msg.insertAdjacentElement('afterend',a);
+  }
+ }
+ setTimeout(showFailure,9000);
+ window.addEventListener('error',()=>setTimeout(showFailure,1000));
+ window.addEventListener('unhandledrejection',()=>setTimeout(showFailure,1000));
+})();
+</script>
+<script type="module" src="./curso.js?v=20261102-owner-session-recovery-v14"></script>
 </body></html>
