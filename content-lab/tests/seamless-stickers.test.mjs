@@ -4,10 +4,10 @@ import {readFileSync} from 'node:fs';
 const source=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('Seamless carousels use a shared full-width canvas sliced to precise 1080x1350 slides',()=>{
  const core=source('src/SeamlessCarousel.ts');
- assert.ok(core.includes('wide.width=total*W'));
- assert.ok(core.includes('ctx.drawImage(wide,i*W,0,W,H,0,0,W,H)'));
+ assert.ok(core.includes('wide.width=virtualWidth*scale'));
+ assert.ok(core.includes('ctx.drawImage(wide,i*W*scale,0,W*scale,H*scale'));
  assert.ok(core.includes('ctx.bezierCurveTo'));
- assert.ok(core.includes('paintFreeBackground(ctx,wide.width,H'));
+ assert.ok(core.includes('paintFreeBackground(ctx,virtualWidth,H'));
  assert.ok(core.includes('export async function drawSeamlessPages'));
 });
 test('Seamless option survives old designs and is reused by preview and separate PNG exports',()=>{
