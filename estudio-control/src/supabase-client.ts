@@ -594,3 +594,27 @@ export async function keepStudioLabImage(url:string):Promise<string>{
   const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(blob);
  });
 }
+
+const REEL_AUDIO_BUCKET='podcast-reel-audio';
+export async function uploadPodcastReelAudio(reelId:string,file:File,onProgress:(n:number)=>void):Promise<string>{
+ if(!client)throw new Error('El Studio debe estar conectado para subir audio.');
+ if(!/^[0-9]{2}$/.test(reelId))throw new Error('Reel no válido.');
+ const ext=(file.name.split('.').pop()||'').toLowerCase();
+ const types:Record<string,string>={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',aac:'audio/aac'};
+ if(!types[ext]||!file.size)throw new Error('Selecciona un audio MP3, M4A, WAV o AAC.');
+ if(file.size>50_000_000)throw new Error('El audio no puede superar 50 MB.');
+ const who=await owner();
+ const path=who.id+'/'+reelId+'/'+crypto.randomUUID()+'.'+ext;
+ const {error}=await client.storage.from(REEL_AUDIO_BUCKET).upload(path,file,{contentType:types[ext],upsert:false});
+ if(error)throw new Error('No se pudo subir el audio: '+error.message);
+ onProgress(100);
+ return path;
+}
+export async function getPodcastReelAudioUrl(path:string):Promise<string>{
+ if(!client)throw new Error('El Studio no está conectado.');
+ const who=await owner();
+ if(!new RegExp('^'+who.id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'/[0-9]{2}/[a-f0-9-]+\\.(mp3|m4a|wav|aac)$').test(path))throw new Error('Archivo de audio no válido.');
+ const {data,error}=await client.storage.from(REEL_AUDIO_BUCKET).createSignedUrl(path,3600);
+ if(error||!data?.signedUrl)throw new Error('No se pudo reproducir el audio privado.');
+ return data.signedUrl;
+}
