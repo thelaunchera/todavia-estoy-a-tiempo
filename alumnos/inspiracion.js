@@ -1,3 +1,4 @@
+import {localizedPrompt} from './prompt-english.js?v=20261102-v1';
 /* Galería privada y ampliable de ejemplos terminados.
    Los kits y fotografías se consultan tras validar la compra/owner por RLS. */
 const esc = s => String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;");
@@ -104,14 +105,16 @@ export async function mountInspiracion(root,{db,courseId,getLanguage=()=> 'es'}=
    const item=document.createElement('details');item.className='inspiration-prompt';
    item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(p.title)+'</strong><small>'+esc(p.step||'')+'</small></summary>';
    const body=document.createElement('div');body.className='inspiration-prompt-body';
-   const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=p.body||'';
-   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar prompt','Copy original prompt',curLang());copy.addEventListener('click',()=>clipboardCopy(p.body||'',copy));
+   const promptText=localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
+   const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=promptText;
+   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar prompt','Copy original prompt',curLang());copy.addEventListener('click',()=>clipboardCopy(promptText,copy));
    body.append(pre,copy);
    for(const pic of Array.isArray(p.photos)?p.photos:[]){
     const photo=document.createElement('details');photo.className='inspiration-photo-prompt';
     const sum=document.createElement('summary');sum.textContent=(curLang()==='en'?'Photo prompt: ':'Prompt de foto: ')+(pic.title||'');
-    const txt=document.createElement('p');txt.textContent=pic.body||'';
-    const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(pic.body||'',cp));
+    const photoText=localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
+    const txt=document.createElement('p');txt.textContent=photoText;
+    const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(photoText,cp));
     photo.append(sum,txt,cp);body.append(photo);
    }
    item.append(body);list.append(item);
