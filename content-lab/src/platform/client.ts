@@ -472,9 +472,9 @@ export const image={
       const img=new Image();img.src=url;await img.decode();
       const originalWidth=img.naturalWidth,originalHeight=img.naturalHeight;
       const maxBytes=Math.min(opts.maxBytes??4_850_000,4_850_000);
-      if(opts.preserveIfPossible && input.type===opts.mimeType && input.size<=maxBytes &&
-        Math.max(originalWidth,originalHeight)<=opts.maxDimension &&
-        originalWidth*originalHeight<=opts.maxPixels){
+      if(opts.preserveIfPossible && input.type===opts.mimeType && input.size<=maxBytes){
+        // Never downsize a native photo merely because it exceeds the preview resolution.
+        // Preserve its original encoded bytes and pixel dimensions within Storage limits.
         // Preserve all original source pixels and JPEG/PNG/WebP bytes when safe.
         return {data:await base64(input),mimeType:opts.mimeType};
       }
