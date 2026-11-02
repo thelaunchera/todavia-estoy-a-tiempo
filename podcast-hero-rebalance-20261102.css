@@ -1,0 +1,70 @@
+/* Podcast intro rebalanced after phone screenshot · 2026-11-02.
+   Only podcast hero; Spotify, episode cards, course, freebies and lab unchanged. */
+.podcast-film-hero .podcast-hero-after{
+ position:relative;z-index:2;
+ padding:0 0 clamp(5px,1.3vw,13px);
+}
+.podcast-film-hero .podcast-hero-after .hero-project-links{
+ box-sizing:border-box;width:100%;max-width:100%;
+ margin-top:12px;padding-top:18px;
+ gap:9px 21px;
+ border-top:1px solid rgba(233,240,248,.22);
+}
+.podcast-film-hero .podcast-hero-after .hero-project-links span{
+ width:auto;margin-right:clamp(4px,1vw,15px);align-self:center;
+}
+.podcast-film-hero .podcast-hero-after .hero-project-links a{
+ font-size:clamp(.74rem,.95vw,.82rem);font-weight:600;
+}
+@media(max-width:850px) {
+ .podcast-film-hero .hero-layout{gap:9px!important}
+ .podcast-film-hero .hero-content{padding-bottom:0}
+ .podcast-film-hero .podcast-hero-after{margin-top:8px}
+}
+@media(max-width:600px) {
+ .podcast-film-hero .hero-content{padding:0!important}
+ .podcast-film-hero .hero-content > .eyebrow{
+   margin-bottom:12px!important;
+   font-size:clamp(.57rem,2.5vw,.65rem);
+   line-height:1.42;
+   letter-spacing:.115em;
+ }
+ .podcast-film-hero #hero-title{
+   max-width:100%;font-size:clamp(2.1rem,8.75vw,2.95rem)!important;
+   line-height:1.065!important;letter-spacing:-.042em!important;
+ }
+ .podcast-film-hero .hero-lede.line-reveal{
+   margin-top:14px!important;
+   max-width:38ch;
+   font-size:clamp(.88rem,3.75vw,.96rem);
+   line-height:1.44;
+ }
+ .podcast-film-hero .hero-cta{
+   margin-top:17px!important;
+ }
+ .podcast-film-hero .hero-cta .button-light{
+   min-height:48px;padding:12px 22px;
+ }
+ .podcast-film-hero .hero-visual {
+   margin:7px auto 1px!important;
+ }
+ .podcast-film-hero .podcast-hero-after{
+   margin-top:9px;
+   padding-bottom:3px;
+ }
+ .podcast-film-hero .podcast-hero-after .hero-project-links{
+   margin-top:0;gap:8px 15px;padding-top:15px;
+ }
+ .podcast-film-hero .podcast-hero-after .hero-project-links span{
+   width:100%;margin-right:0;font-size:.72rem;
+ }
+ .podcast-film-hero .podcast-hero-after .hero-project-links a{
+   font-size:.76rem;
+ }
+}
+@media(max-width:360px) {
+ .podcast-film-hero #hero-title{
+   font-size:clamp(2rem,8.7vw,2.25rem)!important;
+ }
+ .podcast-film-hero .hero-lede.line-reveal{font-size:.87rem}
+}
