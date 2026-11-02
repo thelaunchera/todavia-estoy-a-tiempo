@@ -31,6 +31,7 @@ export default function SeamlessEditor(){
  const replacePhotoId=useRef<number|null>(null);
  const swipe=useRef<{pointer:number;x:number;y:number}|null>(null);
  const swipeStart=useRef<{x:number;y:number;slide:number}|null>(null);
+ const layerGesture=useRef(false);
  const [slide,setSlide]=useState(0);
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
@@ -47,23 +48,124 @@ export default function SeamlessEditor(){
   for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';textLines(it).forEach((line,index)=>ctx.fillText(line,x,it.y+index*it.fontSize*1.3))}else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
   ctx.restore();
  };
- useEffect(()=>{let active=true;const render=async()=>{const c=canvas.current;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;c.width=width;c.height=H;await paint(ctx,1,0,width,editingText);if(!active)return;ctx.strokeStyle='rgba(25,25,25,.25)';ctx.setLineDash([12,12]);for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}ctx.setLineDash([]);const chosen=doc.items.find(it=>it.id===selected);if(chosen){const b=itemBounds(chosen);ctx.save();ctx.strokeStyle='#1677c5';ctx.lineWidth=5;ctx.setLineDash([12,8]);ctx.translate(chosen.x+b.w/2,chosen.y+b.h/2);ctx.rotate((chosen.rotation||0)*Math.PI/180);ctx.strokeRect(-b.w/2,-b.h/2,b.w,b.h);ctx.setLineDash([]);ctx.restore()}};void render();return()=>{active=false}},[doc,selected,editingText]);
+ useEffect(()=>{
+   let active=true;
+   const render=async()=>{
+     const visible=canvas.current;if(!visible)return;
+     // Paint in an isolated, display-sized buffer. An older asynchronous image
+     // decode must never overwrite newer edits or make a layer disappear.
+     // The export path still paints at the full 1080 × 1350 per slide.
+     const previewScale=600/W;
+     const buffer=document.createElement('canvas');
+     buffer.width=Math.round(width*previewScale);
+     buffer.height=Math.round(H*previewScale);
+     const background=buffer.getContext('2d');if(!background)return;
+     await paint(background,previewScale,0,width,editingText);
+     if(!active)return;
+     visible.width=buffer.width;visible.height=buffer.height;
+     const ctx=visible.getContext('2d');if(!ctx)return;
+     ctx.drawImage(buffer,0,0);
+     ctx.save();ctx.scale(previewScale,previewScale);
+     ctx.strokeStyle='rgba(25,25,25,.25)';ctx.setLineDash([12,12]);
+     for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}
+     ctx.setLineDash([]);
+     const chosen=doc.items.find(it=>it.id===selected);
+     if(chosen){
+       const b=itemBounds(chosen);ctx.save();
+       ctx.strokeStyle='#1677c5';ctx.lineWidth=5;ctx.setLineDash([12,8]);
+       ctx.translate(chosen.x+b.w/2,chosen.y+b.h/2);
+       ctx.rotate((chosen.rotation||0)*Math.PI/180);
+       ctx.strokeRect(-b.w/2,-b.h/2,b.w,b.h);
+       ctx.setLineDash([]);ctx.restore();
+     }
+     ctx.restore();
+   };
+   void render();return()=>{active=false};
+ },[doc,selected,editingText]);
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
  const addPrivateSticker=(url:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id)};
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
  const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
  const setLabBackground=(file:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:labUrl(file)}}));
  const addSticker=(emoji:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'sticker',text:emoji,x:slide*W+200,y:220,width:180,fontSize:160,color:'#191919'}]}));setSelected(id)};
- const addText=(style:'hook'|'title'|'paragraph'|'caption'='paragraph')=>{const id=++nextId.current;const existing=doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===slide).length;const sizes={hook:104,title:82,paragraph:44,caption:30};setDoc(d=>({...d,items:[...d.items,{id,kind:'text',text:'',textStyle:style,x:slide*W+90,y:140+(existing%6)*170,width:900,fontSize:sizes[style],color:'#191919'}]}));setSelected(id);setMessage('Nuevo bloque de texto: escribe lo que quieras, incluso varios párrafos.');setTimeout(()=>textEditor.current?.focus(),60)};
+ const addText=(style:'hook'|'title'|'paragraph'|'caption'='paragraph')=>{
+   const starter=doc.items.find(it=>it.kind==='text'&&Math.floor((it.x+(it.width||900)/2)/W)===slide&&!(it.text||'').trim());
+   if(starter){setSelected(starter.id);setEditingText(starter.id);
+     setMessage('Edita el texto vacío que ya existe; no se añadió otro.');return;}
+   const id=++nextId.current;
+   const existing=doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===slide).length;
+   const sizes={hook:104,title:82,paragraph:44,caption:30};
+   setDoc(d=>({...d,items:[...d.items,{id,kind:'text',text:'',textStyle:style,
+     x:slide*W+90,y:140+(existing%6)*170,width:900,fontSize:sizes[style],color:'#191919'}]}));
+   setSelected(id);setEditingText(id);
+   setMessage('Escribe directamente sobre el carrusel. Puedes mover el texto después.');
+ };
  const onFile=async(e:React.ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){setMessage('Selecciona una foto válida.');return}if(file.size>18_000_000){setMessage('Usa una foto de menos de 18 MB.');return}const reader=new FileReader();reader.onerror=()=>setMessage('No se pudo abrir la foto. Prueba con JPEG o PNG.');reader.onload=()=>{const replacing=replacePhotoId.current;replacePhotoId.current=null;if(replacing!==null){update(replacing,{src:String(reader.result)});setSelected(replacing);setMessage('Foto reemplazada sin perder su posición ni tamaño.')}else{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:String(reader.result),x:slide*W+100,y:160,width:650,fontSize:80,color:'#191919'}]}));setSelected(id)}};reader.readAsDataURL(file);e.target.value=''};
  const locate=(e:React.PointerEvent<HTMLCanvasElement>|React.MouseEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect();return {x:(e.clientX-r.left)*width/r.width,y:(e.clientY-r.top)*H/r.height}};
  const textLines=(it:Item)=>{const lines:string[]=[];const maxWidth=it.width||900;const font=it.fontSize;for(const para of (it.text||'').split('\n')){if(!para.trim()){lines.push('');continue}let line='';for(const word of para.split(/\s+/)){const candidate=line?line+' '+word:word;if(candidate.length*font*.53>maxWidth&&line){lines.push(line);line=word}else line=candidate}lines.push(line)}return lines.length?lines:['']};
  const itemBounds=(it:Item)=>{const im=it.src?images.current.get(it.src):undefined;return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,h:it.kind==='text'?it.fontSize*1.3*Math.max(1,textLines(it).length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width}};
- const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{const im=it.src?images.current.get(it.src):undefined;const h=it.kind==='text'?it.fontSize*1.4*Math.max(1,(it.text||'').split('\n').length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width;const w=it.kind==='text'?Math.max(150,...(it.text||'').split('\n').map(line=>line.length*it.fontSize*.65)):it.kind==='sticker'?it.fontSize:it.width;const cx=it.x+w/2,cy=it.y+h/2,a=-(it.rotation||0)*Math.PI/180,dx=x-cx,dy=y-cy;const lx=dx*Math.cos(a)-dy*Math.sin(a)+w/2,ly=dx*Math.sin(a)+dy*Math.cos(a)+h/2;return lx>=0&&lx<=w&&ly>=0&&ly<=h});
- const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);touches.current.set(e.pointerId,p);if(touches.current.size===2&&selected!==null){const points=[...touches.current.values()];const it=doc.items.find(item=>item.id===selected);if(it){pinch.current={id:it.id,distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y),size:it.kind==='image'?it.width:it.fontSize,angle:Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x),rotation:it.rotation||0};drag.current=null;e.currentTarget.setPointerCapture(e.pointerId);return}}const chosen=doc.items.find(it=>it.id===selected);let resize=false;let it=hit(p.x,p.y);if(chosen){const b=itemBounds(chosen);void b;void resize;}setSelected(it?.id||null);setEditingText(null);if(!it){swipe.current={pointer:e.pointerId,x:p.x,y:p.y};e.currentTarget.setPointerCapture(e.pointerId)}if(it){drag.current={id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:resize?'resize':'move',startSize:it.kind==='image'?it.width:it.fontSize};e.currentTarget.setPointerCapture(e.pointerId)}};
- const goSlide=(n:number)=>{const next=Math.max(0,Math.min(doc.count-1,n));setSlide(next);setSelected(null);const vp=viewport.current;if(vp)vp.scrollTo({left:next*(vp.scrollWidth/doc.count),behavior:'smooth'});};
- const onViewportTouchStart=(e:React.TouchEvent<HTMLDivElement>)=>{if(e.touches.length!==1){swipeStart.current=null;return}const touch=e.touches[0];swipeStart.current={x:touch.clientX,y:touch.clientY,slide}};
- const onViewportTouchEnd=(e:React.TouchEvent<HTMLDivElement>)=>{const start=swipeStart.current;swipeStart.current=null;if(!start||e.changedTouches.length!==1||e.touches.length!==0||pinch.current||drag.current)return;const touch=e.changedTouches[0];const dx=touch.clientX-start.x,dy=touch.clientY-start.y;if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1))};
+ const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{
+   // The hit area must match the wrapped, rotated element that was painted.
+   // Otherwise a finger selects the photograph underneath the text.
+   const {w,h}=itemBounds(it);
+   const cx=it.x+w/2,cy=it.y+h/2,a=-(it.rotation||0)*Math.PI/180;
+   const dx=x-cx,dy=y-cy;
+   const lx=dx*Math.cos(a)-dy*Math.sin(a)+w/2;
+   const ly=dx*Math.sin(a)+dy*Math.cos(a)+h/2;
+   const tolerance=24; // approximately seven displayed pixels on a phone
+   return lx>=-tolerance&&lx<=w+tolerance&&ly>=-tolerance&&ly<=h+tolerance;
+ });
+ const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{
+   const p=locate(e);
+   touches.current.set(e.pointerId,p);
+   if(touches.current.size===2){
+     // Use the element from the first finger, not a possibly stale React
+     // selected state. This also works when the other finger lands on blank canvas.
+     const id=drag.current?.id??selected;
+     const it=doc.items.find(item=>item.id===id);
+     if(it){
+       const points=[...touches.current.values()];
+       pinch.current={id:it.id,distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),
+         size:it.kind==='image'?it.width:it.fontSize,
+         angle:Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x),rotation:it.rotation||0};
+       drag.current=null;layerGesture.current=true;swipeStart.current=null;
+       e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);return;
+     }
+   }
+   if(touches.current.size>2)return;
+   const it=hit(p.x,p.y);
+   setSelected(it?.id??null);setEditingText(null);
+   if(it){
+     layerGesture.current=true;swipeStart.current=null;
+     drag.current={id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:'move',
+       startSize:it.kind==='image'?it.width:it.fontSize};
+     e.preventDefault();
+   }else{
+     layerGesture.current=false;
+     swipe.current={pointer:e.pointerId,x:p.x,y:p.y};
+   }
+   e.currentTarget.setPointerCapture(e.pointerId);
+ };
+ const goSlide=(n:number,keepSelection=false)=>{
+   const next=Math.max(0,Math.min(doc.count-1,n));setSlide(next);
+   if(!keepSelection){setSelected(null);setEditingText(null);}
+   const vp=viewport.current;
+   if(vp)vp.scrollTo({left:next*(vp.scrollWidth/doc.count),behavior:'smooth'});
+ };
+ const onViewportTouchStart=(e:React.TouchEvent<HTMLDivElement>)=>{
+   if(e.touches.length!==1){swipeStart.current=null;return}
+   layerGesture.current=false;
+   const touch=e.touches[0];
+   swipeStart.current={x:touch.clientX,y:touch.clientY,slide};
+ };
+ const onViewportTouchEnd=(e:React.TouchEvent<HTMLDivElement>)=>{
+   const start=swipeStart.current;swipeStart.current=null;
+   const interacted=layerGesture.current;
+   if(e.touches.length===0)layerGesture.current=false;
+   if(interacted||!start||e.changedTouches.length!==1||e.touches.length!==0||pinch.current||drag.current)return;
+   const touch=e.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
+   if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
+ };
  const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current)return;const d=drag.current;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
  const downloadSlide=async(i:number)=>{setBusy(true);setMessage('Preparando imagen para tu teléfono…');try{const cv=document.createElement('canvas');cv.width=W;cv.height=H;const ctx=cv.getContext('2d');if(!ctx)throw Error('Canvas');await paint(ctx,1,i*W,W);const blob=await new Promise<Blob>((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const filename='carrusel-slide-'+String(i+1).padStart(2,'0')+'.png';const file=new File([blob],filename,{type:'image/png'});if(typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Slide '+(i+1)});setMessage('Elige «Guardar imagen» en el menú de tu teléfono.');return}catch(error){if((error as Error)?.name==='AbortError'){setMessage('No se guardó la imagen.');return}}}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage('PNG descargado. En iPhone, si no aparece en Fotos, abre Archivos → Descargas y guarda la imagen.')}catch{setMessage('No se pudo preparar la imagen. Inténtalo de nuevo.')}finally{setBusy(false)}};
  const exportSlides=async()=>{setBusy(true);setMessage('Preparando PNG…');try{for(let i=0;i<doc.count;i++){const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');if(!ctx)throw Error('Canvas');await paint(ctx,1,i*W,W);const a=document.createElement('a');a.download='seamless-slide-'+String(i+1).padStart(2,'0')+'.png';a.href=c.toDataURL('image/png');a.click();await new Promise(r=>setTimeout(r,280))}setMessage('Se generaron '+doc.count+' imágenes PNG. Revisa las descargas del navegador.')}catch{setMessage('No se pudo exportar. Inténtalo de nuevo.')}finally{setBusy(false)}};
@@ -162,7 +264,7 @@ export default function SeamlessEditor(){
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
-        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))));setQuickPanel(null)}}>
+        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true);setQuickPanel(null)}}>
          {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
            style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
            (it.text||'Sticker').slice(0,40)}

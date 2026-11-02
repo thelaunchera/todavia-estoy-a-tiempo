@@ -5,15 +5,19 @@ export type LayerPlacement = 'behind-text' | 'front';
 
 /** Saved order is bottom-to-top, with behind-text layers rendered first. */
 export function reorderPanoramaLayers(layers: PanoramaLayer[], id: string, action: LayerMove): PanoramaLayer[] {
-  const sorted = [...layers.filter(layer => layer.placement === 'behind-text'),
-    ...layers.filter(layer => layer.placement !== 'behind-text')];
-  const from = sorted.findIndex(layer => layer.id === id);
-  if (from < 0) return sorted;
-  const current = sorted[from];
-  sorted.splice(from, 1);
-  const destination = action === 'back' ? 0 : action === 'front' ? sorted.length
-    : Math.max(0, Math.min(sorted.length, from + (action === 'forward' ? 1 : -1)));
-  const behindCount = sorted.filter(layer => layer.placement === 'behind-text').length;
+  const sorted = [...layers.filter(layer=>layer.role==='background'),
+    ...layers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
+    ...layers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
+  const from=sorted.findIndex(layer=>layer.id===id);
+  if(from<0)return sorted;
+  const current=sorted[from];
+  // A wallpaper is permanently behind all content, even when left unlocked.
+  if(current.role==='background')return sorted;
+  sorted.splice(from,1);
+  const minimum=sorted.filter(layer=>layer.role==='background').length;
+  const destination=action==='back'?minimum:action==='front'?sorted.length
+    :Math.max(minimum,Math.min(sorted.length,from+(action==='forward'?1:-1)));
+  const behindCount=sorted.filter(layer=>layer.role==='background'||layer.placement==='behind-text').length;
   const placement: LayerPlacement = action === 'back' ? 'behind-text'
     : action === 'front' ? 'front'
     : destination < behindCount ? 'behind-text'

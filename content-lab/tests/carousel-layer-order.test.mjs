@@ -5,7 +5,7 @@ const source=readFileSync(new URL('../src/TouchLayerCanvas.tsx',import.meta.url)
 const css=readFileSync(new URL('../src/TouchLayerCanvas.css',import.meta.url),'utf8');
 test('creation order is the only layer stacking rule, background always underneath',()=>{
  assert.match(source,/layers\.map\(\(layer, layerIndex\)/);
- assert.match(source,/const z = layer\.role==='background' \? 1 : 20 \+ layerIndex/);
+ assert.match(source,/const z = layer\.role==='background'\?1:layer\.placement==='behind-text'\?2\+\(layerIndex\/Math\.max\(1,layers\.length\)\):20\+layerIndex/);
  assert.match(source,/zIndex:z/);
  assert.match(source,/pointerEvents:layer\.locked\|\|layer\.role==='background'/);
  assert.match(source,/layers\.slice\(\)\.reverse\(\)\.map/);
