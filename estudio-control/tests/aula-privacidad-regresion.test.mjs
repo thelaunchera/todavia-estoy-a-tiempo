@@ -15,7 +15,7 @@ test('biblioteca única: el sidebar comparte la misma pantalla de materiales, si
  assert.equal((room.match(/data-aula-panel="prompts"/g)||[]).length,0,'Sin una segunda pantalla paralela');
  assert.match(course,/view==='prompts'\?'materiales':view/,'La entrada de prompts reutiliza Materiales');
  assert.match(course,/materialsController\?\.go\('prompts'\)/,'Navegación directa a los prompts');
- assert.match(course,/materialsController\?\.go\('inicio'\)/,'Materiales vuelve a la vista inicial');
+ assert.match(course,/materialsController\?\.go\('inicio',\{track:false\}\)/,'Materiales vuelve a su inicio sin conservar pestañas antiguas');
  assert.match(course,/import \{mountMateriales\} from '\.\/materiales-interactivos\.js(?:\?[^']+)?'/,'Reutilizar el módulo existente');
  assert.doesNotMatch(room,/prompts-biblioteca\.js|prompts-library\.js/,'No incluir una biblioteca duplicada');
 });
