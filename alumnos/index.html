@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=20261102-owner-private-v2"><link rel="stylesheet" href="./subtitulos-20261102.css?v=1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261102-header-layout-v5"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261102-prompt-library-v4"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261102-student-greeting-v3"><link rel="stylesheet" href="./aula-inspiracion.css?v=20261102-v1">
+<link rel="stylesheet" href="./curso.css?v=20261102-owner-private-v2"><link rel="stylesheet" href="./subtitulos-20261102.css?v=1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261102-refresh-v6"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261102-prompt-library-v4"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261102-student-greeting-v3"><link rel="stylesheet" href="./aula-inspiracion.css?v=20261102-v1">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -148,7 +148,7 @@
     <header class="aula-main-top">
       <button type="button" id="aula-menu-open" class="aula-menu-open" aria-controls="aula-rail" aria-expanded="false" aria-label="Abrir menú del aula"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menú</span></button>
       <div class="aula-main-location"><span>MI AULA</span><span class="aula-main-separator" aria-hidden="true">/</span><strong id="aula-active-title">Mis lecciones</strong></div>
-      <div class="aula-main-actions"><label class="aula-lang-control" for="aula-language"><span class="aula-lang-icon" aria-hidden="true">🌐</span><span class="sr-only">Idioma / Language</span><select id="aula-language" aria-label="Idioma del aula / Classroom language"><option value="es">ES</option><option value="en">EN</option></select></label><span class="aula-access-note" title="Este espacio requiere una cuenta autorizada.">Acceso protegido</span><button type="button" class="aula-quick-help" data-course-help aria-controls="soporte-aula" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg><span>Ayuda</span></button></div>
+      <div class="aula-main-actions"><button id="aula-refresh" class="aula-refresh" type="button" aria-label="Actualizar la página del aula" title="Actualizar la página del aula"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/></svg><span>Actualizar</span></button><label class="aula-lang-control" for="aula-language"><span class="aula-lang-icon" aria-hidden="true">🌐</span><span class="sr-only">Idioma / Language</span><select id="aula-language" aria-label="Idioma del aula / Classroom language"><option value="es">ES</option><option value="en">EN</option></select></label><span class="aula-access-note" title="Este espacio requiere una cuenta autorizada.">Acceso protegido</span><button type="button" class="aula-quick-help" data-course-help aria-controls="soporte-aula" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg><span>Ayuda</span></button></div>
     </header>
        <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista privada del aula</strong><p>Solo tú puedes revisar borradores. La experiencia de los alumnos no incluye este aviso.</p></div></div>
 
@@ -416,8 +416,15 @@
  window.addEventListener('unhandledrejection',()=>setTimeout(showFailure,1000));
 })();
 </script>
+<script>
+document.getElementById('aula-refresh')?.addEventListener('click',()=>{
+ const section=document.querySelector('#aula-layout .aula-side-link[data-aula-view][aria-current="page"]')?.getAttribute('data-aula-view')||'inicio';
+ try{sessionStorage.setItem('tle_aula_refresh_view',section);}catch{}
+ window.location.reload();
+});
+</script>
 <script type="module">
-import('./curso.js?v=20261102-curated-classroom-v19').catch(error=>{
+import('./curso.js?v=20261102-refresh-v20').catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
   msg.hidden=false;
