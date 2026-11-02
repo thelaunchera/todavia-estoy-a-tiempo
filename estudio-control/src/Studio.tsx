@@ -1,3 +1,4 @@
+import SeamlessEditor from './SeamlessEditor';
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
@@ -61,6 +62,7 @@ type Page =
   | 'inicio'
   | 'episodios'
   | 'reels'
+  | 'seamless'
   | 'clases'
   | 'demos'
   | 'alumnos'
@@ -157,6 +159,7 @@ const NAV = [
   { id: 'links', label: 'Centro de links', icon: Link2 },
   { id: 'episodios', label: 'Episodios', icon: Mic2, group: 'CREACIÓN Y CONTENIDO' },
   { id: 'reels', label: 'Reels · producción', icon: Film },
+  { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
   { id: 'clases', label: 'Clases · grabación', icon: Video },
   { id: 'demos', label: 'Demos terminados', icon: Globe2 },
   { id: 'alumnos', label: 'Centro de alumnos', icon: BookOpen },
@@ -177,6 +180,7 @@ const LABELS: Record<Page, string> = {
   inicio: 'Mi estudio',
   episodios: 'Episodios',
   reels: 'Reels · producción',
+  seamless: 'Carruseles seamless',
   clases: 'Clases · grabación',
   demos: 'Demos terminados',
   alumnos: 'Centro de alumnos',
@@ -1243,6 +1247,7 @@ function App() {
               {episodeRows}
             </>
           )}
+          {page === 'seamless' && <SeamlessEditor />}
           {page === 'reels' && (
             <ReelsProduction entries={items.ideas} onSave={async (entry,patch)=>{
               await api.put('/api/items/ideas/'+entry.id,{...entry,...patch});
