@@ -16,7 +16,7 @@ export async function sourceAwareScale(
         factor=Math.max(factor,Math.ceil(Math.max(im.naturalWidth/baseWidth,im.naturalHeight/baseHeight)));
     }catch{/* Missing media is reported by the underlying editor renderer. */}
   }
-  return Math.max(2,Math.min(maxScale,factor));
+  return Math.max(1,Math.min(maxScale,factor));
 }
 
 export function canvasToLosslessPng(canvas:HTMLCanvasElement):Promise<Blob>{
