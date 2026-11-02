@@ -268,7 +268,7 @@ Deno.serve(async request=>{
   }
   if(action==='ideas'){
    const b=await find('brands',clean(body.brandId,100));
-   const lang=language(b)==='English'?'US ENGLISH':'LATIN AMERICAN SPANISH';
+   const lang=language(b)==='English'?'US ENGLISH':'SPANISH';
    const platforms=['instagram','facebook','tiktok','threads','youtube','pinterest','linkedin'];
    const primary=platforms.includes(b.primaryPlatform)?b.primaryPlatform:'instagram';
    const destination=platforms.includes(body.platform)?body.platform:primary;
@@ -339,7 +339,7 @@ Deno.serve(async request=>{
    const isPortrait=body.kind==='portrait';
    const prompt=[
     isPortrait?'Create NINE distinct realistic photo posts of the SAME REAL PERSON using image 1 as the true portrait identity. Use natural portrait camera angles, real floors and streets. No surreal podiums, stages, geometric platforms, product flat-lays or floating people.': 'Create a campaign of exactly 9 independent Instagram posts from ONE product reference. Do not make a carousel or repeat the same photograph.',
-    'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Latin American Spanish')+'.',
+    'Write ALL headline, subtext and caption fields in '+(lang==='English'?'natural US English':'natural Spanish')+'.',
     'Brand: '+clean(b.name,100)+'. Voice: '+clean(b.voice,130)+'.',
     'Audience: '+clean(b.audience,200)+'. Notes: '+clean(b.rules,290)+'.',
     'Creative brief from owner — follow their specific instructions before general creative defaults: '+clean(body.brief,1900)+'.',
