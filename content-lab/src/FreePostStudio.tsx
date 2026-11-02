@@ -40,7 +40,10 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
    shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,locked:decor.headlineLocked===true,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
- return [...layers,...legacyStickers(decor),...decor.layers];
+ const ordered=[...layers,...legacyStickers(decor),...decor.layers];
+ return [...ordered.filter(l=>l.role==='background'||(l.kind!=='text'&&l.placement==='behind-text')),
+ ...ordered.filter(l=>l.role!=='background'&&l.kind!=='text'&&l.placement!=='behind-text'),
+ ...ordered.filter(l=>l.kind==='text')];
 }
 export const freePostDimensions=(format?:string)=>format==='Reel'||format==='Story'?{width:1080,height:1920}:{width:1080,height:1350};
 async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>,width:number,height:number){
@@ -75,11 +78,27 @@ export async function exportFreePost(post:Post,brand:Brand,images:Record<string,
  a.download=(post.title||'mi-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,50)+'-'+width+'x'+height+'.png';
  a.href=canvas.toDataURL('image/png');a.click();
 }
+function MediaThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
+ const ref=useRef<HTMLSpanElement>(null);
+ useEffect(()=>{if(src)return;const node=ref.current;if(!node)return;
+  if(typeof IntersectionObserver==='undefined'){loadImage(asset.id);return}
+  const observer=new IntersectionObserver(entries=>{if(entries.some(item=>item.isIntersecting)){
+   loadImage(asset.id);observer.disconnect();
+  }},{rootMargin:'110px'});
+  observer.observe(node);return()=>observer.disconnect();
+ },[asset.id,src,loadImage]);
+ return <span className="free-post-media-preview" ref={ref}>{src?
+  <img src={src} alt={displayAssetName(asset)} loading="lazy" draggable={false}/>:
+  <span className="free-post-media-skeleton" aria-label="Cargando miniatura"/>}</span>;
+}
 export default function FreePostStudio({post,brand,assets,images,onChange,onTitle,onUpload,loadImage,
  onOpenStickers,onUploadBackground,notify,locale,onSave,saving=false}:Props){
  const decor=readCoverDecor(post.designData);
  const [preview,setPreview]=useState(''),[error,setError]=useState('');
  const [mediaOpen,setMediaOpen]=useState(false);
+ const [mediaTab,setMediaTab]=useState<'sticker'|'photo'>('sticker');
+ const [mediaQuery,setMediaQuery]=useState('');
+ const [recentMedia,setRecentMedia]=useState<string[]>([]);
  const [backgroundOpen,setBackgroundOpen]=useState(false);
  const [history,setHistory]=useState<CoverDecor[]>([]);
  const [future,setFuture]=useState<CoverDecor[]>([]);
@@ -114,12 +133,19 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
   if(!images[assetId])loadImage(assetId);
   const sticker=assetCategory(asset)==='sticker';
+  const id=uniqueId();setFocusLayerId(id);
   const width=sticker?.19:.46,height=sticker?.18:.40;
-  update({...decor,layers:[...decor.layers,{id:uniqueId(),assetId,
+  setRecentMedia(old=>[assetId,...old.filter(value=>value!==assetId)].slice(0,12));
+  update({...decor,layers:[...decor.layers,{id,assetId,
     name:displayAssetName(asset),kind:sticker?'sticker':'photo',
-    rect:clampRect({x:point.x-width/2,y:point.y-height/2,w:width,h:height})}]});
+    placement:'front',rect:clampFreePhotoRect({x:point.x-width/2,y:point.y-height/2,w:width,h:height})}]});
+  if(window.matchMedia('(max-width:799px)').matches)setMediaOpen(false);
  };
  const addElement=(kind:'text'|'shape',shape:PanoramaLayer['shape']='paper')=>{
+  if(kind==='text'){
+   const starter=decor.layers.find(l=>l.kind==='text'&&['Escribe aquí','Write here',''].includes((l.text||'').trim()));
+   if(starter){setFocusLayerId(starter.id);notify(plain('Edit the selected text on the canvas.','Edita este texto directamente en el lienzo.',locale));return}
+  }
   if(decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
   const id=uniqueId();setFocusLayerId(id);
   update({...decor,layers:[...decor.layers,
@@ -130,6 +156,12 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
      rect:{x:.22,y:.43,w:.56,h:shape==='tape'?.08:.32}}]});
  };
  const addPosterTitle=()=>{
+  const existing=decor.layers.find(l=>l.kind==='text'&&l.font==='poster');
+  if(existing){setFocusLayerId(existing.id);notify('Ya tienes texto póster; edítalo en la publicación.');return}
+  if(['TU GRAN IDEA','YOUR BIG IDEA'].includes(post.hook.trim().toUpperCase())){
+   update({...decor,headlineStyle:{...decor.headlineStyle,font:'poster',fontSize:116,fontWeight:900,lineHeight:.98}});
+   setFocusLayerId('main-title');return;
+  }
   if(decor.layers.length>=22){notify('Máximo 22 elementos por post');return;}
   const id=uniqueId();setFocusLayerId(id);
   update({...decor,layers:[...decor.layers,{
@@ -227,6 +259,13 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(id==='main-title'||id==='main-photo')return;
   update({...decor,layers:reorderPanoramaLayers(decor.layers,id,move)});
  };
+ const cleanStarterTexts=()=>{
+  const samples=new Set(['escribe aquí','write here','tu gran idea','your big idea']);
+  const extras=decor.layers.filter(l=>l.kind==='text'&&samples.has((l.text||'').trim().toLocaleLowerCase('es')));
+  if(!extras.length){notify('No quedan textos de ejemplo adicionales.');return}
+  update({...decor,layers:decor.layers.filter(l=>!extras.some(x=>x.id===l.id))});setFocusLayerId('');
+  notify(extras.length+' textos de ejemplo retirados. Los textos que escribiste se conservaron.');
+ };
  const uploadPhotos=async(files:File[],point:Point={x:.5,y:.5})=>{
   setBusy(true);
   try{
@@ -249,8 +288,12 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   finally{setBusy(false)}
  };
  const allowed=assets.filter(a=>assetCategory(a)!=='background');
+ const visibleMedia=allowed.filter(asset=>(mediaTab==='sticker'?assetCategory(asset)==='sticker':assetCategory(asset)!=='sticker')
+  &&displayAssetName(asset).toLocaleLowerCase('es').includes(mediaQuery.trim().toLocaleLowerCase('es')))
+  .sort((a,b)=>(recentMedia.indexOf(a.id)===-1?999:recentMedia.indexOf(a.id))-
+    (recentMedia.indexOf(b.id)===-1?999:recentMedia.indexOf(b.id))).slice(0,90);
  const touchLayers:TouchLayer[]=layers.map(l=>({...l,src:images[l.assetId]||''}));
- return <section className="free-post-studio" aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
+ return <section className={'free-post-studio'+(mediaOpen||backgroundOpen?' with-media':'')} aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
   <div className="free-post-tools">
    <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
    <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
@@ -258,8 +301,10 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     <Paintbrush size={17}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
    <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Add text','Añadir texto',locale)}</button>
    <button type="button" className="free-post-poster-button" onClick={addPosterTitle}><Type size={18}/>{plain('Poster Bold','Texto póster BOLD',locale)}</button>
-   <button type="button" onClick={()=>setMediaOpen(v=>!v)}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
-   <button type="button" onClick={()=>setBackgroundOpen(v=>!v)}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
+   <button type="button" aria-expanded={mediaOpen} onClick={()=>{setMediaOpen(v=>!v);setBackgroundOpen(false)}}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
+   <button type="button" aria-expanded={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false)}}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
+   {decor.layers.some(l=>l.kind==='text'&&['escribe aquí','write here','tu gran idea','your big idea'].includes((l.text||'').trim().toLocaleLowerCase('es')))&&
+    <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>
    <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}><Undo2 size={17}/></button>
    <button type="button" disabled={!future.length} onClick={redo} title={plain('Redo','Rehacer',locale)}><Redo2 size={17}/></button>
   </div>
