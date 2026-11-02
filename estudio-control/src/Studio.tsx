@@ -284,6 +284,21 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
+  const [aulaPreviewOpen,setAulaPreviewOpen] = useState(false);
+  const openAulaPreview = () => { setMobileNav(false); setAulaPreviewOpen(true); };
+  useEffect(() => {
+    if (!aulaPreviewOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setAulaPreviewOpen(false);
+    };
+    window.addEventListener('keydown',onEscape);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown',onEscape);
+    };
+  },[aulaPreviewOpen]);
 
   const [seriesTab,setSeriesTab] = useState<string>('all');
   const [episodeScope,setEpisodeScope] = useState<'active'|'month'|'published'>('active');
@@ -945,6 +960,10 @@ function App() {
       <aside className={'sidebar ' + (mobileNav ? 'open' : '')}>
         <div className="brand">
           <img src={LOGO} alt="Todavía estoy a tiempo" />
+          <button type="button" className="studio-aula-brand-link" onClick={openAulaPreview}
+            aria-label="Vista privada del aula de alumnos" title="Ver aula">
+            <BookOpen size={18} />
+          </button>
           <button className="close-nav" onClick={() => setMobileNav(false)}>
             <X size={20} />
           </button>
@@ -1005,6 +1024,10 @@ function App() {
             <Menu size={23} />
           </button>
           <span className="top-star" aria-hidden="true"><Mic2 size={18} strokeWidth={1.6} /></span>
+          <button type="button" className="studio-aula-mobile-link" onClick={openAulaPreview}
+            aria-label="Ver aula como administradora" title="Vista privada del aula">
+            <BookOpen size={15}/><span>Aula</span>
+          </button>
           <span className="top-label">
             EL ESTUDIO <i>/</i> {LABELS[page]}
           </span>
@@ -1352,9 +1375,10 @@ function App() {
             <section className="studio-students-workspace">
               <nav className="studio-student-tabs" aria-label="Centro de alumnos: administración y vista del aula">
                 <span className="studio-student-tab-current"><Users size={17}/> Alumnos y bonos</span>
-                <a className="studio-student-tab-link" href="../alumnos/?vista=admin" aria-label="Ver aula completa como administradora, sin alterar el progreso">
+                <button type="button" className="studio-student-tab-link" onClick={openAulaPreview}
+                  aria-label="Ver aula completa dentro del Studio, sin realizar compras ni alterar el progreso">
                   <BookOpen size={17}/> Ver aula completa <ExternalLink size={15}/>
-                </a>
+                </button>
               </nav>
               <StudentManager />
               <p className="studio-student-qa-note">La vista del aula se abre en pantalla completa, sin barras duplicadas ni ventanas dentro de ventanas. Regresas aquí desde «Volver a Mi Estudio».</p>
@@ -2035,6 +2059,17 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+      {aulaPreviewOpen && !!account && !denied && (
+        <section className="studio-aula-preview" role="dialog" aria-modal="true" aria-label="Vista privada del aula de estudiantes">
+          <header className="studio-aula-preview-bar">
+            <div className="studio-aula-preview-identity"><BookOpen size={18}/><span>Vista del aula</span><small>Administración · sin compras</small></div>
+            <button type="button" onClick={() => setAulaPreviewOpen(false)}
+              aria-label="Cerrar vista previa y volver al Studio"><X size={17}/> Volver al Studio</button>
+          </header>
+          <iframe title="Aula completa · vista privada de administración"
+            src="../alumnos/?vista=admin&origen=studio" referrerPolicy="same-origin"/>
+        </section>
       )}
       {deleting && !recording && (
         <div className="modal-backdrop">
