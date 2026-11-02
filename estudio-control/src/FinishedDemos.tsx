@@ -183,9 +183,10 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        <small>{d.note}</small>
-       {!!d.photos?.length&&<details className="finished-demo-photos">
-         <summary>Ver fotos individuales <span>{d.photos.length} fotos aprobadas</span></summary>
-         <p>Estas son imágenes de referencia del proyecto, cada una por separado. Puedes abrirlas, copiar su enlace y consultar un prompt orientativo para recrear una foto similar. Los pasos para reconstruir la web están debajo.</p>
+       <details className="finished-demo-kit">
+         <summary><span>Ver kit completo: fotos + prompts + pasos</span><span>{d.photos.length} fotos · {studioDemoPrompts[d.promptsFor].length} pasos</span></summary>
+         <h4 className="finished-demo-kit-heading">Fotografías y prompts de cada imagen</h4>
+         <p>Imágenes del proyecto, enlaces y prompts para crear fotografías similares. Los pasos para reconstruir la web se guardan en este mismo kit. Los prompts de referencia no deben confundirse con los textos originales cuando estos no están documentados.</p>
          <div className="finished-demo-photos-grid">
            {d.photos.map(photo=><div className="finished-demo-photo-tile" key={photo.key}>
              <a href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={'Abrir fotografía '+photo.title}>
@@ -206,11 +207,10 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
              </div>
            </div>)}
          </div>
-       </details>}
-       {d.promptsFor&&<details className="finished-demo-prompts">
-         <summary>Prompts para reconstruir desde cero <span>{studioDemoPrompts[d.promptsFor].length} pasos</span></summary>
+       <div className="finished-demo-prompts">
+         <h4 className="finished-demo-kit-heading">Pasos y prompts para reconstruir la web</h4>
          <div className="finished-demo-prompt-list">
-           <p className="finished-demo-prompt-context">Guía privada de grabación: en cada sección tienes qué decir en voz alta, qué enseñar y el prompt exacto para copiar a ChatGPT. Trabaja en la app de práctica, no en el demo oficial. Aquí no se genera ni publica ninguna web.</p>
+           <p className="finished-demo-prompt-context">Guía privada de grabación: qué decir, qué mostrar y qué copiar en cada paso. Los prompts que se conservaron originalmente se mantienen; otros se han reconstruido como instrucciones de práctica. Nunca construyas las pruebas encima del demo oficial ni sobre la web de un cliente.</p>
            <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
              <strong>Cómo pedir fotos sin confundir a ChatGPT</strong>
              <p><b>Fotografía individual:</b> copia UN comando, pide UNA imagen en UN archivo, revisa el resultado y solo después pasa a la siguiente. Nunca solicites seis fotos en un mismo mensaje: puede devolver un collage o mezclar sabores.</p>
@@ -256,7 +256,8 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
              </article>
            ))}
          </div>
-       </details>}
+       </div>
+       </details>
      </div>
    </article>)}
    </div>
