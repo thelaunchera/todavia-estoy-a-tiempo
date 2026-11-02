@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
 import {recordingStarts, RECORDING_EXAMPLE} from './recording-starts';
-import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText } from 'lucide-react';
+import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText, UploadCloud } from 'lucide-react';
 import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_LAUNCH, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
 
 export type ClassEntry = {
   id: string; title: string; section?: string; subtitle?: string;
   status?: string; notes?: string; link?: string; performance_notes?: string;
+  recording_path?: string; recording_name?: string; recording_bytes?: string;
 };
 type Props = {
   entries: ClassEntry[];
@@ -17,6 +18,8 @@ type Props = {
   onTaskToggle: (task:ClassWeeklyTask,next:'pendiente'|'completado')=>Promise<void>;
   launchStats?: {waitlist:number; buyers:number}|null;
   onSave: (item: ClassEntry, fields: Pick<ClassEntry,'status'|'notes'|'link'|'performance_notes'>) => Promise<void>;
+  onUpload: (item:ClassEntry,file:File,onProgress:(percent:number)=>void)=>Promise<void>;
+  onViewRecording: (path:string)=>Promise<string>;
 };
 function validVideoLink(value: string): boolean {
   if (!value.trim()) return true;
@@ -27,8 +30,13 @@ function safeStatus(value?:string) {
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
 
-export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,onSave}:Props) {
+export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
  const [lessonId,setLessonId]=useState('00');
+ const filePicker=useRef<HTMLInputElement>(null);
+ const targetChapter=useRef<string>('00');
+ const [uploadingId,setUploadingId]=useState<string|null>(null);
+ const [uploadProgress,setUploadProgress]=useState(0);
+ const [uploadNotice,setUploadNotice]=useState('');
  const [area,setArea]=useState<'grabar'|'recursos'|'plan'>('grabar');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
@@ -75,6 +83,42 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
      setNotice('Progreso guardado en tu Estudio privado.');
    } catch(e) {setNotice(e instanceof Error?e.message:'No se pudo guardar.');}
    finally{setSaving(false);}
+ }
+ function startUpload(id:string) {
+   if(uploadingId)return;
+   targetChapter.current=id;
+   setUploadNotice('');
+   filePicker.current?.click();
+ }
+ async function handleSelectedFile(event:ChangeEvent<HTMLInputElement>) {
+   const file=event.target.files?.[0];
+   event.target.value='';
+   if(!file)return;
+   const target=targetChapter.current;
+   const chapter=records.find(entry=>entry.subtitle===target);
+   if(!chapter){setUploadNotice('No se encontró la ficha de ese capítulo. Actualiza el Studio.');return;}
+   const ext=file.name.split('.').pop()?.toLowerCase();
+   if(!['mp4','mov','webm'].includes(ext||'')){setUploadNotice('Elige un archivo MP4, MOV o WEBM.');return;}
+   if(file.size>50_000_000){setUploadNotice('El archivo supera 50 MB. Súbelo a YouTube como No listado y pega su enlace en el capítulo; así conservas el video completo.');return;}
+   setUploadingId(target);setUploadProgress(0);setUploadNotice('');
+   try {
+     await onUpload(chapter,file,p=>setUploadProgress(p));
+     setUploadNotice('Video '+target+' guardado en tu archivo privado. No está publicado para los alumnos.');
+   }catch(error){
+     setUploadNotice(error instanceof Error?error.message:'No se pudo subir el video. Vuelve a intentarlo.');
+   }finally{setUploadingId(null);}
+ }
+ async function viewRecording(path:string){
+   // Open a tab synchronously so Safari does not block the private signed link.
+   const tab=window.open('about:blank','_blank');
+   try{
+     const signed=await onViewRecording(path);
+     if(tab)tab.location.href=signed;
+     else window.location.href=signed;
+   }catch(error){
+     tab?.close();
+     setUploadNotice(error instanceof Error?error.message:'No pude abrir la grabación.');
+   }
  }
  function togglePrep(i:number) {setChecked(prev=>prev.includes(i)?prev.filter(x=>x!==i):[...prev,i]);}
  const chapterNotes=[
@@ -172,13 +216,22 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
+      <input ref={filePicker} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" className="class-recording-picker" tabIndex={-1} aria-label="Elegir grabación del capítulo" onChange={event=>void handleSelectedFile(event)}/>
+      <p className="class-upload-hint">Sube la grabación original de cada capítulo. Privada · MP4, MOV o WEBM · hasta 50 MB por archivo.</p>
       {classLessons.map(item=>{
-       const stage=safeStatus(records.find(x=>x.subtitle===item.id)?.status);
-       return <button key={item.id} type="button" className={'class-module '+(item.id===lesson.id?'selected':'')} onClick={()=>choose(item.id)} aria-current={item.id===lesson.id?'step':undefined}>
-        <span className="class-number">{item.id}</span>
-        <span className="class-module-main"><b>{item.title}</b><small>{item.minutes} min aprox. · {stage}</small></span>
-        {stage==='aprobado'&&<CheckCircle2 size={17}/>}
-       </button>;
+       const entry=records.find(x=>x.subtitle===item.id);
+       const stage=safeStatus(entry?.status);
+       return <div key={item.id} className="class-module-entry">
+         <button type="button" className={'class-module '+(item.id===lesson.id?'selected':'')} onClick={()=>choose(item.id)} aria-current={item.id===lesson.id?'step':undefined}>
+          <span className="class-number">{item.id}</span>
+          <span className="class-module-main"><b>{item.title}</b><small>{item.minutes} min aprox. · {stage}{entry?.recording_path?' · archivo guardado':''}</small></span>
+          {stage==='aprobado'&&<CheckCircle2 size={17}/>}
+         </button>
+         <button type="button" className="class-module-upload" disabled={!!uploadingId||!entry} onClick={()=>startUpload(item.id)}
+          aria-label={'Subir video del capítulo '+item.id+' · '+item.title}>
+          <UploadCloud size={15}/>{uploadingId===item.id?'Subiendo '+uploadProgress+'%':entry?.recording_path?'Cambiar video':'Subir video'}
+         </button>
+       </div>;
       })}
     </aside>
     <div className="class-workspace">
@@ -267,6 +320,16 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
          <p><a href={CLASS_PLAN} target="_blank" rel="noopener noreferrer">Ver las nueve fichas completas en Notion <ExternalLink size={13}/></a></p>
         </div>
        </details>
+      </div>
+      <div className="class-upload-status" role="region" aria-label="Grabación privada del capítulo">
+        <div className="class-section-heading"><h4>Grabación del capítulo {lesson.id}</h4><span>Solo tú puedes verla</span></div>
+        {record?.recording_path?
+          <div className="class-upload-saved"><CheckCircle2 size={18}/><span>Archivo privado: <strong>{record.recording_name||'Grabación guardada'}</strong></span><button type="button" onClick={()=>void viewRecording(record.recording_path!)}>Revisar video</button></div>
+          : <p>No has subido un video para este capítulo. Puedes grabarlo primero y añadirlo cuando esté listo.</p>}
+        <button type="button" className="class-upload-main" disabled={!!uploadingId||!record} onClick={()=>startUpload(lesson.id)}><UploadCloud size={17}/>{uploadingId===lesson.id?'Subiendo '+uploadProgress+'%':record?.recording_path?'Cambiar grabación':'Subir video de este capítulo'}</button>
+        {uploadingId&&<div className="class-upload-progress" aria-label={'Cargando capítulo '+uploadingId+' '+uploadProgress+'%'}><div style={{width:uploadProgress+'%'}}/></div>}
+        <p className="class-upload-limit">MP4, MOV o WEBM · máximo 50 MB. Para grabaciones largas, sube el video a YouTube como <strong>No listado</strong> y pega el enlace abajo.</p>
+        <p className="class-upload-notice" role="status">{uploadNotice}</p>
       </div>
       <div className="class-production-state">
        <div className="class-section-heading"><h4>Guarda tu avance</h4><span>No publica nada</span></div>
