@@ -34,6 +34,7 @@ let running=0;
 export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons,onCloseMaterials,getLanguage=()=> 'es'}){
  if(!root||root.dataset.mounted==='true')return;
  root.dataset.mounted='true';
+ root.textContent=getLanguage()==='en'?'Loading your learning materials…':'Cargando tus materiales y biblioteca de prompts…';
  const {data:resource,error:resourceError}=await db.from('podcast_class_learning_assets')
   .select('payload,status')
   .eq('course_id',courseId).eq('asset_code','interactive_guides_v1').maybeSingle();
@@ -63,7 +64,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   ]);
   if(!error&&Array.isArray(rows))MODULE_PROMPTS=rows;
   if(!kitError&&kit?.status==='ready'&&Array.isArray(kit?.payload?.demos)){
-   for(const d of kit.payload.demos){
+   for(const d of kit.payload.demos.filter(d=>adminPreview||d.published!==false)){
     for(const [i,p] of (Array.isArray(d.prompts)?d.prompts:[]).entries()){
      EXAMPLE_PROMPTS.push({prompt_code:'demo_'+d.id+'_'+i,title:p.title,
       summary:d.title+' · '+(p.step||''),body:p.body,category:'demo_'+(d.category||'services'),
@@ -81,7 +82,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  const ownerPreview=adminPreview||!user;
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
- root.appendChild(app);
+ root.replaceChildren(app);
  app.innerHTML=`<div class="mi-header"><div><span class="mi-eyebrow">TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA</span><h2>Tu mesa de trabajo<span>.</span></h2><p>Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.</p></div></div>
  <nav class="mi-tabs" aria-label="Cuatro categorías de materiales"></nav><nav class="mi-subtabs" aria-label="Contenido de la categoría"></nav>
  <div class="mi-content" aria-live="polite"></div>
