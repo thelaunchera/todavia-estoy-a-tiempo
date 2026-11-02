@@ -5,6 +5,7 @@ const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supaba
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
+const ADMIN_VIEW_REQUESTED=new URL(location.href).searchParams.get('vista')==='admin';
 const REMEMBER_KEY='podcast_class_remember_24h_v1';
 const TAB_KEY='podcast_class_tab_24h_v1';
 const DAY_MS=24*60*60*1000;
@@ -37,7 +38,7 @@ function setAuthMode(mode){
  if(!Object.hasOwn(forms,mode))return;
  for(const [name,form] of Object.entries(forms))form.hidden=name!==mode;
  const copy={
-  login:['Qué gusto verte por aquí.','Entra con el correo de tu compra y tu contraseña.'],
+  login:ADMIN_VIEW_REQUESTED?['Vista previa del aula','Entra con tu correo y contraseña de administradora del Studio. No tienes que comprar la clase.']:['Qué gusto verte por aquí.','Entra con el correo de tu compra y tu contraseña.'],
   register:['Empieza por aquí.','Crea tu cuenta para tener tus lecciones en un solo lugar.'],
   reset:['Recupera tu acceso.','Te ayudamos a establecer una nueva contraseña.'],
   newPassword:['Crea una nueva contraseña.','Escríbela dos veces para guardarla de forma segura.']
@@ -435,7 +436,7 @@ async function refreshAuth(){
  try{
   const {data:{user:who},error}=await db.auth.getUser();
   if(error && !/Auth session missing/i.test(error.message||''))throw error;
-  if(!who){user=null;out.hidden=true;display(login);if(!message.dataset.noticeShown)status('Entra con tu correo y contraseña.');return;}
+  if(!who){user=null;out.hidden=true;display(login);if(!message.dataset.noticeShown)status(ADMIN_VIEW_REQUESTED?'Entra con tu cuenta administradora del Studio.':'Entra con tu correo y contraseña.');return;}
   const owner=await isAuthorizedOwner(who);
   // La propietaria autenticada accede sin compra; para todos los demás
   // la entrada de alumnos exige pago verificado y caduca a las 24 horas.
