@@ -120,26 +120,26 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
 
  const saveBadge=el('div','mi-save');
  if(ownerPreview){saveBadge.textContent='Vista de administración · no guarda respuestas';}
- else {saveBadge.textContent='Cargando tu cuaderno…';}
+ else {saveBadge.textContent=t('Cargando tu cuaderno…','Loading your workbook…');}
  app.querySelector('.mi-header').append(saveBadge);
  async function load(){
   if(ownerPreview)return;
   const {data,error}=await db.from('podcast_class_workbook').select('answers,checks')
    .eq('course_id',courseId).eq('user_id',user.id).maybeSingle();
-  if(error){saveBadge.textContent='No pudimos cargar tus respuestas';return;}
+  if(error){saveBadge.textContent=t('No pudimos cargar tus respuestas','Your saved answers could not be loaded');return;}
   answers=(data?.answers&&typeof data.answers==='object')?data.answers:{};
   checks=(data?.checks&&typeof data.checks==='object')?data.checks:{};
-  saveBadge.textContent='Tus respuestas son privadas';
+  saveBadge.textContent=t('Tus respuestas son privadas','Your answers are private');
  }
  await load();
  async function save(){
   if(ownerPreview||saveRunning)return;
-  const version=dirty;saveRunning=true;saveBadge.textContent='Guardando…';
+  const version=dirty;saveRunning=true;saveBadge.textContent=t('Guardando…','Saving…');
   const {error}=await db.from('podcast_class_workbook').upsert({
     course_id:courseId,user_id:user.id,answers,checks,updated_at:new Date().toISOString()
   },{onConflict:'course_id,user_id'});
   saveRunning=false;
-  saveBadge.textContent=error?'No se guardó. Toca «Reintentar»':'Guardado en tu cuenta ✓';
+  saveBadge.textContent=error?t('No se guardó. Toca «Reintentar»','Could not save. Tap Retry'):t('Guardado en tu cuenta ✓','Saved to your account');
   if(error){saveBadge.classList.add('mi-save-error');saveBadge.onclick=()=>void save();}
   else{saveBadge.classList.remove('mi-save-error');saveBadge.onclick=null;}
   if(version!==dirty)queueSave();
