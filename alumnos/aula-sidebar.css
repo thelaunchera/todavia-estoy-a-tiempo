@@ -192,3 +192,20 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
  #aula-layout .aula-section-navigation{gap:7px}
  #aula-layout .aula-section-nav-button{font-size:12px}
 }
+
+/* ES/EN classroom switch 2026-11-02 */
+.aula-lang-control,.aula-public-lang{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;color:#41667e;font:700 12px/1.1 'DM Sans',Arial,sans-serif}
+.aula-lang-control{border:1px solid #c9d9e3;background:#fff;border-radius:10px;padding:4px 7px;min-height:40px}
+.aula-lang-control select,.aula-public-lang select{appearance:auto;border:0;outline:0;min-height:30px;padding:2px 4px;background:transparent;color:#284c64;font:750 12px/1.2 'DM Sans',Arial,sans-serif;cursor:pointer}
+.aula-lang-control:focus-within,.aula-public-lang:focus-within{outline:3px solid #87adbf;outline-offset:2px}
+.aula-public-lang{margin-left:auto;padding:8px 10px;border:1px solid #d8e3e7;border-radius:11px;background:#f4f7f7}
+.aula-public-lang select{min-width:83px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:690px){
+ .aula-public-lang{padding:6px 8px;gap:4px}
+ .aula-public-lang select{min-width:70px;font-size:11px}
+ #aula-layout .aula-main-actions{display:flex;align-items:center;gap:5px}
+ .aula-lang-control{padding:3px 5px;min-height:37px}
+ .aula-lang-control select{font-size:11px;padding:2px 2px}
+}
+@media(max-width:410px){.aula-public-lang>span{display:none}.aula-lang-icon{display:none}.aula-public-lang select{min-width:65px}}
