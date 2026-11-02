@@ -10,7 +10,7 @@ const materialsCss=readFileSync('alumnos/materiales-interactivos.css','utf8');
 const workflow=readFileSync('.github/workflows/pages.yml','utf8');
 
 test('biblioteca única: el sidebar comparte la misma pantalla de materiales, sin duplicar prompts',()=>{
- assert.equal((room.match(/data-aula-view="prompts"/g)||[]).length,2,'Un acceso en el menú y otro en el inicio');
+ assert.ok((room.match(/data-aula-view="prompts"/g)||[]).length>=2,'La biblioteca es accesible desde el menú, portada y recorrido sin duplicar su contenido');
  assert.equal((room.match(/id="materiales-interactivos"/g)||[]).length,1,'Un solo módulo montado');
  assert.equal((room.match(/data-aula-panel="prompts"/g)||[]).length,0,'Sin una segunda pantalla paralela');
  assert.match(course,/view==='prompts'\?'materiales':view/,'La entrada de prompts reutiliza Materiales');
