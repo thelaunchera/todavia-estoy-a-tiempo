@@ -40,6 +40,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const [area,setArea]=useState<'grabar'|'alumno'|'recursos'|'plan'>('grabar');
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
+ const [voiceMode,setVoiceMode]=useState<'pistas'|'texto'>('pistas');
  const [status,setStatus]=useState('pendiente');
  const [notes,setNotes]=useState('');
  const [url,setUrl]=useState('');
@@ -300,7 +301,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
        </div>
       </details>
       <div className="class-scene-head">
-       <div><h4>Guion para grabar</h4><p>Qué dices, dónde tocas y cómo comprobarlo, escena por escena, con una sola voz de principio a fin.</p></div>
+       <div><h4>Guía para grabar sin leer</h4><p>Ideas breves para explicar mientras haces cada paso. El guion completo queda como apoyo opcional.</p></div>
        <div className="class-segment">
         <button type="button" onClick={()=>setMode('scene')} className={mode==='scene'?'active':''}>Una escena</button>
         <button type="button" onClick={()=>setMode('overview')} className={mode==='overview'?'active':''}>Guion completo</button>
@@ -309,9 +310,20 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
       {mode==='scene' ? <div className="class-prompter" aria-live="polite">
        <div className="class-prompter-meta"><span>ESCENA {scene+1} DE {lesson.beats.length}</span><span>{lesson.beats[scene].label}</span></div>
        <div className="class-script-box">
-        <span><Headphones size={15}/> QUÉ DECIR · VOZ NATURAL</span>
-        <p>{lesson.beats[scene].say}</p>
-        <button type="button" onClick={()=>void copy(lesson.beats[scene].say,'say')}><Clipboard size={14}/>{copied==='say'?'Copiado':'Copiar esta frase'}</button>
+        <span><Headphones size={15}/> VOZ NATURAL · PISTAS PARA EXPLICAR</span>
+        <div className="class-voice-toggle" role="group" aria-label="Elegir guía de voz">
+         <button type="button" className={voiceMode==='pistas'?'active':''} aria-pressed={voiceMode==='pistas'} onClick={()=>setVoiceMode('pistas')}>Pistas, sin leer</button>
+         <button type="button" className={voiceMode==='texto'?'active':''} aria-pressed={voiceMode==='texto'} onClick={()=>setVoiceMode('texto')}>Texto de apoyo</button>
+        </div>
+        {voiceMode==='pistas'?<div className="class-voice-cues">
+         <b>Escena: {lesson.beats[scene].label}</b>
+         <ol>
+          <li><strong>Qué problema resuelve:</strong> cuenta por qué este paso importa para Casa Brownie o para una web real.</li>
+          <li><strong>Hazlo mientras hablas:</strong> {lesson.beats[scene].show}</li>
+          <li><strong>Comprueba y cierra:</strong> muestra qué cambió y qué debe guardar el alumno.</li>
+         </ol>
+         <p>Una idea por toma. Puedes hablar con tus propias palabras, dejar silencios mientras tocas la pantalla y repetir solo una frase si te equivocas.</p>
+        </div>:<><p>{lesson.beats[scene].say}</p><button type="button" onClick={()=>void copy(lesson.beats[scene].say,'say')}><Clipboard size={14}/>{copied==='say'?'Copiado':'Copiar texto de apoyo'}</button></>}
        </div>
        <div className="class-screen-box">
         <span><MonitorPlay size={16}/> QUÉ MOSTRAR EN PANTALLA</span>
