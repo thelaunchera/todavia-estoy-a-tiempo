@@ -546,3 +546,5 @@
  .factory-download-step .factory-canvas-exports{grid-template-columns:1fr;gap:8px}
  .factory-download-step .factory-canvas-exports button{width:100%;min-height:45px}
 }
+
+.factory-mode-hint{margin:10px 0;padding:10px 13px;background:#e9f1f1;border:1px solid #cadae0;border-radius:10px;color:#2a4c58;font-size:12px;line-height:1.5}
