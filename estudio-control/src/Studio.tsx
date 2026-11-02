@@ -314,6 +314,29 @@ function App() {
     window.addEventListener('message',onOwnerRequest);
     return()=>window.removeEventListener('message',onOwnerRequest);
   },[aulaPreviewOpen,account,denied,sendClassroomSession]);
+  // Never leave the owner trapped in a silent iframe loading state.
+  useEffect(()=>{
+    if(!aulaPreviewOpen)return;
+    const onBootError=(event:MessageEvent)=>{
+      if(event.origin!==window.location.origin || event.source!==aulaFrameRef.current?.contentWindow)return;
+      if(event.data?.type==='TLE_CLASSROOM_BOOT_ERROR'){
+        setAulaPreviewError('El aula no pudo iniciar sus archivos (AULA-MODULE). Cierra esta vista y vuelve a abrirla.');
+      }
+    };
+    window.addEventListener('message',onBootError);
+    const timeout=window.setTimeout(()=>{
+      const doc=aulaFrameRef.current?.contentDocument;
+      const content=doc?.getElementById('class-content');
+      const message=doc?.getElementById('room-message');
+      if(content?.hidden && !aulaPreviewError){
+        setAulaPreviewError('El aula sigue esperando la conexión privada. Puedes cerrar y reabrir esta vista; el Studio permanece conectado.');
+      }
+      if(!doc || !message){
+        setAulaPreviewError('El aula no terminó de cargar. Comprueba la conexión e inténtalo otra vez.');
+      }
+    },11000);
+    return()=>{window.clearTimeout(timeout);window.removeEventListener('message',onBootError);};
+  },[aulaPreviewOpen]);
   useEffect(() => {
     if (!aulaPreviewOpen) return;
     const originalOverflow = document.body.style.overflow;
