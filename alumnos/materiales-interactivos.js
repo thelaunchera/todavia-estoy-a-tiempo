@@ -1,4 +1,4 @@
-import {renderWebBasics,renderProjectOrder} from './guia-principiantes.js';
+import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
@@ -9,6 +9,7 @@ const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll
 const headers=[
  ['inicio','Empieza aquí','Primero entiende lo que vas a construir.'],
  ['funciona','Cómo funciona mi web','Distingue el diseño de los procesos internos.'],
+ ['pasos','Paso a paso: mi propia web','De la idea a una página real con tu marca.'],
  ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
  ['prompts','Biblioteca de prompts','Incluye el bonus para diseñar desde tu celular.'],
  ['mara','Mara · mi guía web','Prepara tu proyecto privado y empieza.'],
@@ -22,7 +23,7 @@ const headers=[
 ];
 const materialGroups=[
  {id:'empezar',title:'Empieza aquí',views:['inicio','funciona','organizacion']},
- {id:'construir',title:'Crea tu web',views:['mara','ejemplo','make','conectores']},
+ {id:'construir',title:'Crea tu web',views:['pasos','mara','ejemplo','make','conectores']},
  {id:'recursos',title:'Tus recursos',views:['prompts','cuaderno','seguridad','legal']},
  {id:'publicar',title:'Antes de publicar',views:['revision']}
 ];
@@ -122,6 +123,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(view==='inicio')renderStart();
   if(view==='funciona')renderWebBasics(content,go);
   if(view==='organizacion')renderProjectOrder(content);
+   if(view==='pasos')renderStudentWebPath(content,go);
   if(view==='prompts')renderPrompts();
   if(view==='mara')renderWebGuide(content,EXTRAS);
   if(view==='make')renderMakeResources(content,EXTRAS);
@@ -152,7 +154,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   for(const [i,item] of items.entries()){
    const c=el('article','mi-step');c.innerHTML='<span>0'+(i+1)+'</span><h4>'+esc(item[0])+'</h4><p>'+esc(item[1])+'</p>';grid.append(c);
   }content.append(grid);
-  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="mara">Configurar mi guía web</button><button type="button" class="mi-quiet" data-go="funciona">Entender mi web</button>';content.append(actions);
+  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="pasos">Construir mi web paso a paso</button><button type="button" class="mi-quiet" data-go="mara">Configurar mi guía web</button><button type="button" class="mi-quiet" data-go="funciona">Entender mi web</button>';content.append(actions);
   actions.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
