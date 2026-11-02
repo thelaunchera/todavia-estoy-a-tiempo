@@ -1666,8 +1666,9 @@ function App() {
                   <RotateCcw size={16} /> {t("Start fresh")}
                 </button>
               </div>
-              <div className="composer">
-                <div className="forms">
+              <div className="composer composer-direct-touch">
+                <details className="forms lab-post-details">
+                  <summary>{loginLanguage==='es'?'Detalles, caption y calendario':'Post details, caption and calendar'}</summary>
                   <section className="panel">
                     <div className="panelhead">
                       <span>01</span>
@@ -1825,7 +1826,7 @@ function App() {
                       {editor.id ? 'Update saved post' : 'Save to my library'}
                     </button>
                   </section>
-                </div>
+                </details>
                 <aside className="visual cover-studio">
                   <div className="cover-studio-heading">
                     <div className="eyebrow">{loginLanguage==='es'?'VISTA PREVIA':'PREVIEW'}</div>
@@ -1840,7 +1841,7 @@ function App() {
                     onUpload={async file=>upload(file,'original',false)}
                     loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
                     onUploadBackground={async file=>upload(file,'background',false)}
-                    notify={toast}/>
+                    notify={toast} saving={busy==='save'} onSave={()=>{void saveAndReturnToCalendar()}}/>
 
                 </aside>
               </div>
