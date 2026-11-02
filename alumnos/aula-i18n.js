@@ -75,6 +75,7 @@ const translations=[
  ['#aula-menu-open > span','Menu'],
  ['.aula-access-note','Protected access'],
  ['.aula-quick-help > span','Help'],
+ ['#aula-refresh > span','Refresh'],
  ['#admin-preview-banner strong','Private course preview'],
  ['#admin-preview-banner p','Only the owner can review drafts. Students never see this notice.'],
  ['.dashboard-hero .dashboard-overline','MY LEARNING SPACE'],
@@ -175,6 +176,8 @@ export function applyClassroomLanguage(){
   const el=document.getElementById(selector);if(el&&el.value!==language)el.value=language;
  }
  for(const [selector,en] of translations)translateElement(selector,en);
+ const refresh=document.getElementById('aula-refresh');
+ if(refresh){refresh.setAttribute('aria-label',language==='en'?'Refresh classroom page':'Actualizar la página del aula');refresh.title=refresh.getAttribute('aria-label');}
  for(const [selector,en] of placeholders){
   const el=document.querySelector(selector);if(!el)continue;
   if(!el.dataset.tleOriginalPlaceholder)el.dataset.tleOriginalPlaceholder=el.placeholder;
