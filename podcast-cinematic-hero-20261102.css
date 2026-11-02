@@ -17,6 +17,17 @@
 .podcast-film-hero[data-film-step="1"] .podcast-film-glow-one,.podcast-film-hero[data-film-step="2"] .podcast-film-glow-one{opacity:0}
 .podcast-film-hero[data-film-step="1"] .podcast-film-glow-two,.podcast-film-hero[data-film-step="2"] .podcast-film-glow-three{opacity:1}
 .podcast-film-hero .hero-layout{position:relative;z-index:1}
+/* The listening CTA should be visible in the first desktop viewport. */
+@media(min-width:1024px) {
+ .podcast-film-hero #hero-title{
+   font-size:clamp(3.8rem,5.15vw,4.75rem);
+   line-height:1.04;
+   letter-spacing:-.045em;
+   max-width:15ch;
+ }
+ .podcast-film-hero .hero-lede.line-reveal{margin-top:18px}
+ .podcast-film-hero .hero-cta{margin-top:22px}
+}
 .podcast-film-hero .hero-content{position:relative;z-index:2}
 .podcast-film-hero .hero-visual{isolation:isolate}
 .podcast-film-hero .podcast-host-portrait {z-index:1}
