@@ -44,6 +44,16 @@ test('curvature uses true circular glyph positions and optional spacing',()=>{
  assert.equal(painted.length,7);
  assert.ok(rotations[0]<0&&rotations.at(-1)>0,'letters follow tangents');
  assert.ok(positions[3][1]<positions[0][1],'center rises on upward arc');
+ const lowerPositions=[],lowerGlyphs=[];
+ const bottomCtx={
+  ...ctx,
+  translate(x,y){lowerPositions.push([x,y])},
+  fillText(letter){lowerGlyphs.push(letter)}
+ };
+ drawCurvedTextLine(bottomCtx,'FAMILIA',0,0,70,-60,800,12);
+ assert.deepEqual(lowerGlyphs,Array.from('FAMILIA'),'letters keep their original sequence');
+ assert.ok(lowerPositions[0][0]<lowerPositions.at(-1)[0],'downward arc remains left-to-right');
+ assert.ok(lowerPositions[3][1]>lowerPositions[0][1],'center lowers on downward arc');
  assert.ok(positions.every(([x,y])=>Number.isFinite(x)&&Number.isFinite(y)));
  assert.equal(clampTextCurve(123),100);
  assert.equal(clampLetterSpacing(80),30);
