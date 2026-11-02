@@ -52,7 +52,7 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  const featured=source.match(/RECENT_DEMO_KEYS = \[([^\]]+)\] as const/);
  assert.ok(featured,'Recent demos must reuse canonical keys');
  const keys=[...featured[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
- assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','tle-experience']);
+ assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','tle-experience']);
  const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
  for(const key of keys){
   const item=byKey[key];
@@ -78,4 +78,6 @@ test('Jaramillo Boutique and YUMMM are available as finished demos in Studio',()
   const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
   assert.equal(byKey['school-jaramillo'].visibility,'demo');
   assert.equal(byKey['school-yummm'].visibility,'demo');
+  assert.equal(byKey['school-soluna'].visibility,'demo');
+  assert.match(finished,/id:'soluna-yoga'/);
 });
