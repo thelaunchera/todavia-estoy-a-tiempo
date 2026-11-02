@@ -10,7 +10,7 @@ import ProductCenter from './ProductCenter';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
+import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, uploadClassRecording, getClassRecordingUrl, removeOldClassRecording, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -1389,7 +1389,23 @@ function App() {
             }} onSave={async (entry, changes) => {
               await api.put('/api/items/ideas/' + entry.id, { ...entry, ...changes });
               await refresh();
-            }} />
+            }} onUpload={async (entry,file,onProgress)=>{
+              const chapter=entry.subtitle||'';
+              const path=await uploadClassRecording(chapter,file,onProgress);
+              try {
+                await api.put('/api/items/ideas/'+entry.id,{
+                  ...entry,recording_path:path,recording_name:file.name,recording_bytes:String(file.size)
+                });
+                await refresh();
+              } catch(error) {
+                // Do not keep an orphaned file if storing its chapter assignment failed.
+                try{await removeOldClassRecording(path);}catch{ /* no impact on existing record */ }
+                throw error;
+              }
+              if(entry.recording_path && entry.recording_path!==path){
+                try{await removeOldClassRecording(entry.recording_path);}catch{ /* new recording safely registered */ }
+              }
+            }} onViewRecording={getClassRecordingUrl} />
           )}
           {page === 'ideas' && (
             <>
