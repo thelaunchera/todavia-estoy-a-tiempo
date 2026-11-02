@@ -811,10 +811,20 @@ if(STUDIO_EMBEDDED_OWNER){
   if(typeof tokens.access_token!=='string'||typeof tokens.refresh_token!=='string')return;
   studioSessionLoading=true;
   try{
-   const {data,error}=await db.auth.setSession({
-    access_token:tokens.access_token,refresh_token:tokens.refresh_token
-   });
-   if(error||!data.user||!await isAuthorizedOwner(data.user))throw error||Error('No autorizado');
+   // Studio and classroom are same-origin: prefer the existing authenticated
+   // browser session. Re-applying the same refresh token in two clients can
+   // race with Supabase token rotation on mobile Safari.
+   const {data:existing}=await db.auth.getSession();
+   const sameSession=existing?.session?.user?.id===tokens.user_id
+     && Boolean(existing?.session?.access_token);
+   if(!sameSession){
+    const {data,error}=await db.auth.setSession({
+     access_token:tokens.access_token,refresh_token:tokens.refresh_token
+    });
+    if(error||!data.user)throw error||Error('Sesión no válida');
+   }
+   const {data:{user:verified},error:verifyError}=await db.auth.getUser();
+   if(verifyError||!verified||!await isAuthorizedOwner(verified))throw verifyError||Error('No autorizado');
    studioSessionReady=true;
    await refreshAuth();
   }catch{
