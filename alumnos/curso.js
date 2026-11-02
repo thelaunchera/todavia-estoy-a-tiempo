@@ -469,7 +469,7 @@ function lessonsUI(){
  setProgress();
  // Continuar en la primera lección pendiente; si terminó todo, mostrar la última.
  const nextIndex=adminPreview?0:lessons.findIndex(item=>item.status==='ready'&&validVideoId(item.youtube_video_id)&&!done.has(item.lesson_code));
- choose(nextIndex<0?lessons.length-1:nextIndex);
+ choose(nextIndex<0?(lessons.some(item=>item.status==='ready'&&validVideoId(item.youtube_video_id))?lessons.length-1:0):nextIndex);
 }
 async function refreshProductShelf(){
  const statusEl=$('learning-lab-status'),actionEl=$('learning-lab-action'),hint=$('learning-lab-hint');
