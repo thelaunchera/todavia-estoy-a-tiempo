@@ -27,7 +27,7 @@ test('all eight bonus names and bilingual prompt bodies are localized',()=>{
  for(let i=1;i<=8;i++){
   const code='freebie_1photo8_'+String(i).padStart(2,'0');
   assert.ok(!/editorial asimétrico|espacio negativo|flujo diagonal|columnas de revista|impacto monumental|textura|jerarquía|tipografía detrás/i.test(englishTitle(code,'Titulo español')));
-  const body='[[ES]]Crear una fotografía original.\\n[[EN]]Create an original photo.';
+  const body='[[ES]]Crear una fotografía original.[[EN]]Create an original photo.';
   assert.equal(localizedPrompt(code,body,'en'),'Create an original photo.');
   assert.equal(localizedPrompt(code,body,'es'),'Crear una fotografía original.');
  }
