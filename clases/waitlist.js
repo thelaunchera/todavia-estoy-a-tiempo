@@ -1,5 +1,6 @@
 /* Lista de espera separada del newsletter. Inscripción solo tras verificar el correo.
    El indicador en la redirección evita depender de sessionStorage entre Gmail, Safari e Instagram. */
+const localized=(es,en)=>document.documentElement.lang==='en'?en:es;
 import {supabaseUrl,supabasePublishableKey,courseId} from './course-config.js';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -48,7 +49,7 @@ function clearReturn(){
 function showConfirmation(email){
  emailEl.value=email;
  submit.disabled=true;
- message('¡Tu inscripción está confirmada!',true);
+ message(localized('¡Tu inscripción está confirmada!',"Your signup is confirmed!"),true);
  form.hidden=true;
  document.querySelector('#course-waitlist-pending').hidden=true;
  const success=document.querySelector('#course-waitlist-success');
@@ -79,11 +80,11 @@ async function subscribe(user){
   return;
  }
  if(!(user.email_confirmed_at||user.confirmed_at)){
-  message('Revisa el enlace que te enviamos por correo para verificar tu dirección.');
+  message(localized('Revisa el enlace que te enviamos por correo para verificar tu dirección.',"Use the email link we sent you to verify your address."));
   return;
  }
  subscribing=true;
- message('Correo verificado. Estamos terminando tu registro…');
+ message(localized('Correo verificado. Estamos terminando tu registro…',"Email verified. We're finishing your signup…"));
  try{
   const previous=await readMembership(email);
   if(previous?.unsubscribed_at){
@@ -112,10 +113,10 @@ form.addEventListener('submit',async event=>{
  if(!consentEl.checked){message('Marca la casilla para recibir las novedades de esta clase.');return;}
  const email=normal(emailEl.value);
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){
-  message('Revisa la dirección de correo electrónico.');return;
+  message(localized('Revisa la dirección de correo electrónico.',"Check your email address."));return;
  }
  submit.disabled=true;
- message('Preparando la verificación de tu correo…');
+ message(localized('Preparando la verificación de tu correo…',"Preparing email verification…"));
  try{
   sessionStorage.setItem(INTENT,JSON.stringify({email}));
   const {data:{user},error:userError}=await db.auth.getUser();
@@ -144,7 +145,7 @@ form.addEventListener('submit',async event=>{
   requestAnimationFrame(()=>p.scrollIntoView({behavior:'smooth',block:'center'}));
  }catch(error){
   submit.disabled=false;
-  message('No pudimos enviar la verificación. Revisa el correo e inténtalo de nuevo.');
+  message(localized('No pudimos enviar la verificación. Revisa el correo e inténtalo de nuevo.',"We couldn't send verification. Please check your email and try again."));
  }
 });
 async function manage(user){
@@ -190,7 +191,7 @@ document.querySelector('#course-waitlist-dismiss').addEventListener('click',()=>
  ['confirmar-lista','huella','reto'].forEach(param=>url.searchParams.delete(param));
  history.replaceState(history.state,'',url.pathname+url.search);
  window.scrollTo({top:0,behavior:'smooth'});
- message('Ya formas parte de la lista de espera. Puedes seguir explorando la clase.');
+ message(localized('Ya formas parte de la lista de espera. Puedes seguir explorando la clase.',"You're already on the waitlist. Keep exploring the class!"));
 });
 document.querySelector('#course-waitlist-edit').addEventListener('click',()=>{
  returning=false;expectedHash='';salt='';
@@ -202,7 +203,7 @@ document.querySelector('#course-waitlist-edit').addEventListener('click',()=>{
  document.querySelector('#course-waitlist-success').hidden=true;
  form.hidden=false;
  submit.disabled=false;emailEl.value='';consentEl.checked=false;
- message('Puedes escribir otro correo y solicitar un nuevo enlace.');
+ message(localized('Puedes escribir otro correo y solicitar un nuevo enlace.',"You can enter another email and request a new link."));
  emailEl.focus();
 });
 if(returning){
@@ -213,7 +214,7 @@ db.auth.getUser().then(({data:{user}})=>{
  if(user)void detectSession(user);
  else if(returning)message('No encontramos una sesión confirmada. Abre de nuevo el enlace del correo en este navegador.');
 }).catch(()=>{
- if(returning)document.querySelector('#course-waitlist-pending-description').textContent='No pudimos completar la verificación. Solicita otro enlace e inténtalo de nuevo.';
+ if(returning)document.querySelector('#course-waitlist-pending-description').textContent=localized('No pudimos completar la verificación. Solicita otro enlace e inténtalo de nuevo.',"We couldn't complete verification. Please request another link and try again.");
 });
 db.auth.onAuthStateChange((_event,session)=>{
  if(session?.user)window.setTimeout(()=>void detectSession(session.user),0);
