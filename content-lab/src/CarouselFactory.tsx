@@ -1311,7 +1311,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(style.seamlessEnabled)ids.push(style.seamlessAssetId);
     // A continuous multi-page canvas has an overall pixel limit on iPhone Safari.
     const maxScale=independentExport()?4:Math.max(1,Math.min(4,Math.floor(Math.sqrt(36_000_000/(slides.length*1080*1350)))));
-    return sourceAwareScale(ids.map(id=>images[id]),1080,1350,maxScale);
+    return sourceAwareScale(ids.map(id=>images[id||'']),1080,1350,maxScale);
   };
   const exportOne=async(n=i)=>{
     if(busy)return;
