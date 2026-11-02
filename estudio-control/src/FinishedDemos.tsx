@@ -88,7 +88,7 @@ const finishedDemos:Demo[]=[
   category:'Estudio de yoga · lanzamiento y membresías',
   description:'Landing editorial para un estudio de yoga próximo a abrir en Fort Lauderdale: oferta de bienvenida del 30%, lista de interés y tres planes mensuales de $10, $15 y $25.',
   image:'https://raw.githubusercontent.com/thelaunchera/demo-booking-landing-/main/demos/soluna-yoga/images/hero.webp',
-  url:'https://soluna-yoga-fort-lauderdale-uc686i.v2.appdeploy.ai/',
+  url:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/soluna-yoga',
   note:'Concepto ficticio. La lista de espera solo guarda una prueba en el navegador; no hay emails, cobros ni suscripciones reales. Incluye ocho fotografías generadas para mostrar el concepto visual del estudio.',
   kind:'other',
