@@ -911,9 +911,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const savedPanoramaLayers=(style.panoramaLayers||[])
     .filter(layer=>(layer.kind==='text'||layer.kind==='shape'||!!images[layer.assetId]))
     .map(layer=>({...layer,src:images[layer.assetId]||'',locked:layer.locked===true}));
-  // Wallpaper is always selectable behind independently movable stickers.
+  // Match export order: wallpaper, manually-sent-back elements, initial
+  // slide content, then freshly added front layers in the saved order.
   const panoramaLayers=[...savedPanoramaLayers.filter(layer=>layer.role==='background'),
-    ...pageLayers,...savedPanoramaLayers.filter(layer=>layer.role!=='background')].map(layer=>style.seamlessEnabled?layer:constrainNormalLayer(layer,slides.length));
+    ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
+    ...pageLayers,
+    ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')]
+    .map(layer=>style.seamlessEnabled?layer:constrainNormalLayer(layer,slides.length));
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -1016,6 +1020,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,...patch}:layer)});
   };
   const addCanvasLayer=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
+    // Repeated taps must edit the existing empty starter, not pile up text.
+    if(kind==='text'){
+      const starter=(style.panoramaLayers||[]).find(layer=>layer.kind==='text'&&
+        ['Escribe tu título','Escribe aquí','Write here',''].includes((layer.text||'').trim())&&
+        Math.floor((layer.rect.x+layer.rect.w/2)*slides.length)===Math.min(i,slides.length-1));
+      if(starter){setFocusWallpaperId(starter.id);notify('Edita el texto seleccionado: no se creó otro.');return;}
+    }
     if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 elementos en el lienzo.');
     const currentId='panorama-'+crypto.randomUUID();
     const n=Math.min(i,slides.length-1),count=slides.length;
@@ -1027,7 +1038,8 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
          placement:'front',color:shape==='tape'?'#E5C9AA':'#F1E5D2',
          rect:{x:(n+.2)/count,y:.35,w:.60/count,h:shape==='tape'?.10:.35}};
     setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),newLayer]});
-    notify(kind==='text'?'Texto añadido: tócalo en el lienzo para editarlo y moverlo.':'Elemento de collage añadido. Arrástralo para colocarlo.');
+    setFocusWallpaperId(currentId);
+    notify(kind==='text'?'Texto seleccionado: tócalo para editarlo.':'Elemento seleccionado: muévelo con el dedo.');
   };
   const reorderPanoramaLayer=(id:string,action:LayerMove)=>{
     if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
