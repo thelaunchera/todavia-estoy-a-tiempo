@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { Upload } from 'tus-js-client';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from './public-supabase-config';
 import {
   auth as localAuth, api as localApi, hasLocalVault,
@@ -76,7 +77,7 @@ function payload(input: unknown): {title:string;payload:Record<string,unknown>} 
   const value = input && typeof input==='object'?input as Record<string,unknown>:{};
   const title = String(value.title || '').trim().slice(0,180);
   const content:Record<string,unknown>={};
-  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','email_art_url','script','announcement_state','script_reviewed','number','series','series_number','spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes']) {
+  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','email_art_url','script','announcement_state','script_reviewed','number','series','series_number','spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes','recording_path','recording_name','recording_bytes']) {
     const v=value[k];
     if((k==='number'||k==='series_number') && typeof v==='number' && Number.isInteger(v) && v>=1 && v<=999) content[k]=v;
     if(k==='script_reviewed' && typeof v==='boolean') content[k]=v;
@@ -506,4 +507,61 @@ export async function setStudioBonusAvailability(resourceCode: string, ready: bo
     .eq('course_id',WORKSHOP_COURSE_ID).eq('resource_code',resourceCode)
     .select('resource_code,status');
   if(error || !data || data.length!==1) throw new Error('No se pudo actualizar la disponibilidad del bono.');
+}
+
+
+/** Original course footage only. Files remain private and are never classroom lessons.
+ *  Supabase Free storage supports at most 50 MB per object; larger recordings should
+ *  be published as unlisted YouTube videos and linked from the existing Studio field.
+ */
+const CLASS_RECORDING_BUCKET = 'podcast-class-recordings';
+export const CLASS_RECORDING_LIMIT = 50_000_000;
+const MIME_TYPES:Record<string,string> = {mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm'};
+export async function uploadClassRecording(lessonCode:string,file:File,onProgress:(percent:number)=>void):Promise<string>{
+ if(!client)throw new Error('La carga directa necesita el Studio conectado.');
+ if(!/^(0[0-8])$/.test(lessonCode))throw new Error('Selecciona un capítulo válido de la clase.');
+ const ext=(file.name.split('.').pop()||'').toLowerCase();
+ const mime=MIME_TYPES[ext];
+ if(!mime||!file.size)throw new Error('Elige un video MP4, MOV o WEBM que no esté vacío.');
+ if(file.size>CLASS_RECORDING_LIMIT)throw new Error('Este archivo supera 50 MB. Sube el video completo a YouTube como No listado y guarda el enlace de este capítulo aquí.');
+ const who=await owner();
+ const {data:{session},error:sessionError}=await client.auth.getSession();
+ if(sessionError||!session?.access_token||session.user.id!==who.id)throw new Error('Tu sesión de Studio caducó. Vuelve a entrar antes de subir el video.');
+ // A new name every time: an interrupted upload can retry but never overwrite a previous take.
+ const objectName=who.id+'/'+lessonCode+'/es-'+crypto.randomUUID()+'.'+ext;
+ await new Promise<void>((resolve,reject)=>{
+   const upload=new Upload(file,{
+     endpoint:url.replace('.supabase.co','.storage.supabase.co')+'/storage/v1/upload/resumable',
+     headers:{authorization:'Bearer '+session.access_token,'x-upsert':'false'},
+     chunkSize:6*1024*1024,
+     retryDelays:[0,3000,5000,10000],
+     uploadDataDuringCreation:true,
+     removeFingerprintOnSuccess:true,
+     metadata:{bucketName:CLASS_RECORDING_BUCKET,objectName,contentType:mime,cacheControl:'3600'},
+     onError:(error)=>reject(new Error('No se pudo subir el archivo: '+error.message)),
+     onProgress:(uploaded,total)=>onProgress(Math.round(uploaded/Math.max(total,1)*100)),
+     onSuccess:()=>resolve()
+   });
+   upload.start();
+ });
+ // Confirm the uploaded object exists and belongs to the signed-in owner.
+ const parts=objectName.split('/');const basename=parts[parts.length-1];
+ const {data,error}=await client.storage.from(CLASS_RECORDING_BUCKET).list(who.id+'/'+lessonCode,{limit:100,search:basename});
+ if(error||!data?.some(x=>x.name===basename))throw new Error('La carga terminó, pero no se pudo verificar el archivo privado. No se ha marcado como guardado.');
+ return objectName;
+}
+export async function getClassRecordingUrl(path:string):Promise<string>{
+ if(!client)throw new Error('Tu Studio necesita estar conectado.');
+ const who=await owner();
+ if(!path.startsWith(who.id+'/')||!new RegExp('^[0-9a-f-]{36}/0[0-8]/es-[0-9a-f-]+\\.(mp4|mov|webm)$').test(path))throw new Error('Ruta del video no válida.');
+ const {data,error}=await client.storage.from(CLASS_RECORDING_BUCKET).createSignedUrl(path,600);
+ if(error||!data?.signedUrl)throw new Error('No se pudo abrir el video privado.');
+ return data.signedUrl;
+}
+export async function removeOldClassRecording(path:string):Promise<void>{
+ if(!client||!path)return;
+ const who=await owner();
+ if(!path.startsWith(who.id+'/'))return;
+ const {error}=await client.storage.from(CLASS_RECORDING_BUCKET).remove([path]);
+ if(error)throw error;
 }
