@@ -3,7 +3,8 @@ import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number};
+import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;originalBackupId?:string};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
@@ -23,6 +24,8 @@ export default function SeamlessEditor(){
  const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
+ const [backgroundProgress,setBackgroundProgress]=useState('');
+ const backgroundGeneration=useRef(0);
  const [brandFilter,setBrandFilter]=useState('todos');
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
@@ -110,7 +113,7 @@ export default function SeamlessEditor(){
    setSelected(id);setEditingText(id);
    setMessage('Escribe directamente sobre el carrusel. Puedes mover el texto después.');
  };
- const onFile=async(e:React.ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){setMessage('Selecciona una foto válida.');return}if(file.size>18_000_000){setMessage('Usa una foto de menos de 18 MB.');return}const reader=new FileReader();reader.onerror=()=>setMessage('No se pudo abrir la foto. Prueba con JPEG o PNG.');reader.onload=()=>{const replacing=replacePhotoId.current;replacePhotoId.current=null;if(replacing!==null){update(replacing,{src:String(reader.result)});setSelected(replacing);setMessage('Foto reemplazada sin perder su posición ni tamaño.')}else{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:String(reader.result),x:slide*W+100,y:160,width:650,fontSize:80,color:'#191919'}]}));setSelected(id)}};reader.readAsDataURL(file);e.target.value=''};
+ const onFile=async(e:React.ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){setMessage('Selecciona una foto válida.');return}if(file.size>18_000_000){setMessage('Usa una foto de menos de 18 MB.');return}const reader=new FileReader();reader.onerror=()=>setMessage('No se pudo abrir la foto. Prueba con JPEG o PNG.');reader.onload=()=>{const replacing=replacePhotoId.current;replacePhotoId.current=null;if(replacing!==null){update(replacing,{src:String(reader.result),originalBackupId:undefined});setSelected(replacing);setMessage('Foto reemplazada sin perder su posición ni tamaño.')}else{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:String(reader.result),x:slide*W+100,y:160,width:650,fontSize:80,color:'#191919'}]}));setSelected(id)}};reader.readAsDataURL(file);e.target.value=''};
  const locate=(e:React.PointerEvent<HTMLCanvasElement>|React.MouseEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect();return {x:(e.clientX-r.left)*width/r.width,y:(e.clientY-r.top)*H/r.height}};
  const textLines=(it:Item)=>{const lines:string[]=[];const maxWidth=it.width||900;const font=it.fontSize;for(const para of (it.text||'').split('\n')){if(!para.trim()){lines.push('');continue}let line='';for(const word of para.split(/\s+/)){const candidate=line?line+' '+word:word;if(candidate.length*font*.53>maxWidth&&line){lines.push(line);line=word}else line=candidate}lines.push(line)}return lines.length?lines:['']};
  const itemBounds=(it:Item)=>{
@@ -202,6 +205,8 @@ export default function SeamlessEditor(){
  const downloadSlide=async(i:number)=>{setBusy(true);setMessage('Preparando imagen para tu teléfono…');try{const cv=await renderExportSlide(i);const blob=await new Promise<Blob>((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const filename='carrusel-slide-'+String(i+1).padStart(2,'0')+'.png';const file=new File([blob],filename,{type:'image/png'});if(typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Slide '+(i+1)});setMessage('Elige «Guardar imagen» en el menú de tu teléfono.');return}catch(error){if((error as Error)?.name==='AbortError'){setMessage('No se guardó la imagen.');return}}}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage('PNG descargado. En iPhone, si no aparece en Fotos, abre Archivos → Descargas y guarda la imagen.')}catch{setMessage('No se pudo preparar la imagen. Inténtalo de nuevo.')}finally{setBusy(false)}};
  const exportSlides=async()=>{setBusy(true);setMessage('Preparando PNG…');try{for(let i=0;i<doc.count;i++){const c=await renderExportSlide(i);const blob=await new Promise<Blob>((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const url=URL.createObjectURL(blob);const a=document.createElement('a');a.download='seamless-slide-'+String(i+1).padStart(2,'0')+'-'+c.width+'x'+c.height+'.png';a.href=url;a.click();c.width=1;c.height=1;setTimeout(()=>URL.revokeObjectURL(url),90000);await new Promise(r=>setTimeout(r,280))}setMessage('Se generaron '+doc.count+' imágenes PNG. Revisa las descargas del navegador.')}catch{setMessage('No se pudo exportar. Inténtalo de nuevo.')}finally{setBusy(false)}};
  const prepareEditorial=(draft:EditorialDraft)=>{
+  if(busy){setMessage('Termina de procesar la foto antes de cambiar el carrusel.');return;}
+  backgroundGeneration.current+=1;
   const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
   if(hasWork&&!saveProject())return;
  const base=draft.brand==='tle'?'#FAF8F3':draft.brand==='lab'?'#FFF8EC':'#F7F3EB';
@@ -221,6 +226,8 @@ export default function SeamlessEditor(){
    }
  };
  const startNewProject=()=>{
+   if(busy){setMessage('Termina de procesar la foto antes de crear otro proyecto.');return;}
+   backgroundGeneration.current+=1;
    const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
    if(hasWork&&!saveProject())return;
    setDoc({...defaults,backgroundImages:{},items:[]});
@@ -255,7 +262,58 @@ export default function SeamlessEditor(){
  };
  const duplicateSelected=()=>{if(selected===null)return;const item=doc.items.find(it=>it.id===selected);if(!item)return;const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{...item,id,x:item.x+55,y:item.y+55}]}));setSelected(id);setMessage('Elemento duplicado. Puedes mover la copia.')};
  const reorderSelected=(position:'front'|'back'|'forward'|'backward')=>{if(selected===null)return;setDoc(d=>{const items=[...d.items];const index=items.findIndex(it=>it.id===selected);if(index<0)return d;const [item]=items.splice(index,1);const target=position==='front'?items.length:position==='back'?0:position==='forward'?Math.min(index+1,items.length):Math.max(index-1,0);items.splice(target,0,item);return {...d,items}})};
- const removeSolidBackground=async()=>{const item=doc.items.find(it=>it.id===selected);if(!item||item.kind!=='image'||!item.src)return;setBusy(true);setMessage('Procesando fondo de color uniforme…');try{const im=await loadImage(item.src);const cv=document.createElement('canvas');const factor=Math.min(1,1600/Math.max(im.width,im.height));cv.width=Math.round(im.width*factor);cv.height=Math.round(im.height*factor);const ctx=cv.getContext('2d',{willReadFrequently:true});if(!ctx)throw Error('canvas');ctx.drawImage(im,0,0,cv.width,cv.height);const data=ctx.getImageData(0,0,cv.width,cv.height);const {width:w,height:h}=cv;const px=data.data;const corners=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];const rgb=[0,1,2].map(channel=>Math.round(corners.reduce((sum,i)=>sum+px[i+channel],0)/4));const visited=new Uint8Array(w*h);const queue=new Int32Array(w*h);let head=0,tail=0;const add=(i:number)=>{if(i<0||i>=w*h||visited[i])return;const p=i*4;const dist=Math.sqrt((px[p]-rgb[0])**2+(px[p+1]-rgb[1])**2+(px[p+2]-rgb[2])**2);if(dist>48)return;visited[i]=1;queue[tail++]=i};for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);px[i*4+3]=0;if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w)}ctx.putImageData(data,0,0);const result=cv.toDataURL('image/png');update(item.id,{src:result});setMessage('Fondo uniforme eliminado. Revisa los bordes; las fotos con fondos complejos necesitan recorte avanzado.')}catch{setMessage('No se pudo quitar el fondo. Prueba con una foto de fondo liso.')}finally{setBusy(false)}};
+ const removePhotoBackground=async()=>{
+  if(busy)return;
+  const item=doc.items.find(it=>it.id===selected);
+  if(!item||item.kind!=='image'||!item.src)return;
+  const generation=backgroundGeneration.current;
+  setBusy(true);setBackgroundProgress('Preparando foto…');
+  setMessage('Quitando el fondo con IA en este dispositivo. La primera vez se descargará el modelo.');
+  try{
+   // Uploaded photos have a data URL, and library assets may have an HTTPS URL.
+   // If the user repeats removal, use the preserved ORIGINAL instead of a cutout.
+   const source=item.originalBackupId
+    ?await restoreOriginalPhoto(item.originalBackupId):item.src;
+   const original=await originalBlobFromSource(source);
+   const transparent=await cutoutOriginalPhoto(original,label=>{
+    if(generation===backgroundGeneration.current)setBackgroundProgress(label);
+   });
+   if(generation!==backgroundGeneration.current)return;
+   const backupId=item.originalBackupId||await storeOriginalPhoto(original);
+   if(generation!==backgroundGeneration.current)return;
+   setDoc(d=>({...d,items:d.items.map(photo=>
+    photo.id===item.id&&photo.src===item.src
+     ?{...photo,src:transparent,originalBackupId:backupId}:photo)}));
+   setMessage('Fondo eliminado. La foto tiene transparencia y conserva su posición. Puedes recuperar la original.');
+  }catch(err){
+   if(generation===backgroundGeneration.current)
+    setMessage((err instanceof Error?err.message:'No se pudo quitar el fondo.')+
+     ' La foto original sigue intacta. Puedes probar «Quitar fondo liso» si tiene un color uniforme.');
+  }finally{
+   if(generation===backgroundGeneration.current){setBusy(false);setBackgroundProgress('');}
+  }
+ };
+ const restorePhotoBackground=async()=>{
+  if(busy)return;
+  const item=doc.items.find(it=>it.id===selected);
+  if(!item?.originalBackupId)return;
+  const generation=backgroundGeneration.current;
+  setBusy(true);setBackgroundProgress('Restaurando foto original…');
+  try{
+   const original=await restoreOriginalPhoto(item.originalBackupId);
+   if(generation!==backgroundGeneration.current)return;
+   setDoc(d=>({...d,items:d.items.map(photo=>
+    photo.id===item.id&&photo.src===item.src
+     ?{...photo,src:original,originalBackupId:undefined}:photo)}));
+   setMessage('Foto original restaurada, sin cambiar su posición ni tamaño.');
+  }catch(err){
+   if(generation===backgroundGeneration.current)
+    setMessage(err instanceof Error?err.message:'No se pudo recuperar la foto original.');
+  }finally{
+   if(generation===backgroundGeneration.current){setBusy(false);setBackgroundProgress('');}
+  }
+ };
+  const removeSolidBackground=async()=>{const item=doc.items.find(it=>it.id===selected);if(!item||item.kind!=='image'||!item.src)return;setBusy(true);setMessage('Procesando fondo de color uniforme…');try{const im=await loadImage(item.src);const cv=document.createElement('canvas');const factor=Math.min(1,1600/Math.max(im.width,im.height));cv.width=Math.round(im.width*factor);cv.height=Math.round(im.height*factor);const ctx=cv.getContext('2d',{willReadFrequently:true});if(!ctx)throw Error('canvas');ctx.drawImage(im,0,0,cv.width,cv.height);const data=ctx.getImageData(0,0,cv.width,cv.height);const {width:w,height:h}=cv;const px=data.data;const corners=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];const rgb=[0,1,2].map(channel=>Math.round(corners.reduce((sum,i)=>sum+px[i+channel],0)/4));const visited=new Uint8Array(w*h);const queue=new Int32Array(w*h);let head=0,tail=0;const add=(i:number)=>{if(i<0||i>=w*h||visited[i])return;const p=i*4;const dist=Math.sqrt((px[p]-rgb[0])**2+(px[p+1]-rgb[1])**2+(px[p+2]-rgb[2])**2);if(dist>48)return;visited[i]=1;queue[tail++]=i};for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);px[i*4+3]=0;if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w)}ctx.putImageData(data,0,0);const result=cv.toDataURL('image/png');update(item.id,{src:result});setMessage('Fondo uniforme eliminado. Revisa los bordes; las fotos con fondos complejos necesitan recorte avanzado.')}catch{setMessage('No se pudo quitar el fondo. Prueba con una foto de fondo liso.')}finally{setBusy(false)}};
  const current=doc.items.find(it=>it.id===selected);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
  const viewportScale=300/W;
@@ -304,7 +362,11 @@ export default function SeamlessEditor(){
     {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
     <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
     <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button></div>
-    {current.kind==='image'&&<button style={control} disabled={busy} onClick={()=>void removeSolidBackground()}>Quitar fondo liso</button>}
+    {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+     <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy} onClick={()=>void removePhotoBackground()}>Quitar fondo con IA</button>
+     {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar foto original</button>}
+     <button type="button" style={control} disabled={busy} onClick={()=>void removeSolidBackground()}>Quitar fondo liso</button>
+    </div>}
     <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>deleteElement(current.id)}>Eliminar elemento</button>
    </div></details>}
   <details style={{margin:'10px 0'}}><summary style={{cursor:'pointer',fontWeight:700,fontSize:12}}>Textos de este slide · abrir para seleccionar</summary><div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',margin:'12px 0'}}><strong>Textos del slide {slide+1}:</strong>{doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===slide).map((it,i)=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white',maxWidth:190,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} onClick={()=>{setSelected(it.id);setTimeout(()=>textEditor.current?.focus(),30)}}>{it.text?.trim()||'Texto nuevo '+(i+1)}</button>)}<button style={control} onClick={()=>addText('paragraph')}>+ Nuevo texto</button></div></details>
@@ -319,7 +381,13 @@ export default function SeamlessEditor(){
    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}><div><strong style={{fontSize:16}}>Slide {slide+1} de {doc.count}</strong><div style={{fontSize:12,color:'#53636B'}}>Selecciona una lámina para editarla</div></div><div style={{display:'flex',gap:6}}><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide-1)} disabled={slide===0} aria-label="Slide anterior">‹</button><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide+1)} disabled={slide>=doc.count-1} aria-label="Slide siguiente">›</button></div></div>
    <div style={{display:'grid',gridTemplateColumns:'repeat('+Math.min(doc.count,5)+',minmax(0,1fr))',gap:7}}>{Array.from({length:doc.count},(_,i)=>{const texts=doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===i);const photos=doc.items.filter(it=>it.kind==='image'&&Math.floor(it.x/W)===i);return <button key={i} type="button" aria-current={slide===i?'step':undefined} aria-label={'Ir al slide '+(i+1)} onClick={()=>goSlide(i)} style={{border:slide===i?'2px solid #244B5B':'1px solid #D7DFE2',background:slide===i?'#E6F0F4':'#fff',color:'#191919',borderRadius:10,padding:'10px 3px',minWidth:0,textAlign:'center'}}><strong style={{display:'block',fontSize:14}}>{i+1}</strong><span style={{display:'block',fontSize:10,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{texts[0]?.text?.trim().slice(0,14)|| (photos.length?'Foto':'Vacío')}</span></button>})}</div>
   </section>
-  {(current||recentlyDeleted)&&<div role="toolbar" aria-label="Edición táctil" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
+  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
+   <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
+    onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo'}</button>
+   {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar original</button>}
+   {busy&&backgroundProgress&&<span role="status" style={{fontSize:12}}>{backgroundProgress}</span>}
+  </div>}
+    {(current||recentlyDeleted)&&<div role="toolbar" aria-label="Edición táctil" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    {current&&<>
    {current.kind==='text'&&<button type="button" style={{...control,background:'#191919',color:'white'}} onClick={editOnCanvas}>✎ Editar texto aquí</button>}
    {current.kind==='text'&&<div role="group" aria-label="Curvar texto seleccionado" style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:7,padding:'6px 9px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
@@ -425,9 +493,9 @@ export default function SeamlessEditor(){
     </div>}
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
   </div>}
-  <p style={{fontSize:12,fontWeight:600}}>Toca una foto, texto o sticker para seleccionarlo. Cuando selecciones un texto, usa «Curvar texto» para arquearlo arriba o abajo. Usa la × o «Borrar» para eliminar elementos.</p>
+  <p style={{fontSize:12,fontWeight:600}}>Selecciona una foto que hayas subido (o una foto de la biblioteca) y toca «Quitar fondo». El recorte queda transparente y puedes restaurar la original. También puedes curvar los textos o borrar elementos con ×.</p>
   <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para pasar de slide; usa dos dedos para cambiar el tamaño de un elemento seleccionado. Los botones Anterior y Siguiente son opcionales.</p>
-  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
+  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
  </section>;
 }
