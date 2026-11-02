@@ -5,11 +5,12 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('Reels and Stories render actual 1080 by 1920 canvases, editable touch ratio and PNG exports',()=>{
  const render=read('src/FreePostStudio.tsx'),touch=read('src/TouchLayerCanvas.tsx'),app=read('src/App.tsx');
  assert.ok(render.includes("format==='Reel'||format==='Story'?{width:1080,height:1920}"));
- assert.ok(render.includes('canvas.width=width;canvas.height=height'));
+ assert.ok(render.includes('canvas.width=width*pixelScale;canvas.height=height*pixelScale'));
+ assert.ok(render.includes('ctx.scale(pixelScale,pixelScale)'));
  assert.ok(render.includes('paintFreeBackground(ctx,width,height,backgroundId)'));
  assert.ok(render.includes('paintPanoramaLayers(ctx,width,height,coverLayers(post,brand,decor),images)'));
  assert.ok(render.includes('canvasHeight={freePostDimensions(post.format).height}'));
- assert.ok(render.includes('a.download=(post.title'));
+ assert.ok(render.includes('downloadLosslessPng(canvas'));
  assert.ok(touch.includes('canvasHeight = 1350'));
  assert.ok(touch.includes('rect.h*canvasHeight'));
  assert.ok(app.includes("['Reel','Story'].includes(editor.format)?'1920 · 9:16':'1350 · 4:5'"));
