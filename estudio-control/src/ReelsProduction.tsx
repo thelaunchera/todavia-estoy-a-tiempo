@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {uploadPodcastReelAudio,getPodcastReelAudioUrl} from './supabase-client';
-import { Check, Clipboard, Film, Headphones, Mic2, Save, ShieldCheck } from 'lucide-react';
+import { Check, Clipboard, Download, Film, Headphones, Mic2, Save, ShieldCheck } from 'lucide-react';
 import { REELS_NOVIEMBRE, REELS_SECTION } from './reels-plan';
 import './reels-production.css';
 
@@ -27,20 +27,12 @@ type Props = {
 
 const steps = [
   { id: 'guion', label: 'Guion revisado' },
-  { id: 'audio', label: 'Voz creada en ElevenLabs' },
-  { id: 'tomas', label: 'Tomas grabadas' },
+  { id: 'audio', label: 'Audio de voz listo' },
+  { id: 'tomas', label: 'Videos cortos grabados' },
   { id: 'edicion', label: 'Reel editado' },
-  { id: 'aprobado', label: 'Montaje aprobado' }
+  { id: 'aprobado', label: 'Reel revisado y aprobado' }
 ] as const;
 const statuses = ['pendiente', 'guion listo', 'audio listo', 'tomas grabadas', 'editando', 'aprobado'] as const;
-function cleanUrl(value:string) {
-  if (!value.trim()) return true;
-  try {
-    const u = new URL(value.trim());
-    return u.protocol === 'https:' && !u.username && !u.password;
-  } catch { return false; }
-}
-
 export default function ReelsProduction({entries,onSave,onCreate}:Props) {
   const [selected,setSelected] = useState('03');
   const reel = useMemo(() => REELS_NOVIEMBRE.find(r=>r.id===selected) || REELS_NOVIEMBRE[0],[selected]);
@@ -51,6 +43,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
   const [url,setUrl] = useState('');
   const [audioPreview,setAudioPreview] = useState('');
   const [uploading,setUploading] = useState(false);
+  const [downloading,setDownloading] = useState(false);
   const [status,setStatus] = useState<string>('guion listo');
   const [checks,setChecks] = useState<string[]>([]);
   const [busy,setBusy] = useState(false);
@@ -69,6 +62,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
 
   useEffect(()=>{let active=true;setAudioPreview('');if(url.startsWith('https://')){setAudioPreview(url)}else if(url){getPodcastReelAudioUrl(url).then(value=>{if(active)setAudioPreview(value)}).catch(()=>{if(active)setNotice('No se pudo reproducir el audio privado.')})}return()=>{active=false}},[url]);
   async function chooseAudio(file:File|undefined){if(!file)return;setUploading(true);setNotice('Subiendo audio…');try{const path=await uploadPodcastReelAudio(reel.id,file,()=>{});setUrl(path);setNotice('Audio subido. Pulsa Guardar progreso para asociarlo al reel.')}catch(e){setNotice(e instanceof Error?e.message:'Error al subir audio.')}finally{setUploading(false)}}
+  async function downloadAudio(){if(!url)return;setDownloading(true);setNotice('Preparando descarga…');try{const source=await getPodcastReelAudioUrl(url);const response=await fetch(source);if(!response.ok)throw new Error('No se pudo descargar el audio.');const blob=await response.blob();const objectUrl=URL.createObjectURL(blob);const a=document.createElement('a');a.href=objectUrl;a.download='PODCAST_REEL_'+reel.id+'.'+(url.split('.').pop()||'mp3');document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);setNotice('Audio listo para guardar en Archivos.')}catch(e){setNotice(e instanceof Error?e.message:'No se pudo descargar el audio.')}finally{setDownloading(false)}}
   const records = entries.filter(e=>e.section===REELS_SECTION);
   const completed = records.filter(e=>e.status==='aprobado').length;
   const drafted = records.filter(e=>(e.script||'').length>0).length;
@@ -102,7 +96,7 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
       <div>
         <span className="reels-kicker"><Film size={16}/> PRODUCCIÓN EDITORIAL · NOVIEMBRE 2026</span>
         <h2>De tu voz, <em>a una historia visual.</em></h2>
-        <p>Aquí están los reels, separados de los capítulos del podcast. Tú produces la voz en ElevenLabs y guardas el audio cuando esté listo. Ninguna acción publica contenido.</p>
+        <p>Aquí están los reels, separados de los capítulos del podcast. Graba o crea tu audio, súbelo desde tu teléfono y descárgalo cuando lo necesites. Ninguna acción publica contenido.</p>
       </div>
       <div className="reels-tally" aria-label={completed+' reels aprobados de cuatro'}>
         <strong>{completed}<span> / 04</span></strong>
@@ -134,43 +128,43 @@ export default function ReelsProduction({entries,onSave,onCreate}:Props) {
         </div>
         <p className="reels-episode-label"><Mic2 size={17}/> Relacionado con el capítulo: <strong>{reel.episode}</strong></p>
         <section className="reels-panel">
-          <div className="reels-panel-head"><div><span>01 / TU VOZ</span><h4>Guion para ElevenLabs</h4></div>
+          <div className="reels-panel-head"><div><span>01 / TU VOZ</span><h4>Texto que se escucha en el reel</h4></div>
             <button type="button" onClick={()=>void copy(script,'script')} className="reels-copy"><Clipboard size={16}/>{copied==='script'?'Copiado':'Copiar voz'}</button></div>
-          <p className="reels-tip">Texto original para este reel, independiente del audio del episodio. Puedes revisarlo antes de generar tu voz. Copiar no incluye indicaciones ni etiquetas.</p>
+          <p className="reels-tip">Este es el texto que se escucha mientras aparecen las imágenes. Puedes cambiarlo y copiarlo para grabar tu voz.</p>
           <textarea className="reels-voice-input" aria-label="Guion de voz para ElevenLabs" value={script} onChange={e=>setScript(e.target.value)} rows={7} maxLength={16000} />
-          <p className="reels-performance"><Headphones size={16}/><span><strong>Dirección de voz:</strong> {reel.tone}</span></p>
+          <p className="reels-performance"><Headphones size={16}/><span><strong>Cómo debe sonar tu voz:</strong> {reel.tone}</span></p>
           <label className="reels-audio-field">Subir audio del reel (MP3, M4A, WAV o AAC)
             <input type="file" accept=".mp3,.m4a,.wav,.aac,audio/*" disabled={uploading||busy} onChange={e=>{void chooseAudio(e.target.files?.[0]);e.target.value=''}}/>
           </label>
           {uploading&&<p role="status">Subiendo audio privado…</p>}
-          {audioPreview&&<audio controls preload="none" src={audioPreview} style={{width:'100%',marginTop:10}}/>}
+          {audioPreview&&<><audio controls preload="none" src={audioPreview} style={{width:'100%',marginTop:10}}/><button type="button" className="reels-copy" disabled={downloading} onClick={()=>void downloadAudio()}><Download size={16}/>{downloading?'Preparando…':'Descargar audio'}</button></>}
         </section>
 
         <section className="reels-panel">
-          <div className="reels-panel-head"><div><span>02 / RODAJE</span><h4>Qué grabar, plano por plano</h4></div>
+          <div className="reels-panel-head"><div><span>02 / QUÉ VIDEOS GRABAR</span><h4>Qué grabar con tu teléfono, paso a paso</h4></div>
             <button type="button" onClick={()=>void copy(shots,'shots')} className="reels-copy"><Clipboard size={16}/>{copied==='shots'?'Copiado':'Copiar tomas'}</button></div>
-          <p className="reels-tip">Graba clips de 6–10 segundos por toma para poder elegir después. Usa iluminación de ventana y el iPhone en vertical; cada reel tiene una secuencia distinta.</p>
+          <p className="reels-tip">Graba cada escena como un video corto. Sostén el teléfono vertical, busca luz cerca de una ventana y sigue los pasos de abajo. No tienes que salir hablando a cámara.</p>
           <textarea aria-label="Direcciones de grabación" className="reels-shots-input" rows={10} maxLength={12000} value={shots} onChange={e=>setShots(e.target.value)} />
-          <div className="reels-note">Guardar el material como <strong>{reel.filename}</strong>. El logo del podcast va pequeño; no añadir flechas ni presentar escenas de prueba como ventas reales.</div>
+          <div className="reels-note">Cuando termines, puedes nombrar el video <strong>{reel.filename}</strong>. Pon el logo pequeño. No necesitas flechas ni inventar resultados.</div>
         </section>
 
         <section className="reels-panel">
-          <div className="reels-panel-head"><div><span>03 / MONTAJE</span><h4>Avance y revisión</h4></div></div>
+          <div className="reels-panel-head"><div><span>03 / TERMINAR EL REEL</span><h4>Marca lo que ya hiciste</h4></div></div>
           <div className="reels-checks">
             {steps.map(step=><label key={step.id}><input type="checkbox" checked={checks.includes(step.id)} onChange={()=>toggleCheck(step.id)} /><span>{step.label}</span>{checks.includes(step.id)&&<Check size={16}/>}</label>)}
           </div>
           <div className="reels-fields">
-            <label>Etapa actual
+            <label>¿En qué paso vas?
               <select value={status} onChange={e=>setStatus(e.target.value)}>
                 {statuses.map(s=><option value={s} key={s}>{s}</option>)}
               </select>
             </label>
-            <label>Notas de edición o tomas pendientes
+            <label>Notas o videos que te faltan
               <textarea rows={3} maxLength={40000} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Qué corregir, qué grabar de nuevo, dónde guardaste el video…" />
             </label>
           </div>
           <div className="reels-savebar">
-            <span><ShieldCheck size={16}/> El reel solo se marca como aprobado si tú lo indicas.</span>
+            <span><ShieldCheck size={16}/> Nada se publica automáticamente.</span>
             <button type="button" onClick={()=>void save()} disabled={busy||uploading}><Save size={17}/>{busy?'Guardando…':'Guardar progreso'}</button>
           </div>
           {notice && <p className="reels-notice" role="status">{notice}</p>}
