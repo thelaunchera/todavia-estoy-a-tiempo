@@ -21,18 +21,18 @@ export const recordingStarts:Record<string,RecordingStart>={
   readyPrompt:'Mi proyecto es Casa Brownie, una marca ficticia de brownies tradicionales. Quiero una web de presentación de una página, sin compras ni reservas activas. Público: personas que quieren conocer un producto artesanal. Acción: leer los detalles y contactar cuando exista información real. Crea una ficha de oferta y separa hechos, decisiones creativas y datos pendientes. No inventes ingredientes, disponibilidad, precios, reseñas ni permisos.'
  },
  '02':{
-  tabs:['Tres referencias concretas guardadas en 02_REFERENCIAS: URL, captura y observación (comprobar antes de grabar)','ChatGPT','Documento 02_REFERENCIAS'],
-  actions:['Abre tres ejemplos y compara únicamente hero, organización y versión móvil.','Escribe una observación y algo que NO vas a copiar de cada página.','Pide a ChatGPT una paleta y estilo propio para Casa Brownie y guárdalos.'],
-  savedPoint:'Guarda URLs y capturas de las tres referencias antes de grabar; no dependen de que sigan abiertas.',
-  finish:'Termina con paleta, composición y tres reglas visuales aprobadas.',
-  readyPrompt:'Estoy diseñando Casa Brownie, una web ficticia de brownies tradicionales. Tras revisar estas tres webs y anotar lo que me gustó [PEGAR MIS OBSERVACIONES], propón una dirección editorial propia: colores, fotografía, tipografías y jerarquía en móvil. No copies textos, fotos, marcas ni estructura completa.'
+  tabs:['Freebie original https://podcast.thelaunchera.com/content-lab/prompts/ con acceso autorizado','ChatGPT y ficha Casa Brownie','Carpeta 04_DISENO para moodboard','Referencias de marca'],
+  actions:['Abre el freebie original y muestra las ocho composiciones con ejemplos de matcha: son estilos, no ocho fotografías a generar.','Elige Offset Negative Space para el hero y Side-Cropped Close-Up para detalles de Casa Brownie; explica por qué.','En ChatGPT, junto con tus referencias, usa el prompt de moodboard. Decide paleta, tipografía, luz y encuadres.','Guarda MOODBOARD_CASA_BROWNIE y tres reglas visuales en 04_DISENO. No abras AppDeploy todavía.'],
+  savedPoint:'Ten las ocho miniaturas y los dos estilos elegidos preparados. No publiques los prompts del freebie fuera de su acceso autorizado.',
+  finish:'Termina con moodboard real y tres decisiones: paleta, luz y composición.',
+  readyPrompt:'Estoy creando un moodboard para Casa Brownie, una web ficticia de brownies. Revisé mis 8 Master Prompts gratuitos de composición y elijo Offset Negative Space para hero y Side-Cropped Close-Up para textura. Propón paleta cálida de tres colores, tipografías, iluminación, fondos y encuadres para la web; sin copiar matcha ni inventar ingredientes, precios o reseñas.'
  },
  '03':{
-  tabs:['ChatGPT con generación de imágenes disponible y límite visible del plan','Paleta y referencias de 02_REFERENCIAS','Carpeta 02_FOTOS','Agenda de producción: mañana fotos y tarde AppDeploy'],
-  actions:['Pega el prompt de imagen horizontal y genera el hero.','Revisa manos extrañas, etiquetas ficticias y letras dibujadas.','Usa el hero como referencia para los seis sabores y dos regalos. Demuestra un archivo y explica cómo repetir el mismo método, una imagen por solicitud.','Muestra tu organización personal: fotos y copys en un bloque de mañana; construcción de la web por la tarde; si Free alcanza su límite, continúa después sin prometer nueve imágenes en una sesión.'],
-  savedPoint:'Guarda HERO_ORIGINAL.png antes de producir variaciones; podrás regresar a él.',
-  finish:'Termina con hero estático, seis sabores y dos regalos guardados por separado; muestra una generación completa y explica la repetición del método.',
-  readyPrompt:'Crea una fotografía editorial realista para Casa Brownie, un proyecto ficticio de brownies tradicionales. Formato horizontal 16:9, luz natural lateral, mesa de madera clara, brownies simples de chocolate, fondo cálido con espacio libre para un título externo. Sin texto impreso, logos, personas, empaques con ingredientes inventados ni reseñas.'
+  tabs:['Moodboard aprobado en 04_DISENO','ChatGPT con fotografías originales adjuntas','Carpeta 02_FOTOS','Ficha Crear cada foto de Casa Brownie'],
+  actions:['Muestra el moodboard anterior y explica cómo garantiza coherencia.','Adjunta la referencia y crea UNA foto principal para hero, con espacio para texto externo; revisa textura, sombras y detalles.','Demuestra una foto de un sabor con la misma luz. Explica cómo repetir el método para seis sabores y dos regalos como archivos separados.','Guarda HERO_ESTATICO y archivos de sabores/regalos uno a uno; si el plan Free alcanza un límite, muestra cómo conservar lo hecho.'],
+  savedPoint:'Conserva moodboard y foto original para comparar. No hagas generaciones adicionales solo por llenar tiempo.',
+  finish:'Termina mostrando una foto de hero y una de sabor revisadas; explica cómo completar las demás.',
+  readyPrompt:'Usa el moodboard aprobado de Casa Brownie y la referencia original adjunta. Genera UNA foto editorial para portada web con brownie realista, luz natural, textura creíble, fondo cálido y espacio limpio para colocar el título fuera de la imagen. No añadas texto, logos inventados ni collages.'
  },
  '04':{
   tabs:['ChatGPT','01_FICHA_DE_OFERTA','03_TEXTOS_DE_WEB'],
