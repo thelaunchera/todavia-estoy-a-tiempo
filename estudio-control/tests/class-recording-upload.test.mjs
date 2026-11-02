@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import test from 'node:test';
+const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+test('nine chapter upload controls in private production UI',()=>{
+ const ui=read('src/ClassProduction.tsx');
+ assert.match(ui,/classLessons\.map\(item=>/);
+ assert.match(ui,/class-module-upload/);
+ assert.match(ui,/Subir video/);
+ assert.match(ui,/Subir video de este capítulo/);
+ assert.match(ui,/type="file"/);
+ assert.match(ui,/accept="\.mp4,\.mov,\.webm/);
+ assert.match(ui,/uploadProgress/);
+ assert.match(ui,/onViewRecording/);
+ assert.match(ui,/role="status"/);
+});
+test('upload is stored privately and scoped to studio owner',()=>{
+ const src=read('src/supabase-client.ts');
+ const storage=read('sql/class-recordings-private-20261102.sql');
+ assert.match(src,/CLASS_RECORDING_BUCKET = 'podcast-class-recordings'/);
+ assert.match(src,/CLASS_RECORDING_LIMIT = 50_000_000/);
+ assert.match(src,/await owner\(\)/);
+ assert.match(src,/getSession\(\)/);
+ assert.match(src,/upload\/resumable/);
+ assert.match(src,/new Upload\(file,/);
+ assert.match(src,/chunkSize:6\*1024\*1024/);
+ assert.match(src,/createSignedUrl\(path,600\)/);
+ assert(!src.includes("getPublicUrl(path)"));
+ assert(storage.includes("public,false")||storage.includes("false,50000000"));
+ assert.match(storage,/podcast_studio_admins/);
+ assert.match(storage,/storage\.foldername\(name\)/);
+});
+test('uploaded original is saved per chapter without publishing lessons',()=>{
+ const app=read('src/Studio.tsx');
+ assert.match(app,/onUpload=\{async \(entry,file,onProgress\)=>/);
+ assert.match(app,/recording_path:path/);
+ assert.match(app,/recording_name:file\.name/);
+ assert.match(app,/onViewRecording=\{getClassRecordingUrl\}/);
+ assert.doesNotMatch(app.slice(app.indexOf("onUpload={async (entry,file,onProgress)=>"),app.indexOf("onViewRecording={getClassRecordingUrl}")),/podcast_class_lessons/);
+ const api=read('src/supabase-client.ts');
+ assert.match(api,/recording_path','recording_name','recording_bytes/);
+});
