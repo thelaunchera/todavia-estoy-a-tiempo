@@ -148,6 +148,6 @@ test('phone customer can upload their own photo and background and edit all imag
  assert.ok(editorial.includes('input.backgroundImageSrc'), 'user-selected background must render behind own photo');
  assert.ok(editorial.includes('frameWidth=region[2]*frameScale'), 'photo pinch must affect PNG image itself');
  assert.ok(touch.includes('fontSize=Math.round(Math.max(16'), 'pinch grows actual layer type');
- assert.ok(free.includes('headlineRect:clampRect(nextRect)'), 'main title size/position save atomically');
+ assert.ok(free.includes('headlineRect:clampFreePhotoRect(nextRect)'), 'main title size/position save atomically with flexible edges');
  assert.ok(app.includes('locale={loginLanguage}'), 'editor language follows ES or EN selector');
 });
