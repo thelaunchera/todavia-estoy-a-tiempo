@@ -158,7 +158,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const addPosterTitle=()=>{
   const existing=decor.layers.find(l=>l.kind==='text'&&l.font==='poster');
   if(existing){setFocusLayerId(existing.id);notify('Ya tienes texto póster; edítalo en la publicación.');return}
-  if(['TU GRAN IDEA','YOUR BIG IDEA'].includes(post.hook.trim().toUpperCase())){
+  if(post.hook.trim()){
    update({...decor,headlineStyle:{...decor.headlineStyle,font:'poster',fontSize:116,fontWeight:900,lineHeight:.98}});
    setFocusLayerId('main-title');return;
   }
