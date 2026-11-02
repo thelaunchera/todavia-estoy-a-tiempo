@@ -24,8 +24,8 @@ test('iPad and iPhone keep a compact Deslizar/Editar switch while scrolling',()=
 });
 
 test('Private Studio seamless carousel retains the same touch-first tools',()=>{
- const studio=read('../../estudio-control/src/SeamlessEditor.tsx');
- const route=read('../../estudio-control/src/Studio.tsx');
+ const studio=read('../estudio-control/src/SeamlessEditor.tsx');
+ const route=read('../estudio-control/src/Studio.tsx');
  assert.ok(route.includes("<SeamlessEditor />"));
  assert.ok(studio.includes('Herramientas táctiles del carrusel seamless'));
  for(const tool of ["label:'Fotos'","label:'Texto'","label:'Stickers'","label:'Capas'","label:'Fondo'"])
