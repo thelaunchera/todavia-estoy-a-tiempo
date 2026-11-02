@@ -1,5 +1,5 @@
 /**
- * Latin-American Spanish / English UI translations for Content Lab.
+ * Spanish / English UI translations for Content Lab.
  * Works with existing React screens without translating members' written copy,
  * account names, graphics, captions, or generated images.
  */
