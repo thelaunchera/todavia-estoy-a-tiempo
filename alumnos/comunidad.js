@@ -254,7 +254,11 @@ function render(){
 async function init(){
  try{
   const allowed=await access();if(!allowed)return;
-  $('club-members').hidden=false;$('club-locked').hidden=true;$('club-studio-link').hidden=!state.owner;
+  $('club-members').hidden=false;$('club-locked').hidden=true;
+  const studioLink=$('club-studio-link');
+  studioLink.hidden=!state.owner;
+  if(state.owner)studioLink.setAttribute('href','../estudio/');
+  else studioLink.removeAttribute('href');
   $('club-admin-banner').hidden=!state.owner;
   if(!state.owner&&!state.courses.includes(courseId)){
    $('club-post-scope').querySelector('[value=curso]').disabled=true;
@@ -276,6 +280,19 @@ async function init(){
   }
  }catch(e){console.error('Community init failed',e?.code||e?.message||'unknown');showLocked('No pudimos comprobar tus permisos. Actualiza la página y vuelve a entrar desde tu aula.');}
 }
+// Atrás vuelve a la navegación anterior solo si salió de esta misma aula.
+$('club-page-back')?.addEventListener('click',()=>{
+ let canGoBack=false;
+ try{
+  const previous=new URL(document.referrer);
+  canGoBack=previous.origin===location.origin
+   && previous.pathname.startsWith('/alumnos/')
+   && previous.pathname!==location.pathname
+   && history.length>1;
+ }catch{}
+ if(canGoBack)history.back();
+ else location.assign('../alumnos/');
+});
 await init();
 // Supabase Realtime notifies the club about new posts, comments and reactions.
 // All actual content is re-read through member-scoped RLS policies.
