@@ -79,7 +79,7 @@ export default function TouchLayerCanvas({
   useEffect(()=>{
     if(focusLayerId&&focusedWallpaperReady){
       setInteractionMode('edit');setSelected(focusLayerId);
-      if(inlineTextTools&&pageCount===1&&layers.some(item=>item.id===focusLayerId&&item.kind==='text')){
+      if(onUpdate&&(inlineTextTools||pageCount>1)&&layers.some(item=>item.id===focusLayerId&&item.kind==='text')){
         setEditingText(focusLayerId);
       }
     }
@@ -501,7 +501,7 @@ export default function TouchLayerCanvas({
           // Every new element stays above earlier ones. Selection must NEVER
           // change stacking order: tapping a photo should not bury its siblings.
           // Background is always the bottom-most layer, independent of locking.
-          const z = layer.role==='background' ? 1 : 20 + layerIndex;
+          const z = layer.role==='background'?1:layer.placement==='behind-text'?2+layerIndex:20+layerIndex;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
@@ -526,7 +526,7 @@ export default function TouchLayerCanvas({
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
             onDoubleClick={() => {
               if(layer.kind==='photo'){setSelected(layer.id);setCropping(true);}
-              if(layer.kind==='text'&&inlineTextTools){setSelected(layer.id);setEditingText(layer.id);}
+              if(layer.kind==='text'&&onUpdate&&(inlineTextTools||pageCount>1)){setSelected(layer.id);setEditingText(layer.id);}
             }}
             onKeyDown={e => {
               if(layer.locked||!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
@@ -545,7 +545,7 @@ export default function TouchLayerCanvas({
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>
             </div>}
-            {layer.kind==='text'&&editingText===layer.id&&inlineTextTools&&active?
+            {layer.kind==='text'&&editingText===layer.id&&onUpdate&&(inlineTextTools||pageCount>1)&&active?
               <textarea ref={quickTextInput} className="touch-editor-oncanvas-text"
                 aria-label="Editar texto directamente sobre el diseño"
                 value={layer.text||''} spellCheck={true}
@@ -595,7 +595,7 @@ export default function TouchLayerCanvas({
           {onRemove&&<button type="button" aria-label="Borrar elemento" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={16}/></button>}
         </div>}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
-          alt="" draggable={false} aria-hidden="true"/>}
+          alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
           {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
           {snapGuides.y!==undefined&&<span className="horizontal" style={{top:snapGuides.y*100+'%'}}/>}
@@ -628,6 +628,7 @@ export default function TouchLayerCanvas({
       <span title={chosen.name}>{chosen.name}</span>
       <button type="button" aria-label="Reducir elemento" onClick={()=>resizeSelected(.86)}>−</button>
       <button type="button" aria-label="Agrandar elemento" onClick={()=>resizeSelected(1.16)}>＋</button>
+      {chosen.kind==='text'&&onUpdate&&<button type="button" onClick={()=>setEditingText(chosen.id)}>✎ Editar texto aquí</button>}
       {chosen.kind==='photo'&&pageCount>1&&<button type="button" className="touch-editor-cross-slide" onClick={()=>{
          const nearest=Math.max(1,Math.min(pageCount-1,Math.round((selectedRect.x+selectedRect.w/2)*pageCount)));
          commit({x:nearest/pageCount-selectedRect.w/2});
