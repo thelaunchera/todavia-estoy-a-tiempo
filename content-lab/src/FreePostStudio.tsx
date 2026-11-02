@@ -221,6 +221,14 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    <p>{plain('Start with your own photo. Add, move, resize and layer photos, text and decorations.',
       'Usa tu foto de fondo y añade encima otras fotos, textos y stickers. Arrastra y ajusta todo.',locale)}</p>
   </header>
+  <div className="free-post-direct-copy">
+    <label htmlFor="free-post-cover-copy">{plain('Text on your design','Texto de tu diseño',locale)}</label>
+    <textarea id="free-post-cover-copy" rows={2} value={post.hook||post.title}
+      onChange={e=>onTitle(e.target.value)}
+      placeholder={plain('Write your headline here…','Escribe aquí el texto principal…',locale)}/>
+    <small>{plain('See changes in the design below. Tap other text to edit it beside the canvas.',
+      'Mira los cambios abajo. Toca otro texto para editarlo aquí mismo, junto al diseño.',locale)}</small>
+  </div>
   <div className="free-post-tools">
    <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
    <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
@@ -280,7 +288,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    </div>}
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
-   <TouchLayerCanvas preview={preview} layers={touchLayers} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
+   <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
      onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
   <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
