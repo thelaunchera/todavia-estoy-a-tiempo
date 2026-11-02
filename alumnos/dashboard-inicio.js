@@ -1,99 +1,86 @@
-/* Inicio del aula: indicadores basados en lecciones y recursos reales, sin avisos inventados. */
-const $ = id => document.getElementById(id);
-function write(id,value){const node=$(id);if(node)node.textContent=value;}
-function addNotice(list,tag,heading,body,tone='neutral'){
- const item=document.createElement('li');
- item.className='dashboard-notice';item.dataset.tone=tone;
- const marker=document.createElement('span');marker.className='dashboard-notice-mark';marker.setAttribute('aria-hidden','true');
+/* Portada para quien ya entró a su clase: sin ventas, otros productos ni pasos de administración. */
+const $=id=>document.getElementById(id);
+const write=(id,value)=>{const n=$(id);if(n)n.textContent=value;};
+const validVideo=id=>typeof id==='string'&&/^[A-Za-z0-9_-]{11}$/.test(id);
+const pick=(lang,es,en)=>lang==='en'?en:es;
+function addNotice(list,tag,heading,body){
+ const li=document.createElement('li');li.className='dashboard-notice';
+ const dot=document.createElement('span');dot.className='dashboard-notice-mark';dot.setAttribute('aria-hidden','true');
  const copy=document.createElement('div');
- const label=document.createElement('span');label.className='dashboard-notice-label';label.textContent=tag;
- const title=document.createElement('strong');title.textContent=heading;
- const paragraph=document.createElement('p');paragraph.textContent=body;
- copy.append(label,title,paragraph);item.append(marker,copy);list.appendChild(item);
+ for(const [tagName,textValue,klass] of [['span',tag,'dashboard-notice-label'],['strong',heading,''],['p',body,'']]){
+  const n=document.createElement(tagName);n.textContent=textValue;if(klass)n.className=klass;copy.append(n);
+ }
+ li.append(dot,copy);list.append(li);
 }
-function validVideo(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
-export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPreview=false,projectShared=false,onLesson,onView}={}){
- const list=$('dashboard-notices');
- const nextButton=$('dashboard-next-action');
- if(!list||!nextButton)return;
+export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPreview=false,projectShared=false,
+ language='es',onLesson,onView,localizeLesson}={}){
+ language=language==='en'?'en':'es';
+ const list=$('dashboard-notices'),next=$('dashboard-next-action'),hero=$('dashboard-hero-continue');
+ if(!list||!next)return;
  const ready=lessons.filter(l=>l.status==='ready'&&validVideo(l.youtube_video_id));
  const pending=ready.find(l=>!done.has(l.lesson_code));
  const completed=ready.filter(l=>done.has(l.lesson_code)).length;
- const readyMaterials=resources.filter(r=>r.status==='ready'&&!r.resource_code?.startsWith('bonus_')&&/^https:\/\//i.test(r.url||''));
  const showProgress=!adminPreview&&ready.length>0;
  $('dashboard-progress-real').hidden=!showProgress;
  $('dashboard-progress-empty').hidden=showProgress;
- $('dashboard-progress-shell').dataset.mode=adminPreview?'admin':showProgress?'progress':'waiting';
- write('student-greeting-message',adminPreview
-  ? 'Revisa el contenido y la experiencia antes de abrir las puertas de esta clase.'
-  : ready.length ? 'Aquí tienes tus lecciones, recursos y próximos pasos, todo en un solo lugar.'
-    : 'Tu espacio está preparado. Las lecciones aparecerán aquí cuando estén publicadas.');
- write('dashboard-progress-empty-title',adminPreview?'Vista previa privada':'Un espacio para empezar');
- write('dashboard-progress-empty-desc',adminPreview
-  ? 'Los avances de esta vista no cuentan como progreso de alumnos.'
-  : 'Tu recorrido se mostrará aquí cuando esté disponible la primera lección.');
+ $('dashboard-progress-shell').dataset.mode=showProgress?'progress':'waiting';
+ write('student-greeting-message',pick(language,
+  'Bienvenido a tu espacio para crear. Aquí puedes investigar tu idea, elegir un estilo, preparar fotos y construir tu página paso a paso.',
+  'Welcome to your creative workspace. Research your idea, choose a style, prepare photos and build your website one step at a time.'));
+ write('dashboard-greeting-tip',pick(language,
+  'Primero entiende qué necesita tu negocio. Después comienza a diseñar.',
+  'Start by understanding what your business needs. Then begin designing.'));
+ write('dashboard-progress-empty-title',pick(language,'Tu proyecto, a tu ritmo.','Your project, your pace.'));
+ write('dashboard-progress-empty-desc',pick(language,
+  'Tu biblioteca de prompts, materiales y ejemplos ya puede ayudarte a preparar tu web.',
+  'Your prompt library, materials and examples are ready to help you prepare your site.'));
  const allDone=ready.length>0&&completed===ready.length;
- let buttonAction;
- if(adminPreview){
-  write('dashboard-next-kicker','REVISIÓN DE LA CLASE');
-  write('dashboard-next-title',lessons.length?'Comprueba las lecciones antes de publicar.':'Tu primera lección empieza aquí.');
-  write('dashboard-next-description',lessons.length
-   ? 'Hay '+lessons.length+' lecciones registradas. Revisa los videos y materiales sin modificar los avances de tus estudiantes.'
-   : 'Todavía no hay lecciones registradas. Desde el Estudio podrás prepararlas antes de abrir el aula.');
-  write('dashboard-next-detail',ready.length+' '+(ready.length===1?'lista para publicar':'listas para publicar')+' · '+(lessons.length-ready.length)+' en preparación');
-  write('dashboard-next-action','Revisar las lecciones');
-  buttonAction=()=>onView?.('lecciones');
- }else if(!ready.length){
-  write('dashboard-next-kicker','ESTAMOS PREPARANDO TU CLASE');
-  write('dashboard-next-title','Aquí empieza tu primera web.');
-  write('dashboard-next-description','Los videos todavía no están publicados. Aquí podrás empezar por el primer módulo cuando esté disponible. Mientras tanto, puedes escribirnos si necesitas algo.');
-  write('dashboard-next-detail','Aún no hay videos disponibles');
-  write('dashboard-next-action','Escribirnos desde aquí');
-  buttonAction=()=>document.querySelector('.dashboard-support [data-course-help]')?.click();
+ let onAction;
+ if(!ready.length){
+  write('dashboard-next-kicker',pick(language,'TU PRIMER PASO','YOUR FIRST STEP'));
+  write('dashboard-next-title',pick(language,'Aquí empieza tu primera web.','Your first website starts here.'));
+  write('dashboard-next-description',pick(language,
+   'Investiga qué necesita el negocio, copia tu primer prompt y guarda una idea de estilo. No tienes que hacer todo el mismo día.',
+   'Research what the business needs, copy your first prompt and save a visual direction. You do not have to do everything today.'));
+  write('dashboard-next-detail',pick(language,'Comienza por tu idea · Materiales disponibles','Start with your idea · Materials ready'));
+  write('dashboard-next-action',pick(language,'Abrir mis prompts','Open my prompts'));
+  onAction=()=>onView?.('prompts');
  }else if(pending){
-  const index=ready.indexOf(pending);
-  write('dashboard-next-kicker',completed?'CONTINÚA POR AQUÍ':'TU PRIMER PASO');
-  write('dashboard-next-title',pending.title||'Tu siguiente lección');
-  write('dashboard-next-description',pending.description||'Mira el video y practica a tu ritmo. Tu avance se guardará en tu cuenta.');
-  write('dashboard-next-detail','Lección '+(index+1)+' de '+ready.length+(pending.minutes?' · '+pending.minutes+' min':''));
-  write('dashboard-next-action',completed?'Continuar esta lección':'Empezar esta lección');
-  const lessonIndex=lessons.indexOf(pending);
-  buttonAction=()=>onLesson?.(lessonIndex);
+  const index=ready.indexOf(pending),originalIndex=lessons.indexOf(pending);
+  const translated=localizeLesson?.(pending)||pending;
+  write('dashboard-next-kicker',completed?pick(language,'CONTINÚA AQUÍ','PICK UP HERE'):pick(language,'TU PRIMER PASO','YOUR FIRST STEP'));
+  write('dashboard-next-title',translated.title||pending.title||'Tu siguiente lección');
+  write('dashboard-next-description',translated.description||pending.description||'');
+  write('dashboard-next-detail',pick(language,'Lección ','Lesson ')+(index+1)+' / '+ready.length+(pending.minutes?' · '+pending.minutes+' min':''));
+  write('dashboard-next-action',completed?pick(language,'Continuar lección','Continue lesson'):pick(language,'Empezar lección','Start lesson'));
+  onAction=()=>onLesson?.(originalIndex);
  }else{
-  write('dashboard-next-kicker','TU PRÓXIMO PASO');
-  write('dashboard-next-title','Terminaste las lecciones disponibles.');
-  write('dashboard-next-description',projectShared
-   ? 'Ya compartiste tu proyecto. Puedes volver a tus materiales o seguir conversando en el Club de Ideas.'
-   : 'Tu siguiente paso puede ser compartir una captura o el enlace de tu página en el Club de Ideas.');
-  write('dashboard-next-detail',completed+' de '+ready.length+' lecciones completadas');
-  write('dashboard-next-action','Entrar al Club de Ideas');
-  buttonAction=()=>onView?.('comunidad');
+  write('dashboard-next-kicker',pick(language,'SIGUIENTE PASO','NEXT STEP'));
+  write('dashboard-next-title',pick(language,'Terminaste las lecciones disponibles.','You finished the available lessons.'));
+  write('dashboard-next-description',pick(language,
+   projectShared?'Tu web ya está compartida. Puedes revisar tus recursos o conversar con otras personas.':'Comparte una captura o enlace de tu web en el Club de Ideas.',
+   projectShared?'Your website is shared. Review your resources or join the conversation.':'Share a screenshot or your site link in the Ideas Club.'));
+  write('dashboard-next-detail',completed+' / '+ready.length+' '+pick(language,'lecciones completadas','lessons completed'));
+  write('dashboard-next-action',pick(language,'Abrir Club de Ideas','Open Ideas Club'));
+  onAction=()=>onView?.('comunidad');
  }
- nextButton.onclick=buttonAction;
+ next.onclick=onAction;
+ if(hero){
+  hero.textContent=ready.length?pick(language,'Continuar mi clase','Continue my course'):pick(language,'Empezar con mis prompts','Start with my prompts');
+  hero.onclick=onAction;
+ }
  list.replaceChildren();
- if(adminPreview){
-  addNotice(list,'ESTADO DE LOS VIDEOS',ready.length+' de '+lessons.length+' lecciones listas',
-   'Puedes ver borradores en tu revisión. Los alumnos solo deben recibir las lecciones publicadas.',ready.length===lessons.length&&ready.length?'good':'info');
-  addNotice(list,'MATERIALES','Recursos de tu aula',
-   readyMaterials.length+' recursos con enlace aprobado. Comprueba cada uno antes de habilitar el curso.');
- }else if(!ready.length){
-  addNotice(list,'AVISO DE LA CLASE','Los videos están en preparación',
-   'No tienes que hacer nada por ahora. Los módulos aparecerán en esta misma aula cuando sean publicados.','info');
-  addNotice(list,'TU CUENTA','Tu progreso empezará con la primera lección',
-   'No mostraremos porcentajes ni tareas completadas hasta que haya videos disponibles.');
+ if(!ready.length){
+  addNotice(list,pick(language,'VIDEOS','VIDEOS'),pick(language,'Los videos están en preparación','Videos are being prepared'),
+   pick(language,'Mientras tanto, los materiales, prompts y ejemplos se pueden consultar.','Meanwhile, you can review materials, prompts and examples.'));
  }else{
-  addNotice(list,'LECCIONES',ready.length+' '+(ready.length===1?'video disponible':'videos disponibles'),
-   allDone?'¡Terminaste todos los videos disponibles! Tu trabajo queda guardado.':'Continúa por donde te quedaste. Cada lección completada se registra en tu cuenta.',allDone?'good':'info');
-  addNotice(list,'MATERIALES',readyMaterials.length
-   ? readyMaterials.length+' '+(readyMaterials.length===1?'material aprobado':'materiales aprobados')
-   : 'Materiales de apoyo',
-   readyMaterials.length?'Puedes consultarlos en la sección Materiales de tu aula.':'Los recursos se irán habilitando cuando estén listos.');
+  addNotice(list,pick(language,'LECCIONES','LESSONS'),ready.length+' '+pick(language,'videos disponibles','videos available'),
+   pick(language,'Tu progreso se guarda al terminar cada lección.','Your progress is saved as you complete each lesson.'));
  }
- addNotice(list,'CLUB DE IDEAS',projectShared?'Tu proyecto ya está compartido':'Un lugar para compartir tu proyecto',
-  projectShared?'Puedes volver al Club de Ideas para ver comentarios y conocer otros proyectos.'
-   :'Cuando tengas un avance de tu web, podrás compartir una captura o un enlace dentro del Club de Ideas.',projectShared?'good':'neutral');
- write('dashboard-tool-materials',readyMaterials.length
-   ?readyMaterials.length+' '+(readyMaterials.length===1?'recurso aprobado':'recursos aprobados')
-   :'Recursos en preparación');
- write('dashboard-tool-community',projectShared?'Proyecto compartido':'Comparte tus avances');
+ addNotice(list,pick(language,'MATERIALES','MATERIALS'),pick(language,'Cuaderno y biblioteca','Workbook & library'),
+  pick(language,'Los ejercicios, prompts y ejemplos están en tu espacio de trabajo.','Exercises, prompts and examples live in your workspace.'));
+ addNotice(list,pick(language,'COMUNIDAD','COMMUNITY'),pick(language,'Club de Ideas','Ideas Club'),
+  pick(language,'Comparte solamente los avances que quieras enseñar.','Share only the work you feel comfortable showing.'));
+ write('dashboard-tool-materials',pick(language,'Cuaderno, guías y checklist','Workbook, guides and checklist'));
+ write('dashboard-tool-community',projectShared?pick(language,'Proyecto compartido','Project shared'):pick(language,'Comparte tus avances','Share your progress'));
 }
