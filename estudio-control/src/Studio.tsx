@@ -51,7 +51,6 @@ import {
   Heart,
   BookOpen,
   CheckCircle2,
-  ChevronRight,
 } from 'lucide-react';
 import './studio.css';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
