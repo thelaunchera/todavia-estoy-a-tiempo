@@ -138,6 +138,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  });
  function go(view,{track=true}={}){
   if(!headers.some(h=>h[0]===view))return;
+  if(!track&&view==='inicio')materialHistory.length=0;
   if(track&&view!==current){
    materialHistory.push(current);
    if(materialHistory.length>12)materialHistory.shift();
