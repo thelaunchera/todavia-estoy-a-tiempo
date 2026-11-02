@@ -15,7 +15,7 @@ Aplicación privada de contenido visual, alojada en GitHub Pages, en una carpeta
 - **Datos y fotos:** Supabase ya existente del podcast, proyecto `fhrvuhikrybobidxpvnh`. Tablas prefijadas `content_lab_*`, propietarios autorizados, políticas RLS y bucket *privado* `content-lab-private`. No se modifican las tablas del Studio.
 - **Servidor:** Supabase Edge Function `content-lab-generate` con verificación JWT y propietario autorizado.
 - **IA:** SOLO Cloudflare Workers AI Free. Imagen: `@cf/black-forest-labs/flux-2-klein-4b`, que acepta una foto de producto + referencia opcional. Texto/ideas: `@cf/meta/llama-3.1-8b-instruct-fp8-fast`. Gemini de pago ya NO se utiliza.
-- **Idioma:** Todavía estoy a tiempo = español latino; The Launch Era = inglés americano.
+- **Idioma:** Todavía estoy a tiempo = español; The Launch Era = inglés americano.
 
 ## Modelo gratuito y sus límites
 
