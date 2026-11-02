@@ -5,11 +5,19 @@ on:
     paths:
       - 'content-lab/**'
       - 'estudio-control/src/SeamlessEditor.tsx'
+      - 'estudio-control/src/curved-text.ts'
+      - 'estudio-control/src/double-tap.ts'
+      - 'estudio-control/src/photo-background.ts'
+      - 'estudio-control/package.json'
       - '.github/workflows/content-lab-ci.yml'
   pull_request:
     paths:
       - 'content-lab/**'
       - 'estudio-control/src/SeamlessEditor.tsx'
+      - 'estudio-control/src/curved-text.ts'
+      - 'estudio-control/src/double-tap.ts'
+      - 'estudio-control/src/photo-background.ts'
+      - 'estudio-control/package.json'
       - '.github/workflows/content-lab-ci.yml'
   workflow_dispatch:
 permissions:
@@ -40,6 +48,9 @@ jobs:
         run: test -s content-lab/dist/index.html
       - name: Install Studio dependencies
         run: npm install --no-audit --no-fund
+        working-directory: estudio-control
+      - name: Type-check Studio TypeScript
+        run: npx tsc --noEmit
         working-directory: estudio-control
       - name: Build private seamless Studio editor
         run: npm run build
