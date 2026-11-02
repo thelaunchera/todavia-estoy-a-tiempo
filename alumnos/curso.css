@@ -469,3 +469,20 @@ body.aula-member .aula-entry{display:none!important}
  .lesson-prompt-heading strong{font-size:.9rem}
  .lesson-prompt-copy{width:100%}
 }
+
+/* PRIVATE OWNER LINK BY AULA LOGO — 2026-11-02 */
+.aula-brand-links{display:flex;align-items:center;gap:10px;min-width:0}
+.aula-brand-links>a:first-child{display:inline-flex;align-items:center;min-width:0}
+.aula-owner-nav{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;line-height:1.1;font-weight:700;text-decoration:none;
+  border:1px solid #d4e0e6;border-radius:8px;
+  background:#eff4f6;color:#385d76;white-space:nowrap;
+  min-height:30px;padding:7px 9px;
+}
+.aula-owner-nav[hidden]{display:none!important}
+.aula-owner-nav:focus-visible{outline:3px solid #7ba9c7;outline-offset:2px}
+@media(max-width:580px){
+  .aula-brand-links{gap:6px}
+  .aula-owner-nav{font-size:9px;padding:6px 7px;min-height:28px}
+}
