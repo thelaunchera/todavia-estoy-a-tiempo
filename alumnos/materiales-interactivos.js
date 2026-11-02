@@ -28,7 +28,7 @@ const materialGroups=[
  {id:'publicar',title:'Antes de publicar',views:['revision']}
 ];
 let running=0;
-export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons}){
+export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons,onCloseMaterials}){
  if(!root||root.dataset.mounted==='true')return;
  root.dataset.mounted='true';
  const {data:resource,error:resourceError}=await db.from('podcast_class_learning_assets')
@@ -69,6 +69,11 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  tools.innerHTML='<span>Elige lo que necesitas para tu proyecto.</span><button type="button" class="mi-print">Imprimir o guardar en PDF</button>';
  tabs.after(tools);
  tools.querySelector('button').addEventListener('click',()=>window.print());
+ const viewControls=el('div','mi-view-controls');
+ viewControls.innerHTML='<button type="button" class="mi-view-back" aria-label="Atrás: regresar al material anterior">← Atrás</button><button type="button" class="mi-view-close" aria-label="Cerrar material abierto">× Cerrar</button>';
+ tools.after(viewControls);
+ const viewBack=viewControls.querySelector('.mi-view-back');
+ const viewClose=viewControls.querySelector('.mi-view-close');
  if(ownerPreview){
   const {data:pdfs}=await db.from('podcast_class_resources')
    .select('resource_code,title,url,status').eq('course_id',courseId).like('resource_code','pdf_%').order('resource_code');
@@ -115,9 +120,31 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  }
  function queueSave(){if(ownerPreview)return;dirty++;clearTimeout(saveTimer);saveTimer=setTimeout(()=>void save(),900);}
  let current='inicio';
- function go(view){
+ const materialHistory=[];
+ viewBack.addEventListener('click',()=>{
+  const previous=materialHistory.pop();
+  if(previous)go(previous,{track:false});
+  else if(current!=='inicio')go('inicio',{track:false});
+  else onCloseMaterials?.();
+ });
+ viewClose.addEventListener('click',()=>{
+  if(current==='inicio'){
+   materialHistory.length=0;
+   onCloseMaterials?.();
+  }else{
+   materialHistory.length=0;
+   go('inicio',{track:false});
+  }
+ });
+ function go(view,{track=true}={}){
   if(!headers.some(h=>h[0]===view))return;
+  if(track&&view!==current){
+   materialHistory.push(current);
+   if(materialHistory.length>12)materialHistory.shift();
+  }
   current=view;
+  viewBack.hidden=current==='inicio'&&!materialHistory.length;
+  viewClose.setAttribute('aria-label',current==='inicio'?'Cerrar materiales y volver al inicio del aula':'Cerrar este material y volver a la biblioteca');
   const headline=app.querySelector('.mi-header h2');
   const intro=app.querySelector('.mi-header p');
   if(headline) headline.textContent=view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
@@ -280,6 +307,6 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const b=el('button',null,group.title);b.type='button';b.dataset.group=group.id;b.setAttribute('aria-current','false');
   b.addEventListener('click',()=>go(group.views[0]));tabs.append(b);
  });
- go('inicio');
+ go('inicio',{track:false});
  return {go};
 }
