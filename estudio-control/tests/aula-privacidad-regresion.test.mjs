@@ -89,7 +89,7 @@ test('Aula de principiantes: primero el siguiente paso, después herramientas op
  assert.match(room,/<details class="dashboard-setup-details">/,'Las instrucciones largas no saturan el inicio');
  assert.match(room,/id="lesson-prev"/,'Se puede volver a la lección anterior');
  assert.match(room,/class="lesson-resources" data-aula-view="materiales"/,'Cada lección enlaza a materiales');
- assert.match(course,/lessons\.findIndex\(item=>!done\.has\(item\.lesson_code\)\)/,'El alumno retoma la primera lección sin terminar');
+ assert.match(course,/lessons\.findIndex\(item=>item\.status==='ready'&&validVideoId\(item\.youtube_video_id\)&&!done\.has\(item\.lesson_code\)\)/,'El alumno solo retoma videos publicados y no marca borradores completados');
  assert.match(course,/\$\('lesson-prev'\)\.disabled=i<=0/,'La primera lección no permite retroceder');
 });
 
