@@ -76,6 +76,8 @@ const translations=[
  ['.aula-access-note','Protected access'],
  ['.aula-quick-help > span','Help'],
  ['#aula-refresh > span','Refresh'],
+ ['#aula-section-back span','Back'],
+ ['#aula-section-close span','Close'],
  ['#admin-preview-banner strong','Private course preview'],
  ['#admin-preview-banner p','Only the owner can review drafts. Students never see this notice.'],
  ['.dashboard-hero .dashboard-overline','MY LEARNING SPACE'],
