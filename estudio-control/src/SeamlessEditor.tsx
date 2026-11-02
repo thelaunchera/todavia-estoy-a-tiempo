@@ -1,12 +1,15 @@
 import {useEffect,useRef,useState} from 'react';
-type Item={id:number;kind:'text'|'image';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string};
 const W=1080,H=1350,KEY='studio-seamless-v1';
 const defaults={count:5,background:'#FAF8F3',items:[] as Item[]};
+const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
+const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙','🦋','🍒','📌','📎','📝','🧘🏽‍♀️','🏋🏽‍♀️','🍵','💪','👟'];
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
+ const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
  const canvas=useRef<HTMLCanvasElement>(null);
  const drag=useRef<{id:number;x:number;y:number;ox:number;oy:number}|null>(null);
  const images=useRef(new Map<string,HTMLImageElement>());
@@ -15,15 +18,16 @@ export default function SeamlessEditor(){
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
-  for(const it of doc.items){const x=it.x-clipStart;if(it.kind==='text'){ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'',x,it.y)}else if(it.src){try{const im=await loadImage(it.src);ctx.drawImage(im,x,it.y,it.width,it.width*im.height/im.width)}catch{}}}
+  for(const it of doc.items){const x=it.x-clipStart;if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'',x,it.y)}else if(it.src){try{const im=await loadImage(it.src);ctx.drawImage(im,x,it.y,it.width,it.width*im.height/im.width)}catch{}}}
   ctx.restore();
  };
  useEffect(()=>{let active=true;const render=async()=>{const c=canvas.current;if(!c)return;const ctx=c.getContext('2d');if(!ctx)return;c.width=width;c.height=H;await paint(ctx);if(!active)return;ctx.strokeStyle='rgba(25,25,25,.25)';ctx.setLineDash([12,12]);for(let i=1;i<doc.count;i++){ctx.beginPath();ctx.moveTo(i*W,0);ctx.lineTo(i*W,H);ctx.stroke()}ctx.setLineDash([])};void render();return()=>{active=false}},[doc]);
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
+ const addSticker=(emoji:string)=>{const id=Date.now();setDoc(d=>({...d,items:[...d.items,{id,kind:'sticker',text:emoji,x:200,y:220,width:180,fontSize:160,color:'#191919'}]}));setSelected(id)};
  const addText=()=>{const id=Date.now();setDoc(d=>({...d,items:[...d.items,{id,kind:'text',text:'Tu mensaje aquí',x:100,y:350,width:600,fontSize:90,color:'#191919'}]}));setSelected(id)};
  const onFile=async(e:React.ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(file.size>8_000_000){setMessage('Usa una foto de menos de 8 MB.');return}const reader=new FileReader();reader.onload=()=>{const id=Date.now();setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:String(reader.result),x:100,y:160,width:650,fontSize:80,color:'#191919'}]}));setSelected(id)};reader.readAsDataURL(file);e.target.value=''};
  const locate=(e:React.PointerEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect();return {x:(e.clientX-r.left)*width/r.width,y:(e.clientY-r.top)*H/r.height}};
- const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{const h=it.kind==='text'?it.fontSize*1.4:it.width;const w=it.kind==='text'?(it.text?.length||5)*it.fontSize*.65:it.width;return x>=it.x&&x<=it.x+w&&y>=it.y&&y<=it.y+h});
+ const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{const h=it.kind==='text'?it.fontSize*1.4:it.kind==='sticker'?it.fontSize:it.width;const w=it.kind==='text'?(it.text?.length||5)*it.fontSize*.65:it.kind==='sticker'?it.fontSize:it.width;return x>=it.x&&x<=it.x+w&&y>=it.y&&y<=it.y+h});
  const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e),it=hit(p.x,p.y);setSelected(it?.id||null);if(it){drag.current={id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y};e.currentTarget.setPointerCapture(e.pointerId)}};
  const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{if(!drag.current)return;const p=locate(e),d=drag.current;update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
  const exportSlides=async()=>{setBusy(true);setMessage('Preparando PNG…');try{for(let i=0;i<doc.count;i++){const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');if(!ctx)throw Error('Canvas');await paint(ctx,1,i*W,W);const a=document.createElement('a');a.download='seamless-slide-'+String(i+1).padStart(2,'0')+'.png';a.href=c.toDataURL('image/png');a.click();await new Promise(r=>setTimeout(r,280))}setMessage('Se generaron '+doc.count+' imágenes PNG. Revisa las descargas del navegador.')}catch{setMessage('No se pudo exportar. Inténtalo de nuevo.')}finally{setBusy(false)}};
@@ -40,12 +44,18 @@ export default function SeamlessEditor(){
   </div>
   {current&&<div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginBottom:16}}>
     {current.kind==='text'&&<><input aria-label="Editar texto" style={{...control,minWidth:180}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
+    {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
     {current.kind==='image'&&<label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label>}
     <button style={control} onClick={()=>{setDoc(d=>({...d,items:d.items.filter(it=>it.id!==current.id)}));setSelected(null)}}>Eliminar elemento</button>
    </div>}
+  <div style={{display:'flex',gap:8,margin:'12px 0'}}>{(['fondos','stickers','capas'] as const).map(tab=><button key={tab} style={{...control,background:panel===tab?'#F2D85B':'white'}} onClick={()=>setPanel(tab)}>{tab==='fondos'?'Fondos':tab==='stickers'?'Stickers':'Capas'}</button>)}</div>
+  {panel==='fondos'&&<div style={{display:'flex',gap:8,overflowX:'auto',padding:'8px 0 18px'}}>{LAB_BACKGROUNDS.map(([name,color])=><button key={name} title={name} onClick={()=>setDoc(d=>({...d,background:color}))} style={{minWidth:96,border:'1px solid #ddd',borderRadius:12,padding:8,background:'white',color:'#191919'}}><span style={{display:'block',height:62,borderRadius:8,background:color,border:'1px solid #ddd'}}/>{name}</button>)}</div>}
+  {panel==='stickers'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:18}}>{LAB_STICKERS.map((emoji,i)=><button key={i} aria-label={'Añadir sticker '+emoji} onClick={()=>addSticker(emoji)} style={{...control,fontSize:28}}>{emoji}</button>)}</div>}
+  {panel==='capas'&&<div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:18}}>{doc.items.map(it=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white'}} onClick={()=>setSelected(it.id)}>{it.kind==='image'?'📷 Foto':it.text||'Texto'}</button>)}</div>}
   <div style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8}}>
-   <canvas ref={canvas} onPointerDown={down} onPointerMove={move} onPointerUp={()=>drag.current=null} onPointerCancel={()=>drag.current=null} style={{display:'block',width:'max(100%, 900px)',height:'auto',touchAction:'pan-x',cursor:'grab'}} aria-label="Lienzo continuo del carrusel; toca un elemento para moverlo"/>
+   <canvas ref={canvas} onPointerDown={down} onPointerMove={move} onPointerUp={()=>drag.current=null} onPointerCancel={()=>drag.current=null} style={{display:'block',width:'max(100%, 900px)',height:'auto',touchAction:'none',cursor:'grab'}} aria-label="Lienzo continuo del carrusel; toca un elemento para moverlo"/>
   </div>
+  <p style={{fontSize:13}}>Para mover una foto, tócala y arrástrala. Para cambiar su tamaño, selecciónala y usa el control «Ancho» de arriba. Desliza horizontalmente sobre el borde gris para ver los demás slides.</p>
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Cada slide se exporta a 1080 × 1350 PNG. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
  </section>;
 }
