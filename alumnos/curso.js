@@ -824,10 +824,10 @@ if(STUDIO_EMBEDDED_OWNER){
  });
  out.hidden=true;display(null);
  status('Conectando con tu Studio privado…');
- // A parent bridge can be unavailable after navigation or a browser reload.
- // Fall back only to an existing verified Supabase owner session, never to a
- // query parameter or a client-side claim. Always end the loading state.
- setTimeout(async()=>{
+ // On the same origin, Supabase may already have a valid Studio session.
+ // Verify the real owner role immediately instead of waiting for the bridge.
+ // The message bridge remains available for isolated browser contexts.
+ const checkExistingOwner=async()=>{
   if(studioSessionReady||studioSessionLoading)return;
   try{
    const {data:{user:existing}}=await db.auth.getUser();
@@ -839,7 +839,9 @@ if(STUDIO_EMBEDDED_OWNER){
   }catch(e){console.warn('Studio session fallback unavailable',e?.name||'unknown');}
   out.hidden=true;display(null);
   status('No se pudo verificar tu acceso de administradora. Vuelve al Studio y abre el aula otra vez. Si continúa, inicia sesión en el Studio de nuevo.');
- },6500);
+ };
+ void checkExistingOwner();
+ setTimeout(()=>{if(!studioSessionReady&&!studioSessionLoading)void checkExistingOwner();},6500);
  // Safari and embedded webviews can load the iframe before React attaches
  // the Studio message listener. Retry the handshake until it is verified.
  const requestOwnerSession=()=>{
