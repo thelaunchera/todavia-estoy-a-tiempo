@@ -114,6 +114,18 @@ test('Navegación táctil: Atrás y Cerrar sección nunca cierran la sesión',()
  const styles=readFileSync('alumnos/aula-sidebar.css','utf8');
  assert.match(styles,/\.aula-section-nav-button/,'Los botones están diseñados como controles táctiles');
  assert.match(styles,/max-width:759px/,'La navegación es compatible con iPhone');
+ const materialTabs=readFileSync('alumnos/materiales-interactivos.js','utf8');
+ const materialCss=readFileSync('alumnos/materiales-interactivos.css','utf8');
+ assert.match(materialTabs,/mi-view-back/,'La biblioteca tiene Atrás');
+ assert.match(materialTabs,/mi-view-close/,'La biblioteca tiene Cerrar');
+ assert.match(materialTabs,/onCloseMaterials\?\.\(\)/,'Cerrar materiales vuelve al aula');
+ assert.match(materialCss,/\.mi-view-controls/,'Controles táctiles de los materiales');
+ const community=readFileSync('alumnos/comunidad.html','utf8');
+ const communityScript=readFileSync('alumnos/comunidad.js','utf8');
+ assert.match(community,/id="club-page-back"/,'La comunidad tiene botón Atrás');
+ assert.match(community,/id="club-page-close"/,'La comunidad tiene botón Cerrar');
+ assert.match(communityScript,/history\.back\(\)/,'Atrás de comunidad recuerda la vista anterior');
+ assert.doesNotMatch(community,/href="\.\.\/estudio\/" id="club-studio-link"/,'El acceso Studio no aparece como link de alumnos');
 });
 
 
