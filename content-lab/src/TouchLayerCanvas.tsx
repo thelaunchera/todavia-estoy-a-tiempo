@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {createPortal} from 'react-dom';
 import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
@@ -50,6 +51,9 @@ export default function TouchLayerCanvas({
   // Separate browsing the panorama from handling a selected object.
   const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
   const [activePage,setActivePage]=useState(0);
+  const [floatingModeBar,setFloatingModeBar]=useState(false);
+  const canvasRoot=useRef<HTMLDivElement>(null);
+  const navigationBar=useRef<HTMLDivElement>(null);
   const [cropping, setCropping] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [snapEnabled,setSnapEnabled]=useState(true);
@@ -86,6 +90,42 @@ export default function TouchLayerCanvas({
     resize();const observer=new ResizeObserver(resize);observer.observe(el);
     return()=>observer.disconnect();
   },[pageCount]);
+  // The fixed switch follows scrolling even inside a fullscreen iPad canvas.
+  useEffect(()=>{
+    if(pageCount<=1){setFloatingModeBar(false);return}
+    let frame=0;
+    const check=()=>{
+      frame=0;
+      const root=canvasRoot.current,nav=navigationBar.current;
+      if(!root||!nav)return;
+      const area=root.getBoundingClientRect(),bar=nav.getBoundingClientRect();
+      const height=window.visualViewport?.height||window.innerHeight;
+      const visible=bar.bottom<12&&area.bottom>100&&area.top<height-30;
+      setFloatingModeBar(previous=>previous===visible?previous:visible);
+    };
+    const schedule=()=>{if(!frame)frame=window.requestAnimationFrame(check)};
+    check();
+    window.addEventListener('scroll',schedule,true);
+    window.addEventListener('resize',schedule);
+    window.visualViewport?.addEventListener('resize',schedule);
+    const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(schedule);
+    if(observer&&canvasRoot.current)observer.observe(canvasRoot.current);
+    return()=>{
+      window.removeEventListener('scroll',schedule,true);
+      window.removeEventListener('resize',schedule);
+      window.visualViewport?.removeEventListener('resize',schedule);
+      observer?.disconnect();
+      if(frame)window.cancelAnimationFrame(frame);
+    };
+  },[pageCount]);
+  const switchMode=(mode:'navigate'|'edit')=>{
+    setInteractionMode(mode);
+    if(mode==='navigate'){
+      setSelected('');setCropping(false);
+      gesture.current=null;pointers.current.clear();
+      window.cancelAnimationFrame(autoPanFrame.current);
+    }
+  };
   const goToPage=(index:number,keepSelection=false)=>{
     if(pageCount<=1)return;
     // Changing slides clears the previous selection; the next slide is editable.
@@ -350,7 +390,7 @@ export default function TouchLayerCanvas({
     onRemove(id);
     if (selected === id) setSelected('');
   };
-  return <div className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
+  return <div ref={canvasRoot} className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
     (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')+
     (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')+
     (inlineTextTools?' touch-editor-inline-mode':'')}
@@ -359,16 +399,15 @@ export default function TouchLayerCanvas({
       {continuous?`${pageCount} slides · líneas azules = cortes al descargar`:`Carrusel normal · ${pageCount} slides independientes`}
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
-    {pageCount>1&&<div className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
+    {pageCount>1&&<div ref={navigationBar} className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
       <div className="touch-editor-mode-switch" role="group" aria-label="Modo de interacción">
         <button type="button" className={interactionMode==='navigate'?'active':''}
           aria-pressed={interactionMode==='navigate'}
-          onClick={()=>{setInteractionMode('navigate');setSelected('');setCropping(false);
-            gesture.current=null;pointers.current.clear();window.cancelAnimationFrame(autoPanFrame.current)}}>
+          onClick={()=>switchMode('navigate')}>
           <span aria-hidden="true">↔</span> Deslizar
         </button>
         <button type="button" className={interactionMode==='edit'?'active':''}
-          aria-pressed={interactionMode==='edit'} onClick={()=>setInteractionMode('edit')}>
+          aria-pressed={interactionMode==='edit'} onClick={()=>switchMode('edit')}>
           <span aria-hidden="true">✋</span> Editar
         </button>
       </div>
@@ -389,6 +428,16 @@ export default function TouchLayerCanvas({
         ?'Desliza para cambiar de slide. Nada se moverá.'
         :'Toca y arrastra cualquier elemento. Usa el tirador para cambiar su tamaño.'}</p>
     </div>}
+    {pageCount>1&&floatingModeBar&&typeof document!=='undefined'&&createPortal(
+      <div className="touch-editor-floating-mode" role="toolbar" aria-label="Modo de carrusel siempre visible">
+        <div className="touch-editor-floating-mode-switch" role="group" aria-label="Deslizar o editar">
+          <button type="button" className={interactionMode==='navigate'?'active':''}
+            aria-pressed={interactionMode==='navigate'} onClick={()=>switchMode('navigate')}>↔ Deslizar</button>
+          <button type="button" className={interactionMode==='edit'?'active':''}
+            aria-pressed={interactionMode==='edit'} onClick={()=>switchMode('edit')}>✋ Editar</button>
+        </div>
+        <span className="touch-editor-floating-slide">{activePage+1} / {pageCount}</span>
+      </div>,document.body)}
     {pageCount===1&&chosen && onRemove && !inlineTextTools && <div className="touch-editor-actionbar touch-editor-actionbar-compact">
       <span>{chosen.name}</span>
       <button type="button" className="touch-editor-delete-primary" onClick={()=>deleteLayer(chosen.id)}>
