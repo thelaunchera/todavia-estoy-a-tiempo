@@ -2281,6 +2281,13 @@ a:focus-visible {
 
 /* OWNER CLASSROOM PREVIEW — 2026-11-02
    These controls only exist in the authenticated Studio. No public admin link. */
+/* Keep the logo and small control inside the 255/226px navigation rail. */
+.sidebar .brand{gap:8px;padding-left:16px;padding-right:16px}
+.sidebar .brand img{width:min(65%,155px);height:auto;min-width:0;flex:0 1 auto}
+@media(max-width:1050px){
+ .studio-aula-brand-link{display:none!important}
+}
+
 .studio-aula-brand-link{
   display:inline-flex;align-items:center;justify-content:center;
   margin-left:auto;width:36px;height:36px;flex:none;
