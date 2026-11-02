@@ -149,9 +149,9 @@ async function drawPhoto(ctx:CanvasRenderingContext2D,src:string,x:number,y:numb
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(im,px,py,im.naturalWidth*k,im.naturalHeight*k);ctx.restore();
  return true;
 }
-export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean;stickerImages?:Record<string,string>;omitStickers?:boolean},size:ExportSize='portrait'){
+export async function composeGridPoster(tile:Source,index:number,brand:Brand,photos:{photo?:string;original?:string;logo?:string;preserve?:boolean;stickerImages?:Record<string,string>;omitStickers?:boolean},size:ExportSize='portrait',pixelScale=1){
  const fmt=LAYOUTS.find(x=>x.name===tile.format)||LAYOUTS[index%LAYOUTS.length],metrics=EXPORT_SIZES[size];
- const W=metrics.w,H=metrics.h,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+ const W=metrics.w*pixelScale,H=metrics.h*pixelScale,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
  try{if((brand.headingFont||'').toLowerCase()==='prompt'&&document.fonts)await document.fonts.load('700 82px Prompt');}catch{/* fall back without blocking export */}
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el canvas');
  if(tile.design){
