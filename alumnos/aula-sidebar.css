@@ -209,3 +209,20 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
  .aula-lang-control select{font-size:11px;padding:2px 2px}
 }
 @media(max-width:410px){.aula-public-lang>span{display:none}.aula-lang-icon{display:none}.aula-public-lang select{min-width:65px}}
+
+/* Classroom header: prevent one-letter vertical wrapping in Studio iframe. */
+#aula-layout .aula-main-top{flex-wrap:wrap;justify-content:flex-start;column-gap:12px;row-gap:10px}
+#aula-layout .aula-main-location{flex:1 1 170px;min-width:150px;max-width:100%;letter-spacing:0;white-space:normal}
+#aula-layout .aula-main-location strong{display:inline-block;min-width:0;overflow-wrap:normal;word-break:normal;hyphens:none;line-height:1.35}
+#aula-layout .aula-main-actions{flex:0 1 auto;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+#aula-layout .aula-section-navigation{flex:0 0 auto;max-width:100%;flex-wrap:wrap}
+@media(min-width:760px) and (max-width:1150px){
+ #aula-layout.room-grid{grid-template-columns:230px minmax(0,1fr)}
+ #aula-layout .aula-main{padding-inline:22px}
+ #aula-layout .aula-main-location{flex:1 1 100%;min-width:0}
+ #aula-layout .aula-main-actions{flex:1 1 auto}
+}
+@media(max-width:759px){
+ #aula-layout .aula-main-location{flex:1 1 auto;min-width:125px;max-width:none}
+ #aula-layout .aula-main-top{align-items:center}
+}
