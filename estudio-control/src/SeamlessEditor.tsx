@@ -21,6 +21,7 @@ export default function SeamlessEditor(){
  const [brandFilter,setBrandFilter]=useState('todos');
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
+ const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
@@ -133,6 +134,63 @@ export default function SeamlessEditor(){
      padding:3,resize:'none',zIndex:5,boxShadow:'0 2px 12px #0002'}}/>}
    </div>
   </div>
+  <div role="toolbar" aria-label="Herramientas táctiles del carrusel seamless"
+    style={{display:'grid',gridTemplateColumns:'repeat(5,minmax(0,1fr))',gap:4,padding:5,position:'sticky',
+      bottom:'calc(74px + env(safe-area-inset-bottom))',zIndex:1500,border:'1px solid #dce5e5',
+      borderRadius:15,background:'#fff',boxShadow:'0 -4px 16px #142c3c20'}}>
+    {([
+      {label:'Fotos',action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
+      {label:'Texto',action:()=>addText('paragraph')},
+      {label:'Stickers',action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
+      {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
+      {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
+    ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
+      aria-pressed={i>1?quickPanel===tool.label.toLowerCase():undefined}
+      style={{border:0,background:i>1&&quickPanel===tool.label.toLowerCase()?'#e9f3f5':'transparent',minHeight:49,
+        display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
+        touchAction:'manipulation'}}>{tool.label}</button>)}
+  </div>
+  {quickPanel&&<div role="region" aria-label={'Opciones de '+quickPanel}
+    style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
+      zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
+      background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
+      <strong style={{fontSize:13}}>{quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':'Seleccionar capa'}</strong>
+      <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
+        style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
+    </div>
+    {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
+      {[...doc.items].reverse().map(it=><button type="button" key={it.id}
+        style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
+        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))));setQuickPanel(null)}}>
+         {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
+           style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
+           (it.text||'Sticker').slice(0,40)}
+      </button>)}
+    </div>}
+    {quickPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
+      {LAB_BACKGROUNDS.map(([name,color])=><button type="button" key={name} onClick={()=>{setDoc(d=>({...d,background:color}));setQuickPanel(null)}}
+        style={{...control,fontSize:11,minHeight:80,padding:6}}>
+        <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
+      </button>)}
+      {LAB_ASSETS.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
+        onClick={()=>{setLabBackground(asset.file);setQuickPanel(null)}} style={{...control,padding:5,fontSize:11}}>
+        <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
+      </button>)}
+    </div>}
+    {quickPanel==='stickers'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(68px,1fr))',gap:8}}>
+      {LAB_STICKERS.map((emoji,i)=><button type="button" key={i} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}
+        style={{...control,minHeight:60,fontSize:27,padding:5}}>{emoji}</button>)}
+      {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,remote:true})),
+        ...LAB_ASSETS.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))].map(asset=><button type="button" key={asset.key}
+          onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
+            else if(asset.file)addLabSticker(asset.file);setQuickPanel(null)}}
+          style={{...control,padding:4,fontSize:10,minWidth:0}}>
+          <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:59,objectFit:'contain'}}/>{asset.name}
+        </button>)}
+    </div>}
+    {libraryStatus&&<small role="status">{libraryStatus}</small>}
+  </div>}
   <p style={{fontSize:12,fontWeight:600}}>Toca una foto, sticker o texto y arrástralo. Separa dos dedos para agrandarlo o júntalos para reducirlo. Para escribir sobre el carrusel, toca «✎ Editar texto aquí».</p>
   <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para pasar de slide; usa dos dedos para cambiar el tamaño de un elemento seleccionado. Los botones Anterior y Siguiente son opcionales.</p>
   <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setSelected(null);setMessage('Proyecto abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar</button></div></div>)}</div>}</details>
