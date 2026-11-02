@@ -30,3 +30,22 @@
  .class-page-v2 #de-idea-a-web .class-casa-open-button{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.class-page-v2 #de-idea-a-web .class-casa-real-frame{transition:none}}
+
+
+/* iPhone/Safari fix: solo una escena completa, sin crossfade ni capas mezcladas. */
+.class-page-v2 #de-idea-a-web .class-formed-web{display:none!important}
+.class-page-v2 #de-idea-a-web .class-transform.is-interactive .class-idea-board,
+.class-page-v2 #de-idea-a-web .class-transform.is-interactive .class-formed-web{
+  opacity:1!important;transform:none!important;will-change:auto!important
+}
+.class-page-v2 #de-idea-a-web .class-transform.is-interactive[data-stage="after"] .class-idea-board{display:none!important}
+.class-page-v2 #de-idea-a-web .class-transform.is-interactive[data-stage="after"] .class-formed-web{display:block!important}
+.class-page-v2 #de-idea-a-web .class-casa-real-frame{
+  visibility:hidden;transition:none!important
+}
+.class-page-v2 #de-idea-a-web .class-casa-real-preview[data-loaded="true"] .class-casa-real-frame{
+  visibility:visible;opacity:1
+}
+.class-page-v2 #de-idea-a-web .class-casa-real-preview[data-loaded="true"] .class-casa-real-fallback{
+  display:none!important
+}
