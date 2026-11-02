@@ -60,15 +60,6 @@
       </nav>
     </div>
   </header>
-    <!-- Invitación discreta al regalo creativo: el hero original sigue intacto -->
-    <aside class="podcast-freebie-topbar" id="freebie-prompts-inicio" aria-label="Prompts gratuitos para tus fotos de producto">
-      <div class="podcast-freebie-topbar__inner">
-        <p class="podcast-freebie-topbar__text"><span aria-hidden="true">✦</span> <strong>8 prompts gratis para tus fotos.</strong></p>
-        <a class="podcast-freebie-topbar__button" href="content-lab/prompts/" aria-label="Quiero mis 8 prompts gratis">Ver regalo</a>
-      </div>
-    </aside>
-
-  <main id="principal">
     <section class="hero dark-paper podcast-hero-v2" aria-labelledby="hero-title">
       <div class="shell hero-layout">
         <div class="hero-content reveal">
@@ -77,7 +68,7 @@
           <p class="hero-lede line-reveal" data-line-reveal>Conversaciones para quienes se comparan, atraviesan cambios o sienten que van tarde. Escucha historias que te acompañan a empezar de nuevo.</p>
           <div class="hero-cta">
             <a href="https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh" target="_blank" rel="noopener noreferrer" class="button button-light" aria-label="Escuchar el podcast en Spotify, abre otra pestaña">Escuchar en Spotify</a>
-            <a href="#coleccion" class="fine-link">Explorar la colección</a>
+            <a href="#regalo" class="fine-link">Recibir las 5 preguntas gratis</a>
           </div>
         </div>
         <div class="hero-visual reveal">
@@ -151,13 +142,41 @@
           <div class="theme-song-player theme-song-player-embedded">
             <audio id="theme-song-audio" controls preload="metadata" controlslist="nodownload" playsinline aria-label="Reproducir la canción oficial de Todavía estoy a tiempo"></audio>
           </div>
-          <p class="theme-song-compact-credit">Powered by <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer">The Launch Era</a></p>
+          
         </div>
         <div class="theme-song-story">
           <p class="theme-song-story-kicker">UN MOMENTO SOLO PARA TI</p>
           <h3>Una canción para <em>bajar el ruido.</em></h3>
           <p>No hace falta tener todo resuelto para darte unos minutos. Esta canción es una pequeña pausa entre tantas cosas que llevamos dentro.</p>
           <a href="#escuchar">Después, seguimos conversando <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+    <section class="free-mini-section paper" id="regalo" aria-labelledby="free-title">
+      <div class="shell free-mini-grid">
+        <div class="free-mini-content reveal">
+          <p class="eyebrow">UN RECURSO PARA EMPEZAR</p>
+          <h2 id="free-title">5 preguntas para cuando sientes que vas <em>tarde.</em></h2>
+          <p>Te lo envío a tu correo.</p>
+        </div>
+        <div class="free-mini-form reveal">          <form id="guide-form" class="podcast-form guide-form" data-podcast-form="guide" novalidate>
+            <label for="guide-email">¿A qué correo te envío la guía?</label>
+            <div class="email-field" data-email-field>
+              <input id="guide-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="guide-email-feedback">
+              <span class="email-check" aria-hidden="true">✓</span>
+            </div>
+            <p class="field-feedback" id="guide-email-feedback" aria-live="polite"></p>
+            <input type="hidden" name="resource" value="cinco_preguntas">
+            <label class="podcast-newsletter-optin" for="guide-newsletter">
+              <input id="guide-newsletter" name="newsletter" type="checkbox" value="yes">
+              <span>Quiero recibir avisos de nuevos episodios <small>(opcional)</small>.</span>
+            </label>
+            <input type="hidden" name="source" value="podcast_website">
+            <div class="honeypot" aria-hidden="true" hidden><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
+            <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
+            <small class="form-small-note">La guía es tuya. Los avisos de episodios son opcionales.</small>
+          </form>
         </div>
       </div>
     </section>
@@ -190,20 +209,6 @@
         </div>
       </div>
     </section>
-    <!-- Matcha en la portada, justo antes de la clase; biblioteca privada tras confirmar el correo -->
-    <aside class="creative-freebie-strip" id="matcha-gratis" aria-labelledby="matcha-free-title">
-      <div class="shell creative-freebie-inner">
-        <a class="creative-freebie-image" href="content-lab/prompts/" aria-label="Ver las fotos editoriales de matcha del freebie">
-          <img src="content-lab/prompts/matcha-01.jpg?v=hd-20261031" width="1080" height="1350" alt="Fotografía editorial de matcha de la colección gratuita de ocho ideas" loading="lazy" decoding="async">
-        </a>
-        <div class="creative-freebie-text">
-          <p class="creative-freebie-label">REGALO CREATIVO · GRATIS</p>
-          <h2 id="matcha-free-title">Una foto. <em>Ocho ideas para publicar.</em></h2>
-          <p>Ocho prompts gratis para adaptar a tu producto.</p>
-          <a class="creative-freebie-link" href="content-lab/prompts/#recibir" aria-label="Abrir el freebie gratuito de matcha">Quiero mis 8 prompts gratis <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-    </aside>
     <!-- Presentación de la clase -->
     <section class="learning-section" id="aprender" aria-labelledby="learning-title">
       <div class="shell learning-grid">
@@ -226,34 +231,6 @@
             <img src="assets/clase-bot-home-2026.webp" alt="Dailin mostrando un asistente de inteligencia artificial en su mano" width="1000" height="914" loading="lazy" decoding="async">
             <figcaption>De una idea a tu primera web.</figcaption>
           </figure>
-        </div>
-      </div>
-    </section>
-    <section class="free-mini-section paper" id="regalo" aria-labelledby="free-title">
-      <div class="shell free-mini-grid">
-        <div class="free-mini-content reveal">
-          <p class="eyebrow">UN RECURSO PARA EMPEZAR</p>
-          <h2 id="free-title">5 preguntas para cuando sientes que vas <em>tarde.</em></h2>
-          <p>Te lo envío a tu correo.</p>
-        </div>
-        <div class="free-mini-form reveal">          <form id="guide-form" class="podcast-form guide-form" data-podcast-form="guide" novalidate>
-            <label for="guide-email">¿A qué correo te envío la guía?</label>
-            <div class="email-field" data-email-field>
-              <input id="guide-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" maxlength="254" required aria-describedby="guide-email-feedback">
-              <span class="email-check" aria-hidden="true">✓</span>
-            </div>
-            <p class="field-feedback" id="guide-email-feedback" aria-live="polite"></p>
-            <input type="hidden" name="resource" value="cinco_preguntas">
-            <label class="podcast-newsletter-optin" for="guide-newsletter">
-              <input id="guide-newsletter" name="newsletter" type="checkbox" value="yes">
-              <span>Quiero recibir avisos de nuevos episodios <small>(opcional)</small>.</span>
-            </label>
-            <input type="hidden" name="source" value="podcast_website">
-            <div class="honeypot" aria-hidden="true" hidden><label for="guide-website">Deja este campo vacío</label><input id="guide-website" name="website" tabindex="-1" autocomplete="off"></div>
-            <button type="submit" class="button button-navy form-submit">Enviarme las 5 preguntas</button>
-            <p class="form-status" id="guide-form-status" role="status" aria-live="polite"></p>
-            <small class="form-small-note">La guía es tuya. Los avisos de episodios son opcionales.</small>
-          </form>
         </div>
       </div>
     </section>
