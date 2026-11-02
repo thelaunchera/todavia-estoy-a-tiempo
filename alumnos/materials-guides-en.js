@@ -15,7 +15,7 @@ const guides={
  ['Online checkout','Only add payments if the product and provider support them. Test payment, failure and fulfillment before claiming it works.'],
  ['Owner operations','Quotes, jobs and follow-up are internal workflows; a public demo must not expose private business or customer data.']
  ],actions:[['Investigate my business','prompts']]},
- pasos:{kicker:'03 / YOUR FIRST WEBPAGE',title:'Build step by step.',intro:'Practice with Casa Brownie, then apply the same process to your own business or a client's business.',steps:[
+ pasos:{kicker:'03 / YOUR FIRST WEBPAGE',title:'Build step by step.',intro:'Practice with Casa Brownie, then apply the same process to your own business or a customer business.',steps:[
  ['01 — Define the goal','Research your business and ideal customer. Write what the site is for and the one action a visitor should take.'],
  ['02 — Mood board','Choose an original palette, typography, photographic tone and packaging direction if needed.'],
  ['03 — Generate individual images','Plan one image for each section. Generate or choose images separately; use real product details and name each file.'],
