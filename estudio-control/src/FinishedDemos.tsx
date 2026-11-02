@@ -3,15 +3,17 @@ import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
+import {ivoryBloomPhotos} from './ivory-bloom-photos';
+import {ivoryBloomRebuildPrompts} from './ivory-bloom-rebuild-prompts';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
  url:string; source:string; note:string; kind:'static'|'video'|'other'|'live';
- promptsFor?:'casa-brownie'|'crumb'|'aftr'|'soluna';
+ promptsFor?:'casa-brownie'|'crumb'|'aftr'|'soluna'|'ivory-bloom';
  photos?:typeof solunaPhotos;
 };
 const finishedDemos:Demo[]=[
@@ -98,6 +100,19 @@ const finishedDemos:Demo[]=[
   promptsFor:'soluna'
  },
  {
+  id:'ivory-bloom',
+  title:'IVORY & BLOOM · Wedding Cake Atelier',
+  category:'Pastelería de bodas · branding, galería y solicitudes personalizadas',
+  description:'Demo editorial con 17 fotografías individuales aprobadas: cakes negros, rosa, amarillo mantequilla, marfil, atelier y celebración con cake azul. Hero con cake artist, galería con diseños únicos y formulario mobile-first.',
+  image:ivoryBloomPhotos[0].url,
+  url:'https://thelaunchera.com/demos/ivory-and-bloom/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/ivory-and-bloom',
+  note:'Concepto ficticio. Los formularios simulan la solicitud; no se reciben pedidos, no se procesan pagos ni se envían datos a una tienda real. Incluye 17 fotos individuales y sus prompts de recreación.',
+  photos:ivoryBloomPhotos,
+  kind:'other',
+  promptsFor:'ivory-bloom'
+ },
+ {
   id:'cb-depot',
   title:'CB Depot · Mobile Detailing',
   category:'Proyecto de cliente · web y reservas de detailing',
@@ -131,7 +146,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, SOLUNA Yoga, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
@@ -171,7 +186,9 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
            <div className="finished-demo-photo-guide" aria-label="Regla para fotografías en ChatGPT">
              <strong>Cómo pedir fotos sin confundir a ChatGPT</strong>
              <p><b>Fotografía individual:</b> copia UN comando, pide UNA imagen en UN archivo, revisa el resultado y solo después pasa a la siguiente. Nunca solicites seis fotos en un mismo mensaje: puede devolver un collage o mezclar sabores.</p>
-             {d.id==='soluna-yoga'
+             {d.id==='ivory-bloom'
+               ? <p><b>Colección IVORY & BLOOM:</b> 17 fotos individuales publicadas, cada una con su prompt y enlace. Hero con la cake artist, galería de cakes distintos en negro, rosa y amarillo mantequilla, y novios cortando el pastel azul solamente debajo de la galería. No generes collages.</p>
+               : d.id==='soluna-yoga'
                ? <p><b>Colección SOLUNA:</b> 13 fotografías reales del concepto, cada una como archivo independiente. Hero cinematográfico, foto tabletop, estudio, clases, matcha y tres fotografías separadas de ropa. No uses un collage como imagen final.</p>
                : <p><b>Brand board:</b> cuando el ejercicio lo pida, puedes crear una composición de referencia; las fotografías finales siempre deben generarse y guardarse por separado.</p>}
              <p><b>Para que quede como el demo aprobado:</b> adjunta las fotografías originales de referencia. Un prompt de generación ayuda a mantener el estilo, pero por sí solo no reproduce píxel por píxel una foto anterior.</p>
