@@ -35,8 +35,56 @@ async function recover(){
   showError(lang()==='en'?'We could not load the material. Try Refresh.':'No pudimos mostrar los materiales. Toca Actualizar para reintentar.');
  }finally{repairing=false;}
 }
+
+async function showStudentResources(button){
+ const root=$('materiales-interactivos'),banner=$('admin-preview-banner');
+ button.disabled=true;button.textContent=lang()==='en'?'Opening student view…':'Abriendo vista del alumno…';
+ try{
+  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+  const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:false}});
+  const {data:{user}}=await db.auth.getUser();
+  const {data:owner}=user?.id?await db.from('podcast_studio_admins').select('role').eq('user_id',user.id).maybeSingle():{data:null};
+  if(owner?.role!=='owner')throw Error('No authorized owner');
+  root.replaceChildren();root.dataset.mounted='';
+  controller=await mountMateriales(root,{db,user:null,courseId,adminPreview:false,getLanguage:lang,
+   onGoLessons:()=>document.querySelector('[data-aula-view="lecciones"]')?.click(),
+   onCloseMaterials:()=>document.querySelector('[data-aula-view="inicio"]')?.click()});
+  if(!controller)throw Error('Student material view unavailable');
+  controller.go('prompts',{track:false});
+  const ownerPdfs=root.querySelector('.mi-owner-pdfs');
+  if(ownerPdfs)ownerPdfs.style.display='none';
+  const ownerBadge=root.querySelector('.mi-save');
+  if(ownerBadge)ownerBadge.style.display='none';
+  const {mountInspiracion}=await import('./inspiracion.js?v=20261102-owner-curation-v3');
+  if($('inspiration-gallery'))await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
+  banner.hidden=true;
+  document.querySelector('.aula-side-link[data-aula-view="prompts"]')?.click();
+  button.disabled=false;button.textContent=lang()==='en'?'Exit student preview':'Salir de vista alumno';
+  button.onclick=()=>window.location.reload();
+  button.title=lang()==='en'?'Read-only preview of published student resources':'Vista de los recursos publicados para alumnos, sin modificar sus datos';
+ }catch(e){
+  console.warn('Student resources preview failed',e?.message||'unknown');
+  button.disabled=false;button.textContent=lang()==='en'?'Try student view again':'Reintentar vista alumno';
+ }
+}
+function offerStudentPreview(){
+ const banner=$('admin-preview-banner'),course=$('class-content');
+ if(!banner||banner.hidden||!course||course.hidden||$('aula-student-preview'))return;
+ const button=document.createElement('button');
+ button.id='aula-student-preview';button.type='button';
+ button.textContent=lang()==='en'?'View as student':'Ver como alumno';
+ button.title=lang()==='en'?'See published learning resources without editing student progress':'Ver recursos publicados sin modificar el progreso de los alumnos';
+ button.style.cssText='display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid #a5bfce;background:#f9fcfd;color:#21455f;font:700 13px/1.3 Arial,sans-serif;cursor:pointer';
+ button.addEventListener('click',()=>void showStudentResources(button),{once:true});
+ const target=document.querySelector('.aula-main-actions')||document.querySelector('.aula-main-top');
+ target?.append(button);
+}
+
 function watch(){
  const root=$('materiales-interactivos');if(!root)return;
+ const ownerBanner=$('admin-preview-banner');
+ if(ownerBanner){new MutationObserver(offerStudentPreview).observe(ownerBanner,{attributes:true,attributeFilter:['hidden']});}
+ setTimeout(offerStudentPreview,2500);
  const observer=new MutationObserver(()=>{
   if(controller && root.querySelector('.mi-app') && document.getElementById('aula-active-title')?.textContent?.match(/prompt/i)){
    const head=root.querySelector('.mi-header h2');
