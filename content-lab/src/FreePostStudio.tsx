@@ -104,7 +104,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const [future,setFuture]=useState<CoverDecor[]>([]);
  const [busy,setBusy]=useState(false);
  const [focusLayerId,setFocusLayerId]=useState('');
- const photosRef=useRef<HTMLInputElement>(null),backgroundRef=useRef<HTMLInputElement>(null);
+ const photosRef=useRef<HTMLInputElement>(null);
  const layers=useMemo(()=>coverLayers(post,brand,decor),[post.designData,post.assetId,post.hook,post.title,brand.headingFont]);
  const needed=[post.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(l=>l.assetId)].filter(Boolean);
  useEffect(()=>{needed.forEach(id=>{if(!images[id])loadImage(id)})},[needed.join('|')]);
@@ -296,7 +296,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  return <section className={'free-post-studio'+(mediaOpen||backgroundOpen?' with-media':'')} aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
   <div className="free-post-tools">
    <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
-   <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
+
    {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
     <Paintbrush size={17}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
    <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Add text','Añadir texto',locale)}</button>
@@ -310,8 +310,6 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   </div>
   <input ref={photosRef} type="file" multiple accept="image/*,.heic,.heif" hidden
    onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';void uploadPhotos(files)}}/>
-  <input ref={backgroundRef} type="file" accept="image/*,.heic,.heif" hidden
-   onChange={e=>{const file=e.target.files?.[0];e.target.value='';void chooseBackground(file)}}/>
   {error&&<p role="alert" className="free-post-error">{error}</p>}
   <div className="free-post-design-row">
  {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
