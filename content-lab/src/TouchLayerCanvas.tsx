@@ -69,7 +69,7 @@ export default function TouchLayerCanvas({
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
-    pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampFreePhotoRect(rect);
+    pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampFreePhotoRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false); }, [selected]);
   useEffect(()=>{if(editingText)window.requestAnimationFrame(()=>quickTextInput.current?.focus());},[editingText]);
