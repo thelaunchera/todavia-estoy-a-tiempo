@@ -209,10 +209,15 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const map={
    'Empieza aquí':'Start here','Crea tu web':'Build your website','Tus recursos':'Your resources',
    'Antes de publicar':'Before publishing','Mi cuaderno':'My workbook',
-   'Tu oferta':'Your offer','Precio y entrega':'Pricing and delivery',
-   'Tus referencias':'Your references','Estilo y fotos':'Visual style and photos',
+   'Tu oferta':'Your offer','Precio y entrega':'Pricing & delivery',
+   'Tus referencias':'Your references','Estilo y fotos':'Visual style & photos',
    'Texto de tu página':'Your website copy','Construcción y móvil':'Building & mobile',
-   'Botón y entrega':'CTA & fulfillment','Tu revisión':'Final review'
+   'Botón y entrega':'CTA & fulfillment','Tu revisión':'Final review',
+   'Cómo funciona mi web':'How my website works','Paso a paso: mi propia web':'Build step by step',
+   'Mi proyecto organizado':'My organized project','Biblioteca de prompts':'Prompt library',
+   'Mara · mi guía web':'My web assistant','Make gratis':'Make free tier',
+   'Comandos de conectores':'Connector instructions','Contraseñas y claves':'Passwords & keys',
+   'Footer y legales':'Footer & legal','Ejemplo explicado':'Explained example'
   };
   for(const button of [...tabs.querySelectorAll('button'),...subtabs.querySelectorAll('button')]){
    if(map[button.textContent])button.textContent=map[button.textContent];
