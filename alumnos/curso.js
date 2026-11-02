@@ -661,6 +661,7 @@ courseHelpForm.addEventListener('submit',async event=>{
 // Si la sesión termina en otra pestaña, recargar vacía los datos privados de este documento.
 // También evita que un cambio de cuenta conserve material de la sesión anterior.
 db.auth.onAuthStateChange((event,session)=>{
+ if(STUDIO_EMBEDDED_OWNER&&!studioSessionReady)return;
  if(event==='PASSWORD_RECOVERY'){
   recoveryMode=true;display(login);setAuthMode('newPassword');authNotice('Enlace verificado. Ya puedes crear una contraseña nueva.');return;
  }
@@ -682,4 +683,32 @@ db.auth.onAuthStateChange((event,session)=>{
  }
 });
 
-await refreshAuth();
+
+if(STUDIO_EMBEDDED_OWNER){
+ // La solicitud se envía a la ventana que ya inició sesión en el Studio.
+ // Nunca lleva credenciales en el enlace ni concede acceso por query string.
+ window.addEventListener('message',async event=>{
+  if(event.origin!==window.location.origin || event.source!==window.parent)return;
+  if(event.data?.type!=='TLE_OWNER_SESSION_RESPONSE'||studioSessionLoading)return;
+  const tokens=event.data;
+  if(typeof tokens.access_token!=='string'||typeof tokens.refresh_token!=='string')return;
+  studioSessionLoading=true;
+  try{
+   const {data,error}=await db.auth.setSession({
+    access_token:tokens.access_token,refresh_token:tokens.refresh_token
+   });
+   if(error||!data.user||!await isAuthorizedOwner(data.user))throw error||Error('No autorizado');
+   studioSessionReady=true;
+   await refreshAuth();
+  }catch{
+   studioSessionReady=false;out.hidden=true;display(null);
+   status('No pudimos abrir la vista privada con la sesión del Studio. Regresa y vuelve a pulsar Aula.');
+  }finally{studioSessionLoading=false;}
+ });
+ out.hidden=true;display(null);
+ status('Conectando con tu Studio privado…');
+ window.parent.postMessage({type:'TLE_OWNER_SESSION_REQUEST'},window.location.origin);
+}else{
+ await refreshAuth();
+}
+
