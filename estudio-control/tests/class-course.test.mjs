@@ -216,7 +216,9 @@ test('Studio muestra Casa Brownie sin video y con video como demos distintos',()
  assert.match(library,/kind:'static'/);
  assert.match(library,/kind:'video'/);
  assert.match(library,/promptsFor:'casa-brownie'/);
- assert.match(library,/d\.promptsFor&&<details/);
+ assert.match(library,/className="finished-demo-kit"/);
+ assert.match(library,/studioDemoPrompts\[d\.promptsFor\]\.length/);
+ assert.match(library,/d\.photos\.map/);
  assert.match(library,/Abrir versión con foto/);
  assert.match(library,/Abrir versión con video/);
  assert.match(style,/finished-demo-variant-static|finished-demo-variant/);
