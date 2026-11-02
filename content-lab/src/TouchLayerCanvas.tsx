@@ -69,7 +69,7 @@ export default function TouchLayerCanvas({
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
-    pageCount>1?clampPanoramaRect(rect,.055/pageCount):inlineTextTools||kind==='photo'?clampFreePhotoRect(rect):clampRect(rect);
+    pageCount>1?clampPanoramaRect(rect,.055/pageCount):clampFreePhotoRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
   useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false); }, [selected]);
   useEffect(()=>{if(editingText)window.requestAnimationFrame(()=>quickTextInput.current?.focus());},[editingText]);
@@ -388,7 +388,7 @@ export default function TouchLayerCanvas({
     } catch { /* Keep the image as-is if its original proportions are unavailable. */ }
   };
   const deleteLayer = (id: string) => {
-    if (!onRemove || !window.confirm('¿Borrar este elemento del carrusel? El archivo original seguirá en tu biblioteca.')) return;
+    if (!onRemove) return;
     onRemove(id);
     if (selected === id) setSelected('');
   };
