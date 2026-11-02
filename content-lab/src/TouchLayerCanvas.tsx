@@ -464,7 +464,7 @@ export default function TouchLayerCanvas({
             className={'touch-editor-layer ' + layer.kind + (layer.role==='background'?' is-background':'') + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
-               zIndex:layer.role==='background'?1:active?8:z,
+               zIndex:layer.role==='background'?1:pageCount===1&&inlineTextTools&&layer.kind==='text'?(active?12:10):active?8:z,
                pointerEvents:layer.locked||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
