@@ -1841,7 +1841,7 @@ function App() {
                     onUpload={async file=>upload(file,'original',false)}
                     loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
                     onUploadBackground={async file=>upload(file,'background',false)}
-                    notify={toast} saving={busy==='save'} onSave={()=>{void saveAndReturnToCalendar()}}/>
+                    notify={toast} saving={busy==='save'} saveState={draftStatus} onSave={()=>{void saveAndReturnToCalendar()}}/>
 
                 </aside>
               </div>
