@@ -1,0 +1,39 @@
+name: Bilingual public content and captions QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index*.html'
+      - 'clases/**'
+      - 'productos/**'
+      - 'centro/**'
+      - 'content-lab/public/**'
+      - 'alumnos/index.html'
+      - 'alumnos/curso.js'
+      - 'app-redesign.js'
+      - 'terminos*.html'
+      - 'privacidad*.html'
+      - 'reembolsos*.html'
+      - 'cookies*.html'
+      - 'tus-datos*.html'
+      - 'baja*.html'
+      - 'scripts/qa-bilingual-content-and-captions.mjs'
+      - '.github/workflows/bilingual-content-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: |
+          node --check app-redesign.js
+          node --check alumnos/curso.js
+          node --check scripts/qa-bilingual-content-and-captions.mjs
+      - name: Verify bilingual sales and legal pages
+        run: node scripts/qa-bilingual-content-and-captions.mjs
