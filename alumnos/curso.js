@@ -5,7 +5,12 @@ const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supaba
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
-const ADMIN_VIEW_REQUESTED=new URL(location.href).searchParams.get('vista')==='admin';
+const queryParams=new URL(location.href).searchParams;
+const ADMIN_VIEW_REQUESTED=queryParams.get('vista')==='admin';
+const STUDIO_EMBEDDED_OWNER=ADMIN_VIEW_REQUESTED && queryParams.get('origen')==='studio'
+  && window.parent!==window;
+let studioSessionReady=false;
+let studioSessionLoading=false;
 const REMEMBER_KEY='podcast_class_remember_24h_v1';
 const TAB_KEY='podcast_class_tab_24h_v1';
 const DAY_MS=24*60*60*1000;
@@ -38,7 +43,7 @@ function setAuthMode(mode){
  if(!Object.hasOwn(forms,mode))return;
  for(const [name,form] of Object.entries(forms))form.hidden=name!==mode;
  const copy={
-  login:ADMIN_VIEW_REQUESTED?['Vista previa del aula','Entra con tu correo y contraseña de administradora del Studio. No tienes que comprar la clase.']:['Qué gusto verte por aquí.','Entra con el correo de tu compra y tu contraseña.'],
+  login:['Qué gusto verte por aquí.','Entra con el correo de tu compra y tu contraseña.'],
   register:['Empieza por aquí.','Crea tu cuenta para tener tus lecciones en un solo lugar.'],
   reset:['Recupera tu acceso.','Te ayudamos a establecer una nueva contraseña.'],
   newPassword:['Crea una nueva contraseña.','Escríbela dos veces para guardarla de forma segura.']
@@ -401,7 +406,12 @@ async function showCourse(email,asAdmin=false){
  asAdmin ? Promise.resolve({data:[],error:null}) : db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email),
  db.from('podcast_class_prompts').select('prompt_code,position,title,summary,body,status').eq('course_id',courseId).like('prompt_code','m%').order('position',{ascending:true})
  ]);
- if(l.error||r.error||p.error||mp.error)throw l.error||r.error||p.error||mp.error;
+ // Una consulta opcional de recursos o prompts no debe echar a la
+ // propietaria fuera de toda la clase si las lecciones siguen disponibles.
+ if(l.error)throw l.error;
+ if(p.error&&!asAdmin)throw p.error;
+ if(!asAdmin&&(r.error||mp.error))throw r.error||mp.error;
+ const hasPartialMaterials=Boolean(r.error||mp.error);
  modulePrompts=(mp.data||[]).filter(item=>item.status==='ready'||asAdmin);
  lessons=asAdmin?(l.data||[]):(l.data||[]).filter(item=>item.status==='ready'&&validVideoId(item.youtube_video_id));
  done=new Set((p.data||[]).map(x=>x.lesson_code));
@@ -423,7 +433,13 @@ async function showCourse(email,asAdmin=false){
  $('progress-label').hidden=asAdmin;
  $('progress-percent').hidden=asAdmin;
  $('lesson-celebration').hidden=true;
- display(course);status(asAdmin?'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.':'Acceso verificado.',true);lessonsUI();setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false});
+ display(course);
+ status(asAdmin
+  ? hasPartialMaterials
+   ? 'Vista privada abierta. Algunas guías o prompts no cargaron; las lecciones siguen disponibles.'
+   : 'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.'
+  : 'Acceso verificado.',true);
+ lessonsUI();setAulaView(location.hash==='#prompts'?'prompts':'inicio',{scroll:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,onGoLessons:()=>setAulaView('lecciones')
@@ -451,7 +467,7 @@ async function refreshAuth(){
    authNotice('Por seguridad, vuelve a entrar con tu contraseña.');
    return;
   }
-  user=who;out.hidden=false;status('Comprobando permisos…');
+  user=who;out.hidden=owner;status('Comprobando permisos…');
   if(!owner&&!who.email_confirmed_at){display(noAccess);status('Confirma tu correo antes de entrar al aula.');return;}
   await showCourse((who.email||'').trim().toLowerCase(),owner);
   if(!course.hidden)void refreshProductShelf();
