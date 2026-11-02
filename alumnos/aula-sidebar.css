@@ -141,3 +141,17 @@ button:focus-visible,.aula-rail a:focus-visible{outline:3px solid #87b5d0;outlin
 /* Volver al centro general desde la clase, sin mostrar lecciones al público. */
 .aula-navigation .aula-hub-link{background:#e8f0f4;color:#214c66;border:1px solid #d2e2eb;text-decoration:none}
 .aula-navigation .aula-hub-link:hover{background:#dbe9ef}
+
+
+/* iPhone: drawer labels must remain visible; never inherit hidden mobile spans. */
+@media(max-width:759px){
+ #aula-layout .aula-rail{width:min(88vw,320px);max-width:calc(100vw - 36px);box-sizing:border-box}
+ #aula-layout .aula-rail .aula-side-link{display:flex;align-items:center;gap:13px;width:100%;font-size:14px;line-height:1.4;padding:12px 13px;white-space:normal}
+ #aula-layout .aula-rail .aula-side-link>span:not(.aula-side-icon){display:block!important;visibility:visible!important;opacity:1!important;min-width:0;flex:1;overflow-wrap:break-word}
+ #aula-layout .aula-rail .aula-nav-group{display:block!important}
+ #aula-layout .aula-rail .lesson-index{max-width:100%;overflow-x:hidden}
+ #aula-layout .aula-rail .lesson-index button{white-space:normal;overflow-wrap:anywhere;text-align:left}
+ #aula-layout .aula-rail-brand img{max-width:175px}
+}
+body.aula-member .learning-shelf,body.aula-member [data-aula-panel="catalogo"],
+body.aula-member [data-aula-view="catalogo"]{display:none!important}
