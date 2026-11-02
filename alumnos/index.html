@@ -416,5 +416,16 @@
  window.addEventListener('unhandledrejection',()=>setTimeout(showFailure,1000));
 })();
 </script>
-<script type="module" src="./curso.js?v=20261102-owner-session-safeguard-v17"></script>
+<script type="module">
+import('./curso.js?v=20261102-diagnostic-owner-v18').catch(error=>{
+ const msg=document.getElementById('room-message');
+ if(msg){
+  msg.hidden=false;
+  msg.textContent='El aula no pudo iniciar sus archivos. Código: AULA-MODULE. Regresa al Studio para reintentar.';
+  msg.dataset.ok='false';
+ }
+ console.error('AULA-MODULE',error);
+ if(window.parent!==window)window.parent.postMessage({type:'TLE_CLASSROOM_BOOT_ERROR',code:'AULA-MODULE'},location.origin);
+});
+</script>
 </body></html>
