@@ -38,7 +38,7 @@ test('Preview uses exactly the export painter; gallery has no text watermark',()
 });
 test('Factory uses the five mobile-first creation steps and keeps ideas with IA optional',()=>{
  const studio=read('src/CarouselFactory.tsx');
- assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('style')"));
+ assert.ok(studio.includes("useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('canvas')"));
  assert.ok(studio.includes('CREA A TU MANERA'));
  assert.ok(studio.includes('Crear carrusel con IA · 1 crédito'));
  assert.ok(studio.includes('PASO 1 DE 5 · FONDOS Y STICKERS'));

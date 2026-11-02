@@ -464,7 +464,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('style');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('canvas');
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
   const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:920px)').matches);
@@ -951,17 +951,27 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Texto duplicado: conserva el color, la fuente y el tamaño.');
   };
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
+    const crossesSeam=(r:TouchRect,count:number)=>Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)/count)
+      .some(cut=>r.x<cut-.0001&&r.x+r.w>cut+.0001);
     if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
+    // A photo crossing an internal 4:5 cut is a seamless layout even if this
+    // draft began in "Normal". Promote it instead of snapping it back.
+    const seamRequested=style.seamlessEnabled||(kind==='photo'&&crossesSeam(rect,slides.length));
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
       const promoted=promoteSource(source,rect);
-      setAll(stripSource(source),{...style,panoramaLayers:[...(style.panoramaLayers||[]),style.seamlessEnabled?promoted:constrainNormalLayer(promoted,slides.length)]});
-    }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>{
-      if(layer.id!==id)return layer;
-      const next={...layer,rect:clampPanoramaRect(rect)};
-      return style.seamlessEnabled?next:constrainNormalLayer(next,slides.length);
-    })});
+      setAll(stripSource(source),{...style,seamlessEnabled:seamRequested,
+        panoramaLayers:[...(style.panoramaLayers||[]),seamRequested?promoted:constrainNormalLayer(promoted,slides.length)]});
+    }else {
+      const updated=(style.panoramaLayers||[]).map(layer=>{
+        if(layer.id!==id)return layer;
+        const next={...layer,rect:clampPanoramaRect(rect)};
+        return seamRequested?next:constrainNormalLayer(next,slides.length);
+      });
+      setArtStyle({seamlessEnabled:seamRequested,panoramaLayers:updated});
+    }
+    if(!style.seamlessEnabled&&seamRequested)notify('Seamless activado: la foto ahora cruza los slides y se cortará al exportar.');
   };
   const copyPanoramaSticker=(id:string,targetIndex:number):StickerCopyResult=>{
     if(targetIndex<0||targetIndex>=slides.length)return 'invalid';
@@ -1388,6 +1398,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         <small>Una imagen continúa y se corta entre slides</small></span>
       </button>
     </div>
+    {studioTab==='canvas'&&<p className="factory-mode-hint">{style.seamlessEnabled
+      ?'✓ Lienzo continuo: coloca una foto sobre la línea entre dos slides. El corte se hace al descargar.'
+      :'Para poner una foto entre dos slides, muévela sobre la línea de corte o pulsa «Foto entre slides». Activaremos Seamless automáticamente.'}</p>}
     <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
       <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
         {([

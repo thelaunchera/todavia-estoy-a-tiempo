@@ -154,7 +154,7 @@ export default function TouchLayerCanvas({
   // Support a pinch even when the second finger lands on another layer or empty space.
   const addPinchPointer=(e:React.PointerEvent<HTMLDivElement>)=>{
     const active=gesture.current;
-    if(!inlineTextTools||pageCount!==1||!active||pointers.current.has(e.pointerId)||pointers.current.size!==1)return false;
+    if((pageCount>1&&interactionMode==='navigate')||!active||pointers.current.has(e.pointerId)||pointers.current.size!==1)return false;
     const source=layers.find(item=>item.id===active.id);if(!source)return false;
     e.preventDefault();e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -208,7 +208,7 @@ export default function TouchLayerCanvas({
     const g = gesture.current;
     if (!g || !pointers.current.has(e.pointerId)) return;
     if(g.id!==layer.id){
-      if(!inlineTextTools)return;
+      if(pageCount>1&&interactionMode==='navigate')return;
       const source=layers.find(item=>item.id===g.id);if(!source)return;
       layer=source;
     }
@@ -249,7 +249,7 @@ export default function TouchLayerCanvas({
   const done = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
     if((pageCount>1&&interactionMode==='navigate')||layer.locked)return;
     if (!pointers.current.has(e.pointerId)) return;
-    if(inlineTextTools&&gesture.current&&gesture.current.id!==layer.id){
+    if(gesture.current&&gesture.current.id!==layer.id){
       const source=layers.find(item=>item.id===gesture.current?.id);if(source)layer=source;
     }
     e.preventDefault(); e.stopPropagation();
@@ -417,17 +417,17 @@ export default function TouchLayerCanvas({
         } }}
         onPointerDown={e=>{if(gesture.current)addPinchPointer(e)}}
         onPointerMove={e=>{
-          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+          if(gesture.current&&pointers.current.has(e.pointerId)){
             const source=layers.find(item=>item.id===gesture.current?.id);if(source)move(e,source);
           }
         }}
         onPointerUp={e=>{
-          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+          if(gesture.current&&pointers.current.has(e.pointerId)){
             const source=layers.find(item=>item.id===gesture.current?.id);if(source)done(e,source);
           }
         }}
         onPointerCancel={e=>{
-          if(inlineTextTools&&gesture.current&&pointers.current.has(e.pointerId)){
+          if(gesture.current&&pointers.current.has(e.pointerId)){
             const source=layers.find(item=>item.id===gesture.current?.id);if(source)done(e,source);
           }
         }}
@@ -559,7 +559,7 @@ export default function TouchLayerCanvas({
         <div>{layers.map(layer=><button type="button" key={layer.id}
           className={selected===layer.id?'selected':''} aria-pressed={selected===layer.id}
           onClick={()=>selectFromList(layer.id)}>
-          {layer.kind==='photo'?'📷':layer.kind==='sticker'?'🎀':layer.kind==='text'?'T':'▧'} {layer.name}
+          {(layer.kind==='photo'||layer.kind==='sticker')&&layer.src?<img className="touch-layer-real-thumb" src={layer.src} alt="" loading="lazy"/>:<span aria-hidden="true">{layer.kind==='text'?'T':'▧'}</span>} <span className="touch-layer-real-name">{layer.name}</span>
         </button>)}</div>
       </div>}
     </details>}
@@ -573,6 +573,12 @@ export default function TouchLayerCanvas({
       <span title={chosen.name}>{chosen.name}</span>
       <button type="button" aria-label="Reducir elemento" onClick={()=>resizeSelected(.86)}>−</button>
       <button type="button" aria-label="Agrandar elemento" onClick={()=>resizeSelected(1.16)}>＋</button>
+      {chosen.kind==='photo'&&pageCount>1&&<button type="button" className="touch-editor-cross-slide" onClick={()=>{
+         const nearest=Math.max(1,Math.min(pageCount-1,Math.round((selectedRect.x+selectedRect.w/2)*pageCount)));
+         commit({x:nearest/pageCount-selectedRect.w/2});
+       }}>Foto entre slides ↔</button>}
+      {chosen.kind==='photo'&&onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar detrás</button>}
+      {chosen.kind==='photo'&&onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer delante</button>}
       {chosen.role==='background'&&<button type="button" onClick={()=>commit({
          w:Math.min(1-selectedRect.x,selectedRect.w+1/pageCount),h:1,y:0
        })}>Estirar fondo ↔</button>}
