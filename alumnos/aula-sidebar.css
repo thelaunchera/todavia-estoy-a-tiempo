@@ -155,3 +155,40 @@ button:focus-visible,.aula-rail a:focus-visible{outline:3px solid #87b5d0;outlin
 }
 body.aula-member .learning-shelf,body.aula-member [data-aula-panel="catalogo"],
 body.aula-member [data-aula-view="catalogo"]{display:none!important}
+
+
+/* Navegación de lecciones y pestañas internas: alumnos y vista privada, 2026-11-02 */
+.aula-section-navigation{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin-left:auto;flex:0 0 auto}
+.aula-section-nav-button{
+ display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;
+ padding:9px 12px;border-radius:11px;border:1px solid #d2dfe6;
+ background:#fff;color:#315873;font:750 12px/1.2 'DM Sans',Arial,sans-serif;
+ cursor:pointer;touch-action:manipulation;white-space:nowrap;
+}
+.aula-section-nav-button svg{width:17px;height:17px;flex:0 0 auto}
+.aula-section-nav-button:hover{background:#e9f1f4}
+.aula-section-nav-button:focus-visible{outline:3px solid #78a8c4;outline-offset:2px}
+.aula-section-nav-button[hidden]{display:none!important}
+.aula-section-nav-close{background:#eef3f4;border-color:#cedde3}
+@media(max-width:1050px){
+ .aula-section-navigation{gap:6px}
+ .aula-section-nav-button{padding:9px 10px}
+}
+@media(max-width:759px){
+ #aula-layout .aula-main-top{flex-wrap:wrap;gap:9px 8px;padding:10px 0 12px}
+ #aula-layout .aula-main-top #aula-menu-open{order:0}
+ #aula-layout .aula-main-location{order:1;flex:1 1 auto;min-width:60px;max-width:calc(100% - 135px)}
+ #aula-layout .aula-main-location>span:first-child{display:none}
+ #aula-layout .aula-main-actions{order:2}
+ #aula-layout .aula-section-navigation{order:3;margin:0;width:100%;justify-content:flex-start}
+ #aula-layout .aula-section-nav-button{min-height:43px;padding:10px 16px;flex:0 0 auto}
+ #aula-layout .aula-section-nav-button>span{display:inline!important}
+ #aula-layout .aula-rail .aula-side-link>span:not(.aula-side-icon){display:block!important;visibility:visible!important;opacity:1!important}
+ #aula-layout .aula-rail .lesson-index span{display:inline!important;visibility:visible!important}
+}
+@media(max-width:390px){
+ #aula-layout .aula-access-note{display:none}
+ #aula-layout .aula-main-location strong{font-size:11px}
+ #aula-layout .aula-section-navigation{gap:7px}
+ #aula-layout .aula-section-nav-button{font-size:12px}
+}
