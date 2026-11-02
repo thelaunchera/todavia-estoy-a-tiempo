@@ -827,9 +827,11 @@ if(STUDIO_EMBEDDED_OWNER){
    if(verifyError||!verified||!await isAuthorizedOwner(verified))throw verifyError||Error('No autorizado');
    studioSessionReady=true;
    await refreshAuth();
-  }catch{
+  }catch(e){
    studioSessionReady=false;out.hidden=true;display(null);
-   status('No pudimos abrir la vista privada con la sesión del Studio. Regresa y vuelve a pulsar Aula.');
+   const reason=e?.code==='PGRST301'?' (sesión caducada)':'';
+   status('No se pudo verificar la sesión de administradora'+reason+'. Vuelve al Studio e inténtalo otra vez.');
+   console.error('Owner classroom bridge verification failed',e?.code||e?.name||'unknown');
   }finally{studioSessionLoading=false;}
  });
  out.hidden=true;display(null);
