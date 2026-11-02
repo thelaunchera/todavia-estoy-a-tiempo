@@ -439,3 +439,52 @@
 /* In edit mode, permit two fingers on the artboard without Safari taking over pan gestures. */
 .panorama-canvas.touch-editor-edit-mode .touch-editor-stage{touch-action:none}
 .panorama-canvas.touch-editor-navigation-mode .touch-editor-stage{touch-action:pan-x pan-y}
+
+/* Carousel mode stays accessible even after scrolling below its original banner.
+   This portal is intentionally a short switch; it never covers the artwork with
+   the long slide navigation/instructions. Hidden when the editor leaves the view. */
+.touch-editor-floating-mode{
+ position:fixed;top:calc(env(safe-area-inset-top, 0px) + 12px);left:50%;
+ transform:translateX(-50%);z-index:7000;
+ display:flex;align-items:center;gap:8px;
+ width:min(440px,calc(100vw - 24px));max-width:calc(100vw - 24px);
+ padding:6px 7px;border:1px solid #c6d9de;border-radius:15px;
+ background:rgba(250,248,243,.98);box-shadow:0 6px 25px #17333d35;
+ color:#284c59;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+ pointer-events:auto;touch-action:manipulation;
+}
+.touch-editor-floating-mode-switch{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:5px;flex:1;min-width:0
+}
+.touch-editor-floating-mode-switch button{
+ display:grid;place-items:center;min-width:0;min-height:44px;padding:9px 7px;
+ background:#fff;border:1px solid #d5e1e4;border-radius:10px;
+ color:#335963;font:750 12px/1.15 'DM Sans',sans-serif;
+ white-space:nowrap;cursor:pointer;touch-action:manipulation
+}
+.touch-editor-floating-mode-switch button.active{background:#244654;color:#fff;border-color:#244654}
+.touch-editor-floating-mode-switch button:focus-visible{
+ outline:3px solid #7cb7d1;outline-offset:2px
+}
+.touch-editor-floating-slide{
+ min-width:42px;flex-shrink:0;text-align:center;
+ font:750 12px/1.2 'DM Sans',sans-serif;
+ font-variant-numeric:tabular-nums;color:#2c5360
+}
+@media(max-width:760px){
+ .touch-editor-floating-mode{top:calc(env(safe-area-inset-top, 0px) + 66px)}
+}
+/* iPad: collapse the initial multi-row banner before it transitions to the
+   fixed switch. Slide numbering and arrows remain available. */
+@media(min-width:761px) and (max-width:1180px){
+ .panorama-canvas .touch-editor-navigation{
+  display:flex;flex-wrap:wrap;align-items:center;gap:7px;
+  padding:8px 9px;margin:0 0 8px
+ }
+ .panorama-canvas .touch-editor-mode-switch{flex:1 1 260px;min-width:0}
+ .panorama-canvas .touch-editor-mode-switch button{min-height:44px}
+ .panorama-canvas .touch-editor-page-navigation{flex:0 0 auto}
+ .panorama-canvas .touch-editor-page-tabs{display:none}
+ .panorama-canvas .touch-editor-navigation-tip{display:none}
+}
