@@ -454,13 +454,27 @@ async function showCourse(email,asAdmin=false){
 }
 async function refreshAuth(){
  if(recoveryMode){out.hidden=true;display(login);setAuthMode('newPassword');authNotice('Enlace de recuperación verificado. Escribe tu nueva contraseña.');return;}
+ // La vista dentro del Studio no debe pedir otra compra ni contraseña.
+ if(STUDIO_EMBEDDED_OWNER&&!studioSessionReady){
+  out.hidden=true;display(null);status('Abriendo tu aula privada desde el Studio…');return;
+ }
+ let ownerConfirmed=false;
+ let stage='sesión';
  try{
   const {data:{user:who},error}=await db.auth.getUser();
   if(error && !/Auth session missing/i.test(error.message||''))throw error;
-  if(!who){user=null;out.hidden=true;display(login);if(!message.dataset.noticeShown)status(ADMIN_VIEW_REQUESTED?'Entra con tu cuenta administradora del Studio.':'Entra con tu correo y contraseña.');return;}
+  if(!who){
+   user=null;out.hidden=true;display(STUDIO_EMBEDDED_OWNER?null:login);
+   status(STUDIO_EMBEDDED_OWNER?'El Studio aún no ha confirmado tu sesión.':'Entra con tu correo y contraseña.');return;
+  }
+  stage='permiso de administradora';
   const owner=await isAuthorizedOwner(who);
-  // La propietaria autenticada accede sin compra; para todos los demás
-  // la entrada de alumnos exige pago verificado y caduca a las 24 horas.
+  ownerConfirmed=owner;
+  if(STUDIO_EMBEDDED_OWNER&&!owner){
+   user=null;out.hidden=true;display(null);
+   status('No pudimos verificar los permisos de administradora. Esta vista no abre cuentas de alumnos.');return;
+  }
+  // Solo alumnos con compra confirmada; nunca cerrar el Studio desde su iframe.
   if(!owner&&!hasAulaSession(who.id)){
    clearRememberedStudent();user=null;lessons=[];done.clear();display(login);out.hidden=true;
    await db.auth.signOut({scope:'local'});
@@ -469,9 +483,23 @@ async function refreshAuth(){
   }
   user=who;out.hidden=owner;status('Comprobando permisos…');
   if(!owner&&!who.email_confirmed_at){display(noAccess);status('Confirma tu correo antes de entrar al aula.');return;}
+  stage='lecciones y materiales';
   await showCourse((who.email||'').trim().toLowerCase(),owner);
   if(!course.hidden)void refreshProductShelf();
- }catch(e){display(login);status('No pudimos comprobar el acceso. Actualiza la página o pide ayuda si continúa.');console.error('Course portal auth check error',e?.code||'unknown');}
+ }catch(e){
+  if(ownerConfirmed){
+   // Rol owner confirmado por RLS. No mostrar la pantalla de pago.
+   adminPreview=true;out.hidden=true;display(course);
+   $('admin-preview-banner').hidden=false;
+   status('Tu sesión de administradora está verificada, pero falló la carga de '+stage+'. Regresa al Studio y abre de nuevo el aula.');
+  }else if(STUDIO_EMBEDDED_OWNER){
+   out.hidden=true;display(null);
+   status('No se pudo confirmar la sesión privada. Regresa al Studio y vuelve a pulsar Aula.');
+  }else{
+   display(login);status('No pudimos comprobar el acceso. Actualiza la página o pide ayuda si continúa.');
+  }
+  console.error('Course portal auth check error',e?.code||e?.name||'unknown',stage);
+ }
 }
 $('login-form').addEventListener('submit',async e=>{
  e.preventDefault();
