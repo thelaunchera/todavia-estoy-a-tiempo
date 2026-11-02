@@ -5,7 +5,7 @@ import {promptGuide} from './prompt-guide.js?v=20261102-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
 import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261102-v1';
 /* Tu primera web con IA · Materiales activos de la clase
-   Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
+   Español y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
 let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={},MODULE_PROMPTS=[],EXAMPLE_PROMPTS=[];
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
