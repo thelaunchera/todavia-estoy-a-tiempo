@@ -2,7 +2,8 @@ import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useEffect,useRef,useState} from 'react';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number};
+import {clampTextCurve,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
@@ -49,7 +50,12 @@ export default function SeamlessEditor(){
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
   for(let slideIndex=0;slideIndex<doc.count;slideIndex++){const src=doc.backgroundImages?.[slideIndex];if(src){try{const bg=await loadImage(src);const left=slideIndex*W-clipStart;ctx.save();ctx.beginPath();ctx.rect(left,0,W,H);ctx.clip();const factor=Math.max(W/bg.width,H/bg.height);const dw=bg.width*factor,dh=bg.height*factor;ctx.drawImage(bg,left+(W-dw)/2,(H-dh)/2,dw,dh);ctx.restore()}catch{}}}
-  for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';textLines(it).forEach((line,index)=>ctx.fillText(line,x,it.y+index*it.fontSize*1.3))}else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
+  for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){
+    ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';
+    const lines=textLines(it),curve=clampTextCurve(it.curve||0);
+    const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines);
+    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900));
+   }else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
   ctx.restore();
  };
  useEffect(()=>{
@@ -107,7 +113,13 @@ export default function SeamlessEditor(){
  const onFile=async(e:React.ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('image/')){setMessage('Selecciona una foto válida.');return}if(file.size>18_000_000){setMessage('Usa una foto de menos de 18 MB.');return}const reader=new FileReader();reader.onerror=()=>setMessage('No se pudo abrir la foto. Prueba con JPEG o PNG.');reader.onload=()=>{const replacing=replacePhotoId.current;replacePhotoId.current=null;if(replacing!==null){update(replacing,{src:String(reader.result)});setSelected(replacing);setMessage('Foto reemplazada sin perder su posición ni tamaño.')}else{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:String(reader.result),x:slide*W+100,y:160,width:650,fontSize:80,color:'#191919'}]}));setSelected(id)}};reader.readAsDataURL(file);e.target.value=''};
  const locate=(e:React.PointerEvent<HTMLCanvasElement>|React.MouseEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect();return {x:(e.clientX-r.left)*width/r.width,y:(e.clientY-r.top)*H/r.height}};
  const textLines=(it:Item)=>{const lines:string[]=[];const maxWidth=it.width||900;const font=it.fontSize;for(const para of (it.text||'').split('\n')){if(!para.trim()){lines.push('');continue}let line='';for(const word of para.split(/\s+/)){const candidate=line?line+' '+word:word;if(candidate.length*font*.53>maxWidth&&line){lines.push(line);line=word}else line=candidate}lines.push(line)}return lines.length?lines:['']};
- const itemBounds=(it:Item)=>{const im=it.src?images.current.get(it.src):undefined;return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,h:it.kind==='text'?it.fontSize*1.3*Math.max(1,textLines(it).length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width}};
+ const itemBounds=(it:Item)=>{
+  const im=it.src?images.current.get(it.src):undefined;
+  const lines=it.kind==='text'?textLines(it):[];
+  const lineHeight=it.fontSize*1.3+(it.kind==='text'?curvedTextExtraHeight(it.fontSize,it.width||900,it.curve||0,lines):0);
+  return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,
+    h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width};
+ };
  const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{
    // The hit area must match the wrapped, rotated element that was painted.
    // Otherwise a finger selects the photograph underneath the text.
@@ -273,6 +285,21 @@ export default function SeamlessEditor(){
   </div></details>
   {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
     {current&&<label style={{display:'flex',alignItems:'center',gap:6}}>Girar <input aria-label="Girar elemento" type="range" min="-180" max="180" step="1" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/><output>{current.rotation||0}°</output></label>}{current.kind==='text'&&<><div style={{flex:'1 1 100%',padding:12,background:'#FAF8F3',borderRadius:12}}><label htmlFor="seamless-text-editor" style={{display:'block',fontWeight:700,marginBottom:6}}>Escribe o edita este texto</label><textarea ref={textEditor} id="seamless-text-editor" aria-label="Escribir texto de la diapositiva" rows={6} placeholder="Escribe aquí todo lo que quieras explicar. Puedes añadir párrafos y saltos de línea…" style={{...control,width:'100%',boxSizing:'border-box',resize:'vertical',fontFamily:'inherit'}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><div style={{fontSize:12,marginTop:5}}>Cada texto es independiente. El párrafo se ajusta automáticamente al ancho del bloque.</div><label style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>Ancho del texto <input aria-label="Ancho del párrafo" type="range" min="200" max="1000" step="20" value={current.width||900} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label></div><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
+    {current.kind==='text'&&<div role="group" aria-label="Curvar texto" style={{flex:'1 1 100%',display:'grid',gap:9,padding:'10px 12px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
+      <strong style={{fontSize:14}}>Curvar texto</strong>
+      <label style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',fontSize:13}}>Curvatura
+        <input type="range" min="-100" max="100" step="1" aria-label="Curvatura del texto"
+          value={clampTextCurve(current.curve||0)} onChange={e=>update(current.id,{curve:Number(e.target.value)})}
+          style={{flex:'1 1 160px',minWidth:120,accentColor:'#191919'}}/>
+        <output aria-live="off">{clampTextCurve(current.curve||0)}%</output>
+      </label>
+      <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+        <button type="button" style={{...control,background:(current.curve||0)>0?'#F2D85B':'white'}} onClick={()=>update(current.id,{curve:65})}>∩ Arco arriba</button>
+        <button type="button" style={{...control,background:(current.curve||0)<0?'#F2D85B':'white'}} onClick={()=>update(current.id,{curve:-65})}>∪ Arco abajo</button>
+        <button type="button" style={{...control,background:!(current.curve||0)?'#F2D85B':'white'}} onClick={()=>update(current.id,{curve:0})}>Texto recto</button>
+      </div>
+      <small style={{color:'#647075'}}>Mueve el control para ajustar el arco. También se mantiene al guardar o exportar el PNG.</small>
+    </div>}
     {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
     {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
     <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
@@ -295,6 +322,17 @@ export default function SeamlessEditor(){
   {(current||recentlyDeleted)&&<div role="toolbar" aria-label="Edición táctil" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    {current&&<>
    {current.kind==='text'&&<button type="button" style={{...control,background:'#191919',color:'white'}} onClick={editOnCanvas}>✎ Editar texto aquí</button>}
+   {current.kind==='text'&&<div role="group" aria-label="Curvar texto seleccionado" style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:7,padding:'6px 9px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
+    <label style={{fontSize:13,fontWeight:700,display:'flex',alignItems:'center',gap:6}}>Curvar texto
+      <input type="range" min="-100" max="100" step="1" aria-label="Curvar letras"
+       value={clampTextCurve(current.curve||0)} onChange={e=>update(current.id,{curve:Number(e.target.value)})}
+       style={{width:125,accentColor:'#191919'}}/>
+    </label>
+    <output style={{fontSize:12,minWidth:34}}>{clampTextCurve(current.curve||0)}%</output>
+    <button type="button" aria-label="Arco hacia arriba" title="Arco hacia arriba" style={{...control,padding:'8px 10px'}} onClick={()=>update(current.id,{curve:65})}>∩</button>
+    <button type="button" aria-label="Arco hacia abajo" title="Arco hacia abajo" style={{...control,padding:'8px 10px'}} onClick={()=>update(current.id,{curve:-65})}>∪</button>
+    <button type="button" style={{...control,padding:'8px 10px'}} onClick={()=>update(current.id,{curve:0})}>Recto</button>
+   </div>}
    <button type="button" style={control} onClick={()=>update(current.id,current.kind==='image'?{width:Math.round(current.width*.85)}:{fontSize:Math.round(current.fontSize*.85)})}>− Reducir</button>
    <button type="button" style={control} onClick={()=>update(current.id,current.kind==='image'?{width:Math.round(current.width*1.15)}:{fontSize:Math.round(current.fontSize*1.15)})}>＋ Agrandar</button>
    <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835',fontWeight:750}} onClick={()=>deleteElement(current.id)}>× Borrar {current.kind==='text'?'texto':current.kind==='image'?'foto':'sticker'}</button>
@@ -387,7 +425,7 @@ export default function SeamlessEditor(){
     </div>}
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
   </div>}
-  <p style={{fontSize:12,fontWeight:600}}>Toca una foto, texto o sticker para seleccionarlo. Usa la × sobre el elemento o el botón «Borrar» para eliminarlo. Usa «Deshacer eliminación» si te equivocas.</p>
+  <p style={{fontSize:12,fontWeight:600}}>Toca una foto, texto o sticker para seleccionarlo. Cuando selecciones un texto, usa «Curvar texto» para arquearlo arriba o abajo. Usa la × o «Borrar» para eliminar elementos.</p>
   <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para pasar de slide; usa dos dedos para cambiar el tamaño de un elemento seleccionado. Los botones Anterior y Siguiente son opcionales.</p>
   <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
