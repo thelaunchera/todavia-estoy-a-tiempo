@@ -24,7 +24,7 @@ test('Both touch editors keep text selectable and do not reset layers on blur',(
  const touch=read('src/TouchLayerCanvas.tsx');
  const studio=read('../estudio-control/src/SeamlessEditor.tsx');
  assert.ok(touch.includes("onClick={()=>setEditingText(chosen.id)}"));
- assert.ok(touch.includes("layer.placement==='behind-text'?2+layerIndex:20+layerIndex"));
+ assert.ok(touch.includes("layer.placement==='behind-text'?2+(layerIndex/Math.max(1,layers.length)):20+layerIndex"));
  assert.ok(touch.includes('onBlur={()=>setEditingText(\'\')}'));
  assert.ok(studio.includes('const {w,h}=itemBounds(it)'));
  assert.ok(studio.includes('const id=drag.current?.id??selected'));
