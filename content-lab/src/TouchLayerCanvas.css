@@ -186,7 +186,6 @@
  pointer-events:none!important;touch-action:pan-x pan-y;cursor:default
 }
 .touch-editor-edit-mode .touch-editor-layer.active{
- z-index:8!important;
  outline:2px dashed #3692b6;outline-offset:1px
 }
 .touch-editor-edit-mode .touch-editor-layer:not(.active){cursor:pointer}
