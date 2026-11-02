@@ -1,7 +1,8 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=20261102-materials-nav-v3';
+import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v5';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
-import {mountInspiracion} from './inspiracion.js?v=20261102-v1';
+import {mountInspiracion} from './inspiracion.js?v=20261102-bilingual-v2';
 import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-v1';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -403,23 +404,27 @@ function renderLessonPrompts(item){
   const summary=document.createElement('summary');
   escapedText(summary,'span',String(index+1).padStart(2,'0'),'lesson-prompt-index');
   const heading=document.createElement('span');heading.className='lesson-prompt-heading';
-  escapedText(heading,'strong',prompt.title);
-  escapedText(heading,'small',prompt.summary||'Copia este prompt y adáptalo a tu negocio.');
+  const isEnglish=getClassroomLanguage()==='en';
+  const textPrompt=localizedPrompt(prompt.prompt_code,prompt.body,getClassroomLanguage());
+  escapedText(heading,'strong',isEnglish?englishTitle(prompt.prompt_code,prompt.title):prompt.title);
+  escapedText(heading,'small',isEnglish?'Copy the prompt and personalize it with your business information.':prompt.summary||'Copia este prompt y adáptalo a tu negocio.');
   summary.append(heading);
   const body=document.createElement('div');body.className='lesson-prompt-body';
-  escapedText(body,'p',prompt.body,'lesson-prompt-text');
+  escapedText(body,'p',textPrompt,'lesson-prompt-text');
   const copy=document.createElement('button');copy.type='button';copy.className='lesson-prompt-copy';copy.textContent=getClassroomLanguage()==='en'?'Copy prompt':'Copiar prompt';
   const state=document.createElement('span');state.className='lesson-prompt-copy-state';state.setAttribute('role','status');
   copy.addEventListener('click',async()=>{
    let copied=false;
-   try{await navigator.clipboard.writeText(prompt.body);copied=true;}catch{}
+   try{await navigator.clipboard.writeText(textPrompt);copied=true;}catch{}
    if(!copied){
-    const temp=document.createElement('textarea');temp.value=prompt.body;temp.style.cssText='position:fixed;left:-9999px';
+    const temp=document.createElement('textarea');temp.value=textPrompt;temp.style.cssText='position:fixed;left:-9999px';
     document.body.append(temp);temp.select();
     try{copied=document.execCommand('copy');}catch{}
     temp.remove();
    }
-   state.textContent=copied?'¡Copiado! Cambia los datos entre corchetes antes de enviarlo.':'Mantén pulsado el prompt para copiarlo manualmente.';
+   state.textContent=isEnglish
+     ?copied?'Copied! Replace bracketed placeholders before submitting.':'Long-press to copy the prompt manually.'
+     :copied?'¡Copiado! Cambia los datos entre corchetes antes de enviarlo.':'Mantén pulsado el prompt para copiarlo manualmente.';
   });
   body.append(copy,state);card.append(summary,body);list.append(card);
  });
