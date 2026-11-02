@@ -25,6 +25,7 @@ const translations=[
  ['.aula-entry-edition','EDITION / 01'],
  ['.aula-entry-eyebrow','YOUR FIRST AI WEBSITE'],
  ['#entry-title','Your space to keep creating.'],
+ ['#student-greeting-title','Hello!'],
  ['.aula-entry-intro','Your lessons, materials and progress live here. Come back whenever you like and move at your own pace.'],
  ['.aula-auth-kicker','CLASS ACCESS'],
  ['[data-auth-mode="login"]','Sign in'],
@@ -53,10 +54,9 @@ const translations=[
  ['.aula-quick-help > span','Help'],
  ['#admin-preview-banner strong','Private course preview'],
  ['#admin-preview-banner p','Only the owner can review drafts. Students never see this notice.'],
- ['.dashboard-overline','MY LEARNING SPACE'],
+ ['.dashboard-hero .dashboard-overline','MY LEARNING SPACE'],
  ['.dashboard-progress-heading','YOUR JOURNEY'],
  ['.dashboard-progress-top > span','Your progress'],
- ['#dashboard-hero-continue','Continue my course'],
  ['.dashboard-hero-secondary[data-aula-view="prompts"]','Explore prompts'],
  ['.dashboard-hero-secondary[data-aula-view="inspiracion"]','See inspiration'],
  ['.dashboard-learning-route .dashboard-announcements-header h2','Your 3-step roadmap.'],
@@ -99,6 +99,18 @@ function translateElement(selector,english){
   if(!el.dataset.tleOriginalText)el.dataset.tleOriginalText=el.textContent;
   if(selector==='#entry-title'){
    el.innerHTML=language==='en'?'Your space to <em>keep creating.</em>':'Tu espacio para <em>seguir creando.</em>';continue;
+  }
+  if(selector==='#student-greeting-title'){
+   const name=el.querySelector('#student-name')?.textContent||'';
+   const spark=el.querySelector('.dashboard-greeting-spark')?.textContent||'✳';
+   el.replaceChildren();
+   el.append(document.createTextNode(language==='en'?'Hello, ':'¡Hola, '));
+   const span=document.createElement('span');span.id='student-name';
+   span.textContent=name|| (language==='en'?'welcome':'qué gusto verte');
+   el.append(span,document.createTextNode(language==='en'?'! ':'! '));
+   const star=document.createElement('span');star.className='dashboard-greeting-spark';
+   star.setAttribute('aria-hidden','true');star.textContent=spark;
+   el.append(star);continue;
   }
   el.textContent=language==='en'?english:el.dataset.tleOriginalText;
  }
