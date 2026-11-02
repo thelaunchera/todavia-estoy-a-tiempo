@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import {createPortal} from 'react-dom';
 import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Pencil, Check, X } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
@@ -168,7 +169,7 @@ export default function PanoramaEditor({
     catch(e){setUploadError(e instanceof Error?e.message:'No se pudo subir la foto.');}
     finally { setUploading(false); }
   };
-  return <section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
+  const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Arrastra elementos a tu carrusel.</h2>
@@ -176,6 +177,9 @@ export default function PanoramaEditor({
     </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
       {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
     </button></header>
+    {expanded&&<button type="button" className="panorama-exit-fixed" onClick={()=>setExpanded(false)}>
+      <Minimize2 size={17}/> Cerrar vista amplia
+    </button>}
     <div className="panorama-primary-actions">
       <button type="button" className="panorama-add-photo" disabled={uploading}
         onClick={()=>{setLibraryOpen(true);input.current?.click()}}>
@@ -303,4 +307,5 @@ export default function PanoramaEditor({
       <span>Suelta en el lienzo</span>
     </div>}
   </section>;
+  return expanded?createPortal(editor,document.body):editor;
 }
