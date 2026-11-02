@@ -341,6 +341,8 @@
       if (kind === 'guide') {
         const chosenLanguage = form.querySelector('[name="lang"]')?.value;
         payload.set('lang', chosenLanguage === 'en' ? 'en' : 'es');
+        // Make's existing webhook already recognizes 'source', so this stays compatible without retraining.
+        payload.set('source', chosenLanguage === 'en' ? 'podcast_website_en' : 'podcast_website_es');
       }
       submit.disabled = true;
       submit.textContent = kind === 'guide' ? ui("Enviando tu guía…","Sending your guide…") : ui("Enviando consulta…","Sending your message…");
