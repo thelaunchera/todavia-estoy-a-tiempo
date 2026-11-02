@@ -1,6 +1,8 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {mountMateriales} from './materiales-interactivos.js?v=20261102-materials-nav-v3';
-import {renderAulaInicio} from './dashboard-inicio.js?v=20261028-final-v1';
+import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
+import {mountInspiracion} from './inspiracion.js?v=20261102-v1';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-v1';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
@@ -114,8 +116,10 @@ const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
  inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
- bonos:'Mis bonos', comunidad:'Club de Ideas'
+ bonos:'Mis bonos', comunidad:'Club de Ideas', inspiracion:'Inspiración · Demos'
 };
+const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'My bonuses',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos'};
+let inspirationController=null;
 let currentAulaView='lecciones';
 const aulaViewHistory=[];
 let aulaBackButton=null,aulaCloseButton=null;
@@ -192,7 +196,7 @@ function setAulaView(view,{scroll=true,track=true}={}){
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
  });
- aulaTitle.textContent=aulaViews[view];
+ aulaTitle.textContent=(getClassroomLanguage()==='en'?aulaViewsEn:aulaViews)[view];
  updateAulaNavigation();
  closeAulaMenu();
  if(scroll&&document.body.classList.contains('aula-member')){
@@ -219,6 +223,27 @@ document.addEventListener('keydown',event=>{
  }
 });
 
+
+function refreshClassroomLanguage(){
+ const lang=getClassroomLanguage();
+ if(!course.hidden){
+  for(const [i,item] of lessons.entries()){
+   const label=$('lesson-buttons')?.querySelector('button[data-index="'+i+'"] .index-title');
+   if(label)label.textContent=translationForLesson(item).title;
+  }
+  if(lessons[selected]){
+   $('lesson-title').textContent=translationForLesson(lessons[selected]).title;
+   $('lesson-description').textContent=translationForLesson(lessons[selected]).description;
+   renderLessonPrompts(lessons[selected]);
+  }
+  aulaTitle.textContent=(lang==='en'?aulaViewsEn:aulaViews)[currentAulaView];
+  updateDashboard();
+  inspirationController?.setLanguage?.();
+  materialsController?.setLanguage?.();
+ }
+ applyClassroomLanguage();
+}
+bindClassroomLanguages(refreshClassroomLanguage);
 function validVideoId(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
 function escapedText(parent,tag,value,klass){const node=document.createElement(tag);node.textContent=value;if(klass)node.className=klass;parent.appendChild(node);return node;}
 function progressStats(){
@@ -284,7 +309,9 @@ function bonusState(){
  }
 }
 function updateDashboard(){
- renderAulaInicio({lessons,done,resources:courseResources,adminPreview,projectShared,onLesson:i=>choose(i),onView:setAulaView});
+ renderAulaInicio({lessons,done,resources:courseResources,adminPreview,projectShared,
+  language:getClassroomLanguage(),localizeLesson:item=>translationForLesson(item),onLesson:i=>choose(i),onView:setAulaView});
+ applyClassroomLanguage();
 }
 function setProgress(){
  const {total,completed,percent}=progressStats();
@@ -381,7 +408,7 @@ function renderLessonPrompts(item){
   summary.append(heading);
   const body=document.createElement('div');body.className='lesson-prompt-body';
   escapedText(body,'p',prompt.body,'lesson-prompt-text');
-  const copy=document.createElement('button');copy.type='button';copy.className='lesson-prompt-copy';copy.textContent='Copiar prompt';
+  const copy=document.createElement('button');copy.type='button';copy.className='lesson-prompt-copy';copy.textContent=getClassroomLanguage()==='en'?'Copy prompt':'Copiar prompt';
   const state=document.createElement('span');state.className='lesson-prompt-copy-state';state.setAttribute('role','status');
   copy.addEventListener('click',async()=>{
    let copied=false;
@@ -406,8 +433,9 @@ function choose(i){
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
- $('lesson-title').textContent=item.title;
- $('lesson-description').textContent=item.description;
+ const localized=translationForLesson(item);
+ $('lesson-title').textContent=localized.title;
+ $('lesson-description').textContent=localized.description;
  renderLessonPrompts(item);
  $('lesson-done').checked=done.has(item.lesson_code);
  $('lesson-done').closest('label').hidden=adminPreview;
@@ -426,7 +454,7 @@ function lessonsUI(){
  lessons.forEach((item,i)=>{
   const button=document.createElement('button');button.type='button';button.dataset.index=String(i);
   escapedText(button,'span',item.lesson_code,'index-no');
-  escapedText(button,'span',item.title,'index-title');
+  escapedText(button,'span',translationForLesson(item).title,'index-title');
   button.addEventListener('click',()=>choose(i));group.appendChild(button);
  });
  setProgress();
@@ -520,6 +548,13 @@ async function showCourse(email,asAdmin=false){
  }).catch(()=>{
   const root=$('materiales-interactivos');
   root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
+ });
+ void mountInspiracion($('inspiration-gallery'),{db,courseId,getLanguage:getClassroomLanguage}).then(controller=>{
+  inspirationController=controller;
+ }).catch(()=>{
+  $('inspiration-gallery').textContent=getClassroomLanguage()==='en'
+   ?'The examples could not be loaded. Please reopen this class.'
+   :'No se pudieron cargar los ejemplos. Vuelve a abrir el aula.';
  });
  if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
