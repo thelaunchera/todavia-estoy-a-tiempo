@@ -94,18 +94,26 @@ test('Aula de principiantes: primero el siguiente paso, después herramientas op
 });
 
 
-test('Aula: productos por compra separados y Lab cerrado sin pago público',()=>{
- assert.match(room,/data-aula-panel="catalogo"/);
- assert.match(room,/learning-shelf-grid/);
- assert.match(room,/Content Lab/);
- assert.match(room,/Checkout no habilitado/);
- assert.match(room,/https:\/\/thelaunchera\.com\/service-checkout\/\?offer=booking-flow/);
- assert.match(room,/https:\/\/thelaunchera\.com\/service-checkout\/\?offer=ai-business/);
- assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/);
- assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/);
- assert.doesNotMatch(room,/href="[^"]*(?:content-lab\/(?!prompts\/)|lab\/checkout)/,'El Lab de pago y sus checkouts privados no deben ser enlaces públicos');
- assert.match(course,/prompts:'Biblioteca de prompts'/,'El Aula muestra su biblioteca didáctica');
- assert.match(course,/if\(view==='catalogo'\)view='lecciones'/,'El catálogo comercial no es una vista de Aula');
+test('Aula de la clase: sin catálogos, otros productos ni enlaces de administración públicos',()=>{
+ assert.doesNotMatch(room,/data-aula-panel="catalogo"|data-aula-view="catalogo"/,'El catálogo vive en el Centro de Productos');
+ assert.doesNotMatch(room,/learning-shelf|Content Lab|No voy tarde|Empezar de nuevo|service-checkout/,'El aula muestra solo la clase y sus recursos');
+ assert.doesNotMatch(room,/href="\.\.\/estudio\//,'No hay enlace navegable al Studio en HTML público');
+ assert.match(room,/data-aula-panel="lecciones"/,'La clase sí está en su aula');
+ assert.match(room,/data-aula-panel="materiales"/,'Los materiales de la clase permanecen disponibles');
+ assert.match(room,/data-aula-panel="comunidad"/,'La comunidad de la clase permanece disponible');
+ assert.match(course,/prompts:'Biblioteca de prompts'/,'La biblioteca de la clase está conectada');
+ assert.match(course,/if\(view==='catalogo'\)view='lecciones'/,'Enlaces antiguos al catálogo ya no muestran productos');
+});
+test('Navegación táctil: Atrás y Cerrar sección nunca cierran la sesión',()=>{
+ assert.match(course,/function ensureAulaNavigation\(/,'El aula monta acciones después del acceso verificado');
+ assert.match(course,/aula-section-back/,'Hay control para volver');
+ assert.match(course,/aula-section-close/,'Hay control para cerrar sección');
+ assert.match(course,/aulaViewHistory\.pop\(\)/,'Se puede volver a la pantalla anterior');
+ assert.match(course,/setAulaView\('inicio',\{track:false\}\)/,'Cerrar sección vuelve al inicio del aula');
+ assert.match(course,/function closeAulaMenu\(/,'El menú del teléfono tiene cierre independiente');
+ const styles=readFileSync('alumnos/aula-sidebar.css','utf8');
+ assert.match(styles,/\.aula-section-nav-button/,'Los botones están diseñados como controles táctiles');
+ assert.match(styles,/max-width:759px/,'La navegación es compatible con iPhone');
 });
 
 
@@ -132,20 +140,16 @@ test('Centro de productos independiente, seguro y incluido en la publicación',(
 });
 
 
-test('Catálogo de productos: acceso privado, PDF reales y Lab sin checkout público',()=>{
- assert.match(room,/id="learning-shelf-title"/,'Existe catálogo integrado en el aula');
- assert.match(room,/id="learning-lab-status"/,'El Lab refleja su estado');
- assert.match(room,/href="\.\.\/content-lab\/prompts\/"/,'El Lab sin acceso solo enlaza a prompts públicos');
- assert.match(room,/href="\.\.\/productos\/no-voy-tarde\.html"/,'Diario apunta a su landing real');
- assert.match(room,/href="\.\.\/productos\/empezar-de-nuevo\.html"/,'Cuaderno apunta a su landing real');
- assert.match(course,/from\('content_lab_memberships'\)/,'Lab consulta la membresía real');
- assert.match(course,/member\?\.status==='active'/,'Solo membresía activa habilita acceso');
+test('Catálogo comercial independiente: ventas y productos permanecen en Centro y Studio',()=>{
+ const center=readFileSync('centro/index.html','utf8');
  const studio=readFileSync('estudio-control/src/Studio.tsx','utf8');
  const service=readFileSync('estudio-control/src/supabase-client.ts','utf8');
- assert.match(studio,/Centro de ventas y productos/);
- assert.match(studio,/getVerifiedSales\(\)/,'Ventas se leen al abrir panel');
+ assert.match(center,/id="programas"/,'Centro de Productos separado');
+ assert.doesNotMatch(room,/id="learning-shelf-title"|id="learning-lab-status"/,'Aula sin tienda ni métricas de otros productos');
+ assert.match(studio,/Centro de ventas y productos/,'La administración conserva el Centro de Productos');
+ assert.match(studio,/getVerifiedSales\(\)/,'La propietaria supervisa sus ventas');
  assert.match(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No prometer compras de Lab activas');
- assert.match(service,/await owner\(\);[\s\S]*?client\.from\('podcast_sales'\)/,'Solo administradora lee las ventas');
+ assert.match(service,/await owner\(\);[\s\S]*?client\.from\('podcast_sales'\)/,'Solo administradora lee ventas');
 });
 
 test('Ventas: refrescar registros, moneda verdadera y resumen de accesos independiente',()=>{
