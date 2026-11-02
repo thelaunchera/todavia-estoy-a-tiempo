@@ -113,7 +113,7 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', catalogo:'Todos los productos', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
+ inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
  bonos:'Mis bonos', comunidad:'Club de Ideas'
 };
 let currentAulaView='lecciones';
@@ -130,6 +130,8 @@ function openAulaMenu(){
  (active||aulaClose).focus({preventScroll:true});
 }
 function setAulaView(view,{scroll=true}={}){
+ // El catálogo comercial pertenece al Centro de Productos, nunca al aula.
+ if(view==='catalogo')view='lecciones';
  if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
  currentAulaView=view;
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
@@ -494,7 +496,7 @@ async function refreshAuth(){
   if(!owner&&!who.email_confirmed_at){display(noAccess);status('Confirma tu correo antes de entrar al aula.');return;}
   stage='lecciones y materiales';
   await showCourse((who.email||'').trim().toLowerCase(),owner);
-  if(!course.hidden)void refreshProductShelf();
+  // El aula no consulta ni anuncia otros productos.
  }catch(e){
   if(ownerConfirmed){
    // Rol owner confirmado por RLS. No mostrar la pantalla de pago.
