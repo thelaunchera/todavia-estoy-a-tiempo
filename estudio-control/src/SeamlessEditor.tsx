@@ -145,8 +145,8 @@ export default function SeamlessEditor(){
       {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
       {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
     ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
-      aria-pressed={i>1?quickPanel===tool.label.toLowerCase():undefined}
-      style={{border:0,background:i>1&&quickPanel===tool.label.toLowerCase()?'#e9f3f5':'transparent',minHeight:49,
+      aria-pressed={i>1?quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase()):undefined}
+      style={{border:0,background:i>1&&quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
         touchAction:'manipulation'}}>{tool.label}</button>)}
   </div>
@@ -173,6 +173,11 @@ export default function SeamlessEditor(){
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
       </button>)}
+      {privateAssets.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
+        onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'));setQuickPanel(null)}}
+        style={{...control,padding:5,fontSize:11}}>
+        <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
+      </button>)}
       {LAB_ASSETS.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
         onClick={()=>{setLabBackground(asset.file);setQuickPanel(null)}} style={{...control,padding:5,fontSize:11}}>
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
@@ -181,7 +186,7 @@ export default function SeamlessEditor(){
     {quickPanel==='stickers'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(68px,1fr))',gap:8}}>
       {LAB_STICKERS.map((emoji,i)=><button type="button" key={i} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}
         style={{...control,minHeight:60,fontSize:27,padding:5}}>{emoji}</button>)}
-      {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,remote:true})),
+      {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
         ...LAB_ASSETS.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))].map(asset=><button type="button" key={asset.key}
           onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
             else if(asset.file)addLabSticker(asset.file);setQuickPanel(null)}}
