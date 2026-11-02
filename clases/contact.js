@@ -1,5 +1,6 @@
 /* Clase · contacto opcional, conectado al mismo soporte del podcast. */
 (() => {
+  const localized=(es,en)=>document.documentElement.lang==='en'?en:es;
   const toggle = document.getElementById('class-contact-toggle');
   const panel = document.getElementById('class-contact-panel');
   const close = document.getElementById('class-contact-close');
@@ -39,7 +40,7 @@
       url = new URL(endpoint);
       if (url.protocol !== 'https:' || url.username || url.password) throw Error('invalid');
     } catch {
-      feedback.textContent = 'El formulario no está disponible ahora. Inténtalo de nuevo más tarde.';
+      feedback.textContent = localized('El formulario no está disponible ahora. Inténtalo de nuevo más tarde.',"The form is not available right now. Please try again later.");
       feedback.dataset.state = 'error';
       return;
     }
@@ -47,17 +48,17 @@
     const original = submit.textContent;
     const payload = new URLSearchParams(new FormData(form));
     submit.disabled = true;
-    submit.textContent = 'Enviando consulta…';
+    submit.textContent = localized('Enviando consulta…',"Sending your message…");
     try {
       const response = await fetch(url.href, {
         method:'POST', mode:'cors', headers:{Accept:'application/json'}, body:payload
       });
       if(!response.ok || (await response.json())?.ok !== true)throw Error('unconfirmed');
-      feedback.textContent = '¡Recibimos tu consulta! Te responderé a este mismo correo.';
+      feedback.textContent = localized('¡Recibimos tu consulta! Te responderé a este mismo correo.',"We received your message! I'll reply to this email address.");
       feedback.dataset.state = 'success';
       form.reset();
     } catch {
-      feedback.textContent = 'No pudimos confirmar el envío. Vuelve a intentarlo.';
+      feedback.textContent = localized('No pudimos confirmar el envío. Vuelve a intentarlo.',"We couldn't confirm delivery. Please try again.");
       feedback.dataset.state = 'error';
     } finally {
       submit.disabled = false;
