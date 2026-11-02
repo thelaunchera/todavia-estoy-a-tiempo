@@ -246,3 +246,16 @@ test('a named personal asset can be opened and dragged from the compact library 
   assert.ok(app.includes("api.put('/api/assets/'+asset.id,{displayName:name})"),'renaming persists');
   assert.ok(app.includes("upload(file,'sticker',false,brand.id,true)"),'private stickers remain private');
 });
+
+test('backgrounds never jump above newly added layers, even when users tap reorder',()=>{
+ const wallpaper={id:'wall',assetId:'wall',name:'Fondo',kind:'photo',role:'background',
+   rect:{x:0,y:0,w:1,h:1},placement:'behind-text'};
+ const photo={id:'photo',assetId:'photo',name:'Foto',kind:'photo',
+   rect:{x:.1,y:.1,w:.4,h:.5},placement:'front'};
+ const text={id:'text',assetId:'',name:'Título',kind:'text',text:'Texto editado',
+   rect:{x:.2,y:.1,w:.6,h:.2},placement:'front'};
+ const start=[wallpaper,photo,text];
+ assert.deepEqual(reorderPanoramaLayers(start,'wall','front').map(x=>x.id),['wall','photo','text']);
+ assert.deepEqual(reorderPanoramaLayers(start,'text','back').map(x=>x.id),['wall','text','photo']);
+ assert.deepEqual(reorderPanoramaLayers(start,'photo','front').map(x=>x.id),['wall','text','photo']);
+});
