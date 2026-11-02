@@ -69,7 +69,7 @@ function authNotice(text){status(text);$('room-message').hidden=false;}
 
 const out=$('logout');
 let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false,projectShared=false;
-let materialsController=null,courseResources=[];
+let materialsController=null,courseResources=[],modulePrompts=[];
 const adminMarkerKey='podcast_studio_password_login_deadline_v1';
 function hasValidStudioSession(id){
  try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
@@ -286,6 +286,41 @@ if(captionPicker){
   if(item)displayVideo(item);
  });
 }
+
+/* Prompts iniciales de cada módulo: contenido del alumno, nunca notas privadas del Studio. */
+function renderLessonPrompts(item){
+ const panel=$('lesson-prompts-panel'),list=$('lesson-prompts-list');
+ if(!panel||!list)return;
+ list.replaceChildren();
+ const entries=modulePrompts.filter(prompt=>prompt.prompt_code.startsWith('m'+item.lesson_code+'_'));
+ panel.hidden=!entries.length;
+ entries.forEach((prompt,index)=>{
+  const card=document.createElement('details');card.className='lesson-prompt-card';card.open=index===0;
+  const summary=document.createElement('summary');
+  escapedText(summary,'span',String(index+1).padStart(2,'0'),'lesson-prompt-index');
+  const heading=document.createElement('span');heading.className='lesson-prompt-heading';
+  escapedText(heading,'strong',prompt.title);
+  escapedText(heading,'small',prompt.summary||'Copia este prompt y adáptalo a tu negocio.');
+  summary.append(heading);
+  const body=document.createElement('div');body.className='lesson-prompt-body';
+  escapedText(body,'p',prompt.body,'lesson-prompt-text');
+  const copy=document.createElement('button');copy.type='button';copy.className='lesson-prompt-copy';copy.textContent='Copiar prompt';
+  const state=document.createElement('span');state.className='lesson-prompt-copy-state';state.setAttribute('role','status');
+  copy.addEventListener('click',async()=>{
+   let copied=false;
+   try{await navigator.clipboard.writeText(prompt.body);copied=true;}catch{}
+   if(!copied){
+    const temp=document.createElement('textarea');temp.value=prompt.body;temp.style.cssText='position:fixed;left:-9999px';
+    document.body.append(temp);temp.select();
+    try{copied=document.execCommand('copy');}catch{}
+    temp.remove();
+   }
+   state.textContent=copied?'¡Copiado! Cambia los datos entre corchetes antes de enviarlo.':'Mantén pulsado el prompt para copiarlo manualmente.';
+  });
+  body.append(copy,state);card.append(summary,body);list.append(card);
+ });
+}
+
 function choose(i){
  selected=i;
  const item=lessons[i];
@@ -296,6 +331,7 @@ function choose(i){
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
  $('lesson-title').textContent=item.title;
  $('lesson-description').textContent=item.description;
+ renderLessonPrompts(item);
  $('lesson-done').checked=done.has(item.lesson_code);
  $('lesson-done').closest('label').hidden=adminPreview;
  $('lesson-info').hidden=false;
@@ -353,12 +389,14 @@ async function showCourse(email,asAdmin=false){
    display(noAccess);status('Acceso pendiente de compra verificada.');return;
   }
  }
- const [l,r,p]=await Promise.all([
+ const [l,r,p,mp]=await Promise.all([
  db.from('podcast_class_lessons').select('lesson_code,position,title,minutes,description,youtube_video_id,status').eq('course_id',courseId).order('position',{ascending:true}),
  db.from('podcast_class_resources').select('resource_code,title,url,status').eq('course_id',courseId).order('resource_code'),
- asAdmin ? Promise.resolve({data:[],error:null}) : db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email)
+ asAdmin ? Promise.resolve({data:[],error:null}) : db.from('podcast_class_progress').select('lesson_code').eq('course_id',courseId).eq('buyer_email',email),
+ db.from('podcast_class_prompts').select('prompt_code,position,title,summary,body,status').eq('course_id',courseId).like('prompt_code','m%').order('position',{ascending:true})
  ]);
- if(l.error||r.error||p.error)throw l.error||r.error||p.error;
+ if(l.error||r.error||p.error||mp.error)throw l.error||r.error||p.error||mp.error;
+ modulePrompts=(mp.data||[]).filter(item=>item.status==='ready'||asAdmin);
  lessons=asAdmin?(l.data||[]):(l.data||[]).filter(item=>item.status==='ready'&&validVideoId(item.youtube_video_id));
  done=new Set((p.data||[]).map(x=>x.lesson_code));
  courseResources=asAdmin?(r.data||[]):(r.data||[]).filter(item=>item.status==='ready');
