@@ -3,7 +3,7 @@ import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWeb
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
-let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={};
+let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={},MODULE_PROMPTS=[];
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const headers=[
@@ -46,6 +46,16 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   root.textContent='La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
   return;
  }
+ /* Se conservan los 12 originales. Los nuevos prompts iniciales se añaden desde
+    la tabla del curso después de validar acceso del alumno o vista administrativa. */
+ MODULE_PROMPTS=[];
+ try{
+  const {data,error}=await db.from('podcast_class_prompts')
+   .select('prompt_code,title,summary,body,position,status')
+   .eq('course_id',courseId).eq('status','ready').like('prompt_code','m%').order('position',{ascending:true});
+  if(!error)MODULE_PROMPTS=(data||[]).filter(p=>/^m\d{2}_/.test(p.prompt_code));
+ }catch{/* mantener los 12 prompts base si hay un fallo temporal */}
+
  const ownerPreview=adminPreview||!user;
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
@@ -159,19 +169,27 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
  function renderPrompts(){
-  section('02 / BIBLIOTECA PARA COPIAR','Pídele a ChatGPT lo que realmente necesitas.','Empieza por los 12 prompts de la clase o usa los bonus para crear y revisar tu web desde el celular. Cambia lo que está entre [corchetes] y toca «Copiar prompt». Nunca compartas contraseñas ni datos privados.');
+  section('02 / BIBLIOTECA PARA COPIAR','Pídele a ChatGPT lo que realmente necesitas.','Empieza por los prompts iniciales de cada módulo: investiga primero tu negocio y también las necesidades de otros negocios. Después usa los 12 prompts de la clase y los bonus móviles. Cambia lo que aparece entre [corchetes]. Nunca compartas contraseñas ni datos privados.');
   const mobileBonus=Array.isArray(EXTRAS.mobile_first_prompts)?EXTRAS.mobile_first_prompts.filter(item=>Array.isArray(item)&&item.length===3&&item.every(v=>typeof v==='string')):[];
-  const catalog=[...PROMPTS,...mobileBonus];
-  if(mobileBonus.length){const note=el('p','mi-mobile-bonus-note',`BONUS MÓVIL · ${mobileBonus.length} prompts para diseñar desde iPhone o Android · prueba a 375 px`);content.append(note);}
-  const filter=el('div','mi-filter');filter.innerHTML='<label for="mi-prompt-search">Busca un tema</label><input id="mi-prompt-search" type="search" placeholder="Ej.: fotos, móvil, botón, entrega" autocomplete="off" />';content.append(filter);
+  const catalog=[
+   ...MODULE_PROMPTS.map(item=>({title:item.title,desc:item.summary||'',prompt:item.body,kind:'module',badge:(item.title.match(/^M\d{2}/)||['M'])[0]})),
+   ...PROMPTS.map(([title,desc,prompt],i)=>({title,desc,prompt,kind:'original',badge:String(i+1).padStart(2,'0')})),
+   ...mobileBonus.map(([title,desc,prompt],i)=>({title,desc,prompt,kind:'mobile',badge:'B'+(i+1)}))
+  ];
+  if(MODULE_PROMPTS.length){
+   content.append(el('p','mi-mobile-bonus-note','PROMPTS INICIALES POR MÓDULO · '+MODULE_PROMPTS.length+' nuevos · el módulo 01 incluye tu propio negocio y otros negocios.'));
+  }
+  if(mobileBonus.length){content.append(el('p','mi-mobile-bonus-note','BONUS MÓVIL · '+mobileBonus.length+' prompts para diseñar desde iPhone o Android · prueba a 375 px'));}
+  const filter=el('div','mi-filter');filter.innerHTML='<label for="mi-prompt-search">Busca un tema o módulo</label><input id="mi-prompt-search" type="search" placeholder="Ej.: M01, otros negocios, mood board, fotos, checkout" autocomplete="off" />';content.append(filter);
   const list=el('div','mi-prompt-list');content.append(list);
   function draw(term=''){
    list.replaceChildren();
-   catalog.forEach(([title,desc,prompt],i)=>{
-    if(![title,desc,prompt].join(' ').toLowerCase().includes(term.toLowerCase()))return;
-    const card=el('details',i>=PROMPTS.length?'mi-prompt mi-prompt-mobile':'mi-prompt');
-    card.innerHTML='<summary><span class="mi-prompt-number">'+(i>=PROMPTS.length?'M'+(i-PROMPTS.length+1):String(i+1).padStart(2,'0'))+'</span><span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+esc(desc)+'</small></span><span class="mi-plus" aria-hidden="true">+</span></summary><div class="mi-prompt-body"><p class="mi-prompt-text">'+esc(prompt)+'</p><button type="button" class="mi-copy">Copiar prompt</button><p class="mi-copy-state" role="status"></p></div>';
-    card.querySelector('.mi-copy').addEventListener('click',()=>void copyPrompt(prompt,card));
+   catalog.forEach(item=>{
+    if(![item.title,item.desc,item.prompt].join(' ').toLowerCase().includes(term.toLowerCase()))return;
+    const klass=item.kind==='module'?'mi-prompt mi-prompt-module':item.kind==='mobile'?'mi-prompt mi-prompt-mobile':'mi-prompt';
+    const card=el('details',klass);
+    card.innerHTML='<summary><span class="mi-prompt-number">'+esc(item.badge)+'</span><span class="mi-prompt-label"><strong>'+esc(item.title)+'</strong><small>'+esc(item.desc)+'</small></span><span class="mi-plus" aria-hidden="true">+</span></summary><div class="mi-prompt-body"><p class="mi-prompt-text">'+esc(item.prompt)+'</p><button type="button" class="mi-copy">Copiar prompt</button><p class="mi-copy-state" role="status"></p></div>';
+    card.querySelector('.mi-copy').addEventListener('click',()=>void copyPrompt(item.prompt,card));
     list.append(card);
    });
    if(!list.children.length)list.append(el('p','mi-note','No encontré ese tema. Prueba con otra palabra.'));
