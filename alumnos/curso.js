@@ -438,13 +438,16 @@ function choose(i){
  setAulaView('lecciones');
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
+ if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
+  ?'Video coming soon. You can explore the lesson prompts and materials now. This lesson cannot be marked complete until its video is published.'
+  :'Video en preparación. Ya puedes explorar los prompts y materiales de esta lección. Podrás marcarla como completada cuando se publique el video.';
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
  const localized=translationForLesson(item);
  $('lesson-title').textContent=localized.title;
  $('lesson-description').textContent=localized.description;
  renderLessonPrompts(item);
  $('lesson-done').checked=done.has(item.lesson_code);
- $('lesson-done').closest('label').hidden=adminPreview;
+ $('lesson-done').closest('label').hidden=adminPreview||item.status!=='ready'||!validVideoId(item.youtube_video_id);
  $('lesson-info').hidden=false;
  $('lesson-prev').disabled=i<=0;
  $('lesson-next').disabled=i>=lessons.length-1;
@@ -465,7 +468,7 @@ function lessonsUI(){
  });
  setProgress();
  // Continuar en la primera lección pendiente; si terminó todo, mostrar la última.
- const nextIndex=adminPreview?0:lessons.findIndex(item=>!done.has(item.lesson_code));
+ const nextIndex=adminPreview?0:lessons.findIndex(item=>item.status==='ready'&&validVideoId(item.youtube_video_id)&&!done.has(item.lesson_code));
  choose(nextIndex<0?lessons.length-1:nextIndex);
 }
 async function refreshProductShelf(){
@@ -513,7 +516,9 @@ async function showCourse(email,asAdmin=false){
  if(!asAdmin&&(r.error||mp.error))throw r.error||mp.error;
  const hasPartialMaterials=Boolean(r.error||mp.error);
  modulePrompts=(mp.data||[]).filter(item=>item.status==='ready'||asAdmin);
- lessons=asAdmin?(l.data||[]):(l.data||[]).filter(item=>item.status==='ready'&&validVideoId(item.youtube_video_id));
+ // Approved classroom outline is visible before recordings; a draft lesson
+ // remains explicitly non-completable until its approved video is published.
+ lessons=(l.data||[]).filter(item=>asAdmin||['draft','ready'].includes(item.status));
  done=new Set((p.data||[]).map(x=>x.lesson_code));
  courseResources=asAdmin?(r.data||[]):(r.data||[]).filter(item=>item.status==='ready');
  const generalResources=courseResources.filter(item=>!item.resource_code.startsWith('bonus_'));
