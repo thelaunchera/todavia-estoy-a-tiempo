@@ -1,5 +1,6 @@
 (() => {
   const config = window.PODCAST_CONFIG || {};
+  const ui = (es, en) => document.documentElement.lang === 'en' ? en : es;
   const nav = document.querySelector('.nav');
   const menu = document.querySelector('.menu-toggle');
   const toast = document.querySelector('#toast');
@@ -35,12 +36,12 @@
   const closeMenu = () => {
     nav?.classList.remove('open');
     menu?.setAttribute('aria-expanded', 'false');
-    menu?.setAttribute('aria-label', 'Abrir navegación');
+    menu?.setAttribute('aria-label', ui("Abrir navegación","Open navigation"));
   };
   menu?.addEventListener('click', () => {
     const open = nav?.classList.toggle('open');
     menu.setAttribute('aria-expanded', String(!!open));
-    menu.setAttribute('aria-label', open ? 'Cerrar navegación' : 'Abrir navegación');
+    menu.setAttribute('aria-label', open ? ui("Cerrar navegación","Close navigation") : ui("Abrir navegación","Open navigation"));
   });
   nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
   document.addEventListener('keydown', event => {
@@ -58,13 +59,13 @@
       if (form) {
         form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         form.querySelector('input[type="email"]')?.focus({ preventScroll: true });
-      } else info('Solicita las 5 preguntas desde el formulario para recibirlas por correo.');
+      } else info(ui("Solicita las 5 preguntas desde el formulario para recibirlas por correo.","Request the five questions using the form, and we'll email them to you."));
     });
   });
   document.querySelectorAll('[data-podcast]').forEach(button => {
     const url = publicUrl(config.podcastUrl);
     if (url) document.querySelector('#podcast-state')?.remove();
-    button.addEventListener('click', () => url ? window.open(url, '_blank', 'noopener,noreferrer') : info('El enlace oficial del podcast se añadirá aquí. Nos escuchamos cada martes.'));
+    button.addEventListener('click', () => url ? window.open(url, '_blank', 'noopener,noreferrer') : info(ui("El enlace oficial del podcast se añadirá aquí. Nos escuchamos cada martes.","The official podcast link will appear here. New episodes arrive on Tuesdays.")));
   });
   document.querySelectorAll('[data-buy]').forEach(button => {
     const url = publicUrl(config.checkoutLinks?.[button.dataset.buy]);
@@ -281,7 +282,7 @@
       wrapper.classList.toggle('is-valid', valid);
       wrapper.classList.toggle('has-error', !valid);
       input.setAttribute('aria-invalid', String(!valid));
-      feedback.textContent = valid ? 'Correo válido' : (value ? 'Revisa tu correo, por ejemplo: nombre@correo.com.' : 'Escribe tu correo para continuar.');
+      feedback.textContent = valid ? ui("Correo válido","Valid email") : (value ? ui("Revisa tu correo, por ejemplo: nombre@correo.com.","Check your email address, such as name@example.com.") : ui("Escribe tu correo para continuar.","Enter your email to continue."));
       if (!valid && showShake && !prefersStillness.matches) {
         wrapper.classList.remove('is-shaking');
         void wrapper.offsetWidth;
@@ -323,7 +324,7 @@
         if (!valid && !firstInvalid) firstInvalid = input;
       }
       if (!emailOkay || firstInvalid) {
-        if (firstInvalid) status.textContent = 'Completa el nombre, el tema y un mensaje de al menos 10 caracteres.';
+        if (firstInvalid) status.textContent = ui("Completa el nombre, el tema y un mensaje de al menos 10 caracteres.","Add your name, a topic and a message with at least 10 characters.");
         (emailOkay ? firstInvalid : field.input).focus();
         return;
       }
@@ -331,22 +332,22 @@
       const wantsEpisodeNotes = kind === 'guide' && form.querySelector('input[name="newsletter"]')?.checked === true;
       const url = publicUrl(kind === 'guide' ? config.freeGuideEndpoint : config.helpEndpoint);
       if (!url) {
-        status.textContent = 'El formulario no está disponible ahora. Inténtalo más tarde.';
+        status.textContent = ui("El formulario no está disponible ahora. Inténtalo más tarde.","This form isn't available right now. Please try again later.");
         status.classList.add('is-error');
         return;
       }
       if (form.querySelector('[name="website"]')?.value) return;
       const payload = new URLSearchParams(new FormData(form));
       submit.disabled = true;
-      submit.textContent = kind === 'guide' ? 'Enviando tu guía…' : 'Enviando consulta…';
+      submit.textContent = kind === 'guide' ? ui("Enviando tu guía…","Sending your guide…") : ui("Enviando consulta…","Sending your message…");
       try {
         const response = await fetch(url, { method: 'POST', mode: 'cors', headers: { Accept: 'application/json' }, body: payload });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data?.ok !== true) throw new Error('Envío no confirmado');
         status.textContent = kind === 'guide'
-          ? 'Te enviamos la guía por correo. Revisa tu bandeja de entrada y la carpeta Spam.'
-          : '¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.';
+          ? ui("Te enviamos la guía por correo. Revisa tu bandeja de entrada y la carpeta Spam.","We emailed your guide. Check your inbox and Spam folder.")
+          : ui("¡Recibimos tu consulta! Te enviamos una confirmación y te responderé pronto.","Your message is in! We emailed a confirmation and will reply soon.");
         status.classList.add('is-success');
         // The freebie never depends on subscribing. Save permission only when
         // the person explicitly checked the optional box.
@@ -367,9 +368,9 @@
               body: consentBody
             });
             if (!consentRes.ok || (await consentRes.json())?.ok !== true) throw new Error('No guardado');
-            status.textContent += ' También te avisaré cuando salga un nuevo episodio.';
+            status.textContent += ui(" También te avisaré cuando salga un nuevo episodio."," You'll also hear from us when a new episode is out.");
           } catch {
-            status.textContent += ' No pude activar los avisos; puedes intentarlo desde el formulario al final de la página.';
+            status.textContent += ui(" No pude activar los avisos; puedes intentarlo desde el formulario al final de la página."," We couldn't activate episode updates. You can try again using the form at the bottom.");
           }
         }
         form.reset();
@@ -377,8 +378,8 @@
         requiredFields.forEach(input => input.classList.remove('has-form-error'));
       } catch (error) {
         status.textContent = kind === 'guide'
-          ? 'No pudimos confirmar el envío de la guía. Inténtalo otra vez.'
-          : 'No pudimos confirmar la consulta. Inténtalo de nuevo.';
+          ? ui("No pudimos confirmar el envío de la guía. Inténtalo otra vez.","We couldn't confirm delivery of the guide. Please try again.")
+          : ui("No pudimos confirmar la consulta. Inténtalo de nuevo.","We couldn't confirm your message. Please try again.");
         status.classList.add('is-error');
       } finally {
         submit.disabled = false;
@@ -496,14 +497,14 @@
       if (!validNewsletterEmail(value)) {
         pill.classList.add('has-error');
         email.setAttribute('aria-invalid', 'true');
-        feedback.textContent = 'Escribe un correo válido para suscribirte.';
+        feedback.textContent = ui("Escribe un correo válido para suscribirte.","Enter a valid email address to subscribe.");
         email.focus();
         return;
       }
       if (newsletterForm.querySelector('[name="website"]')?.value) return;
       const endpoint = publicUrl(config.newsletterEndpoint);
       if (!endpoint) {
-        feedback.textContent = 'La suscripción no está disponible en este momento.';
+        feedback.textContent = ui("La suscripción no está disponible en este momento.","Subscription is unavailable right now.");
         return;
       }
       button.classList.add('is-pressing');
@@ -511,7 +512,7 @@
       email.disabled = true;
       button.disabled = true;
       const originalText = button.textContent;
-      button.textContent = 'Enviando…';
+      button.textContent = ui("Enviando…","Sending…");
       try {
         const payload = new URLSearchParams();
         payload.set('email', value);
@@ -526,17 +527,17 @@
         if (!response.ok) throw new Error('Error ' + response.status);
         const data = await response.json();
         if (data?.ok !== true) throw new Error('Alta no confirmada');
-        confirmationText.textContent = '¡Ya estás dentro!';
+        confirmationText.textContent = ui("¡Ya estás dentro!","You're subscribed!");
         confirmation.setAttribute('aria-hidden', 'false');
         newsletterForm.classList.add('is-done');
-        feedback.textContent = 'Recibirás únicamente novedades del podcast.';
+        feedback.textContent = ui("Recibirás únicamente novedades del podcast.","You'll only receive podcast updates.");
         // Do not reset: successful subscriptions remain visibly confirmed.
         button.textContent = originalText;
       } catch {
         email.disabled = false;
         button.disabled = false;
         button.textContent = originalText;
-        feedback.textContent = 'No pudimos confirmar tu suscripción. Inténtalo otra vez.';
+        feedback.textContent = ui("No pudimos confirmar tu suscripción. Inténtalo otra vez.","We couldn't confirm your subscription. Please try again.");
         pill.classList.add('has-error');
       }
     });
