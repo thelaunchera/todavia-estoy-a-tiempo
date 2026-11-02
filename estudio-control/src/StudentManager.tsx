@@ -38,7 +38,6 @@ export default function StudentManager() {
   const filtered = useMemo(()=>students.filter(s=>
     s.buyer_email.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
   ),[students,search]);
-  const current = students.find(s=>s.buyer_email===selected);
   const active = students.filter(s=>s.status==='active'&&!s.revoked_at).length;
   const assigned = grants.filter(g=>g.buyer_email===selected);
 
