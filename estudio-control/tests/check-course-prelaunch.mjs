@@ -396,7 +396,11 @@ assert.match(roomScript,/setAulaView\('lecciones'\)/,'Seleccionar lección abre 
 assert.match(roomScript,/if\(panel!==course\)closeAulaMenu\(\)/,'Cierra menú si la sesión termina');
 assert.match(room,/aula-sidebar\.css\?v=/,'Stylesheet de sidebar con cache-bust');
 assert.match(studioShell,/className="studio-student-tab-current"/,'La lista de alumnos está en Mi Estudio');
-assert.match(studioShell,/href="\.\.\/alumnos\/\?vista=admin"/,'Vista del aula se abre a pantalla completa');
+assert.match(studioShell,/src="\.\.\/alumnos\/\?vista=admin&origen=studio"/,'La vista completa usa el aula real en el mismo contexto del Studio');
+assert.match(studioShell,/aulaPreviewOpen && !!account && !denied/,'No montar vista del aula sin la sesión privada del Studio');
+assert.match(room,/id="aula-owner-nav"[^>]*hidden/,'El enlace junto al logo permanece oculto hasta verificar la propietaria');
+assert.doesNotMatch(room,/Soy la administradora · Ver aula sin comprar/,'Sin enlaces de administración en el formulario público');
+assert.match(roomScript,/ownerNav.hidden=panel!==course\|\|!adminPreview/,'El enlace privado exige una vista de propietaria validada');
 assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'Logo no sale al landing');
 console.log('QA: sidebar real, cinco secciones, menú móvil y estudio separado OK');
 
@@ -428,8 +432,9 @@ assert.match(clubHubCss,/@media\(max-width:700px\)/,'Club apilado en teléfono')
 assert.match(clubJs,/requested\.get\('canal'\)/,'Acciones abren su canal real');
 assert.match(clubJs,/requested\.get\('accion'\)==='publicar'/,'Publicar enfoca la entrada real');
 assert.match(studioShell,/Ver aula completa/,'Botón único de vista completa');
-assert.doesNotMatch(studioShell,/iframe title="Centro de alumnos · vista privada/,'No anidar la aplicación del aula');
-console.log('QA: club compacto e interactivo, vista de administradora sin iframe duplicado OK');
+assert.match(studioShell,/className="studio-aula-preview"/,'Vista previa privada a pantalla completa, dentro del Studio');
+assert.match(studioShell,/Cerrar vista previa y volver al Studio/,'La propietaria puede cerrar la vista sin salir de su sesión');
+console.log('QA: club compacto e interactivo, vista completa privada dentro del Studio OK');
 
 
 // El centro muestra la información de los productos antes de enviar a un checkout.
