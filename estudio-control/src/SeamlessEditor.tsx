@@ -2,9 +2,10 @@ import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useEffect,useRef,useState} from 'react';
-import {clampTextCurve,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
+import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
+import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;originalBackupId?:string};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
@@ -13,6 +14,18 @@ const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙',
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
+ const [deleteArmedId,setDeleteArmedId]=useState<number|null>(null);
+ const lastTap=useRef<LayerTap|null>(null);
+ const pointerStart=useRef<{pointer:number;id:number|null;x:number;y:number}|null>(null);
+ useEffect(()=>{
+  const hideOutside=(event:PointerEvent)=>{
+   const target=event.target;
+   if(!(target instanceof Element)||target.closest('[data-carousel-canvas],[data-carousel-delete]'))return;
+   setDeleteArmedId(null);lastTap.current=null;
+  };
+  document.addEventListener('pointerdown',hideOutside,true);
+  return ()=>document.removeEventListener('pointerdown',hideOutside,true);
+ },[]);
  const [editingText,setEditingText]=useState<number|null>(null);
  const canvasTextRef=useRef<HTMLTextAreaElement>(null);
  useEffect(()=>{if(editingText!==null)requestAnimationFrame(()=>canvasTextRef.current?.focus());},[editingText]);
@@ -56,8 +69,8 @@ export default function SeamlessEditor(){
   for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){
     ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';
     const lines=textLines(it),curve=clampTextCurve(it.curve||0);
-    const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines);
-    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900));
+    const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines,it.letterSpacing||0);
+    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0));
    }else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
   ctx.restore();
  };
@@ -119,7 +132,7 @@ export default function SeamlessEditor(){
  const itemBounds=(it:Item)=>{
   const im=it.src?images.current.get(it.src):undefined;
   const lines=it.kind==='text'?textLines(it):[];
-  const lineHeight=it.fontSize*1.3+(it.kind==='text'?curvedTextExtraHeight(it.fontSize,it.width||900,it.curve||0,lines):0);
+  const lineHeight=it.fontSize*1.3+(it.kind==='text'?curvedTextExtraHeight(it.fontSize,it.width||900,it.curve||0,lines,it.letterSpacing||0):0);
   return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,
     h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width};
  };
@@ -138,6 +151,7 @@ export default function SeamlessEditor(){
    const p=locate(e);
    touches.current.set(e.pointerId,p);
    if(touches.current.size===2){
+     pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null);
      // Use the element from the first finger, not a possibly stale React
      // selected state. This also works when the other finger lands on blank canvas.
      const id=drag.current?.id??selected;
@@ -153,6 +167,9 @@ export default function SeamlessEditor(){
    }
    if(touches.current.size>2)return;
    const it=hit(p.x,p.y);
+   pointerStart.current={pointer:e.pointerId,id:it?.id??null,x:e.clientX,y:e.clientY};
+   if(!it||deleteArmedId!==it.id)setDeleteArmedId(null);
+   if(!it)lastTap.current=null;
    setSelected(it?.id??null);setEditingText(null);
    if(it){
      layerGesture.current=true;swipeStart.current=null;
@@ -167,7 +184,7 @@ export default function SeamlessEditor(){
  };
  const goSlide=(n:number,keepSelection=false)=>{
    const next=Math.max(0,Math.min(doc.count-1,n));setSlide(next);
-   if(!keepSelection){setSelected(null);setEditingText(null);}
+   if(!keepSelection){setSelected(null);setEditingText(null);setDeleteArmedId(null);lastTap.current=null;}
    const vp=viewport.current;
    if(vp)vp.scrollTo({left:next*(vp.scrollWidth/doc.count),behavior:'smooth'});
  };
@@ -186,7 +203,27 @@ export default function SeamlessEditor(){
    if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
  };
  const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current)return;const d=drag.current;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
- // Download directly from original images at native-aware resolution, not from editor thumbnails.
+ const up=(e:React.PointerEvent<HTMLCanvasElement>)=>{
+  const start=pointerStart.current;
+  if(start?.pointer===e.pointerId&&start.id!==null&&touches.current.size===1&&!pinch.current&&
+     isStationaryTap(start,{x:e.clientX,y:e.clientY})){
+   const next:LayerTap={id:start.id,at:e.timeStamp,x:e.clientX,y:e.clientY};
+   if(isLayerDoubleTap(lastTap.current,next)){
+    setSelected(start.id);setDeleteArmedId(start.id);setEditingText(null);lastTap.current=null;
+   }else lastTap.current=next;
+  }else lastTap.current=null;
+  pointerStart.current=null;
+  const pending=swipe.current;
+  if(pending?.pointer===e.pointerId){
+   if(e.pointerType!=='touch'){
+    const p=locate(e),dx=p.x-pending.x;
+    if(Math.abs(dx)>130&&Math.abs(p.y-pending.y)<Math.abs(dx)*1.1)goSlide(slide+(dx<0?1:-1));
+   }
+   swipe.current=null;
+  }
+  touches.current.delete(e.pointerId);drag.current=null;pinch.current=null;
+ };
+  // Download directly from original images at native-aware resolution, not from editor thumbnails.
  const renderExportSlide=async(i:number)=>{
   const sources=[doc.backgroundImages?.[i],...doc.items.filter(item=>item.kind==='image'&&item.src&&item.x<(i+1)*W&&item.x+item.width>i*W).map(item=>item.src)]
    .filter((src):src is string=>Boolean(src));
@@ -247,7 +284,7 @@ export default function SeamlessEditor(){
    if(index<0)return;
    setRecentlyDeleted({item:{...doc.items[index]},index});
    setDoc(d=>({...d,items:d.items.filter(it=>it.id!==id)}));
-   setSelected(null);setEditingText(null);
+   setSelected(null);setEditingText(null);setDeleteArmedId(null);lastTap.current=null;
    setMessage('Elemento eliminado. Pulsa «Deshacer» para recuperarlo.');
  };
  const undoDelete=()=>{
