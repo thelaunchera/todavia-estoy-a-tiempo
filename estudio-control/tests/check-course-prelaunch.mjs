@@ -26,17 +26,16 @@ assert.ok(freebie.includes('Mobile QA: freebie CTA and carousel controls occupy 
 assert.ok(freebie.includes('margin:18px 0 0!important')||(freebie.includes('padding-bottom:126px')&&freebie.includes('.hero-with-carousel .hero-arrow{bottom:43px}')),'El carrusel reserva un área independiente para sus flechas');
 
 
-const matchaPos=home.indexOf('id="matcha-gratis"');
-const classPos=home.indexOf('<section class="learning-section" id="aprender"');
-assert.ok(matchaPos>0&&classPos>matchaPos,'Freebie de matcha antes de la clase en el podcast');
-assert.equal((home.match(/id="matcha-gratis"/g)||[]).length,1,'El freebie no se duplica');
-assert.match(home,/href="content-lab\/prompts\/#recibir"[^>]*aria-label="Abrir el freebie gratuito de matcha"/,'El botón lleva directamente a solicitar los prompts privados, no a la clase');
-assert.ok(home.includes('src="content-lab/prompts/matcha-01.jpg?v=hd-20261031"'),'La tarjeta Matcha usa la fotografía HD original, no un banco de imágenes');
-assert.ok(read('content-lab/public/prompts/index.html').includes('matcha-01.jpg'),'La imagen del Matcha es la misma usada en el freebie');
-const matchaStyles=read('styles-redesign.css');
-assert.match(matchaStyles,/Original high-resolution Matcha artwork/,'La tarjeta Matcha tiene un diseño editorial actualizado');
-assert.ok(matchaStyles.includes('grid-template-columns:minmax(0,40%) minmax(0,1fr)'),'La fotografía Matcha conserva espacio visible en móviles');
-
+const podcastGiftPos=home.indexOf('id="regalo"');
+const podcastCollectionPos=home.indexOf('id="coleccion"');
+const podcastClassPos=home.indexOf('<section class="learning-section" id="aprender"');
+assert.ok(podcastGiftPos>0&&podcastCollectionPos>podcastGiftPos&&podcastClassPos>podcastGiftPos,'El freebie emocional aparece antes de los productos y la clase');
+assert.match(home,/href="#regalo" class="fine-link">Recibir las 5 preguntas gratis/,'El hero lleva al recurso propio del podcast');
+assert.equal((home.match(/id="regalo"/g)||[]).length,1,'El regalo emocional no se duplica');
+assert.doesNotMatch(home,/id="matcha-gratis"|id="freebie-prompts-inicio"|Powered by <a href="https:\/\/thelaunchera\.com/,'La portada del podcast no promociona el Content Lab ni muestra créditos antiguos');
+const matchaFreebie=read('content-lab/public/prompts/index.html');
+assert.ok(matchaFreebie.includes('matcha-01.jpg'),'El regalo creativo conserva su fotografía dentro de su propio landing');
+assert.match(matchaFreebie,/id="recibir"/,'El formulario de ocho prompts sigue disponible');
 
 assert.match(classPage,/id="course-waitlist-form"/);
 assert.match(classPage,/id="course-waitlist-consent"/);
