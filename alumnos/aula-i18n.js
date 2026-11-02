@@ -161,6 +161,11 @@ function translateElement(selector,english){
    star.setAttribute('aria-hidden','true');star.textContent=spark;
    el.append(star);continue;
   }
+  if(selector==='.lesson-completed'){
+   const textNode=[...el.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
+   if(textNode)textNode.textContent=' '+(language==='en'?english:'Ya terminé esta lección');
+   continue;
+  }
   el.textContent=language==='en'?english:el.dataset.tleOriginalText;
  }
 }
