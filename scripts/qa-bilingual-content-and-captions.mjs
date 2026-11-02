@@ -38,7 +38,7 @@ const courseEs=read('clases/primera-landing.html');
 const courseEn=read('clases/primera-landing-en.html');
 assert.match(courseEs,/Audio y subtítulos en español e inglés/,'Spanish class landing must promise bilingual audio and captions');
 assert.match(courseEn,/Audio and subtitles in English and Spanish/,'English class landing must promise bilingual audio and captions');
-assert.match(courseEs,/La clase tendrá audio en español latino y en inglés/,'Spanish FAQ should agree with class offer');
+assert.match(courseEs,/La clase tendrá audio en español y en inglés/,'Spanish FAQ should agree with class offer');
 assert.match(courseEn,/The class will offer audio in both English and Latin American Spanish/,'English FAQ should agree with class offer');
 assert.doesNotMatch(courseEs,/el audio no está doblado|La opción «English» no cambia el idioma de la voz/,'Spanish landing must not contradict bilingual audio');
 assert.doesNotMatch(courseEn,/the lessons are not dubbed|does not change the spoken audio/,'English landing must not contradict bilingual audio');
