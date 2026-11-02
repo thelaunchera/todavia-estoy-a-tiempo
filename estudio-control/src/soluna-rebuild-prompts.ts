@@ -1,6 +1,7 @@
 import type {DemoRebuildPrompt} from './demo-rebuild-prompts';
+import {solunaPhotos} from './soluna-photos';
 
-// Material privado para el Studio; comandos independientes para reconstruir el demo.
+/** Guía privada SOLUNA · texto de los pasos + master prompts de las fotografías originales. */
 export const solunaRebuildPrompts:DemoRebuildPrompt[] = [
   {
     "title": "00 · Investigación y dirección visual",
@@ -17,66 +18,33 @@ export const solunaRebuildPrompts:DemoRebuildPrompt[] = [
     "show": "Presentar paleta, jerarquía y ejemplos de encuadre."
   },
   {
-    "title": "02 · Fotografías maestras, una por vez",
-    "step": "Banco fotográfico",
-    "prompt": "Crea las ocho fotografías de SOLUNA usando la dirección artística global y los comandos individuales adjuntos. Genera UNA imagen por solicitud y guarda archivos separados. Empieza por el hero y el interior para mantener consistencia. No collage, no imágenes con letras.",
-    "say": "Primero hacemos la foto principal y el estudio; esas dos sirven de referencia para que las demás no parezcan lugares diferentes.",
-    "show": "Mostrar los ocho prompts individuales y el orden de generación.",
-    "photoCommands": [
-      {
-        "title": "01 · Hero — Tabletop · 16:9",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. A natural-looking adult Latina with dark brown hair in a low bun, matching sage sports bra and leggings, performing accurate Bharmanasana tabletop on a beige mat: wrists under shoulders, knees under hips, neutral spine, gaze slightly downward. Full body at right, generous clear negative space at left for headline, flattering three-quarter side angle, same SOLUNA studio. Landscape 16:9."
-      },
-      {
-        "title": "02 · Exterior — fachada · 16:9",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Photorealistic storefront of fictional SOLUNA YOGA studio in Fort Lauderdale, ivory stucco facade, tall glass windows, oak entry door, sage trim, restrained tropical plants, subtle single correctly spelled SOLUNA YOGA sign, authentic Florida streetscape, no people blocking the door. Architectural perspective, landscape 16:9. This is concept art, not a real location."
-      },
-      {
-        "title": "03 · Interior vacío · 16:9",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Wide architectural view of the same SOLUNA Yoga studio: ivory textured walls, light oak floor, tall windows, translucent linen curtains, eight beige mats, cork blocks and folded cream blankets, clear circulation space, no people, natural 24mm lens and straight verticals. Landscape 16:9."
-      },
-      {
-        "title": "04 · Clase grupal Warrior II · 16:9",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Six adult women of diverse appearances each on her own beige or sage mat, all in anatomically accurate Warrior II with bent front knee, straight back leg, arms horizontal; instructor visible at front. Same SOLUNA studio, warm window light, all participants in frame, no duplicated faces or limbs. Landscape 16:9."
-      },
-      {
-        "title": "05 · Slow Flow · 4:5",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Same Latina woman from hero, identical sage outfit and low bun, performing accurate gentle low lunge Anjaneyasana, front knee over ankle, back knee supported, upright torso, arms lifted naturally. Same studio and beige mat, full body and breathing room for responsive crop. Vertical 4:5."
-      },
-      {
-        "title": "06 · Deep Rest · 4:5",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Adult woman in soft sand-colored yoga clothes resting supine on a beige mat with linen bolster under knees, folded blanket nearby, relaxed expression, eyes closed. Same SOLUNA studio, warm indirect light, realistic support and anatomy, elevated three-quarter camera angle. Vertical 4:5."
-      },
-      {
-        "title": "07 · Morning Ritual · 4:5",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Same Latina woman from hero in same sage outfit and low bun, standing in anatomically accurate Mountain Pose Tadasana, feet grounded, relaxed straight legs, shoulders down, arms at sides, full body visible. Beige mat, linen-curtained window, soft Florida morning light, same studio. Vertical 4:5."
-      },
-      {
-        "title": "08 · Flores recepción · 4:5",
-        "prompt": "Create one ultra-realistic premium editorial photograph for SOLUNA Yoga, a fictional boutique studio in Fort Lauderdale. Same coherent architecture throughout: warm ivory plaster, light oak floor, linen curtains, sage accents, neutral mats, warm Florida sunlight. Natural skin and anatomy, believable perspective, no collage, no text overlay, no watermark. Fine-art still life of matte ivory ceramic vase with delicate white cosmos flowers, cream blossoms and green branches on limestone console beside tall sunlit window. Same SOLUNA reception with softly blurred yoga mats and sage-and-ivory studio in background. Natural textures, soft shadows, vertical 4:5."
-      }
-    ]
+    "title": "02 · Fotografía premium: 13 fotos individuales",
+    "step": "Fotografías",
+    "prompt": "Crea una colección editorial de 13 fotografías individuales para SOLUNA Yoga, respetando la misma modelo, arquitectura y luz en toda la serie. Usa los 13 MASTER PROMPTS que aparecen justo debajo, uno por uno, y utiliza las fotos aprobadas como referencias si están disponibles. Prohibido usar collages, mosaicos, paneles divididos, textos sobre imágenes, marcas inventadas o caras cambiantes. Guarda cada imagen individual con su nombre de archivo correspondiente. Comienza con el hero cinematográfico y el interior; continúa con las clases, fachada, matcha y ropa.",
+    "say": "Aquí es donde la página comienza a sentirse como una marca real. No pido las 13 fotos juntas porque el generador puede devolver un collage. Creo una, reviso su resultado, guardo el archivo y después sigo con el siguiente prompt. Así tenemos una colección coherente y podemos reutilizarla en la landing o en redes.",
+    "show": "Abrir cada una de las 13 fotos individuales y enseñar su prompt, localización en la página y archivo original de GitHub. Nunca usar collages.",
+    "photoCommands": solunaPhotos.map(photo=>({title:photo.title,prompt:photo.prompt,imageUrl:photo.url}))
   },
   {
-    "title": "03 · Hero y CTA de lanzamiento",
+    "title": "03 · Hero editorial que impacta",
     "step": "Hero",
-    "prompt": "Construye solo el hero de SOLUNA Yoga con una fotografía 16:9 a la derecha y titular 'Yoga that feels like you.' a la izquierda. Explica que es un estudio nuevo en Fort Lauderdale, amigable para principiantes, que abre pronto. CTA único 'Join the early list', secundario 'View memberships'. Sin flechas ni emojis. Diseña mobile-first a 375px. No inventes fecha ni dirección.",
-    "say": "La portada debe explicar en segundos qué es, para quién es y qué hacer. No necesitamos llenar de botones ni promesas.",
-    "show": "Comparar portada desktop y móvil, comprobar CTA."
+    "prompt": "Construye el hero editorial premium de SOLUNA Yoga tomando como fotografía principal aprobada images/soluna-hero-editorial.webp: mujer adulta con conjunto verde salvia en una postura suave de yoga, estudio orgánico y luz cálida. En escritorio, imagen protagonista a la derecha y texto legible a la izquierda: 'Yoga that feels like you.' En móvil, fotografía primero y copy después, sin banners que tapen a la modelo. Explica que abre próximamente en Fort Lauderdale y que está diseñado para principiantes. CTA principal 'Join the early list'; secundario 'View memberships'. Evita fechas, direcciones, testimonios, flechas, emojis y promesas inventadas. Verifica en 375 px.",
+    "say": "La primera impresión la hace la fotografía. Aquí no quiero que el texto tape a la modelo. En el teléfono la foto abre la página y debajo aparece el mensaje con un botón claro. Así se entiende qué es SOLUNA y qué hacer.",
+    "show": "Abrir el hero en teléfono y escritorio, comprobar recorte, contraste, ubicación del CTA y la ausencia de banners sobre la fotografía."
   },
   {
-    "title": "04 · Oferta 30% y experiencias",
+    "title": "04 · Oferta interactiva 30% y tres clases",
     "step": "Oferta y clases",
-    "prompt": "Añade la oferta para clientes nuevos: 30% de bienvenida, con condiciones pendientes de confirmar. Después crea tres experiencias Slow Flow, Deep Rest y Morning Ritual con fotografías independientes. No inventes horario ni cupos. Mantén diseño editorial, sin flechas ni adornos.",
-    "say": "El descuento debe verse rápido, pero no vamos a decir que se aplica a algo específico hasta que el negocio confirme las condiciones.",
-    "show": "Revisar bloque del descuento y las tres tarjetas con fotos."
+    "prompt": "En el demo de SOLUNA crea un bloque de bienvenida 30% OFF para huéspedes nuevos; no inventes fecha límite ni condiciones, ni un contador falso. Añade un botón o disclosure accesible 'How does the offer work?' que explica que los términos se confirmarán antes de abrir. Después crea tres clases Slow Flow, Deep Rest y Morning Ritual, cada una con su fotografía individual sin banner grande encima, nombre y descripción debajo, botón 'Discover this practice' que despliega detalles. Incluye una foto grupal Warrior II como introducción a las clases. Diseña para 375 px y pantallas grandes.",
+    "say": "El descuento llama la atención, pero no vamos a inventar urgencia. El botón explica exactamente qué se sabe. Después las clases usan fotografías limpias, con sus textos debajo, para que ninguna cara quede escondida por una tarjeta.",
+    "show": "Tocar el detalle del 30% y los botones de las tres clases. Confirmar que la foto queda visible y que los detalles se despliegan sin saltos."
   },
   {
-    "title": "05 · Our Studio y ubicación",
-    "step": "Espacio",
-    "prompt": "Crea sección Our Studio con fotografía exterior y otra interior del mismo estudio ficticio. Añade fotografía floral en el bloque de location/lista de espera. Usa el texto 'Fort Lauderdale · opening soon'; no inventes calle, dirección ni fecha. Explica que las imágenes son conceptuales.",
-    "say": "Mostramos cómo se sentiría visitar el estudio, pero aclaramos que es una propuesta visual, no fotografías de un local abierto.",
-    "show": "Enseñar fachada, interior y detalle floral."
+    "title": "05 · Our Studio y segunda fotografía editorial",
+    "step": "Espacios",
+    "prompt": "Crea Our Studio con dos fotografías individuales verificadas images/studio-exterior.webp e images/studio-interior.webp y una pequeña etiqueta por foto; recuerda que es un estudio ficticio conceptual, no real. Coloca la foto images/hero.webp (modelo en tabletop Bharmanasana) en una sección editorial secundaria 'Every practice begins somewhere', NO en el hero. Usa images/floral.webp como detalle de recepción junto al formulario. Elimina espacios excesivamente altos en iPhone y evita repetir la misma imagen.",
+    "say": "Ahora mostramos la fachada, el salón y una segunda escena humana. La mujer haciendo yoga en cuatro apoyos ya no es la portada: tiene una sección propia para contar la historia del estudio. También colocamos un detalle floral cerca del formulario.",
+    "show": "Recorrer fachada, interior, imagen tabletop y flores; revisar proporciones en móvil y confirmar que no se repitan fotos."
   },
   {
     "title": "06 · Membresías sin cobro ficticio",
@@ -86,17 +54,24 @@ export const solunaRebuildPrompts:DemoRebuildPrompt[] = [
     "show": "Probar selección de las tres opciones y explicar la diferencia entre interés y pago."
   },
   {
-    "title": "07 · Lista de espera, privacidad y QA",
-    "step": "Conversión y prueba",
-    "prompt": "Crea formulario mobile-first con nombre, email, interés y consentimiento explícito. Si no hay backend, identifica la inscripción como demo local, sin prometer emails. Añade FAQ sobre apertura, principiantes, 30% y pagos. Revisa diseño a 375px, teclado móvil, navegación, accesibilidad, sin errores de consola y sin flechas ni emojis.",
-    "say": "Antes de compartir la web probamos todo como si fuéramos una persona nueva. Si un formulario solo simula, lo decimos.",
-    "show": "Completar formulario de prueba, revisar validación y comprobar el móvil."
+    "title": "07 · Formulario de interés y control de calidad",
+    "step": "Conversión y QA",
+    "prompt": "Construye la sección de lista de espera en inglés, con nombre, email, selección de interés y consentimiento claro. Si el demo funciona sin backend, indica que los registros solo se simulan en el navegador y que no se envían emails. Añade FAQ sobre principiantes, apertura, membresías, oferta y compras. Comprueba el formulario, los estados de validación, navegación, tamaños táctiles, accesibilidad, recursos e imágenes en viewport 375 px. Nunca digas que se procesó un pago ni que se inscribió a una persona real.",
+    "say": "Probamos la web como si acabáramos de descubrir el estudio. Tocamos los botones y llenamos un ejemplo para saber qué pasa. Es importante contar con claridad lo que realmente funciona y lo que todavía es una simulación.",
+    "show": "Enviar formulario de prueba con consentimiento, abrir FAQ y confirmar que todo queda legible en iPhone."
   },
   {
-    "title": "08 · Publicar y comparar",
-    "step": "GitHub y publicación",
-    "prompt": "Publica SOLUNA como demo separado en GitHub sin modificar otros demos. Verifica URL pública, imágenes, navegación y botones. Documenta las fotografías y los pasos que faltan para habilitar lista de espera y pagos reales. No inventes una URL: devuelve la que haya quedado efectivamente publicada.",
-    "say": "Terminamos con la página funcionando y un enlace que se pueda abrir. El repositorio conserva lo que construimos.",
-    "show": "Abrir URL pública, GitHub y checklist final."
+    "title": "08 · SOLUNA Shop: matcha y tres fotografías de ropa",
+    "step": "Tienda conceptual",
+    "prompt": "Añade la sección SOLUNA Shop usando exactamente CUATRO fotografías INDIVIDUALES, nunca collages: images/soluna-matcha-single.webp (un iced matcha), images/soluna-apparel-model.webp (modelo con conjunto verde salvia), images/soluna-apparel-set.webp (set fotografiado solo) e images/soluna-apparel-rack.webp (prendas en perchas). Construye cuatro tarjetas editoriales de la misma colección, con imagen visible y texto fuera de la foto. Cada tarjeta tiene botón 'Explore this idea/look' que despliega una descripción. No simules inventario, precios, pedidos ni checkout: son conceptos ficticios. En móvil usa una o dos columnas dependiendo del ancho, táctil cómodo, fotos sin recortes agresivos.",
+    "say": "Aquí mostramos cómo podríamos ampliar una marca sin inventar que vende productos. Yo enseño cuatro fotografías distintas y coherentes: una sola bebida y tres de ropa. Todas están separadas, así podremos cambiarlas sin tocar las demás.",
+    "show": "Abrir SOLUNA Shop y tocar el detalle de Matcha Ritual, Made to Move, Soft Essentials y The Studio Edit; enseñar imágenes individuales y los botones desplegables."
+  },
+  {
+    "title": "09 · Guardar en repositorio y publicar en Studio",
+    "step": "Publicación",
+    "prompt": "Guarda el demo SOLUNA Yoga en el repositorio thelaunchera/demo-booking-landing- bajo demos/soluna-yoga/ con index.html, carpeta images/ y README. Asegura que cada archivo original esté en images/ y que el HTML use exclusivamente las fotos aprobadas. Publica por GitHub Pages, comprueba que el enlace abra en móvil. Después agrega el demo y sus 13 fotografías, enlaces y master prompts a la sección 'Demos terminados' del Studio privado, sin duplicar fichas. No toques otros demos, pagos ni sistemas. La lista de espera y la tienda son demostraciones; explica qué no funciona en producción.",
+    "say": "Este es el paso final: guardamos el proyecto en GitHub, comprobamos el enlace y lo ponemos en nuestra biblioteca de demos terminados con sus imágenes y prompts para reconstruirlo. Así queda organizado y es reutilizable.",
+    "show": "Abrir GitHub Pages y el Studio, revisar la ficha SOLUNA, las fotos individuales y copiar dos prompts de ejemplo."
   }
 ];
