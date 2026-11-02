@@ -68,6 +68,10 @@ function setText(selector,en){
   if(selector==='.club-welcome h2'){
    node.innerHTML=language==='en'?'Learning grows <em>together.</em>':'Aquí también se aprende <em>compartiendo.</em>';continue;
   }
+  if(node.tagName==='LABEL'&&node.querySelector('input,select')){
+   const first=[...node.childNodes].find(x=>x.nodeType===Node.TEXT_NODE);
+   if(first){first.textContent=value+' ';continue;}
+  }
   node.textContent=value;
  }
 }
