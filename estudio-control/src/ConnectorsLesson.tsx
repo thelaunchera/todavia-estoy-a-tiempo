@@ -46,9 +46,9 @@ export default function ConnectorsLesson(){
  const guide=guides[selected];
  async function copy(){try{await navigator.clipboard.writeText(guide.prompt);setCopied(true);}catch{setCopied(false);}}
  return <section id="class-connectors-workshop" className="connectors-lesson" aria-label="Explicación privada para preparar las grabaciones">
-  <header className="connectors-heading"><span><BookOpen size={16}/> GUÍA PRIVADA PARA GRABAR · NIVEL PRINCIPIANTE</span><h3>Cómo funciona una web y cómo tenerlo todo en orden.</h3><p>Un proyecto, un recorrido y herramientas fáciles. Todo se explica con el ejemplo ficticio de Casa Brownie, que no vende ni recibe pedidos.</p></header>
-  <div className="connectors-organization">
-    <h4>Cómo grabar el método gratis primero: plugins, organización y negocios reales</h4>
+  <header className="connectors-heading"><span><BookOpen size={16}/> MATERIAL DE APOYO DOCENTE · NO VISIBLE PARA ALUMNOS</span><h3>Herramientas y explicaciones para tus videos.</h3><p>Esta es tu referencia para explicar AppDeploy y otros conceptos. El alumno no tiene que completar esta lista: su ruta está en el aula, en «Crea tu web → Paso a paso: mi propia web».</p></header>
+  <details className="connectors-organization connectors-fold"><summary>Ideas para explicar durante la grabación (opcional)</summary><div>
+    <h4>Tu explicación: primero preparar, después construir</h4>
     <p><b>Tu experiencia:</b> «He conseguido terminar hasta tres webs en un día cuando llevaba todo preparado». Muestra tu método: mañana para crear identidad, textos y fotos; tarde para construir con AppDeploy y probar. Es una experiencia, no una promesa de tres webs diarias para todos.</p>
     <p><b>ChatGPT:</b> con Free puedes comenzar a organizar y generar contenido dentro de sus límites. Plus es opcional si necesitas más capacidad o trabajar con menos interrupciones; su precio no es requisito de la clase. Comprueba la disponibilidad real del plugin AppDeploy antes de decir que funciona en Free.</p>
     <p><b>Plugins:</b> explica primero qué son y cómo buscar AppDeploy, Google/Gmail, Make y Stripe; conectar cuentas no garantiza permiso de uso desde cualquier plan. Gmail tiene cuenta personal gratuita, Make y AppDeploy tienen planes Free; Stripe cobra comisiones por transacción real. Hay que distinguir creación de cuenta, integración y activación de cobros.</p>
@@ -58,7 +58,7 @@ export default function ConnectorsLesson(){
     <p><b>Seguridad:</b> explica en una escena por qué se usa un gestor de contraseñas, verificación en dos pasos y secretos protegidos. Una clave API secreta no se pega en ChatGPT, capturas o frontend. Si se filtra, debe revocarse desde su proveedor.</p>
     <p><b>Footer legal:</b> mostrar nombre del negocio, contacto verificable, privacidad para datos recopilados, términos/devoluciones si corresponden y cookies según seguimiento y normativa. Revisar enlaces y accesibilidad sin asegurar cumplimiento legal.</p>
     <p><b>Mara:</b> enseña a crear un Proyecto PRIVADO en ChatGPT y pegar las instrucciones de «Mara · tu guía web» disponibles dentro del Centro de alumnos → Materiales. No compartas un mismo proyecto con todos: los proyectos compartidos permiten ver chats y archivos de otras personas.</p>
-   </div>
+   </div></details>
   <div className="connectors-foundation">
    <article><span className="connectors-level">LO QUE SE VE · FRONTEND</span><h4>La cara visible de tu web</h4><p>Son las fotos, los títulos, colores, botones, menú y cómo se acomoda todo en el teléfono. El visitante puede verlo y tocarlo. Un diseño claro ayuda a entender la idea, incluso sin hacer ninguna compra.</p><p><b>Ejemplo:</b> en Casa Brownie ves una fotografía, lees «¿Qué llevo de regalo?» y tocas «Descubrir sabores».</p></article>
    <article><span className="connectors-level">LO QUE OCURRE DETRÁS · BACKEND</span><h4>Los procesos que no se ven</h4><p>Si más adelante alguien se registra, paga o recibe un acceso privado, tiene que existir un sistema que compruebe la información y ejecute la acción correcta. Puede estar en servicios como Stripe y Make; no necesitas construir tu propio servidor para una página informativa.</p><p><b>Ejemplo:</b> Stripe confirma un pago real, Make comprueba la condición y Gmail envía una confirmación, solo si todo se configuró y probó.</p></article>
@@ -69,23 +69,23 @@ export default function ConnectorsLesson(){
    </div>
    {example==='simple'?<div className="connectors-flow-result"><b>Tu web pública → tus fotos y textos → un botón informativo.</b><p>AppDeploy puede publicar esta primera versión. No se requiere base de datos, cuentas de usuarios ni pagar un dominio.</p></div>:<div className="connectors-flow-result"><b>Página pública → pago alojado por Stripe → pago comprobado → Make → Gmail.</b><p>Son servicios separados con tus permisos. El correo no demuestra el pago: primero hay que verificarlo. No guardes tarjetas ni contraseñas en la parte visible.</p></div>}
   </div>
-  <div className="connectors-organization">
+  <details className="connectors-organization connectors-fold"><summary>Carpetas y archivos de Casa Brownie · ejemplo de la profesora</summary><div>
    <h4>La carpeta que mantiene tu proyecto organizado</h4><p>En Drive crea una sola carpeta con el nombre de tu negocio y dentro guarda estas secciones. Si cambias una foto o un texto, sabrás exactamente dónde está la versión correcta.</p>
    <div className="connectors-folder-grid">{projectFolders.map(([name,description])=><div key={name}><strong>{name}</strong><span>{description}</span></div>)}</div>
    <p className="connectors-warning"><ShieldCheck size={16}/> <span>Las contraseñas, claves privadas, datos bancarios y números de identificación van en el servicio correspondiente o en un gestor de contraseñas. Nunca en una carpeta compartida, imagen ni prompt.</span></p>
-  </div>
+  </div></details>
   <div className="connectors-path"><div><b>1 · CREAR Y PUBLICAR</b><small>ChatGPT + AppDeploy</small></div><div><b>2 · VENDER SOLO CUANDO ESTÉ LISTO</b><small>Stripe → Make → Gmail</small></div><div><b>3 · AMPLIAR SOLO SI HACE FALTA</b><small>Supabase y dominio opcional</small></div></div>
   <div className="connectors-grid">
    <nav className="connectors-tabs" aria-label="Elegir conexión">{guides.map((item,i)=><button key={item.name} type="button" aria-current={i===selected?'true':undefined} onClick={()=>{setSelected(i);setCopied(false);}} className={i===selected?'selected':''}><strong>{item.name}</strong><small>{item.level}</small></button>)}</nav>
    <article className="connectors-detail">
     <span className="connectors-level">{guide.level}</span><h4>{guide.name}</h4><p className="connectors-why">{guide.why}</p>
     <p className="connectors-cost"><CheckCircle2 size={16}/> {guide.cost}</p>
-    <h5>Dónde tocar, paso a paso</h5><ol>{guide.steps.map(step=><li key={step}>{step}</li>)}</ol>
-    <div className="connectors-prompt"><div><h5>Texto listo para copiar en ChatGPT</h5><button type="button" onClick={()=>void copy()}><Clipboard size={14}/>{copied?'Copiado':'Copiar instrucciones'}</button></div><p>{guide.prompt}</p></div>
+    <h5>Qué mostrar en pantalla y cómo explicarlo</h5><ol>{guide.steps.map(step=><li key={step}>{step}</li>)}</ol>
+    <div className="connectors-prompt"><div><h5>Prompt de tu demostración (Casa Brownie)</h5><button type="button" onClick={()=>void copy()}><Clipboard size={14}/>{copied?'Copiado':'Copiar instrucciones'}</button></div><p>{guide.prompt}</p></div>
     <div className="connectors-warning"><ShieldCheck size={16}/><span>{guide.warning}</span></div>
     <a href={guide.url} target="_blank" rel="noopener noreferrer" className="connectors-source">Ver ayuda oficial <ExternalLink size={14}/></a>
    </article>
   </div>
-  <footer className="connectors-bottom"><Globe2 size={18}/><p><b>El objetivo de esta clase es publicar una primera web que funcione, no aprender todas las herramientas.</b> Primero frontend y organización. Después, solo si es necesario, pagos, automatizaciones y datos. Tarifas y condiciones: revisar antes de grabar.</p></footer>
+  <footer className="connectors-bottom"><Globe2 size={18}/><p><b>Orden didáctico:</b> idea → fotos y textos → estructura → secciones → pruebas → enlace. Los pagos y las automatizaciones son opcionales y se explican después, sin volverlos requisito de la primera web. Verifica tarifas y condiciones antes de grabar.</p></footer>
  </section>;
 }
