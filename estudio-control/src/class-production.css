@@ -216,3 +216,14 @@
 .class-student-route-chapter>div button{margin-top:5px;border:1px solid #244964;border-radius:99px;background:#244964;color:#fff;min-height:44px;padding:9px 15px;font-size:12px}
 @media(max-width:650px){.class-student-route-actions>*{flex:1 1 100%}.class-student-route-chapter summary{padding:12px}.class-student-route-chapter summary small{display:none}.class-student-route-chapter>div{padding:15px}}
 @media(prefers-reduced-motion:reduce){.class-student-route-chapter summary svg{transition:none}}
+
+
+/* Enseñar mirando la pantalla: pistas de voz opcionales en lugar de leer párrafos. */
+.class-voice-toggle{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.class-voice-toggle button{border:1px solid #bbcbd5;background:#f5f8f8;color:#355066;min-height:42px;border-radius:99px;padding:10px 15px;font-size:12px;cursor:pointer}
+.class-voice-toggle button.active{background:#203f5b;border-color:#203f5b;color:#fff}
+.class-voice-cues{font-size:14px;line-height:1.7;color:#2d4357}
+.class-voice-cues>b{display:block;font-size:17px;line-height:1.4;margin:13px 0}
+.class-voice-cues ol{margin:10px 0 14px;padding-left:22px}
+.class-voice-cues li{margin:0 0 12px}
+.class-voice-cues p{font-size:13px;color:#5c7384;line-height:1.6}
