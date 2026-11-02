@@ -28,9 +28,10 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/casa-brownie',
   note:'Sin video en el hero. Es una vista del mismo demo oficial, no una copia ni una segunda web.',
   kind:'static',
-  promptsFor:'casa-brownie'
   photos:additionalDemoPhotos['casa-brownie'],
+  promptsFor:'casa-brownie',
  },
+
  {
   id:'casa-brownie',
   title:'Casa Brownie · Con video',
@@ -40,10 +41,11 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.com/demos/casa-brownie/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/casa-brownie',
   note:'Versión con video: reservar para el bono, después de grabar la web con foto estática.',
-  kind:'video'
+  kind:'video',
   photos:additionalDemoPhotos['casa-brownie'],
   promptsFor:'casa-brownie',
  },
+
  {
   id:'crumb',
   title:'CRUMB',
@@ -54,9 +56,10 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/crumb',
   note:'Demo ficticio: no acepta pedidos ni pagos reales.',
   kind:'other',
-  promptsFor:'crumb'
   photos:additionalDemoPhotos['crumb'],
+  promptsFor:'crumb',
  },
+
  {
   id:'aftr',
   title:'AFTR. · Las Vegas',
@@ -67,8 +70,10 @@ const finishedDemos:Demo[]=[
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/aftr',
   note:'Concepto ficticio 21+. Las reservas, entradas, ofertas y formularios solo se simulan; no hay cobros ni datos reales.',
   kind:'other',
-  promptsFor:'aftr'
- } ,
+  photos:additionalDemoPhotos['aftr'],
+  promptsFor:'aftr',
+ },
+
  {
   id:'jaramillo-boutique',
   title:'Jaramillo Boutique · Fashion Editorial',
@@ -78,10 +83,11 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.github.io/demo-booking-landing-/jaramillo-boutique/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/demo/jaramillo-boutique/demos/jaramillo-boutique',
   note:'Vista demostrativa de la boutique: la selección de prendas permite consultar interés, pero no procesa pagos. Disponibilidad, precios definitivos y datos de tiendas requieren confirmación.',
-  kind:'other'
-  photos:additionalDemoPhotos['aftr'],
+  kind:'other',
+  photos:additionalDemoPhotos['jaramillo-boutique'],
   promptsFor:'jaramillo-boutique',
  },
+
  {
   id:'yummm',
   title:'YUMMM · Coffee, Bakery & Sweets',
@@ -91,10 +97,11 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.github.io/demo-booking-landing-/yummm/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/yummm',
   note:'Concepto ficticio; el catálogo y los precios son ilustrativos. No se aceptan pedidos ni pagos reales.',
-  kind:'other'
+  kind:'other',
   photos:additionalDemoPhotos['yummm'],
   promptsFor:'yummm',
  },
+
  {
   id:'soluna-yoga',
   title:'SOLUNA Yoga · Fort Lauderdale',
@@ -104,10 +111,11 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/',
   source:'https://github.com/thelaunchera/demo-booking-landing-/tree/main/demos/soluna-yoga',
   note:'Concepto ficticio: la lista de espera es una simulación local, no se envían emails ni se realizan cobros. Incluye 13 fotos originales individuales, con sus prompts y enlaces.',
-  photos:solunaPhotos,
   kind:'other',
-  promptsFor:'soluna'
+  photos:solunaPhotos,
+  promptsFor:'soluna',
  },
+
  {
   id:'ivory-bloom',
   title:'IVORY & BLOOM · Wedding Cake Atelier',
@@ -117,10 +125,11 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.com/demos/ivory-and-bloom/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/ivory-and-bloom',
   note:'Concepto ficticio. Los formularios simulan la solicitud; no se reciben pedidos, no se procesan pagos ni se envían datos a una tienda real. Incluye 17 fotos individuales y sus prompts de recreación.',
-  photos:ivoryBloomPhotos,
   kind:'other',
-  promptsFor:'ivory-bloom'
+  photos:ivoryBloomPhotos,
+  promptsFor:'ivory-bloom',
  },
+
  {
   id:'cb-depot',
   title:'CB Depot · Mobile Detailing',
@@ -130,10 +139,11 @@ const finishedDemos:Demo[]=[
   url:'https://cb-depot-booking.pages.dev/',
   source:'https://github.com/thelaunchera/cb-depot-booking',
   note:'Proyecto de cliente real. El formulario puede recibir reservas y solicitudes auténticas: no lo utilices para pruebas ni compartas información privada del cliente.',
-  kind:'live'
+  kind:'live',
   photos:additionalDemoPhotos['cb-depot'],
   promptsFor:'cb-depot',
  },
+
  {
   id:'experience-cleaning',
   title:'Experience Cleaning · Booking Journey',
@@ -143,10 +153,10 @@ const finishedDemos:Demo[]=[
   url:'https://thelaunchera.com/experience-cleaning/',
   source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/experience-cleaning',
   note:'Demo pública y segura, con información ilustrativa. No crea reservas, no cobra ni modifica datos reales. El Command Center mostrado pertenece a la simulación, no a una cuenta privada.',
-  kind:'other'
+  kind:'other',
   photos:additionalDemoPhotos['experience-cleaning'],
   promptsFor:'experience-cleaning',
- }
+ },
 ];
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
  const [copied,setCopied]=useState('');
