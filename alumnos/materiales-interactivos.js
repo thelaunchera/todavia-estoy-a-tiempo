@@ -1,9 +1,10 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
-let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={},MODULE_PROMPTS=[];
+let PROMPTS=[],WORKBOOK=[],CHECKS=[],EXTRAS={},MODULE_PROMPTS=[],EXAMPLE_PROMPTS=[];
 function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const headers=[
@@ -28,7 +29,7 @@ const materialGroups=[
  {id:'publicar',title:'Antes de publicar',views:['revision']}
 ];
 let running=0;
-export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons,onCloseMaterials}){
+export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons,onCloseMaterials,getLanguage=()=> 'es'}){
  if(!root||root.dataset.mounted==='true')return;
  root.dataset.mounted='true';
  const {data:resource,error:resourceError}=await db.from('podcast_class_learning_assets')
@@ -46,16 +47,35 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   root.textContent='La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
   return;
  }
- /* Se conservan los 12 originales. Los nuevos prompts iniciales se añaden desde
-    la tabla del curso después de validar acceso del alumno o vista administrativa. */
- MODULE_PROMPTS=[];
+ /* Biblioteca desde la misma base protegida por RLS para estudiantes
+    con compra verificada; incluye los prompts que se agreguen en el futuro. */
+ MODULE_PROMPTS=[];EXAMPLE_PROMPTS=[];
  try{
-  const {data,error}=await db.from('podcast_class_prompts')
-   .select('prompt_code,title,summary,body,position,status')
-   .eq('course_id',courseId).eq('status','ready').like('prompt_code','m%').order('position',{ascending:true});
-  if(!error)MODULE_PROMPTS=(data||[]).filter(p=>/^m\d{2}_/.test(p.prompt_code));
- }catch{/* mantener los 12 prompts base si hay un fallo temporal */}
-
+  const [{data:rows,error},{data:kit,error:kitError}]=await Promise.all([
+   db.from('podcast_class_prompts')
+    .select('prompt_code,title,summary,body,position,status,category')
+    .eq('course_id',courseId).eq('status','ready').order('position',{ascending:true}),
+   db.from('podcast_class_learning_assets')
+    .select('payload,status').eq('course_id',courseId)
+    .eq('asset_code','inspiration_gallery_v1').maybeSingle()
+  ]);
+  if(!error&&Array.isArray(rows))MODULE_PROMPTS=rows;
+  if(!kitError&&kit?.status==='ready'&&Array.isArray(kit?.payload?.demos)){
+   for(const d of kit.payload.demos){
+    for(const [i,p] of (Array.isArray(d.prompts)?d.prompts:[]).entries()){
+     EXAMPLE_PROMPTS.push({prompt_code:'demo_'+d.id+'_'+i,title:p.title,
+      summary:d.title+' · '+(p.step||''),body:p.body,category:'demo_'+(d.category||'services'),
+      brand:d.title,position:1000+EXAMPLE_PROMPTS.length,status:'ready'});
+     for(const [j,photo] of (Array.isArray(p.photos)?p.photos:[]).entries()){
+      EXAMPLE_PROMPTS.push({prompt_code:'demo-photo_'+d.id+'_'+i+'_'+j,
+       title:photo.title,summary:d.title+' · Foto individual',
+       body:photo.body,category:'demo_photos',brand:d.title,
+       position:2000+EXAMPLE_PROMPTS.length,status:'ready'});
+     }
+    }
+   }
+  }
+ }catch{/* Mantener originales si la consulta adicional no responde */}
  const ownerPreview=adminPreview||!user;
  let answers={},checks={},saveTimer=null,dirty=0,saveRunning=false;
  const app=el('div','mi-app');
@@ -197,32 +217,106 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
  function renderPrompts(){
-  section('02 / BIBLIOTECA PARA COPIAR','Pídele a ChatGPT lo que realmente necesitas.','Empieza por los prompts iniciales de cada módulo: investiga primero tu negocio y también las necesidades de otros negocios. Después usa los 12 prompts de la clase y los bonus móviles. Cambia lo que aparece entre [corchetes]. Nunca compartas contraseñas ni datos privados.');
-  const mobileBonus=Array.isArray(EXTRAS.mobile_first_prompts)?EXTRAS.mobile_first_prompts.filter(item=>Array.isArray(item)&&item.length===3&&item.every(v=>typeof v==='string')):[];
-  const catalog=[
-   ...MODULE_PROMPTS.map(item=>({title:item.title,desc:item.summary||'',prompt:item.body,kind:'module',badge:(item.title.match(/^M\d{2}/)||['M'])[0]})),
-   ...PROMPTS.map(([title,desc,prompt],i)=>({title,desc,prompt,kind:'original',badge:String(i+1).padStart(2,'0')})),
-   ...mobileBonus.map(([title,desc,prompt],i)=>({title,desc,prompt,kind:'mobile',badge:'B'+(i+1)}))
+  const lang=getLanguage()==='en'?'en':'es';
+  const t=(es,en)=>lang==='en'?en:es;
+  section(t('02 / BIBLIOTECA DE PROMPTS','02 / PROMPT LIBRARY'),
+   t('Una biblioteca para cualquier negocio.','One library for every business.'),
+   t('Empieza con 1 foto · 8 prompts · 1 marca. Después investiga tu negocio, crea tu identidad, organiza tus fotos y construye la web. Los demos muestran los comandos originales por etapa.','Start with 1 Photo · 8 Prompts · 1 Brand. Then research your business, build a visual identity, plan individual photos and create your website. Demo packs include their original step-by-step commands.'));
+  const originals=new Map([
+   ['idea',0],['cliente',1],['estructura',2],['referencias',3],['imagenes',4],['hero',5],
+   ['copy',6],['construccion',7],['formularios',8],['pagos',9],['movil',10],['auditoria',11]
+  ]);
+  const fallback=MODULE_PROMPTS.length===0?PROMPTS.map(([title,desc,body],i)=>({prompt_code:[...originals.keys()][i],title,summary:desc,body,category:'Planificación',position:i+1})):[];
+  const bonus=Array.isArray(EXTRAS.mobile_first_prompts)?EXTRAS.mobile_first_prompts
+   .filter(x=>Array.isArray(x)&&x.length===3).map(([title,desc,body],i)=>({
+    prompt_code:'mobile_'+(i+1),title,summary:desc,body,category:'mobile',position:500+i})):[];
+  const fullCatalog=[...MODULE_PROMPTS,...fallback,...bonus,...EXAMPLE_PROMPTS].map(p=>{
+   const code=p.prompt_code;
+   const isFreebie=code.startsWith('freebie_1photo8_');
+   const cat=String(p.category||'').toLowerCase();
+   const isDemo=code.startsWith('demo_')||code.startsWith('demo-photo_');
+   let group='planning';
+   if(isFreebie)group='freebie';
+   else if(code.startsWith('demo-photo_'))group='demo_photos';
+   else if(isDemo)group='demo_'+(p.category||'demo').replace(/^demo_/,'');
+   else if(code.startsWith('mobile_')||/revisi|m[oó]vil|auditor|qa|public/i.test(cat+' '+code))group='mobile';
+   else if(/foto|imagen|empaque|photograph/i.test(code+' '+cat))group='photos';
+   else if(/diseño|visual|identidad|brand|mood/i.test(cat+' '+code))group='design';
+   else if(/constru|pagos|formular|copy|hero|checkout|estructura|m05|m07/.test(cat+' '+code))group='build';
+   return {...p,group,englishTitle:englishTitle(code,p.title)};
+  });
+  fullCatalog.sort((a,b)=>{
+   const priority={freebie:0,planning:1,design:2,photos:3,build:4,mobile:5,
+    demo_food:6,demo_wellness:7,demo_hospitality:8,demo_fashion:9,demo_services:10,demo_photos:11};
+   return (priority[a.group]??99)-(priority[b.group]??99)||(a.position||0)-(b.position||0);
+  });
+  const filters=[
+   ['all',t('Todos','All')],['freebie','1 Photo · 8 Prompts · 1 Brand'],
+   ['planning',t('Investigación','Research')],['design',t('Marca y mood board','Brand & mood board')],
+   ['photos',t('Fotografías','Photos')],['build',t('Construcción web','Website building')],
+   ['mobile',t('Móvil y QA','Mobile & QA')],['demo_food',t('Demos · Comida','Demos · Food')],
+   ['demo_wellness',t('Demos · Bienestar','Demos · Wellness')],
+   ['demo_hospitality',t('Demos · Eventos','Demos · Events')],
+   ['demo_photos',t('Fotos de los demos','Demo photo prompts')],
+   ['demo_services',t('Demos · Servicios','Demos · Services')]
   ];
-  if(MODULE_PROMPTS.length){
-   content.append(el('p','mi-mobile-bonus-note','PROMPTS INICIALES POR MÓDULO · '+MODULE_PROMPTS.length+' nuevos · el módulo 01 incluye tu propio negocio y otros negocios.'));
+  const tools=el('div','mi-prompt-searchbar');
+  const label=el('label',null,t('Buscar un prompt','Search prompts'));
+  const input=el('input');input.type='search';input.placeholder=t('Ej.: mi negocio, empaques, hero, móvil…','E.g. product, packaging, hero, mobile…');
+  input.id='mi-prompt-search';label.setAttribute('for',input.id);
+  label.append(input);
+  const counter=el('p','mi-prompt-count');
+  tools.append(label,counter);content.append(tools);
+  const chips=el('div','mi-prompt-categories');chips.setAttribute('role','group');chips.setAttribute('aria-label',t('Categorías de prompts','Prompt categories'));
+  const list=el('div','mi-prompt-list');
+  const more=el('button','mi-prompt-more',t('Mostrar más prompts','Load more prompts'));
+  more.type='button';
+  content.append(chips,list,more);
+  let active='all',limit=18,query='';
+  function matchesGroup(x){
+   if(active==='all')return true;
+   return x.group===active;
   }
-  if(mobileBonus.length){content.append(el('p','mi-mobile-bonus-note','BONUS MÓVIL · '+mobileBonus.length+' prompts para diseñar desde iPhone o Android · prueba a 375 px'));}
-  const filter=el('div','mi-filter');filter.innerHTML='<label for="mi-prompt-search">Busca un tema o módulo</label><input id="mi-prompt-search" type="search" placeholder="Ej.: M01, otros negocios, mood board, fotos, checkout" autocomplete="off" />';content.append(filter);
-  const list=el('div','mi-prompt-list');content.append(list);
-  function draw(term=''){
+  function renderChips(){
+   chips.replaceChildren();
+   for(const [id,name] of filters){
+    if(id!=='all'&&!fullCatalog.some(x=>x.group===id))continue;
+    const n=fullCatalog.filter(x=>id==='all'||x.group===id).length;
+    const b=el('button',null,name+' · '+n);b.type='button';
+    b.setAttribute('aria-pressed',id===active?'true':'false');
+    b.addEventListener('click',()=>{active=id;limit=18;renderChips();draw();});
+    chips.append(b);
+   }
+  }
+  function draw(){
    list.replaceChildren();
-   catalog.forEach(item=>{
-    if(![item.title,item.desc,item.prompt].join(' ').toLowerCase().includes(term.toLowerCase()))return;
-    const klass=item.kind==='module'?'mi-prompt mi-prompt-module':item.kind==='mobile'?'mi-prompt mi-prompt-mobile':'mi-prompt';
-    const card=el('details',klass);
-    card.innerHTML='<summary><span class="mi-prompt-number">'+esc(item.badge)+'</span><span class="mi-prompt-label"><strong>'+esc(item.title)+'</strong><small>'+esc(item.desc)+'</small></span><span class="mi-plus" aria-hidden="true">+</span></summary><div class="mi-prompt-body"><p class="mi-prompt-text">'+esc(item.prompt)+'</p><button type="button" class="mi-copy">Copiar prompt</button><p class="mi-copy-state" role="status"></p></div>';
-    card.querySelector('.mi-copy').addEventListener('click',()=>void copyPrompt(item.prompt,card));
-    list.append(card);
+   const found=fullCatalog.filter(x=>{
+    const searchable=[x.title,x.englishTitle,x.summary,x.body,x.brand||''].join(' ').toLowerCase();
+    return matchesGroup(x)&&(!query||searchable.includes(query.toLowerCase()));
    });
-   if(!list.children.length)list.append(el('p','mi-note','No encontré ese tema. Prueba con otra palabra.'));
+   counter.textContent=found.length+' '+t('prompts disponibles en esta selección','available prompts in this selection');
+   for(const [i,item] of found.slice(0,limit).entries()){
+    const original=localizedPrompt(item.prompt_code,item.body,lang,item.brand||'');
+    const title=lang==='en'?item.englishTitle:item.title;
+    const card=el('details','mi-prompt');
+    const badge=item.group==='freebie'?String(Number(item.prompt_code.slice(-2))).padStart(2,'0'):String(i+1).padStart(2,'0');
+    const summary=el('summary');
+    summary.innerHTML='<span class="mi-prompt-number">'+esc(badge)+'</span>'+
+      '<span class="mi-prompt-label"><strong>'+esc(title)+'</strong><small>'+esc(item.brand?item.brand+' · '+(item.summary||''):(item.summary||''))+'</small></span>'+
+      '<span class="mi-plus" aria-hidden="true">+</span>';
+    const body=el('div','mi-prompt-body');
+    const paragraph=el('p','mi-prompt-text',original);
+    const copy=el('button','mi-copy',t('Copiar prompt','Copy prompt'));copy.type='button';
+    const state=el('p','mi-copy-state');state.setAttribute('role','status');
+    copy.addEventListener('click',()=>void copyPrompt(original,card));
+    body.append(paragraph,copy,state);card.append(summary,body);list.append(card);
+   }
+   more.hidden=found.length<=limit;
+   if(!found.length)list.append(el('p','mi-note',t('No encontré ese tema. Prueba con otra categoría o palabra.','No results. Try another category or word.')));
   }
-  draw();filter.querySelector('input').addEventListener('input',e=>draw(e.target.value));
+  input.addEventListener('input',()=>{query=input.value;limit=18;draw();});
+  more.addEventListener('click',()=>{limit+=18;draw();});
+  renderChips();draw();
  }
  async function copyPrompt(value,card){
   let ok=false;
@@ -309,5 +403,9 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   b.addEventListener('click',()=>go(group.views[0]));tabs.append(b);
  });
  go('inicio',{track:false});
- return {go};
+ return {go,setLanguage(){
+  const view=current;
+  if(view==='prompts')go('prompts',{track:false});
+  else if(view==='inicio'){ /* No sobrescribir respuestas del cuaderno en edición */ }
+ }};
 }
