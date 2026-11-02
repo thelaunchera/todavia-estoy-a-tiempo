@@ -8,7 +8,7 @@ import {carouselFontFamily,readableColor,type CarouselFont} from './CarouselArtD
 import {editorialPlan,type EditorialLayout} from './EditorialRhythm';
 export type SeamlessPage={title:string;eyebrow:string;description:string;layout?:string;photoFocus?:string;titleFont?:CarouselFont;assetId?:string;stickerIds?:string[];photoPosition?:TouchRect;stickerPositions?:StickerPositions;backgroundImageId?:string;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string};
 export type SeamlessBrand={name:string;color:string;background:string;headingFont?:string;bodyFont?:string};
-export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;editorialRhythm?:boolean;canvasColor?:string;canvasGradient?:string;usePageBackgrounds?:boolean};
+export type SeamlessOptions={backgroundId?:FreeBackgroundId;assetId?:string;accent?:string;editorMode?:boolean;font?:CarouselFont;layers?:PanoramaLayer[];freeCanvas?:boolean;editorialRhythm?:boolean;canvasColor?:string;canvasGradient?:string;usePageBackgrounds?:boolean;outputScale?:number};
 const W=1080,H=1350;
 const load=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('No se pudo abrir el fondo seamless'));im.src=src;
@@ -27,13 +27,14 @@ const words=(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:nu
  lines.slice(0,maxLines).forEach((line,i)=>ctx.fillText(line,x,y+i*size*1.13));
 };
 const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
- const output:HTMLCanvasElement[]=[];
+ const scale=wide.height/H,output:HTMLCanvasElement[]=[];
  for(let i=0;i<count;i++){
-  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const c=document.createElement('canvas');c.width=W*scale;c.height=H*scale;
   const ctx=c.getContext('2d');if(!ctx)throw Error('No se pudo cortar el carrusel.');
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(wide,i*W,0,W,H,0,0,W,H);output.push(c);
+  ctx.drawImage(wide,i*W*scale,0,W*scale,H*scale,0,0,c.width,c.height);output.push(c);
  }
+ wide.width=1;wide.height=1;
  return output;
 };
 
@@ -69,8 +70,10 @@ export async function paintSeamlessTypography(
 /** Renders ONE continuous design first and then slices it on exact 1080px boundaries. */
 export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement>{
  if(pages.length<2||pages.length>10)throw Error('El carrusel seamless necesita entre 2 y 10 slides.');
- const total=pages.length,wide=document.createElement('canvas');wide.width=total*W;wide.height=H;
+ const total=pages.length,scale=Math.max(1,Math.min(4,opts.outputScale||1)),virtualWidth=total*W;
+ const wide=document.createElement('canvas');wide.width=virtualWidth*scale;wide.height=H*scale;
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');
+ ctx.scale(scale,scale);
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const accent=/^#[0-9a-f]{6}$/i.test(opts.accent||'')?opts.accent!:brand.color;
  // Library images applied across all slides must keep their original 4:5
@@ -101,9 +104,9 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
     }
   }else if(opts.freeCanvas&&(!opts.backgroundId||opts.backgroundId==='brand')){
    const a=opts.canvasColor||'#FFFFFF',b=opts.canvasGradient;
-   if(b){const g=ctx.createLinearGradient(0,0,wide.width,H);g.addColorStop(0,a);g.addColorStop(1,b);
-     ctx.fillStyle=g;ctx.fillRect(0,0,wide.width,H);}
-   else{ctx.fillStyle=a;ctx.fillRect(0,0,wide.width,H);}
+   if(b){const g=ctx.createLinearGradient(0,0,virtualWidth,H);g.addColorStop(0,a);g.addColorStop(1,b);
+     ctx.fillStyle=g;ctx.fillRect(0,0,virtualWidth,H);}
+   else{ctx.fillStyle=a;ctx.fillRect(0,0,virtualWidth,H);}
  }else if(isBowBackground(opts.backgroundId)){
    // Keep bows at true slide scale on panoramas; avoid gigantic ribbons on 8-slide canvases.
    // Every tile is painted using the same 1080×1350 renderer as regular slides.
@@ -112,25 +115,25 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
      paintFreeBackground(ctx,W,H,opts.backgroundId,accent,brand.background);
      ctx.restore();
    }
- }else paintFreeBackground(ctx,wide.width,H,opts.backgroundId||'brand',accent,brand.background);
+ }else paintFreeBackground(ctx,virtualWidth,H,opts.backgroundId||'brand',accent,brand.background);
  if(!opts.usePageBackgrounds&&!sharedImageIsBackground&&opts.assetId&&images[opts.assetId]){
-  const im=await load(images[opts.assetId]);const ratio=Math.max(wide.width/im.naturalWidth,H/im.naturalHeight);
-  const sw=wide.width/ratio,sh=H/ratio;
+  const im=await load(images[opts.assetId]);const ratio=Math.max(virtualWidth/im.naturalWidth,H/im.naturalHeight);
+  const sw=virtualWidth/ratio,sh=H/ratio;
   ctx.save();ctx.globalAlpha=.27;
-  ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,wide.width,H);
+  ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,virtualWidth,H);
   ctx.restore();
  }
  // Paint a stretched wallpaper below photos/stickers across every slide.
  // In the editor the same wallpaper is a draggable photo layer instead.
  if(!opts.editorMode){
   const wallpaper=(opts.layers||[]).filter(layer=>layer.role==='background');
-  if(wallpaper.length)await paintPanoramaLayers(ctx,wide.width,H,wallpaper,images);
+  if(wallpaper.length)await paintPanoramaLayers(ctx,virtualWidth,H,wallpaper,images);
  }
  // Legacy decorative waves are hidden for the new clean design studio.
  if(!opts.freeCanvas){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=accent;
  ctx.beginPath();ctx.moveTo(0,H*.67);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.25,H*.45,x+W*.6,H*.8,x+W,H*.56)}
- ctx.lineTo(wide.width,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+ ctx.lineTo(virtualWidth,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
  ctx.strokeStyle=accent;ctx.globalAlpha=.45;ctx.lineWidth=10;
  ctx.beginPath();ctx.moveTo(0,H*.68);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.3,H*.55,x+W*.72,H*.81,x+W,H*.62)}
@@ -187,11 +190,11 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  if(!opts.editorMode) {
   const behind=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text');
-  await paintPanoramaLayers(ctx,wide.width,H,behind,images);
+  await paintPanoramaLayers(ctx,virtualWidth,H,behind,images);
   if(behind.length)await paintSeamlessTypography(ctx,
      opts.usePageBackgrounds?pages:pages.map(p=>({...p,backgroundId:opts.backgroundId,backgroundColor:opts.canvasColor})),
      brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor,opts.editorialRhythm);
-  await paintPanoramaLayers(ctx,wide.width,H,front,images);
+  await paintPanoramaLayers(ctx,virtualWidth,H,front,images);
  }
  return wide;
 }
