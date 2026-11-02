@@ -8,9 +8,9 @@
   const groups = {
     inicio:[0,1,3,5,6],
     herramientas:[2,4,7,9],
-    inscripcion:[8,10]
+    inscripcion:[8,10,11]
   };
-  if (list && tablist && details.length === 11) {
+  if (list && tablist && details.length === 12) {
     const panels = {};
     for(const [key,indexes] of Object.entries(groups)) {
       const panel = document.createElement('div');
