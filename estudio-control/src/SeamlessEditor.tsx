@@ -58,7 +58,7 @@ export default function SeamlessEditor(){
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
  const pinch=useRef<{id:number;distance:number;size:number;angle:number;rotation:number}|null>(null);
- const drag=useRef<{id:number;x:number;y:number;ox:number;oy:number;mode:'move'|'resize';startSize:number}|null>(null);
+ const drag=useRef<{pointer:number;id:number;x:number;y:number;ox:number;oy:number;mode:'move'|'resize';startSize:number}|null>(null);
  const images=useRef(new Map<string,HTMLImageElement>());
  const width=doc.count*W;
  useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(doc))}catch{setMessage('El navegador no tiene espacio para guardar. Exporta tus imágenes.')}},[doc]);
@@ -173,7 +173,7 @@ export default function SeamlessEditor(){
    setSelected(it?.id??null);setEditingText(null);
    if(it){
      layerGesture.current=true;swipeStart.current=null;
-     drag.current={id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:'move',
+     drag.current={pointer:e.pointerId,id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:'move',
        startSize:it.kind==='image'?it.width:it.fontSize};
      e.preventDefault();
    }else{
@@ -202,7 +202,7 @@ export default function SeamlessEditor(){
    const touch=e.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
    if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
  };
- const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current)return;const d=drag.current;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
+ const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current||drag.current.pointer!==e.pointerId)return;const d=drag.current;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
  const up=(e:React.PointerEvent<HTMLCanvasElement>)=>{
   const start=pointerStart.current;
   if(start?.pointer===e.pointerId&&start.id!==null&&touches.current.size===1&&!pinch.current&&
@@ -221,7 +221,7 @@ export default function SeamlessEditor(){
    }
    swipe.current=null;
   }
-  touches.current.delete(e.pointerId);drag.current=null;pinch.current=null;
+  touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;
  };
   // Download directly from original images at native-aware resolution, not from editor thumbnails.
  const renderExportSlide=async(i:number)=>{
@@ -465,7 +465,7 @@ export default function SeamlessEditor(){
   <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'x proximity',overscrollBehaviorX:'contain'}}>
    <div style={{position:'relative',width:doc.count*300,maxWidth:'none'}}>
    <canvas ref={canvas} data-carousel-canvas="true" onPointerDown={down} onPointerMove={move}
-    onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);drag.current=null;pinch.current=null;swipe.current=null;pointerStart.current=null;lastTap.current=null}}
+    onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
     style={{display:'block',width:'100%',height:'auto',maxWidth:'none',touchAction:'none',cursor:'grab'}}
     aria-label="Lienzo continuo del carrusel: toca para seleccionar y mover; toca dos veces para mostrar la cruz de eliminar"/>
    {current&&deleteArmedId===current.id&&<button type="button" data-carousel-delete="true"
