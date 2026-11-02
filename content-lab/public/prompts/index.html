@@ -525,7 +525,7 @@ main{padding-top:8px}
 <a href="#recibir" class="matcha-send-button matcha-lock-cta">Volver al formulario</a>
 </section>
 <div id="crear" class="grid" hidden aria-label="Editor privado de ocho prompts"><section class="panel"><div class="eyebrow">PASO 1 · TU PRODUCTO</div><h2>Cuéntanos qué quieres mostrar</h2><p class="step-help">Empieza con lo básico. Los detalles extra son opcionales.</p>
-<label for="brandName">Marca con la que publicarás</label><input id="brandName" maxlength="120" autocomplete="organization" placeholder="Escribe el nombre de tu marca (o déjalo vacío)"><label for="copyLanguage">Idioma de los textos</label><select id="copyLanguage"><option value="es">Español latino</option><option value="en">English (US)</option></select>
+<label for="brandName">Marca con la que publicarás</label><input id="brandName" maxlength="120" autocomplete="organization" placeholder="Escribe el nombre de tu marca (o déjalo vacío)"><label for="copyLanguage">Idioma de los textos</label><select id="copyLanguage"><option value="es">Español</option><option value="en">English (US)</option></select>
 <div class="half"><div><label for="product">¿Qué producto aparece en la foto?</label><input id="product" placeholder="Cookie, matcha, perfume…"></div><div><label for="headline">Título que quieres en el post</label><input id="headline" placeholder="Texto principal"></div></div>
 <div class="file"><img id="preview" alt="Foto original"><span id="fileSymbol" style="font-size:31px">▧</span><strong id="fileLabel">Elige la foto que quieres usar</strong><small>Tu imagen queda en tu navegador</small><input type="file" id="photo" accept="image/*,.heic,.heif" aria-label="Subir foto original"></div>
 <div class="radio"><label><input type="radio" name="kind" checked value="product"> Foto del producto</label><label><input type="radio" name="kind" value="poster"> Imagen que ya tiene texto</label></div>
@@ -561,7 +561,7 @@ const text=(id,fall)=>$(id).value.trim()||fall;
 const es=()=> $('copyLanguage').value==='es';
 const build=i=>{
  if(!privateRules||!layouts[i])return '';
- const lang=es()?'Latin American Spanish':'US English';
+ const lang=es()?'Spanish':'US English';
  const tags=es()?['[TÍTULO]','[TEXTO SECUNDARIO]','[FRASE DE MARCA]','[DETALLES]']:['[MAIN HEADLINE]','[SUPPORTING TEXT]','[TAGLINE]','[DETAILS]'];
  const rules=privateRules;
  return [
