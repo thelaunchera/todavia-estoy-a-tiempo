@@ -70,14 +70,14 @@ function authNotice(text){status(text);$('room-message').hidden=false;}
 const out=$('logout');
 let user=null,lessons=[],done=new Set(),selected=0,adminPreview=false,projectShared=false;
 let materialsController=null,courseResources=[],modulePrompts=[];
-const adminMarkerKey='podcast_studio_password_login_deadline_v1';
-function hasValidStudioSession(id){
- try {const value=JSON.parse(localStorage.getItem(adminMarkerKey)||'null');return value?.userId===id && Number(value?.expiresAt)>Date.now();}
- catch {return false;}
-}
+// La vista previa se autoriza con una sesión autenticada y confirmada de
+// Supabase Y con el rol de propietaria en la base de datos (RLS).
+// No debe depender de una marca local del Studio que puede faltar al
+// cambiar de navegador o dispositivo.
 async function isAuthorizedOwner(who){
- if(!hasValidStudioSession(who.id))return false;
- const {data,error}=await db.from('podcast_studio_admins').select('role').eq('user_id',who.id).maybeSingle();
+ if(!who?.id || !who?.email_confirmed_at)return false;
+ const {data,error}=await db.from('podcast_studio_admins')
+  .select('role').eq('user_id',who.id).maybeSingle();
  if(error)throw error;
  return data?.role==='owner';
 }
@@ -437,8 +437,8 @@ async function refreshAuth(){
   if(error && !/Auth session missing/i.test(error.message||''))throw error;
   if(!who){user=null;out.hidden=true;display(login);if(!message.dataset.noticeShown)status('Entra con tu correo y contraseña.');return;}
   const owner=await isAuthorizedOwner(who);
-  // La autenticación de administradora usa su propia sesión segura del Estudio.
-  // La entrada de alumnos caduca a las 24 horas y no se renueva por refrescar la página.
+  // La propietaria autenticada accede sin compra; para todos los demás
+  // la entrada de alumnos exige pago verificado y caduca a las 24 horas.
   if(!owner&&!hasAulaSession(who.id)){
    clearRememberedStudent();user=null;lessons=[];done.clear();display(login);out.hidden=true;
    await db.auth.signOut({scope:'local'});
