@@ -34,3 +34,21 @@ test('Free post studio keeps the draggable layer editor, stickers and background
  assert.ok(!controls.includes('<span>FREE</span>'));
  assert.ok(app.includes('writeCoverDecor'));
 });
+
+test('Touch-first post and seamless editors use compact tools while retaining optional controls',()=>{
+ const post=read('src/FreePostStudio.tsx'),postCss=read('src/FreePostStudio.css');
+ const panorama=read('src/PanoramaEditor.tsx'),panoramaCss=read('src/PanoramaEditor.css');
+ const app=read('src/App.tsx');
+ assert.ok(post.includes('free-post-utility-bar'));
+ assert.ok(post.includes('free-post-layers'));
+ assert.ok(post.includes('saveState'));
+ assert.ok(post.includes('backgroundImageId:post.assetId'));
+ assert.ok(postCss.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
+ assert.ok(postCss.includes('max-height:min(35dvh,340px)'));
+ assert.ok(panorama.includes('panorama-primary-actions'));
+ assert.ok(panorama.includes("setLibraryKind('sticker')"));
+ assert.ok(panorama.includes('panorama-mobile-layer-panel'));
+ assert.ok(panoramaCss.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
+ assert.ok(app.includes('saveState={draftStatus}'));
+ assert.ok(app.includes('writeDraftBackup(account.email,editor)'));
+});

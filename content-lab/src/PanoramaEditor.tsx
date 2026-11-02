@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Pencil, Check, X } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
@@ -36,7 +36,10 @@ export default function PanoramaEditor({
   canExtendBackground,onExtendBackground,focusLayerId,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [libraryOpen,setLibraryOpen]=useState(true);
+  const [libraryOpen,setLibraryOpen]=useState(false);
+  const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('photo');
+  const [layersOpen,setLayersOpen]=useState(false);
+  const [focusedLayerId,setFocusedLayerId]=useState('');
   const containerRef=useRef<HTMLElement>(null);
   const draggingRef=useRef<{id:string;pointerId:number;startX:number;startY:number;handled:boolean}|null>(null);
   const ignoreClick=useRef('');
@@ -66,7 +69,9 @@ export default function PanoramaEditor({
   },[onUndo,onRedo,canUndo,canRedo]);
   const input = useRef<HTMLInputElement>(null);
   // Keep personal uploads first; shared packs remain searchable below them.
-  const available = assets.filter(a => displayAssetName(a).toLowerCase().includes(filter.toLowerCase()))
+  const available = assets.filter(a =>
+    (libraryKind==='all'||(libraryKind==='sticker'?assetCategory(a)==='sticker':assetCategory(a)!=='sticker'))&&
+    displayAssetName(a).toLowerCase().includes(filter.toLowerCase()))
     .sort((a,b)=>Number(!(a.brandId===brandId&&!a.shared))-Number(!(b.brandId===brandId&&!b.shared)))
     .slice(0,120);
   const libraryIds=available.map(a=>a.id).join('|');
@@ -180,18 +185,39 @@ export default function PanoramaEditor({
     {expanded&&<button type="button" className="panorama-exit-fixed" onClick={()=>setExpanded(false)}>
       <Minimize2 size={17}/> Cerrar vista amplia
     </button>}
-    <div className="panorama-primary-actions">
+    <div className="panorama-primary-actions" role="toolbar" aria-label="Herramientas del carrusel">
+      <button type="button" className="panorama-toggle-library" aria-pressed={libraryOpen&&libraryKind==='photo'}
+        onClick={()=>{const open=libraryOpen&&libraryKind==='photo';setLibraryKind('photo');setLibraryOpen(!open);setLayersOpen(false)}}>
+        <ImagePlus size={20}/><span>Fotos</span></button>
+      <button type="button" onClick={()=>onAddLayer('text')}><Type size={20}/><span>Texto</span></button>
+      <button type="button" className="panorama-toggle-library" aria-pressed={libraryOpen&&libraryKind==='sticker'}
+        onClick={()=>{const open=libraryOpen&&libraryKind==='sticker';setLibraryKind('sticker');setLibraryOpen(!open);setLayersOpen(false)}}>
+        <Shapes size={20}/><span>Stickers</span></button>
+      <button type="button" aria-pressed={layersOpen}
+        onClick={()=>{setLayersOpen(v=>!v);setLibraryOpen(false)}}><Layers3 size={20}/><span>Capas</span></button>
+      <button type="button" className="panorama-more-toggle" aria-pressed={moreTools}
+        onClick={()=>setMoreTools(open=>!open)}><Pencil size={20}/><span>Más</span></button>
+    </div>
+    <div className="panorama-editor-utilities">
+      <button type="button" disabled={!canUndo} onClick={onUndo} aria-label="Deshacer"><Undo2 size={17}/></button>
+      <button type="button" disabled={!canRedo} onClick={onRedo} aria-label="Rehacer"><Redo2 size={17}/></button>
       <button type="button" className="panorama-add-photo" disabled={uploading}
         onClick={()=>{setLibraryOpen(true);input.current?.click()}}>
-        <Upload size={18}/> Subir a mi biblioteca
+        <Upload size={16}/> Subir imagen
       </button>
-      <button type="button" className="panorama-toggle-library" aria-expanded={libraryOpen}
-        onClick={()=>setLibraryOpen(open=>!open)}>
-        <ImagePlus size={17}/> {libraryOpen?'Ocultar elementos':'Ver mis elementos'}
-      </button>
-      <button type="button" className="panorama-more-toggle" onClick={()=>setMoreTools(open=>!open)}
-        aria-expanded={moreTools}>{moreTools?'Menos herramientas':'Más herramientas'}</button>
     </div>
+    {layersOpen&&<div className="panorama-mobile-layer-panel" aria-label="Capas del carrusel">
+      <strong>Selecciona una capa</strong>
+      <button type="button" onClick={()=>setLayersOpen(false)} aria-label="Cerrar capas">×</button>
+      <div className="panorama-mobile-layer-items">
+        {[...layers].reverse().map(layer=><button type="button" key={layer.id}
+          onClick={()=>{setFocusedLayerId(layer.id);setLayersOpen(false)}} aria-label={'Seleccionar '+layer.name}>
+          {(layer.kind==='photo'||layer.kind==='sticker')&&layer.src?
+            <img src={layer.src} loading="lazy" alt=""/>:<span>{layer.kind==='text'?'T':'▧'}</span>}
+          <small>{layer.name}</small>
+        </button>)}
+      </div>
+    </div>}
     <input ref={input} hidden type="file" accept="image/*,.heic,.heif" multiple
       onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';chooseLibraryFiles(files)}}/>
     {pendingFiles.length>0&&<div className="panorama-upload-pending" role="group" aria-label="Guardar imágenes con nombre">
@@ -226,6 +252,12 @@ export default function PanoramaEditor({
       {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Mis elementos</strong>
         <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small></div>
+      <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
+        {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
+          aria-pressed={libraryKind===kind} onClick={()=>setLibraryKind(kind)}>
+          {kind==='photo'?'Fotos':kind==='sticker'?'Stickers':'Todos'}
+        </button>)}
+      </div>
       <div className="panorama-library-controls">
         <input aria-label="Buscar mis imágenes y stickers" placeholder="Buscar por nombre…" value={filter}
           onChange={e=>setFilter(e.target.value)}/>
@@ -285,7 +317,7 @@ export default function PanoramaEditor({
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
-        focusLayerId={focusLayerId}
+        focusLayerId={focusedLayerId||focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>

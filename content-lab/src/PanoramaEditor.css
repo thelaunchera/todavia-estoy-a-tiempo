@@ -161,3 +161,36 @@
 .panorama-editor.expanded .panorama-heading{position:sticky;top:0;z-index:10;background:#FAF8F3;padding:9px 0}
 .panorama-exit-fixed{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));z-index:5101;min-height:46px;min-width:165px;display:flex;align-items:center;justify-content:center;gap:8px;background:#191919;color:white;border:2px solid white;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;box-shadow:0 4px 20px #0003}
 @media(max-width:760px){.panorama-editor.expanded{inset:0;padding:calc(62px + env(safe-area-inset-top)) 8px calc(14px + env(safe-area-inset-bottom))}.panorama-exit-fixed{right:calc(8px + env(safe-area-inset-right));}}
+
+/* Same five-action design dock as Post. The canvas remains the primary workspace. */
+.panorama-primary-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;max-width:620px;margin:8px auto;padding:5px;background:#fff;border:1px solid #e0e9e9;border-radius:16px;box-shadow:0 2px 14px #213b480f}
+.panorama-primary-actions>button,.panorama-primary-actions>.panorama-more-toggle{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:53px;min-width:0;padding:6px 3px;white-space:normal;border:0;border-radius:10px;background:transparent;color:#2e5361;font-size:11px;font-weight:700}
+.panorama-primary-actions>button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panorama-primary-actions>button[aria-pressed=true]{background:#e9f2f4;color:#1c5369}
+.panorama-primary-actions>button:focus-visible,.panorama-editor-utilities button:focus-visible{outline:2px solid #4e93ae;outline-offset:2px}
+.panorama-editor-utilities{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin:4px 0 10px}
+.panorama-editor-utilities button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:40px;min-height:40px;padding:8px 9px;border:1px solid #d2e0e3;border-radius:10px;background:#fff;color:#345361;font-size:12px;font-weight:700;touch-action:manipulation}
+.panorama-editor-utilities button:disabled{opacity:.35}
+.panorama-library-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#eaf1f2;border-radius:10px;padding:4px;margin:6px 0 9px}
+.panorama-library-tabs button{min-width:0;min-height:42px;padding:7px 4px;border:0;border-radius:8px;background:transparent;color:#40616d;font-size:12px;font-weight:700}
+.panorama-library-tabs button[aria-pressed=true]{background:white;color:#183e4d;box-shadow:0 1px 6px #243b481a}
+.panorama-mobile-layer-panel{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px;margin-bottom:10px;border:1px solid #d5e2e4;border-radius:13px;background:#FAF8F3}
+.panorama-mobile-layer-panel>strong{font-size:13px;color:#2d5060}
+.panorama-mobile-layer-panel>button{width:42px;height:42px;display:grid;place-items:center;border:1px solid #d4e2e6;border-radius:9px;background:#fff;font-size:24px}
+.panorama-mobile-layer-items{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:7px;overflow:auto;max-height:220px}
+.panorama-mobile-layer-items button{display:flex;align-items:center;gap:5px;padding:6px;border:1px solid #dae6e7;border-radius:10px;background:#fff;color:#2b5363;text-align:left;min-height:48px;min-width:0;font-size:11px}
+.panorama-mobile-layer-items img,.panorama-mobile-layer-items button>span{display:grid;place-items:center;width:35px;height:35px;object-fit:contain;border-radius:7px;background:#edf3f3;flex-shrink:0}
+.panorama-mobile-layer-items small{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px}
+@media(max-width:799px){
+ .panorama-primary-actions{position:sticky;z-index:35;bottom:calc(74px + env(safe-area-inset-bottom));padding:5px;width:100%;max-width:100%;margin:5px auto}
+ .panorama-primary-actions>button{min-height:50px;min-width:0;padding:5px 2px}
+ .panorama-primary-actions>button span{font-size:10px}
+ .panorama-editor-utilities{margin:4px 0 8px}
+ .panorama-body:not(.panorama-library-collapsed)>.panorama-library{position:fixed;z-index:6005;left:8px;right:8px;bottom:calc(81px + env(safe-area-inset-bottom));width:auto;max-width:none;max-height:min(36dvh,350px);overflow:auto;padding:12px;border-radius:15px;background:#FAF8F3;box-shadow:0 -7px 22px #172c3b33}
+ .panorama-mobile-layer-panel{position:fixed;z-index:6010;left:8px;right:8px;bottom:calc(81px + env(safe-area-inset-bottom));max-height:min(36dvh,350px);overflow:auto;box-shadow:0 -7px 22px #172c3b33}
+ .panorama-body{grid-template-columns:minmax(0,1fr)}
+ .panorama-workspace{min-width:0}
+ .panorama-editor.expanded .panorama-primary-actions{bottom:calc(9px + env(safe-area-inset-bottom))}
+ .panorama-editor.expanded .panorama-body:not(.panorama-library-collapsed)>.panorama-library,
+ .panorama-editor.expanded .panorama-mobile-layer-panel{bottom:calc(69px + env(safe-area-inset-bottom))}
+}

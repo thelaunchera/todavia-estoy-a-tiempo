@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2} from 'lucide-react';
+import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2,Shapes,Check,Clock3,AlertCircle} from 'lucide-react';
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintPanoramaLayers,reorderPanoramaLayers,panoramaFont,panoramaTextWeight,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
 import {clampRect,clampFreePhotoRect,paintCoverImage,type TouchRect} from './TouchGeometry';
@@ -19,7 +19,7 @@ type Props={
  onUpload:(file:File)=>Promise<LibraryAsset|null>;loadImage:(id:string)=>void;
  onOpenStickers:()=>void;onUploadBackground:(file:File)=>Promise<LibraryAsset|null>;
  notify:(message:string)=>void;locale:'es'|'en';
- onSave?:()=>void;saving?:boolean;
+ onSave?:()=>void;saving?:boolean;saveState?:'saved'|'unsaved'|'saving'|'offline';
 };
 const plain=(en:string,es:string,locale:'es'|'en')=>locale==='es'?es:en;
 function uniqueId(){return 'free-'+crypto.randomUUID();}
@@ -92,7 +92,7 @@ function MediaThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;lo
   <span className="free-post-media-skeleton" aria-label="Cargando miniatura"/>}</span>;
 }
 export default function FreePostStudio({post,brand,assets,images,onChange,onTitle,onUpload,loadImage,
- onOpenStickers,onUploadBackground,notify,locale,onSave,saving=false}:Props){
+ onOpenStickers,onUploadBackground,notify,locale,onSave,saving=false,saveState='saved'}:Props){
  const decor=readCoverDecor(post.designData);
  const [preview,setPreview]=useState(''),[error,setError]=useState('');
  const [mediaOpen,setMediaOpen]=useState(false);
@@ -100,6 +100,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const [mediaQuery,setMediaQuery]=useState('');
  const [recentMedia,setRecentMedia]=useState<string[]>([]);
  const [backgroundOpen,setBackgroundOpen]=useState(false);
+ const [layersOpen,setLayersOpen]=useState(false);
  const [history,setHistory]=useState<CoverDecor[]>([]);
  const [future,setFuture]=useState<CoverDecor[]>([]);
  const [busy,setBusy]=useState(false);
@@ -278,7 +279,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     additions.push({id:uniqueId(),assetId:item.id,name:displayAssetName(item),kind:'photo',
       rect:clampRect({x:point.x-width/2+n*.035,y:point.y-height/2+n*.035,w:width,h:height})});
    }
-   if(additions.length)update({...decor,layers:[...decor.layers,...additions].slice(-22)});
+   if(additions.length){update({...decor,layers:[...decor.layers,...additions].slice(-22)});setFocusLayerId(additions[additions.length-1].id)};
   }finally{setBusy(false)}
  };
  const chooseBackground=async(file?:File)=>{
@@ -293,20 +294,40 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   .sort((a,b)=>(recentMedia.indexOf(a.id)===-1?999:recentMedia.indexOf(a.id))-
     (recentMedia.indexOf(b.id)===-1?999:recentMedia.indexOf(b.id))).slice(0,90);
  const touchLayers:TouchLayer[]=layers.map(l=>({...l,src:images[l.assetId]||''}));
- return <section className={'free-post-studio'+(mediaOpen||backgroundOpen?' with-media':'')} aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
-  <div className="free-post-tools">
-   <button type="button" onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={17}/>{plain('Add photos','Añadir fotos',locale)}</button>
-   <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={17}/>{plain('Upload background','Subir fondo',locale)}</button>
-   {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
-    <Paintbrush size={17}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
-   <button type="button" onClick={()=>addElement('text')}><Type size={17}/>{plain('Add text','Añadir texto',locale)}</button>
-   <button type="button" className="free-post-poster-button" onClick={addPosterTitle}><Type size={18}/>{plain('Poster Bold','Texto póster BOLD',locale)}</button>
-   <button type="button" aria-expanded={mediaOpen} onClick={()=>{setMediaOpen(v=>!v);setBackgroundOpen(false)}}><Layers3 size={17}/>{plain('Photos and stickers','Fotos y stickers',locale)}</button>
-   <button type="button" aria-expanded={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false)}}><Paintbrush size={17}/>{plain('Backgrounds','Fondos',locale)}</button>
-   {decor.layers.some(l=>l.kind==='text'&&['escribe aquí','write here','tu gran idea','your big idea'].includes((l.text||'').trim().toLocaleLowerCase('es')))&&
-    <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>}
-   <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}><Undo2 size={17}/></button>
-   <button type="button" disabled={!future.length} onClick={redo} title={plain('Redo','Rehacer',locale)}><Redo2 size={17}/></button>
+ return <section className={'free-post-studio'+(mediaOpen||backgroundOpen||layersOpen?' with-media':'')} aria-label={plain('Free post editor','Editor libre de publicaciones',locale)}>
+  <div className="free-post-tools" role="toolbar" aria-label={plain('Editing tools','Herramientas de edición',locale)}>
+   <button type="button" title={plain('Add photos','Añadir fotos',locale)} aria-label={plain('Add photos','Añadir fotos',locale)}
+     onClick={()=>photosRef.current?.click()} disabled={busy}><ImagePlus size={21}/><span>{plain('Photos','Fotos',locale)}</span></button>
+   <button type="button" onClick={()=>addElement('text')}><Type size={21}/><span>{plain('Text','Texto',locale)}</span></button>
+   <button type="button" aria-pressed={mediaOpen&&mediaTab==='sticker'}
+     onClick={()=>{const isOpen=mediaOpen&&mediaTab==='sticker';setMediaTab('sticker');setMediaOpen(!isOpen);setBackgroundOpen(false);setLayersOpen(false)}}>
+     <Shapes size={21}/><span>Stickers</span></button>
+   <button type="button" aria-pressed={layersOpen} onClick={()=>{setLayersOpen(v=>!v);setMediaOpen(false);setBackgroundOpen(false)}}>
+     <Layers3 size={21}/><span>{plain('Layers','Capas',locale)}</span></button>
+   <button type="button" aria-pressed={backgroundOpen} onClick={()=>{setBackgroundOpen(v=>!v);setMediaOpen(false);setLayersOpen(false)}}>
+     <Paintbrush size={21}/><span>{plain('Background','Fondo',locale)}</span></button>
+  </div>
+  <div className="free-post-utility-bar">
+   <span className={'free-post-save-state '+saveState} role="status" aria-live="polite">
+    {saveState==='saved'?<Check size={14}/>:saveState==='offline'?<AlertCircle size={14}/>:<Clock3 size={14}/>}
+    {plain(
+      saveState==='saved'?'Autosaved':saveState==='saving'?'Saving…':saveState==='offline'?'Saved on this device':'Unsaved changes',
+      saveState==='saved'?'Guardado automático':saveState==='saving'?'Guardando…':saveState==='offline'?'Guardado en este dispositivo':'Cambios pendientes',locale)}
+   </span>
+   <div className="free-post-utility-actions">
+    <button type="button" disabled={!history.length} onClick={undo} title={plain('Undo','Deshacer',locale)}
+      aria-label={plain('Undo','Deshacer',locale)}><Undo2 size={19}/></button>
+    <button type="button" disabled={!future.length} onClick={redo} title={plain('Redo','Rehacer',locale)}
+      aria-label={plain('Redo','Rehacer',locale)}><Redo2 size={19}/></button>
+    <details className="free-post-more-menu">
+      <summary aria-label={plain('More tools','Más herramientas',locale)}>···</summary>
+      <div>
+        <button type="button" onClick={addPosterTitle}>{plain('Poster bold','Texto póster BOLD',locale)}</button>
+        {decor.layers.some(l=>l.kind==='text'&&['escribe aquí','write here','tu gran idea','your big idea'].includes((l.text||'').trim().toLocaleLowerCase('es')))&&
+          <button type="button" onClick={cleanStarterTexts}>{plain('Clear sample texts','Quitar textos de ejemplo',locale)}</button>}
+      </div>
+    </details>
+   </div>
   </div>
   <input ref={photosRef} type="file" multiple accept="image/*,.heic,.heif" hidden
    onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';void uploadPhotos(files)}}/>
@@ -341,7 +362,35 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    {({paper:'Papel',tape:'Cinta',frame:'Marco',circle:'Círculo'})[shape]}</button>)}
  </div>
  </aside>}
+  {layersOpen&&<aside className="free-post-layers" aria-label={plain('Design layers','Capas del diseño',locale)}>
+   <div className="free-post-media-top">
+    <strong>{plain('Your layers','Tus capas',locale)}</strong>
+    <button type="button" onClick={()=>setLayersOpen(false)} aria-label={plain('Close layers','Cerrar capas',locale)}>×</button>
+   </div>
+   <p className="free-post-media-hint">{plain('Tap any layer to select it on the design.','Toca un elemento para seleccionarlo sobre la publicación.',locale)}</p>
+   <div className="free-post-layer-list">
+    {[...touchLayers].reverse().map(layer=><div key={layer.id} className="free-post-layer-item">
+     <button type="button" onClick={()=>{setFocusLayerId(layer.id);if(window.matchMedia('(max-width:799px)').matches)setLayersOpen(false)}}
+       aria-label={plain('Select','Seleccionar',locale)+' '+layer.name}>
+      {(layer.kind==='photo'||layer.kind==='sticker')&&layer.src?<img src={layer.src} alt="" loading="lazy"/>:
+        <span className="free-post-layer-symbol">{layer.kind==='text'?'T':layer.kind==='shape'?'▧':'◻'}</span>}
+      <span>{layer.name}</span>
+     </button>
+     {layer.id!=='main-title'&&layer.id!=='main-photo'&&<div className="free-post-layer-actions">
+      <button type="button" onClick={()=>reorder(layer.id,'back')} aria-label={plain('Move behind','Enviar atrás',locale)}>↓</button>
+      <button type="button" onClick={()=>reorder(layer.id,'front')} aria-label={plain('Move forward','Traer delante',locale)}>↑</button>
+     </div>}
+    </div>)}
+   </div>
+  </aside>}
 {backgroundOpen&&<div className="free-post-background-panel">
+    <div className="free-post-media-top"><strong>{plain('Background','Fondo',locale)}</strong>
+      <button type="button" onClick={()=>setBackgroundOpen(false)} aria-label={plain('Close background panel','Cerrar fondos',locale)}>×</button></div>
+    <div className="free-post-background-shortcuts">
+      <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={16}/>{plain('Upload background','Subir fondo',locale)}</button>
+      {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
+       <ImagePlus size={16}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
+    </div>
     <div className="free-post-background-colors">
      <label>{plain('Background color','Color de fondo',locale)} <input type="color" value={decor.color}
       onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',color:e.target.value})}/></label>
