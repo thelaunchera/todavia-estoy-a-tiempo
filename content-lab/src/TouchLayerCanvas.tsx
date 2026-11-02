@@ -493,9 +493,12 @@ export default function TouchLayerCanvas({
         }}>
         {preview ? <img className="touch-editor-base" src={preview} alt="Fondo y textos del diseño" draggable={false}/>
           : <div className="touch-editor-loading">Preparando lienzo…</div>}
-        {layers.map(layer => {
+        {layers.map((layer, layerIndex) => {
           const rect = getRect(layer), active = selected === layer.id;
-          const z = pageCount > 1 ? (layer.role==='background'?1:layer.placement === 'behind-text' ? 2 : 5) : 5;
+          // Every new element stays above earlier ones. Selection must NEVER
+          // change stacking order: tapping a photo should not bury its siblings.
+          // Background is always the bottom-most layer, independent of locking.
+          const z = layer.role==='background' ? 1 : 20 + layerIndex;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
@@ -513,8 +516,8 @@ export default function TouchLayerCanvas({
             className={'touch-editor-layer ' + layer.kind + (layer.role==='background'?' is-background':'') + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
-               zIndex:layer.role==='background'?1:pageCount===1&&inlineTextTools&&layer.kind==='text'?(active?12:10):active?8:z,
-               pointerEvents:layer.locked||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
+               zIndex:z,
+               pointerEvents:layer.locked||layer.role==='background'||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
@@ -605,7 +608,7 @@ export default function TouchLayerCanvas({
       {interactionMode==='edit'&&<div className="touch-editor-quick-layers" role="group"
         aria-label="Elegir foto o sticker incluso si están superpuestos">
         <strong>Elige un elemento para moverlo:</strong>
-        <div>{layers.map(layer=><button type="button" key={layer.id}
+        <div>{layers.slice().reverse().map(layer=><button type="button" key={layer.id}
           className={selected===layer.id?'selected':''} aria-pressed={selected===layer.id}
           onClick={()=>selectFromList(layer.id)}>
           {(layer.kind==='photo'||layer.kind==='sticker')&&layer.src?<img className="touch-layer-real-thumb" src={layer.src} alt="" loading="lazy"/>:<span aria-hidden="true">{layer.kind==='text'?'T':'▧'}</span>} <span className="touch-layer-real-name">{layer.name}</span>
