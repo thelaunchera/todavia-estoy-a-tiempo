@@ -168,8 +168,12 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   viewClose.setAttribute('aria-label',current==='inicio'?'Cerrar materiales y volver al inicio del aula':'Cerrar este material y volver a la biblioteca');
   const headline=app.querySelector('.mi-header h2');
   const intro=app.querySelector('.mi-header p');
-  if(headline) headline.textContent=view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
-  if(intro) intro.textContent=view==='prompts'?'Prompts para copiar, adaptar y usar, incluyendo un bonus para quienes trabajan desde el teléfono.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
+  if(headline)headline.textContent=getLanguage()==='en'
+  ?view==='prompts'?'Prompt library.':'Your creative desk.'
+  :view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
+  if(intro)intro.textContent=getLanguage()==='en'
+ ?view==='prompts'?'Copy and personalize prompts for your business and see mobile-friendly examples.':'Open a resource, complete one exercise and keep building, step by step.'
+ :view==='prompts'?'Prompts para copiar, adaptar y usar, incluyendo un bonus para quienes trabajan desde el teléfono.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
   const activeGroup=materialGroups.find(group=>group.views.includes(view));
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.group===activeGroup?.id?'page':'false'));
   subtabs.replaceChildren();
@@ -191,6 +195,22 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(view==='cuaderno')renderWorkbook();
   if(view==='ejemplo')renderExample();
   if(view==='revision')renderChecks();
+  translateCurrentMaterial();
+ }
+
+ function translateCurrentMaterial(){
+  if(getLanguage()!=='en')return;
+  const map={
+   'Empieza aquí':'Start here','Crea tu web':'Build your website','Tus recursos':'Your resources',
+   'Antes de publicar':'Before publishing','Mi cuaderno':'My workbook',
+   'Tu oferta':'Your offer','Precio y entrega':'Pricing and delivery',
+   'Tus referencias':'Your references','Estilo y fotos':'Visual style and photos',
+   'Texto de tu página':'Your website copy','Construcción y móvil':'Building & mobile',
+   'Botón y entrega':'CTA & fulfillment','Tu revisión':'Final review'
+  };
+  for(const button of [...tabs.querySelectorAll('button'),...subtabs.querySelectorAll('button')]){
+   if(map[button.textContent])button.textContent=map[button.textContent];
+  }
  }
  function section(kicker,title,intro){
   const head=el('header','mi-section-head');
@@ -325,7 +345,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const area=el('textarea');area.value=value;area.style.cssText='position:absolute;left:-9999px';document.body.append(area);area.select();
    try{ok=document.execCommand('copy');}catch{}area.remove();
   }
-  const label=card.querySelector('.mi-copy-state');label.textContent=ok?'¡Copiado! Pégalo en ChatGPT y completa tus datos.':'Tu navegador no permitió copiar. Mantén pulsado el texto del prompt para seleccionarlo.';
+  const label=card.querySelector('.mi-copy-state');
+  label.textContent=getLanguage()==='en'
+   ?ok?'Copied! Paste into ChatGPT and add your details.':'Copy blocked. Long-press to select the prompt.'
+   :ok?'¡Copiado! Pégalo en ChatGPT y completa tus datos.':'Tu navegador no permitió copiar. Mantén pulsado el texto del prompt para seleccionarlo.';
  }
  function renderWorkbook(){
   section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
@@ -405,7 +428,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  go('inicio',{track:false});
  return {go,setLanguage(){
   const view=current;
-  if(view==='prompts')go('prompts',{track:false});
-  else if(view==='inicio'){ /* No sobrescribir respuestas del cuaderno en edición */ }
+  if(view==='cuaderno'){translateCurrentMaterial();return;}
+  go(view,{track:false});
  }};
 }
