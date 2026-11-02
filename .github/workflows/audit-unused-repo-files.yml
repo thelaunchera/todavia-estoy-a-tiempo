@@ -1,0 +1,21 @@
+name: Audit unused files (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/audit-unused-repo-files.mjs
+      - .github/workflows/audit-unused-repo-files.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Identify unreferenced files without deleting anything
+        run: node scripts/audit-unused-repo-files.mjs
