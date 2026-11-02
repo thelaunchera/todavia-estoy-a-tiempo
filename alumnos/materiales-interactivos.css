@@ -247,3 +247,20 @@
 /* Enlace directo al lead magnet: el aula nunca duplica los prompts restringidos. */
 .mi-path-freebie-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 17px;border-radius:99px;background:#214762;color:#fff!important;font-size:13px;font-weight:750;text-decoration:none;margin:0 0 17px}
 .mi-path-freebie-link:focus-visible{outline:3px solid #88aec5;outline-offset:3px}
+
+/* Nested materials navigation: 2026-11-02 */
+.mi-view-controls{display:flex;justify-content:flex-start;align-items:center;gap:9px;margin:0 0 18px}
+.mi-view-controls button{
+ display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ padding:10px 16px;border-radius:11px;border:1px solid #c9d9e2;
+ background:#fff;color:#315875;font:750 12px/1.3 'DM Sans',Arial,sans-serif;
+ cursor:pointer;touch-action:manipulation;
+}
+.mi-view-controls button:hover{background:#ecf3f6}
+.mi-view-controls button:focus-visible{outline:3px solid #84aec9;outline-offset:2px}
+.mi-view-controls button[hidden]{display:none!important}
+.mi-view-controls .mi-view-close{background:#edf3f5}
+@media(max-width:650px){
+ .mi-view-controls{gap:8px}
+ .mi-view-controls button{min-height:44px;font-size:13px}
+}
