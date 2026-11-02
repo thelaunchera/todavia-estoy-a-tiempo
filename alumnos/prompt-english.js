@@ -40,7 +40,26 @@ const mobile=[
 /* English educational adaptations of approved example steps. The source briefs
    stay private in Supabase; never display Spanish briefs on the English view. */
 const demoStages={"casa-brownie":[["Start from a blank page","Plan a fictional brownie website and outline its sections before adding visuals."],["Brand identity and navigation","Set up a clean header, brand name and simple navigation."],["One static hero photo","Build the opening section around one still brownie photograph, readable text and a clear CTA."],["Six individual product photos","Prepare six distinct brownie flavor images, one file per flavor."],["Product banner and catalog","Arrange the six brownie items with clear names and accurate mock content."],["Editorial gifts and double banner","Show gift packaging with two individual photos and a cohesive gift section."],["Brand story and fictional location","Write an honest practice-site story and label any example location as fictional."],["Illustrative delivery information","Explain a possible delivery experience without implying real fulfillment."],["Demo cart interactions","Design sample interactions without placing orders or charging money."],["Footer and attribution","Add an accessible footer, relevant links and clear practice-project credits."],["Compare the result with screenshots","Audit mobile and desktop against the approved reference without recreating unrelated parts."],["Optional animated hero bonus","Explore an optional hero-video concept only after the static experience works."]],"crumb":[["Start with a blank website","Prepare the fictional cookie brand's site structure and core information."],["Photo brand board with 14 scenes","Plan 14 separate scenes for products, storefront, gifting and behind-the-scenes content."],["Complete header and hero","Build an editorial header and an opening section with one approved hero photo."],["Six individual catalog photos","Use individual photos for six cookies without repeats or collage layouts."],["Cookie flavors and labels","Build an accurate display of six flavors with illustrative labels and approved pricing."],["Gift boxes and packaging","Create a gifting section that explains presentation and uses the approved images."],["Inside the brand gallery","Create a concise image gallery that explains the product and atmosphere."],["Interactive build-your-box demo","Sketch an interactive sample box builder with clear states and no real charges."],["Illustrative Miami location","Label the location as a concept, never as a real GPS-verified storefront."],["Editorial storytelling banners","Build two brand-story banners without hiding key product information."],["Footer and sample contact links","Show a complete footer with clearly non-operational example links where necessary."],["Responsive review and final QA","Check mobile and desktop, image paths, touch controls and approved copy."]],"aftr":[["Afterglow-inspired visual direction","Plan an original nightlife visual identity and brand board."],["Eight separate nightlife photos","Prepare distinct photos for the club, VIP, entrance, DJ, dancefloor and tickets."],["Hero, navigation and age gate","Sketch the opening experience and a clear 21+ access notice."],["Event schedule and weekly lineup","Present sample event information in a readable editorial format."],["VIP tables and guest list","Explain example VIP experiences and guest list flows without fake reservations."],["Tickets and final QA","Review sample ticket interactions, mobile responsiveness and age messaging."]],"soluna":[["Research and visual concept","Plan the goals, positioning and original visual direction of a yoga practice site."],["Brand identity and visual rules","Define typography, colors, photography and consistent layout rules."],["Eight individual yoga photographs","Plan eight distinct editorial photos for the hero, studio, classes and reception."],["Launch hero and primary CTA","Build a clear opening screen with one honest call to action."],["Launch offer and class experiences","Present the example promotion and clearly described classes without misleading claims."],["Studio details and location","Show the studio experience and illustrative location information."],["Memberships without sample charges","Outline sample memberships without pretending to process payments."],["Waitlist, privacy and QA","Design a truthful waitlist and test its consent, confirmation and mobile display."],["Publish and compare","Review a version-controlled publication and compare it with the approved preview."]]};
-const demoPhotos={"casa-brownie":["Brownie hero image","Classic brownie","Chocolate and walnut brownie","Dulce de leche brownie","Raspberry brownie","Cookies and cream brownie","Special edition brownie","Gift box with a pink ribbon","Gift bags and boxes"],"crumb":["Brand and mural","Open box of six cookies","Cookie lifestyle scene","Storefront","Classic chocolate chip","Double chocolate","Salted caramel","White chocolate raspberry","Nutty dream","Brownie chip","Preparing dough","Closed gift box","Kraft bag","Baker holding a tray","Cookie hero"],"aftr":["Main club hero","VIP lounge","Entry corridor","Fashion portrait","DJ booth","VIP bottle service","Dancefloor","Tickets"],"soluna":["Yoga hero still life","Studio exterior","Empty studio interior","Warrior II group class","Slow Flow class","Deep Rest class","Morning Ritual class","Reception flowers"]};
+
+const demoPhotoSteps={
+ 'casa-brownie':{
+  2:['Static hero brownie photo'],
+  3:['Classic brownie','Chocolate and walnut brownie','Dulce de leche brownie','Raspberry brownie','Cookies and cream brownie','Special edition brownie'],
+  5:['Gift box with pink ribbon','Gift bags and boxes']
+ },
+ crumb:{
+  1:['Cookie brand mural','Open six-cookie box','Cookie lifestyle photograph','CRUMB storefront','Classic chocolate chip cookie','Double chocolate cookie','Salted caramel cookie','White chocolate raspberry cookie','Nutty dream cookie','Brownie chip cookie','Preparing cookie dough','Closed gift box','Kraft cookie bag','Baker with a tray'],
+  2:['CRUMB opening hero photograph']
+ },
+ aftr:{1:['Main nightclub','VIP lounge','Entry corridor','Fashion portrait','DJ booth','Bottle service','Dancefloor','Ticket detail']},
+ soluna:{2:['Yoga hero still life','Studio exterior','Empty studio interior','Group yoga class','Slow Flow class','Deep Rest class','Morning Ritual class','Reception flowers']}
+};
+export function englishDemoPhotoTitle(code,title=''){
+ const match=/^demo-photo_(.+)_(\d+)_(\d+)$/.exec(String(code));
+ if(match)return demoPhotoSteps[match[1]]?.[Number(match[2])]?.[Number(match[3])]||'Photo '+(Number(match[3])+1);
+ return title||'Photo';
+}
+
 export function englishDemoTitle(code,title=''){
  const m=/^demo_(.+)_(\d+)$/.exec(String(code));
  if(m)return demoStages[m[1]]?.[Number(m[2])]?.[0]||'Website example · Step '+(Number(m[2])+1);
@@ -59,9 +78,8 @@ export function englishDemoStep(code,brand=''){
  }
  const p=/^demo-photo_(.+)_(\d+)_(\d+)$/.exec(String(code));
  if(p){
-  const names=demoPhotos[p[1]]||[];
-  // Each photo entry is independently generated, with the approved reference supplied by the student.
-  const subject=names[Number(p[3])]||'the subject indicated in the approved shot list';
+  // The photo index belongs to its parent step, not to the full demo gallery.
+  const subject=englishDemoPhotoTitle(code);
   return 'INDIVIDUAL PHOTO PRACTICE — '+(brand||'Example website')+'\\n\\n'+
    'Create ONE high-resolution editorial photo of '+subject+'. Match the supplied approved reference, materials, brand and lighting. Keep proportions and real product details accurate, leave useful crop space, and return ONE photo file only. No collage, invented labels, text or watermark. Check the image before using it on the website.';
  }
