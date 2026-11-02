@@ -1,7 +1,7 @@
 # Una sola voz · Tu primera web con IA · Casa Brownie
 
 ## Objetivo
-Enseñar sin hacer sentir al alumno que necesita saber programación antes de empezar. La voz es **la de Dailin**: una emprendedora que enseña lo que está haciendo, en español latino claro y cercano. Inspiración pedagógica: introducción con una situación reconocible, ejemplos visuales concretos, ritmo ágil y una práctica alcanzable, **sin copiar frases, muletillas ni identidad de otras creadoras**.
+Enseñar sin hacer sentir al alumno que necesita saber programación antes de empezar. La voz es **la de Dailin**: una emprendedora que enseña lo que está haciendo, en español claro y cercano. Inspiración pedagógica: introducción con una situación reconocible, ejemplos visuales concretos, ritmo ágil y una práctica alcanzable, **sin copiar frases, muletillas ni identidad de otras creadoras**.
 
 ## Patrón para cada explicación
 1. **Conecta con una duda real**: «¿Qué llevo de regalo?», «¿Por qué no aparece la foto?», «¿Cómo sé que el botón funciona?».
