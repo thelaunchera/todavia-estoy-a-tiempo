@@ -824,6 +824,22 @@ if(STUDIO_EMBEDDED_OWNER){
  });
  out.hidden=true;display(null);
  status('Conectando con tu Studio privado…');
+ // A parent bridge can be unavailable after navigation or a browser reload.
+ // Fall back only to an existing verified Supabase owner session, never to a
+ // query parameter or a client-side claim. Always end the loading state.
+ setTimeout(async()=>{
+  if(studioSessionReady||studioSessionLoading)return;
+  try{
+   const {data:{user:existing}}=await db.auth.getUser();
+   if(existing&&await isAuthorizedOwner(existing)){
+    studioSessionReady=true;
+    await refreshAuth();
+    return;
+   }
+  }catch(e){console.warn('Studio session fallback unavailable',e?.name||'unknown');}
+  out.hidden=true;display(null);
+  status('No se pudo verificar tu acceso de administradora. Vuelve al Studio y abre el aula otra vez. Si continúa, inicia sesión en el Studio de nuevo.');
+ },6500);
  window.parent.postMessage({type:'TLE_OWNER_SESSION_REQUEST'},window.location.origin);
 }else{
  await refreshAuth();
