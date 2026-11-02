@@ -30,6 +30,7 @@ type Props = {
   textPalette?:string[];
   focusLayerId?:string;
   inlineTextTools?:boolean;
+  fullscreen?:boolean;
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
@@ -40,7 +41,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,
+  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,fullscreen=false,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -92,7 +93,8 @@ export default function TouchLayerCanvas({
   },[pageCount]);
   // The fixed switch follows scrolling even inside a fullscreen iPad canvas.
   useEffect(()=>{
-    if(pageCount<=1){setFloatingModeBar(false);return}
+    // Fullscreen always uses its own fixed toolbar, including in iPhone in-app browsers.
+    if(pageCount<=1||fullscreen){setFloatingModeBar(false);return}
     let frame=0;
     const check=()=>{
       frame=0;
@@ -117,7 +119,7 @@ export default function TouchLayerCanvas({
       observer?.disconnect();
       if(frame)window.cancelAnimationFrame(frame);
     };
-  },[pageCount]);
+  },[pageCount,fullscreen]);
   const switchMode=(mode:'navigate'|'edit')=>{
     setInteractionMode(mode);
     if(mode==='navigate'){
@@ -393,13 +395,14 @@ export default function TouchLayerCanvas({
   return <div ref={canvasRoot} className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
     (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')+
     (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')+
-    (inlineTextTools?' touch-editor-inline-mode':'')}
+    (inlineTextTools?' touch-editor-inline-mode':'')+
+    (fullscreen?' touch-editor-fullscreen-mode':'')}
     aria-label="Editor visual de fotos y stickers">
     {pageCount > 1 && <div className="panorama-guide-legend"><span className="panorama-guide-swatch" aria-hidden="true"/>
       {continuous?`${pageCount} slides · líneas azules = cortes al descargar`:`Carrusel normal · ${pageCount} slides independientes`}
       <label className="touch-snap-toggle"><input type="checkbox" checked={snapEnabled}
         onChange={e=>setSnapEnabled(e.target.checked)}/>Alinear automáticamente</label></div>}
-    {pageCount>1&&<div ref={navigationBar} className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
+    {pageCount>1&&!fullscreen&&<div ref={navigationBar} className="touch-editor-navigation" aria-label="Navegación y edición de carrusel">
       <div className="touch-editor-mode-switch" role="group" aria-label="Modo de interacción">
         <button type="button" className={interactionMode==='navigate'?'active':''}
           aria-pressed={interactionMode==='navigate'}
@@ -428,8 +431,8 @@ export default function TouchLayerCanvas({
         ?'Desliza para cambiar de slide. Nada se moverá.'
         :'Toca y arrastra cualquier elemento. Usa el tirador para cambiar su tamaño.'}</p>
     </div>}
-    {pageCount>1&&floatingModeBar&&typeof document!=='undefined'&&createPortal(
-      <div className="touch-editor-floating-mode" role="toolbar" aria-label="Modo de carrusel siempre visible">
+    {pageCount>1&&(fullscreen||floatingModeBar)&&typeof document!=='undefined'&&createPortal(
+      <div className={'touch-editor-floating-mode'+(fullscreen?' fullscreen':'')} role="toolbar" aria-label="Modo de carrusel siempre visible">
         <div className="touch-editor-floating-mode-switch" role="group" aria-label="Deslizar o editar">
           <button type="button" className={interactionMode==='navigate'?'active':''}
             aria-pressed={interactionMode==='navigate'} onClick={()=>switchMode('navigate')}>↔ Deslizar</button>
