@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=20261031-student-journey-v1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261101-mobile-bonus-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-learning-hub-v2">
+<link rel="stylesheet" href="./curso.css?v=20261031-student-journey-v1"><link rel="stylesheet" href="./subtitulos-20261102.css?v=1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261028-access-v1"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261101-mobile-bonus-v1"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-learning-hub-v2">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -341,6 +341,15 @@
 
           <div class="lesson-stage">
       <div id="lesson-player" class="video-box" hidden></div>
+      <div class="course-captions" id="course-captions" hidden>
+        <label for="course-caption-language">Subtítulos del video</label>
+        <select id="course-caption-language" aria-describedby="course-caption-help">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="auto">Según YouTube / desactivados</option>
+        </select>
+        <p id="course-caption-help">La clase se explica en español. Puedes elegir subtítulos en el reproductor cuando estén publicados; si no aparecen, toca ⚙️ → Subtítulos en YouTube. Cambiar esta opción reinicia el video.</p>
+      </div>
       <p id="lesson-unavailable" class="empty" hidden>Este video todavía está en preparación. Cuando se publique su enlace aprobado aparecerá aquí, sin cambiar el diseño del aula.</p>
       <p id="empty-lessons" class="empty">Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.</p>
       <div id="lesson-info" hidden>
