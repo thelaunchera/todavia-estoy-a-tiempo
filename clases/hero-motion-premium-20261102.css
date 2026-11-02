@@ -1,0 +1,26 @@
+/* Hero motion enhancement · 2026-11-02. Progressive, accessible, mobile-safe. */
+@media (prefers-reduced-motion: no-preference) {
+  body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {animation:tle-hero-rise .65s .05s both cubic-bezier(.2,.7,.2,1)}
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {animation:tle-hero-rise .82s .16s both cubic-bezier(.16,1,.3,1)}
+  body.class-page-v2 .class-hero .class-hero-intro > h1 em {display:inline-block;animation:tle-hero-highlight .9s .48s both cubic-bezier(.16,1,.3,1)}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {animation:tle-hero-rise .75s .35s both}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede,
+  body.class-page-v2 .class-hero .class-hero-intro > .class-audio-language-note {animation:tle-hero-rise .7s .48s both}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {animation:tle-hero-rise .7s .62s both}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {animation:tle-hero-scene .95s .18s both cubic-bezier(.16,1,.3,1)}
+  body.class-page-v2 .class-cinema-visual .class-cinema-kicker {animation:tle-hero-rise .6s .65s both}
+  body.class-page-v2 .class-cinema-visual .class-cinema-statement {animation:tle-hero-rise .85s .75s both cubic-bezier(.16,1,.3,1)}
+  body.class-page-v2 .class-cinema-visual .class-cinema-browser {animation:tle-browser-arrive 1s 1.13s both cubic-bezier(.16,1,.3,1)!important;will-change:transform}
+  body.class-page-v2 .class-cinema-visual .class-cinema-browser:hover,
+  body.class-page-v2 .class-cinema-visual .class-cinema-browser:focus-visible {transform:translate3d(0,calc(var(--tle-browser-scroll,0px) - 7px),0) scale(1.025);transition:transform .3s ease}
+  @keyframes tle-hero-rise {from{opacity:0;transform:translate3d(0,19px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+  @keyframes tle-hero-highlight {from{opacity:.15;transform:translate3d(0,16px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+  @keyframes tle-hero-scene {from{opacity:.72;transform:translate3d(0,18px,0) scale(.975)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+  @keyframes tle-browser-arrive {from{opacity:0;transform:translate3d(18px,54px,0) rotate(2deg) scale(.9)}to{opacity:1;transform:translate3d(0,0,0) rotate(0) scale(1)}}
+  @media(min-width:901px) {
+    body.class-page-v2.tle-hero-scrolled .class-cinema-visual .class-cinema-browser {animation:none!important;transform:translate3d(0,var(--tle-browser-scroll,0px),0)}
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.class-page-v2 .class-cinema-visual .class-cinema-browser {animation:none!important;transform:none!important}
+}
