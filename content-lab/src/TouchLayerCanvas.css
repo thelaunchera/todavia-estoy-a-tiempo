@@ -488,3 +488,12 @@
  .panorama-canvas .touch-editor-page-tabs{display:none}
  .panorama-canvas .touch-editor-navigation-tip{display:none}
 }
+
+/* The DOM stacking order is the saved creation order, not the selected layer.
+   A selected older photo cannot jump above newer text or stickers. */
+.panorama-canvas.touch-editor-edit-mode .touch-editor-layer.active{
+ z-index:revert-layer!important;
+}
+/* The wallpaper is a visual base, never a draggable hit target. The user can
+   still choose it from the layers inspector to adjust its settings. */
+.panorama-canvas .touch-editor-layer.is-background{pointer-events:none!important}
