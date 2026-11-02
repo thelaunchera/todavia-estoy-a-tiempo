@@ -566,6 +566,7 @@ export async function removeOldClassRecording(path:string):Promise<void>{
  if(error)throw error;
 }
 
+
 export type StudioLabAsset={id:string;name:string;category:'sticker'|'background';url:string};
 export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
  if(!client)throw Error('Conexión de biblioteca no disponible.');
@@ -575,11 +576,21 @@ export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
  for(const [table,category] of [['content_lab_sticker_catalog','sticker'],['content_lab_background_catalog','background']] as const){
   const {data,error}=await client.from(table).select('id,name,path').eq('published',true).order('created_at',{ascending:true});
   if(error)throw Error('No se pudo consultar '+category+': '+error.message);
-  for(const asset of data||[]){
-   if(!asset.path)continue;
-   const {data:signed,error:signError}=await client.storage.from('content-lab-private').createSignedUrl(asset.path,3600);
-   if(!signError&&signed?.signedUrl)result.push({id:asset.id,name:asset.name,category,url:signed.signedUrl});
+  const entries=(data||[]).filter(x=>Boolean(x.path));
+  for(let i=0;i<entries.length;i+=50){
+   const batch=entries.slice(i,i+50);
+   const {data:signed,error:signError}=await client.storage.from('content-lab-private').createSignedUrls(batch.map(x=>x.path),3600);
+   if(signError)throw Error('No se pudo abrir la biblioteca privada: '+signError.message);
+   (signed||[]).forEach((item,index)=>{if(item.signedUrl)result.push({id:batch[index].id,name:batch[index].name,category,url:item.signedUrl})});
   }
  }
  return result;
+}
+export async function keepStudioLabImage(url:string):Promise<string>{
+ const response=await fetch(url);
+ if(!response.ok)throw Error('No se pudo descargar el recurso. Vuelve a abrir la biblioteca.');
+ const blob=await response.blob();
+ return await new Promise<string>((resolve,reject)=>{
+  const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(blob);
+ });
 }
