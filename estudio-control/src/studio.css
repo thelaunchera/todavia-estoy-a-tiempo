@@ -2336,6 +2336,10 @@ a:focus-visible {
  .studio-aula-preview-bar>button{min-height:38px;font-size:11px;padding:8px 10px}
 }
 @media(max-width:490px){
+ .topbar{gap:4px}
+ .topbar .top-label{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .topbar .top-actions{flex:none}
+ .topbar .top-star{margin-left:2px;margin-right:2px}
  .studio-aula-mobile-link{margin-right:4px}
  .studio-aula-mobile-link span{display:none}
  .studio-aula-preview-identity{font-size:12px}
