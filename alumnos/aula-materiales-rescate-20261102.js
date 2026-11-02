@@ -2,7 +2,7 @@
    No crea accesos públicos ni copia prompts al HTML. */
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v7';
-let repairing=false,controller=null;
+let repairing=false,controller=null,studentGallery=null;
 const $=id=>document.getElementById(id);
 const lang=()=> $('aula-language')?.value==='en'?'en':'es';
 function showError(message){
@@ -56,10 +56,10 @@ async function showStudentResources(button){
   const ownerBadge=root.querySelector('.mi-save');
   if(ownerBadge)ownerBadge.style.display='none';
   const {mountInspiracion}=await import('./inspiracion.js?v=20261102-owner-curation-v4');
-  if($('inspiration-gallery'))await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
+  if($('inspiration-gallery'))studentGallery=await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
   banner.hidden=true;
   document.querySelector('.aula-side-link[data-aula-view="prompts"]')?.click();
-  button.disabled=false;button.textContent=lang()==='en'?'Exit student preview':'Salir de vista alumno';
+  button.disabled=false;button.dataset.previewActive='true';button.textContent=lang()==='en'?'Exit student preview':'Salir de vista alumno';
   button.onclick=()=>window.location.reload();
   button.title=lang()==='en'?'Read-only preview of published student resources':'Vista de los recursos publicados para alumnos, sin modificar sus datos';
  }catch(e){
@@ -80,6 +80,14 @@ function offerStudentPreview(){
  target?.append(button);
 }
 
+function syncPreviewLanguage(){
+ if(controller?.setLanguage)controller.setLanguage();
+ if(studentGallery?.setLanguage)studentGallery.setLanguage();
+ const button=$('aula-student-preview');
+ if(button)button.textContent=button.dataset.previewActive==='true'
+  ?(lang()==='en'?'Exit student preview':'Salir de vista alumno')
+  :(lang()==='en'?'View as student':'Ver como alumno');
+}
 function watch(){
  const root=$('materiales-interactivos');if(!root)return;
  const ownerBanner=$('admin-preview-banner');
@@ -92,6 +100,7 @@ function watch(){
   }
  });
  observer.observe($('aula-active-title')||root,{childList:true,subtree:true});
+ ['aula-language','aula-public-language'].forEach(id=>$(id)?.addEventListener('change',()=>setTimeout(syncPreviewLanguage,0)));
  setTimeout(recover,2200);
  document.querySelectorAll('[data-aula-view="prompts"],[data-aula-view="materiales"]').forEach(el=>el.addEventListener('click',()=>setTimeout(recover,450)));
  $('aula-refresh')?.addEventListener('click',()=>setTimeout(recover,800));
