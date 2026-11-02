@@ -58,3 +58,21 @@
 
 /* Mensaje de privacidad sin sellos ni iconos: solo visible a miembros autorizados. */
 .club-welcome .club-private-note{margin:15px 0 0;max-width:none;font:650 11px/1.55 'DM Sans',Arial,sans-serif;letter-spacing:.005em;color:#647f90}
+
+/* Student community navigation: 2026-11-02 */
+.club-back-controls{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.club-back-controls .club-top-link{
+ display:inline-flex;justify-content:center;align-items:center;gap:6px;min-height:43px;
+ border:1px solid #c9d9e2;border-radius:10px;background:#fff;
+ color:#345871;font:700 12px/1.2 'DM Sans',Arial,sans-serif;
+ text-decoration:none;padding:10px 14px;white-space:nowrap;cursor:pointer;
+}
+.club-back-controls .club-nav-close{background:#edf3f5}
+.club-back-controls .club-top-link:hover{background:#e5eff4}
+.club-back-controls .club-top-link:focus-visible{outline:3px solid #7daec9;outline-offset:2px}
+@media(max-width:580px){
+ .club-top-inner{gap:9px;min-height:70px}
+ .club-back-controls{gap:6px;flex:0 0 auto}
+ .club-back-controls .club-top-link{min-height:42px;padding:10px 11px;font-size:12px}
+ .club-top-inner>a:first-child{min-width:0;flex:1 1 auto;max-width:155px}
+}
