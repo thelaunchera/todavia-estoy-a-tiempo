@@ -43,3 +43,11 @@ El flujo existente de GitHub Pages publica la rama `main`.
 El Estudio de Control protegido se encuentra en `https://podcast.thelaunchera.com/estudio/`. El proyecto exclusivo de Supabase está activo y exige una cuenta autorizada. No enlazar el estudio desde el menú público ni mostrar proveedores internos en la pantalla de acceso.
 
 Dirección editorial: el podcast se dirige a todas las personas; voz natural y cercana, sin repetir «chica» ni asumir una audiencia exclusivamente femenina.
+
+
+## Regla visual permanente — todos los proyectos (2026-11-02)
+
+- **Prohibido añadir emojis verdes decorativos** en Studio, aula, landings, demos, productos y cualquier nueva interfaz: marcas de verificación verdes, destellos verdes, círculos verdes, tréboles, corazones verdes o pegatinas similares.
+- Evitar también emojis decorativos como sustitutos de iconos, indicadores de éxito o adornos en titulares. Usar tipografía, espaciado e iconos SVG monocromáticos del sistema de diseño.
+- No reintroducir el símbolo decorativo de saludo del aula (`dashboard-greeting-spark`).
+- Aplicar esta regla a diseños nuevos y revisiones de los existentes, sin cambiar los indicadores de estado funcionales que requieran significado accesible.
