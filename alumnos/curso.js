@@ -568,7 +568,7 @@ async function showCourse(email,asAdmin=false){
   const root=$('materiales-interactivos');
   root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
  });
- void mountInspiracion($('inspiration-gallery'),{db,courseId,getLanguage:getClassroomLanguage}).then(controller=>{
+ void mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage}).then(controller=>{
   inspirationController=controller;
  }).catch(()=>{
   $('inspiration-gallery').textContent=getClassroomLanguage()==='en'
