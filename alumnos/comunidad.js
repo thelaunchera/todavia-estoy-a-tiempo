@@ -1,4 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
+import {bindCommunityLanguage,applyCommunityLanguage,communityLanguage,communityText} from './comunidad-i18n.js?v=20261102-v1';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
@@ -22,11 +23,11 @@ function button(text,onClick,cls=''){
  const b=node('button',cls,text);b.type='button';b.addEventListener('click',onClick);return b;
 }
 function nameOf(id){return state.owner && id===state.user?.id?'Dailin · Anfitriona':state.profiles.get(id)||'Miembro del club';}
-function dateOf(value){return new Date(value).toLocaleDateString('es',{day:'numeric',month:'short',year:'numeric'});}
+function dateOf(value){return new Date(value).toLocaleDateString(communityLanguage()==='en'?'en-US':'es',{day:'numeric',month:'short',year:'numeric'});}
 function showLocked(reason){
  $('club-members').hidden=true;$('club-locked').hidden=false;
  $('club-locked-message').textContent=reason;
- message('No se ha podido abrir la comunidad.','error');
+ message(communityText('No se ha podido abrir la comunidad.','Unable to open the community.'),'error');
 }
 function validName(s){return s.length>=2&&s.length<=32&&!s.includes('@');}
 function validUrl(s){
@@ -278,7 +279,7 @@ async function init(){
   await loadMyProfile();
   await loadFeed();
   updateComposerChannel();
-  message('Qué bueno verte en el Club de Ideas. Este espacio es privado para miembros.','good');
+  message(communityText('Qué bueno verte en el Club de Ideas. Este espacio es privado para miembros.','Welcome to Ideas Club. This is a private members-only space.'),'good');
   if(requested.get('accion')==='publicar'){
     const target=state.profile?$('club-post-body'):$('club-display-name');
     target?.scrollIntoView({behavior:'smooth',block:'center'});
@@ -299,7 +300,9 @@ $('club-page-back')?.addEventListener('click',()=>{
  if(canGoBack)history.back();
  else location.assign('../alumnos/');
 });
+bindCommunityLanguage();
 await init();
+applyCommunityLanguage();
 // Supabase Realtime notifies the club about new posts, comments and reactions.
 // All actual content is re-read through member-scoped RLS policies.
 let realtimeRefresh=null;
