@@ -1,0 +1,430 @@
+/* EMERGENCY MOBILE HERO RECOVERY — classroom landing only, 1 Nov 2026.
+   The previous class styles contained many competing @media/layout overrides.
+   This LAST stylesheet makes header + hero a predictable block flow on
+   Instagram iOS at 320–650 px. Desktop, waitlist, checkout and lessons untouched. */
+@media (max-width: 650px) {
+  html { scroll-padding-top: 16px; }
+  body.class-page-v2 {
+    overflow-x: clip !important;
+    background:#FAF8F3;
+  }
+  body.class-page-v2 .class-scroll-progress {display:none!important;}
+
+  /* One small header: the animated countdown's 2nd row was colliding with the hero. */
+  body.class-page-v2 .class-topbar {
+    position:relative!important;
+    top:auto!important;
+    z-index:5!important;
+    background:#14233c!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    box-shadow:none!important;
+  }
+  body.class-page-v2 .class-topbar .shell.class-topbar-inner {
+    display:flex!important;
+    grid-template:none!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    min-height:72px!important;
+    height:auto!important;
+    padding:11px 0!important;
+    overflow:visible!important;
+  }
+  body.class-page-v2 .class-topbar .class-wordmark {
+    position:static!important;
+    grid-area:auto!important;
+    display:inline-flex!important;
+    flex:0 1 auto!important;
+    min-width:0;
+    max-width:62%;
+    align-items:center;
+  }
+  body.class-page-v2 .class-topbar .class-wordmark img {
+    display:block!important;
+    width:clamp(145px,42vw,190px)!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:51px!important;
+    object-fit:contain!important;
+  }
+  body.class-page-v2 .class-topbar .class-launch-clock {display:contents!important;}
+  body.class-page-v2 .class-topbar .class-launch-clock-heading,
+  body.class-page-v2 .class-topbar .class-flip-timer,
+  body.class-page-v2 .class-topbar .class-launch-clock-status,
+  body.class-page-v2 .class-topbar .class-launch-clock-fallback,
+  body.class-page-v2 .class-topbar .class-launch-clock-reader {display:none!important;}
+  body.class-page-v2 .class-topbar .class-launch-clock-footer {
+    position:static!important;
+    display:flex!important;
+    grid-area:auto!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    flex:0 0 auto!important;
+    justify-content:flex-end!important;
+    align-items:center!important;
+  }
+  body.class-page-v2 .class-topbar a.class-launch-clock-cta {
+    position:static!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:45px!important;
+    padding:11px 20px!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+    border-radius:999px!important;
+    background:#e5eff6!important;
+    color:#19354d!important;
+    white-space:nowrap!important;
+    box-shadow:none!important;
+  }
+
+  /* The hero no longer inherits artificial grid rows assigned to nonexistent
+     direct children, transforms or absolute positioning. */
+  body.class-page-v2 .class-hero {
+    position:relative!important;
+    display:block!important;
+    isolation:isolate;
+    overflow:hidden!important;
+    margin:0!important;
+    padding:28px 0 43px!important;
+    min-height:0!important;
+    height:auto!important;
+    background:#FAF8F3!important;
+    background-image:none!important;
+    color:#14263e!important;
+  }
+  body.class-page-v2 .class-hero::before,
+  body.class-page-v2 .class-hero::after {display:none!important;}
+  body.class-page-v2 .class-hero .shell.class-hero-grid {
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    grid-template:none!important;
+    grid-template-columns:none!important;
+    grid-template-rows:none!important;
+    grid-template-areas:none!important;
+    gap:0!important;
+    width:calc(100% - 38px)!important;
+    max-width:560px!important;
+    margin:0 auto!important;
+    padding:0!important;
+    min-height:0!important;
+    height:auto!important;
+    transform:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro {
+    position:relative!important;
+    inset:auto!important;
+    grid-area:auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    align-self:stretch!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:0!important;
+    height:auto!important;
+    gap:0!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    text-align:left!important;
+    color:#14263e!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > :is(
+    .class-eyebrow,h1,.class-opportunity,.class-lede,.class-hero-actions,
+    .class-hero-chips,.class-price-inline,.class-availability,.class-notice
+  ) {
+    position:static!important;
+    inset:auto!important;
+    z-index:auto!important;
+    float:none!important;
+    clear:none!important;
+    translate:none!important;
+    transform:none!important;
+    grid-area:auto!important;
+    min-width:0!important;
+    min-height:0!important;
+    max-width:100%!important;
+    width:100%!important;
+    height:auto!important;
+    box-sizing:border-box!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {
+    display:block!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    color:#52728a!important;
+    font:750 11px/1.4 'DM Sans',Arial,sans-serif!important;
+    letter-spacing:.1em!important;
+    text-wrap:wrap;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {
+    display:block!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:clamp(36px,10vw,47px)!important;
+    line-height:1.08!important;
+    letter-spacing:-.046em!important;
+    font-weight:400!important;
+    color:#152740!important;
+    overflow-wrap:normal!important;
+    text-wrap:balance;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > h1 em {
+    color:#517a92!important;
+    font-style:italic!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {
+    display:block!important;
+    margin:13px 0 0!important;
+    padding:0!important;
+    color:#213c55!important;
+    font-size:clamp(18px,5vw,22px)!important;
+    line-height:1.35!important;
+    font-weight:500!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity em {
+    color:#517a92!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede {
+    display:block!important;
+    margin:12px 0 0!important;
+    padding:0!important;
+    color:#405a70!important;
+    font-size:15px!important;
+    line-height:1.58!important;
+    letter-spacing:0!important;
+    text-align:left!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede strong {color:#173d57!important;}
+  /* Primary next action and one quiet secondary text action */
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    grid-template:none!important;
+    gap:9px!important;
+    margin:20px 0 0!important;
+    padding:0!important;
+    background:none!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions > .class-primary-button {
+    position:static!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:52px!important;
+    width:100%!important;
+    height:auto!important;
+    margin:0!important;
+    padding:13px 19px!important;
+    background:#14263e!important;
+    color:#fff!important;
+    border:1px solid #14263e!important;
+    border-radius:999px!important;
+    text-align:center!important;
+    font:700 15px/1.35 'DM Sans',Arial,sans-serif!important;
+    box-shadow:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions > .class-campaign-notify-link {
+    position:static!important;
+    display:inline-flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    min-height:42px!important;
+    height:auto!important;
+    width:100%!important;
+    margin:0!important;
+    padding:8px 12px!important;
+    color:#345a74!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    text-decoration:underline!important;
+    text-underline-offset:4px!important;
+    font:600 13px/1.4 'DM Sans',Arial,sans-serif!important;
+    box-shadow:none!important;
+  }
+  /* Repeated chips merely consumed first-fold space. Benefit is in the lede. */
+  body.class-page-v2 .class-hero .class-hero-chips {display:none!important;}
+
+  /* The $9.99 amount is an ordinary block, never positioned over the headline
+     or a 90px display type. Information hierarchy: label > price > terms. */
+  body.class-page-v2 .class-hero .class-hero-intro > .class-price-campaign {
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:flex-start!important;
+    gap:0!important;
+    margin:19px 0 0!important;
+    padding:16px 0 0!important;
+    border:0!important;
+    border-top:1px solid #c7d7e2!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:none!important;
+    text-align:left!important;
+    isolation:auto!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-campaign-pill {
+    position:static!important;
+    display:inline-flex!important;
+    width:auto!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:6px 11px!important;
+    background:#e5eff5!important;
+    color:#2c5872!important;
+    border:1px solid #cbdde7!important;
+    border-radius:999px!important;
+    font:750 10px/1.35 'DM Sans',Arial,sans-serif!important;
+    letter-spacing:.035em!important;
+    text-align:left!important;
+    white-space:normal!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-current {
+    position:static!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:flex-start!important;
+    gap:2px!important;
+    width:auto!important;
+    margin:11px 0 0!important;
+    padding:0!important;
+    background:none!important;
+    color:#14263e!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-label {
+    position:static!important;
+    clip:auto!important;
+    clip-path:none!important;
+    display:block!important;
+    width:auto!important;
+    height:auto!important;
+    overflow:visible!important;
+    white-space:normal!important;
+    color:#526b7d!important;
+    font:700 10px/1.5 'DM Sans',Arial,sans-serif!important;
+    letter-spacing:.08em!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-current strong {
+    position:static!important;
+    display:block!important;
+    font:400 clamp(42px,12vw,55px)/1.1 Georgia,serif!important;
+    letter-spacing:-.05em!important;
+    color:#14263e!important;
+    width:auto!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-regular {
+    position:static!important;
+    display:flex!important;
+    align-items:baseline!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    gap:6px!important;
+    margin:3px 0 0!important;
+    padding:0!important;
+    color:#516b7d!important;
+    width:auto!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-regular span,
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-regular del {
+    font:400 13px/1.4 'DM Sans',Arial,sans-serif!important;
+    color:#5d7282!important;
+  }
+  body.class-page-v2 .class-hero .class-campaign-divider {display:none!important;}
+  body.class-page-v2 .class-hero .class-price-campaign p.class-campaign-detail {
+    position:static!important;
+    display:block!important;
+    margin:9px 0 0!important;
+    padding:0!important;
+    max-width:38ch!important;
+    color:#5c7284!important;
+    font:400 13px/1.52 'DM Sans',Arial,sans-serif!important;
+    text-align:left!important;
+  }
+  body.class-page-v2 .class-hero .class-availability {
+    display:flex!important;
+    align-items:center!important;
+    margin:14px 0 0!important;
+    font:700 12px/1.4 'DM Sans',Arial,sans-serif!important;
+    color:#365f79!important;
+  }
+  body.class-page-v2 .class-hero .class-notice {
+    display:block!important;
+    margin:6px 0 0!important;
+    font:400 12px/1.48 'DM Sans',Arial,sans-serif!important;
+    color:#526b7c!important;
+    text-align:left!important;
+  }
+  body.class-page-v2 .class-hero .class-notice strong {
+    color:#365f79!important;
+    font-weight:650!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-art {
+    position:relative!important;
+    grid-area:auto!important;
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:auto!important;
+    margin:24px 0 0!important;
+    padding:0!important;
+    transform:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-image-frame {
+    position:relative!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    border:0!important;
+    border-radius:16px!important;
+    overflow:hidden!important;
+    box-shadow:none!important;
+    background:#e6e9e7!important;
+    transform:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-art img {
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    max-width:100%!important;
+    max-height:none!important;
+    aspect-ratio:4/3!important;
+    object-fit:cover!important;
+    object-position:center 29%!important;
+    border-radius:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+  }
+  body.class-page-v2 .class-hero :is(a,button):focus-visible {
+    outline:3px solid #608fa8!important;
+    outline-offset:3px!important;
+  }
+}
+@media(max-width:370px) {
+  body.class-page-v2 .class-hero .shell.class-hero-grid {width:calc(100% - 30px)!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {font-size:35px!important;}
+  body.class-page-v2 .class-topbar .class-wordmark img {width:138px!important;}
+}
