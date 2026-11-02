@@ -6,7 +6,8 @@ const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 test('Carousel final output is native-resolution lossless PNG with high-quality smoothing',()=>{
   const factory=read('CarouselFactory.tsx');
   const seamless=read('SeamlessCarousel.ts');
-  assert.match(factory,/canvas\.width=1080;canvas\.height=1350/);
+  assert.match(factory,/canvas\.width=1080\*pixelScale;canvas\.height=1350\*pixelScale/);
+  assert.match(factory,/ctx\.scale\(pixelScale,pixelScale\)/);
   assert.match(factory,/ctx\.imageSmoothingQuality='high'/);
   assert.match(factory,/canvasToPngBlob\(canvas\)/);
   assert.match(factory,/canvas\.toBlob\(blob=>/);
