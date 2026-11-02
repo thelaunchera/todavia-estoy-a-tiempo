@@ -8,6 +8,7 @@ import TouchLayerCanvas,{type TouchLayer} from './TouchLayerCanvas';
 import FreeDecorControls from './FreeDecorControls';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import {readCoverDecor,type CoverDecor} from './CoverDecor';
+import {downloadLosslessPng,sourceAwareScale} from './ExportQuality';
 import './FreePostStudio.css';
 
 type Post={title:string;hook:string;cta:string;template:string;assetId:string;format?:string;designData?:string};
@@ -63,21 +64,25 @@ async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Rec
  ctx.fillRect(0,0,width,height);
 }
 export async function renderFreePost(post:Post,brand:Brand,images:Record<string,string>,
- omitLayers=false):Promise<HTMLCanvasElement>{
+ omitLayers=false,pixelScale=1):Promise<HTMLCanvasElement>{
  const decor=readCoverDecor(post.designData);
  const {width,height}=freePostDimensions(post.format);
- const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const canvas=document.createElement('canvas');canvas.width=width*pixelScale;canvas.height=height*pixelScale;
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('No se pudo crear el lienzo.');
+ ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ ctx.scale(pixelScale,pixelScale);
  await backdrop(ctx,decor,images,width,height);
  if(!omitLayers)await paintPanoramaLayers(ctx,width,height,coverLayers(post,brand,decor),images);
  return canvas;
 }
 export async function exportFreePost(post:Post,brand:Brand,images:Record<string,string>){
- const canvas=await renderFreePost(post,brand,images);
- const a=document.createElement('a');
+ const decor=readCoverDecor(post.designData);
  const {width,height}=freePostDimensions(post.format);
- a.download=(post.title||'mi-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,50)+'-'+width+'x'+height+'.png';
- a.href=canvas.toDataURL('image/png');a.click();
+ const ids=[post.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(layer=>layer.assetId)];
+ const scale=await sourceAwareScale(ids.map(id=>images[id]),width,height);
+ const canvas=await renderFreePost(post,brand,images,false,scale);
+ try{await downloadLosslessPng(canvas,(post.title||'mi-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,50))}
+ finally{canvas.width=1;canvas.height=1}
 }
 function MediaThumbnail({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
  const ref=useRef<HTMLSpanElement>(null);
