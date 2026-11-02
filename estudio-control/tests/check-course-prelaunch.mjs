@@ -289,7 +289,12 @@ assert.match(classPage,/Ejemplo ilustrativo de lo que puedes crear en la clase/,
 assert.doesNotMatch(classPage,/class-production-rhythm|MI FORMA DE TRABAJAR/,'Se retiró el bloque añadido sin autorización');
 assert.doesNotMatch(classPage,/ChatGPT Plus (?:obligatorio|requerido)|Plus es obligatorio/i,'El landing no exige Plus para empezar');
 assert.match(newExperience,/ideaProgress.addEventListener\('input'/);
-assert.match(newExperience,/reducedMotion.matches \|\| start === target/);
+assert.match(classPage,/id="idea-progress"[^>]*step="100"/,'Comparador con dos estados, sin puntos intermedios');
+assert.match(newExperience,/transformation\.dataset\.stage = complete \? 'after' : 'before'/,'El comparador cambia de vista sin superposición');
+assert.doesNotMatch(newExperience,/requestAnimationFrame\(step\)/,'La mezcla de capas animadas se eliminó');
+const casaPreviewCss=read('clases/casa-brownie-real-preview-20261102.css');
+assert.match(casaPreviewCss,/data-stage="after"\] \.class-idea-board\{display:none!important\}/,'Al mostrar Resultado el Boceto no se pinta');
+assert.match(casaPreviewCss,/data-loaded="true"\] \.class-casa-real-fallback\{[\s\S]*?display:none!important/,'El iframe sustituye el fallback, no se superpone');
 assert.match(home,/paso a paso[\s\S]{0,100}Sin saber programar\./i,'Mensaje claro del extra de IA sin jerga técnica');
 assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
 assert.doesNotMatch(home,/experta|experto/i);
