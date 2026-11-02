@@ -1,0 +1,8 @@
+/* Selección de preferencias de subtítulos, accesible en teléfono y teclado. */
+.course-captions{margin-top:12px;padding:14px 15px;background:#f0f5f8;border:1px solid #d8e5ec;border-radius:13px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.course-captions[hidden]{display:none!important}
+.course-captions label{color:#28435a;font:700 13px/1.4 'DM Sans',Arial,sans-serif}
+.course-captions select{color:#203e55;min-height:44px;max-width:100%;background:white;border:1px solid #aabecd;border-radius:9px;padding:9px 32px 9px 12px;font:600 13px/1.4 'DM Sans',Arial,sans-serif}
+.course-captions select:focus-visible{outline:3px solid #5a8ba8;outline-offset:2px}
+.course-captions #course-caption-help{flex-basis:100%;margin:0!important;color:#5d7080;font:400 12px/1.5 'DM Sans',Arial,sans-serif}
+@media(max-width:470px){.course-captions{align-items:flex-start;flex-direction:column}.course-captions select{width:100%}}
