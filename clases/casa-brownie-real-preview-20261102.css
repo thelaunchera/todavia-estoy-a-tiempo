@@ -49,3 +49,13 @@
 .class-page-v2 #de-idea-a-web .class-casa-real-preview[data-loaded="true"] .class-casa-real-fallback{
   display:none!important
 }
+
+/* Language-of-instruction disclosure in both class landings. */
+.class-hero .class-audio-language-note{
+ max-width:47ch;margin:14px 0 0;padding:11px 15px;
+ border-left:3px solid #7698b4;background:rgba(240,246,250,.72);
+ color:#344d60;font:400 clamp(.78rem,1.3vw,.9rem)/1.55 Arial,sans-serif;
+ border-radius:0 10px 10px 0;
+}
+.class-hero .class-audio-language-note strong{font-weight:750}
+@media(max-width:600px){.class-hero .class-audio-language-note{margin-top:12px;padding:10px 12px;font-size:.79rem}}
