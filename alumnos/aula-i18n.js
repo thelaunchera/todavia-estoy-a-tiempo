@@ -1,4 +1,4 @@
-/* Español latino / US English — classroom UI only.
+/* Español / US English — classroom UI only.
    Language changes presentation; never changes authentication or data visibility. */
 const KEY='tle_classroom_language_v1';
 let language='es';
@@ -85,7 +85,7 @@ const translations=[
  ['#lesson-unavailable','This video is still being prepared. It will appear here after approval.'],
  ['#empty-lessons','Lesson videos are being prepared. Meanwhile, explore prompts, materials and finished demos.'],
  ['.course-captions label','Video subtitles'],
- ['#course-caption-help','Lessons will be recorded in Latin American Spanish unless an English audio track is supplied. Reviewed subtitles will appear after video publication. You can also change subtitles in YouTube settings.'],
+ ['#course-caption-help','Lessons will be recorded in Spanish unless an English audio track is supplied. Reviewed subtitles will appear after video publication. You can also change subtitles in YouTube settings.'],
  ['.lesson-guidance','Watch, practice in your project, then mark this lesson complete.'],
  ['.lesson-completed','I finished this lesson'],
  ['.lesson-module-prompts-eyebrow','PRACTICE THIS LESSON'],
