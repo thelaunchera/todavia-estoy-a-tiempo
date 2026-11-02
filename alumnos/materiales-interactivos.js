@@ -1,6 +1,7 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v1';
+import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
 /* Tu primera web con IA · Materiales activos de la clase
    Español latino y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
@@ -351,30 +352,31 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    :ok?'¡Copiado! Pégalo en ChatGPT y completa tus datos.':'Tu navegador no permitió copiar. Mantén pulsado el texto del prompt para seleccionarlo.';
  }
  function renderWorkbook(){
-  section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
+  if(getLanguage()==='en')section('03 / WORKBOOK','One idea at a time.','Write your answers and use them to plan your webpage. Come back anytime.');
+  else section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
   if(ownerPreview){content.append(el('p','mi-note','Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.'));}
   else{content.append(el('p','mi-note','Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.'));}
   const summary=el('div','mi-work-summary');content.append(summary);
   const grid=el('div','mi-workbook-sections');content.append(grid);
-  WORKBOOK.forEach((block,i)=>{
+  translateWorkbookBlocks(WORKBOOK,getLanguage()).forEach((block,i)=>{
    const details=el('details','mi-work-step');
    if(i===0)details.open=true;
    const count=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length;
-   details.innerHTML='<summary><span class="mi-prompt-number">'+String(i+1).padStart(2,'0')+'</span><span><strong>'+esc(block.title)+'</strong><small>'+count+' de '+block.qs.length+' respuestas</small></span><span class="mi-plus">+</span></summary><div class="mi-work-body"><p>'+esc(block.sub)+'</p></div>';
+   details.innerHTML='<summary><span class="mi-prompt-number">'+String(i+1).padStart(2,'0')+'</span><span><strong>'+esc(block.title)+'</strong><small>'+count+(getLanguage()==='en'?' of ':' de ')+block.qs.length+(getLanguage()==='en'?' answers':' respuestas')+'</small></span><span class="mi-plus">+</span></summary><div class="mi-work-body"><p>'+esc(block.sub)+'</p></div>';
    if(block.example)details.querySelector('.mi-work-body').append(el('p','mi-note','Ejemplo: '+block.example));
    block.qs.forEach(([key,title,placeholder])=>{
     const field=el('div','mi-field'),label=el('label',null,title),textarea=el('textarea');
     textarea.id='mi-'+key;label.htmlFor=textarea.id;textarea.placeholder=placeholder;textarea.maxLength=600;textarea.rows=2;textarea.value=answers[key]||'';textarea.disabled=ownerPreview;
-    textarea.addEventListener('input',()=>{answers[key]=textarea.value;queueSave();updateSummary();const small=details.querySelector('summary small');small.textContent=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length+' de '+block.qs.length+' respuestas';});
+    textarea.addEventListener('input',()=>{answers[key]=textarea.value;queueSave();updateSummary();const small=details.querySelector('summary small');small.textContent=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length+(getLanguage()==='en'?' of ':' de ')+block.qs.length+(getLanguage()==='en'?' answers':' respuestas');});
     field.append(label,textarea);details.querySelector('.mi-work-body').append(field);
    });grid.append(details);
   });
   function updateSummary(){
    const answered=WORKBOOK.reduce((n,b)=>n+b.qs.filter(q=>String(answers[q[0]]||'').trim()).length,0);
    const total=WORKBOOK.reduce((n,b)=>n+b.qs.length,0);
-   summary.innerHTML='<span>Tu avance en el cuaderno</span><strong>'+answered+' / '+total+'</strong><div class="mi-bar"><i style="width:'+Math.round(100*answered/total)+'%"></i></div>';
+   summary.innerHTML='<span>'+(getLanguage()==='en'?'Workbook progress':'Tu avance en el cuaderno')+'</span><strong>'+answered+' / '+total+'</strong><div class="mi-bar"><i style="width:'+Math.round(100*answered/total)+'%"></i></div>';
   }updateSummary();
-  const actions=el('div','mi-actions');actions.innerHTML='<button class="mi-primary" type="button">Guardar mis respuestas</button><button class="mi-quiet" type="button">Imprimir mi cuaderno</button>';content.append(actions);
+  const actions=el('div','mi-actions');actions.innerHTML=getLanguage()==='en'?'<button class="mi-primary" type="button">Save answers</button><button class="mi-quiet" type="button">Print workbook</button>':'<button class="mi-primary" type="button">Guardar mis respuestas</button><button class="mi-quiet" type="button">Imprimir mi cuaderno</button>';content.append(actions);
   actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',()=>window.print());
  }
@@ -397,7 +399,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   content.append(el('p','mi-note','Tu proyecto puede ser muy diferente de este ejemplo. Lo importante es que cada sección responda una pregunta real.'));
  }
  function renderChecks(){
-  section('05 / ANTES DE COMPARTIR','¿Está lista tu página?','Marca una casilla cuando hayas hecho la prueba. Si algo falta, déjalo pendiente y vuelve después.');
+  if(getLanguage()==='en')section('05 / BEFORE YOU SHARE','Is your webpage ready?','Check each item after you actually test it. Leave incomplete items unchecked.');
+  else section('05 / ANTES DE COMPARTIR','¿Está lista tu página?','Marca una casilla cuando hayas hecho la prueba. Si algo falta, déjalo pendiente y vuelve después.');
   const phoneGuide=el('details','mi-explain');
   phoneGuide.innerHTML='<summary><span>📱</span><strong>¿Solo tienes teléfono? Revisa tu web sin computadora</strong><b>+</b></summary>'+
    '<div><p>Todo este ejercicio se puede hacer desde el navegador de tu celular. Primero comprueba los botones en la web real. Después compara distintos tamaños de pantalla: una vista previa no sustituye probar un dispositivo físico.</p>'+
@@ -410,7 +413,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const count=el('div','mi-check-progress');content.append(count);
   const list=el('div','mi-check-list');content.append(list);
   function update(){const n=CHECKS.filter((x,i)=>checks['check'+i]===true).length;count.innerHTML='<div><span>Comprobaciones hechas</span><strong>'+n+' de '+CHECKS.length+'</strong></div><div class="mi-bar"><i style="width:'+Math.round(n/CHECKS.length*100)+'%"></i></div>'; }
-  CHECKS.forEach((item,i)=>{
+  CHECKS.map((item,i)=>translateCheckItem(item,i,getLanguage())).forEach((item,i)=>{
    const card=el('article','mi-check');const inp=el('input');inp.type='checkbox';inp.id='mi-check-'+i;inp.checked=checks['check'+i]===true;inp.disabled=ownerPreview;const label=el('label');label.htmlFor=inp.id;
    label.innerHTML='<strong>'+String(i+1).padStart(2,'0')+'. '+esc(item.name)+'</strong><span>'+esc(item.how)+'</span><small>Listo cuando: '+esc(item.done)+'</small>';
    inp.addEventListener('change',()=>{checks['check'+i]=inp.checked;card.classList.toggle('checked',inp.checked);update();queueSave();});
@@ -428,7 +431,6 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  go('inicio',{track:false});
  return {go,setLanguage(){
   const view=current;
-  if(view==='cuaderno'){translateCurrentMaterial();return;}
   go(view,{track:false});
  }};
 }
