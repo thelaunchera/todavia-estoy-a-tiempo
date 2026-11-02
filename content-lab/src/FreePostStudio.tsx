@@ -312,31 +312,36 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';void uploadPhotos(files)}}/>
   <input ref={backgroundRef} type="file" accept="image/*,.heic,.heif" hidden
    onChange={e=>{const file=e.target.files?.[0];e.target.value='';void chooseBackground(file)}}/>
-  {mediaOpen&&<div className="free-post-media">
-    <strong>{plain('Your photo and sticker library','Tus fotos y stickers',locale)}</strong>
-    <div className="free-post-media-grid">{allowed.map(item=><button type="button" key={item.id}
-      onClick={()=>addAsset(item.id)} aria-label={plain('Add','Añadir',locale)+' '+displayAssetName(item)}>
-       {images[item.id]?<img loading="lazy" src={images[item.id]} alt=""/>:<span>{displayAssetName(item)}</span>}
-       <small>{displayAssetName(item)}</small>
-       <span className="free-post-add-label">{plain('Add on top','Poner encima',locale)}</span></button>)}</div>
-    {allowed.length===0&&<p>{plain('Upload a photo to start','Sube una foto para empezar',locale)}</p>}
-    <details className="free-post-background-from-library">
-       <summary>{plain('Use an existing photo as a full background','Poner una foto de mi biblioteca como fondo',locale)}</summary>
-       <div className="free-post-media-grid">{allowed.filter(asset=>assetCategory(asset)!=='sticker').map(asset=>
-         <button type="button" key={'background-'+asset.id}
-           onClick={()=>{if(!images[asset.id])loadImage(asset.id);
-             update({...decor,backgroundImageId:asset.id,backgroundId:'brand'});setMediaOpen(false)}}>
-           {images[asset.id]?<img loading="lazy" src={images[asset.id]} alt=""/>:<span>{displayAssetName(asset)}</span>}
-           <small>{displayAssetName(asset)}</small></button>)}
-       </div>
-     </details>
-
-    <div className="free-post-extra">
-     {(['paper','tape','frame','circle'] as const).map(shape=><button type="button" key={shape} onClick={()=>addElement('shape',shape)}>
-       {({paper:'Papel',tape:'Cinta',frame:'Marco',circle:'Círculo'})[shape]}</button>)}
-    </div>
-   </div>}
-  {backgroundOpen&&<div className="free-post-background-panel">
+  {error&&<p role="alert" className="free-post-error">{error}</p>}
+  <div className="free-post-design-row">
+ {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
+   <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools focusLayerId={focusLayerId} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
+     onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
+     onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
+  {mediaOpen&&<aside className="free-post-media" aria-label={plain('Photo and sticker picker','Selector de fotos y stickers',locale)}>
+ <div className="free-post-media-top"><strong>{plain('Choose an element','Elige un elemento',locale)}</strong>
+  <button type="button" onClick={()=>setMediaOpen(false)} aria-label={plain('Close picker','Cerrar selector',locale)}>×</button></div>
+ <div className="free-post-media-tabs" role="group" aria-label="Tipo de recurso">
+  <button type="button" className={mediaTab==='sticker'?'active':''} aria-pressed={mediaTab==='sticker'} onClick={()=>setMediaTab('sticker')}>Stickers</button>
+  <button type="button" className={mediaTab==='photo'?'active':''} aria-pressed={mediaTab==='photo'} onClick={()=>setMediaTab('photo')}>{plain('Photos','Fotos',locale)}</button>
+ </div>
+ <input className="free-post-media-search" type="search" value={mediaQuery} onChange={e=>setMediaQuery(e.target.value)}
+  placeholder={plain('Find by name…','Buscar por nombre…',locale)} aria-label={plain('Search media','Buscar fotos y stickers',locale)}/>
+ <p className="free-post-media-hint">{plain('Tap an image: it appears in the center, ready to move.',
+  'Toca una miniatura: aparece en el centro, lista para moverla.',locale)}</p>
+ <div className="free-post-media-grid">{visibleMedia.map(item=><button type="button" key={item.id}
+  aria-label={plain('Place','Colocar',locale)+' '+displayAssetName(item)}
+  onClick={()=>addAsset(item.id)} onFocus={()=>{if(!images[item.id])loadImage(item.id)}}>
+   <MediaThumbnail asset={item} src={images[item.id]} loadImage={loadImage}/>
+   <small title={displayAssetName(item)}>{displayAssetName(item)}</small></button>)}</div>
+ {!visibleMedia.length&&<p className="free-post-no-media">{plain('No results. Try another search or upload a photo.',
+  'No hay resultados. Busca otra palabra o sube una imagen.',locale)}</p>}
+ <div className="free-post-extra">
+  {(['paper','tape','frame','circle'] as const).map(shape=><button type="button" key={shape} onClick={()=>addElement('shape',shape)}>
+   {({paper:'Papel',tape:'Cinta',frame:'Marco',circle:'Círculo'})[shape]}</button>)}
+ </div>
+ </aside>}
+{backgroundOpen&&<div className="free-post-background-panel">
     <div className="free-post-background-colors">
      <label>{plain('Background color','Color de fondo',locale)} <input type="color" value={decor.color}
       onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',color:e.target.value})}/></label>
@@ -353,12 +358,9 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
       onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
       onChange={next=>update({...decor,...next})}/>
    </div>}
-  {error&&<p role="alert" className="free-post-error">{error}</p>}
-  {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
-   <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools focusLayerId={focusLayerId} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
-     onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
-     onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
-  <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
+  
+ </div>
+ <div className="free-post-under"><span>{plain('Editable','Lienzo editable',locale)} 1080 × {freePostDimensions(post.format).height} · {post.format==='Reel'?'Reel 9:16':post.format==='Story'?'Story 9:16':plain('no template or watermark','sin plantilla ni marcas',locale)}</span>
     {onSave&&<button type="button" className="free-post-save" disabled={saving} onClick={onSave}>{saving?plain('Saving…','Guardando…',locale):plain('Save post','Guardar publicación',locale)}</button>}
     <button type="button" disabled={busy} onClick={()=>void exportFreePost(post,brand,images)
       .then(()=>notify(plain('PNG ready','PNG descargado',locale)))
