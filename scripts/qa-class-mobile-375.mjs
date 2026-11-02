@@ -62,6 +62,12 @@ try {
   await resultButton.scrollIntoViewIfNeeded();
   await resultButton.click();
   await page.waitForFunction(()=>{const el=document.querySelector('[data-casa-brownie-open]');return el && !el.hidden;},null,{timeout:10000});
+  const afterState=await page.evaluate(()=>({stage:document.querySelector('[data-idea-transform]')?.dataset.stage,
+    sketch:getComputedStyle(document.querySelector('.class-idea-board')).display,
+    result:getComputedStyle(document.querySelector('.class-formed-web')).display}));
+  assert.equal(afterState.stage,'after','Resultado debe tener el estado correcto a '+width);
+  assert.equal(afterState.sketch,'none','El Boceto no puede superponerse al Resultado a '+width);
+  assert.notEqual(afterState.result,'none','La web real debe mostrarse a '+width);
   const fullLink=page.locator('[data-casa-brownie-open] a');
   assert.equal(await fullLink.getAttribute('href'),'https://thelaunchera.com/demos/casa-brownie/');
   assert.equal(await fullLink.getAttribute('target'),'_blank');
@@ -71,6 +77,12 @@ try {
   await page.screenshot({path:'artifacts/class-mobile/casa-resultado-'+width+'.png',fullPage:false});
   await page.locator('#de-idea-a-web [data-transform-to="0"]').click();
   await page.waitForFunction(()=>document.querySelector('[data-casa-brownie-open]')?.hidden===true,null,{timeout:10000});
+  const beforeState=await page.evaluate(()=>({stage:document.querySelector('[data-idea-transform]')?.dataset.stage,
+    sketch:getComputedStyle(document.querySelector('.class-idea-board')).display,
+    result:getComputedStyle(document.querySelector('.class-formed-web')).display}));
+  assert.equal(beforeState.stage,'before','Boceto debe tener el estado correcto a '+width);
+  assert.notEqual(beforeState.sketch,'none','El Boceto debe verse a '+width);
+  assert.equal(beforeState.result,'none','La vista real debe quedar oculta al regresar al Boceto a '+width);
   assert((await page.evaluate(()=>document.documentElement.scrollWidth))<=width+2,'After preview overflows mobile at '+width);
   await page.close();
  }
