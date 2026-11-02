@@ -10,8 +10,8 @@ import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import ProductCenter from './ProductCenter';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { auth, api, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, uploadClassRecording, getClassRecordingUrl, removeOldClassRecording, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { auth, api, getOwnerClassroomSession, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, uploadClassRecording, getClassRecordingUrl, removeOldClassRecording, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
   Mic2,
@@ -285,7 +285,35 @@ function App() {
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [aulaPreviewOpen,setAulaPreviewOpen] = useState(false);
-  const openAulaPreview = () => { setMobileNav(false); setAulaPreviewOpen(true); };
+  const [aulaPreviewError,setAulaPreviewError] = useState('');
+  const aulaFrameRef=useRef<HTMLIFrameElement>(null);
+  const openAulaPreview = () => { setMobileNav(false); setAulaPreviewError(''); setAulaPreviewOpen(true); };
+  // Solo esta ventana, ya autenticada como propietaria, puede pasar la
+  // sesión al iframe del MISMO origen. El aula vuelve a consultar el rol
+  // owner en Supabase; no hay permisos por parámetros URL.
+  const sendClassroomSession=useCallback(async()=>{
+    if(!aulaPreviewOpen || !account || denied || !SUPABASE_ENABLED)return;
+    const target=aulaFrameRef.current?.contentWindow;
+    if(!target)return;
+    try{
+      const tokens=await getOwnerClassroomSession();
+      if(aulaFrameRef.current?.contentWindow!==target)return;
+      target.postMessage({type:'TLE_OWNER_SESSION_RESPONSE',...tokens},window.location.origin);
+      setAulaPreviewError('');
+    }catch{
+      setAulaPreviewError('No se pudo confirmar la sesión privada. Cierra esta vista y comprueba tu acceso al Studio.');
+    }
+  },[aulaPreviewOpen,account,denied]);
+  useEffect(()=>{
+    if(!aulaPreviewOpen || !account || denied)return;
+    const onOwnerRequest=(event:MessageEvent)=>{
+      if(event.origin!==window.location.origin || event.source!==aulaFrameRef.current?.contentWindow)return;
+      if(event.data?.type!=='TLE_OWNER_SESSION_REQUEST')return;
+      void sendClassroomSession();
+    };
+    window.addEventListener('message',onOwnerRequest);
+    return()=>window.removeEventListener('message',onOwnerRequest);
+  },[aulaPreviewOpen,account,denied,sendClassroomSession]);
   useEffect(() => {
     if (!aulaPreviewOpen) return;
     const originalOverflow = document.body.style.overflow;
@@ -2067,7 +2095,9 @@ function App() {
             <button type="button" onClick={() => setAulaPreviewOpen(false)}
               aria-label="Cerrar vista previa y volver al Studio"><X size={17}/> Volver al Studio</button>
           </header>
-          <iframe title="Aula completa · vista privada de administración"
+          {aulaPreviewError && <p className="studio-aula-preview-error" role="alert">{aulaPreviewError}</p>}
+          <iframe ref={aulaFrameRef} onLoad={()=>void sendClassroomSession()}
+            title="Aula completa · vista privada de administración"
             src="../alumnos/?vista=admin&origen=studio" referrerPolicy="same-origin"/>
         </section>
       )}
