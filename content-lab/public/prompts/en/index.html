@@ -504,7 +504,7 @@ main{padding-top:8px}
     <p>Choose your product, explore the ideas and copy the prompt you want to try.</p>
     <ol class="process-steps"><li><span>1</span> Tell us about your product</li><li><span>2</span> Explore eight compositions</li><li><span>3</span> Copia tu favorita y crea tu contenido</li></ol>
   </div>
-  <div class="process-art" aria-label="Tres ejemplos visuales con matcha"><img src="./matcha-02.jpg?v=hd-20261031" alt="Ejemplo matcha con composición tipográfica abstracta" loading="lazy"><img src="./matcha-05.jpg?v=hd-20261031" alt="Ejemplo matcha en composición editorial" loading="lazy"><img src="./matcha-04.jpg?v=hd-20261031" alt="Ejemplo matcha en primer plano" loading="lazy"></div>
+  <div class="process-art" aria-label="Tres ejemplos visuales with matcha"><img src="./matcha-02.jpg?v=hd-20261031" alt="Ejemplo matcha con composición tipográfica abstracta" loading="lazy"><img src="./matcha-05.jpg?v=hd-20261031" alt="Ejemplo matcha en composición editorial" loading="lazy"><img src="./matcha-04.jpg?v=hd-20261031" alt="Ejemplo matcha en primer plano" loading="lazy"></div>
 </section>
 <div class="all-products">Use it with any product, not only matcha.</div>
 
@@ -586,11 +586,11 @@ function render(){const root=$('output');root.replaceChildren();
   const n=document.createElement('b');n.className='number';n.textContent=String(i+1).padStart(2,'0');
   const heading=document.createElement('span');heading.className='heading';
   const strong=document.createElement('strong');strong.textContent=v.title;const desc=document.createElement('small');desc.textContent=v.desc;heading.append(strong,desc);
-  const photo=document.createElement('img');photo.className='sample-thumb';photo.src='./matcha-'+String(i+1).padStart(2,'0')+'.jpg?v=hd-20261031';photo.alt='Ejemplo de la composición '+String(i+1)+' con matcha';photo.loading='lazy';photo.onerror=()=>photo.remove();
+  const photo=document.createElement('img');photo.className='sample-thumb';photo.src='./matcha-'+String(i+1).padStart(2,'0')+'.jpg?v=hd-20261031';photo.alt='Example of composition '+String(i+1)+' with matcha';photo.loading='lazy';photo.onerror=()=>photo.remove();
   const toggle=document.createElement('span');toggle.textContent=selected===i?'−':'+';btn.append(n,photo,heading,toggle);
   btn.onclick=()=>{selected=selected===i?-1:i;render()};article.append(btn);
   if(selected===i){const body=document.createElement('div');body.className='body';const textarea=document.createElement('textarea');textarea.readOnly=true;textarea.rows=17;textarea.value=build(i);
-    const copy=document.createElement('button');copy.className='action';copy.textContent='Copiar prompt '+String(i+1).padStart(2,'0');copy.onclick=()=>copyText(build(i));body.append(textarea,copy);article.append(body)}
+    const copy=document.createElement('button');copy.className='action';copy.textContent='Copy prompt '+String(i+1).padStart(2,'0');copy.onclick=()=>copyText(build(i));body.append(textarea,copy);article.append(body)}
   root.append(article);
  });
 }
@@ -619,7 +619,7 @@ render();
    current=(index+sources.length)%sources.length;
    frame.classList.add('is-changing');
    frame.src=sources[current];
-   frame.alt='Ejemplo de publicación para cualquier producto: composición '+(current+1)+' de 8, mostrado con matcha';
+   frame.alt='Ejemplo de publicación para cualquier producto: composición '+(current+1)+' de 8, mostrado with matcha';
    thumbnails.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-pressed',String(i===current));});
    dots.forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.setAttribute('aria-current',String(i===current));});
    const tray=thumbnails[current].parentElement;
@@ -662,6 +662,7 @@ render();
      product_name:document.getElementById('product').value.trim(),
      marketing_opt_in:document.getElementById('matcha-marketing').checked,
      website:document.getElementById('matcha-website').value,
+     language:'en',
      started_at:startedAt
     })
    });
@@ -724,14 +725,14 @@ render();
  let token=action==='access'?magicToken:null;
  if(action==='confirm'){
   placeholder.classList.add('is-loading');
-  title.textContent='Abriendo tus ocho prompts…';
-  note.textContent='Estamos comprobando tu correo y preparando tu espacio creativo.';
+  title.textContent='Unlocking your eight prompts…';
+  note.textContent='We're confirming your email and preparing your creative space.';
   requestLink.hidden=true;
   try{
    const data=await sendAction('confirm',{confirm_token:magicToken});
    token=data.access_token;
   }catch(error){
-   feedback('No pudimos abrir tu regalo',error.message+' Solicita un enlace nuevo en el formulario.');
+   feedback('We couldn't open your free prompts',error.message+' Request a new link using the form.');
    placeholder.scrollIntoView({block:'start'});return;
   }
  }
@@ -744,11 +745,22 @@ render();
  if(!token)token=sessionStorage.getItem('matcha_private_access_v1');
  if(!token)return;
  placeholder.classList.add('is-loading');
- if(!action){title.textContent='Recuperando tus prompts…';requestLink.hidden=true}
+ if(!action){title.textContent='Restoring your prompts…';requestLink.hidden=true}
  try{
   const data=await sendAction('library',{access_token:token});
-  if(!Array.isArray(data.layouts)||data.layouts.length!==8||!data.rules)throw new Error('La biblioteca no está disponible.');
-  layouts=data.layouts;privateRules=data.rules;
+  if(!Array.isArray(data.layouts)||data.layouts.length!==8||!data.rules)throw new Error('Your prompt library isn't available right now.');
+  const englishTitles=[
+    ["Asymmetric Editorial","A large product photo on the right"],
+    ["Monumental Center","A bold headline with your product below"],
+    ["Type Behind Product","Oversized typography layered behind the product"],
+    ["Side-Cropped Close-Up","A close-up entering from the side"],
+    ["Offset Negative Space","Thoughtful spacing with the product lower right"],
+    ["Diagonal Visual Flow","A diagonal layout without rotating your words"],
+    ["Vertical Editorial Stack","Headline, supporting copy and product in a vertical flow"],
+    ["Magazine Column Split","A narrow text column and generous product photography"]
+  ];
+  layouts=data.layouts.map((item,index)=>({...item,title:englishTitles[index]?.[0]||item.title,desc:englishTitles[index]?.[1]||item.desc}));
+  privateRules=data.rules;
   sessionStorage.setItem('matcha_private_access_v1',token);
   try{localStorage.setItem('matcha_private_access_v2',JSON.stringify({token,expires:Date.now()+90*86400000}))}catch{}
   placeholder.hidden=true;
@@ -756,7 +768,7 @@ render();
   document.getElementById('content-lab').hidden=false;
   if(!document.querySelector('.matcha-access-ready')){
    const ready=document.createElement('p');ready.className='matcha-access-ready';
-   ready.textContent='✓ ¡Tus ocho prompts están abiertos! Personalízalos con tu marca. Tu foto se queda en tu dispositivo.';
+   ready.textContent='✓ Your eight prompts are unlocked! Customize them for your brand. Your photo stays on your device.';
    editor.before(ready);
   }
   render();
