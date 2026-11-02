@@ -454,7 +454,7 @@ export default function SeamlessEditor(){
       style={{width:100,flex:'1 1 90px',accentColor:'#191919'}}/>
      <output>{clampLetterSpacing(current.letterSpacing||0)}</output>
     </label>
-   </div>
+    </div>}
    <button type="button" style={control} onClick={()=>update(current.id,current.kind==='image'?{width:Math.round(current.width*.85)}:{fontSize:Math.round(current.fontSize*.85)})}>− Reducir</button>
    <button type="button" style={control} onClick={()=>update(current.id,current.kind==='image'?{width:Math.round(current.width*1.15)}:{fontSize:Math.round(current.fontSize*1.15)})}>＋ Agrandar</button>
    <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835',fontWeight:750}} onClick={()=>deleteElement(current.id)}>× Borrar {current.kind==='text'?'texto':current.kind==='image'?'foto':'sticker'}</button>
