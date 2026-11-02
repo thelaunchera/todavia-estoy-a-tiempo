@@ -234,3 +234,10 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
 .inspiration-owner-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:9px}
 .inspiration-owner-options label{display:flex;align-items:center;gap:10px;min-width:0;background:#fff;padding:12px;border:1px solid #d8e3e6;border-radius:10px;font-size:13px;font-weight:700;line-height:1.35;color:#25435a;cursor:pointer}
 .inspiration-owner-options input{width:18px;height:18px;flex:0 0 18px;accent-color:#355f79}
+
+/* Actualizar el aula: botón táctil que permanece visible en la cabecera sticky. */
+#aula-layout .aula-refresh{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;flex:0 0 auto;border:1px solid #c7d7df;border-radius:11px;padding:10px 13px;background:#fff;color:#284e68;font:750 12px/1.2 'DM Sans',Arial,sans-serif;white-space:nowrap;cursor:pointer;touch-action:manipulation}
+#aula-layout .aula-refresh svg{width:18px;height:18px;display:block;flex:0 0 18px}
+#aula-layout .aula-refresh:hover{background:#edf3f5}
+#aula-layout .aula-refresh:focus-visible{outline:3px solid #78a8c4;outline-offset:2px}
+@media(max-width:410px){#aula-layout .aula-refresh{padding-inline:10px;gap:6px;font-size:11px}#aula-layout .aula-refresh svg{width:16px;height:16px;flex-basis:16px}}
