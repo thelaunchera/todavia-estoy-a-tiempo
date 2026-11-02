@@ -72,15 +72,15 @@ export function englishDemoStep(code,brand=''){
  if(m){
   const desc=demoStages[m[1]]?.[Number(m[2])];
   const task=desc?.[1]||'Build only the named part of this website, keeping existing approved information and images.';
-  return 'PRACTICE BRIEF — '+(brand||'Example website')+'\\n\\n'+
-   'Task: '+task+'\\n\\n'+
+  return 'PRACTICE BRIEF — '+(brand||'Example website')+'\n\n'+
+   'Task: '+task+'\n\n'+
    'Use the existing approved brand board, exact reference images and verified business details. Work on ONE section at a time. Do not copy another brand, invent prices, accept real payments or claim untested functions work. Show the updated section and explain what changed before proceeding.';
  }
  const p=/^demo-photo_(.+)_(\d+)_(\d+)$/.exec(String(code));
  if(p){
   // The photo index belongs to its parent step, not to the full demo gallery.
   const subject=englishDemoPhotoTitle(code);
-  return 'INDIVIDUAL PHOTO PRACTICE — '+(brand||'Example website')+'\\n\\n'+
+  return 'INDIVIDUAL PHOTO PRACTICE — '+(brand||'Example website')+'\n\n'+
    'Create ONE high-resolution editorial photo of '+subject+'. Match the supplied approved reference, materials, brand and lighting. Keep proportions and real product details accurate, leave useful crop space, and return ONE photo file only. No collage, invented labels, text or watermark. Check the image before using it on the website.';
  }
  return '';
