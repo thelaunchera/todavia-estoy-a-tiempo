@@ -99,7 +99,7 @@ async function owner():Promise<{id:string;email:string}> {
 // Uso exclusivo de la vista previa del aula dentro del Studio autenticado.
 // El token nunca se coloca en URLs, logs ni en el HTML público. La RLS del
 // aula vuelve a comprobar el rol owner cuando la vista carga.
-export async function getOwnerClassroomSession():Promise<{access_token:string;refresh_token:string}>{
+export async function getOwnerClassroomSession():Promise<{access_token:string;refresh_token:string;user_id:string}>{
   if(!client)throw new Error('Studio sin sesión de Supabase.');
   const studioOwner=await owner();
   const {data,error}=await client.auth.getSession();
@@ -108,7 +108,7 @@ export async function getOwnerClassroomSession():Promise<{access_token:string;re
      session.user?.id!==studioOwner.id){
     throw new Error('No se pudo verificar la sesión de administración.');
   }
-  return {access_token:session.access_token,refresh_token:session.refresh_token};
+  return {access_token:session.access_token,refresh_token:session.refresh_token,user_id:studioOwner.id};
 }
 
 export const auth={
