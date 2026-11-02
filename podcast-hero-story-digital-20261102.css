@@ -24,3 +24,52 @@
  .podcast-hero-v2 #hero-title{font-size:clamp(2rem,9.15vw,2.45rem)!important}
  .podcast-hero-v2 .hero-project-links a{font-size:.78rem}
 }
+
+/* Content Lab is a small optional creative resource near the class, not a second podcast hero. */
+.podcast-hero-v2 .hero-project-links a[href*="content-lab/descubre/"]{font-weight:700}
+.learning-section .learning-lab-resource{
+  margin-top:clamp(18px,3vw,27px);
+  padding:clamp(17px,2.5vw,22px) 0 0;
+  border-top:1px solid rgba(27,59,86,.2);
+  max-width:570px;
+}
+.learning-section .learning-lab-resource p{
+  max-width:46ch;
+  font:400 clamp(.85rem,1.4vw,.95rem)/1.55 system-ui,sans-serif;
+  color:#3e5263;
+  margin:0 0 12px;
+}
+.learning-section .learning-lab-resource-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px 16px;
+}
+.learning-section .learning-lab-resource-button{
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:fit-content;
+  max-width:min(100%,280px);
+  min-height:46px;
+  padding:11px 21px;
+  background:#234662;
+  border:1px solid #234662;
+  border-radius:999px;
+  color:#fff!important;
+  text-decoration:none;
+  text-align:center;
+  font:700 .83rem/1.35 system-ui,sans-serif;
+}
+.learning-section .learning-lab-resource-button:hover{background:#345a78}
+.learning-section .learning-lab-resource-lang{
+  color:#274d65!important;
+  text-underline-offset:4px;
+  font:600 .81rem/1.4 system-ui,sans-serif;
+}
+.learning-section .learning-lab-resource a:focus-visible{outline:3px solid #416d9a;outline-offset:4px}
+@media(max-width:600px){
+  .learning-section .learning-lab-resource{margin-top:19px;padding-top:16px}
+  .learning-section .learning-lab-resource-actions{gap:9px 15px}
+}
