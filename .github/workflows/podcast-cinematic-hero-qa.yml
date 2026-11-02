@@ -1,0 +1,50 @@
+name: Podcast Cinematic Hero QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'podcast-cinematic-hero-20261102.css'
+      - 'podcast-cinematic-hero-20261102.js'
+      - 'scripts/qa-podcast-cinema.mjs'
+      - '.github/workflows/podcast-cinematic-hero-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  podcast-hero:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check cinema markup, links and JavaScript
+        run: |
+          node --check podcast-cinematic-hero-20261102.js
+          node scripts/qa-podcast-cinema.mjs
+      - name: Install browser QA separately from the site
+        run: |
+          mkdir -p /tmp/podcast-cinema-qa
+          cd /tmp/podcast-cinema-qa
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund playwright@1.57.0
+          npx playwright install --with-deps chromium
+          mkdir -p "$GITHUB_WORKSPACE/node_modules"
+          ln -sfn /tmp/podcast-cinema-qa/node_modules/playwright "$GITHUB_WORKSPACE/node_modules/playwright"
+          ln -sfn /tmp/podcast-cinema-qa/node_modules/playwright-core "$GITHUB_WORKSPACE/node_modules/playwright-core"
+      - name: Test portrait, links, mobile sizing and manual scenes
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/podcast-cinema-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/qa-podcast-cinema.mjs --browser
+      - name: Keep screenshots for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: podcast-cinematic-mobile-desktop
+          path: artifacts/podcast-cinema/*.png
+          if-no-files-found: ignore
