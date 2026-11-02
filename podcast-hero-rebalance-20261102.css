@@ -68,3 +68,9 @@
  }
  .podcast-film-hero .hero-lede.line-reveal{font-size:.87rem}
 }
+
+/* Interactive scene selectors must receive real taps above all photograph overlays. */
+.podcast-film-hero .podcast-film-captions{pointer-events:auto!important}
+.podcast-film-hero .podcast-film-scenes{pointer-events:none}
+.podcast-film-hero .podcast-film-controls{position:relative;z-index:12;pointer-events:auto!important}
+.podcast-film-hero .podcast-film-controls button{position:relative;z-index:13;pointer-events:auto!important;touch-action:manipulation}
