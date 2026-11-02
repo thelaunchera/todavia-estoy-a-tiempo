@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {draftFingerprint,writeDraftBackup,removeDraftBackup,newerUnsavedBackup,type LocalDraft} from './DraftRecovery';
 import { api, auth, image } from './platform/client';
+import {sourceAwareScale,downloadLosslessPng} from './ExportQuality';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import LiveFeedGrid from './LiveFeedGrid';
@@ -251,11 +252,13 @@ function Graphic({
   );
 }
 async function downloadPng(post: Post, brand: Brand, photo?: string) {
+  const pixelScale=await sourceAwareScale([photo],1080,1350);
   const canvas = document.createElement('canvas');
-  canvas.width = 1080;
-  canvas.height = 1350;
+  canvas.width = 1080*pixelScale;
+  canvas.height = 1350*pixelScale;
   const c = canvas.getContext('2d');
   if (!c) throw Error('No se pudo exportar.');
+  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.scale(pixelScale,pixelScale);
   const rect = (x: number, y: number, w: number, h: number, color: string) => {
     c.fillStyle = color;
     c.fillRect(x, y, w, h);
@@ -342,12 +345,8 @@ async function downloadPng(post: Post, brand: Brand, photo?: string) {
     await drawPhoto(620, 720, 410, 450);
     small(post.cta, 70, 1280, paperInk);
   }
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download =
-    (post.title || 'content').replace(/[^a-z0-9-]/gi, '-').toLowerCase() +
-    '-1080x1350.png';
-  a.click();
+  try{await downloadLosslessPng(canvas,(post.title||'content').replace(/[^a-z0-9-]/gi,'-').toLowerCase())}
+  finally{canvas.width=1;canvas.height=1}
 }
 function App() {
   const [account, setAccount] = useState<{ email?: string } | null>(null);
