@@ -37,7 +37,7 @@ test('Photo can overflow single post and is no longer clamped to canvas width',(
  assert.ok(touch.includes('onClick={()=>resizeSelected(.85)}'));
  assert.ok(touch.includes('max="300"'));
  assert.ok(free.includes('primaryPhotoRect:clampFreePhotoRect(rect)'));
- assert.ok(free.includes("kind==='photo'?clampFreePhotoRect(rect):clampRect(rect)"));
+ assert.ok(free.includes("rect:clampFreePhotoRect(rect)"),'all draggable elements may extend beyond a single post edge');
 });
 test('Controls stay outside the clipped artboard and are usable with iPhone-sized touch targets',()=>{
  const css=read('src/TouchLayerCanvas.css');
