@@ -96,6 +96,21 @@ async function owner():Promise<{id:string;email:string}> {
   if(roleError || !admin){ throw Object.assign(new Error('La sesión existe, pero el acceso de administradora todavía no está autorizado.'),{code:'unauthorized'}); }
   return {id:user.id,email:user.email||''};
 }
+// Uso exclusivo de la vista previa del aula dentro del Studio autenticado.
+// El token nunca se coloca en URLs, logs ni en el HTML público. La RLS del
+// aula vuelve a comprobar el rol owner cuando la vista carga.
+export async function getOwnerClassroomSession():Promise<{access_token:string;refresh_token:string}>{
+  if(!client)throw new Error('Studio sin sesión de Supabase.');
+  const studioOwner=await owner();
+  const {data,error}=await client.auth.getSession();
+  const session=data?.session;
+  if(error||!session?.access_token||!session?.refresh_token||
+     session.user?.id!==studioOwner.id){
+    throw new Error('No se pudo verificar la sesión de administración.');
+  }
+  return {access_token:session.access_token,refresh_token:session.refresh_token};
+}
+
 export const auth={
   isRecovering: () => recoveringPassword,
   onSessionEvent(callback: (event: string) => void): () => void {
