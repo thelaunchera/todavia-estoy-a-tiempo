@@ -34,7 +34,8 @@ test('image alpha is applied to original resolution rather than preview resoluti
  assert.match(moduleSource,/globalCompositeOperation='destination-in'/);
  assert.match(moduleSource,/drawImage\(mask,0,0,out\.width,out\.height\)/);
  assert.match(moduleSource,/toBlob\(blob=>blob\?resolve\(blob\)/);
- assert.match(moduleSource,/model:'lite',quality:'quality'/);
+ assert.match(moduleSource,/quality:'quality'/);
+ assert.doesNotMatch(moduleSource,/model:'lite'/,'BG0 chooses the supported model automatically');
 });
 
 test('background failure leaves original photo untouched and offers a fallback',()=>{
