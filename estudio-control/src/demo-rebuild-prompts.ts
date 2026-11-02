@@ -1,5 +1,5 @@
 /* Studio privado de The Launch Era. Material didáctico: no se ejecuta ni publica nada. */
-export type DemoPhotoCommand = {title:string;prompt:string};
+export type DemoPhotoCommand = {title:string;prompt:string;imageUrl?:string};
 export type DemoRebuildPrompt = {title:string;step:string;prompt:string;say:string;show:string;photoCommands?:DemoPhotoCommand[]};
 export const demoRebuildPrompts: Record<'casa-brownie'|'crumb', DemoRebuildPrompt[]> = {
   "casa-brownie": [
