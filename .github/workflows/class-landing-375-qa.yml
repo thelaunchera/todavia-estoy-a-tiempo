@@ -1,0 +1,42 @@
+name: Aula landing - iPhone 375px visual QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'clases/primera-landing.html'
+      - 'clases/clases.css'
+      - 'clases/editorial-real.css'
+      - 'clases/mobile-hero-recovery-20261101.css'
+      - 'site-hierarchy-20261101.css'
+      - 'scripts/qa-class-mobile-375.mjs'
+      - '.github/workflows/class-landing-375-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-hero:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser QA
+        run: |
+          npm install --no-audit --no-fund --no-save playwright@1.57.0
+          npx playwright install chromium
+      - name: Serve public class landing, inspect iPhone geometry, and capture screenshots
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/course-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid || true' EXIT
+          sleep 2
+          node scripts/qa-class-mobile-375.mjs
+      - name: Preserve 375px screenshot even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: class-landing-mobile-screenshots
+          path: artifacts/class-mobile/*.png
+          if-no-files-found: ignore
