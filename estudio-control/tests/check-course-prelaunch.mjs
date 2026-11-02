@@ -401,6 +401,12 @@ assert.match(studioShell,/aulaPreviewOpen && !!account && !denied/,'No montar vi
 assert.match(room,/id="aula-owner-nav"[^>]*hidden/,'El enlace junto al logo permanece oculto hasta verificar la propietaria');
 assert.doesNotMatch(room,/Soy la administradora · Ver aula sin comprar/,'Sin enlaces de administración en el formulario público');
 assert.match(roomScript,/ownerNav.hidden=panel!==course\|\|!adminPreview/,'El enlace privado exige una vista de propietaria validada');
+assert.match(studioShell,/getOwnerClassroomSession/,'El Studio comprueba la sesión de propietaria antes de compartirla');
+assert.match(studioShell,/TLE_OWNER_SESSION_RESPONSE/,'Vista privada recibe sesión por el mismo origen sin URL con tokens');
+assert.match(roomScript,/STUDIO_EMBEDDED_OWNER&&!studioSessionReady/,'El iframe del Studio no presenta el formulario del alumno');
+assert.match(roomScript,/event.origin!==window.location.origin \|\| event.source!==window.parent/,'El iframe solo acepta mensajes de su ventana padre legítima');
+assert.doesNotMatch(room,/Si eres la administradora, entra con tus datos del Studio/,'No hablar de administración en el formulario público');
+assert.match(roomScript,/if\(ownerConfirmed\)/,'Tras verificar propietaria, un fallo al cargar no muestra una pantalla de compra');
 assert.doesNotMatch(room,/href="\.\.\/index\.html" aria-label="Volver al podcast"/,'Logo no sale al landing');
 console.log('QA: sidebar real, cinco secciones, menú móvil y estudio separado OK');
 
