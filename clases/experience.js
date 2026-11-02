@@ -12,6 +12,20 @@
     const before = transformation.querySelector('[data-transform-caption="before"]');
     const after = transformation.querySelector('[data-transform-caption="after"]');
     const scene = document.getElementById('transform-scene');
+    const fullPageLink = transformation.querySelector('[data-casa-brownie-open]');
+    const liveFrame = transformation.querySelector('[data-casa-brownie-frame]');
+    const liveFrameWrap = transformation.querySelector('[data-casa-preview]');
+    let previewStarted = false;
+    const showRealLanding = () => {
+      if (previewStarted || !liveFrame) return;
+      const address = liveFrame.getAttribute('data-src');
+      if (!address) return;
+      previewStarted = true;
+      liveFrame.addEventListener('load', () => {
+        liveFrameWrap?.setAttribute('data-loaded', 'true');
+      }, {once:true});
+      liveFrame.setAttribute('src', address);
+    };
     let animation = null;
     function renderIdea(value) {
       const progress = Math.max(0, Math.min(100, Number(value) || 0));
@@ -26,6 +40,8 @@
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(Number(choice.dataset.transformTo) === (complete ? 100 : 0))));
       if (before) before.hidden = complete;
       if (after) after.hidden = !complete;
+      if (fullPageLink) fullPageLink.hidden = !complete;
+      if (complete) showRealLanding();
     }
     function stopTransformation() {
       if (animation !== null) window.cancelAnimationFrame(animation);
