@@ -34,8 +34,14 @@ for(const p of ['clases/primera-landing.html','clases/primera-landing-en.html'])
  assert.match(body,/class-audio-language-note/,p+' must clearly disclose audio language');
  assert.match(body,/href="#lista-espera"/,p+' must preserve waitlist CTA');
 }
-assert.match(read('clases/primera-landing.html'),/Audio de las lecciones: español latino|La clase se explica en español latino/);
-assert.match(read('clases/primera-landing-en.html'),/Lesson audio: Latin American Spanish|Lessons are taught in Latin American Spanish/);
+const courseEs=read('clases/primera-landing.html');
+const courseEn=read('clases/primera-landing-en.html');
+assert.match(courseEs,/Audio y subtítulos en español e inglés/,'Spanish class landing must promise bilingual audio and captions');
+assert.match(courseEn,/Audio and subtitles in English and Spanish/,'English class landing must promise bilingual audio and captions');
+assert.match(courseEs,/La clase tendrá audio en español latino y en inglés/,'Spanish FAQ should agree with class offer');
+assert.match(courseEn,/The class will offer audio in both English and Latin American Spanish/,'English FAQ should agree with class offer');
+assert.doesNotMatch(courseEs,/el audio no está doblado|La opción «English» no cambia el idioma de la voz/,'Spanish landing must not contradict bilingual audio');
+assert.doesNotMatch(courseEn,/the lessons are not dubbed|does not change the spoken audio/,'English landing must not contradict bilingual audio');
 const room=read('alumnos/index.html');
 for(const lang of ['es','en','auto']) assert(room.includes('value="'+lang+'"'), 'Caption option '+lang);
 const player=read('alumnos/curso.js');
