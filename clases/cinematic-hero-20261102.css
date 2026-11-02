@@ -1,0 +1,262 @@
+/* Hero cinematográfico de la masterclass · 2 nov 2026.
+   Solo modifica el primer hero; conserva precio, formulario y resto de landings. */
+body.class-page-v2 .class-hero {
+  background:linear-gradient(113deg,#faf8f3 0%,#f8f5ee 58%,#f0ede5 100%)!important;
+  overflow:hidden!important;
+  padding:clamp(30px,4.5vw,62px) 0 clamp(36px,5vw,64px)!important;
+}
+body.class-page-v2 .class-hero .shell.class-hero-grid {
+  display:block!important;
+  width:min(100% - 48px,1240px)!important;
+  max-width:1240px!important;
+  margin:0 auto!important;
+  padding:0!important;
+  transform:none!important;
+}
+body.class-page-v2 .class-hero .class-hero-art {display:none!important}
+body.class-page-v2 .class-hero .class-hero-intro {
+  display:grid!important;
+  grid-template-columns:minmax(0,.91fr) minmax(0,1.09fr)!important;
+  grid-template-rows:repeat(9,auto)!important;
+  column-gap:clamp(24px,5vw,80px)!important;
+  row-gap:0!important;
+  align-items:start!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  transform:none!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > :not(.class-cinema-visual) {
+  grid-column:1!important;
+  min-width:0;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {margin-top:8px!important}
+body.class-page-v2 .class-hero .class-hero-intro > h1 {
+  font-size:clamp(3.25rem,5.7vw,6rem)!important;
+  line-height:1.02!important;
+  letter-spacing:-.055em!important;
+  margin:13px 0 0!important;
+  text-align:left!important;
+  max-width:11ch!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {
+  font-size:clamp(1.16rem,1.8vw,1.6rem)!important;
+  margin:18px 0 0!important;
+  line-height:1.32!important;
+  text-align:left!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-lede {
+  margin:15px 0 0!important;
+  width:100%!important;
+  max-width:47ch!important;
+  font-size:clamp(.9rem,1.15vw,1rem)!important;
+  line-height:1.58!important;
+  text-align:left!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:10px!important;
+  margin:22px 0 0!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  grid-template-columns:none!important;
+  width:100%!important;
+}
+body.class-page-v2 .class-hero .class-hero-actions > a {
+  min-height:50px!important;
+  width:auto!important;
+  max-width:100%!important;
+  flex:0 1 auto!important;
+  margin:0!important;
+  padding:13px 19px!important;
+  line-height:1.3!important;
+  border-radius:999px!important;
+}
+body.class-page-v2 .class-hero .class-hero-actions > .class-campaign-notify-link {
+  border-color:transparent!important;
+  background:transparent!important;
+  text-decoration:underline!important;
+  text-underline-offset:4px!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-price-inline {
+  margin:19px 0 0!important;
+  max-width:100%!important;
+  padding-top:10px!important;
+}
+body.class-page-v2 .class-hero .class-price-campaign .class-price-current {
+  align-items:flex-start!important;
+  margin:9px 0 0!important;
+}
+body.class-page-v2 .class-hero .class-price-campaign .class-price-current strong {
+  font-size:clamp(2.65rem,4.4vw,4rem)!important;
+  line-height:1!important;
+}
+body.class-page-v2 .class-hero .class-price-campaign .class-price-regular {
+  justify-content:flex-start!important;
+}
+body.class-page-v2 .class-hero .class-price-campaign p.class-campaign-detail {
+  text-align:left!important;
+  font-size:.8rem!important;
+  line-height:1.45!important;
+}
+body.class-page-v2 .class-hero .class-campaign-pill {
+  font-size:.62rem!important;
+  padding:7px 12px!important;
+}
+body.class-page-v2 .class-hero .class-campaign-divider {display:none!important}
+body.class-page-v2 .class-hero .class-hero-intro > .class-availability {margin:14px 0 0!important}
+body.class-page-v2 .class-hero .class-hero-intro > .class-notice {margin:4px 0 0!important}
+
+/* El video y la web de muestra son una sola escena editorial, sin tarjeta decorativa. */
+body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+  grid-column:2!important;
+  grid-row:1 / span 10!important;
+  align-self:stretch!important;
+  display:block!important;
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden;
+  min-width:0!important;
+  min-height:560px!important;
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:3px;
+  background:#6b3f33;
+  color:#fff;
+  box-shadow:none!important;
+}
+.class-cinema-visual .class-cinema-film {position:absolute;inset:0;overflow:hidden}
+.class-cinema-visual .class-cinema-film video {
+  display:block;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.04);
+}
+.class-cinema-visual .class-cinema-photo {
+  position:absolute;inset:0;
+  background:url('https://thelaunchera.com/demos/casa-brownie/assets/regalo-lazo-rosa.webp') center/cover no-repeat;
+  opacity:0;
+  animation:class-cinema-photo-fade 13s ease-in-out infinite;
+}
+.class-cinema-visual .class-cinema-tint {
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(28,14,12,.32),transparent 41%,rgba(25,12,12,.25) 60%,rgba(20,10,8,.70));
+}
+.class-cinema-visual .class-cinema-kicker {
+  position:absolute;top:clamp(20px,3vw,36px);left:clamp(18px,3.2vw,38px);
+  margin:0;color:#fff;font:700 .67rem/1.4 Arial,sans-serif;
+  letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 12px #21120f80;
+}
+.class-cinema-visual .class-cinema-statement {
+  position:absolute;top:16%;left:clamp(18px,3.2vw,38px);
+  margin:0;font:400 clamp(2.2rem,4vw,4.4rem)/.99 Georgia,serif;
+  letter-spacing:-.065em;color:#fff;text-shadow:0 2px 22px #30170e8a;
+}
+.class-cinema-visual .class-cinema-statement em {
+  font-style:italic;color:#fff3e7;
+}
+.class-cinema-visual .class-cinema-browser {
+  position:absolute;right:clamp(14px,2.5vw,30px);bottom:clamp(67px,8vw,104px);
+  width:min(56%,340px);min-width:230px;
+  border:1px solid #ffffffab;border-radius:11px;overflow:hidden;
+  background:#f8efe7;color:#482e28;box-shadow:0 22px 62px #160c0a66;
+  transform:translateY(0);
+  animation:class-cinema-window-in 1s .25s ease-out both;
+  text-decoration:none;
+}
+.class-cinema-visual .class-cinema-browser:focus-visible {outline:3px solid #fff;outline-offset:5px}
+.class-cinema-visual .class-cinema-browser-top {
+  height:25px;display:flex;align-items:center;gap:6px;padding:0 11px;background:#efe8e1;border-bottom:1px solid #d9c6ba;
+}
+.class-cinema-visual .class-cinema-browser-top i {width:6px;height:6px;border-radius:50%;background:#ac8978}
+.class-cinema-visual .class-cinema-browser-url {flex:1;text-align:center;font:500 9px/1.4 Arial,sans-serif;color:#876d61}
+.class-cinema-visual .class-cinema-browser-photo {
+  height:clamp(86px,11vw,136px);width:100%;
+  background:url('https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp') center 48%/cover no-repeat;
+}
+.class-cinema-visual .class-cinema-browser-copy {padding:12px 16px 16px}
+.class-cinema-visual .class-cinema-browser-brand {
+  display:block;font:700 9px/1.2 Arial,sans-serif;letter-spacing:.18em;color:#a07259;
+}
+.class-cinema-visual .class-cinema-browser-title {
+  display:block;margin:6px 0 0;font:500 clamp(1.15rem,2vw,1.7rem)/1.03 Georgia,serif;
+  letter-spacing:-.04em;color:#4d3028;
+}
+.class-cinema-visual .class-cinema-browser-tap {
+  display:inline-block;margin-top:11px;padding:8px 12px;border-radius:40px;background:#4e342c;
+  color:#fff;font:700 10px/1.2 Arial,sans-serif;
+}
+.class-cinema-visual .class-cinema-footer {
+  position:absolute;bottom:clamp(18px,3vw,36px);left:clamp(18px,3.2vw,38px);right:20px;
+  display:flex;gap:10px;align-items:center;justify-content:space-between;
+  color:#fff;font:700 .65rem/1.4 Arial,sans-serif;letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.class-cinema-visual .class-cinema-footer-mark {display:inline-block;border-top:1px solid #ffffff90;padding-top:9px}
+.class-cinema-visual .class-cinema-footer a {color:#fff;text-decoration:underline;text-underline-offset:4px;letter-spacing:0;text-transform:none}
+@keyframes class-cinema-photo-fade {0%,42%{opacity:0}49%,78%{opacity:1}91%,100%{opacity:0}}
+@keyframes class-cinema-window-in {from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1000px) {
+  body.class-page-v2 .class-hero .class-hero-intro {grid-template-columns:minmax(0,1fr) minmax(0,.98fr)!important;column-gap:26px!important}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {min-height:520px!important}
+  .class-cinema-visual .class-cinema-browser {min-width:190px;width:63%}
+}
+@media(max-width:700px) {
+  body.class-page-v2 .class-hero {padding:26px 0 35px!important}
+  body.class-page-v2 .class-hero .shell.class-hero-grid {width:calc(100% - 38px)!important;max-width:560px!important}
+  body.class-page-v2 .class-hero .class-hero-intro {
+    display:flex!important;flex-direction:column!important;gap:0!important;
+    align-items:stretch!important;grid-template:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {margin:0 0 9px!important}
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {
+    font-size:clamp(36px,9.5vw,48px)!important;
+    max-width:100%!important;margin:0!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {margin:12px 0 0!important;font-size:clamp(18px,5vw,22px)!important}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede {margin:10px 0 0!important;font-size:14px!important}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {
+    flex-direction:column!important;align-items:stretch!important;
+    margin:18px 0 0!important;gap:5px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions > a {width:100%!important;min-height:48px!important}
+  body.class-page-v2 .class-hero .class-hero-actions > .class-campaign-notify-link {
+    min-height:35px!important;padding:7px 12px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+    order:0!important;align-self:stretch!important;flex:0 0 auto!important;
+    min-height:0!important;height:clamp(330px,103vw,450px)!important;
+    margin:18px 0 0!important;width:100%!important;
+    max-width:100%!important;border-radius:9px!important;
+  }
+  .class-cinema-visual .class-cinema-kicker {top:18px;left:18px;font-size:9px}
+  .class-cinema-visual .class-cinema-statement {top:16%;left:18px;font-size:clamp(2rem,8vw,2.8rem)}
+  .class-cinema-visual .class-cinema-browser {
+    width:52%;min-width:165px;right:13px;bottom:55px;border-radius:8px;
+  }
+  .class-cinema-visual .class-cinema-browser-top {height:21px}
+  .class-cinema-visual .class-cinema-browser-photo {height:72px}
+  .class-cinema-visual .class-cinema-browser-copy {padding:9px 10px 11px}
+  .class-cinema-visual .class-cinema-browser-title {font-size:1.02rem}
+  .class-cinema-visual .class-cinema-browser-tap {font-size:9px;padding:7px 9px}
+  .class-cinema-visual .class-cinema-footer {left:18px;right:16px;bottom:13px;font-size:9px}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-price-inline {
+    order:0!important;margin:14px 0 0!important;
+    padding:15px 0 0!important;border-top:1px solid #d4dde0!important;
+  }
+  body.class-page-v2 .class-hero .class-price-campaign .class-price-current strong {font-size:45px!important}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-availability {margin:10px 0 0!important}
+  body.class-page-v2 .class-hero .class-hero-chips {display:none!important}
+}
+@media(max-width:370px) {
+  body.class-page-v2 .class-hero .shell.class-hero-grid {width:calc(100% - 30px)!important}
+  .class-cinema-visual .class-cinema-browser {min-width:160px;width:53%}
+  .class-cinema-visual .class-cinema-statement {font-size:1.9rem}
+}
+@media(prefers-reduced-motion:reduce) {
+  .class-cinema-visual .class-cinema-photo {animation:none!important;opacity:0!important}
+  .class-cinema-visual .class-cinema-browser {animation:none!important}
+}
