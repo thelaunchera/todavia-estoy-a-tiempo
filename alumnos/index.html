@@ -7,7 +7,7 @@
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./curso.css?v=20261102-owner-private-v2"><link rel="stylesheet" href="./subtitulos-20261102.css?v=1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261102-navigation-v3"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261102-materials-nav-v2"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-learning-hub-v2">
+<link rel="stylesheet" href="./curso.css?v=20261102-owner-private-v2"><link rel="stylesheet" href="./subtitulos-20261102.css?v=1"><link rel="stylesheet" href="./aula-sidebar.css?v=20261102-class-ux-v4"><link rel="stylesheet" href="./materiales-interactivos.css?v=20261102-materials-nav-v2"><link rel="stylesheet" href="./club-hub.css?v=20261028-4"><link rel="stylesheet" href="./dashboard-inicio.css?v=20261031-learning-hub-v2">
 </head>
 <body>
 <a class="skip" href="#aula">Saltar al aula</a>
@@ -134,7 +134,8 @@
       <div class="lesson-index" aria-label="Lista de lecciones"><h3>CONTENIDO DE LA CLASE</h3><div id="lesson-buttons"></div></div>
       <p class="aula-nav-group">MIS HERRAMIENTAS</p>
       <button class="aula-side-link" type="button" data-aula-view="prompts" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>Biblioteca de prompts</span></button>
-      <button class="aula-side-link" type="button" data-aula-view="materiales" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3z"/><path d="M3 7V4h7l2 3"/></svg></span><span>Materiales</span></button>
+      <button class="aula-side-link" type="button" data-aula-view="inspiracion" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="2"/><path d="m4 19 5-6 4 3 3-5 4 8"/></svg></span><span>Inspiración · Demos</span></button>
+       <button class="aula-side-link" type="button" data-aula-view="materiales" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3z"/><path d="M3 7V4h7l2 3"/></svg></span><span>Materiales</span></button>
       <button class="aula-side-link" type="button" data-aula-view="bonos" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18M12 9C6 9 5 3 8 3c3 0 4 6 4 6Zm0 0c6 0 7-6 4-6s-4 6-4 6Z"/></svg></span><span>Mis bonos</span></button>
       <button class="aula-side-link" type="button" data-aula-view="comunidad" aria-current="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2zM17 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5"/></svg></span><span>Club de Ideas</span></button>
       <button class="aula-side-link" type="button" data-course-help aria-controls="soporte-aula" aria-expanded="false"><span class="aula-side-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg></span><span>Necesito ayuda</span></button>
@@ -146,18 +147,23 @@
     <header class="aula-main-top">
       <button type="button" id="aula-menu-open" class="aula-menu-open" aria-controls="aula-rail" aria-expanded="false" aria-label="Abrir menú del aula"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menú</span></button>
       <div class="aula-main-location"><span>MI AULA</span><span class="aula-main-separator" aria-hidden="true">/</span><strong id="aula-active-title">Mis lecciones</strong></div>
-      <div class="aula-main-actions"><span class="aula-access-note" title="Este espacio requiere una cuenta autorizada.">Acceso protegido</span><button type="button" class="aula-quick-help" data-course-help aria-controls="soporte-aula" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg><span>Ayuda</span></button></div>
+      <div class="aula-main-actions"><label class="aula-lang-control" for="aula-language"><span class="aula-lang-icon" aria-hidden="true">🌐</span><span class="sr-only">Idioma / Language</span><select id="aula-language" aria-label="Idioma del aula / Classroom language"><option value="es">ES</option><option value="en">EN</option></select></label><span class="aula-access-note" title="Este espacio requiere una cuenta autorizada.">Acceso protegido</span><button type="button" class="aula-quick-help" data-course-help aria-controls="soporte-aula" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1.2 1-1.9 1.5-1.9 3"/><circle cx="12" cy="17" r=".7" fill="currentColor" stroke="none"/></svg><span>Ayuda</span></button></div>
     </header>
-       <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista previa de tu clase</strong><p>Así se ve el aula en construcción. Puedes revisar módulos y materiales aún no publicados. No cuenta avances ni concede acceso a compradores.</p></div></div>
+       <div id="admin-preview-banner" class="admin-preview-banner" hidden><div><strong>Vista privada del aula</strong><p>Solo tú puedes revisar borradores. La experiencia de los alumnos no incluye este aviso.</p></div></div>
 
     <div data-aula-panel="inicio" class="aula-panel aula-home-dashboard" hidden>
       
       <section class="dashboard-hero" aria-labelledby="student-greeting-title">
         <div class="dashboard-hero-copy">
           <p class="dashboard-overline">MI ESPACIO PARA APRENDER</p>
-          <h1 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>!</h1>
-          <p id="student-greeting-message">Aquí tienes un lugar para crear a tu ritmo.</p>
-          <div class="dashboard-welcome-note">Una idea, una lección y un paso a la vez.</div>
+          <h1 id="student-greeting-title">¡Hola, <span id="student-name">qué gusto verte</span>! <span class="dashboard-greeting-spark" aria-hidden="true">✳</span></h1>
+          <p id="student-greeting-message">Hoy puedes avanzar con una sola cosa: tu idea, tus fotos o tu web. Este espacio es tuyo para practicar sin presión.</p>
+          <div class="dashboard-welcome-note"><span class="dashboard-welcome-dot" aria-hidden="true"></span><span id="dashboard-greeting-tip">Tu primera web empieza por entender lo que necesita el negocio.</span></div>
+          <div class="dashboard-hero-actions" aria-label="Empezar desde tu aula">
+           <button type="button" class="dashboard-hero-primary" id="dashboard-hero-continue" data-aula-view="lecciones">Continuar mi clase</button>
+           <button type="button" class="dashboard-hero-secondary" data-aula-view="prompts">Explorar prompts</button>
+           <button type="button" class="dashboard-hero-secondary" data-aula-view="inspiracion">Ver inspiración</button>
+          </div>
         </div>
         <div class="dashboard-progress-card" id="dashboard-progress-shell">
           <p class="dashboard-progress-heading">TU RECORRIDO</p>
@@ -187,13 +193,15 @@
             <button id="dashboard-next-action" class="dashboard-next-action" type="button">Ver mis lecciones</button>
           </div>
         </section>
-        <section class="dashboard-announcements" aria-labelledby="dashboard-announcements-title">
-          <div class="dashboard-announcements-header">
-            <div><p>LO QUE NECESITAS SABER</p><h2 id="dashboard-announcements-title">Avisos del aula</h2></div>
-            <span class="dashboard-count" aria-label="Tres avisos">03</span>
+        <section class="dashboard-announcements dashboard-learning-route" aria-labelledby="dashboard-announcements-title">
+          <div class="dashboard-announcements-header"><div><p>UN PLAN CLARO</p><h2 id="dashboard-announcements-title">Tu ruta en 3 pasos.</h2></div><span class="dashboard-count" aria-hidden="true">03</span></div>
+          <div class="dashboard-learning-steps">
+           <button type="button" data-aula-view="lecciones"><span>01</span><strong>Entiende la necesidad</strong><small>Primero investiga el negocio y su objetivo.</small></button>
+           <button type="button" data-aula-view="prompts"><span>02</span><strong>Prepara identidad y fotos</strong><small>Copia los prompts y guarda tus imágenes individuales.</small></button>
+           <button type="button" data-aula-view="inspiracion"><span>03</span><strong>Construye con referencias</strong><small>Mira demos reales y compara cada sección.</small></button>
           </div>
-          <ul class="dashboard-notices" id="dashboard-notices" aria-live="polite" aria-relevant="additions text"></ul>
-        </section>
+          <ul class="dashboard-notices" id="dashboard-notices" hidden aria-live="polite"></ul>
+         </section>
       </div>
 
       <section class="dashboard-setup" aria-labelledby="dashboard-setup-title">
@@ -225,6 +233,7 @@
             <span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span>
             <strong>Biblioteca de prompts</strong><span>Guarda tiempo con instrucciones para copiar y adaptar.</span>
           </button>
+          <button type="button" class="dashboard-tool" data-aula-view="inspiracion"><span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m5 17 5-6 4 3 3-4 3 7"/></svg></span><strong>Inspiración y demos</strong><span>Fotos separadas, páginas terminadas y prompts para aprender.</span></button>
           <button type="button" class="dashboard-tool" data-aula-view="materiales">
             <span class="dashboard-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v11H3zM3 7V4h7l2 3"/></svg></span>
             <strong>Mis materiales</strong><span id="dashboard-tool-materials">Recursos en preparación</span>
@@ -291,6 +300,7 @@
         <p id="empty-resources"></p>
       </div>
     </div>
+    <div data-aula-panel="inspiracion" class="aula-panel" hidden><div id="inspiration-gallery" aria-label="Galería privada de demos, fotografías y prompts"></div></div>
     <div data-aula-panel="comunidad" class="aula-panel" hidden>
       <section class="club-aula-hub" aria-labelledby="club-aula-heading">
         <div class="club-aula-hub-heading">
@@ -378,5 +388,5 @@
 </main>
 <footer class="bottom"><div class="wrap"><span>© 2026 · Todavía estoy a tiempo</span><span><a href="../privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="../terminos.html" target="_blank" rel="noopener noreferrer">Términos</a></span></div></footer>
 <script defer src="../site-config.js"></script>
-<script type="module" src="./curso.js?v=20261102-navigation-v9"></script>
+<script type="module" src="./curso.js?v=20261102-class-ux-v10"></script>
 </body></html>
