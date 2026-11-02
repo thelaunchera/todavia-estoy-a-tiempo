@@ -19,7 +19,7 @@ for (const [path, price, key] of [
   assert.ok(html.includes('data-buy="' + key + '"'), path + ' checkout binding');
   assert.ok(!html.includes('../index.html#sobre-mi'), path + ' no broken link');
   assert.ok(html.includes('../index.html#escuchar'), path + ' valid navigation');
-  assert.ok(html.includes('Powered by The Launch Era'), path + ' credit');
+  assert.ok(html.includes('Todavía estoy a tiempo'), path + ' podcast identity');
   assert.ok(!html.includes('Secure checkout'), path + ' language');
 }
 assert.ok(!login.includes('Un estudio que funciona desde GitHub.'), 'No technical info in login');
