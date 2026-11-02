@@ -77,4 +77,21 @@ for(const file of ['assets/freebies/5-preguntas-idea-digital-es.pdf','assets/fre
  assert(buffer.subarray(0,4).toString() === '%PDF','Malformed PDF: '+file);
 }
 
+// Keep the language name short across public pages and visible app labels.
+// This checks only the specific label, not cultural references to Latino people.
+const languageLabelFiles=[...new Set([
+ ...paired.flat(),
+ 'alumnos/index.html','alumnos/aula-i18n.js',
+ 'centro/index.html','centro/centro.js',
+ 'content-lab/src/App.tsx','content-lab/src/platform/client.ts',
+ 'content-lab/src/IdeaBank.tsx','content-lab/src/OnePhotoNinePrompts.ts',
+ 'estudio-control/src/ClassProduction.tsx'
+])];
+for(const file of languageLabelFiles){
+ assert.doesNotMatch(read(file),/español\s+latin[oa]|latin[ -]american\s+spanish/i,
+  file+' must say Español or Spanish without a regional qualifier');
+}
+assert.match(read('index.html'),/<option value="es" selected>Español<\/option>/);
+assert.match(read('content-lab/public/prompts/index.html'),/<option value="es">Español<\/option>/);
+
 console.log('Bilingual landing + legal + subtitle contracts: PASS ('+paired.length+' pairs)');
