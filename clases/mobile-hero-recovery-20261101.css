@@ -428,3 +428,32 @@
   body.class-page-v2 .class-hero .class-hero-intro > h1 {font-size:35px!important;}
   body.class-page-v2 .class-topbar .class-wordmark img {width:138px!important;}
 }
+
+/* Geometry QA recovery: old grid used order:-1 for portrait and width-calc
+   for lede. Force the actual reading order on Instagram's WebKit viewport. */
+@media(max-width:650px){
+ body.class-page-v2 .class-hero .class-hero-grid > .class-hero-intro {
+   order:1!important;
+   flex:0 0 auto!important;
+ }
+ body.class-page-v2 .class-hero .class-hero-grid > .class-hero-art {
+   order:2!important;
+   flex:0 0 auto!important;
+ }
+ body.class-page-v2 .class-hero .class-hero-grid > .class-hero-intro > p.class-lede {
+   width:100%!important;
+   max-width:100%!important;
+   margin:12px 0 0!important;
+   padding:0!important;
+   transform:none!important;
+ }
+ body.class-page-v2 .class-hero .class-hero-intro > .class-price-campaign > .class-campaign-divider {
+   position:static!important;
+   display:none!important;
+   width:0!important;
+   height:0!important;
+   margin:0!important;
+   padding:0!important;
+   overflow:hidden!important;
+ }
+}
