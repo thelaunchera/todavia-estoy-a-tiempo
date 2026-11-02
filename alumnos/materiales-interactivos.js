@@ -1,6 +1,6 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v2';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
 import {promptGuide} from './prompt-guide.js?v=20261102-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
 import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261102-v1';
