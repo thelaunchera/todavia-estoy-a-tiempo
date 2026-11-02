@@ -472,7 +472,7 @@
  font-variant-numeric:tabular-nums;color:#2c5360
 }
 @media(max-width:760px){
- .touch-editor-floating-mode{top:calc(env(safe-area-inset-top, 0px) + 66px)}
+ .touch-editor-floating-mode{top:auto;bottom:calc(100px + env(safe-area-inset-bottom, 0px))}
 }
 /* iPad: collapse the initial multi-row banner before it transitions to the
    fixed switch. Slide numbering and arrows remain available. */
@@ -493,3 +493,16 @@
 /* The wallpaper is a visual base, never a draggable hit target. The user can
    still choose it from the layers inspector to adjust its settings. */
 .panorama-canvas .touch-editor-layer.is-background{pointer-events:none!important}
+
+/* In fullscreen the mode switch remains in view during every vertical swipe.
+   The native in-app browser buttons may cover the lower screen on iPhone. */
+.touch-editor-floating-mode.fullscreen{
+ top:auto;bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+ z-index:7200;
+}
+@media(max-width:760px){
+ .touch-editor-floating-mode.fullscreen{
+   top:auto;bottom:calc(102px + env(safe-area-inset-bottom, 0px));
+   width:min(410px,calc(100vw - 20px));
+ }
+}

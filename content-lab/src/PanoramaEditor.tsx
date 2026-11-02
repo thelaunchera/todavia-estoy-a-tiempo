@@ -179,9 +179,9 @@ export default function PanoramaEditor({
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Arrastra elementos a tu carrusel.</h2>
       <p>Como en el ejemplo: elige una foto o un sticker de tu biblioteca, arrástralo al lienzo y cambia su tamaño. En seamless puedes cruzar los límites de los slides.</p>
-    </div><button type="button" className="btn ghost" aria-pressed={expanded} onClick={() => setExpanded(v => !v)}>
-      {expanded ? <Minimize2 size={16}/> : <Maximize2 size={16}/>} {expanded ? 'Cerrar vista amplia' : 'Ampliar lienzo'}
-    </button></header>
+    </div>{!expanded&&<button type="button" className="btn ghost" onClick={()=>setExpanded(true)}>
+      <Maximize2 size={16}/> Ampliar lienzo
+    </button>}</header>
     {expanded&&<button type="button" className="panorama-exit-fixed" onClick={()=>setExpanded(false)}>
       <Minimize2 size={17}/> Cerrar vista amplia
     </button>}
@@ -317,6 +317,7 @@ export default function PanoramaEditor({
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
+        fullscreen={expanded}
         focusLayerId={focusedLayerId||focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}

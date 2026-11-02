@@ -194,3 +194,13 @@
  .panorama-editor.expanded .panorama-body:not(.panorama-library-collapsed)>.panorama-library,
  .panorama-editor.expanded .panorama-mobile-layer-panel{bottom:calc(69px + env(safe-area-inset-bottom))}
 }
+
+/* The fullscreen exit is a single, fixed button. Remove the duplicate
+   heading and keep the phone viewport dedicated to the artwork. */
+.panorama-editor.expanded .panorama-heading{display:none}
+@media(max-width:760px){
+ .panorama-editor.expanded{padding-top:calc(66px + env(safe-area-inset-top))}
+ .panorama-editor.expanded .panorama-export-note{
+   padding-bottom:calc(76px + env(safe-area-inset-bottom));
+ }
+}
