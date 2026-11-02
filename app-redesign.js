@@ -338,6 +338,10 @@
       }
       if (form.querySelector('[name="website"]')?.value) return;
       const payload = new URLSearchParams(new FormData(form));
+      if (kind === 'guide') {
+        const chosenLanguage = form.querySelector('[name="lang"]')?.value;
+        payload.set('lang', chosenLanguage === 'en' ? 'en' : 'es');
+      }
       submit.disabled = true;
       submit.textContent = kind === 'guide' ? ui("Enviando tu guía…","Sending your guide…") : ui("Enviando consulta…","Sending your message…");
       try {
