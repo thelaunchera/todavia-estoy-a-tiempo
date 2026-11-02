@@ -26,15 +26,14 @@
       }, {once:true});
       liveFrame.setAttribute('src', address);
     };
-    let animation = null;
+    // Las vistas son estados completos: nunca mezclar sus capas en Safari iOS.
     function renderIdea(value) {
       const progress = Math.max(0, Math.min(100, Number(value) || 0));
       const complete = progress >= 50;
-      transformation.style.setProperty('--formation', String(progress / 100));
-      transformation.style.setProperty('--formed-opacity', String(Math.max(0, (progress - 15) / 85)));
+      transformation.dataset.stage = complete ? 'after' : 'before';
       ideaProgress.style.setProperty('--fill', progress + '%');
       ideaProgress.value = String(progress);
-      const description = progress === 0 ? 'Boceto inicial de Casa Brownie' : progress === 100 ? 'Resultado: muestra visual de Casa Brownie' : 'Transformación visual: ' + Math.round(progress) + '%';
+      const description = complete ? 'Resultado: muestra visual de Casa Brownie' : 'Boceto inicial de Casa Brownie';
       ideaProgress.setAttribute('aria-valuetext', description);
       scene?.setAttribute('aria-label', complete ? 'Resultado: muestra visual de la landing Casa Brownie.' : 'Boceto de Casa Brownie con bloques de texto, imagen y botón sin diseñar.');
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(Number(choice.dataset.transformTo) === (complete ? 100 : 0))));
@@ -43,42 +42,13 @@
       if (fullPageLink) fullPageLink.hidden = !complete;
       if (complete) showRealLanding();
     }
-    function stopTransformation() {
-      if (animation !== null) window.cancelAnimationFrame(animation);
-      animation = null;
-    }
+    // Cambios inmediatos: el arrastre cambia de estado, no anima dos páginas superpuestas.
     choices.forEach(choice => choice.addEventListener('click', () => {
-      stopTransformation();
-      const target = Number(choice.dataset.transformTo);
-      const start = Number(ideaProgress.value);
-      if (reducedMotion.matches || start === target) {
-        renderIdea(target);
-        return;
-      }
-      const began = performance.now();
-      function step(now) {
-        const elapsed = Math.min(1, (now - began) / 650);
-        const eased = elapsed * elapsed * (3 - 2 * elapsed);
-        renderIdea(start + (target - start) * eased);
-        if (elapsed < 1) animation = window.requestAnimationFrame(step);
-        else animation = null;
-      }
-      animation = window.requestAnimationFrame(step);
+      renderIdea(Number(choice.dataset.transformTo));
     }));
-    ideaProgress.addEventListener('input', () => {
-      stopTransformation();
-      renderIdea(ideaProgress.value);
-    });
-    ideaProgress.addEventListener('pointerdown', stopTransformation);
-    ideaProgress.addEventListener('keydown', stopTransformation);
-    reducedMotion.addEventListener?.('change', event => {
-      if (event.matches) {
-        stopTransformation();
-        renderIdea(Number(ideaProgress.value) >= 50 ? 100 : 0);
-      }
-    });
-    renderIdea(ideaProgress.value);
+    ideaProgress.addEventListener('input', () => renderIdea(ideaProgress.value));
     transformation.classList.add('is-interactive');
+    renderIdea(ideaProgress.value);
     transformation.querySelectorAll('.class-transform-hint, .class-transform-options, .class-transform-control').forEach(element => {element.hidden = false;});
   }
   const preview = document.querySelector('.class-browser');
