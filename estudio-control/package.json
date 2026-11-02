@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bg0/browser": "0.1.1",
     "lucide-react": "^0.469.0",
     "fflate": "^0.8.2",
     "react": "^19.0.0",
