@@ -95,6 +95,7 @@ jobs:
           npm run test:classes
           node --test tests/link-center.test.mjs
           node --test tests/product-center.test.mjs
+          node --test tests/finished-demo-kits.test.mjs
           npm run build
       - name: Compilar Content Lab en GitHub
         env:
