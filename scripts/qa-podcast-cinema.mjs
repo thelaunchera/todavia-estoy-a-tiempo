@@ -50,6 +50,7 @@ try {
   assert(!state.overflow,width+': page horizontal overflow');
   assert(state.photo,width+': missing host portrait');
   assert(state.cta?.height>=45,width+': Spotify button too small');
+  if(width===1440)assert(state.cta.bottom<755,'Desktop Spotify CTA must appear on first screen');
   assert(state.controls.length===3,width+': missing cinematic controls');
   assert(state.controls.every(v=>v.left>=-2&&v.right<=width+2&&v.height>=30),width+': controls clipped');
   assert(state.title.left>=-10&&state.title.right<=width+10,width+': title clipped');
