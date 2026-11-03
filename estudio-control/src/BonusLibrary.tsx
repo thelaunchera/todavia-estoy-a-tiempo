@@ -77,10 +77,24 @@ export default function BonusLibrary() {
               <span className="bonus-library-draft">{item.status === 'ready' ? 'Listo · entrega individual tras el reto' : 'Borrador privado'}</span>
             </div>
             <h3>{item.title}</h3>
-            <p>{item.resource_code === 'bonus_motion_studio' ? '130 demostraciones de efectos para páginas web. Previsualiza las animaciones y copia los prompts o el código de cada ejemplo.' : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
+            <p>{item.resource_code === 'bonus_motion_studio'
+              ? '130 demostraciones de efectos para páginas web. Previsualiza las animaciones y copia los prompts o el código de cada ejemplo.'
+              : item.resource_code === 'bonus_hero_cinematic_scroll'
+                ? 'BONO · Hero cinematográfico. Guía en español e inglés para convertir un vídeo en fotogramas y animar el hero al hacer scroll. Tú controlas su activación y la asignación individual.'
+                : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
+            {item.resource_code === 'bonus_hero_cinematic_scroll' && (
+              <div className="bonus-hero-demo">
+                <span>Vista previa · vídeo de ejemplo en el hero de Casa Brownie</span>
+                <video controls muted playsInline preload="none" poster="https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.webp">
+                  <source src="https://thelaunchera.com/demos/casa-brownie/assets/hero-brownies.mp4" type="video/mp4" />
+                  Tu navegador no puede mostrar este vídeo.
+                </video>
+                <small>Este vídeo es una referencia visual. El bono enseña la versión con fotogramas controlados por scroll.</small>
+              </div>
+            )}
             <div className="bonus-library-url" title={item.url}>{item.url}</div>
             <div className="bonus-library-actions">
-              <a href={item.url} target="_blank" rel="noopener noreferrer">Abrir biblioteca <ExternalLink size={16} /></a>
+              <a href={item.url} target="_blank" rel="noopener noreferrer">{item.resource_code === 'bonus_hero_cinematic_scroll' ? 'Abrir aula' : 'Abrir biblioteca'} <ExternalLink size={16} /></a>
               <button type="button" onClick={() => void copyLink(item.url, item.resource_code)}>
                 {copied === item.resource_code ? <Check size={16} /> : <Copy size={16} />}
                 {copied === item.resource_code ? 'Copiado' : 'Copiar enlace'}
