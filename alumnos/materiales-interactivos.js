@@ -1,5 +1,5 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js';
-import {renderMakeResources,renderSafetyResources,renderLegalResources,renderWebGuide,renderConnectorPrompts} from './recursos-avanzados.js';
+import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
 import {promptGuide} from './prompt-guide.js?v=20261102-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
@@ -16,7 +16,6 @@ const headers=[
  ['pasos','Paso a paso: mi propia web','De la idea a una página real con tu marca.'],
  ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
  ['prompts','Biblioteca de prompts','Incluye el bonus para diseñar desde tu celular.'],
- ['mara','Mara · mi guía web','Prepara tu proyecto privado y empieza.'],
  ['make','Make gratis','Escenarios con Gmail, paso a paso.'],
  ['conectores','Comandos de conectores','Cada servicio explicado sin programación.'],
  ['seguridad','Contraseñas y claves','Tus accesos siempre privados.'],
@@ -27,7 +26,7 @@ const headers=[
 ];
 const materialGroups=[
  {id:'empezar',title:'Empieza aquí',views:['inicio','funciona','organizacion']},
- {id:'construir',title:'Crea tu web',views:['pasos','mara','ejemplo','make','conectores']},
+ {id:'construir',title:'Crea tu web',views:['pasos','ejemplo','make','conectores']},
  {id:'recursos',title:'Tus recursos',views:['prompts','cuaderno','seguridad','legal']},
  {id:'publicar',title:'Antes de publicar',views:['revision']}
 ];
@@ -216,7 +215,6 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(view==='organizacion')renderProjectOrder(content);
    if(view==='pasos')renderStudentWebPath(content,go);
   if(view==='prompts')renderPrompts();
-  if(view==='mara')renderWebGuide(content,EXTRAS);
   if(view==='make')renderMakeResources(content,EXTRAS);
   if(view==='conectores')renderConnectorPrompts(content,EXTRAS);
   if(view==='seguridad')renderSafetyResources(content,EXTRAS);
@@ -267,7 +265,11 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const c=el('article','mi-step');c.innerHTML='<span>0'+(i+1)+'</span><h4>'+esc(item[0])+'</h4><p>'+esc(item[1])+'</p>';grid.append(c);
   }content.append(grid);
   const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="pasos">Construir mi web paso a paso</button><button type="button" class="mi-quiet" data-go="mara">Configurar mi guía web</button><button type="button" class="mi-quiet" data-go="funciona">Entender mi web</button>';content.append(actions);
-  actions.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
+  actions.addEventListener('click',e=>{
+    const b=e.target.closest('[data-go]');if(!b)return;
+    if(b.dataset.go==='mara'){document.querySelector('.aula-side-link[data-aula-view="mara"]')?.click();return;}
+    go(b.dataset.go);
+   });
   const note=el('p','mi-note','Un consejo: usa un solo producto o servicio mientras haces la clase. Así vas a poder comparar tu primera versión con el resultado final.');content.append(note);
  }
  function renderPrompts(){
