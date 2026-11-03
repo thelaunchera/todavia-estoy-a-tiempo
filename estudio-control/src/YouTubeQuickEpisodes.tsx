@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {BookOpen,Check,Clapperboard,Copy,Download,FolderArchive,ImagePlus,MonitorPlay,RefreshCcw,Smartphone,Video,Wallet} from 'lucide-react';
 import {zipSync,strToU8} from 'fflate';
-import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microPilotChecklist,microLimits} from './youtube/micro-production';
+import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microPilotChecklist} from './youtube/micro-production';
 import {loadYouTubeSavedPhotos,type YouTubeSavedPhoto} from './supabase-client';
 import './youtube-quick-episodes.css';
 
