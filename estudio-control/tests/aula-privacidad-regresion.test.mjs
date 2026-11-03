@@ -273,3 +273,18 @@ test('Inspiración de demos no puede quedar vacía después de entrar al aula',(
  assert.match(styles,/\.inspiration-recovery/,'La pantalla de error se puede leer en móvil');
  assert.doesNotMatch(room,/SUPABASE_SERVICE_ROLE_KEY|sk_live_/,'Nada confidencial en HTML');
 });
+
+
+test('Fotos etiquetadas por sección verificada, no por posición de archivo',()=>{
+ const inspiration=readFileSync('alumnos/inspiracion.js','utf8');
+ const styles=readFileSync('alumnos/aula-inspiracion.css','utf8');
+ assert.match(inspiration,/const explicit=lang==='en'\?photo\?\.label_en:photo\?\.label_es/,'Priorizar metadatos reales de la imagen');
+ assert.match(inspiration,/galleryPhotoSection\(p,curLang\(\)\)/,'Identificar la sección correspondiente');
+ assert.match(inspiration,/galleryPhotoOrder\(a\.p,a\.index\)/,'Mostrar heroes identificados antes que referencias');
+ assert.match(inspiration,/if\(p\.usage==='hero'\)/,'Los heroes requieren marcación explícita');
+ assert.doesNotMatch(inspiration,/spanishPhotoNames|englishPhotoNames/,'Prohibir etiquetas fijas por índice');
+ assert.match(inspiration,/coverPhoto\?\.usage==='hero'/,'La foto destacada solo dice Hero cuando está verificada');
+ assert.match(styles,/\.inspiration-photo-section/,'El nombre de sección es visible en el teléfono');
+ assert.match(room,/aula-inspiracion\.css\?v=20261103-photo-roles-v1/,'El iPhone recibe la hoja de estilos actualizada');
+ assert.match(course,/inspiracion\.js\?v=20261103-photo-roles-v1/,'El aula recibe las etiquetas nuevas');
+});
