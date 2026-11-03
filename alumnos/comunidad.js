@@ -6,13 +6,88 @@ const $=id=>document.getElementById(id);
 const state={user:null,owner:false,courses:[],profile:null,channel:'charla',scope:'all',posts:[],comments:[],likes:[],profiles:new Map(),images:new Map(),reports:[],busy:false};
 const bucket='podcast-club-projects',marker='podcast_studio_password_login_deadline_v1';
 const channelNames={charla:'Comunidad',proyectos:'Proyectos',preguntas:'Preguntas'};
-const scopeName=post=>post.scope==='club'?'Todo el club':'Clase 01';
+const communityMessages={
+ "Usa una captura PNG, JPG o WebP.": "Use a PNG, JPG, or WebP screenshot.",
+ "El archivo supera los 5 MB permitidos.": "The file exceeds the 5 MB limit.",
+ "PNG, JPG o WebP · máximo 5 MB": "PNG, JPG or WebP · up to 5 MB",
+ "Abre este espacio desde tu Centro de alumnos. Debes tener una sesión iniciada.": "Open this page from your student classroom. You must be signed in.",
+ "Para participar necesitas una compra verificada de alguna clase. La lista de espera no otorga acceso a la comunidad.": "You need a verified class purchase to participate. Joining the waitlist does not grant access.",
+ "Usa un nombre o apodo de 2 a 32 caracteres, sin dirección de correo.": "Choose a display name of 2–32 characters, not an email address.",
+ "Nombre guardado. Así te verán las personas del club.": "Name saved. This is how other club members will see you.",
+ "Primero guarda tu nombre o apodo para que podamos reconocer tus publicaciones.": "Save your display name before creating a post.",
+ "Escribe entre 2 y 2000 caracteres.": "Write between 2 and 2,000 characters.",
+ "El enlace de tu proyecto debe comenzar con https:// y ser una web válida.": "Your project link must start with https:// and be a valid website.",
+ "No tienes acceso a esa clase.": "You do not have access to that class.",
+ "Ya quedó publicado. Puedes verlo en el Club.": "Your post is live in Ideas Club.",
+ "No pudimos publicar. Prueba otra vez.": "Could not publish your post. Please try again.",
+ "Comunidad actualizada.": "Community refreshed.",
+ "Guarda tu nombre antes de comentar.": "Save your display name before commenting.",
+ "Tu comentario debe tener entre 2 y 700 caracteres.": "Your comment must be between 2 and 700 characters.",
+ "Comentario enviado.": "Comment posted.",
+ "¿Qué deberíamos revisar de esta publicación? Describe el motivo brevemente.": "What should we review in this post? Briefly describe the reason.",
+ "Escribe un motivo de 4 a 300 caracteres.": "Enter a reason between 4 and 300 characters.",
+ "Ya reportaste esta publicación.": "You already reported this post.",
+ "No se pudo enviar el reporte.": "We could not send the report.",
+ "Gracias. El reporte está disponible para moderación.": "Thank you. Your report has been sent for moderation.",
+ "¿Ocultar esta publicación a los alumnos?": "Hide this post from students?",
+ "¿Restaurar esta publicación en el club?": "Restore this post to Ideas Club?",
+ "No se pudo moderar la publicación.": "We could not moderate this post.",
+ "Moderación guardada.": "Moderation change saved.",
+ "¿Eliminar definitivamente tu publicación y todos sus comentarios?": "Permanently delete your post and all its comments?",
+ "No se pudo eliminar la publicación.": "We could not delete the post.",
+ "Publicación eliminada.": "Post deleted.",
+ "No se pudo quitar el comentario.": "We could not delete the comment.",
+ "Muéstranos tu proyecto": "Show your project",
+ "¿Qué necesitas resolver?": "What do you need help with?",
+ "¿Qué estás creando?": "What are you creating?",
+ "Así va mi proyecto. Me gustaría recibir opiniones sobre…": "Here is my progress. I would like feedback on…",
+ "Estoy haciendo mi web y necesito ayuda con…": "I am building my website and need help with…",
+ "Hoy avancé con mi primera web…": "Today I made progress on my first website…",
+ "Miembro del club": "Club member",
+ "Ver el proyecto": "View project",
+ "Me gusta": "Likes",
+ "comentarios": "comments",
+ "reportes": "reports",
+ "Restaurar": "Restore",
+ "Ocultar": "Hide",
+ "Reportar": "Report",
+ "Eliminar": "Delete",
+ "Escribe un comentario útil…": "Write a helpful comment…",
+ "Comentar esta publicación": "Comment on this post",
+ "Enviar": "Post",
+ "Publicando…": "Publishing…",
+ "Publicar en el club": "Post to Ideas Club",
+ "Captura compartida del proyecto de ": "Project screenshot shared by ",
+ "Todo el club": "Entire club",
+ "Clase 01": "Class 01",
+ "Comunidad": "Community",
+ "Proyectos": "Projects",
+ "Preguntas": "Questions",
+ "Oculto": "Hidden",
+ "Error al subir captura.": "Could not upload screenshot."
+};
+function clubCopy(value){
+ const str=String(value??'');
+ if(communityLanguage()!=='en')return str;
+ if(Object.hasOwn(communityMessages,str))return communityMessages[str];
+ for(const prefix of ['No se pudo guardar el nombre. ','No se pudo publicar el comentario. ','No se pudo guardar el me gusta. ']){
+  if(str.startsWith(prefix))return (communityMessages[prefix.trim()]||({ 
+   'No se pudo guardar el nombre. ':'Could not save your display name. ',
+   'No se pudo publicar el comentario. ':'Could not post your comment. ',
+   'No se pudo guardar el me gusta. ':'Could not save your like. '
+  })[prefix])+'Please try again.';
+ }
+ return str;
+}
+
+const localizedChannel=key=>clubCopy(channelNames[key]||'Comunidad');
+const scopeName=post=>clubCopy(post.scope==='club'?'Todo el club':'Clase 01');
 function sessionIsStudioOwner(id){
  try{const v=JSON.parse(localStorage.getItem(marker)||'null');return v?.userId===id && Number(v.expiresAt)>Date.now();}
  catch{return false;}
 }
 function message(value,kind=''){
- const p=$('club-feedback');p.textContent=value;p.dataset.kind=kind;
+ const p=$('club-feedback');p.dataset.sourceMessage=String(value??'');p.textContent=clubCopy(value);p.dataset.kind=kind;
 }
 function node(tag,className,textValue){
  const x=document.createElement(tag);if(className)x.className=className;
@@ -22,11 +97,11 @@ function node(tag,className,textValue){
 function button(text,onClick,cls=''){
  const b=node('button',cls,text);b.type='button';b.addEventListener('click',onClick);return b;
 }
-function nameOf(id){return state.owner && id===state.user?.id?'Dailin · Anfitriona':state.profiles.get(id)||'Miembro del club';}
+function nameOf(id){return state.owner && id===state.user?.id?'Dailin · Anfitriona':state.profiles.get(id)||clubCopy('Miembro del club');}
 function dateOf(value){return new Date(value).toLocaleDateString(communityLanguage()==='en'?'en-US':'es',{day:'numeric',month:'short',year:'numeric'});}
 function showLocked(reason){
  $('club-members').hidden=true;$('club-locked').hidden=false;
- $('club-locked-message').textContent=reason;
+ $('club-locked-message').textContent=clubCopy(reason);
  message(communityText('No se ha podido abrir la comunidad.','Unable to open the community.'),'error');
 }
 function validName(s){return s.length>=2&&s.length<=32&&!s.includes('@');}
@@ -42,7 +117,7 @@ function checkedImage(){
 }
 let previewObjectUrl=null;
 function clearImage(){
- $('club-post-image').value='';$('club-image-label').textContent='PNG, JPG o WebP · máximo 5 MB';
+ $('club-post-image').value='';$('club-image-label').textContent=clubCopy('PNG, JPG o WebP · máximo 5 MB');
  $('club-image-preview').hidden=true;
  if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=null;}
 }
@@ -105,7 +180,7 @@ $('club-post-form').addEventListener('submit',async ev=>{
  if(body.length<2||body.length>2000){message('Escribe entre 2 y 2000 caracteres.','error');return;}
  if(url&&!validUrl(url)){message('El enlace de tu proyecto debe comenzar con https:// y ser una web válida.','error');return;}
  if(scope==='curso'&&!state.courses.includes(courseId)){message('No tienes acceso a esa clase.','error');return;}
- let imagePath=null;state.busy=true;$('club-submit').disabled=true;$('club-submit').textContent='Publicando…';
+ let imagePath=null;state.busy=true;$('club-submit').disabled=true;$('club-submit').textContent=clubCopy('Publicando…');
  try{
   const file=checkedImage();if(file)imagePath=await uploadScreenshot(file);
   const row={author_id:state.user.id,scope,course_id:scope==='curso'?courseId:null,channel:state.channel,title:title||null,body,project_url:url||null,image_path:imagePath};
@@ -116,12 +191,12 @@ $('club-post-form').addEventListener('submit',async ev=>{
  }catch(e){
   if(imagePath)await db.storage.from(bucket).remove([imagePath]).catch(()=>{});
   message(e.message||'No pudimos publicar. Prueba otra vez.','error');
- }finally{state.busy=false;$('club-submit').disabled=false;$('club-submit').textContent='Publicar en el club';}
+ }finally{state.busy=false;$('club-submit').disabled=false;$('club-submit').textContent=clubCopy('Publicar en el club');}
 });
 function updateComposerChannel(){
- $('club-compose-heading').textContent=state.channel==='proyectos'?'Muéstranos tu proyecto':state.channel==='preguntas'?'¿Qué necesitas resolver?':'¿Qué estás creando?';
- $('club-post-body').placeholder=state.channel==='proyectos'?'Así va mi proyecto. Me gustaría recibir opiniones sobre…':state.channel==='preguntas'?'Estoy haciendo mi web y necesito ayuda con…':'Hoy avancé con mi primera web…';
- $('club-feed-title').textContent=channelNames[state.channel];
+ $('club-compose-heading').textContent=clubCopy(state.channel==='proyectos'?'Muéstranos tu proyecto':state.channel==='preguntas'?'¿Qué necesitas resolver?':'¿Qué estás creando?');
+ $('club-post-body').placeholder=clubCopy(state.channel==='proyectos'?'Así va mi proyecto. Me gustaría recibir opiniones sobre…':state.channel==='preguntas'?'Estoy haciendo mi web y necesito ayuda con…':'Hoy avancé con mi primera web…');
+ $('club-feed-title').textContent=localizedChannel(state.channel);
  document.querySelectorAll('[data-channel]').forEach(el=>{const yes=el.dataset.channel===state.channel;el.classList.toggle('active',yes);el.setAttribute('aria-selected',String(yes));});
  render();
 }
@@ -172,7 +247,7 @@ async function comment(post,input,submit){
  }catch(e){message('No se pudo publicar el comentario. '+(e.message||''),'error');submit.disabled=false;}
 }
 async function report(post){
- const reason=window.prompt('¿Qué deberíamos revisar de esta publicación? Describe el motivo brevemente.');
+ const reason=window.prompt(clubCopy('¿Qué deberíamos revisar de esta publicación? Describe el motivo brevemente.'));
  if(reason===null)return;
  const clean=reason.trim();if(clean.length<4||clean.length>300){message('Escribe un motivo de 4 a 300 caracteres.','error');return;}
  const {error}=await db.from('podcast_club_reports').insert({post_id:post.id,reporter_id:state.user.id,reason:clean});
@@ -181,13 +256,13 @@ async function report(post){
 }
 async function hide(post){
  const target=post.status==='oculto'?'visible':'oculto';
- if(!window.confirm(target==='oculto'?'¿Ocultar esta publicación a los alumnos?':'¿Restaurar esta publicación en el club?'))return;
+ if(!window.confirm(target==='oculto'?clubCopy('¿Ocultar esta publicación a los alumnos?'):clubCopy('¿Restaurar esta publicación en el club?')))return;
  const {error}=await db.from('podcast_club_posts').update({status:target,updated_at:new Date().toISOString()}).eq('id',post.id);
  if(error){message('No se pudo moderar la publicación.','error');return;}
  await loadFeed();message('Moderación guardada.','good');
 }
 async function removePost(post){
- if(!window.confirm('¿Eliminar definitivamente tu publicación y todos sus comentarios?'))return;
+ if(!window.confirm(clubCopy('¿Eliminar definitivamente tu publicación y todos sus comentarios?')))return;
  const {error}=await db.from('podcast_club_posts').delete().eq('id',post.id);
  if(error){message('No se pudo eliminar la publicación.','error');return;}
  if(post.image_path)await db.storage.from(bucket).remove([post.image_path]);
@@ -208,43 +283,43 @@ function render(){
   const avatar=node('div','club-avatar',(nameOf(post.author_id)||'M').trim().charAt(0).toUpperCase());
   avatar.setAttribute('aria-hidden','true');
   const author=node('div','club-post-author');
-  author.append(node('strong','',nameOf(post.author_id)),node('small','',dateOf(post.created_at)+' · '+scopeName(post)+(post.status==='oculto'?' · Oculto':'')));
-  top.append(avatar,author,node('span','club-post-tag',channelNames[post.channel]||'Comunidad'));article.append(top);
+  author.append(node('strong','',nameOf(post.author_id)),node('small','',dateOf(post.created_at)+' · '+scopeName(post)+(post.status==='oculto'?' · '+clubCopy('Oculto'):'')));
+  top.append(avatar,author,node('span','club-post-tag',localizedChannel(post.channel)));article.append(top);
   if(post.title)article.append(node('h3','',post.title));
   article.append(node('p','club-post-body',post.body));
   if(post.image_path&&state.images.get(post.image_path)){
-    const im=node('img','club-post-image');im.src=state.images.get(post.image_path);im.alt='Captura compartida del proyecto de '+nameOf(post.author_id);im.loading='lazy';article.append(im);
+    const im=node('img','club-post-image');im.src=state.images.get(post.image_path);im.alt=clubCopy('Captura compartida del proyecto de ')+nameOf(post.author_id);im.loading='lazy';article.append(im);
   }
   if(post.project_url&&validUrl(post.project_url)){
-    const a=node('a','club-post-link','Ver el proyecto');
+    const a=node('a','club-post-link',clubCopy('Ver el proyecto'));
     a.href=post.project_url;a.target='_blank';a.rel='nofollow noopener noreferrer';article.append(a);
   }
   const actions=node('div','club-post-actions');
   const count=state.likes.filter(x=>x.post_id===post.id).length;
   const liked=state.likes.some(x=>x.post_id===post.id&&x.author_id===state.user.id);
-  actions.append(button((liked?'♥':'♡')+' '+count+' Me gusta',()=>void like(post),liked?'liked':''));
+  actions.append(button((liked?'♥':'♡')+' '+count+' '+clubCopy('Me gusta'),()=>void like(post),liked?'liked':''));
   const cs=state.comments.filter(x=>x.post_id===post.id&&x.status==='visible').length;
-  actions.append(node('span','club-post-tag',cs+' comentarios'));
+  actions.append(node('span','club-post-tag',cs+' '+clubCopy('comentarios')));
   if(state.owner){
    const reports=state.reports.filter(x=>x.post_id===post.id);
-   if(reports.length)actions.append(node('span','club-post-tag','⚑ '+reports.length+' reportes'));
-   actions.append(button(post.status==='oculto'?'Restaurar':'Ocultar',()=>void hide(post),'club-moderate'));
-  }else if(post.author_id!==state.user.id)actions.append(button('Reportar',()=>void report(post)));
-  if(post.author_id===state.user.id||state.owner)actions.append(button('Eliminar',()=>void removePost(post),'club-moderate'));
+   if(reports.length)actions.append(node('span','club-post-tag','⚑ '+reports.length+' '+clubCopy('reportes')));
+   actions.append(button(clubCopy(post.status==='oculto'?'Restaurar':'Ocultar'),()=>void hide(post),'club-moderate'));
+  }else if(post.author_id!==state.user.id)actions.append(button(clubCopy('Reportar'),()=>void report(post)));
+  if(post.author_id===state.user.id||state.owner)actions.append(button(clubCopy('Eliminar'),()=>void removePost(post),'club-moderate'));
   article.append(actions);
   const thread=node('div','club-comments');
   const related=state.comments.filter(x=>x.post_id===post.id && (x.status==='visible'||state.owner));
   for(const c of related){
    const line=node('div','club-comment');const copy=node('div');
-   const lead=node('div');lead.append(node('strong','',nameOf(c.author_id)),node('time','',dateOf(c.created_at)+(c.status==='oculto'?' · Oculto':'')));
+   const lead=node('div');lead.append(node('strong','',nameOf(c.author_id)),node('time','',dateOf(c.created_at)+(c.status==='oculto'?' · '+clubCopy('Oculto'):'')));
    copy.append(lead,node('p','',c.body));line.append(copy);
-   if(c.author_id===state.user.id||state.owner)line.append(button('Eliminar',()=>void removeComment(c)));
+   if(c.author_id===state.user.id||state.owner)line.append(button(clubCopy('Eliminar'),()=>void removeComment(c)));
    thread.append(line);
   }
   if(post.status==='visible'){
    const form=node('form','club-comment-form');
-   const input=node('input');input.type='text';input.maxLength=700;input.minLength=2;input.required=true;input.placeholder='Escribe un comentario útil…';input.setAttribute('aria-label','Comentar esta publicación');
-   const send=node('button','','Enviar');send.type='submit';
+   const input=node('input');input.type='text';input.maxLength=700;input.minLength=2;input.required=true;input.placeholder=clubCopy('Escribe un comentario útil…');input.setAttribute('aria-label',clubCopy('Comentar esta publicación'));
+   const send=node('button','',clubCopy('Enviar'));send.type='submit';
    form.append(input,send);
    form.addEventListener('submit',ev=>{ev.preventDefault();void comment(post,input,send);});
    thread.append(form);
@@ -301,6 +376,7 @@ $('club-page-back')?.addEventListener('click',()=>{
  else location.assign('../alumnos/');
 });
 bindCommunityLanguage();
+$('club-language')?.addEventListener('change',()=>{queueMicrotask(()=>{updateComposerChannel();render();const info=$('club-feedback');if(info?.dataset.sourceMessage)info.textContent=clubCopy(info.dataset.sourceMessage);});});
 await init();
 applyCommunityLanguage();
 // Supabase Realtime notifies the club about new posts, comments and reactions.
