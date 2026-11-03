@@ -716,7 +716,7 @@ export async function removeYouTubePhoto(shotId:string):Promise<void>{
    RLS restricts UPDATE to podcast_studio_admins.role='owner'; students have
    read-only access to ready course resources, never the publishing controls. */
 const CLASSROOM_COURSE_ID='primera-landing-ia-01';
-type ClassroomDemoPhoto={name:string;url:string;order:number};
+type ClassroomDemoPhoto={name:string;url:string;order:number;label_es?:string;label_en?:string;section_es?:string;section_en?:string;usage?:'hero'|'section'|'reference';display_order?:number};
 type ClassroomDemoStep={title:string;step:string;body:string;order:number;photos:{title:string;body:string}[]};
 export type ClassroomDemoEntry={
   id:string; title:string; category:string;category_es:string;category_en:string;
@@ -758,7 +758,14 @@ export async function setClassroomDemoVisibility(
     const enriched=visible?{
       ...old,
       // Preserve original verified student prompts and approved photos when present.
-      photos:(old.photos?.length||0)>=(entry.photos?.length||0)?old.photos:entry.photos,
+      // Keep verified section labels and hero classification on existing photos.
+      // Append any new Studio photos without replacing the curated gallery.
+      photos:[
+        ...(Array.isArray(old.photos)?old.photos:[]),
+        ...(Array.isArray(entry.photos)?entry.photos:[]).filter(photo=>
+          !Array.isArray(old.photos)||!old.photos.some(saved=>
+            saved.url?.split('?')[0]===photo.url?.split('?')[0]))
+      ],
       prompts:(old.prompts?.length||0)>0?old.prompts:entry.prompts,
       description_en:old.description_en||entry.description_en,
       description_es:old.description_es||entry.description_es,
