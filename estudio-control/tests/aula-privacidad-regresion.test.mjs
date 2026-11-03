@@ -285,6 +285,19 @@ test('Fotos etiquetadas por sección verificada, no por posición de archivo',()
  assert.doesNotMatch(inspiration,/spanishPhotoNames|englishPhotoNames/,'Prohibir etiquetas fijas por índice');
  assert.match(inspiration,/coverPhoto\?\.usage==='hero'/,'La foto destacada solo dice Hero cuando está verificada');
  assert.match(styles,/\.inspiration-photo-section/,'El nombre de sección es visible en el teléfono');
- assert.match(room,/aula-inspiracion\.css\?v=20261103-photo-roles-v1/,'El iPhone recibe la hoja de estilos actualizada');
- assert.match(course,/inspiracion\.js\?v=20261103-photo-roles-v1/,'El aula recibe las etiquetas nuevas');
+ assert.match(room,/aula-inspiracion\.css\?v=20261103-photo-prompts-v2/,'El iPhone recibe la hoja de estilos actualizada');
+ assert.match(course,/inspiracion\.js\?v=20261103-photo-prompts-v2/,'El aula recibe las etiquetas nuevas');
+});
+
+
+test('Prompts de secciones conservan imagen real, títulos y versión inglesa',()=>{
+ const source=readFileSync('alumnos/inspiracion.js','utf8');
+ const styles=readFileSync('alumnos/aula-inspiracion.css','utf8');
+ assert.match(source,/prompt\?\.title_en/,'Los títulos corregidos son bilingües');
+ assert.match(source,/p\.body_en\?p\.body_en/,'Los prompts corregidos prevalecen sobre traducciones de versiones antiguas');
+ assert.match(source,/pic\.body_en\?pic\.body_en/,'Los prompts fotográficos conservan su traducción correcta');
+ assert.match(source,/className='inspiration-step-photos'/,'El alumno ve la foto real junto a la etapa');
+ assert.match(source,/p\.body\.includes\(photo\.url\)/,'Las imágenes se enlazan a la instrucción que las menciona');
+ assert.match(styles,/\.inspiration-step-photo/, 'Vista visual del recurso en el iPhone');
+ assert.match(room,/classroomModule='\.\/curso\.js\?v=20261103-photo-prompts-v2'/,'Safari obtiene la versión actual');
 });
