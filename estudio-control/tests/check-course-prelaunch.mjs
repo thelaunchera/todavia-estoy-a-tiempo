@@ -113,7 +113,7 @@ for(const path of ['privacidad.html','terminos.html','reembolsos.html','cookies.
   assert.ok(classPage.includes('../'+path),'Footer legal: '+path);
 }
 assert.match(classPage,/logo-podcast-04.svg/);
-assert.match(classPage,/Powered by The Launch Era/);
+assert.match(classPage,/class-footer-bottom[\\s\\S]*Todavía estoy a tiempo/,'El footer pertenece a la marca pública de la clase');
 assert.match(classPage,/data-privacy-settings/);
 assert.match(newExperience,/prefers-reduced-motion/);
 assert.match(newExperience,/IntersectionObserver/);
