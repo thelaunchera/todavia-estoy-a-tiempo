@@ -40,7 +40,7 @@ async function clipboardCopy(value,button,language='es'){
 }
 export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
- root.innerHTML='<p class="inspiration-loading" role="status">Cargando proyectos / Loading projects…</p>';
+ root.innerHTML='<p class="inspiration-loading" role="status">'+(getLanguage()==='en'?'Loading projects…':'Cargando proyectos…')+'</p>';
  const {data,error}=await db.from('podcast_class_learning_assets')
   .select('payload,status').eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1').maybeSingle();
  if(error||!data?.payload||data.status!=='ready'){
@@ -88,8 +88,8 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
      const updated={...data.payload,demos};
      const {error}=await db.from('podcast_class_learning_assets').update({payload:updated}).eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1');
      input.disabled=false;
-     if(error){demo.published=previous;input.checked=previous!==false;state.textContent='No se pudo guardar. Vuelve a intentarlo.';}
-     else{state.textContent='Selección guardada. Los alumnos verán los proyectos activados.';}
+     if(error){demo.published=previous;input.checked=previous!==false;state.textContent=enLabel('No se pudo guardar. Vuelve a intentarlo.','Could not save. Try again.',curLang());}
+     else{state.textContent=enLabel('Selección guardada. Los alumnos verán los proyectos activados.','Selection saved. Students will see the enabled projects.',curLang());}
     });
    }
    editor.append(heading,hint,options,state);root.append(editor);
