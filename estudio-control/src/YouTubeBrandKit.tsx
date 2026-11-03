@@ -35,7 +35,7 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
   finally{setLoading(false)}
  },[]);
  useEffect(()=>{void reload()},[reload]);
- const done=useMemo(()=>offBriefAssetSlots.filter(x=>Boolean(files[x.id])).length,[files]);
+ const done=useMemo(()=>offBriefAssetSlots.filter(x=>Boolean(files[x.id]||entries.some(entry=>entry.section==='youtube-storyboards-v1'&&entry.title==='OFF BRIEF brand: '+x.id&&Boolean(entry.art||entry.link)))).length,[files,entries]);
  const copy=async(text:string,title:string)=>{
   try{await navigator.clipboard.writeText(text);setNotice(title+' copiado.');}
   catch{setNotice('No se pudo copiar; selecciona el texto manualmente.');}
