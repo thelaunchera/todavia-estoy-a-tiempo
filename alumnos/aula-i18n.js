@@ -183,6 +183,14 @@ function translateElement(selector,english){
    star.setAttribute('aria-hidden','true');star.textContent=spark;
    el.append(star);continue;
   }
+  if(selector==='.course-help-note'){
+   if(!el.dataset.tleOriginalHtml)el.dataset.tleOriginalHtml=el.innerHTML;
+   if(language==='en'){
+    el.replaceChildren(document.createTextNode('Do not include passwords or sensitive information. We only use these details to reply. '));
+    const privacy=document.createElement('a');privacy.href='../privacidad.html';privacy.target='_blank';privacy.rel='noopener noreferrer';privacy.textContent='Privacy policy';el.append(privacy,document.createTextNode('.'));
+   }else el.innerHTML=el.dataset.tleOriginalHtml;
+   continue;
+  }
   if(selector==='.lesson-completed'){
    const textNode=[...el.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
    if(textNode)textNode.textContent=' '+(language==='en'?english:'Ya terminé esta lección');
