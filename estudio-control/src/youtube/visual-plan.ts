@@ -844,6 +844,6 @@ export function getYouTubePhotoPrompt(photo:YouTubePhoto):string {
  'LIGHTING AND QUALITY: intentional light matching time of day and scene mood, believable eyes and hands, cinematic depth of field, refined controlled palette and sharp focal point.',
  'FRAME: one horizontal 16:9 still, complete scene composition with essential props visible.',
  photoStyles.neg
- ].join('\\n\\n');
+ ].join('\n\n');
 }
 export const youtubeVisualStats={ episodes:8,framesPerEpisode:10,totalFrames:80 } as const;
