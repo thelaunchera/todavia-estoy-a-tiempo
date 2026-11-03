@@ -8,7 +8,6 @@ const safeUrl = value => {
 const enLabel = (es,en,lang) => lang==='en'?en:es;
 
 const spanishStageNames={"casa-brownie":["Empezar desde una página vacía","Identidad y menú de navegación","Portada con una foto fija","Seis fotos individuales de brownies","Catálogo y presentación de sabores","Regalos y fotografías de empaques","Historia y ubicación ficticia","Información de entrega de ejemplo","Interacciones de carrito de demostración","Pie de página y créditos","Revisión final con capturas","Bono opcional: video en la portada"],"crumb":["Crear la estructura inicial","Dirección fotográfica: 14 escenas","Portada y navegación","Seis fotografías individuales","Catálogo de sabores","Regalos, cajas y presentación","Galería de la marca","Armar tu caja: demostración interactiva","Ubicación ilustrativa","Banners e historia de la marca","Pie de página y contacto ilustrativo","Revisión móvil y final"],"aftr":["Dirección visual del local nocturno","Ocho fotografías individuales","Portada, menú y acceso para mayores de 21","Eventos de hoy y programación semanal","Mesas exclusivas y lista de invitados","Entradas y revisión final"],"soluna":["Investigar el negocio y su estilo","Identidad y sistema visual","Ocho fotografías individuales de yoga","Portada y botón principal","Oferta de lanzamiento y clases","Espacios y ubicación","Membresías de demostración","Lista de espera, privacidad y revisión","Publicar y comparar"]};
-const spanishPhotoNames={"casa-brownie":["Portada de brownies","Brownie clásico","Brownie con nueces","Brownie de dulce de leche","Brownie de frambuesa","Brownie de galleta y crema","Brownie edición especial","Regalo con lazo rosa","Bolsas y cajas de regalo"],"crumb":["Fachada de la tienda","Portada principal","Galleta clásica","Galleta doble chocolate","Galleta de caramelo","Galleta de frambuesa","Galleta con nueces","Galleta brownie","Caja para regalos","Empaque de marca","Foto de estilo de vida","Persona preparando galletas","Historia de la marca"],"aftr":["Portada del club","Cabina de DJ","Pista de baile","Entrada","Retrato de moda","Sala exclusiva","Servicio de botellas","Entradas"],"soluna":["Portada","Interior del estudio","Exterior del estudio","Clase lenta","Clase de descanso","Ritual matutino","Clase grupal","Flores","Ropa del estudio","Bebidas del estudio"],"cleaning":["Portada de limpieza residencial"],"jaramillo":["Portada de boutique"]};
 function stageLabel(id,index,original,lang){
  if(lang==='en')return englishDemoTitle('demo_'+id+'_'+index,original);
  return spanishStageNames[id]?.[index]||original||'Etapa '+(index+1);
@@ -16,19 +15,14 @@ function stageLabel(id,index,original,lang){
 const spanishDescriptions={"aftr":["Identidad visual de un club nocturno ficticio, con portada, eventos, áreas exclusivas y fotografías editoriales.","Concepto educativo para mayores de 21 años. No se venden entradas ni se reservan mesas."],"casa-brownie":["Página de repostería con portada de foto fija, sabores, fotografías individuales, regalos y contacto. Es el ejemplo principal del curso.","Ejemplo ficticio. No recibe pedidos ni pagos reales. La portada con video es opcional."],"cb-depot":["Ejemplo real de negocio de servicios, con reservas y presentación cuidada. Se muestra solo su página pública.","Proyecto de un cliente real. No se comparten sus fotografías ni instrucciones privadas."],"cleaning":["Reservas de limpieza residencial y solicitudes de presupuesto comercial. Estudia sus servicios y recorrido del cliente.","Demostración pública de servicios para el hogar. No se comparten datos internos ni automatizaciones."],"crumb":["Tienda de galletas con fotografía editorial, productos, cajas, empaques, historia de marca y diseño móvil.","Proyecto ficticio. No procesa pagos ni promete entregas reales."],"jaramillo":["Ejemplo de boutique de moda que presenta a su diseñadora y sus colecciones, sin proceso de pago.","Concepto de boutique. No reutilices la imagen ni identidad de la diseñadora."],"soluna":["Estudio de yoga: investigación, identidad, clases, oferta de lanzamiento, lista de espera y revisión final.","Ejemplo educativo. Los formularios y membresías son demostrativos; no se cobran pagos."],"yummm":["Cafetería y repostería: fotografías de postres, menú, empaques para llevar y página con identidad de marca.","Galería de 20 imágenes. Los prompts originales del estudio aún no están incorporados, por lo que no se presentan como verificados."]};
 function demoDescription(d,language){return language==='en'?(d.description_en||''):(spanishDescriptions[d.id]?.[0]||d.description_es||'');}
 function demoNotes(d,language){return language==='en'?(d.notes_en||''):(spanishDescriptions[d.id]?.[1]||d.notes_es||'');}
-const englishPhotoNames={
- 'casa-brownie':['Brownie hero','Classic brownie','Walnut brownie','Dulce de leche brownie','Raspberry brownie','Cookies & cream brownie','Special edition brownie','Pink-ribbon gift','Gift bags and boxes'],
- crumb:['Storefront','Hero','Classic chocolate chip','Double chocolate','Caramel','Raspberry','Nutty cookie','Brownie cookie','Gift box','Packaging','Lifestyle photo','Baker portrait','Brand story'],
- aftr:['Club hero','DJ booth','Dancefloor','Entrance','Fashion portrait','VIP lounge','Bottle service','Tickets'],
- soluna:['Hero','Studio interior','Studio exterior','Slow Flow','Deep Rest','Morning Ritual','Group class','Flowers','Studio apparel','Studio drinks'],
- cleaning:['Cleaning hero'],jaramillo:['Boutique hero']
-};
 function galleryPhotoLabel(demo,index,photo,lang){
  const explicit=lang==='en'?photo?.label_en:photo?.label_es;
  if(explicit)return String(explicit);
- const original=photo?.name;
- if(lang!=='en')return spanishPhotoNames[demo]?.[index]||original||'Foto '+(index+1);
- return englishPhotoNames[demo]?.[index]||original||'Reference photo '+String(index+1).padStart(2,'0');
+ const raw=String(photo?.name||'').trim();
+ const descriptive=raw&&!/^(?:\d{1,2}|hero|image|photo|img)$/i.test(raw)&&!/\.(webp|png|jpe?g)$/i.test(raw);
+ // A filename or a position in an array is not evidence of placement.
+ if(descriptive)return raw;
+ return lang==='en'?'Reference photo '+String(index+1).padStart(2,'0'):'Fotografía de referencia '+String(index+1).padStart(2,'0');
 }
 function galleryPhotoSection(photo,lang){
  return lang==='en'?(photo?.section_en||'Reference image'):(photo?.section_es||'Fotografía de referencia');
