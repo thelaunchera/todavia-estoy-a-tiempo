@@ -15,16 +15,16 @@ const guides={
  ['Online checkout','Only add payments if the product and provider support them. Test payment, failure and fulfillment before claiming it works.'],
  ['Owner operations','Quotes, jobs and follow-up are internal workflows; a public demo must not expose private business or customer data.']
  ],actions:[['Investigate my business','prompts']]},
- pasos:{kicker:'BUILD YOUR WEBSITE',title:'Build step by step.',intro:'Use Casa Brownie as a reference while you build ONE website of your own. Finish your first project before starting another.',steps:[
- ['01 — Define the goal','Research your business and ideal customer. Write what the site is for and the one action a visitor should take.'],
- ['02 — Mood board','Choose an original palette, typography, photographic tone and packaging direction if needed.'],
+ pasos:{kicker:'BUILD YOUR WEBSITE',title:'Direct ChatGPT to build your website.',intro:'Use Casa Brownie as a reference while you build ONE website of your own. Finish your first project before starting another.',steps:[
+ ['01 — Define the goal','Ask ChatGPT to research your business and ideal customer, propose the website goal and one clear visitor action. Confirm the facts and approve the plan.'],
+ ['02 — Mood board','Share references and ask ChatGPT to propose an original palette, typography, photography style and packaging direction when needed. Approve the direction.'],
  ['03 — Prepare photos in Google Drive','Create each image with ChatGPT and ask to send it directly to the 02_PHOTOS folder in Drive if uploads are supported. Do not save it to your personal Photos gallery.'],
  ['03B — Check your backup','If a direct Drive upload is unavailable, use Share or a temporary file in Files, then upload through the Drive app. Open each image from Drive before removing its temporary local copy. Connecting Drive never uploads or deletes photos automatically.'],
- ['04 — Write your content','Write a clear hero headline that immediately communicates what matters most about your business: what you offer, who it helps and why it matters. Add products/services, useful information, FAQs and one clear CTA. A hero video is an optional bonus, not a requirement.'],
+ ['04 — Write your content','Ask ChatGPT to write a clear hero headline that immediately communicates what matters most about your business: what you offer, who it helps and why it matters. Add products/services, useful information, FAQs and one clear CTA. A hero video is an optional bonus, not a requirement.'],
  ['05 — Let ChatGPT build with connected apps','Connect AppDeploy in ChatGPT and ask the AI to build your first website mockup using approved business information. ChatGPT should give you a preview URL when ready. Ask for changes and photo placement in the same chat. Use Google Drive for files and Make for approved automations only when needed. You give instructions, authorize connections, approve and test; you do not manually build inside AppDeploy.'],
- ['06 — Review mobile first','Check 375 px, phone tap targets, photo cropping, empty cards, form labels and responsive layout.'],
- ['07 — Set up the next step','For a real business, test contact, booking, quote or payment flows only when appropriate. Do not collect payments in the practice demo.'],
- ['08 — Test and share','Verify links, forms, footer and public access. Keep a record of what passed and what remains untested.']
+ ['06 — Review mobile first','Open the preview on your phone, take screenshots of issues and ask ChatGPT to correct the connected project. Verify 375 px, tap targets, photos, labels and responsive layout.'],
+ ['07 — Set up the next step','Ask ChatGPT to configure authorized connectors or automations only when your business needs them. Approve permissions and test contact, booking, quote or payment flows when appropriate. No real charges in the practice demo.'],
+ ['08 — Test and share','Ask ChatGPT to audit links, forms, footer and public access; personally verify the results and keep a record of anything untested.']
  ],actions:[['Copy the building prompts','prompts']]},
  organizacion:{kicker:'KEEP YOUR FILES ORGANIZED',title:'Organize your entire project.',intro:'Work on ONE website at a time until you feel confident. Keep its photos, prompts and text in a dedicated Google Drive folder so you do not mix files from different businesses.',steps:[
  ['CONNECT GOOGLE DRIVE','In ChatGPT, open Settings → Plugins (or Apps), find Google Drive, connect your Google account, and review permissions. If direct saving is supported, ask ChatGPT to send each generated image into Drive → 02_PHOTOS.'],
@@ -54,7 +54,7 @@ const guides={
  ],actions:[['Automation planning prompts','prompts']]},
  conectores:{kicker:'TOOLS AND CONNECTIONS',title:'Connect tools without programming.',intro:'Some apps or plugins may not be available on every device or plan. Use the available alternatives without promising a connection you cannot verify.',steps:[
  ['ChatGPT','Use prompts for research, copy, image planning and explanations. Keep passwords and client secrets out of chats.'],
- ['AppDeploy','If available, open your project, apply one section prompt and test the preview before continuing.'],
+ ['AppDeploy','Ask ChatGPT to create the first mockup using the connected AppDeploy tool, share the preview URL, then implement your requested revisions. You approve and test rather than building manually.'],
  ['Gmail and Make','Where available, a tested form can send a confirmation or owner notification. Confirm scopes and message delivery.'],
  ['Payment provider','Only connect a supported provider for an eligible real business after testing its checkout.'],
  ['Troubleshooting','Document the exact error and what was tested. Never paste API keys or recovery codes into public materials.']
