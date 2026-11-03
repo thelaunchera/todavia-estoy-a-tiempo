@@ -88,6 +88,34 @@ export function microWindowsProject(season:number,episode:number){
   integration:'Import into the OFF BRIEF 2 min / dual format Windows companion. Project manifest is not guaranteed native import to the old Video Studio ZIP.'
  };
 }
+export function microVoiceCues(q:MicroEpisode):string{
+ const rows=['BEAT,START_SEC,END_SEC,SPEAKER,DIALOGUE'];
+ for(const b of q.beats){
+  const chunks=b.script.match(/(?:^|\\s)([A-Z][A-Z0-9 ]{1,25}):\\s*([\\s\\S]*?)(?=\\s+[A-Z][A-Z0-9 ]{1,25}:|$)/g)||[];
+  for(const c of chunks){
+   const m=c.trim().match(/^([A-Z][A-Z0-9 ]{1,25}):\\s*([\\s\\S]*)$/);
+   if(m){const vals=[b.label,String(b.start),String(b.end),m[1],m[2]];rows.push(vals.map(x=>'"'+x.replace(/"/g,'""')+'"').join(','));}
+  }
+ }
+ return rows.join('\\r\\n');
+}
+export function microRecordingChecklist(q:MicroEpisode):string{
+ const cast=[...new Set(microVoiceCues(q).split('\\r\\n').slice(1).map(x=>x.split('","')[3]?.replace(/"/g,'')).filter(Boolean))];
+ return ['OFF BRIEF / QUICK RECORDING GUIDE','SEASON '+q.season+' EPISODE '+q.episode+' — '+q.title,
+ 'TARGET: 90–120 seconds. Record voices first and use their actual length; do not force artificial silence to fill 120 seconds.',
+ 'CAST: '+cast.join(', '),
+ '1. Read scripts/2-minute-cut.txt once, then rehearse the four beats.',
+ '2. Record each character separately using the free Windows Sound Recorder, or your existing voice tool. Save a master audio track as WAV or MP3.',
+ '3. Keep each character consistent; do not impersonate real people without consent.',
+ '4. Leave a brief pause between jokes and for the final question.',
+ '5. Check voice levels, pronunciation, background noise and total duration.',
+ '6. Import the master audio into the free OFF BRIEF Windows editor. It uses the SAME three PNGs for both exports.',
+ '7. Make a 12-second preview before full export, then watch BOTH versions before uploading.',
+ '8. The editor does not create mouth movements or automatically generate speech. No videos are uploaded automatically.',
+ 'VOICE CUES (CSV): see scripts/voice-cues.csv'
+ ].join('\\r\\n');
+}
+
 export function microWindowsFiles(season:number,episode:number):Record<string,string>{
  const q=getMicroEpisode(season,episode);if(!q)return {};
  const frames=microFrames(season,episode);
@@ -95,6 +123,8 @@ export function microWindowsFiles(season:number,episode:number):Record<string,st
  const files:Record<string,string>={
   'project.json':JSON.stringify(manifest,null,2),
   'scripts/2-minute-cut.txt':microScriptText(q),
+  'scripts/voice-cues.csv':microVoiceCues(q),
+  'scripts/GRABACION-PASO-A-PASO.txt':microRecordingChecklist(q),
   'media/stills/PUT-YOUR-THREE-APPROVED-PNGS-HERE.txt':'Create or copy only the 3 image files required by project.json. Use the same originals for YouTube and TikTok.\r\n',
   'media/voice/IMPORT-VOICE-WAV-HERE.txt':'Export the full approved dialogue as one soundtrack WAV/MP3, then select it in the free Windows editor. Do not imitate real peoples voices without permission.\r\n',
   'README-WINDOWS.txt':[
