@@ -315,11 +315,12 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const isFreebie=code.startsWith('freebie_1photo8_');
    const cat=String(p.category||'').toLowerCase();
    const isDemo=code.startsWith('demo_')||code.startsWith('demo-photo_');
+   // Each demo owns its complete prompt collection, including individual photos.
+   const demoId=isDemo?code.replace(/^demo-photo_|^demo_/,'').replace(/_\\d+(?:_\\d+)?$/,''):null;
    let group='planning';
    if(code.startsWith('typography_'))group='typography';
    else if(isFreebie)group='freebie';
-   else if(code.startsWith('demo-photo_'))group='demo_photos';
-   else if(isDemo)group='demo_'+(p.category||'demo').replace(/^demo_/,'');
+   else if(isDemo)group='demo:'+demoId;
    else if(code.startsWith('mobile_')||/revisi|m[oó]vil|auditor|qa|public/i.test(cat+' '+code))group='mobile';
    else if(/foto|imagen|empaque|photograph/i.test(code+' '+cat))group='photos';
    else if(/diseño|visual|identidad|brand|mood/i.test(cat+' '+code))group='design';
@@ -327,9 +328,13 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    return {...p,group,englishTitle:englishTitle(code,p.title)};
   });
   fullCatalog.sort((a,b)=>{
-   const priority={planning:0,design:1,photos:2,build:3,mobile:4,freebie:5,typography:5.5,
-    demo_food:6,demo_wellness:7,demo_hospitality:8,demo_fashion:9,demo_services:10,demo_photos:11};
-   return (priority[a.group]??99)-(priority[b.group]??99)||(a.position||0)-(b.position||0);
+   const priority={planning:0,design:1,photos:2,build:3,mobile:4,freebie:5,typography:5.5};
+   const demoA=a.group.startsWith('demo:'),demoB=b.group.startsWith('demo:');
+   if(demoA&&demoB){
+    const nameA=String(a.brand||a.group),nameB=String(b.brand||b.group);
+    return nameA.localeCompare(nameB,getLanguage()==='en'?'en':'es')||(a.position||0)-(b.position||0);
+   }
+   return (demoA?6:(priority[a.group]??99))-(demoB?6:(priority[b.group]??99))||(a.position||0)-(b.position||0);
   });
   const filters=[
    ['all',t('Todos los prompts','All prompts')],['planning',t('01 · Investiga el negocio','01 · Research the business')],
@@ -338,13 +343,16 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    ['build',t('04 · Construye la web','04 · Build the website')],
    ['mobile',t('05 · Revisa y publica','05 · Review & publish')],
    ['freebie',t('Bonus · 1 foto, 8 diseños','Bonus · 1 photo, 8 designs')],
-   ['typography',t('Extra · 16 estilos tipográficos','Extra · 16 typography styles')],
-   ['demo_food',t('Demos · Comida','Demos · Food')],
-   ['demo_wellness',t('Demos · Bienestar','Demos · Wellness')],
-   ['demo_hospitality',t('Demos · Eventos','Demos · Events')],
-   ['demo_photos',t('Fotos de los demos','Demo photo prompts')],
-   ['demo_services',t('Demos · Servicios','Demos · Services')]
+   ['typography',t('Extra · 16 estilos tipográficos','Extra · 16 typography styles')]
   ];
+  // Build one named filter per real demo, never per industry or photo type.
+  const demoGroups=new Map();
+  for(const item of fullCatalog){
+   if(item.group.startsWith('demo:')&&!demoGroups.has(item.group))demoGroups.set(item.group,String(item.brand||item.group.slice(5)));
+  }
+  for(const [id,name] of [...demoGroups].sort((a,b)=>a[1].localeCompare(b[1],lang))){
+   filters.push([id,t('Demo · ','Demo · ')+name]);
+  }
   const itinerary=el('div','mi-prompt-itinerary');
   itinerary.innerHTML='<strong>'+t('¿Por dónde empiezo?','Where do I begin?')+'</strong><p>'+t(
    'Sigue las categorías 01 a 05 para crear tu web. El bonus de 8 diseños sirve para practicar composiciones con una fotografía. El extra de tipografía permite cambiar solo el estilo de letra en una imagen original. Los demos son ejemplos que puedes estudiar sin copiarlos.',
