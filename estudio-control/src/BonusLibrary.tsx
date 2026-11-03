@@ -118,7 +118,7 @@ export default function BonusLibrary() {
             )}
             <div className="bonus-library-url" title={item.url}>{item.url}</div>
             <div className="bonus-library-actions">
-              <a href={item.url} target="_blank" rel="noopener noreferrer">{item.resource_code === 'bonus_hero_cinematic_scroll' ? 'Abrir aula' : 'Abrir biblioteca'} <ExternalLink size={16} /></a>
+              <a href={item.url} target="_blank" rel="noopener noreferrer">{['bonus_hero_cinematic_scroll','bonus_content_command_notion'].includes(item.resource_code) ? 'Abrir aula' : 'Abrir biblioteca'} <ExternalLink size={16} /></a>
               <button type="button" onClick={() => void copyLink(item.url, item.resource_code)}>
                 {copied === item.resource_code ? <Check size={16} /> : <Copy size={16} />}
                 {copied === item.resource_code ? 'Copiado' : 'Copiar enlace'}
