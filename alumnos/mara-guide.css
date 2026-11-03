@@ -38,3 +38,9 @@
 }
 @media(max-width:370px){.mara-task-grid{grid-template-columns:1fr}.mara-hero h1{font-size:33px}}
 @media(prefers-reduced-motion:reduce){.mara-app *{scroll-behavior:auto}}
+
+/* Show Mara as a distinct workspace in the classroom sidebar. */
+.aula-navigation .aula-mara-nav{background:#eef4f6;border:1px solid #cfdee6;color:#254b66;font-weight:800}
+.aula-navigation .aula-mara-nav:hover{background:#e1edf3;border-color:#bad2df}
+.aula-navigation .aula-mara-nav[aria-current="page"]{background:#dcebf2;border-color:#9dbfd1}
+.aula-navigation .aula-mara-nav .aula-side-icon{color:#457d9d}
