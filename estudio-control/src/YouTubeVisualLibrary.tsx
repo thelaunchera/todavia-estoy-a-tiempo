@@ -49,7 +49,7 @@ function PhotoCard({photo,entry,readOnly,onChanged}:{photo:YouTubePhoto,entry?:Y
   };
   return <article className="yt-frame">
     <div className="yt-frame-image">
-      {saved?<img src={saved} loading="lazy" alt={'Escena '+photo.id+' · '+photo.title} onError={event=>{event.currentTarget.style.visibility='hidden';}}/>:
+      {saved?<img src={saved} loading="lazy" alt={'Escena '+photo.id+' · '+photo.title} onError={event=>{event.currentTarget.style.visibility='hidden';}} onLoad={event=>{event.currentTarget.style.visibility='visible';}}/>:
       <div className="yt-frame-placeholder"><Camera size={30}/><strong>{photo.id}</strong><small>Foto pendiente</small></div>}
     </div>
     <div className="yt-frame-body">
@@ -72,12 +72,16 @@ function PhotoCard({photo,entry,readOnly,onChanged}:{photo:YouTubePhoto,entry?:Y
 export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:Props){
   const [selected,setSelected]=useState(1);
   const [filter,setFilter]=useState('');
+  const [batchStatus,setBatchStatus]=useState('');
   const episode=youtubeEpisodes.find(item=>item.number===selected)||youtubeEpisodes[0];
   const look=youtubeWardrobe[selected];
   const photos=useMemo(()=>[...(youtubePhotoBoard[selected]||[]),...youtubeHolidayFrames.filter(x=>x.id.startsWith('E'+episodeNum(selected)))], [selected]);
   const filtered=useMemo(()=>photos.filter(p=>(p.title+' '+p.id+' '+p.action+' '+p.shot).toLowerCase().includes(filter.toLowerCase())),[photos,filter]);
   const owned=useMemo(()=>new Map(entries.filter(x=>x.section===YOUTUBE_PHOTO_SECTION).map(x=>[x.title,x])),[entries]);
   const ready=photos.filter(p=>owned.get(p.id)?.art||p.image).length;
+  const batchText=useMemo(()=>photos.map(p=>'=== '+p.id+' · '+p.title+' ===\n'+getYouTubePhotoPrompt(p)).join('\n\n-----------------------\n\n'),[photos]);
+  const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
+  const copyAll=async()=>{try{await navigator.clipboard.writeText(batchText);setBatchStatus('Todos los prompts del capítulo copiados.');}catch{setBatchStatus('Usa Descargar TXT para guardar todos los prompts.');}};
   return <div className="yt-visual">
     <section className="yt-paper">
       <div className="yt-small-title"><Users size={17}/> BIBLIA DE PERSONAJES</div>
@@ -108,6 +112,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <div><div className="yt-small-title"><Film size={16}/> STORYBOARD Y FOTOS POR CAPÍTULO</div><h3>Galería de producción</h3><p>Una imagen por plano. Cada ficha incluye encuadre, acción, vestuario y prompt cinematográfico individual en inglés.</p></div>
         <div className="yt-visual-counter">{ready}/{photos.length}<small>imágenes vinculadas</small></div>
       </div>
+      <div className="yt-visual-batch"><button type="button" onClick={copyAll}><Copy size={16}/> Copiar prompts del capítulo</button><button type="button" onClick={downloadAll}><Save size={16}/> Descargar prompts TXT</button>{batchStatus&&<small role="status">{batchStatus}</small>}</div>
       <div className="yt-visual-episode-nav">{youtubeEpisodes.map(ep=><button type="button" key={ep.number} className={selected===ep.number?'active':''} onClick={()=>{setSelected(ep.number);setFilter('')}}>EP {episodeNum(ep.number)}</button>)}</div>
       <div className="yt-visual-episode-header">
         <div><span className="yt-small-title">CAPÍTULO {episodeNum(selected)}</span><h4>{episode.title}</h4><p>{episode.logline}</p></div>
