@@ -43,6 +43,18 @@ test('el cuaderno persiste las respuestas del usuario actual, no las de otro alu
  assert.match(materials,/if\(ownerPreview\|\|saveRunning\)return;/,'La vista de administración no guarda');
 });
 
+test('el owner prueba el cuaderno y las casillas sin tocar respuestas reales',()=>{
+ assert.match(materials,/const ownerPreview=adminPreview\|\|!user/,'El modo owner se detecta sin identidad de alumno');
+ assert.doesNotMatch(materials,/textarea\.disabled=ownerPreview/,'Los campos de prueba no deben estar deshabilitados');
+ assert.doesNotMatch(materials,/inp\.disabled=ownerPreview/,'Las casillas de prueba no deben estar deshabilitadas');
+ assert.match(materials,/mi-owner-test-note/,'El alumno y la administradora distinguen la prueba');
+ assert.match(materials,/mi-owner-test-clear/,'La prueba se puede borrar');
+ assert.match(materials,/if\(ownerPreview\|\|saveRunning\)return;/,'Nunca guardar la vista owner en Supabase');
+ assert.match(materials,/if\(ownerPreview\)return;/,'Nunca leer respuestas de estudiantes en preview');
+ assert.match(materials,/mi-owner-test-feedback/,'El resultado de la prueba se muestra junto al botón');
+ assert.match(materialsCss,/\.mi-owner-test-note/,'Vista de prueba identificable en el teléfono');
+});
+
 test('cada prompt ofrece Copiar con alternativa para Safari',()=>{
  assert.match(materials,/navigator\.clipboard\.writeText\(value\)/);
  assert.match(materials,/document\.execCommand\('copy'\)/);
