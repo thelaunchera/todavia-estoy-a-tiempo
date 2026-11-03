@@ -1,3 +1,4 @@
+import YouTubeStudio from './YouTubeStudio';
 import SeamlessEditor from './SeamlessEditor';
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
@@ -62,6 +63,7 @@ type Page =
   | 'episodios'
   | 'reels'
   | 'seamless'
+  | 'youtube'
   | 'clases'
   | 'demos'
   | 'alumnos'
@@ -154,6 +156,7 @@ const NAV = [
   { id: 'bonos', label: 'Materiales y bonos', icon: Sparkles },
   { id: 'club', label: 'Comunidad · Club', icon: Users },
   { id: 'demos', label: 'Demos de la clase', icon: Globe2 },
+  { id: 'youtube', label: 'YouTube · Nia y Ruby', icon: Film, group: 'YOUTUBE · SERIE ANIMADA' },
   { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles, group: '🎨 CREACIÓN DE CONTENIDO' },
   { id: 'ideas', label: 'Banco de ideas', icon: Lightbulb },
   { id: 'ventas', label: 'Ventas e ingresos', icon: CreditCard, group: '💼 NEGOCIO Y OPERACIONES' },
@@ -170,6 +173,7 @@ const LABELS: Record<Page, string> = {
   episodios: 'Podcast · capítulos y guiones',
   reels: 'Podcast · reels',
   seamless: 'Carruseles seamless',
+  youtube: 'YouTube · Nia y Ruby',
   clases: 'Clase · grabar módulos',
   demos: 'Clase · demos',
   alumnos: 'Clase · aula y estudiantes',
@@ -278,7 +282,7 @@ function App() {
     [error, setError] = useState('');
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -649,7 +653,7 @@ function App() {
     setMobileNav(false);
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links' || p==='productos') nextUrl.searchParams.set('seccion',p);
+    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1101,6 +1105,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
+                  : page === 'youtube' ? 'YOUTUBE / SERIE ANIMADA'
                   : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'espera' || page === 'bonos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
                     : 'PODCAST / DIRECCIÓN EDITORIAL'}
@@ -1310,6 +1315,7 @@ function App() {
               {episodeRows}
             </>
           )}
+          {page === 'youtube' && <YouTubeStudio />}
           {page === 'seamless' && <SeamlessEditor />}
           {page === 'reels' && (
             <ReelsProduction entries={items.ideas} onSave={async (entry,patch)=>{
