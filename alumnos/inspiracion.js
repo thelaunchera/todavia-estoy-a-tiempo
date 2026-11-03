@@ -77,7 +77,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
  }
  const demos=Array.isArray(data.payload.demos)?data.payload.demos.filter(d=>d&&d.id&&d.title&&safeUrl(d.url)):[];
  const visibleDemos=()=>adminPreview?demos:demos.filter(d=>d.published!==false);
- const demoPrompts=d=>Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guidePayload?.cases?.[d.id]?.extra_prompts)?guidePayload.cases[d.id].extra_prompts:[]);
+ const demoPrompts=d=>{const guideCase=guidePayload?.cases?.[d.id];return Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guideCase?.extra_prompts)?guideCase.extra_prompts:[]);};
  let currentId=null,category='all',search='';
  const categoryNames={
   all:['Todas','All'],food:['Repostería y comida','Food & bakery'],
