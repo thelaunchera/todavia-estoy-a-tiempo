@@ -54,13 +54,13 @@ export async function mountBonusLibrary(root,{db,courseId,getLanguage=()=> 'es'}
   lang=getLanguage()==='en'?'en':'es';
   root.replaceChildren();
   const count=document.getElementById('bonus-library-count');
-  if(count)count.textContent=failed?'':rows.length+' '+word(rows.length===1?'bono disponible':'bonos disponibles',rows.length===1?'available bonus':'available bonuses',lang);
+  if(count)count.textContent=failed||!rows.length?'':rows.length+' '+word(rows.length===1?'bono':'bonos',rows.length===1?'bonus':'bonuses',lang);
   if(failed){
    root.append(create('p','bonus-library-message',word('No pudimos cargar la biblioteca. Actualiza el aula para intentar de nuevo.','We could not load the bonus library. Refresh your classroom to try again.',lang)));
    return;
   }
   if(!rows.length){
-   root.append(create('p','bonus-library-message',word('Tus bonos aparecerán aquí después de que los activen y asignen a tu cuenta, y completes los requisitos de la clase.','Bonuses appear here once they have been activated and assigned to your account and you complete the course requirements.',lang)));
+   root.append(create('p','bonus-library-message',word('Todavía no tienes bonos desbloqueados.','You have no unlocked bonuses yet.',lang)));
    return;
   }
   rows.forEach((item,index)=>{
@@ -124,7 +124,7 @@ export async function mountBonusLibrary(root,{db,courseId,getLanguage=()=> 'es'}
    card.append(panel);root.append(card);
   });
  };
- root.replaceChildren(create('p','bonus-library-message',word('Cargando recursos…','Loading resources…',lang)));
+ root.replaceChildren(create('p','bonus-library-message',word('Cargando bonos…','Loading bonuses…',lang)));
  try{
   const [{data:resources,error:resourceError},{data:prompts,error:promptError}]=await Promise.all([
    db.from('podcast_class_resources')
