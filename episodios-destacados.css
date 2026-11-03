@@ -166,3 +166,39 @@
  .episodes-compact-v2 .episode-curated-copy h3,.episodes-compact-v2 .episode-previous-link{font-size:1.13rem}
 }
 @media(prefers-reduced-motion:reduce){.episodes-compact-v2 .episode-mini-card{transition:none!important}}
+
+/* 2026-11-03 · Tres capítulos publicados en la landing.
+   La portada del 03 es la portada general confirmada del podcast.
+   No modificar el hero ni las fotos originales de cada episodio. */
+@media(min-width:1001px){
+  .episodes-compact-v2 .episode-curated-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-items:stretch;
+    gap:14px;
+  }
+  .episodes-compact-v2 .episode-mini-card{padding:16px;gap:12px}
+  .episodes-compact-v2 .episode-curated-art,
+  .episodes-compact-v2 .episode-previous-image{
+    flex:0 0 clamp(76px,7vw,98px);
+    width:clamp(76px,7vw,98px);
+    height:clamp(76px,7vw,98px);
+  }
+  .episodes-compact-v2 .episode-curated-copy h3,
+  .episodes-compact-v2 .episode-previous-link{
+    font-size:clamp(1.03rem,1.52vw,1.4rem);
+    line-height:1.23;
+    overflow-wrap:break-word;
+  }
+}
+@media(min-width:721px) and (max-width:1000px){
+  .episodes-compact-v2 .episode-curated-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .episodes-compact-v2 .episode-earlier{grid-column:1/-1}
+}
+@media(max-width:720px){
+  .episodes-compact-v2 .episode-earlier{grid-column:auto}
+}
+/* Third item is a full episode card, not a second hero. */
+.episodes-compact-v2 .episode-earlier .episode-previous-image img{
+  width:100%;height:100%;object-fit:cover;object-position:center;
+}
+.episodes-compact-v2 .episode-earlier[hidden]{display:none!important}
