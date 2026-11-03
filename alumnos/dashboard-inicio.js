@@ -25,23 +25,23 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
  $('dashboard-progress-empty').hidden=showProgress;
  $('dashboard-progress-shell').dataset.mode=showProgress?'progress':'waiting';
  write('student-greeting-message',pick(language,
-  'Bienvenido a tu espacio para crear. Aquí puedes investigar tu idea, elegir un estilo, preparar fotos y construir tu página paso a paso.',
-  'Welcome to your creative workspace. Research your idea, choose a style, prepare photos and build your website one step at a time.'));
+  'Vamos a crear una web, paso a paso. No necesitas resolverlo todo hoy.',
+  'We will build one website, step by step. You do not have to figure everything out today.'));
  write('dashboard-greeting-tip',pick(language,
-  'Primero entiende qué necesita tu negocio. Después comienza a diseñar.',
-  'Start by understanding what your business needs. Then begin designing.'));
+  'Trabaja en una sola web y guarda sus fotos en la misma carpeta.',
+  'Work on one website and keep its photos in one folder.'));
  write('dashboard-progress-empty-title',pick(language,'Tu proyecto, a tu ritmo.','Your project, your pace.'));
  write('dashboard-progress-empty-desc',pick(language,
-  'Tu biblioteca de prompts, materiales y ejemplos ya puede ayudarte a preparar tu web.',
-  'Your prompt library, materials and examples are ready to help you prepare your site.'));
+  'Puedes empezar con los prompts y la guía, aunque los videos sigan en preparación.',
+  'You can start with prompts and the guide while the videos are being prepared.'));
  const allDone=ready.length>0&&completed===ready.length;
  let onAction;
  if(!ready.length){
   write('dashboard-next-kicker',pick(language,'TU PRIMER PASO','YOUR FIRST STEP'));
   write('dashboard-next-title',pick(language,'Aquí empieza tu primera web.','Your first website starts here.'));
   write('dashboard-next-description',pick(language,
-   'Investiga qué necesita el negocio, copia tu primer prompt y guarda una idea de estilo. No tienes que hacer todo el mismo día.',
-   'Research what the business needs, copy your first prompt and save a visual direction. You do not have to do everything today.'));
+   'Define qué necesita tu negocio y guarda tu primera idea.',
+   'Decide what your business needs and save your first idea.'));
   write('dashboard-next-detail',pick(language,'Comienza por tu idea · Materiales disponibles','Start with your idea · Materials ready'));
   write('dashboard-next-action',pick(language,'Abrir mis prompts','Open my prompts'));
   onAction=()=>onView?.('prompts');
@@ -50,7 +50,9 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
   const translated=localizeLesson?.(pending)||pending;
   write('dashboard-next-kicker',completed?pick(language,'CONTINÚA AQUÍ','PICK UP HERE'):pick(language,'TU PRIMER PASO','YOUR FIRST STEP'));
   write('dashboard-next-title',translated.title||pending.title||'Tu siguiente lección');
-  write('dashboard-next-description',translated.description||pending.description||'');
+  write('dashboard-next-description',pick(language,
+    'Mira la lección y haz una práctica. Todo lo demás puede esperar.',
+    'Watch the lesson and try one exercise. The rest can wait.'));
   write('dashboard-next-detail',pick(language,'Lección ','Lesson ')+(index+1)+' / '+ready.length+(pending.minutes?' · '+pending.minutes+' min':''));
   write('dashboard-next-action',completed?pick(language,'Continuar lección','Continue lesson'):pick(language,'Empezar lección','Start lesson'));
   onAction=()=>onLesson?.(originalIndex);
@@ -58,8 +60,8 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
   write('dashboard-next-kicker',pick(language,'SIGUIENTE PASO','NEXT STEP'));
   write('dashboard-next-title',pick(language,'Terminaste las lecciones disponibles.','You finished the available lessons.'));
   write('dashboard-next-description',pick(language,
-   projectShared?'Tu web ya está compartida. Puedes revisar tus recursos o conversar con otras personas.':'Comparte una captura o enlace de tu web en el Club de Ideas.',
-   projectShared?'Your website is shared. Review your resources or join the conversation.':'Share a screenshot or your site link in the Ideas Club.'));
+   projectShared?'¡Tu web ya está compartida! Puedes revisar tus materiales.':'Comparte tu web en el Club de Ideas para cerrar este recorrido.',
+   projectShared?'Your website is shared! You can review your materials.':'Share your website in Ideas Club to finish this journey.'));
   write('dashboard-next-detail',completed+' / '+ready.length+' '+pick(language,'lecciones completadas','lessons completed'));
   write('dashboard-next-action',pick(language,'Abrir Club de Ideas','Open Ideas Club'));
   onAction=()=>onView?.('comunidad');
