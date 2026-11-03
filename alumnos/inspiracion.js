@@ -28,7 +28,7 @@ function galleryPhotoLabel(demo,index,original,lang){
  return englishPhotoNames[demo]?.[index]||'Reference photo '+String(index+1).padStart(2,'0');
 }
 
-async function clipboardCopy(value,button){
+async function clipboardCopy(value,button,language='es'){
  let copied=false;
  try{await navigator.clipboard.writeText(value);copied=true;}catch{}
  if(!copied){
@@ -36,7 +36,7 @@ async function clipboardCopy(value,button){
   document.body.append(input);input.select();
   try{copied=document.execCommand('copy');}catch{}input.remove();
  }
- button.textContent=copied?'✓ Copied / Copiado':'Select text / Selecciona el texto';
+ button.textContent=language==='en'?(copied?'Copied!':'Select text to copy'):(copied?'¡Copiado!':'Selecciona el texto para copiarlo');
 }
 export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
@@ -153,14 +153,14 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
    const body=document.createElement('div');body.className='inspiration-prompt-body';
    const promptText=localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
    const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=promptText;
-   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar instrucciones','Copy practice instructions',curLang());copy.addEventListener('click',()=>clipboardCopy(promptText,copy));
+   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar instrucciones','Copy practice instructions',curLang());copy.addEventListener('click',()=>clipboardCopy(promptText,copy,curLang()));
    body.append(pre,copy);
    for(const pic of Array.isArray(p.photos)?p.photos:[]){
     const photo=document.createElement('details');photo.className='inspiration-photo-prompt';
     const sum=document.createElement('summary');sum.textContent=(curLang()==='en'?'Photo prompt: ':'Prompt de foto: ')+(curLang()==='en'?englishDemoPhotoTitle('demo-photo_'+d.id+'_'+i+'_'+(Array.isArray(p.photos)?p.photos.indexOf(pic):0),pic.title):pic.title||'');
     const photoText=localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
     const txt=document.createElement('p');txt.textContent=photoText;
-    const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(photoText,cp));
+    const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(photoText,cp,curLang()));
     photo.append(sum,txt,cp);body.append(photo);
    }
    item.append(body);list.append(item);
