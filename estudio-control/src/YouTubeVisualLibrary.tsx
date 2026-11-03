@@ -8,7 +8,7 @@ import { getCharacterLookPrompt, youtubeHolidayFrames, youtubeWardrobe, youtubeR
 import './youtube-visual-library.css';
 
 export const YOUTUBE_PHOTO_SECTION = 'youtube-storyboards-v1';
-export type YouTubeSavedPhoto = {id:string;title:string;section?:string;art?:string;notes?:string;status?:string};
+export type YouTubeSavedPhoto = {id:string;title:string;section?:string;art?:string;notes?:string;status?:string;link?:string};
 type Props={ entries:YouTubeSavedPhoto[]; onChanged:()=>Promise<void>;readOnly?:boolean };
 const base=import.meta.env.BASE_URL;
 const avatarImages:Record<string,string> = {
@@ -93,6 +93,26 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
   </article>;
 }
 
+
+const EXTRA_MOODBOARD_SECTION='youtube-s1e02-idea-accion-v1';
+function ExtraMoodboardPhoto({entry}:{entry:YouTubeSavedPhoto}){
+ const [unavailable,setUnavailable]=useState(false);
+ const driveLink=entry.link||'';
+ return <article className="yt-frame">
+   <div className="yt-frame-image">
+     {entry.art&&!unavailable
+      ?<img src={entry.art} loading="lazy" alt={entry.title} onError={()=>setUnavailable(true)}/>
+      :<div className="yt-frame-placeholder"><ImagePlus size={28}/><strong>{entry.title.slice(0,8)}</strong><small>PNG guardado en Drive</small></div>}
+   </div>
+   <div className="yt-frame-body">
+     <div className="yt-frame-meta"><span>Serie 1</span><span>Capítulo 02</span></div>
+     <h4>{entry.title.replace(/^S1E02-\\d+ · /,'')}</h4>
+     <p>Moodboard «De la idea a la acción» · imagen individual</p>
+     {driveLink&&<div className="yt-frame-buttons"><a href={driveLink} target="_blank" rel="noopener noreferrer"><Eye size={15}/> Abrir PNG en Drive</a></div>}
+   </div>
+ </article>;
+}
+
 export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:Props){
   const [selected,setSelected]=useState(1);
   const [filter,setFilter]=useState('');
@@ -112,6 +132,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const photos=useMemo(()=>[...(youtubePhotoBoard[selected]||[]),...youtubeHolidayFrames.filter(x=>x.id.startsWith('E'+episodeNum(selected)))], [selected]);
   const filtered=useMemo(()=>photos.filter(p=>(p.title+' '+p.id+' '+p.action+' '+p.shot).toLowerCase().includes(filter.toLowerCase())),[photos,filter]);
   const owned=useMemo(()=>new Map(entries.filter(x=>x.section===YOUTUBE_PHOTO_SECTION).map(x=>[x.title,x])),[entries]);
+  const extraMoodboard=useMemo(()=>entries.filter(x=>x.section===EXTRA_MOODBOARD_SECTION).sort((a,b)=>a.title.localeCompare(b.title)),[entries]);
   const ready=photos.filter(p=>privatePhotos.get(p.id)?.url||owned.get(p.id)?.art||p.image).length;
   const batchText=useMemo(()=>photos.map(p=>'=== '+p.id+' · '+p.title+' ===\n'+getYouTubePhotoPrompt(p)).join('\n\n-----------------------\n\n'),[photos]);
   const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
@@ -156,7 +177,14 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <span className="yt-look-label">{look.mood}</span>
       </div>
       <div className="yt-holiday-note"><CalendarDays size={18}/><span>{selected===5?'Especial Thanksgiving: cuatro tomas opcionales añadidas a este episodio.':selected===8?'Especial Christmas: cuatro tomas opcionales añadidas al cierre de temporada.':look.note} <b>Publicaciones mensuales: {youtubeReleasePlan.cadence}.</b> Decidiremos la frecuencia al terminar y probar el Video Studio gratuito.</span></div>
-      <label className="yt-gallery-search"><Search size={17}/><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Buscar un plano o una escena..." aria-label="Buscar imágenes del capítulo"/></label>
+      {selected===2&&extraMoodboard.length>0&&<section className="yt-moodboard-extra" aria-label="Moodboard alternativo del capítulo 2">
+ <div className="yt-small-title">BIBLIOTECA ADICIONAL · SERIE 1 · CAPÍTULO 02</div>
+ <h3>De la idea a la acción · 9 imágenes</h3>
+ <p>Las nueve escenas individuales están guardadas en tu Google Drive y enlazadas desde este Studio. Este moodboard es distinto del guion «The Client Said Beige»: no reemplaza sus fotografías ni su historia.</p>
+ <div className="yt-photo-grid">{extraMoodboard.map(entry=><ExtraMoodboardPhoto key={entry.id} entry={entry}/>)}</div>
+ <p className="yt-muted">Si no carga alguna miniatura de Drive, toca «Abrir PNG en Drive» para verla y descargarla con tu cuenta.</p>
+ </section>}
+ <label className="yt-gallery-search"><Search size={17}/><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Buscar un plano o una escena..." aria-label="Buscar imágenes del capítulo"/></label>
       <div className="yt-photo-grid">{filtered.map(photo=><PhotoCard key={photo.id} photo={photo} entry={owned.get(photo.id)} privatePhoto={privatePhotos.get(photo.id)} readOnly={readOnly} onChanged={onChanged} onPrivateChanged={refreshPrivate}/>)}</div>
       {filtered.length===0&&<p className="yt-muted">No hay planos que coincidan con la búsqueda.</p>}
       <p className="yt-gallery-disclaimer">Los espacios en blanco son fotos todavía por generar. Los dos avatares sí están cargados. Nada de esta biblioteca programa publicaciones ni produce videos automáticamente.</p>
