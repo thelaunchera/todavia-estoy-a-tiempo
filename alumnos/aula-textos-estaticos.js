@@ -2,7 +2,14 @@
  * member-authored content, prompt body, workbook answer, or demo source text. */
 const textByLanguage={
  "Saltar al aula": "Skip to classroom",
- "Mi Studio": "My Studio",
+ "Administración": "Administration",
+ "PARA SEGUIR CREANDO": "KEEP CREATING",
+ "Un lugar para tus recursos extra.": "A place for your extra resources.",
+ "TUS BONOS": "YOUR BONUSES",
+ "Recursos disponibles": "Available resources",
+ "Más recursos para ti": "More resources for you",
+ "Bonos que tienes disponibles.": "Bonuses available to you.",
+ "Completa estos dos pasos para acceder a tus bonos:": "Two steps to unlock your bonuses:",
  "MI AULA · TU PRIMERA WEB CON IA": "MY CLASSROOM · YOUR FIRST WEBSITE WITH AI",
  "Salir de mi cuenta": "Sign out",
  "Tu espacio para": "Your space to",
@@ -93,19 +100,19 @@ const textByLanguage={
  "ELEGIDOS PARA TI": "CHOSEN FOR YOU",
  "Tus bonos personales": "Your personal bonuses",
  "Estos recursos fueron seleccionados especialmente para tu cuenta.": "These resources were selected for your account.",
- "UN REGALO POR TU ESFUERZO": "A REWARD FOR YOUR WORK",
- "Desbloquea tu bono": "Unlock your bonus",
+ "UN PASO MÁS": "ONE MORE STEP",
+ "Cómo desbloquear tus bonos": "How to unlock your bonuses",
  "Tu bono se activa": "Your bonus unlocks",
  "solo cuando hayas terminado la última lección": "only after you finish the final lesson",
  "y hayas publicado tu primera web en": "and share your first website in",
  ", dentro del Club de Ideas.": ", inside Ideas Club.",
- "Terminar todas las lecciones": "Finish all lessons",
- "Compartir tu primera web en el club": "Share your first website in the club",
+ "Termina las lecciones": "Finish your lessons",
+ "Comparte tu web en el Club de Ideas": "Share your website in Ideas Club",
  "Bono bloqueado · completa los dos pasos para habilitarlo.": "Bonus locked · complete both requirements to unlock it.",
- "¡Reto completado!": "Challenge completed!",
- "Cumpliste los requisitos del bono. El material aparecerá aquí cuando esté publicado.": "You met the bonus requirements. Your resource will appear here once published.",
- "Volver al Studio para reintentar": "Return to Studio to try again",
- "El aula no pudo iniciar sus archivos. Código: AULA-MODULE. Regresa al Studio para reintentar.": "The classroom could not load its files. Code: AULA-MODULE. Return to Studio to try again."
+ "¡Lo lograste!": "You did it!",
+ "Tus bonos aparecerán arriba cuando estén disponibles.": "Your bonuses will appear above when available.",
+ "Volver a administración": "Back to administration",
+ "El aula no pudo iniciar sus archivos. Código: AULA-MODULE. Vuelve a administración para reintentar.": "The classroom could not load. Go back to administration and try again."
 };
 const sources=new WeakMap();
 export function translateStaticClassroomText(language='es'){
