@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Camera, Check, Clapperboard, Copy, Download, Film, ImagePlus, Play, Users } from 'lucide-react';
+import { BookOpen, Camera, Check, Clapperboard, Copy, Download, ImagePlus, Play, Users } from 'lucide-react';
 import { seasonTwo } from './youtube/season-2';
 import { seasonTwoScriptForEpisode } from './youtube/season-2-scripts';
 import { getSeasonTwoShots, seasonTwoShotTotal } from './youtube/season-2-shots';
