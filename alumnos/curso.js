@@ -194,7 +194,7 @@ async function ensureMara(){
  if(maraController||maraLoading||!user||course.hidden)return;
  const root=$('mara-guide');if(!root)return;
  root.textContent=getClassroomLanguage()==='en'?'Preparing your private guide…':'Preparando tu guía privada…';
- maraLoading=import('./mara-guide.js?v=20261103-mara-appdeploy-v2')
+ maraLoading=import('./mara-guide.js?v=20261103-mara-full-app-v3')
   .then(mod=>mod.mountMara(root,{db,courseId,getLanguage:getClassroomLanguage}))
   .then(controller=>{maraController=controller||null;})
   .catch(error=>{
