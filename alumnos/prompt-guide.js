@@ -46,6 +46,21 @@ export function promptGuide(code,language='es'){
   when:en?'After preparing a short product animation and extracting sequential JPG frames.':'Después de preparar un vídeo corto del producto y extraer sus JPG en orden.',
   result:en?'A responsive scroll-driven canvas animation integrated into your existing website.':'Una animación con canvas adaptable e integrada en tu web existente.'
  };
+ if(code==='typography_master_16')return {
+  purpose:en?'Generate sixteen independently copyable typography prompts from one original image.':'Generar dieciséis prompts de tipografía independientes a partir de una imagen original.',
+  when:en?'Before comparing new fonts on a poster, product photograph or advertisement.':'Antes de explorar fuentes nuevas en un póster, fotografía o anuncio.',
+  result:en?'Sixteen separate prompts that preserve the original design and branding.':'Dieciséis instrucciones independientes para respetar el diseño y la marca originales.'
+ };
+ if(/^typography_(0[1-9]|1[0-6])$/.test(code)){
+  const labelsEs=["Sans serif contemporánea de impacto","Serif elegante de alto contraste","Tipografía ultracondensada","Serif editorial retro","Sans geométrica minimalista","Slab serif vintage robusta","Cursiva editorial expresiva","Display contemporánea redondeada","Monoespaciada suiza","Art déco de lujo","Gótica contemporánea","Pincel expresivo","Tipografía modular Bauhaus","Serif clásica romana","Sans futurista extendida","Display retro orgánica suave"];
+  const labelsEn=["Bold Contemporary Sans Serif","Elegant High-Contrast Serif","Ultra-Condensed Display Typography","Retro Editorial Serif","Minimal Geometric Sans Serif","Heavy Vintage Slab Serif","Expressive Editorial Italic","Rounded Contemporary Display","Swiss Monospaced Typography","Art Deco Luxury Typography","Contemporary Gothic Blackletter","Expressive Hand-Painted Brush","Bauhaus Modular Typography","Classical Roman Inscription Serif","Futuristic Extended Sans Serif","Soft Organic Retro Display"];
+  const index=Number(code.slice(-2))-1;
+  return {
+   purpose:en?'Explore '+labelsEn[index]+' on the existing image while keeping its original design.':'Explorar '+labelsEs[index].toLowerCase()+' en la imagen sin cambiar su diseño.',
+   when:en?'After uploading the ORIGINAL image, before producing this single font variation.':'Después de subir la imagen ORIGINAL y antes de crear esta variación tipográfica.',
+   result:en?'One standalone image with only the editable font style changed.':'Una sola imagen donde únicamente cambia el estilo de letra editable.'
+  };
+ }
  const row=descriptions[code];
  if(row)return {purpose:en?row[1]:row[0],when:en?row[3]:row[2],result:en?row[5]:row[4]};
  if(/^mobile_/.test(code))return {purpose:en?'Improve the mobile version of your site.':'Mejorar la versión móvil de tu web.',when:en?'After building your first draft.':'Después de construir el primer borrador.',result:en?'A specific mobile fix or review.':'Una corrección o revisión móvil concreta.'};
