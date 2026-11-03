@@ -50,13 +50,15 @@ export const youtubeBrief = {
   ],
   "creativeRules": [
     "Personajes 3D adultos estilizados, cinematográficos y expresivos, inspirados en animación de alta gama sin copiar un estudio específico.",
-    "Mantener en TODOS los planos el rostro, piel, peinado, vestuario base y proporciones de los dos avatares proporcionados.",
+    "Mantener en todos los planos la identidad visual, rostro, piel, peinado característico, gafas, accesorios distintivos y proporciones de Nia y Ruby. El vestuario SÍ cambia por episodio: usar la ficha de ropa y respetar continuidad dentro de cada escena.",
     "Cámara con lenguaje cinematográfico: contrapicados, close-ups cómicos, reacciones y whip cuts solo cuando cuentan un chiste.",
     "Sonidos de ambiente y música original breve; evitar efectos genéricos excesivos y visuales de stock.",
     "Títulos, miniaturas y diálogos públicos de esta serie en inglés. Notas de dirección y producción del Studio en español.",
     "No atribuir colaboraciones reales a marcas reconocibles sin permiso; usar marcas de ficción.",
     "No reutilizar un hook ni el mismo conflicto como centro de dos episodios.",
-    "Escenas diseñadas para producción modular; reutilizar set del estudio y expresiones, variar utilería y cámara."
+    "Escenas diseñadas para producción modular; reutilizar set del estudio y expresiones, variar utilería y cámara.",
+    "Thanksgiving: usar una paleta otoñal elegante, decoraciones discretas y ropa casual de temporada; Navidad: looks borgoña/verde bosque y ambiente cálido de librería, sin disfraces ni exceso de clichés.",
+    "No definir número de videos por mes ni fechas de publicación hasta que el Video Studio gratuito esté listo y probado de punta a punta."
   ],
   "recurringJokes": [
     "La cafetera parece decidir si el estudio vivirá otro día.",
@@ -78,10 +80,15 @@ export const youtubeBrief = {
     "youtube": "Episodios horizontales 16:9, 1920×1080 mínimo, 24 fps como referencia; exportar con audio limpio y subtítulos revisados.",
     "shorts": "1–2 recortes verticales por capítulo, 9:16, 15–45 segundos; cada corte debe tener contexto y remate propio.",
     "structure": "Cold open (15–30 s) → título (3–5 s) → planteamiento → escalada → giro → resolución emocional/cómica → tag final.",
-    "production": "Guion → storyboard → voces → animatic → modelado/rigging de avatares → sets → animación → sonido → subtítulos → QA → publicación.",
+    "production": "Guion → storyboard → voces → animatic → modelado/rigging de avatares → sets → animación → sonido → subtítulos → QA → publicación. La frecuencia de publicación mensual se decidirá tras probar nuestro Video Studio gratuito sin suscripciones.",
     "statusLegend": "Guion inicial completo: listo para lectura de mesa. No equivale a voces grabadas, storyboard ilustrado o episodio producido."
   },
-  "characterReferences": "Los dos avatares adjuntos en la conversación del proyecto son la referencia definitiva. Las fotografías no se han generado ni añadido aún.",
+  "characterReferences": "Los dos avatares originales (Nia, blazer azul y trenza; Ruby, pelirroja de gafas y camisa verde) ya están añadidos en YouTube → Fotos y prompts como referencias de identidad. Son LOOKS DE REFERENCIA, no ropa obligatoria para todos los capítulos. Las fotos de escenas siguen pendientes de producir.",
   "pilotSignatureShot": "Cámara desde el suelo, contrapicado mirando verticalmente al cielo o techo del estudio. Nia y Ruby se inclinan sobre el lente como dos amigas intentando diagnosticar una cámara caída. Recuperar este plano cerca del clímax.",
-  "created": "2026-11-03"
+  "created": "2026-11-03",
+  "seasonalAdaptations": {
+    "thanksgiving": "E05 tiene un pack opcional de 4 fotos de Thanksgiving con ropa otoñal y estilismo de producto sin alterar la historia principal.",
+    "christmas": "E08 tiene 4 fotos opcionales de Navidad, visita a librería y final festivo. Mantener personajes adultos y comedia de amistad.",
+    "cadence": "Pendiente: decidir cantidad de episodios por mes al terminar el Video Studio gratuito."
+  }
 } as const;
