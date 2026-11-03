@@ -1,4 +1,4 @@
-import type {S2Scene} from '../season-2-shot-model';
+import type {S2Scene} from '../../season-2-shot-model';
 /** Season two episode 6: 8 scenes, each with 3 production-ready shot prompts. */
 export const sceneShots06:S2Scene[]=[
   {
