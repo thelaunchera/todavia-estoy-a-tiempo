@@ -25,7 +25,7 @@ NIA: They need a hundred unique product images.
 RUBY: One hundred? For how many products?
 NIA: One.
 RUBY: That's not a shoot. That's a long-term relationship.
-NIA: It's for a launch library. Website, social, emails, ads.
+NIA: It's for their fall and Thanksgiving launch library. Website, social, emails, ads.
 RUBY: Great. A lifestyle, a hero shot, an outdoors shot, a flat lay—
 NIA: And ninety-six others.
 RUBY: Please let me finish being optimistic.
@@ -36,7 +36,7 @@ RUBY: A metaphor for the modern internet.
 ### SCENE 3 — UNLIMITED IDEAS, LIMITED SPACE
 **SHOT:** Ruby opens a prop cabinet. A wave of fabric, plastic fruit and mini cones falls out.
 
-RUBY: Blue bottle on blue paper. Blue bottle on an orange cube. Blue bottle at a picnic.
+RUBY: Blue bottle on blue paper. Blue bottle on an orange cube. Blue bottle on a Friendsgiving dinner table with tiny pumpkins.
 NIA: We cannot physically stage a hundred sets today.
 RUBY: We could build a tiny planet.
 NIA: We are not building a tiny planet.
@@ -53,7 +53,7 @@ RUBY: Is that... a boundary?
 NIA: I have been practicing.
 
 ### SCENE 4 — THE SHOOT MONTAGE
-**SHOT:** Rapid cuts of ten inventive setups. Ruby rotates the product; Nia records filenames and captures.
+**SHOT:** Rapid cuts of ten inventive setups including one warm Thanksgiving-inspired harvest table. Ruby rotates the product; Nia records filenames and captures.
 
 RUBY: Set one. Hero. The bottle is mysterious.
 NIA: The bottle is a bottle.
