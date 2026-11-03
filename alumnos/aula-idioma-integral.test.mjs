@@ -80,3 +80,29 @@ test('Notion command center bonus describes Metricool and GSC Wizard separately 
  assert.match(studentBonuses,/Centro de comando · Notion/);
  assert.match(ownerBonuses,/item.resource_code === 'bonus_content_command_notion'/);
 });
+
+test('learner-first navigation and in-page lesson picker are bilingual and accessible',()=>{
+ const html=load('index.html'),app=load('curso.js'),language=load('aula-i18n.js'),strings=load('aula-textos-estaticos.js');
+ assert.match(html,/id="lesson-picker-shell" hidden/);
+ assert.match(html,/<label for="lesson-picker">Elige tu lección<\/label>/);
+ assert.match(html,/<select id="lesson-picker"/);
+ assert.match(app,/\$\('lesson-picker'\)\?\.addEventListener\('change'/);
+ assert.match(app,/option\.textContent=courseCopy\('Lección ','Lesson '/);
+ assert.match(language,/\['#lesson-picker-shell label','Choose a lesson'\]/);
+ assert.match(language,/\['#lesson-picker','aria-label','Choose a lesson from this course'\]/);
+ for(const text of ['RECURSOS PARA PRACTICAR','COMPARTE Y SIGUE','CUANDO NECESITES MÁS']){
+  assert.ok(strings.includes('"'+text+'":'),text+' missing from the bilingual classroom');
+ }
+ assert.doesNotMatch(html,/class="dashboard-hero-secondary"/,'Avoid competing CTAs in the first screen');
+ assert.match(html,/data-aula-view="materiales"><span>03<\/span><strong>Construye tu web<\/strong>/);
+});
+test('materials follow four progressive learning stages without hiding tool details',()=>{
+ const source=load('materiales-interactivos.js');
+ for(const item of ['01 · Empieza aquí','02 · Prepara tu web','03 · Herramientas','04 · Revisa y publica']){
+  assert.ok(source.includes(item),'Missing stage: '+item);
+ }
+ for(const view of ["'organizacion'","'prompts'","'conectores'","'make'","'cuaderno'","'revision'"]){
+  assert.ok(source.includes(view),'Missing teaching resource: '+view);
+ }
+ assert.match(source,/renderEnglishMaterialGuide\(content,view,go\)/);
+});
