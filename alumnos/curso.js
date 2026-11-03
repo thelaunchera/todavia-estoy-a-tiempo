@@ -4,7 +4,7 @@ import {mountMateriales} from './materiales-interactivos.js?v=20261103-learning-
 import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-command-center-v3';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-bonus-owner-gated-v2';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-learning-clarity-v1';
-import {mountInspiracion} from './inspiracion.js?v=20261103-moodboard-batches-v3';
+import {mountInspiracion} from './inspiracion.js?v=20261103-demo-inventory-v1';
 import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-learning-clarity-v1';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
