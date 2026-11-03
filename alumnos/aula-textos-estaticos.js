@@ -1,0 +1,128 @@
+/* Only translate known classroom interface text nodes. Do not translate any
+ * member-authored content, prompt body, workbook answer, or demo source text. */
+const textByLanguage={
+ "Saltar al aula": "Skip to classroom",
+ "Mi Studio": "My Studio",
+ "MI AULA · TU PRIMERA WEB CON IA": "MY CLASSROOM · YOUR FIRST WEBSITE WITH AI",
+ "Salir de mi cuenta": "Sign out",
+ "Tu espacio para": "Your space to",
+ "seguir creando.": "keep creating.",
+ "Si es tu primera vez, crea una contraseña con el correo que usaste al comprar. Tendrás que confirmar tu email.": "If this is your first visit, create a password using your purchase email. You will need to confirm your email address.",
+ "Aprende a tu ritmo. Tu progreso se guarda en tu cuenta.": "Learn at your own pace. Your progress is saved to your account.",
+ "MI ESPACIO CREATIVO": "MY CREATIVE SPACE",
+ "01 / AULA": "01 / CLASSROOM",
+ "Cada gran idea": "Every great idea",
+ "empieza": "starts",
+ "con un paso.": "with a single step.",
+ "DISEÑO": "DESIGN",
+ "TU WEB": "YOUR WEBSITE",
+ "A TU RITMO": "AT YOUR PACE",
+ "TU ESPACIO": "YOUR SPACE",
+ "CONTENIDO DE LA CLASE": "COURSE CONTENT",
+ "MIS HERRAMIENTAS": "MY TOOLS",
+ "Tu primera web empieza por entender lo que necesita el negocio.": "Your first website starts with understanding the business needs.",
+ "TU RECORRIDO": "YOUR LEARNING PATH",
+ "Tu avance": "Your progress",
+ "0 lecciones completadas": "0 lessons completed",
+ "Un espacio para empezar": "A place to begin",
+ "Tu recorrido aparecerá aquí cuando esté disponible la primera lección.": "Your learning path will appear when the first lesson is available.",
+ "TU SIGUIENTE PASO": "YOUR NEXT STEP",
+ "Todo lo que necesitas para seguir creando estará aquí.": "Everything you need to keep creating will be here.",
+ "Tu clase": "Your class",
+ "Ver mis lecciones": "View my lessons",
+ "UN PLAN CLARO": "A CLEAR PLAN",
+ "Tu ruta en 3 pasos.": "Your three-step roadmap.",
+ "Entiende la necesidad": "Understand the need",
+ "Primero investiga el negocio y su objetivo.": "First, research the business and its goal.",
+ "Prepara identidad y fotos": "Prepare your brand and photos",
+ "Copia los prompts y guarda tus imágenes individuales.": "Copy the prompts and save each photo separately.",
+ "Construye con referencias": "Build with references",
+ "Mira demos reales y compara cada sección.": "Study finished demos and compare each section.",
+ "CUANDO LO NECESITES": "WHEN YOU NEED IT",
+ "Prepara tus herramientas.": "Get your tools ready.",
+ "Empieza con tu lección. Aquí tienes las instrucciones para preparar las herramientas cuando toque utilizarlas.": "Start with your lesson. Set up each tool only when it is needed.",
+ "Ver qué herramientas necesitas": "See which tools you need",
+ "Comienza gratis · Plus es opcional": "Start free · Plus is optional",
+ "Primero vamos a organizar tu idea y crear los textos y fotos con": "First, we will organize your idea and create copy and photos with",
+ ", dentro de sus límites. También veremos el plan gratuito de": ", within its available limits. We will also review the free tier of",
+ ". La disponibilidad del plugin AppDeploy en ChatGPT depende de los permisos y del plan de cada cuenta; revisaremos esa conexión antes de construir.": ". AppDeploy availability depends on your account permissions and plan; we will check that connection before building.",
+ "desde tu teléfono y utiliza tu cuenta gratuita para la primera lección.": "from your phone and use your free account for the first lesson.",
+ ", busca AppDeploy, Google/Gmail, Make y Stripe. Lee qué permisos requiere cada conexión; no todas sus funciones están incluidas en todos los planes.": ", look for AppDeploy, Google/Gmail, Make and Stripe. Check the permissions requested by each connection; features vary by plan.",
+ "Prepara las fotos de marca, textos y secciones antes de construir. En la clase verás el método: mañana para crear, tarde para montar la web.": "Prepare your brand photos, text and sections before building. The lesson will walk through creating assets and then assembling your website.",
+ "Cuando lleguemos a AppDeploy, comprueba sus créditos disponibles y si tu plan de ChatGPT permite conectar el plugin.": "Before using AppDeploy, check available credits and whether your ChatGPT plan supports the connection.",
+ "No tienes que comprar Plus para empezar": "You do not need Plus to get started",
+ "; puedes considerarlo después si necesitas más capacidad.": "; you can consider it later if you need additional capacity.",
+ "TODO A MANO": "ALL IN ONE PLACE",
+ "Tu espacio de trabajo": "Your workspace",
+ "Entra directamente a lo que necesitas.": "Go straight to what you need.",
+ "Guarda tiempo con instrucciones para copiar y adaptar.": "Save time with instructions you can copy and adapt.",
+ "Fotos separadas, páginas terminadas y prompts para aprender.": "Individual photos, finished sites and learning prompts.",
+ "Recursos en preparación": "Resources being prepared",
+ "Comparte tus avances": "Share your progress",
+ "¿Algo no te sale como esperabas?": "Something not working as expected?",
+ "Escríbeme desde aquí, sin salir del aula ni perder tu avance.": "Ask for help here without leaving the classroom or losing your progress.",
+ "Pedir ayuda aquí": "Ask for help",
+ "¡Lo lograste!": "You did it!",
+ "Una lección más completada. Sigue a tu ritmo.": "Another lesson completed. Keep learning at your own pace.",
+ "Subtítulos del video": "Video subtitles",
+ "Controlar en YouTube (incluye desactivar)": "Manage in YouTube (including off)",
+ "La voz de las lecciones es en español, también al seleccionar English.": "Lesson audio is in Spanish, even when the English interface is selected.",
+ "Este video todavía está en preparación. Cuando se publique su enlace aprobado aparecerá aquí, sin cambiar el diseño del aula.": "This video is being prepared. Once approved, it will appear here without changing your classroom layout.",
+ "Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.": "Lessons are being prepared. Approved videos will appear here when the course opens.",
+ "← Anterior": "← Previous",
+ "Siguiente lección →": "Next lesson →",
+ "Abrir mis materiales de apoyo": "Open supporting materials",
+ "COMUNIDAD DE LA CLASE": "CLASS COMMUNITY",
+ "¿Ya empezaste tu página? Aquí puedes enseñar cómo va, preguntar cuando algo no salga y descubrir las ideas de otras personas de la clase.": "Share your website progress, ask questions and explore projects from other students.",
+ "PROYECTOS": "PROJECTS",
+ "Mostrar mi proyecto": "Show my project",
+ "Comparte una captura o el enlace de tu página. No tiene que estar terminada.": "Share a screenshot or website link. It does not need to be finished.",
+ "Compartir mi avance": "Share my progress",
+ "PREGUNTAS": "QUESTIONS",
+ "Hacer una pregunta": "Ask a question",
+ "Cuenta qué no te está funcionando para recibir una orientación más útil.": "Explain what is not working so you can get more useful guidance.",
+ "Escribir mi pregunta": "Write my question",
+ "IDEAS": "IDEAS",
+ "Descubrir otros proyectos": "Explore other projects",
+ "Mira cómo van sus páginas, encuentra ideas y comparte una opinión si te apetece.": "See other students' pages, get ideas and share helpful feedback.",
+ "Ver proyectos": "View projects",
+ "Tu espacio, tus decisiones.": "Your space, your choice.",
+ "Comparte solo lo que tú quieras. Tu correo y lo que escribes en tu cuaderno no aparecen en las publicaciones del Club.": "Share only what you want. Your email and private workbook answers do not appear in club posts.",
+ "EXCLUSIVO PARA TU CUENTA": "EXCLUSIVE TO YOUR ACCOUNT",
+ "Al completar la clase y compartir tu proyecto, podrás abrir los bonos que se te hayan asignado.": "Finish your lessons and share your project to unlock any assigned bonuses.",
+ "ELEGIDOS PARA TI": "CHOSEN FOR YOU",
+ "Tus bonos personales": "Your personal bonuses",
+ "Estos recursos fueron seleccionados especialmente para tu cuenta.": "These resources were selected for your account.",
+ "UN REGALO POR TU ESFUERZO": "A REWARD FOR YOUR WORK",
+ "Desbloquea tu bono": "Unlock your bonus",
+ "Tu bono se activa": "Your bonus unlocks",
+ "solo cuando hayas terminado la última lección": "only after you finish the final lesson",
+ "y hayas publicado tu primera web en": "and share your first website in",
+ ", dentro del Club de Ideas.": ", inside Ideas Club.",
+ "Terminar todas las lecciones": "Finish all lessons",
+ "Compartir tu primera web en el club": "Share your first website in the club",
+ "Bono bloqueado · completa los dos pasos para habilitarlo.": "Bonus locked · complete both requirements to unlock it.",
+ "¡Reto completado!": "Challenge completed!",
+ "Cumpliste los requisitos del bono. El material aparecerá aquí cuando esté publicado.": "You met the bonus requirements. Your resource will appear here once published.",
+ "Volver al Studio para reintentar": "Return to Studio to try again",
+ "El aula no pudo iniciar sus archivos. Código: AULA-MODULE. Regresa al Studio para reintentar.": "The classroom could not load its files. Code: AULA-MODULE. Return to Studio to try again."
+};
+const sources=new WeakMap();
+export function translateStaticClassroomText(language='es'){
+ if(typeof document==='undefined'||!document.body)return;
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+ const changed=[];
+ while(walker.nextNode()){
+  const node=walker.currentNode,parent=node.parentElement;
+  if(!parent)continue;
+  if(parent.closest('script,style,textarea,option,.mi-app,#inspiration-gallery,#lesson-prompts-list,#resource-list,#student-name,#lesson-description,#lesson-title,#course-help-status,#room-message'))continue;
+  const prior=sources.get(node)||node.textContent;
+  const key=prior.trim();
+  if(!Object.hasOwn(textByLanguage,key))continue;
+  if(!sources.has(node))sources.set(node,prior);
+  const suffix=language==='en'?textByLanguage[key]:key;
+  node.textContent=prior.replace(key,suffix);
+  changed.push(node);
+ }
+ return changed.length;
+}
