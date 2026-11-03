@@ -336,9 +336,9 @@
       </section>
     </div>
     <div data-aula-panel="bonos" class="aula-panel" hidden>
-      <div class="aula-section-heading"><p class="eyebrow">RECURSOS EXTRA DE TU CLASE</p><h1>Biblioteca de bonos</h1><p>Encuentra recursos prácticos que puedes abrir y copiar. Agregaremos nuevos bonos aquí.</p></div>
+      <div class="aula-section-heading"><p class="eyebrow">RECURSOS EXTRA DE TU CLASE</p><h1>Biblioteca de bonos</h1><p>Aquí encontrarás los bonos que se desbloqueen para tu cuenta. Los recursos adicionales se irán incorporando a esta biblioteca.</p></div>
       <section id="bonus-library" class="bonus-library" aria-labelledby="bonus-library-heading">
-        <header class="bonus-library-top"><p class="eyebrow">BONOS INCLUIDOS</p><h2 id="bonus-library-heading">Explora tus recursos extra</h2><p>Prompts y guías para mejorar tu web. Los bonos que se publican aquí están disponibles en tu aula.</p><span id="bonus-library-count" aria-live="polite"></span></header>
+        <header class="bonus-library-top"><p class="eyebrow">BONOS DESBLOQUEADOS</p><h2 id="bonus-library-heading">Tus recursos extra</h2><p>Los bonos aparecen cuando se activan y asignan a tu cuenta desde el Studio, una vez cumplidos los requisitos de la clase.</p><span id="bonus-library-count" aria-live="polite"></span></header>
         <div id="bonus-library-items" class="bonus-library-items" aria-live="polite"><p class="bonus-library-message">Cargando recursos…</p></div>
       </section>
          <section class="assigned-bonuses" id="assigned-bonuses" aria-labelledby="assigned-bonuses-heading" hidden>
@@ -434,7 +434,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261103-owner-gated-v2'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261103-owner-gated-v3'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
