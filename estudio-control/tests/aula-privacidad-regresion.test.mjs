@@ -62,7 +62,8 @@ test('la protección forma parte de la compilación del portal, sin activar cobr
  assert.match(workflow,/cp -R assets productos clases alumnos/);
  assert.match(room,/id="class-content" hidden/);
  assert.match(room,/robots" content="noindex,nofollow/);
- assert.match(room,/import\('\.\/curso\.js\?v=|src="\.\/curso\.js\?v=/,'El módulo del aula se carga y los errores de importación se muestran');
+  assert.match(room,/const classroomModule='\.\/curso\.js\?v=/,'El arranque usa una versión explícita del módulo');
+  assert.match(room,/import\(classroomModule\)\.catch\(error=>\{/,'El módulo del aula captura los errores de importación');
 });
 
 
