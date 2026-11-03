@@ -75,3 +75,9 @@
 .yt-private-file-delete:disabled{cursor:not-allowed;opacity:.6}
 .yt-private-file-input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;overflow:hidden!important;pointer-events:none}
 .yt-private-error{background:#fff3f0;color:#993c34;border:1px solid #edd5d1;border-radius:9px;font-size:.82rem;padding:12px}
+
+.yt-look-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px;padding:13px;border-radius:12px;background:#f1f6fa}
+.yt-look-tools span{font-size:.77rem;font-weight:750;color:#425367;margin-right:auto}
+.yt-look-tools button{display:inline-flex;gap:7px;align-items:center;border:1px solid #cad8e4;color:#233c54;background:#fff;border-radius:9px;padding:9px 11px;font-size:.78rem;font-weight:700;cursor:pointer}
+.yt-look-tools button:hover{background:#e5f0f9}
+@media(max-width:480px){.yt-look-tools button{width:100%;justify-content:center}}
