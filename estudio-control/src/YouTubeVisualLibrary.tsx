@@ -8,7 +8,7 @@ import { getCharacterLookPrompt, youtubeHolidayFrames, youtubeWardrobe, youtubeR
 import './youtube-visual-library.css';
 
 export const YOUTUBE_PHOTO_SECTION = 'youtube-storyboards-v1';
-export type YouTubeSavedPhoto = {id:string;title:string;section?:string;art?:string;notes?:string;status?:string};
+export type YouTubeSavedPhoto = {id:string;title:string;section?:string;art?:string;notes?:string;status?:string;link?:string};
 type Props={ entries:YouTubeSavedPhoto[]; onChanged:()=>Promise<void>;readOnly?:boolean };
 const base=import.meta.env.BASE_URL;
 const avatarImages:Record<string,string> = {
@@ -73,7 +73,7 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
       <div className="yt-frame-meta"><span>{photo.id}</span><span>Escena {photo.scene}</span>{photo.id.includes('-H')&&<span>Especial de temporada</span>}</div>
       <h4>{photo.title}</h4>
       <p><b>Plano:</b> {photo.shot}</p>
-      <div className="yt-frame-buttons"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} Copiar prompt</button></div>
+      <div className="yt-frame-buttons"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} Copiar prompt</button>{entry?.link&&safeImageUrl(entry.link)&&<a href={entry.link} target="_blank" rel="noopener noreferrer"><Eye size={15}/> Ver PNG en Drive</a>}</div>
       {canUpload&&<div className="yt-private-photo-actions">
         <label className="yt-photo-file-upload" htmlFor={'yt-private-upload-'+photo.id}><UploadCloud size={15}/>{busy?'Guardando...':privatePhoto?'Reemplazar archivo':'Subir foto PNG/JPG/WEBP'}</label>
         <input id={'yt-private-upload-'+photo.id} className="yt-private-file-input" type="file" accept="image/png,image/jpeg,image/webp" disabled={readOnly||busy} aria-label={'Subir foto privada para '+photo.id}
