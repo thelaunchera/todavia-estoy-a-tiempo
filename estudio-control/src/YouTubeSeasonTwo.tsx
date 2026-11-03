@@ -23,7 +23,7 @@ export default function YouTubeSeasonTwo(){
        <div className="yt2-cast-grid">
          {seasonTwo.roster.filter(person=>person.group===group).map(person=><article className="yt2-cast-card" key={person.name}>
            <div className="yt2-cast-heading">
-             <div className={'yt2-cast-symbol yt2-symbol-'+person.avatar} aria-hidden="true">{person.name.charAt(0)}</div>
+             {person.avatar === 0 ? <img className="yt2-cast-photo" src={import.meta.env.BASE_URL+'youtube/characters/ruby.webp'} alt="Avatar original de Ruby" loading="lazy" /> : <div className="yt2-cast-photo" role="img" aria-label={'Avatar original de '+person.name} style={{backgroundImage:'url('+import.meta.env.BASE_URL+'youtube/season-2/cast-grid.webp)',backgroundSize:'300% 300%',backgroundPosition:((person.avatar-1)%3)*50+'% '+Math.floor((person.avatar-1)/3)*50+'%'}}/>}
              <div><strong>{person.name}</strong><span>{person.role}</span></div>
            </div>
            <p>{person.trait}</p><p><b>En la serie:</b> {person.job}</p>
