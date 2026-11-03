@@ -4,7 +4,7 @@ import { api, loadYouTubeSavedPhotos, uploadYouTubePhoto, removeYouTubePhoto, ty
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
 import { getYouTubePhotoPrompt, youtubePhotoBoard, type YouTubePhoto } from './youtube/visual-plan';
-import { youtubeHolidayFrames, youtubeWardrobe, youtubeReleasePlan } from './youtube/wardrobe';
+import { getCharacterLookPrompt, youtubeHolidayFrames, youtubeWardrobe, youtubeReleasePlan } from './youtube/wardrobe';
 import './youtube-visual-library.css';
 
 export const YOUTUBE_PHOTO_SECTION = 'youtube-storyboards-v1';
@@ -116,6 +116,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const batchText=useMemo(()=>photos.map(p=>'=== '+p.id+' · '+p.title+' ===\n'+getYouTubePhotoPrompt(p)).join('\n\n-----------------------\n\n'),[photos]);
   const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
   const copyAll=async()=>{try{await navigator.clipboard.writeText(batchText);setBatchStatus('Todos los prompts del capítulo copiados.');}catch{setBatchStatus('Usa Descargar TXT para guardar todos los prompts.');}};
+  const copyLook=async(who:'nia'|'ruby')=>{try{await navigator.clipboard.writeText(getCharacterLookPrompt(selected,who));setBatchStatus('Prompt del look de '+(who==='nia'?'Nia':'Ruby')+' copiado.');}catch{setBatchStatus('No se pudo copiar el prompt del vestuario.');}};
   return <div className="yt-visual">
     <section className="yt-paper">
       <div className="yt-small-title"><Users size={17}/> BIBLIA DE PERSONAJES</div>
@@ -140,6 +141,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <span>EP {episodeNum(w.id)} · {w.season==='thanksgiving'?'THANKSGIVING':w.season==='christmas'?'CHRISTMAS':w.season==='fall'?'FALL':'REGULAR'}</span>
         <strong>{w.mood}</strong><small><b>Nia:</b> {w.nia}</small><small><b>Ruby:</b> {w.ruby}</small>
       </button>)}</div>
+      <div className="yt-look-tools"><span>EP {episodeNum(selected)} · {look.mood}</span><button type="button" onClick={()=>copyLook('nia')}><Copy size={15}/> Prompt look Nia</button><button type="button" onClick={()=>copyLook('ruby')}><Copy size={15}/> Prompt look Ruby</button></div>
     </section>
     <section className="yt-paper">
       <div className="yt-visual-heading">
