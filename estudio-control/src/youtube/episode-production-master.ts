@@ -7,7 +7,7 @@ import { getMicroEpisode } from './micro-production';
 
 export type EpisodePhotoAvailability = {
   id: string;
-  source: 'private' | 'studio' | 'missing';
+  source: 'private' | 'studio' | 'drive' | 'missing';
   fileName?: string;
 };
 
@@ -32,7 +32,7 @@ export function getEpisodeProductionMaster(episodeNumber: number, availability: 
     ...block.photos.map(photo => {
       const asset = status.get(photo.id);
       const source = asset?.source === 'private' ? 'SUBIDA PRIVADA'
-        : asset?.source === 'studio' ? 'VINCULADA EN STUDIO' : 'PENDIENTE DE FOTO';
+        : asset?.source === 'studio' ? 'VISTA PREVIA EN STUDIO' : asset?.source === 'drive' ? 'ARCHIVO ORIGINAL VINCULADO EN DRIVE (abrir con conector)' : 'PENDIENTE DE FOTO';
       return [
         photo.id + ' / ' + photo.title + ' / fuente: ' + source,
         '  Escena oficial: ' + photo.scene,
