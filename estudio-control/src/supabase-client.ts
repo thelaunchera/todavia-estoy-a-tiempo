@@ -633,3 +633,72 @@ export async function getPodcastReelAudioUrl(path:string):Promise<string>{
  if(error||!data?.signedUrl)throw new Error('No se pudo reproducir el audio privado.');
  return data.signedUrl;
 }
+
+/** Galería privada de fotos de la serie Fuera de Brief (YouTube). */
+const YOUTUBE_PHOTO_BUCKET='podcast-youtube-storyboard';
+const YOUTUBE_PHOTO_MAX_BYTES=15_000_000;
+export type YouTubeSavedPhoto={shot_id:string;episode:number;object_path:string;file_name:string;file_size:number;url:string};
+const youtubeShotPattern=/^E(0[1-8])-F(0[1-9]|10)$/;
+function validatedYouTubeShot(id:string):number{
+ const match=youtubeShotPattern.exec(id);
+ if(!match)throw new Error('El identificador de foto no es válido.');
+ return Number(match[1]);
+}
+export async function loadYouTubeSavedPhotos():Promise<YouTubeSavedPhoto[]>{
+ if(!client)throw new Error('Para ver las fotos guardadas, conecta el Studio.');
+ const who=await owner();
+ const {data:rows,error}=await client.from('podcast_youtube_photo_assets')
+   .select('shot_id,episode,object_path,file_name,file_size')
+   .eq('user_id',who.id).order('shot_id',{ascending:true});
+ if(error)throw new Error('No se pudo consultar la galería privada: '+error.message);
+ if(!rows?.length)return [];
+ const {data:signed,error:signError}=await client.storage.from(YOUTUBE_PHOTO_BUCKET)
+   .createSignedUrls(rows.map(photo=>photo.object_path),1800);
+ if(signError)throw new Error('No se pudo cargar la vista previa de las fotos: '+signError.message);
+ return rows.map((photo,index)=>({
+   shot_id:photo.shot_id,episode:photo.episode,object_path:photo.object_path,
+   file_name:photo.file_name,file_size:photo.file_size,url:signed?.[index]?.signedUrl||''
+ }));
+}
+export async function uploadYouTubePhoto(shotId:string,file:File):Promise<void>{
+ if(!client)throw new Error('El Studio necesita una conexión válida para guardar fotos.');
+ const episode=validatedYouTubeShot(shotId);
+ const types:Record<string,string>={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'};
+ const ext=types[file.type];
+ if(!ext||file.size===0)throw new Error('Selecciona una imagen PNG, JPG o WEBP.');
+ if(file.size>YOUTUBE_PHOTO_MAX_BYTES)throw new Error('La foto supera 15 MB. Reduce su peso sin perder resolución y vuelve a intentar.');
+ const who=await owner();
+ const {data:old,error:oldError}=await client.from('podcast_youtube_photo_assets')
+   .select('object_path').eq('user_id',who.id).eq('shot_id',shotId).maybeSingle();
+ if(oldError)throw new Error('No se pudo consultar la foto anterior.');
+ const path=who.id+'/'+String(episode).padStart(2,'0')+'/'+shotId+'/'+crypto.randomUUID()+'.'+ext;
+ const {error:uploadError}=await client.storage.from(YOUTUBE_PHOTO_BUCKET).upload(path,file,{upsert:false,contentType:file.type,cacheControl:'3600'});
+ if(uploadError)throw new Error('No se pudo guardar la imagen original: '+uploadError.message);
+ const {error:saveError}=await client.from('podcast_youtube_photo_assets').upsert({
+   user_id:who.id,shot_id:shotId,episode,object_path:path,
+   file_name:(file.name||shotId+'.'+ext).slice(0,180),file_size:file.size,
+   updated_at:new Date().toISOString()
+ },{onConflict:'user_id,shot_id'});
+ if(saveError){
+   await client.storage.from(YOUTUBE_PHOTO_BUCKET).remove([path]);
+   throw new Error('No se pudo asignar la foto a este plano: '+saveError.message);
+ }
+ if(old?.object_path&&old.object_path!==path){
+   // La foto actual ya quedó guardada: la limpieza de la anterior es secundaria.
+   await client.storage.from(YOUTUBE_PHOTO_BUCKET).remove([old.object_path]);
+ }
+}
+export async function removeYouTubePhoto(shotId:string):Promise<void>{
+ if(!client)throw new Error('El Studio debe estar conectado para borrar fotos.');
+ validatedYouTubeShot(shotId);
+ const who=await owner();
+ const {data:old,error:readError}=await client.from('podcast_youtube_photo_assets')
+   .select('object_path').eq('user_id',who.id).eq('shot_id',shotId).maybeSingle();
+ if(readError)throw new Error('No se pudo localizar la foto.');
+ if(!old?.object_path)return;
+ const {error:deleteError}=await client.from('podcast_youtube_photo_assets').delete()
+   .eq('user_id',who.id).eq('shot_id',shotId);
+ if(deleteError)throw new Error('No se pudo quitar la foto del capítulo: '+deleteError.message);
+ const {error:storageError}=await client.storage.from(YOUTUBE_PHOTO_BUCKET).remove([old.object_path]);
+ if(storageError)throw new Error('Se quitó la foto del capítulo, pero no se pudo limpiar su archivo privado.');
+}
