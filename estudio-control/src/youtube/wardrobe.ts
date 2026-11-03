@@ -12,7 +12,7 @@ export const youtubeWardrobe:Record<number,Wardrobe> = {
   8:{id:8,mood:'Christmas · new beginnings',season:'christmas',nia:'deep burgundy fitted knit with fine dark-blue blazer, cream wide-leg trousers and neutral sneakers',ruby:'forest-green soft knit sweater, ivory palazzo trousers and cream sneakers',setting:'Studio with a few tasteful fairy lights, evergreen foliage and wrapped sample packages; seasonal bookstore campaign props',note:'Navidad editorial, no gorros de Santa ni disfraces. Repetir los looks dentro de las escenas de un mismo día.'}
 };
 export function wardrobeForShot(id:string,scene:number,cast:string){
- const episode = Number(/^E(\\d{2})/.exec(id)?.[1] || 1);
+ const episode = Number(/^E(\d{2})/.exec(id)?.[1] || 1);
  const look=youtubeWardrobe[episode] || youtubeWardrobe[1];
  const nia=episode===3 && [1,3,4].includes(scene)
   ? 'cream satin robe over understated ivory basics, with her dark side braid still unchanged, as a deliberately staged influencer costume'
