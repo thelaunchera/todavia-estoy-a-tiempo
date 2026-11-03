@@ -46,3 +46,20 @@ test('demo English learning adaptations do not include Spanish source text',()=>
  assert.match(englishDemoPhotoTitle(photo),/Dulce de leche/i);
  assert.ok(!localizedPrompt(photo,'Fotografía con caja', 'en','Casa Brownie').includes('Fotografía con caja'));
 });
+
+// The 16 styles and their master must be readable in both classroom languages.
+test('typography master and all 16 individual styles have bilingual guides and English titles',()=>{
+ const codes=['typography_master_16',...Array.from({length:16},(_,i)=>'typography_'+String(i+1).padStart(2,'0'))];
+ for(const code of codes){
+  for(const lang of ['es','en']){
+   const guide=promptGuide(code,lang);
+   assert.ok(guide.purpose?.length>15,code+' '+lang+' purpose');
+   assert.ok(guide.when?.length>15,code+' '+lang+' when');
+   assert.ok(guide.result?.length>15,code+' '+lang+' result');
+  }
+  assert.ok(!/tipográfico|tipografía|Sans serif contemporánea|Serif elegante/i.test(englishTitle(code,'Título español')),code);
+  const original='[[ES]]Usa la foto ORIGINAL para cambiar la tipografía.[[EN]]Use the ORIGINAL photo to change the lettering.';
+  assert.equal(localizedPrompt(code,original,'es'),'Usa la foto ORIGINAL para cambiar la tipografía.');
+  assert.equal(localizedPrompt(code,original,'en'),'Use the ORIGINAL photo to change the lettering.');
+ }
+});
