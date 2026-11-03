@@ -133,10 +133,11 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const blocks=getEpisodeProductionBlocks(corePhotos);
   const extras=photos.filter(photo=>photo.id.includes('-H'));
   const available:EpisodePhotoAvailability[]=corePhotos.map((p):EpisodePhotoAvailability=>{
+    const driveUrl=owned.get(p.id)?.link;
     const local=privatePhotos.get(p.id);
-    if(local?.url)return {id:p.id,source:'private',fileName:local.file_name};
-    if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png'};
-    if(drivePreviewUrl(owned.get(p.id)?.link))return {id:p.id,source:'drive',fileName:p.id+'.png'};
+    if(local?.url)return {id:p.id,source:'private',fileName:local.file_name,driveUrl};
+    if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png',driveUrl};
+    if(drivePreviewUrl(owned.get(p.id)?.link))return {id:p.id,source:'drive',fileName:p.id+'.png',driveUrl};
     return {id:p.id,source:'missing',fileName:p.id+'.png'};
   });
   const ready=available.filter(item=>item.source!=='missing').length;
