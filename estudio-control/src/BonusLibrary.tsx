@@ -109,7 +109,7 @@ export default function BonusLibrary() {
                         {copied === item.resource_code + '_prompt_' + language ? 'Copiado' : 'Copiar prompt'}
                       </button>
                     </div>
-                    <pre>{localizedBonusPrompt(item.prompt_body, language)}</pre>
+                    <pre>{localizedBonusPrompt(item.prompt_body || '', language)}</pre>
                   </div>
                 ))}
               </details>
