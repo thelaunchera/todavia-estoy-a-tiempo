@@ -63,11 +63,13 @@ function correctedDemoText(text,spec){
 export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
  root.innerHTML='<p class="inspiration-loading" role="status">'+(getLanguage()==='en'?'Loading projects…':'Cargando proyectos…')+'</p>';
- const [galleryResponse,workflowResponse]=await Promise.all([
+ const [galleryResponse,workflowResponse,extrasResponse]=await Promise.all([
   db.from('podcast_class_learning_assets').select('payload,status')
     .eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1').maybeSingle(),
   db.from('podcast_class_learning_assets').select('payload,status')
-    .eq('course_id',courseId).eq('asset_code','inspiration_workflow_v3').maybeSingle()
+    .eq('course_id',courseId).eq('asset_code','inspiration_workflow_v3').maybeSingle(),
+  db.from('podcast_class_learning_assets').select('payload,status')
+    .eq('course_id',courseId).eq('asset_code','inspiration_gallery_extras_v1').maybeSingle()
  ]);
  const {data,error}=galleryResponse;
  const guidePayload=workflowResponse?.data?.status==='ready'?workflowResponse.data.payload:null;
@@ -75,7 +77,25 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   root.textContent=getLanguage()==='en'?'Your inspiration gallery is being prepared.':'Tu galería de inspiración se está preparando.';
   return {setLanguage(){}};
  }
- const demos=Array.isArray(data.payload.demos)?data.payload.demos.filter(d=>d&&d.id&&d.title&&safeUrl(d.url)):[];
+ // Current source-of-truth inventory is kept apart from historical gallery
+ // data to avoid the 100KB asset limit and accidental return of obsolete photos.
+ const extras=extrasResponse?.data?.status==='ready'?extrasResponse.data.payload?.cases:null;
+ const demos=Array.isArray(data.payload.demos)?data.payload.demos.filter(d=>d&&d.id&&d.title&&safeUrl(d.url)).map(d=>{
+  const spec=extras?.[d.id];
+  if(!spec)return d;
+  const existing=Array.isArray(d.photos)?d.photos:[];
+  const additional=Array.isArray(spec.photos)?spec.photos.filter(p=>p&&safeUrl(p.url)):[];
+  const photos=spec.replacePhotos?additional:[
+    ...existing,
+    ...additional.filter(p=>!existing.some(row=>safeUrl(row.url)===safeUrl(p.url)))
+  ];
+  const graphics=Array.isArray(spec.graphics)?spec.graphics.filter(g=>g&&safeUrl(g.url)):[];
+  return {...d,photos,graphics,prompts:existingPrompts(d,spec)};
+ }):[];
+ function existingPrompts(d,spec){
+  if(Array.isArray(d.prompts)&&d.prompts.length)return d.prompts;
+  return Array.isArray(spec?.prompts)?spec.prompts:[];
+ }
  const visibleDemos=()=>adminPreview?demos:demos.filter(d=>d.published!==false);
  const demoPrompts=d=>{const guideCase=guidePayload?.cases?.[d.id];return Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guideCase?.extra_prompts)?guideCase.extra_prompts:[]);};
  let currentId=null,category='all',search='';
@@ -225,6 +245,22 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   }
   if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos privadas de clientes no se comparten. Usa imágenes propias autorizadas para tu práctica.','Private client photos are not shared. Use your own authorized practice images.',curLang())+'</p>';
   photoBlock.append(gallery);root.append(photoBlock);
+  if(Array.isArray(d.graphics)&&d.graphics.length){
+   const graphicsBlock=document.createElement('section');graphicsBlock.className='inspiration-graphic-assets';
+   const label=document.createElement('h3');
+   label.textContent=enLabel('Elementos gráficos de esta web','Graphic elements used on this site',curLang());
+   const hint=document.createElement('p');
+   hint.textContent=enLabel('Son ilustraciones o composiciones SVG, no fotos individuales. Cada recurso está identificado por su sección.','These are SVG illustrations/compositions, not individual photographs. Each one is labeled by its actual section.',curLang());
+   const grid=document.createElement('div');grid.className='inspiration-photo-grid';
+   for(const g of d.graphics){
+    const link=document.createElement('a');link.className='inspiration-photo';link.target='_blank';link.rel='noopener noreferrer';link.href=safeUrl(g.url);
+    const name=curLang()==='en'?(g.label_en||g.name):(g.label_es||g.name);
+    const where=galleryPhotoSection(g,curLang());
+    link.innerHTML='<img loading="lazy" src="'+esc(safeUrl(g.url))+'" alt="'+esc(name)+'"><small class="inspiration-photo-section">'+esc(where)+'</small><span>'+esc(name)+'</span>';
+    grid.append(link);
+   }
+   graphicsBlock.append(label,hint,grid);root.append(graphicsBlock);
+  }
   const prompts=demoPrompts(d);
   const pSection=document.createElement('section');pSection.className='inspiration-prompts';
   pSection.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Prompts por etapa','Step-by-step prompts',curLang())+'</h3>'+
