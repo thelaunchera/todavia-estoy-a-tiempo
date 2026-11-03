@@ -144,3 +144,24 @@
 @media(prefers-reduced-motion:reduce){
   #podcast-ep03-dialog .ep03-cta{transition:none}
 }
+
+/* Friendly bilingual episode announcement, artwork intact */
+#podcast-ep03-dialog[open]{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);width:min(780px,calc(100% - 28px));border:1px solid #dbcdd4;border-radius:24px;background:#faf7f2}
+#podcast-ep03-dialog .ep03-art{background:#e9e3e5}
+#podcast-ep03-dialog .ep03-art img{object-fit:contain}
+#podcast-ep03-dialog .ep03-copy{padding:clamp(26px,4vw,44px)}
+#podcast-ep03-dialog .ep03-eyebrow{font-size:11px;letter-spacing:.09em;color:#905b78}
+#podcast-ep03-dialog h2{font-size:clamp(1.85rem,3.3vw,2.9rem);line-height:1.13;letter-spacing:-.03em;max-width:19ch}
+#podcast-ep03-dialog .ep03-description{font-size:clamp(.92rem,1.3vw,1rem);line-height:1.6;margin:17px 0 22px;max-width:46ch}
+#podcast-ep03-dialog .ep03-cta{min-height:50px;width:100%;font-size:.92rem}
+#podcast-ep03-dialog .ep03-later{align-self:center;border:0;background:transparent;color:#647183;padding:13px 8px;margin:7px auto 0;font:600 .82rem/1.4 system-ui,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+#podcast-ep03-dialog .ep03-later:focus-visible{outline:3px solid #b780a1;outline-offset:3px}
+#podcast-ep03-dialog .ep03-close{width:42px;height:42px;min-width:42px;min-height:42px;font-size:25px;box-shadow:none}
+@media(max-width:620px){
+#podcast-ep03-dialog[open]{display:flex;flex-direction:column;width:min(420px,calc(100% - 24px));max-height:90dvh;overflow-y:auto}
+#podcast-ep03-dialog .ep03-art{flex:none;height:auto;max-height:27dvh}
+#podcast-ep03-dialog .ep03-art img{width:100%;height:auto;max-height:27dvh;min-height:0;object-fit:contain}
+#podcast-ep03-dialog .ep03-copy{padding:21px 23px 20px}
+#podcast-ep03-dialog h2{font-size:clamp(1.75rem,7.1vw,2.3rem);max-width:none}
+#podcast-ep03-dialog .ep03-description{font-size:.9rem;line-height:1.5;margin:12px 0 17px}
+}
