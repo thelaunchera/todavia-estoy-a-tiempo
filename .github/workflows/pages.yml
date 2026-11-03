@@ -101,6 +101,7 @@ jobs:
           node --check alumnos/curso.js
           node --check alumnos/aula-materiales-rescate-20261102.js
           node --test alumnos/aula-prompt-bilingual.test.mjs alumnos/aula-idioma-integral.test.mjs
+          node --test alumnos/aula-home-screen.test.mjs
           node --test estudio-control/tests/class-public-language-contract.test.mjs
           node --check centro/centro.js
           node --check centro/interacciones.js
