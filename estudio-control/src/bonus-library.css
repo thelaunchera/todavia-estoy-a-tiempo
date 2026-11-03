@@ -28,3 +28,10 @@
 .bonus-library-bottom svg{flex:none;margin-top:2px}
 @media(max-width:720px){.bonus-library-header{align-items:flex-start}.bonus-library-symbol{width:48px;height:48px;border-radius:16px}.bonus-library-card{padding:20px}.bonus-library-card p{min-height:0}.bonus-library-actions a,.bonus-library-actions button{flex:1}.bonus-library-toolbar{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.studio-bonus-library *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+
+/* Local, opt-in video reference for the hero bonus (no autoplay). */
+.bonus-hero-demo{margin:2px 0 16px;padding:14px;background:#f3f5f4;border:1px solid #e2e7e5;border-radius:13px}
+.bonus-hero-demo span{display:block;font-size:.78rem;font-weight:750;color:#314c5d;margin-bottom:10px}
+.bonus-hero-demo video{display:block;width:100%;max-height:240px;object-fit:cover;border-radius:10px;background:#131313}
+.bonus-hero-demo small{display:block;font-size:.73rem;color:#596b75;line-height:1.45;margin-top:10px}
