@@ -192,3 +192,21 @@
  .inspiration-workflow-step>summary:after{display:none}
  .inspiration-photo-item{break-inside:avoid}
 }
+
+
+/* Section-specific graphic elements audit: never count SVG illustrations as photographs. */
+.inspiration-graphic-assets{
+ display:grid;gap:12px;margin:28px 0 20px;padding-top:20px;
+ border-top:1px solid #d2e2e9;color:#26475d;
+}
+.inspiration-graphic-assets>h3{
+ font:500 clamp(23px,4vw,33px)/1.2 "DM Serif Display",Georgia,serif;
+ margin:0;color:#1c3a51;
+}
+.inspiration-graphic-assets>p{
+ font:400 13px/1.6 "DM Sans",Arial,sans-serif;color:#617c8c;
+ margin:0 0 8px;
+}
+.inspiration-graphic-assets .inspiration-photo img{
+ background:#f5f4ef;object-fit:contain;aspect-ratio:1/1;
+}
