@@ -40,7 +40,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   .select('payload,status')
   .eq('course_id',courseId).eq('asset_code','interactive_guides_v1').maybeSingle();
  if(resourceError||!resource?.payload){
-  root.textContent='Los materiales todavía están en preparación. Podrás usarlos cuando se active la clase.';
+  root.textContent=getLanguage()==='en'?'Materials are being prepared. You can use them once the course is ready.':'Los materiales todavía están en preparación. Podrás usarlos cuando se active la clase.';
   return;
  }
  PROMPTS=Array.isArray(resource.payload.prompts)?resource.payload.prompts:[];
@@ -48,7 +48,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  CHECKS=Array.isArray(resource.payload.checks)?resource.payload.checks:[];
  EXTRAS=(resource.payload.extras&&typeof resource.payload.extras==='object')?resource.payload.extras:{};
  if(PROMPTS.length!==12||WORKBOOK.length!==8||CHECKS.length!==16){
-  root.textContent='La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
+  root.textContent=getLanguage()==='en'?'The library is incomplete. Please request help from the classroom.':'La biblioteca no está completa. Por favor solicita ayuda desde el aula.';
   return;
  }
  /* Biblioteca desde la misma base protegida por RLS para estudiantes
@@ -119,7 +119,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  }
 
  const saveBadge=el('div','mi-save');
- if(ownerPreview){saveBadge.textContent='Vista de administración · no guarda respuestas';}
+ if(ownerPreview){saveBadge.textContent=t('Vista de administración · no guarda respuestas','Owner preview · answers are not saved');}
  else {saveBadge.textContent=t('Cargando tu cuaderno…','Loading your workbook…');}
  app.querySelector('.mi-header').append(saveBadge);
  async function load(){
@@ -171,7 +171,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   }
   current=view;
   viewBack.hidden=current==='inicio'&&!materialHistory.length;
-  viewClose.setAttribute('aria-label',current==='inicio'?'Cerrar materiales y volver al inicio del aula':'Cerrar este material y volver a la biblioteca');
+  viewClose.setAttribute('aria-label',getLanguage()==='en'?(current==='inicio'?'Close materials and return to classroom home':'Close this material and return to the library'):(current==='inicio'?'Cerrar materiales y volver al inicio del aula':'Cerrar este material y volver a la biblioteca'));
   app.querySelector('.mi-eyebrow')?.replaceChildren(document.createTextNode(getLanguage()==='en'?'YOUR FIRST WEBSITE WITH AI / STUDENT MATERIALS':'TODAVÍA ESTOY A TIEMPO / TU PRIMERA WEB CON IA'));
   const footerSpans=app.querySelectorAll('.mi-footer span');
   if(footerSpans[0])footerSpans[0].textContent=t('Un paso claro es mejor que diez pantallas bonitas.','One clear step beats ten pretty screens.');
@@ -183,6 +183,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   viewBack.textContent=t('Atrás','Back');
   viewClose.textContent=t('Cerrar','Close');
   if(ownerPreview)saveBadge.textContent=t('Vista de administración · no guarda respuestas','Admin preview · answers are not saved');
+  const ownerDraftPdfs=app.querySelector('.mi-owner-pdfs');
+  if(ownerDraftPdfs)ownerDraftPdfs.hidden=getLanguage()==='en'; // Never show Spanish PDF content in English.
   for(const groupButton of tabs.querySelectorAll('button[data-group]')){
    const group=materialGroups.find(g=>g.id===groupButton.dataset.group);
    if(group)groupButton.textContent=getLanguage()==='en'?({
