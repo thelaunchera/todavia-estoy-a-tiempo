@@ -2,7 +2,6 @@
  * member-authored content, prompt body, workbook answer, or demo source text. */
 const textByLanguage={
  "Saltar al aula": "Skip to classroom",
- "TU RECORRIDO": "YOUR JOURNEY",
  "SI NECESITAS AYUDA": "WHEN YOU NEED HELP",
  "RECURSOS PARA PRACTICAR": "RESOURCES FOR PRACTICE",
  "COMPARTE Y SIGUE": "SHARE AND KEEP GOING",
