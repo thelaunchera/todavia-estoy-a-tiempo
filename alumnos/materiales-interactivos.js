@@ -142,7 +142,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  }
 
  const saveBadge=el('div','mi-save');
- if(ownerPreview){saveBadge.textContent=t('Vista de administración · no guarda respuestas','Owner preview · answers are not saved');}
+ if(ownerPreview){saveBadge.textContent=t('Prueba editable · no guarda respuestas','Editable preview · answers are not saved');}
  else {saveBadge.textContent=t('Cargando tu cuaderno…','Loading your workbook…');}
  app.querySelector('.mi-header').append(saveBadge);
  async function load(){
@@ -205,7 +205,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   if(printButton)printButton.textContent=t('Imprimir o guardar en PDF','Print or save as PDF');
   viewBack.textContent=t('Atrás','Back');
   viewClose.textContent=t('Cerrar','Close');
-  if(ownerPreview)saveBadge.textContent=t('Vista de administración · no guarda respuestas','Admin preview · answers are not saved');
+  if(ownerPreview)saveBadge.textContent=t('Prueba editable · no guarda respuestas','Editable preview · answers are not saved');
   const ownerDraftPdfs=app.querySelector('.mi-owner-pdfs');
   if(ownerDraftPdfs)ownerDraftPdfs.hidden=getLanguage()==='en'; // Never show Spanish PDF content in English.
   for(const groupButton of tabs.querySelectorAll('button[data-group]')){
@@ -431,7 +431,21 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  function renderWorkbook(){
   if(getLanguage()==='en')section('03 / WORKBOOK','One idea at a time.','Write your answers and use them to plan your webpage. Come back anytime.');
   else section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
-  if(ownerPreview){content.append(el('p','mi-note',t('Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.','This is an admin preview. Students’ private answers are not shown here.')));}
+  if(ownerPreview){
+   const previewNotice=el('div','mi-owner-test-note');
+   previewNotice.setAttribute('role','note');
+   previewNotice.append(el('strong',null,t('Modo de prueba editable','Editable test mode')),
+     el('p',null,t('Escribe como un alumno para comprobar los campos. Tu prueba no se envía a Supabase ni modifica respuestas reales.','Type like a student to check the fields. This preview is not sent to Supabase and never changes real student answers.')));
+   const clear=el('button','mi-owner-test-clear',t('Borrar mi prueba','Clear my test'));
+   clear.type='button';
+   clear.addEventListener('click',()=>{
+    answers={};checks={};
+    saveBadge.textContent=t('Prueba borrada · nada se guardó','Test cleared · nothing was saved');
+    go('cuaderno',{track:false});
+   });
+   previewNotice.append(clear);
+   content.append(previewNotice);
+  }
   else{content.append(el('p','mi-note',t('Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.','Your answers are saved to your account. Do not enter passwords or private customer information.')));}
   const summary=el('div','mi-work-summary');content.append(summary);
   const grid=el('div','mi-workbook-sections');content.append(grid);
@@ -443,8 +457,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    if(block.example)details.querySelector('.mi-work-body').append(el('p','mi-note',getLanguage()==='en'?'Example: enter accurate details from your own business.':'Ejemplo: '+block.example));
    block.qs.forEach(([key,title,placeholder])=>{
     const field=el('div','mi-field'),label=el('label',null,title),textarea=el('textarea');
-    textarea.id='mi-'+key;label.htmlFor=textarea.id;textarea.placeholder=placeholder;textarea.maxLength=600;textarea.rows=2;textarea.value=answers[key]||'';textarea.disabled=ownerPreview;
-    textarea.addEventListener('input',()=>{answers[key]=textarea.value;queueSave();updateSummary();const small=details.querySelector('summary small');small.textContent=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length+(getLanguage()==='en'?' of ':' de ')+block.qs.length+(getLanguage()==='en'?' answers':' respuestas');});
+    textarea.id='mi-'+key;label.htmlFor=textarea.id;textarea.placeholder=placeholder;textarea.maxLength=600;textarea.rows=2;textarea.value=answers[key]||''; // Admin can type, but never saves preview data.
+    textarea.addEventListener('input',()=>{answers[key]=textarea.value;
+     if(ownerPreview)saveBadge.textContent=t('Prueba editable · sin guardar en cuentas','Editable preview · not saved to accounts');
+     queueSave();updateSummary();const small=details.querySelector('summary small');small.textContent=block.qs.filter(q=>String(answers[q[0]]||'').trim()).length+(getLanguage()==='en'?' of ':' de ')+block.qs.length+(getLanguage()==='en'?' answers':' respuestas');});
     field.append(label,textarea);details.querySelector('.mi-work-body').append(field);
    });grid.append(details);
   });
@@ -454,7 +470,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    summary.innerHTML='<span>'+(getLanguage()==='en'?'Workbook progress':'Tu avance en el cuaderno')+'</span><strong>'+answered+' / '+total+'</strong><div class="mi-bar"><i style="width:'+Math.round(100*answered/total)+'%"></i></div>';
   }updateSummary();
   const actions=el('div','mi-actions');actions.innerHTML=getLanguage()==='en'?'<button class="mi-primary" type="button">Save answers</button><button class="mi-quiet" type="button">Print workbook</button>':'<button class="mi-primary" type="button">Guardar mis respuestas</button><button class="mi-quiet" type="button">Imprimir mi cuaderno</button>';content.append(actions);
-  actions.children[0].addEventListener('click',()=>void save());
+  if(ownerPreview){
+   actions.children[0].textContent=t('Probar guardado','Test save');
+   actions.children[0].addEventListener('click',()=>{saveBadge.textContent=t('La escritura funciona. Ninguna respuesta fue guardada en cuentas.','Typing works. No account data was saved.');});
+  }else actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',printCurrentMaterial);
  }
  function renderExample(){
@@ -499,14 +518,19 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const list=el('div','mi-check-list');content.append(list);
   function update(){const n=CHECKS.filter((x,i)=>checks['check'+i]===true).length;count.innerHTML='<div><span>'+t('Comprobaciones hechas','Checks completed')+'</span><strong>'+n+t(' de ',' of ')+CHECKS.length+'</strong></div><div class="mi-bar"><i style="width:'+Math.round(n/CHECKS.length*100)+'%"></i></div>'; }
   CHECKS.map((item,i)=>translateCheckItem(item,i,getLanguage())).forEach((item,i)=>{
-   const card=el('article','mi-check');const inp=el('input');inp.type='checkbox';inp.id='mi-check-'+i;inp.checked=checks['check'+i]===true;inp.disabled=ownerPreview;const label=el('label');label.htmlFor=inp.id;
+   const card=el('article','mi-check');const inp=el('input');inp.type='checkbox';inp.id='mi-check-'+i;inp.checked=checks['check'+i]===true;const label=el('label');label.htmlFor=inp.id;
    label.innerHTML='<strong>'+String(i+1).padStart(2,'0')+'. '+esc(item.name)+'</strong><span>'+esc(item.how)+'</span><small>Listo cuando: '+esc(item.done)+'</small>';
-   inp.addEventListener('change',()=>{checks['check'+i]=inp.checked;card.classList.toggle('checked',inp.checked);update();queueSave();});
+   inp.addEventListener('change',()=>{checks['check'+i]=inp.checked;card.classList.toggle('checked',inp.checked);update();
+    if(ownerPreview)saveBadge.textContent=t('Lista de prueba · sin guardar en cuentas','Test checklist · not saved to accounts');
+    queueSave();});
    card.classList.toggle('checked',inp.checked);card.append(inp,label);list.append(card);
   });update();
   const note=el('p','mi-note',t('No necesitas terminar todo en un día. Cuando algo no funcione, anota el problema y corrígelo antes de compartir tu enlace.','You do not need to finish in one day. If something fails, note the problem and fix it before sharing your link.'));content.append(note);
   const actions=el('div','mi-actions');actions.innerHTML='<button class="mi-primary" type="button">'+t('Guardar comprobaciones','Save checks')+'</button><button class="mi-quiet" type="button">'+t('Volver a mis lecciones','Back to lessons')+'</button>';content.append(actions);
-  actions.children[0].addEventListener('click',()=>void save());
+  if(ownerPreview){
+   actions.children[0].textContent=t('Probar guardado','Test save');
+   actions.children[0].addEventListener('click',()=>{saveBadge.textContent=t('Las casillas funcionan. No se guardó ningún dato.','Checkboxes work. No data was saved.');});
+  }else actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',()=>onGoLessons?.());
  }
  materialGroups.forEach(group=>{
