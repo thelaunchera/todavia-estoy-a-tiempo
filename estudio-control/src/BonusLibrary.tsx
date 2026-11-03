@@ -3,6 +3,12 @@ import { BookOpen, Check, Copy, ExternalLink, Gift, RotateCcw, ShieldCheck, Spar
 import { getStudioBonusResources, setStudioBonusAvailability, type StudioBonusResource } from './supabase-client';
 import './bonus-library.css';
 
+function localizedBonusPrompt(body: string, language: 'es' | 'en'): string {
+  const spanish = body.includes('[[ES]]') ? body.split('[[ES]]')[1]?.split('[[EN]]')[0]?.trim() || body : body;
+  const english = body.includes('[[EN]]') ? body.split('[[EN]]')[1]?.trim() || spanish : spanish;
+  return language === 'en' ? english : spanish;
+}
+
 export default function BonusLibrary() {
   const [resources, setResources] = useState<StudioBonusResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +97,22 @@ export default function BonusLibrary() {
                 </video>
                 <small>Este vídeo es una referencia visual. El bono enseña la versión con fotogramas controlados por scroll.</small>
               </div>
+            )}
+            {item.prompt_body && (
+              <details className="studio-bonus-prompt-preview">
+                <summary>Ver el prompt guardado · Español / Inglés</summary>
+                {(['es', 'en'] as const).map(language => (
+                  <div className="studio-bonus-prompt-language" key={language}>
+                    <div className="studio-bonus-prompt-bar">
+                      <strong>{language === 'es' ? 'ESPAÑOL' : 'ENGLISH'}</strong>
+                      <button type="button" onClick={() => void copyLink(localizedBonusPrompt(item.prompt_body || '', language), item.resource_code + '_prompt_' + language)}>
+                        {copied === item.resource_code + '_prompt_' + language ? 'Copiado' : 'Copiar prompt'}
+                      </button>
+                    </div>
+                    <pre>{localizedBonusPrompt(item.prompt_body, language)}</pre>
+                  </div>
+                ))}
+              </details>
             )}
             <div className="bonus-library-url" title={item.url}>{item.url}</div>
             <div className="bonus-library-actions">
