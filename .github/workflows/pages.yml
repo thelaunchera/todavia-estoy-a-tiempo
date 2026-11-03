@@ -86,6 +86,7 @@ jobs:
           node --check alumnos/aula-mensajes.js
           node --check alumnos/comunidad.js
           node --check alumnos/aula-i18n.js
+          node --check alumnos/aula-textos-estaticos.js
           node --test alumnos/aula-prompt-bilingual.test.mjs alumnos/aula-idioma-integral.test.mjs
           node --check centro/centro.js
           node --check centro/interacciones.js
