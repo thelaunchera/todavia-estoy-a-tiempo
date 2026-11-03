@@ -36,10 +36,10 @@ for(const p of ['clases/primera-landing.html','clases/primera-landing-en.html'])
 }
 const courseEs=read('clases/primera-landing.html');
 const courseEn=read('clases/primera-landing-en.html');
-assert.match(courseEs,/Audio y subtítulos en español e inglés/,'Spanish class landing must promise bilingual audio and captions');
-assert.match(courseEn,/Audio and subtitles in English and Spanish/,'English class landing must promise bilingual audio and captions');
-assert.match(courseEs,/La clase tendrá audio en español y en inglés/,'Spanish FAQ should agree with class offer');
-assert.match(courseEn,/The class will offer audio in both English and Spanish/,'English FAQ should agree with class offer');
+assert.match(courseEs,/Materiales en español e inglés/,'Spanish class landing must describe bilingual materials accurately');
+assert.match(courseEn,/Learning materials in English and Spanish/,'English class landing must describe bilingual materials accurately');
+assert.match(courseEs,/El audio y los subtítulos de cada video se indicarán cuando estén disponibles/,'Spanish FAQ must label video-language availability honestly');
+assert.match(courseEn,/Video audio and subtitles will be labeled as they become available/,'English FAQ must label video-language availability honestly');
 assert.doesNotMatch(courseEs,/el audio no está doblado|La opción «English» no cambia el idioma de la voz/,'Spanish landing must not contradict bilingual audio');
 assert.doesNotMatch(courseEn,/the lessons are not dubbed|does not change the spoken audio/,'English landing must not contradict bilingual audio');
 const room=read('alumnos/index.html');
