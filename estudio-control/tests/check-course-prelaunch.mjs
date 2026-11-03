@@ -315,7 +315,7 @@ for(const id of ['student-greeting-title','student-name','progress-percent','stu
  assert.match(room,new RegExp('id="'+id+'"|class="'+id+'"'));
 }
 assert.match(room,/<aside class="aula-rail"/);
-assert.match(room,/Desbloquea tu bono/);
+assert.match(room,/Cómo desbloquear tus bonos/,'El aula explica el acceso gradual a los bonos');
 assert.match(room,/Club de Ideas/);
 assert.match(room,/id="aula-layout"/);
 assert.match(room,/data-aula-panel="materiales"/);
