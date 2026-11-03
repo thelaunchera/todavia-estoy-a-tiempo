@@ -42,10 +42,17 @@ const photoMotionPrompt=(id:string,shot:string,action:string)=>
  'Original camera setup: '+shot+'. Action: '+action+'. Move: slow 3–6% push-in, small eye and head movements only; another take may use a gentle pan or reaction zoom. '+
  'No new characters, no text, no invented speech, no identity changes. 16:9 1920×1080 first. Edit a separate 9:16 version with a safe-fit or approved custom crop FROM THE SAME IMAGE, not new AI image generation. '+
  'Keep voices as original separately recorded English dialogue. Use free FFmpeg/editor keyframes if no video AI is installed.';
+export const MICRO_SCENE_SECTION='youtube-micro-scenes-v1';
+const beigeShortFrames:YouTubePhoto[]=[
+ {id:'OFFBRIEF_S01E02_F01',scene:1,title:'The Beige Brief',cast:'NR',shot:'Medium-wide three-quarter workstation two-shot',action:'Nia studies a flat beige candle campaign on the laptop while Ruby recoils at the nearly identical beige swatches.',image:'',status:'por producir'},
+ {id:'OFFBRIEF_S01E02_F02',scene:2,title:'Ruby Rebels',cast:'NR',shot:'Dynamic medium two-shot from the end of the worktable',action:'Ruby theatrically presents an amber lighting idea with a gold reflector and the ivory candle. Nia reacts with a dry side-eye.',image:'',status:'por producir'},
+ {id:'OFFBRIEF_S01E02_F03',scene:3,title:'The Final Reaction',cast:'NR',shot:'Slightly elevated three-quarter two-shot above the worktable',action:'Nia and Ruby compare two physical proofs of the same candle: a cozy moment of real use and a dramatic amber flame close-up. Nia gives Ruby a knowing look while Ruby invites the viewer to choose. No client verdict.',image:'',status:'por producir'},
+];
 export function microFrames(season:number,episode:number):MicroFrame[]{
  if(season===1){
   const raw=(youtubePhotoBoard[episode]||[]).filter(p=>/^E0[1-8]-F(?:0[1-9]|10)$/.test(p.id));
-  return chooseDistinct(raw,3).map((p:YouTubePhoto)=>({
+  const frames=episode===2?beigeShortFrames:chooseDistinct(raw,3);
+  return frames.map(p=>({
    id:p.id,scene:p.scene,title:p.title,
    imagePrompt:getYouTubePhotoPrompt(p)+'\n\nCOST SAVER: This is one of only THREE unique images required for the shortened episode. Frame the two main characters toward the central safe area so the same still can be reframed vertically.',
    motionPrompt:photoMotionPrompt(p.id,p.shot,p.action)

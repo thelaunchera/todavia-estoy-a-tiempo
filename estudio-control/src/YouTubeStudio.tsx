@@ -100,7 +100,7 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
       <button type="button" role="tab" aria-selected={tab === 'brand'} className={tab === 'brand' ? 'active' : ''} onClick={() => setTab('brand')}><WandSparkles size={17}/> Marca, logo y covers</button>
     </div>
 
-    {tab === 'quick' ? <YouTubeQuickEpisodes/> : tab === 'brief' ? <div className="yt-brief" role="tabpanel">
+    {tab === 'quick' ? <YouTubeQuickEpisodes entries={entries}/> : tab === 'brief' ? <div className="yt-brief" role="tabpanel">
       <section className="yt-paper yt-identity">
         <div className="yt-small-title">SERIE ORIGINAL · BIBLIA CREATIVA</div>
         <h3>{youtubeBrief.workingEnglishTitle} / {youtubeBrief.title}</h3>

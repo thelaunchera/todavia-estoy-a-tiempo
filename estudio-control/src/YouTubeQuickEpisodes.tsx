@@ -1,8 +1,9 @@
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {BookOpen,Check,Clapperboard,Copy,Download,FolderArchive,ImagePlus,MonitorPlay,RefreshCcw,Smartphone,Video,Wallet} from 'lucide-react';
 import {zipSync,strToU8} from 'fflate';
-import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microPilotChecklist} from './youtube/micro-production';
+import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microPilotChecklist,MICRO_SCENE_SECTION} from './youtube/micro-production';
 import {loadYouTubeSavedPhotos,type YouTubeSavedPhoto} from './supabase-client';
+import type {YouTubeSavedPhoto as LinkedScene} from './YouTubeVisualLibrary';
 import './youtube-quick-episodes.css';
 
 function downloadText(name:string,content:string){
@@ -16,14 +17,15 @@ function downloadZip(name:string,files:Record<string,string>){
  const url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download=name;a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-export default function YouTubeQuickEpisodes(){
+export default function YouTubeQuickEpisodes({entries}:{entries:LinkedScene[]}){
  const [season,setSeason]=useState(1),[episode,setEpisode]=useState(1);
  const [saved,setSaved]=useState<Record<string,YouTubeSavedPhoto>>({});
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(false);
  const [prompts,setPrompts]=useState<Record<string,'still'|'motion'|undefined>>({});
  const q=getMicroEpisode(season,episode)!;
  const frames=useMemo(()=>microFrames(season,episode),[season,episode]);
- const ready=frames.filter(x=>saved[x.id]?.url).length;
+ const linkedScenes=useMemo(()=>new Map(entries.filter(entry=>entry.section===MICRO_SCENE_SECTION).map(entry=>[entry.title,entry])),[entries]);
+ const ready=frames.filter(x=>saved[x.id]?.url||linkedScenes.get(x.id)?.link).length;
  const reload=useCallback(async()=>{
    setLoading(true);setError('');
    try{const assets=await loadYouTubeSavedPhotos();setSaved(Object.fromEntries(assets.map(p=>[p.shot_id,p])));}
@@ -71,12 +73,15 @@ export default function YouTubeQuickEpisodes(){
    {error&&<p role="alert" className="mq-error">{error}</p>}
    <div className="mq-frame-grid">{frames.map((frame,i)=>{
     const photo=saved[frame.id];
+    const linked=linkedScenes.get(frame.id);
+    const preview=photo?.url||linked?.art;
     const mode=prompts[frame.id];
     return <article key={frame.id}>
-      <div className="mq-frame-image">{photo?.url?<img src={photo.url} loading="lazy" alt={'Imagen de '+frame.title}/>:<div><ImagePlus size={23}/><span>Foto por producir</span></div>}</div>
+      <div className="mq-frame-image">{preview?<img src={preview} loading="lazy" alt={'Imagen de '+frame.title}/>:<div><ImagePlus size={23}/><span>{linked?.link?'PNG guardado':'Foto por producir'}</span></div>}</div>
       <div className="mq-frame-content">
        <small>FOTO {i+1} · {frame.id}</small><h4>{frame.title}</h4>
        <div className="mq-actions">
+        {linked?.link&&<a href={linked.link} target="_blank" rel="noreferrer"><Download size={15}/> Abrir PNG original</a>}
         <button type="button" onClick={()=>setPrompts(old=>({...old,[frame.id]:mode==='still'?undefined:'still'}))}><ImagePlus size={15}/> Prompt de foto</button>
         <button type="button" onClick={()=>setPrompts(old=>({...old,[frame.id]:mode==='motion'?undefined:'motion'}))}><Clapperboard size={15}/> Foto → video</button>
        </div>
