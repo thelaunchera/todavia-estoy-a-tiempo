@@ -84,3 +84,27 @@
 
 .yt-frame-buttons a{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;background:#fff;color:#191919;text-decoration:none;border:1px solid #cfd5d8;border-radius:9px;font-weight:700;font-size:.8rem;min-height:40px}
 .yt-frame-buttons a:hover{background:#f6f5f1}
+
+/* Single episode production: ten canonical shots, three editorial beats. */
+.yt-production-references{margin:0 0 16px;border:1px solid #e6e4df;background:#faf8f3;border-radius:14px;overflow:hidden}
+.yt-production-references>summary{display:flex;align-items:center;gap:9px;padding:14px 18px;font-size:.85rem;font-weight:750;color:#253647;cursor:pointer;list-style:none}
+.yt-production-references>summary::-webkit-details-marker{display:none}
+.yt-production-references[open]>summary{border-bottom:1px solid #ece9e2}
+.yt-production-references>.yt-paper{margin:12px}
+.yt-production-master{margin:18px 0;padding:20px;border:1px solid #e5d58e;background:#fffdf3;border-radius:14px}
+.yt-production-master h4{margin:8px 0;font-size:1.18rem;color:#191919}
+.yt-production-master p{max-width:72ch;line-height:1.55;color:#515151;font-size:.86rem}
+.yt-production-master .yt-visual-batch{padding:8px 0}
+.yt-production-master .yt-visual-batch button:first-child{background:#191919;border-color:#191919;color:#fff}
+.yt-production-alert{background:#fff8e1;border-left:3px solid #e1b745;padding:9px 12px;margin:8px 0 14px!important;font-weight:650}
+.yt-production-master-preview{border-top:1px solid #ece4ba;margin-top:10px;padding-top:12px}
+.yt-production-master-preview summary{font-size:.85rem;font-weight:700;cursor:pointer;padding:6px 0}
+.yt-production-master-preview textarea{margin-top:10px;width:100%;min-height:200px;border:1px solid #dad7cc;border-radius:9px;padding:12px;background:#fff;color:#191919;font-size:.78rem;line-height:1.55;font-family:ui-monospace,Consolas,monospace;resize:vertical}
+.yt-production-groups{display:grid;gap:22px;margin-top:16px}
+.yt-production-group{padding:16px;border:1px solid #e7e7e2;background:#fbfaf7;border-radius:14px}
+.yt-production-group>header{display:flex;align-items:start;justify-content:space-between;gap:16px;margin:0 0 14px}
+.yt-production-group>header h4{margin:4px 0;color:#191919;font-size:1.14rem}
+.yt-production-group>header p{margin:0;color:#60615f;font-size:.82rem;line-height:1.5}
+.yt-production-group>header>strong{flex-shrink:0;font-variant-numeric:tabular-nums;font-size:.83rem;padding:7px 10px;border-radius:8px;background:#f0eee7;color:#191919}
+.yt-production-group .yt-photo-grid{margin:0}
+@media(max-width:690px){.yt-production-master,.yt-production-group{padding:13px}.yt-production-group>header{gap:8px}.yt-production-references>.yt-paper{margin:8px}.yt-production-master .yt-visual-batch button{width:100%;justify-content:center}}
