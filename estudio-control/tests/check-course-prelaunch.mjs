@@ -228,7 +228,14 @@ assert.ok(episodeOrderMarkup.indexOf('EPISODIO 03')<episodeOrderMarkup.indexOf('
 assert.ok(episodeOrderMarkup.includes('5NtsF2XPSEZ2pTzBBQtw3c'),'Ep 03 enlaza al Spotify publicado');
 assert.ok(episodeOrderJs.includes('21aYHKY0kodWEzg1835xcD'),'El ep 01 permanece en el catálogo');
 assert.ok(episodeOrderMarkup.includes('6ICSx9E7BVlU8Qi8rFC0s3'),'Ep 02 Spotify real');
-assert.match(episodeOrderJs,/published\.slice\(0, 2\)/,'El estreno ocupa el primer lugar tras ordenar por número descendente');
+assert.ok(episodeOrderMarkup.indexOf('EPISODIO 02') < episodeOrderMarkup.indexOf('EPISODIO 01'),'Los episodios publicados siguen 03 → 02 → 01');
+assert.ok(episodeOrderMarkup.includes('21aYHKY0kodWEzg1835xcD'),'El episodio 01 está visible con su enlace real');
+assert.match(home,/No quiero ser influencer para vender lo que hago/,'El episodio 03 usa el título verificado del Studio');
+assert.match(episodeOrderJs,/No quiero ser influencer para vender lo que hago/,'El catálogo usa el título vigente');
+assert.doesNotMatch(home,/Me alegro por ti, pero también me duele/,'La portada y el popup no usan un guion antiguo archivado');
+assert.doesNotMatch(episodeOrderJs,/Me alegro por ti, pero también me duele/,'No se confunden registros históricos con capítulos publicados');
+assert.match(read('index-en.html'),/I don.t want to be an influencer to sell what I do/,'La traducción del capítulo 03 también está corregida');
+assert.match(episodeOrderJs,/published\.slice\(0, 3\)/,'Los tres capítulos publicados permanecen visibles en orden de estreno');
 assert.match(home,/assets\/episodio-03-portada\.webp/,'Se muestra la portada del capítulo 3');
 assert.ok(readFileSync('assets/episodio-03-portada.webp').byteLength>1_000,'La portada aprobada se conserva en assets');
 const popupEp03=read('podcast-episode-03-announcement-20261103.js');
@@ -242,7 +249,7 @@ assert.match(newStyles,/object-fit:contain!important/);
 assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
-console.log('QA: estreno 03 antes de 02, anuncio ES por tres días, hero cinematográfico y tipografía contrastada OK');
+console.log('QA: capítulos 03, 02 y 01 visibles, título vigente de influencer y aviso ES temporal correctos');
 
 
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
