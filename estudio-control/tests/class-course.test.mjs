@@ -123,7 +123,9 @@ test('automatizaciones, seguridad y footer se enseñan dentro de las nueve ficha
  const learner=readFileSync('../alumnos/materiales-interactivos.js','utf8');
  const module=readFileSync('../alumnos/recursos-avanzados.js','utf8');
  assert.match(learner,/resource\.payload\.extras/,'carga las guías de la tabla privada');
- assert.match(learner,/renderWebGuide/);
+ const mara=readFileSync('../alumnos/mara-guide.js','utf8');
+ assert.match(mara,/podcast_class_learning_assets/,'Mara lee su configuración desde el curso privado');
+ assert.match(mara,/instructions_en/,'Mara también tiene su proyecto en inglés');
  assert.match(learner,/renderMakeResources/);
  assert.match(learner,/renderSafetyResources/);
  assert.match(learner,/renderLegalResources/);
