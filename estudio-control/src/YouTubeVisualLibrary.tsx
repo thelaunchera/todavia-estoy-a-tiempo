@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { zipSync, strToU8 } from 'fflate';
 import { Camera, Check, Copy, ImagePlus, Save, Users, CalendarDays, Film, Shirt, Search, UploadCloud, Trash2, RefreshCcw, Eye } from 'lucide-react';
 import { api, loadYouTubeSavedPhotos, uploadYouTubePhoto, removeYouTubePhoto, type YouTubeSavedPhoto as PrivatePhoto } from './supabase-client';
 import { youtubeBrief } from './youtube/brief';
