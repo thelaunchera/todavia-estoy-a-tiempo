@@ -136,6 +136,47 @@ const aulaViews={
 };
 const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'Bonus library',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos',mara:'Mara · your web guide'};
 let inspirationController=null;
+let inspirationLoading=null;
+function showInspirationRetry(root){
+ const english=getClassroomLanguage()==='en';
+ const section=document.createElement('section');
+ section.className='inspiration-recovery';section.setAttribute('role','alert');
+ const title=document.createElement('h2');
+ title.textContent=english?'Could not display projects.':'No pudimos mostrar los demos.';
+ const message=document.createElement('p');
+ message.textContent=english?'Your saved projects are safe. Try again.':'Tus proyectos están guardados. Intenta cargar la galería nuevamente.';
+ const button=document.createElement('button');
+ button.type='button';button.className='inspiration-retry';
+ button.textContent=english?'Retry gallery':'Reintentar galería';
+ button.addEventListener('click',()=>void ensureInspiracion(true));
+ section.append(title,message,button);
+ root.replaceChildren(section);
+}
+function ensureInspiracion(force=false){
+ const root=$('inspiration-gallery');
+ if(!root||!user||course.hidden)return Promise.resolve();
+ if(inspirationLoading)return inspirationLoading;
+ if(!force&&inspirationController&&root.querySelector('.inspiration-heading'))return Promise.resolve();
+ const loading=document.createElement('p');
+ loading.className='inspiration-loading';loading.setAttribute('role','status');
+ loading.textContent=getClassroomLanguage()==='en'?'Loading finished demos…':'Cargando demos terminados…';
+ root.replaceChildren(loading);
+ const call=mountInspiracion(root,{db,courseId,adminPreview,getLanguage:getClassroomLanguage})
+  .then(controller=>{
+   if(!root.querySelector('.inspiration-heading')){
+    inspirationController=null;
+    showInspirationRetry(root);
+   }else{
+    inspirationController=controller||null;
+   }
+  }).catch(error=>{
+   console.warn('Inspiration gallery failed',error?.code||error?.name||'unknown');
+   inspirationController=null;
+   showInspirationRetry(root);
+  }).finally(()=>{inspirationLoading=null;});
+ inspirationLoading=call;
+ return call;
+}
 let bonusLibraryController=null,bonusLibraryLoading=null;
 function ensureBonusLibrary(){
  if(bonusLibraryController||bonusLibraryLoading||!user||course.hidden)return;
@@ -238,6 +279,7 @@ function setAulaView(view,{scroll=true,track=true}={}){
  if(view==='materiales')materialsController?.go('inicio',{track:false});
  if(view==='mara')void ensureMara();
  if(view==='bonos')void ensureBonusLibrary();
+ if(view==='inspiracion')void ensureInspiracion();
  document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
@@ -620,13 +662,9 @@ async function showCourse(email,asAdmin=false){
   const root=$('materiales-interactivos');
   root.textContent=translateCourseMessage('No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.',getClassroomLanguage());
  });
- void mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage}).then(controller=>{
-  inspirationController=controller;
- }).catch(()=>{
-  $('inspiration-gallery').textContent=getClassroomLanguage()==='en'
-   ?'The examples could not be loaded. Please reopen this class.'
-   :'No se pudieron cargar los ejemplos. Vuelve a abrir el aula.';
- });
+ // Preload independently, with navigation fallback and visible error handling.
+ inspirationController=null;
+ void ensureInspiracion();
  if(user){await loadMemberName(user,asAdmin);if(!asAdmin)await checkProjectShared();}
 }
 async function refreshAuth(){
