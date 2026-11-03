@@ -116,6 +116,32 @@ export function microRecordingChecklist(q:MicroEpisode):string{
  ].join('\r\n');
 }
 
+export function microPilotChecklist(season:number,episode:number):string{
+ const q=getMicroEpisode(season,episode);if(!q)return '';
+ const frames=microFrames(season,episode);
+ return [
+ 'OFF BRIEF — EPISODE PILOT / PRODUCTION QA',
+ 'Season '+season+' · Episode '+episode+' — '+q.title,
+ 'STATUS: PRE-PRODUCTION. This document is a checklist, NOT evidence of a finished video.',
+ '',
+ '01. SCRIPT: '+q.beats.length+' short beats, original English dialogue, opening joke, practical lesson and audience question.',
+ '02. IMAGE BUDGET: '+frames.length+' unique approved stills; do not create another picture until the test edit proves it is necessary.',
+ ...frames.map((p,i)=>'    '+(i+1)+'. '+p.id+' — '+p.title),
+ '03. CONTINUITY: Verify Nia and Ruby look identical to their canonical avatars; no changed faces, hair, clothing or duplicated limbs.',
+ '04. VOICES: Record and listen to each character. Export one correctly ordered soundtrack WAV/MP3. Do not assume voice synthesis or lip-sync exists.',
+ '05. 12-SECOND TEST: Render the first 12 seconds on Windows. Verify the joke is understandable, picture is sharp and voices are synchronized.',
+ '06. FULL EDIT: Target 90–120 seconds, paced to actual speech. If the voices run long, tighten pauses before deleting the lesson.',
+ '07. HORIZONTAL: Export 1920x1080 H.264/AAC; inspect opening, scene cuts, sound, question and final frame.',
+ '08. VERTICAL: Export 1080x1920 H.264/AAC from SAME three stills; ensure both faces remain visible and on-screen captions are readable.',
+ '09. EDUCATION: Viewer should understand: '+q.lesson,
+ '10. INTERACTION: End with the exact question: '+q.question,
+ '11. NO AUTO-PUBLISH: Keep both MP4s local until final approval.',
+ '',
+ 'BLOCKERS TO REAL VIDEO: three actual approved PNG images; approved character voice audio; Windows FFmpeg/Python environment tested.',
+ 'PASS RULE: Do not claim complete until the actual full MP4s exist and are watched in both ratios.'
+ ].join('\\r\\n');
+}
+
 export function microEpisodeMasterPrompt(season:number,episode:number):string{
  const q=getMicroEpisode(season,episode);
  if(!q)return '';
@@ -153,6 +179,7 @@ export function microWindowsFiles(season:number,episode:number):Record<string,st
  const files:Record<string,string>={
   'project.json':JSON.stringify(manifest,null,2),
   'scripts/2-minute-cut.txt':microScriptText(q),
+  'QA/EPISODE-PILOT-CHECKLIST.txt':microPilotChecklist(season,episode),
   'prompts/MASTER-PROMPT-VIDEO-COMPLETO.txt':microEpisodeMasterPrompt(season,episode),
   'scripts/voice-cues.csv':microVoiceCues(q),
   'scripts/GRABACION-PASO-A-PASO.txt':microRecordingChecklist(q),
