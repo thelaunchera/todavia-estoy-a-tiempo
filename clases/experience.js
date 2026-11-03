@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const root = document.querySelector('.class-page-v2');
+  const en = document.documentElement.lang === 'en';
   if (!root) return;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   // Transformación dirigida por la persona: sin autoplay ni ciclos decorativos.
@@ -33,9 +34,11 @@
       transformation.dataset.stage = complete ? 'after' : 'before';
       ideaProgress.style.setProperty('--fill', progress + '%');
       ideaProgress.value = String(progress);
-      const description = complete ? 'Resultado: muestra visual de Casa Brownie' : 'Boceto inicial de Casa Brownie';
+      const description = complete ? (en?'Casa Brownie: finished example':'Resultado: muestra visual de Casa Brownie') : (en?'Casa Brownie: initial wireframe':'Boceto inicial de Casa Brownie');
       ideaProgress.setAttribute('aria-valuetext', description);
-      scene?.setAttribute('aria-label', complete ? 'Resultado: muestra visual de la landing Casa Brownie.' : 'Boceto de Casa Brownie con bloques de texto, imagen y botón sin diseñar.');
+      scene?.setAttribute('aria-label', complete
+        ? (en?'Finished Casa Brownie website sample.':'Resultado: muestra visual de la landing Casa Brownie.')
+        : (en?'Casa Brownie wireframe with text, image and button blocks.':'Boceto de Casa Brownie con bloques de texto, imagen y botón sin diseñar.'));
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(Number(choice.dataset.transformTo) === (complete ? 100 : 0))));
       if (before) before.hidden = complete;
       if (after) after.hidden = !complete;
@@ -72,11 +75,16 @@
       action: 'Explorar el menú'
     }
   };
+  const previewCopyEn = {
+    limpieza:{kicker:'LOCAL SERVICE · EXAMPLE',title:'More time to enjoy your home.',text:'A clear page to explain the service and request information.',action:'Check availability'},
+    belleza:{kicker:'LOCAL BEAUTY · EXAMPLE',title:'A place to take care of yourself.',text:'Introduce services and make it easier to reach out from a phone.',action:'Explore services'},
+    cafe:{kicker:'LOCAL CAFÉ · EXAMPLE',title:'Your favorite place in town.',text:'Show what you offer and help customers find your business.',action:'Explore the menu'}
+  };
   const buttons = Array.from(document.querySelectorAll('[data-preview-choice]'));
   buttons.forEach(button => {
     button.addEventListener('click', () => {
       const id = button.dataset.previewChoice;
-      const data = previewCopy[id];
+      const data = en ? previewCopyEn[id] : previewCopy[id];
       if (!data || !preview) return;
       preview.dataset.preview = id;
       document.getElementById('preview-kicker').textContent = data.kicker;
@@ -135,9 +143,9 @@
     const original = copy.textContent;
     try {
       await navigator.clipboard.writeText(prompt);
-      copy.textContent = 'Copiado ✓';
+      copy.textContent = en?'Copied ✓':'Copiado ✓';
     } catch {
-      copy.textContent = 'Selecciona el texto para copiar';
+      copy.textContent = en?'Select the text to copy it':'Selecciona el texto para copiar';
     }
     window.setTimeout(() => {copy.textContent = original;}, 2400);
   });
