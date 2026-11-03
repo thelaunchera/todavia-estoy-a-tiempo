@@ -1,9 +1,9 @@
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-bonus-library-v1';
 import {promptGuide} from './prompt-guide.js?v=20261103-bonus-library-v1';
 
-/* Published bonus prompts live in the existing protected classroom table.
-   Extra bonuses can be added later as ready rows with prompt_code bonus_*.
-   This shelf is separate from the personal, graduation-gated bonus rewards. */
+/* The existing resource RLS is the sole source of student bonus visibility.
+   Bonus prompts are queried separately and never reveal an unassigned resource.
+   Studio activation, individual grant, course completion and project apply. */
 const word=(es,en,lang)=>lang==='en'?en:es;
 const create=(tag,cls,text)=>{
  const node=document.createElement(tag);
@@ -12,7 +12,7 @@ const create=(tag,cls,text)=>{
  return node;
 };
 function languageContent(item,lang){
- return localizedPrompt(item.prompt_code,item.body,lang).trim();
+ return item.body?localizedPrompt(item.prompt_code,item.body,lang).trim():'';
 }
 function splitInstructions(content,lang){
  const marker=lang==='en'?'PROMPT TO COPY':'PROMPT PARA COPIAR';
@@ -23,6 +23,7 @@ function splitInstructions(content,lang){
 }
 function titleFor(item,lang){
  if(lang!=='en')return item.title;
+ if(item.resource_code==='bonus_motion_studio')return 'The Launch Era Motion Studio · Effects Library';
  const known=englishTitle(item.prompt_code,item.title);
  if(known!==item.title)return known;
  const english=languageContent(item,'en');
@@ -59,7 +60,7 @@ export async function mountBonusLibrary(root,{db,courseId,getLanguage=()=> 'es'}
    return;
   }
   if(!rows.length){
-   root.append(create('p','bonus-library-message',word('Próximamente encontrarás más recursos aquí.','More resources will appear here soon.',lang)));
+   root.append(create('p','bonus-library-message',word('Tus bonos aparecerán aquí después de que los activen y asignen a tu cuenta, y completes los requisitos de la clase.','Bonuses appear here once they have been activated and assigned to your account and you complete the course requirements.',lang)));
    return;
   }
   rows.forEach((item,index)=>{
@@ -69,7 +70,11 @@ export async function mountBonusLibrary(root,{db,courseId,getLanguage=()=> 'es'}
    const headText=create('span','bonus-library-card-titles');
    const category=create('small','bonus-library-tag',word('RECURSO EXTRA','EXTRA RESOURCE',lang));
    const title=create('strong','bonus-library-card-title',titleFor(item,lang));
-   const guide=promptGuide(item.prompt_code,lang);
+   const guide=item.body?promptGuide(item.prompt_code,lang):{
+    purpose:word('Biblioteca extra de recursos y ejemplos para crear tu web.','An extra library of resources and examples to build your site.',lang),
+    when:word('Cuando quieras explorar técnicas adicionales.','When you want to explore additional techniques.',lang),
+    result:word('Ideas y ejemplos prácticos.','Practical ideas and examples.',lang)
+   };
    const caption=create('span','bonus-library-card-summary',guide.purpose);
    headText.append(category,title,caption);
    const plus=create('span','bonus-library-plus','+');plus.setAttribute('aria-hidden','true');
@@ -81,36 +86,68 @@ export async function mountBonusLibrary(root,{db,courseId,getLanguage=()=> 'es'}
     create('p',null,word('Cuándo usarlo: ','When to use it: ',lang)+guide.when),
     create('p',null,word('Qué obtendrás: ','What you will get: ',lang)+guide.result)
    );
-   const translated=languageContent(item,lang);
-   const parts=splitInstructions(translated,lang);
    panel.append(details);
-   if(parts.guide && parts.guide!==parts.instructions){
-    panel.append(create('h3','bonus-library-subheading',word('Preparación y pasos','Preparation and steps',lang)));
-    panel.append(create('p','bonus-library-prep',parts.guide));
-   }
-   panel.append(create('h3','bonus-library-subheading',word('Prompt listo para copiar','Ready-to-copy prompt',lang)));
-   panel.append(create('p','bonus-library-prompt',parts.instructions));
    const actions=create('div','bonus-library-actions');
-   const button=create('button','bonus-library-copy',word('Copiar prompt','Copy prompt',lang));
-   button.type='button';
-   const state=create('span','bonus-library-copy-state');
-   state.setAttribute('role','status');
-   button.addEventListener('click',async()=>{
-    const ok=await copyText(parts.instructions);
-    state.textContent=ok?word('Copiado','Copied',lang):word('Selecciona el texto del prompt para copiarlo.','Select the prompt text to copy it.',lang);
-   });
-   actions.append(button,state);panel.append(actions);
+   if(item.body){
+    const translated=languageContent(item,lang);
+    const parts=splitInstructions(translated,lang);
+    if(parts.guide && parts.guide!==parts.instructions){
+     panel.append(create('h3','bonus-library-subheading',word('Preparación y pasos','Preparation and steps',lang)));
+     panel.append(create('p','bonus-library-prep',parts.guide));
+    }
+    panel.append(create('h3','bonus-library-subheading',word('Prompt listo para copiar','Ready-to-copy prompt',lang)));
+    panel.append(create('p','bonus-library-prompt',parts.instructions));
+    const button=create('button','bonus-library-copy',word('Copiar prompt','Copy prompt',lang));
+    button.type='button';
+    const state=create('span','bonus-library-copy-state');
+    state.setAttribute('role','status');
+    button.addEventListener('click',async()=>{
+     const ok=await copyText(parts.instructions);
+     state.textContent=ok?word('Copiado','Copied',lang):word('Selecciona el texto del prompt para copiarlo.','Select the prompt text to copy it.',lang);
+    });
+    actions.append(button,state);
+   }else if(/^https:\/\//.test(item.url||'')){
+    const link=create('a','bonus-library-copy',word('Abrir recurso','Open resource',lang));
+    link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
+    actions.append(link);
+   }
+   if(item.resource_code==='bonus_hero_cinematic_scroll'){
+    panel.append(create('p','bonus-library-example-note',word(
+      'Referencia: la portada de la clase utiliza un vídeo MP4 en reproducción. El prompt de este bono es diferente: convierte fotogramas en una animación controlada por scroll.',
+      'Reference: the class landing uses a looping MP4. This bonus prompt is different: it turns image frames into a scroll-controlled animation.',lang)));
+    const example=create('a','bonus-library-example-link',word('Ver ejemplo de hero con vídeo','View video hero example',lang));
+    example.href='https://podcast.thelaunchera.com/clases/primera-landing.html';
+    example.target='_blank';example.rel='noopener noreferrer';
+    actions.append(example);
+   }
+   panel.append(actions);
    card.append(panel);root.append(card);
   });
  };
  root.replaceChildren(create('p','bonus-library-message',word('Cargando recursos…','Loading resources…',lang)));
  try{
-  const {data,error}=await db.from('podcast_class_prompts')
-   .select('prompt_code,title,summary,category,position,body,status')
-   .eq('course_id',courseId).eq('status','ready')
-   .like('prompt_code','bonus_%').order('position',{ascending:true});
-  if(error)throw error;
-  rows=(Array.isArray(data)?data:[]).filter(row=>row.prompt_code?.startsWith('bonus_') && row.status==='ready');
+  const [{data:resources,error:resourceError},{data:prompts,error:promptError}]=await Promise.all([
+   db.from('podcast_class_resources')
+    .select('resource_code,title,url,status')
+    .eq('course_id',courseId).eq('status','ready')
+    .like('resource_code','bonus_%').order('resource_code',{ascending:true}),
+   db.from('podcast_class_prompts')
+    .select('prompt_code,body,summary,category,position,status')
+    .eq('course_id',courseId).eq('status','ready')
+    .like('prompt_code','bonus_%')
+  ]);
+  if(resourceError||promptError)throw resourceError||promptError;
+  // Filter from the resource query first. Reading a bonus prompt by itself
+  // is never sufficient to unlock it for the student's account.
+  const visibleResources=(Array.isArray(resources)?resources:[])
+   .filter(item=>item.resource_code?.startsWith('bonus_')&&item.status==='ready');
+  const promptMap=new Map((Array.isArray(prompts)?prompts:[]).map(row=>[row.prompt_code,row]));
+  rows=visibleResources.map(item=>({
+   ...item,
+   prompt_code:item.resource_code,
+   body:promptMap.get(item.resource_code)?.body||'',
+   summary:promptMap.get(item.resource_code)?.summary||''
+  }));
  }catch(error){
   failed=true;
   console.warn('Optional classroom bonus library unavailable',error?.code||error?.name||'unknown');
