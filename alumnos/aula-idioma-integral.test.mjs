@@ -59,8 +59,24 @@ test('Drive connection instructions and one-project guidance stay available in b
  assert.match(translations,/In ChatGPT, open Settings/);
  assert.match(translations,/Start with one website/);
  assert.match(spanish,/Trabaja en una sola web/);
- assert.match(spanish,/Antes de borrar fotos del teléfono|antes de borrar ninguna copia local/);
+ assert.match(spanish,/galería personal/);
+ assert.match(spanish,/02_FOTOS/);
  assert.match(english,/Work on ONE website at a time/);
  assert.match(english,/Settings → Plugins \(or Apps\)/);
- assert.match(english,/before removing any copies from your phone/);
+ assert.match(english,/personal Photos gallery/);
+ assert.match(english,/02_PHOTOS/);
+ assert.match(home,/directamente en Drive → 02_FOTOS/);
+ assert.match(translations,/directly to Drive → 02_PHOTOS/);
+});
+
+test('Notion command center bonus describes Metricool and GSC Wizard separately in both languages',()=>{
+ const guide=load('prompt-guide.js');
+ const englishTitleSource=load('prompt-english.js');
+ const studentBonuses=load('biblioteca-bonos.js');
+ const ownerBonuses=load('../estudio-control/src/BonusLibrary.tsx');
+ assert.match(guide,/bonus_content_command_notion/);
+ assert.match(guide,/GSC Wizard/);
+ assert.match(englishTitleSource,/BONUS · Notion command center/);
+ assert.match(studentBonuses,/Centro de comando · Notion/);
+ assert.match(ownerBonuses,/item.resource_code === 'bonus_content_command_notion'/);
 });
