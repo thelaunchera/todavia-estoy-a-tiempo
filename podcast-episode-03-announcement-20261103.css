@@ -1,0 +1,146 @@
+/* Podcast · episodio 03 — anuncio de estreno (3 al 5 de noviembre de 2026).
+   Aislado del hero, la navegación, los formularios y las imágenes originales. */
+.podcast-episodes-curated .episode-release-note{
+  margin:12px 0 0;
+  color:#83556d;
+  font:700 clamp(.78rem,1vw,.9rem)/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:.025em;
+}
+#podcast-ep03-dialog:not([open]){display:none!important}
+#podcast-ep03-dialog[open]{
+  position:fixed;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+  align-items:stretch;
+  width:min(760px,calc(100% - 30px));
+  max-width:760px;
+  max-height:min(88dvh,780px);
+  margin:auto;
+  padding:0;
+  border:1px solid #c6b9bd;
+  border-radius:23px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  background:#f8f4f0;
+  box-shadow:0 24px 90px #07102185;
+  color:#1b2a41;
+  isolation:isolate;
+}
+#podcast-ep03-dialog::backdrop{background:rgba(11,19,34,.77);backdrop-filter:blur(6px)}
+#podcast-ep03-dialog .ep03-art{
+  min-width:0;
+  margin:0;
+  background:#19233a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+#podcast-ep03-dialog .ep03-art img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:540px;
+  object-fit:contain;
+  object-position:center;
+}
+#podcast-ep03-dialog .ep03-copy{
+  min-width:0;
+  padding:clamp(29px,4.6vw,48px) clamp(22px,4vw,42px) 32px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+}
+#podcast-ep03-dialog .ep03-eyebrow{
+  display:block;
+  margin:0 0 13px;
+  font:700 11px/1.5 system-ui,-apple-system,sans-serif;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#9c5f81;
+}
+#podcast-ep03-dialog h2{
+  margin:0;
+  font:400 clamp(2.2rem,4.2vw,3.7rem)/1.07 Georgia,"Times New Roman",serif;
+  letter-spacing:-.045em;
+  max-width:14ch;
+  text-wrap:balance;
+  color:#20304a;
+}
+#podcast-ep03-dialog .ep03-description{
+  max-width:39ch;
+  margin:19px 0 23px;
+  font:400 15px/1.65 system-ui,-apple-system,sans-serif;
+  color:#4b5666;
+}
+#podcast-ep03-dialog .ep03-cta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:50px;
+  max-width:100%;
+  padding:13px 22px;
+  background:#1a2b47;
+  border-radius:999px;
+  font:700 14px/1.35 system-ui,-apple-system,sans-serif;
+  color:#fff;
+  text-decoration:none;
+  text-align:center;
+  box-sizing:border-box;
+}
+#podcast-ep03-dialog .ep03-cta:hover{background:#385471}
+#podcast-ep03-dialog .ep03-cta:focus-visible,
+#podcast-ep03-dialog .ep03-close:focus-visible{
+  outline:3px solid #b780a1;
+  outline-offset:3px;
+}
+#podcast-ep03-dialog .ep03-close{
+  position:absolute;
+  z-index:3;
+  right:13px;
+  top:13px;
+  display:grid;
+  place-items:center;
+  width:43px;
+  height:43px;
+  min-width:43px;
+  min-height:43px;
+  padding:0;
+  border:1px solid #bcb2b9;
+  border-radius:50%;
+  color:#27384e;
+  background:#fffdfbed;
+  cursor:pointer;
+  font:400 29px/1 Arial,sans-serif;
+  box-shadow:0 3px 15px #20304a18;
+}
+@media(max-width:620px){
+  #podcast-ep03-dialog[open]{
+    display:flex;
+    flex-direction:column;
+    width:min(430px,calc(100% - 22px));
+    max-height:90dvh;
+    border-radius:19px;
+  }
+  #podcast-ep03-dialog .ep03-art{flex:none}
+  #podcast-ep03-dialog .ep03-art img{
+    display:block;
+    max-height:30dvh;
+    min-height:130px;
+    width:100%;
+    object-fit:contain;
+  }
+  #podcast-ep03-dialog .ep03-copy{
+    padding:22px 22px 26px;
+    align-items:stretch;
+  }
+  #podcast-ep03-dialog h2{font-size:clamp(2rem,8.2vw,2.75rem);max-width:100%;line-height:1.09}
+  #podcast-ep03-dialog .ep03-description{margin:13px 0 19px;font-size:14px;line-height:1.55}
+  #podcast-ep03-dialog .ep03-cta{width:100%;min-height:50px}
+  #podcast-ep03-dialog .ep03-close{right:12px;top:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  #podcast-ep03-dialog .ep03-cta{transition:none}
+}
