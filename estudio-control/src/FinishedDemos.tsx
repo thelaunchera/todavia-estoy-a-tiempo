@@ -6,6 +6,7 @@ import {solunaPhotos} from './soluna-photos';
 import {ivoryBloomPhotos} from './ivory-bloom-photos';
 import {ivoryBloomRebuildPrompts} from './ivory-bloom-rebuild-prompts';
 import {additionalDemoPhotos, additionalDemoPrompts, type FinishedDemoPhoto} from './finished-demo-resources';
+import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemoPublishing} from './ClassroomDemoPublishing';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
@@ -161,6 +162,7 @@ const finishedDemos:Demo[]=[
 export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
  const [copied,setCopied]=useState('');
  const [notice,setNotice]=useState('');
+ const classroom=useClassroomDemoPublishing();
  async function copy(text:string,key:string,kind:'prompt'|'link'='prompt') {
    try {await navigator.clipboard.writeText(text);setCopied(key);setNotice(kind==='link'?'Enlace de la foto copiado.':'Prompt copiado.');}
    catch {setNotice('Selecciona el texto para copiarlo manualmente.');}
@@ -170,6 +172,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
      <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
@@ -178,6 +181,11 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
        <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
+       <ClassroomDemoPublication control={classroom} demo={{
+         id:d.id,title:d.title,category:d.category,description:d.description,
+         image:d.image,url:d.url,note:d.note,kind:d.kind,photos:d.photos,
+         steps:studioDemoPrompts[d.promptsFor]
+       }}/>
        <div className="finished-demo-actions">
          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
