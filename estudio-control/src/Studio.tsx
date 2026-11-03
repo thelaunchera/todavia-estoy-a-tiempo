@@ -614,7 +614,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION);
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1');
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -1315,7 +1315,7 @@ function App() {
               {episodeRows}
             </>
           )}
-          {page === 'youtube' && <YouTubeStudio />}
+          {page === 'youtube' && <YouTubeStudio entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'seamless' && <SeamlessEditor />}
           {page === 'reels' && (
             <ReelsProduction entries={items.ideas} onSave={async (entry,patch)=>{
