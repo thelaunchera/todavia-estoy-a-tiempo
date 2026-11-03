@@ -4,11 +4,12 @@ import YouTubeVisualLibrary, { type YouTubeSavedPhoto } from './YouTubeVisualLib
 import YouTubeSeasonTwo from './YouTubeSeasonTwo';
 import YouTubeSeasonOneVideo from './YouTubeSeasonOneVideo';
 import YouTubeBrandKit from './YouTubeBrandKit';
+import YouTubeQuickEpisodes from './YouTubeQuickEpisodes';
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
 import './youtube-studio.css';
 
-type Tab = 'brief' | 'episodes' | 'photos' | 'season1video' | 'season2' | 'brand';
+type Tab = 'brief' | 'quick' | 'episodes' | 'photos' | 'season1video' | 'season2' | 'brand';
 type Props = { entries: YouTubeSavedPhoto[]; onChanged:()=>Promise<void>; readOnly?:boolean };
 
 function BulletPanel({ title, items }: { title: string; items: readonly string[] }) {
@@ -39,7 +40,7 @@ function ScriptText({ content }: { content: string }) {
 }
 
 export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) {
-  const [tab, setTab] = useState<Tab>('brief');
+  const [tab, setTab] = useState<Tab>('quick');
   const [selected, setSelected] = useState(1);
   const [query, setQuery] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -91,14 +92,15 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
 
     <div className="yt-view-switch" role="tablist" aria-label="Biblioteca de YouTube">
       <button type="button" role="tab" aria-selected={tab === 'brief'} className={tab === 'brief' ? 'active' : ''} onClick={() => setTab('brief')}><BookOpen size={17}/> Brief completo</button>
-      <button type="button" role="tab" aria-selected={tab === 'episodes'} className={tab === 'episodes' ? 'active' : ''} onClick={() => setTab('episodes')}><Layers3 size={17}/> Guiones de los 8 capítulos</button>
+      <button type="button" role="tab" aria-selected={tab === 'quick'} className={tab === 'quick' ? 'active' : ''} onClick={() => setTab('quick')}><Video size={17}/> Episodios 2 min · YouTube + TikTok</button>
+      <button type="button" role="tab" aria-selected={tab === 'episodes'} className={tab === 'episodes' ? 'active' : ''} onClick={() => setTab('episodes')}><Layers3 size={17}/> Archivo · Guiones largos T1</button>
       <button type="button" role="tab" aria-selected={tab === 'photos'} className={tab === 'photos' ? 'active' : ''} onClick={() => setTab('photos')}><Camera size={17}/> Fotos y prompts</button>
-      <button type="button" role="tab" aria-selected={tab === 'season1video'} className={tab === 'season1video' ? 'active' : ''} onClick={() => setTab('season1video')}><Video size={17}/> Temporada 1 · Master Video</button>
-      <button type="button" role="tab" aria-selected={tab === 'season2'} className={tab === 'season2' ? 'active' : ''} onClick={() => setTab('season2')}><Users size={17}/> Temporada 2 · propuesta</button>
+      <button type="button" role="tab" aria-selected={tab === 'season1video'} className={tab === 'season1video' ? 'active' : ''} onClick={() => setTab('season1video')}><Video size={17}/> Archivo · Master Video T1</button>
+      <button type="button" role="tab" aria-selected={tab === 'season2'} className={tab === 'season2' ? 'active' : ''} onClick={() => setTab('season2')}><Users size={17}/> Archivo · Guiones T2</button>
       <button type="button" role="tab" aria-selected={tab === 'brand'} className={tab === 'brand' ? 'active' : ''} onClick={() => setTab('brand')}><WandSparkles size={17}/> Marca, logo y covers</button>
     </div>
 
-    {tab === 'brief' ? <div className="yt-brief" role="tabpanel">
+    {tab === 'quick' ? <YouTubeQuickEpisodes/> : tab === 'brief' ? <div className="yt-brief" role="tabpanel">
       <section className="yt-paper yt-identity">
         <div className="yt-small-title">SERIE ORIGINAL · BIBLIA CREATIVA</div>
         <h3>{youtubeBrief.workingEnglishTitle} / {youtubeBrief.title}</h3>
