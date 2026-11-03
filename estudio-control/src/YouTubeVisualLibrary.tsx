@@ -114,7 +114,17 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const photos=useMemo(()=>[...(youtubePhotoBoard[selected]||[]),...youtubeHolidayFrames.filter(x=>x.id.startsWith('E'+episodeNum(selected)))], [selected]);
   const filtered=useMemo(()=>photos.filter(p=>(p.title+' '+p.id+' '+p.action+' '+p.shot).toLowerCase().includes(filter.toLowerCase())),[photos,filter]);
   const owned=useMemo(()=>new Map(entries.filter(x=>x.section===YOUTUBE_PHOTO_SECTION).map(x=>[x.title,x])),[entries]);
-  const ready=photos.filter(p=>privatePhotos.get(p.id)?.url||owned.get(p.id)?.art||p.image).length;
+  const corePhotos=youtubePhotoBoard[selected]||[];
+  const blocks=getEpisodeProductionBlocks(corePhotos);
+  const extras=photos.filter(photo=>photo.id.includes('-H'));
+  const available:EpisodePhotoAvailability[]=corePhotos.map(p=>{
+    const local=privatePhotos.get(p.id);
+    if(local?.url)return {id:p.id,source:'private',fileName:local.file_name};
+    if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png'};
+    return {id:p.id,source:'missing',fileName:p.id+'.png'};
+  });
+  const ready=available.filter(item=>item.source!=='missing').length;
+  const masterVideoPrompt=getEpisodeProductionMaster(selected,available);
   const batchText=useMemo(()=>photos.map(p=>'=== '+p.id+' · '+p.title+' ===\n'+getYouTubePhotoPrompt(p)).join('\n\n-----------------------\n\n'),[photos]);
   const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
   const copyAll=async()=>{try{await navigator.clipboard.writeText(batchText);setBatchStatus('Todos los prompts del capítulo copiados.');}catch{setBatchStatus('Usa Descargar TXT para guardar todos los prompts.');}};
