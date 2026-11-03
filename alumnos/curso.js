@@ -81,8 +81,9 @@ $('forgot-password-trigger').addEventListener('click',()=>{setAuthMode('reset');
 document.querySelectorAll('[data-password-toggle]').forEach(button=>button.addEventListener('click',()=>{
  const input=$(button.dataset.passwordToggle);if(!input)return;
  const visible=input.type==='password';input.type=visible?'text':'password';
- button.textContent=visible?'Ocultar':'Mostrar';
- button.setAttribute('aria-label',visible?'Ocultar contraseña':'Mostrar contraseña');
+ const en=getClassroomLanguage()==='en';
+ button.textContent=visible?(en?'Hide':'Ocultar'):(en?'Show':'Mostrar');
+ button.setAttribute('aria-label',visible?(en?'Hide password':'Ocultar contraseña'):(en?'Show password':'Mostrar contraseña'));
 }));
 async function submitAuth(form,fn){
  if(authBusy)return;
