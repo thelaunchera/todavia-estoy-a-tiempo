@@ -41,15 +41,12 @@ jobs:
           from pathlib import Path
           import cairosvg
           source = Path("assets/logo-podcast-04.svg").read_bytes()
-          # The private classroom can be added to iPhone/Android Home Screen.
-          # Generate icon PNGs from the EXISTING brand artwork; never cache
-          # lesson files, account data or signed-in responses.
-          icon_svg = Path("assets/monograma-podcast-04.svg").read_bytes()
-          icon_folder = Path("alumnos/icons")
-          icon_folder.mkdir(parents=True, exist_ok=True)
-          for size, filename in ((180, "aula-180.png"), (192, "aula-192.png"), (512, "aula-512.png")):
-              cairosvg.svg2png(bytestring=icon_svg, write_to=str(icon_folder / filename),
-                               output_width=size, output_height=size)
+          # Mi Aula / Mara uses its own approved icon, separate from the podcast.
+          # Do not regenerate or overwrite these committed PNG assets.
+          for size in (180, 192, 512):
+              icon_path = Path(f"alumnos/icons/aula-{size}.png")
+              if not icon_path.is_file() or icon_path.stat().st_size == 0:
+                  raise FileNotFoundError(f"Missing approved classroom icon: {icon_path}")
           cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-email.png", output_width=900)
           # Email illustrations use opaque backgrounds so Gmail dark mode cannot
           # invert the card and make the logo illegible.
