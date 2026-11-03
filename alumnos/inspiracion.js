@@ -8,7 +8,9 @@ const safeUrl = value => {
 const enLabel = (es,en,lang) => lang==='en'?en:es;
 
 const spanishStageNames={"casa-brownie":["Empezar desde una página vacía","Identidad y menú de navegación","Portada con una foto fija","Seis fotos individuales de brownies","Catálogo y presentación de sabores","Regalos y fotografías de empaques","Historia y ubicación ficticia","Información de entrega de ejemplo","Interacciones de carrito de demostración","Pie de página y créditos","Revisión final con capturas","Bono opcional: video en la portada"],"crumb":["Crear la estructura inicial","Dirección fotográfica: 14 escenas","Portada y navegación","Seis fotografías individuales","Catálogo de sabores","Regalos, cajas y presentación","Galería de la marca","Armar tu caja: demostración interactiva","Ubicación ilustrativa","Banners e historia de la marca","Pie de página y contacto ilustrativo","Revisión móvil y final"],"aftr":["Dirección visual del local nocturno","Ocho fotografías individuales","Portada, menú y acceso para mayores de 21","Eventos de hoy y programación semanal","Mesas exclusivas y lista de invitados","Entradas y revisión final"],"soluna":["Investigar el negocio y su estilo","Identidad y sistema visual","Ocho fotografías individuales de yoga","Portada y botón principal","Oferta de lanzamiento y clases","Espacios y ubicación","Membresías de demostración","Lista de espera, privacidad y revisión","Publicar y comparar"]};
-function stageLabel(id,index,original,lang){
+function stageLabel(id,index,original,lang,prompt){
+ if(lang==='en'&&prompt?.title_en)return prompt.title_en;
+ if(lang!=='en'&&prompt?.title_es)return prompt.title_es;
  if(lang==='en')return englishDemoTitle('demo_'+id+'_'+index,original);
  return spanishStageNames[id]?.[index]||original||'Etapa '+(index+1);
 }
@@ -164,16 +166,28 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   const list=document.createElement('div');list.className='inspiration-prompt-list';
   for(const [i,p] of prompts.entries()){
    const item=document.createElement('details');item.className='inspiration-prompt';
-   item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(stageLabel(d.id,i,p.title,curLang()))+'</strong><small>'+esc(curLang()==='en'?'Step '+(i+1)+' of '+prompts.length:p.step||'')+'</small></summary>';
+   item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(stageLabel(d.id,i,p.title,curLang(),p))+'</strong><small>'+esc(curLang()==='en'?'Step '+(i+1)+' of '+prompts.length:p.step||'')+'</small></summary>';
    const body=document.createElement('div');body.className='inspiration-prompt-body';
-   const promptText=localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
+   const promptText=curLang()==='en'&&p.body_en?p.body_en:localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
    const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=promptText;
    const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar instrucciones','Copy practice instructions',curLang());copy.addEventListener('click',()=>clipboardCopy(promptText,copy,curLang()));
+   const usedPhotos=photos.map(row=>row.p).filter(photo=>typeof p.body==='string'&&p.body.includes(photo.url));
+   if(usedPhotos.length){
+    const photoRefs=document.createElement('div');photoRefs.className='inspiration-step-photos';
+    for(const img of usedPhotos){
+     const a=document.createElement('a');a.className='inspiration-step-photo';a.href=safeUrl(img.url);
+     a.target='_blank';a.rel='noopener noreferrer';
+     const label=galleryPhotoLabel(d.id,0,img,curLang());
+     a.innerHTML='<img src="'+esc(safeUrl(img.url))+'" alt="'+esc(label)+'" loading="lazy"><span>'+esc(galleryPhotoSection(img,curLang()))+'</span>';
+     photoRefs.append(a);
+    }
+    body.append(photoRefs);
+   }
    body.append(pre,copy);
    for(const pic of Array.isArray(p.photos)?p.photos:[]){
     const photo=document.createElement('details');photo.className='inspiration-photo-prompt';
-    const sum=document.createElement('summary');sum.textContent=(curLang()==='en'?'Photo prompt: ':'Prompt de foto: ')+(curLang()==='en'?englishDemoPhotoTitle('demo-photo_'+d.id+'_'+i+'_'+(Array.isArray(p.photos)?p.photos.indexOf(pic):0),pic.title):pic.title||'');
-    const photoText=localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
+    const sum=document.createElement('summary');sum.textContent=(curLang()==='en'?'Photo prompt: ':'Prompt de foto: ')+(curLang()==='en'?(pic.title_en||englishDemoPhotoTitle('demo-photo_'+d.id+'_'+i+'_'+(Array.isArray(p.photos)?p.photos.indexOf(pic):0),pic.title)):pic.title||'');
+    const photoText=curLang()==='en'&&pic.body_en?pic.body_en:localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
     const txt=document.createElement('p');txt.textContent=photoText;
     const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(photoText,cp,curLang()));
     photo.append(sum,txt,cp);body.append(photo);
