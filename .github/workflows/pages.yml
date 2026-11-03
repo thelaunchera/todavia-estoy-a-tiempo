@@ -41,6 +41,15 @@ jobs:
           from pathlib import Path
           import cairosvg
           source = Path("assets/logo-podcast-04.svg").read_bytes()
+          # The private classroom can be added to iPhone/Android Home Screen.
+          # Generate icon PNGs from the EXISTING brand artwork; never cache
+          # lesson files, account data or signed-in responses.
+          icon_svg = Path("assets/monograma-podcast-04.svg").read_bytes()
+          icon_folder = Path("alumnos/icons")
+          icon_folder.mkdir(parents=True, exist_ok=True)
+          for size, filename in ((180, "aula-180.png"), (192, "aula-192.png"), (512, "aula-512.png")):
+              cairosvg.svg2png(bytestring=icon_svg, write_to=str(icon_folder / filename),
+                               output_width=size, output_height=size)
           cairosvg.svg2png(bytestring=source, write_to="assets/logo-podcast-04-email.png", output_width=900)
           # Email illustrations use opaque backgrounds so Gmail dark mode cannot
           # invert the card and make the logo illegible.
@@ -167,6 +176,11 @@ jobs:
           test -s _podcast_pages/centro/contacto.html
           test -s _podcast_pages/centro/legales.css
           test -s _podcast_pages/alumnos/index.html
+          test -s _podcast_pages/alumnos/manifest.webmanifest
+          test -s _podcast_pages/alumnos/manifest-en.webmanifest
+          test -s _podcast_pages/alumnos/icons/aula-180.png
+          test -s _podcast_pages/alumnos/icons/aula-192.png
+          test -s _podcast_pages/alumnos/icons/aula-512.png
           test -s _podcast_pages/alumnos/curso.js
           test -s _podcast_pages/alumnos/mara-guide.js
           test -s _podcast_pages/alumnos/mara-guide.css
