@@ -22,6 +22,7 @@ function splitInstructions(content,lang){
  return {guide:content.slice(0,found.index).trim(),instructions:content.slice(at).trim()};
 }
 function titleFor(item,lang){
+ if(item.resource_code==='bonus_content_command_notion')return word('Centro de comando · Notion + Metricool + GSC Wizard','Command center · Notion + Metricool + GSC Wizard',lang);
  if(item.resource_code==='bonus_motion_studio')return word('Biblioteca de efectos web','Website effects library',lang);
  if(lang!=='en')return item.title;
  const known=englishTitle(item.prompt_code,item.title);
