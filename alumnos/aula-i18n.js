@@ -4,7 +4,7 @@ let translationTask=null;
 function updateStaticLanguage(lang){
  try{translateStaticClassroomText(lang);}catch(error){console.warn('Optional classroom translations unavailable',error?.name||'unknown');}
  if(translationTask)return;
- translationTask=import('./aula-textos-estaticos.js?v=20261103-classroom-tools-v5')
+ translationTask=import('./aula-textos-estaticos.js?v=20261103-drive-project-v6')
   .then(mod=>{if(typeof mod.translateStaticClassroomText==='function'){translateStaticClassroomText=mod.translateStaticClassroomText;try{translateStaticClassroomText(language);}catch(error){console.warn('Optional classroom translation failed',error?.name||'unknown');}}})
   .catch(error=>console.warn('Optional classroom language module unavailable',error?.name||'unknown'));
 }
