@@ -1,7 +1,7 @@
 /* Recuperación segura del panel de materiales del aula privada.
    No crea accesos públicos ni copia prompts al HTML. */
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=20261103-safari-restore-v1';
+import {mountMateriales} from './materiales-interactivos.js?v=20261103-syntax-fix-v2';
 let repairing=false,controller=null,studentGallery=null;
 const $=id=>document.getElementById(id);
 const lang=()=> $('aula-language')?.value==='en'?'en':'es';
