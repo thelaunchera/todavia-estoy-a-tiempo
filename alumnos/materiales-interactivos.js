@@ -471,8 +471,13 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   }updateSummary();
   const actions=el('div','mi-actions');actions.innerHTML=getLanguage()==='en'?'<button class="mi-primary" type="button">Save answers</button><button class="mi-quiet" type="button">Print workbook</button>':'<button class="mi-primary" type="button">Guardar mis respuestas</button><button class="mi-quiet" type="button">Imprimir mi cuaderno</button>';content.append(actions);
   if(ownerPreview){
-   actions.children[0].textContent=t('Probar guardado','Test save');
-   actions.children[0].addEventListener('click',()=>{saveBadge.textContent=t('La escritura funciona. Ninguna respuesta fue guardada en cuentas.','Typing works. No account data was saved.');});
+   actions.children[0].textContent=t('Comprobar prueba','Check my test');
+   const feedback=el('p','mi-owner-test-feedback','');
+   feedback.setAttribute('role','status');actions.append(feedback);
+   actions.children[0].addEventListener('click',()=>{
+    const result=t('Los campos funcionan: '+Object.values(answers).filter(v=>String(v).trim()).length+' respuestas de prueba. No se guardó nada en ninguna cuenta.','Fields work: '+Object.values(answers).filter(v=>String(v).trim()).length+' test answers. Nothing was saved to any account.');
+    saveBadge.textContent=result;feedback.textContent=result;
+   });
   }else actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',printCurrentMaterial);
  }
@@ -528,8 +533,13 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const note=el('p','mi-note',t('No necesitas terminar todo en un día. Cuando algo no funcione, anota el problema y corrígelo antes de compartir tu enlace.','You do not need to finish in one day. If something fails, note the problem and fix it before sharing your link.'));content.append(note);
   const actions=el('div','mi-actions');actions.innerHTML='<button class="mi-primary" type="button">'+t('Guardar comprobaciones','Save checks')+'</button><button class="mi-quiet" type="button">'+t('Volver a mis lecciones','Back to lessons')+'</button>';content.append(actions);
   if(ownerPreview){
-   actions.children[0].textContent=t('Probar guardado','Test save');
-   actions.children[0].addEventListener('click',()=>{saveBadge.textContent=t('Las casillas funcionan. No se guardó ningún dato.','Checkboxes work. No data was saved.');});
+   actions.children[0].textContent=t('Comprobar prueba','Check my test');
+   const feedback=el('p','mi-owner-test-feedback','');
+   feedback.setAttribute('role','status');actions.append(feedback);
+   actions.children[0].addEventListener('click',()=>{
+    const result=t('Las casillas funcionan en la prueba. No se guardó ningún dato.','Checkboxes work in this preview. No data was saved.');
+    saveBadge.textContent=result;feedback.textContent=result;
+   });
   }else actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',()=>onGoLessons?.());
  }
