@@ -38,12 +38,14 @@ function drivePreviewUrl(link?:string):string{
 function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged}:{photo:YouTubePhoto,entry?:YouTubeSavedPhoto,privatePhoto?:PrivatePhoto,readOnly?:boolean,onChanged:()=>Promise<void>,onPrivateChanged:()=>Promise<void>}){
   const linked=entry?.art||photo.image;
   const saved=privatePhoto?.url||linked;
-  const [link,setLink]=useState(linked||'');
+  const drivePreview=!saved?drivePreviewUrl(entry?.link):'';
+  const alternativeUrl=linked?.startsWith('https://')?linked:'';
+  const [link,setLink]=useState(alternativeUrl);
   const [status,setStatus]=useState('');
   const [busy,setBusy]=useState(false);
   const [copied,setCopied]=useState(false);
   const prompt=getYouTubePhotoPrompt(photo);
-  useEffect(()=>{setLink(linked||'');},[linked]);
+  useEffect(()=>{setLink(alternativeUrl);},[alternativeUrl]);
   const copy=async()=>{
     try { await navigator.clipboard.writeText(prompt);setCopied(true);setStatus('Prompt copiado.'); }
     catch{setStatus('No se pudo copiar. Selecciona el texto del prompt.');}
