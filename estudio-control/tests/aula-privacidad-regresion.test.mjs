@@ -299,5 +299,5 @@ test('Prompts de secciones conservan imagen real, títulos y versión inglesa',(
  assert.match(source,/className='inspiration-step-photos'/,'El alumno ve la foto real junto a la etapa');
  assert.match(source,/p\.body\.includes\(photo\.url\)/,'Las imágenes se enlazan a la instrucción que las menciona');
  assert.match(styles,/\.inspiration-step-photo/, 'Vista visual del recurso en el iPhone');
- assert.match(room,/classroomModule='\.\/curso\.js\?v=20261103-photo-prompts-v2'/,'Safari obtiene la versión actual');
+ assert.match(room,/const classroomModule='\\.\\/curso\\.js\\?v=[^']+'/,'Safari importa un módulo versionado, sin fijar un nombre de release de otros módulos');
 });
