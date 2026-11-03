@@ -64,3 +64,14 @@
 .yt-visual-batch button:hover{background:#f2f7fb;border-color:#b2c9d8}
 .yt-visual-batch small{color:#556777;font-size:.75rem}
 @media(max-width:420px){.yt-visual-batch button{width:100%;justify-content:center}}
+
+/* Actual-file uploads live in a private Supabase bucket, not an external link. */
+.yt-private-photo-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 9px}
+.yt-photo-file-upload,.yt-private-file-link,.yt-private-file-delete{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;min-height:38px;border-radius:9px;padding:8px 11px;font-size:.76rem;font-weight:700;text-decoration:none}
+.yt-photo-file-upload{background:#f2d85b;color:#191919}
+.yt-photo-file-upload:hover{background:#f8e47a}
+.yt-private-file-link,.yt-private-file-delete{background:white;color:#252525;border:1px solid #d9e0e3}
+.yt-private-file-delete:hover{background:#fff3f2;color:#9b3636}
+.yt-private-file-delete:disabled{cursor:not-allowed;opacity:.6}
+.yt-private-file-input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;overflow:hidden!important;pointer-events:none}
+.yt-private-error{background:#fff3f0;color:#993c34;border:1px solid #edd5d1;border-radius:9px;font-size:.82rem;padding:12px}
