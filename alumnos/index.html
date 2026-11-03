@@ -423,13 +423,21 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
  window.location.reload();
 });
 </script>
-<script type="module" src="./aula-materiales-rescate-20261102.js?v=6"></script>
+<script type="module" src="./aula-materiales-rescate-20261102.js?v=7"></script>
 <script type="module">
-import('./curso.js?v=20261102-refresh-v24').catch(error=>{
+import('./curso.js?v=20261102-stable-v25').catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
   msg.hidden=false;
-  msg.textContent='El aula no pudo iniciar sus archivos. Código: AULA-MODULE. Regresa al Studio para reintentar.';
+  let english=false;try{english=localStorage.getItem('tle_classroom_language_v1')==='en';}catch{}
+  msg.textContent=english?'The classroom could not finish loading (AULA-MODULE). Your saved work was not changed. Try reloading the classroom.':'El aula no pudo terminar de cargar (AULA-MODULE). No se modificaron tus materiales guardados. Intenta abrir el aula de nuevo.';
+  if(!document.getElementById('aula-retry-load')){
+   const retry=document.createElement('button');retry.id='aula-retry-load';retry.type='button';
+   retry.textContent=english?'Retry loading':'Reintentar carga';
+   retry.style.cssText='margin:14px 0 0;padding:12px 18px;border-radius:12px;border:1px solid #9bb4c4;color:#17344b;background:#fff;font-weight:700';
+   retry.addEventListener('click',()=>{const u=new URL(location.href);u.searchParams.set('aula_retry',String(Date.now()));location.assign(u.href);});
+   msg.insertAdjacentElement('afterend',retry);
+  }
   msg.dataset.ok='false';
  }
  console.error('AULA-MODULE',error);
