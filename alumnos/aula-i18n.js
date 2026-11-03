@@ -164,8 +164,8 @@ const translations=[
  ['.course-help-note','Do not include passwords or sensitive information. We will use your details only to reply. Privacy policy.'],
  ['#course-help-form button[type="submit"]','Send my request'],
  ['#cancel-course-help','Back to my classroom'],
- ['.bottom a[href="../privacidad.html"]','Privacy'],
- ['.bottom a[href="../terminos.html"]','Terms'],
+ ['.bottom a[href*="privacidad"]','Privacy'],
+ ['.bottom a[href*="terminos"]','Terms'],
  ['.aula-rail-close','×']
 ];
 const placeholders=[['#login-email','name@email.com'],['#login-password','Your password'],['#course-help-name','Your name'],['#course-help-email','you@email.com'],['#course-help-message','Tell us what happened and where you need help…']];
@@ -203,7 +203,7 @@ function translateElement(selector,english){
    if(!el.dataset.tleOriginalHtml)el.dataset.tleOriginalHtml=el.innerHTML;
    if(language==='en'){
     el.replaceChildren(document.createTextNode('Do not include passwords or sensitive information. We only use these details to reply. '));
-    const privacy=document.createElement('a');privacy.href='../privacidad.html';privacy.target='_blank';privacy.rel='noopener noreferrer';privacy.textContent='Privacy policy';el.append(privacy,document.createTextNode('.'));
+    const privacy=document.createElement('a');privacy.href='../privacidad-en.html';privacy.hreflang='en';privacy.target='_blank';privacy.rel='noopener noreferrer';privacy.textContent='Privacy policy';el.append(privacy,document.createTextNode('.'));
    }else el.innerHTML=el.dataset.tleOriginalHtml;
    continue;
   }
@@ -228,6 +228,11 @@ export function applyClassroomLanguage(){
   const el=document.querySelector(selector);if(!el)continue;
   if(!el.dataset.tleOriginalPlaceholder)el.dataset.tleOriginalPlaceholder=el.placeholder;
   el.placeholder=language==='en'?en:el.dataset.tleOriginalPlaceholder;
+ }
+ // Keep legal links in the selected language, even after switching back and forth.
+ for(const stem of ['privacidad','terminos']){
+  const link=document.querySelector('.bottom a[href*="'+stem+'"]');
+  if(link){link.href='../'+stem+(language==='en'?'-en':'')+'.html';link.hreflang=language;}
  }
  updateStaticLanguage(language);
 }
