@@ -319,6 +319,8 @@ function refreshClassroomLanguage(){
   for(const [i,item] of lessons.entries()){
    const label=$('lesson-buttons')?.querySelector('button[data-index="'+i+'"] .index-title');
    if(label)label.textContent=translationForLesson(item).title;
+   const option=$('lesson-picker')?.querySelector('option[value="'+i+'"]');
+   if(option)option.textContent=courseCopy('Lección ','Lesson ',lang)+(i+1)+' · '+translationForLesson(item).title;
   }
   if(lessons[selected]){
    $('lesson-title').textContent=translationForLesson(lessons[selected]).title;
@@ -540,12 +542,13 @@ function choose(i){
  selected=i;
  const item=lessons[i];
  if(!item)return;
+ if($('lesson-picker'))$('lesson-picker').value=String(i);
  setAulaView('lecciones');
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
-  ?'Video coming soon. You can explore the lesson prompts and materials now. This lesson cannot be marked complete until its video is published.'
-  :'Video en preparación. Ya puedes explorar los prompts y materiales de esta lección. Podrás marcarla como completada cuando se publique el video.';
+  ?'Video coming soon. You can still practice with this lesson’s prompts.'
+  :'El video estará disponible pronto. Mientras tanto, puedes practicar con sus prompts.';
  $('lesson-number').textContent='VIDEO '+item.lesson_code;
  const localized=translationForLesson(item);
  $('lesson-title').textContent=localized.title;
@@ -563,6 +566,9 @@ function choose(i){
 }
 function lessonsUI(){
  const group=$('lesson-buttons');group.replaceChildren();
+ const picker=$('lesson-picker');
+ if(picker)picker.replaceChildren();
+ if($('lesson-picker-shell'))$('lesson-picker-shell').hidden=!lessons.length;
  if(!lessons.length){$('empty-lessons').hidden=false;setProgress();return;}
  $('empty-lessons').hidden=true;
  lessons.forEach((item,i)=>{
@@ -570,6 +576,12 @@ function lessonsUI(){
   escapedText(button,'span',item.lesson_code,'index-no');
   escapedText(button,'span',translationForLesson(item).title,'index-title');
   button.addEventListener('click',()=>choose(i));group.appendChild(button);
+  if(picker){
+   const option=document.createElement('option');
+   option.value=String(i);
+   option.textContent=courseCopy('Lección ','Lesson ',getClassroomLanguage())+(i+1)+' · '+translationForLesson(item).title;
+   picker.append(option);
+  }
  });
  setProgress();
  // Continuar en la primera lección pendiente; si terminó todo, mostrar la última.
@@ -805,6 +817,10 @@ $('lesson-done').addEventListener('change',async e=>{
   else $('lesson-celebration').hidden=true;
  }catch{box.checked=!box.checked;status('No pudimos guardar tu avance. Vuelve a intentarlo.');}
  finally{box.disabled=false;}
+});
+$('lesson-picker')?.addEventListener('change',event=>{
+ const index=Number(event.currentTarget.value);
+ if(Number.isInteger(index)&&index>=0&&index<lessons.length)choose(index);
 });
 $('lesson-prev').addEventListener('click',()=>choose(Math.max(0,selected-1)));
 $('lesson-next').addEventListener('click',()=>choose(Math.min(selected+1,lessons.length-1)));
