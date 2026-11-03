@@ -55,3 +55,19 @@
 @media(max-width:1250px){.yt-avatar-card{grid-template-columns:1fr}.yt-avatar-image{min-height:220px}.yt-avatar-image img{max-height:220px}}
 @media(max-width:850px){.yt-avatar-grid{grid-template-columns:1fr}.yt-avatar-card{grid-template-columns:minmax(110px,32%) minmax(0,1fr)}.yt-chapter-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.yt-photo-grid{grid-template-columns:minmax(0,1fr)}.yt-avatar-card{grid-template-columns:1fr}.yt-avatar-image{min-height:180px;padding:8px}.yt-avatar-image img{max-height:240px}.yt-photo-chapters-head,.yt-photo-chapter-summary{flex-direction:column;align-items:stretch}.yt-photo-chapter-summary{padding:14px}.yt-chapter-tabs button span{font-size:.73rem}.yt-outline-action,.yt-solid-action{min-height:40px}}
+
+.yt-gallery-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.yt-gallery-actions button:disabled{opacity:.65;cursor:wait}
+.yt-photo-upload-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;margin-bottom:2px}
+.yt-upload-action{display:inline-flex;align-items:center;gap:7px;justify-content:center;padding:9px 11px;border-radius:9px;background:#f2d85b;color:#191919;font-size:.77rem;font-weight:750;cursor:pointer;min-height:38px}
+.yt-upload-action:hover{background:#f9e77d}
+.yt-upload-action.yt-upload-busy{opacity:.65;cursor:wait;pointer-events:none}
+.yt-file-input{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap;border:0;padding:0}
+.yt-file-input:focus-visible+.yt-upload-action,.yt-upload-action:focus-within{outline:3px solid #8db7d9;outline-offset:2px}
+.yt-photo-view,.yt-photo-remove{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#fff;border:1px solid #dce1e3;border-radius:8px;padding:8px 10px;min-height:38px;cursor:pointer;color:#404449;font-size:.74rem;font-weight:650;text-decoration:none}
+.yt-photo-remove:hover{background:#fff1f1;color:#a03a3a}
+.yt-photo-remove:disabled{opacity:.6;cursor:wait}
+.yt-photo-view:hover{background:#f5f8fa}
+.yt-photos-error{background:#fff2f0;color:#943b32;border:1px solid #f4d6d2;padding:10px 12px;border-radius:9px;font-size:.82rem}
+.yt-photo-loading{font-size:.82rem;color:#656565}
+@media(max-width:600px){.yt-gallery-actions{width:100%;justify-content:stretch}.yt-gallery-actions button{flex:1;min-height:44px}}
