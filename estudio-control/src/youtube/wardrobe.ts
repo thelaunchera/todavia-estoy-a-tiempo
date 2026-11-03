@@ -34,7 +34,7 @@ export function getCharacterLookPrompt(episode:number,who:'nia'|'ruby'):string{
  'NEW OUTFIT: '+clothes,
  'SEASON: '+look.mood+'. '+look.setting,
  'ONE full-body image in a natural standing three-quarter pose, footwear visible, neutral warm studio background, fine fabric details, premium cinematic 3D animation, soft even lighting, no text, no collage, no watermarks, 3:4 vertical.',
- 'No face swap, no changed hairstyle, no childlike stylization, no new glasses for Nia, never remove Ruby glasses, no swapped clothing or identities.'].join('\\n\\n');
+ 'No face swap, no changed hairstyle, no childlike stylization, no new glasses for Nia, never remove Ruby glasses, no swapped clothing or identities.'].join('\n\n');
 }
 /** Pack estacional opcional. No establece fecha ni frecuencia de publicaciones. */
 export const youtubeHolidayFrames = [
