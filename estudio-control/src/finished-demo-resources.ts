@@ -427,87 +427,93 @@ const photoData={
   "experience-cleaning": {
     "base": "https://thelaunchera.com/experience-cleaning/photos/",
     "brand": "Experience Cleaning",
-    "style": "fotografía realista de limpieza residencial en hogares luminosos, tonos crema y soft black, espacios impecables y acción humana auténtica",
+    "style": "marfil y azul suave con fotografías reales de espacios; distinguir claramente imágenes de stock externo de fotos originales. No inventar clientes ni reservas.",
     "items": [
       [
         "/assets/cleaning-demo/hero-cleaner-original.jpg",
-        "Hero de limpieza",
-        "Portada principal"
+        "Hero · profesional de limpieza",
+        "Hero · residencial"
       ],
       [
-        "clean_roll_01_kitchen.webp",
-        "Cocina impecable",
-        "Galería · cocina"
+        "https://images.pexels.com/photos/8055186/pexels-photo-8055186.jpeg?auto=compress&w=1260&h=750&dpr=1",
+        "Standard Cleaning · foto ilustrativa",
+        "Servicios · fotografía de referencia externa"
+      ],
+      [
+        "https://images.pexels.com/photos/9462635/pexels-photo-9462635.jpeg?auto=compress&w=1260&h=750&dpr=1",
+        "Deep Cleaning · foto ilustrativa",
+        "Servicios · fotografía de referencia externa"
+      ],
+      [
+        "/assets/drive-house-gallery/whole-home.png",
+        "Move In/Out · casa completa",
+        "Servicios · fotografía de referencia"
+      ],
+      [
+        "https://images.pexels.com/photos/9462298/pexels-photo-9462298.jpeg?auto=compress&w=1260&h=750&dpr=1",
+        "Custom Cleaning · foto ilustrativa",
+        "Servicios · fotografía de referencia externa"
+      ],
+      [
+        "https://images.pexels.com/photos/33357392/pexels-photo-33357392/free-photo-of-janitors-cleaning-large-glass-doors-in-office-building.png?auto=compress&w=1260&h=750&dpr=1",
+        "Commercial Office · foto ilustrativa",
+        "Servicios · fotografía de referencia externa"
+      ],
+      [
+        "https://images.pexels.com/photos/8440062/pexels-photo-8440062.jpeg?auto=compress&w=1260&h=750&dpr=1",
+        "Custom Commercial · foto ilustrativa",
+        "Servicios · fotografía de referencia externa"
       ],
       [
         "clean_roll_02_bathroom.webp",
-        "Baño preparado",
-        "Galería · baño"
-      ],
-      [
-        "clean_roll_03_bedroom.webp",
-        "Habitación limpia",
-        "Galería · dormitorio"
-      ],
-      [
-        "clean_roll_04_living_entry.webp",
-        "Sala y entrada",
-        "Galería · sala"
-      ],
-      [
-        "clean_roll_05_cleaning_details.webp",
-        "Detalles de limpieza",
-        "Galería · detalles"
-      ],
-      [
-        "clean_roll_06_pets_lifestyle.webp",
-        "Pet friendly",
-        "Galería · mascotas"
-      ],
-      [
-        "cleaner-owner-portrait.webp",
-        "Cleaner · retrato",
-        "Presentación"
+        "Baño listo",
+        "Trabajos · baño"
       ],
       [
         "portfolio_kitchen_finished.webp",
         "Cocina terminada",
-        "Portafolio"
-      ],
-      [
-        "portfolio_bedroom_finished.webp",
-        "Habitación terminada",
-        "Portafolio"
+        "Trabajos · cocina"
       ],
       [
         "portfolio_cleaning_action.webp",
         "Limpieza en acción",
-        "Portafolio"
+        "Trabajos · acción"
       ],
       [
         "portfolio_living_finished.webp",
         "Sala terminada",
-        "Portafolio"
+        "Trabajos · sala"
+      ],
+      [
+        "portfolio_bedroom_finished.webp",
+        "Dormitorio terminado",
+        "Trabajos · dormitorio"
       ],
       [
         "portfolio_pet_friendly.webp",
-        "Hogar con mascota",
-        "Portafolio"
+        "Hogar pet-friendly",
+        "Trabajos · mascotas"
+      ],
+      [
+        "cleaner-owner-portrait.webp",
+        "Retrato de profesional",
+        "Equipo · presentación"
       ],
       [
         "final_living_room_overhead.jpg",
-        "Sala luminosa final",
-        "Promoción"
+        "Sala final luminosa",
+        "Cierre · foto"
       ]
     ]
   }
+
 } as const;
 export const additionalDemoPhotos:Record<string,FinishedDemoPhoto[]> = Object.fromEntries(
  Object.entries(photoData).map(([id,collection])=>[id,collection.items.map((photo,index)=>({
   key:id+'-'+index,
   title:photo[1],
   placement:photo[2],
-  url:photo[0].startsWith('/')?'https://thelaunchera.com'+photo[0]:collection.base+photo[0],
+  url:photo[0].startsWith('https://')?photo[0]:photo[0].startsWith('/')?'https://thelaunchera.com'+photo[0]:collection.base+photo[0],
   prompt:photo[2].includes('foto original')||id==='cb-depot' ? 'Referencia existente de un proyecto. No regeneres ni modifiques la imagen del cliente o diseñadora sin autorización. Si necesitas una imagen nueva de práctica, crea una fotografía ORIGINAL con la misma función visual: '+photo[1]+'.' : 'Generate exactly ONE independent high-resolution photographic asset for a fictional '+collection.brand+' practice website. Subject: '+photo[1]+'. Placement: '+photo[2]+'. Art direction: '+collection.style+'. Photorealistic/editorial, clean composition, natural details, no collage, no text, no watermark. Do not recreate an actual person without their photo and permission.'
  }))])
 );
