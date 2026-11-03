@@ -87,7 +87,9 @@ export default function BonusLibrary() {
               ? '130 demostraciones de efectos para páginas web. Previsualiza las animaciones y copia los prompts o el código de cada ejemplo.'
               : item.resource_code === 'bonus_hero_cinematic_scroll'
                 ? 'BONO · Hero cinematográfico. Guía en español e inglés para convertir un vídeo en fotogramas y animar el hero al hacer scroll. Tú controlas su activación y la asignación individual.'
-                : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
+                : item.resource_code === 'bonus_content_command_notion'
+                  ? 'BONO · Notion como centro de comando, Google Drive para imágenes, Metricool solo para posts aprobados y GSC Wizard para revisar el rendimiento de la web. Incluye guía y prompt en ambos idiomas.'
+                  : 'Recurso guardado para preparar los próximos materiales de la clase.'}</p>
             {item.resource_code === 'bonus_hero_cinematic_scroll' && (
               <div className="bonus-hero-demo">
                 <span>Vista previa · vídeo de ejemplo en el hero de Casa Brownie</span>
