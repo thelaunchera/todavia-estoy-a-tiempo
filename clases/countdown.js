@@ -8,6 +8,7 @@
   'use strict';
 
   const clock = document.getElementById('reloj-lanzamiento');
+  const en = document.documentElement.lang === 'en';
   if (!clock) return;
 
   const target = Date.parse(clock.dataset.launchAt || '');
@@ -20,9 +21,7 @@
   let finished = false;
 
   const asString = (value) => String(value).padStart(2, '0');
-  const display = {
-    days: 'días', hours: 'horas', minutes: 'minutos', seconds: 'segundos'
-  };
+  const display = en ? {days:'days',hours:'hours',minutes:'minutes',seconds:'seconds'} : {days:'días',hours:'horas',minutes:'minutos',seconds:'segundos'};
 
   function makeHalf(cssClass, text) {
     const half = document.createElement('span');
@@ -99,7 +98,7 @@
     clock.querySelector('.class-flip-timer')?.setAttribute(
       'aria-label',
       groups.map(key => values[key] + ' ' + display[key]).join(', ') +
-      ' para el lanzamiento'
+      (en?' until launch':' para el lanzamiento')
     );
   }
 
@@ -122,8 +121,8 @@
       clock.classList.add('is-launched');
       const heading = clock.querySelector('#class-launch-heading');
       const status = clock.querySelector('#class-launch-status');
-      if (heading) heading.textContent = '¡Llegó el día del lanzamiento!';
-      if (status) status.textContent = 'Revisa la información más reciente de la clase.';
+      if (heading) heading.textContent = en?'Launch day is here!':'¡Llegó el día del lanzamiento!';
+      if (status) status.textContent = en?'See the latest class details.':'Revisa la información más reciente de la clase.';
       if (interval !== null) {
         window.clearInterval(interval);
         interval = null;
