@@ -131,9 +131,28 @@ const translations=[
  ['.club-aula-action-featured strong','Share my project'],
  ['.club-aula-action:nth-child(2) strong','Ask a question'],
  ['.club-aula-action:nth-child(3) strong','Explore projects'],
+ ['.course-support-heading .eyebrow','HELP INSIDE YOUR CLASSROOM'],
+ ['#course-help-title','Tell me what you need.'],
+ ['.course-support-heading p:not(.eyebrow)','Your class will still be here when you finish. We will reply directly by email.'],
+ ['#close-course-help','Close ×'],
+ ['#course-help-form label[for="course-help-name"]','Your name'],
+ ['#course-help-form label[for="course-help-email"]','Your email address'],
+ ['#course-help-form label[for="course-help-topic"]','What do you need help with?'],
+ ['#course-help-form label[for="course-help-message"]','Your message'],
+ ['#course-help-topic option[value=""]','Choose a topic'],
+ ['#course-help-topic option[value="Clase · acceso al aula"]','Classroom access'],
+ ['#course-help-topic option[value="Clase · videos y lecciones"]','Videos and lessons'],
+ ['#course-help-topic option[value="Clase · recursos y prompts"]','Materials and prompts'],
+ ['#course-help-topic option[value="Clase · Club de Ideas"]','Ideas Club'],
+ ['#course-help-topic option[value="Clase · otra consulta"]','Another class question'],
+ ['.course-help-note','Do not include passwords or sensitive information. We will use your details only to reply. Privacy policy.'],
+ ['#course-help-form button[type="submit"]','Send my request'],
+ ['#cancel-course-help','Back to my classroom'],
+ ['.bottom a[href="../privacidad.html"]','Privacy'],
+ ['.bottom a[href="../terminos.html"]','Terms'],
  ['.aula-rail-close','×']
 ];
-const placeholders=[['#login-email','name@email.com'],['#login-password','Your password']];
+const placeholders=[['#login-email','name@email.com'],['#login-password','Your password'],['#course-help-name','Your name'],['#course-help-email','you@email.com'],['#course-help-message','Tell us what happened and where you need help…']];
 function translateElement(selector,english){
  for(const el of document.querySelectorAll(selector)){
   if(!el.dataset.tleOriginalText)el.dataset.tleOriginalText=el.textContent;
