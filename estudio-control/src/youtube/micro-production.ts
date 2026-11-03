@@ -91,16 +91,16 @@ export function microWindowsProject(season:number,episode:number){
 export function microVoiceCues(q:MicroEpisode):string{
  const rows=['BEAT,START_SEC,END_SEC,SPEAKER,DIALOGUE'];
  for(const b of q.beats){
-  const chunks=b.script.match(/(?:^|\\s)([A-Z][A-Z0-9 ]{1,25}):\\s*([\\s\\S]*?)(?=\\s+[A-Z][A-Z0-9 ]{1,25}:|$)/g)||[];
+  const chunks=b.script.match(/(?:^|\s)([A-Z][A-Z0-9 ]{1,25}):\s*([\s\S]*?)(?=\s+[A-Z][A-Z0-9 ]{1,25}:|$)/g)||[];
   for(const c of chunks){
-   const m=c.trim().match(/^([A-Z][A-Z0-9 ]{1,25}):\\s*([\\s\\S]*)$/);
+   const m=c.trim().match(/^([A-Z][A-Z0-9 ]{1,25}):\s*([\s\S]*)$/);
    if(m){const vals=[b.label,String(b.start),String(b.end),m[1],m[2]];rows.push(vals.map(x=>'"'+x.replace(/"/g,'""')+'"').join(','));}
   }
  }
- return rows.join('\\r\\n');
+ return rows.join('\r\n');
 }
 export function microRecordingChecklist(q:MicroEpisode):string{
- const cast=[...new Set(microVoiceCues(q).split('\\r\\n').slice(1).map(x=>x.split('","')[3]?.replace(/"/g,'')).filter(Boolean))];
+ const cast=[...new Set(microVoiceCues(q).split('\r\n').slice(1).map(x=>x.split('","')[3]?.replace(/"/g,'')).filter(Boolean))];
  return ['OFF BRIEF / QUICK RECORDING GUIDE','SEASON '+q.season+' EPISODE '+q.episode+' — '+q.title,
  'TARGET: 90–120 seconds. Record voices first and use their actual length; do not force artificial silence to fill 120 seconds.',
  'CAST: '+cast.join(', '),
@@ -113,7 +113,7 @@ export function microRecordingChecklist(q:MicroEpisode):string{
  '7. Make a 12-second preview before full export, then watch BOTH versions before uploading.',
  '8. The editor does not create mouth movements or automatically generate speech. No videos are uploaded automatically.',
  'VOICE CUES (CSV): see scripts/voice-cues.csv'
- ].join('\\r\\n');
+ ].join('\r\n');
 }
 
 export function microWindowsFiles(season:number,episode:number):Record<string,string>{
