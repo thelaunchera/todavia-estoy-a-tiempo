@@ -316,7 +316,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const cat=String(p.category||'').toLowerCase();
    const isDemo=code.startsWith('demo_')||code.startsWith('demo-photo_');
    let group='planning';
-   if(isFreebie)group='freebie';
+   if(code.startsWith('typography_'))group='typography';
+   else if(isFreebie)group='freebie';
    else if(code.startsWith('demo-photo_'))group='demo_photos';
    else if(isDemo)group='demo_'+(p.category||'demo').replace(/^demo_/,'');
    else if(code.startsWith('mobile_')||/revisi|m[oó]vil|auditor|qa|public/i.test(cat+' '+code))group='mobile';
@@ -326,7 +327,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    return {...p,group,englishTitle:englishTitle(code,p.title)};
   });
   fullCatalog.sort((a,b)=>{
-   const priority={planning:0,design:1,photos:2,build:3,mobile:4,freebie:5,
+   const priority={planning:0,design:1,photos:2,build:3,mobile:4,freebie:5,typography:5.5,
     demo_food:6,demo_wellness:7,demo_hospitality:8,demo_fashion:9,demo_services:10,demo_photos:11};
    return (priority[a.group]??99)-(priority[b.group]??99)||(a.position||0)-(b.position||0);
   });
@@ -337,6 +338,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    ['build',t('04 · Construye la web','04 · Build the website')],
    ['mobile',t('05 · Revisa y publica','05 · Review & publish')],
    ['freebie',t('Bonus · 1 foto, 8 diseños','Bonus · 1 photo, 8 designs')],
+   ['typography',t('Extra · 16 estilos tipográficos','Extra · 16 typography styles')],
    ['demo_food',t('Demos · Comida','Demos · Food')],
    ['demo_wellness',t('Demos · Bienestar','Demos · Wellness')],
    ['demo_hospitality',t('Demos · Eventos','Demos · Events')],
@@ -345,8 +347,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   ];
   const itinerary=el('div','mi-prompt-itinerary');
   itinerary.innerHTML='<strong>'+t('¿Por dónde empiezo?','Where do I begin?')+'</strong><p>'+t(
-   'Sigue las categorías 01 a 05 para crear tu web. El bonus de 8 diseños es para practicar composiciones con una fotografía. Los demos son ejemplos que puedes estudiar sin copiarlos.',
-   'Follow categories 01 through 05 to build your site. Use the 8-design bonus to practice layouts with one photo. Study the demos as references, not templates to copy.'
+   'Sigue las categorías 01 a 05 para crear tu web. El bonus de 8 diseños sirve para practicar composiciones con una fotografía. El extra de tipografía permite cambiar solo el estilo de letra en una imagen original. Los demos son ejemplos que puedes estudiar sin copiarlos.',
+   'Follow categories 01 through 05 to build your site. Use the 8-design bonus to practice layouts with one photo. The typography extra changes only the lettering style in an original image. Study demos as references, not templates to copy.'
   )+'</p>';
   content.append(itinerary);
   const tools=el('div','mi-prompt-searchbar');
