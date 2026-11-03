@@ -82,6 +82,7 @@ jobs:
           node --check alumnos/prompt-guide.js
           node --check alumnos/prompt-english.js
           node --check alumnos/materiales-interactivos.js
+          node --check alumnos/mara-guide.js
           node --check alumnos/inspiracion.js
           node --check alumnos/aula-mensajes.js
           node --check alumnos/comunidad.js
@@ -165,6 +166,8 @@ jobs:
           test -s _podcast_pages/centro/legales.css
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
+          test -s _podcast_pages/alumnos/mara-guide.js
+          test -s _podcast_pages/alumnos/mara-guide.css
           test -s _podcast_pages/alumnos/supabase-local.js
           test -s _podcast_pages/alumnos/aula-mensajes.js
           test -s _podcast_pages/alumnos/materiales-interactivos.js
