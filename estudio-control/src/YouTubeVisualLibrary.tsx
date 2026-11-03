@@ -81,10 +81,11 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
   return <article className="yt-frame">
     <div className="yt-frame-image">
       {saved?<img src={saved} loading="lazy" alt={'Escena '+photo.id+' · '+photo.title} onError={event=>{event.currentTarget.style.visibility='hidden';}} onLoad={event=>{event.currentTarget.style.visibility='visible';}}/>:
+      drivePreview?<iframe loading="lazy" title={'Original en Drive · '+photo.id} src={drivePreview} referrerPolicy="no-referrer" />:
       <div className="yt-frame-placeholder"><Camera size={30}/><strong>{photo.id}</strong><small>Foto pendiente</small></div>}
     </div>
     <div className="yt-frame-body">
-      <div className="yt-frame-meta"><span>{photo.id}</span><span>Escena {photo.scene}</span>{photo.id.includes('-H')&&<span>Especial de temporada</span>}</div>
+      <div className="yt-frame-meta"><span>{photo.id}</span><span>Escena {photo.scene}</span>{photo.id.includes('-H')&&<span>Especial de temporada</span>}{privatePhoto?.url?<span>Archivo privado</span>:drivePreview?<span>Original vinculado en Drive</span>:saved?<span>Vista previa</span>:null}</div>
       <h4>{photo.title}</h4>
       <p><b>Plano:</b> {photo.shot}</p>
       <div className="yt-frame-buttons"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} Copiar prompt</button>{entry?.link&&safeImageUrl(entry.link)&&<a href={entry.link} target="_blank" rel="noopener noreferrer"><Eye size={15}/> Ver PNG en Drive</a>}</div>
