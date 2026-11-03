@@ -69,12 +69,17 @@ test('Help instructions and Home Screen name switch completely to English',()=>{
  assert.match(course,/\$\('course-help-title'\)\.focus/);
 });
 
-test('the publish workflow creates and ships brand-based classroom PNG icons',()=>{
+test('the publish workflow keeps the approved Mara icon instead of regenerating the podcast monogram',()=>{
  const workflow=read('../.github/workflows/pages.yml');
- assert.match(workflow,/assets\/monograma-podcast-04\.svg/);
- for(const size of ['180','192','512']){
+ assert.doesNotMatch(workflow,/icon_svg\s*=\s*Path\(/,'Classroom icon must not be recreated from the podcast logo');
+ for(const size of [180,192,512]){
+  const icon=readFileSync(new URL('./icons/aula-'+size+'.png',import.meta.url));
+  assert.ok(icon.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),'Icon must be PNG');
+  assert.equal(icon.readUInt32BE(16),size,'Incorrect PNG width: '+size);
+  assert.equal(icon.readUInt32BE(20),size,'Incorrect PNG height: '+size);
   assert.match(workflow,new RegExp('aula-'+size+'\\.png'));
   assert.match(workflow,new RegExp('_podcast_pages/alumnos/icons/aula-'+size+'\\.png'));
  }
+ assert.match(html,/rel="icon" href="\.\/icons\/aula-192\.png" type="image\/png"/);
  assert.match(workflow,/test -s _podcast_pages\/alumnos\/manifest-en\.webmanifest/);
 });
