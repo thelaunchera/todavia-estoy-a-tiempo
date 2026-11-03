@@ -441,7 +441,7 @@ assert.match(clubJs,/requested\.get\('canal'\)/,'Acciones abren su canal real');
 assert.match(clubJs,/requested\.get\('accion'\)==='publicar'/,'Publicar enfoca la entrada real');
 assert.match(studioShell,/Ver aula completa/,'Botón único de vista completa');
 assert.match(studioShell,/className="studio-aula-preview"/,'Vista previa privada a pantalla completa, dentro del Studio');
-assert.match(studioShell,/Cerrar vista previa y volver al Studio/,'La propietaria puede cerrar la vista sin salir de su sesión');
+assert.match(studioShell,/Cerrar vista del aula y volver a administración/,'La propietaria puede cerrar la vista sin salir de su sesión');
 console.log('QA: club compacto e interactivo, vista completa privada dentro del Studio OK');
 
 
