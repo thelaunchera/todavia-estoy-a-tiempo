@@ -22,8 +22,8 @@ function splitInstructions(content,lang){
  return {guide:content.slice(0,found.index).trim(),instructions:content.slice(at).trim()};
 }
 function titleFor(item,lang){
+ if(item.resource_code==='bonus_motion_studio')return word('Biblioteca de efectos web','Website effects library',lang);
  if(lang!=='en')return item.title;
- if(item.resource_code==='bonus_motion_studio')return 'The Launch Era Motion Studio · Effects Library';
  const known=englishTitle(item.prompt_code,item.title);
  if(known!==item.title)return known;
  const english=languageContent(item,'en');
