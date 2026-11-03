@@ -92,7 +92,31 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  const tools=el('div','mi-toolbar');
  tools.innerHTML='<span>Elige lo que necesitas para tu proyecto.</span><button type="button" class="mi-print">Imprimir o guardar en PDF</button>';
  tabs.after(tools);
- tools.querySelector('button').addEventListener('click',()=>window.print());
+ function printCurrentMaterial(){
+   // Print only the material that is currently open, not the classroom app.
+   // Workbooks expand for print and return to their previous state afterwards.
+   const wasOpen=[];
+   if(current==='cuaderno'){
+     content.querySelectorAll('details.mi-work-step').forEach(node=>{
+       wasOpen.push([node,node.open]);
+       node.open=true;
+     });
+   }
+   document.body.classList.add('aula-print-material');
+   let restored=false;
+   const restore=()=>{
+     if(restored)return;restored=true;
+     wasOpen.forEach(([node,opened])=>{node.open=opened;});
+     document.body.classList.remove('aula-print-material');
+     window.removeEventListener('afterprint',restore);
+   };
+   window.addEventListener('afterprint',restore,{once:true});
+   window.print();
+   // iOS Safari sometimes does not fire afterprint. Keep the print-only CSS
+   // scoped to @media print, and restore the workbook on the next interaction.
+   document.addEventListener('pointerdown',restore,{once:true});
+ }
+ tools.querySelector('button').addEventListener('click',printCurrentMaterial);
  const viewControls=el('div','mi-view-controls');
  viewControls.innerHTML='<button type="button" class="mi-view-back" aria-label="Atrás: regresar al material anterior">← Atrás</button><button type="button" class="mi-view-close" aria-label="Cerrar material abierto">× Cerrar</button>';
  tools.after(viewControls);
@@ -431,7 +455,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   }updateSummary();
   const actions=el('div','mi-actions');actions.innerHTML=getLanguage()==='en'?'<button class="mi-primary" type="button">Save answers</button><button class="mi-quiet" type="button">Print workbook</button>':'<button class="mi-primary" type="button">Guardar mis respuestas</button><button class="mi-quiet" type="button">Imprimir mi cuaderno</button>';content.append(actions);
   actions.children[0].addEventListener('click',()=>void save());
-  actions.children[1].addEventListener('click',()=>window.print());
+  actions.children[1].addEventListener('click',printCurrentMaterial);
  }
  function renderExample(){
   section('06 / EL MISMO EJEMPLO DE TODA LA CLASE','Así se ve una página que se entiende.','Seguimos con Casa Brownie, el concepto ficticio de brownies tradicionales. No se aceptan pedidos ni cobros: se trata de una web informativa.');
