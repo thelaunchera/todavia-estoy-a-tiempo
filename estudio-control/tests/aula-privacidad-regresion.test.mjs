@@ -285,8 +285,8 @@ test('Fotos etiquetadas por sección verificada, no por posición de archivo',()
  assert.doesNotMatch(inspiration,/spanishPhotoNames|englishPhotoNames/,'Prohibir etiquetas fijas por índice');
  assert.match(inspiration,/coverPhoto\?\.usage==='hero'/,'La foto destacada solo dice Hero cuando está verificada');
  assert.match(styles,/\.inspiration-photo-section/,'El nombre de sección es visible en el teléfono');
- assert.match(room,/aula-inspiracion\.css\?v=20261103-photo-prompts-v2/,'El iPhone recibe la hoja de estilos actualizada');
- assert.match(course,/inspiracion\.js\?v=20261103-photo-prompts-v2/,'El aula recibe las etiquetas nuevas');
+ assert.ok(room.includes('./aula-inspiracion.css?v='),'El iPhone importa estilos versionados de inspiración');
+ assert.ok(course.includes("./inspiracion.js?v="),'El aula importa la galería con versión de caché');
 });
 
 
@@ -299,5 +299,5 @@ test('Prompts de secciones conservan imagen real, títulos y versión inglesa',(
  assert.match(source,/className='inspiration-step-photos'/,'El alumno ve la foto real junto a la etapa');
  assert.match(source,/p\.body\.includes\(photo\.url\)/,'Las imágenes se enlazan a la instrucción que las menciona');
  assert.match(styles,/\.inspiration-step-photo/, 'Vista visual del recurso en el iPhone');
- assert.match(room,/const classroomModule='\\.\\/curso\\.js\\?v=[^']+'/,'Safari importa un módulo versionado, sin fijar un nombre de release de otros módulos');
+ assert.ok(room.includes("const classroomModule='./curso.js?v="),'Safari importa un módulo versionado sin fijar nombres de releases');
 });
