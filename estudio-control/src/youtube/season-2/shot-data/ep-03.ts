@@ -1,4 +1,4 @@
-import type {S2Scene} from '../season-2-shot-model';
+import type {S2Scene} from '../../season-2-shot-model';
 /** Season two episode 3: storyboard 3 directed shots per screenplay scene. */
 export const sceneShots03:S2Scene[]=[
   {
