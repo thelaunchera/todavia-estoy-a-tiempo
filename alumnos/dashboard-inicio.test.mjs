@@ -75,7 +75,7 @@ test('English student experience and accurate class progress',()=>{
  let action='';
  renderAulaInicio({lessons:[],done:new Set(),resources:[],language:'en',onView:v=>action=v});
  assert.equal(node('dashboard-next-title').textContent,'Your first website starts here.');
- assert.match(node('student-greeting-message').textContent,/Welcome to your creative workspace/);
+ assert.match(node('student-greeting-message').textContent,/We will build one website, step by step/);
  node('dashboard-next-action').onclick();
  assert.equal(action,'prompts');
 });
