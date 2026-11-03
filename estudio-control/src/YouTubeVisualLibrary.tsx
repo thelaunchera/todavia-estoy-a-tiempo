@@ -180,6 +180,20 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <span className="yt-look-label">{look.mood}</span>
       </div>
       <div className="yt-holiday-note"><CalendarDays size={18}/><span>{selected===5?'Especial Thanksgiving: cuatro tomas opcionales añadidas a este episodio.':selected===8?'Especial Christmas: cuatro tomas opcionales añadidas al cierre de temporada.':look.note} <b>Publicaciones mensuales: {youtubeReleasePlan.cadence}.</b> Decidiremos la frecuencia al terminar y probar el Video Studio gratuito.</span></div>
+      <div className="yt-production-master">
+        <div className="yt-small-title"><Film size={16}/> PROMPT ÚNICO POR CAPÍTULO</div>
+        <h4>De las diez fotos a un video completo</h4>
+        <p>Este Master Prompt reúne las diez imágenes en el orden del storyboard, el guion breve en inglés y las instrucciones para animarlas y montar el capítulo. Necesitas suministrar los archivos originales y usar un editor o una herramienta de video compatible: el texto solo no exporta un MP4.</p>
+        <div className="yt-visual-batch">
+          <button type="button" onClick={()=>void copyVideoMaster()}><Copy size={16}/> Copiar Master Prompt completo</button>
+          <button type="button" onClick={downloadVideoMaster}><Save size={16}/> Descargar Master Prompt TXT</button>
+        </div>
+        {ready<corePhotos.length&&<p className="yt-production-alert">Faltan {corePhotos.length-ready} imágenes por vincular. Sus espacios están disponibles abajo; no se dan por producidas.</p>}
+        <details className="yt-production-master-preview">
+          <summary>Ver el Master Prompt de este episodio</summary>
+          <textarea readOnly rows={14} value={masterVideoPrompt} aria-label={'Master Prompt de producción del episodio '+selected}/>
+        </details>
+      </div>
       <label className="yt-gallery-search"><Search size={17}/><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Buscar un plano o una escena..." aria-label="Buscar imágenes del capítulo"/></label>
       <div className="yt-photo-grid">{filtered.map(photo=><PhotoCard key={photo.id} photo={photo} entry={owned.get(photo.id)} privatePhoto={privatePhotos.get(photo.id)} readOnly={readOnly} onChanged={onChanged} onPrivateChanged={refreshPrivate}/>)}</div>
       {filtered.length===0&&<p className="yt-muted">No hay planos que coincidan con la búsqueda.</p>}
