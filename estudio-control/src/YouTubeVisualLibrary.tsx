@@ -4,6 +4,7 @@ import { api, loadYouTubeSavedPhotos, uploadYouTubePhoto, removeYouTubePhoto, ty
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
 import { getYouTubePhotoPrompt, youtubePhotoBoard, type YouTubePhoto } from './youtube/visual-plan';
+import { getEpisodeProductionBlocks, getEpisodeProductionMaster, type EpisodePhotoAvailability } from './youtube/episode-production-master';
 import { getCharacterLookPrompt, youtubeHolidayFrames, youtubeWardrobe, youtubeReleasePlan } from './youtube/wardrobe';
 import './youtube-visual-library.css';
 
