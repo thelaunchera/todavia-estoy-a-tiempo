@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { BookOpen, Camera, Check, Clapperboard, Copy, Download, Film, Layers3, Search, Users, Video, WandSparkles } from 'lucide-react';
-import YouTubePhotoLibrary from './YouTubePhotoLibrary';
+import YouTubeVisualLibrary, { type YouTubeSavedPhoto } from './YouTubeVisualLibrary';
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
 import './youtube-studio.css';
 
 type Tab = 'brief' | 'episodes' | 'photos';
+type Props = { entries: YouTubeSavedPhoto[]; onChanged:()=>Promise<void>; readOnly?:boolean };
 
 function BulletPanel({ title, items }: { title: string; items: readonly string[] }) {
   return <section className="yt-paper yt-list-paper">
@@ -34,7 +35,7 @@ function ScriptText({ content }: { content: string }) {
   </div>;
 }
 
-export default function YouTubeStudio() {
+export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) {
   const [tab, setTab] = useState<Tab>('brief');
   const [selected, setSelected] = useState(1);
   const [query, setQuery] = useState('');
@@ -158,7 +159,7 @@ export default function YouTubeStudio() {
         <h4>Referencias visuales</h4><p>{youtubeBrief.characterReferences}</p>
         <p className="yt-muted">{youtubeBrief.format.statusLegend}</p>
       </section>
-    </div> : tab === 'photos' ? <YouTubePhotoLibrary/> : <div className="yt-episodes" role="tabpanel">
+    </div> : tab === 'photos' ? <YouTubeVisualLibrary entries={entries} onChanged={onChanged} readOnly={readOnly}/> : <div className="yt-episodes" role="tabpanel">
       <aside className="yt-episodes-sidebar">
         <label className="yt-search"><Search size={17}/><input aria-label="Buscar dentro de los guiones" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar capítulo o diálogo..."/></label>
         <div className="yt-episode-list">
