@@ -398,21 +398,29 @@ export type StudioBonusResource = {
   title: string;
   url: string;
   status: 'draft' | 'ready';
+  prompt_body?: string;
 };
 export async function getStudioBonusResources(): Promise<StudioBonusResource[]> {
   if (!client) throw new Error('El Estudio no está conectado.');
   await owner();
-  const { data, error } = await client.from('podcast_class_resources')
-    .select('resource_code,title,url,status')
-    .eq('course_id', 'primera-landing-ia-01')
-    .like('resource_code', 'bonus_%')
-    .order('title', { ascending: true });
-  if (error) throw new Error('No se pudo consultar el catálogo privado de bonos.');
+  const [{ data, error }, { data: prompts, error: promptError }] = await Promise.all([
+    client.from('podcast_class_resources')
+      .select('resource_code,title,url,status')
+      .eq('course_id', 'primera-landing-ia-01')
+      .like('resource_code', 'bonus_%')
+      .order('title', { ascending: true }),
+    client.from('podcast_class_prompts')
+      .select('prompt_code,body').eq('course_id','primera-landing-ia-01')
+      .like('prompt_code','bonus_%')
+  ]);
+  if (error || promptError) throw new Error('No se pudo consultar el catálogo privado de bonos.');
+  const byCode = new Map((prompts || []).map(row => [String(row.prompt_code), String(row.body||'')]));
   return (data || []).map((row): StudioBonusResource => ({
     resource_code: String(row.resource_code),
     title: String(row.title),
     url: String(row.url),
     status: row.status === 'ready' ? 'ready' : 'draft',
+    prompt_body: byCode.get(String(row.resource_code)) || undefined,
   }));
 }
 
