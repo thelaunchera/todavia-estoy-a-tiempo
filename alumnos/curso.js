@@ -130,11 +130,28 @@ const aulaClose=$('aula-rail-close');
 const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
- inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales',
+ inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales', mara:'Mara · tu guía web',
  bonos:'Mis bonos', comunidad:'Club de Ideas', inspiracion:'Inspiración · Demos'
 };
-const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'My bonuses',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos'};
+const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'My bonuses',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos',mara:'Mara · your web guide'};
 let inspirationController=null;
+let maraController=null,maraLoading=null;
+async function ensureMara(){
+ if(maraController||maraLoading||!user||course.hidden)return;
+ const root=$('mara-guide');if(!root)return;
+ root.textContent=getClassroomLanguage()==='en'?'Preparing your private guide…':'Preparando tu guía privada…';
+ maraLoading=import('./mara-guide.js?v=20261103-mara-v1')
+  .then(mod=>mod.mountMara(root,{db,courseId,getLanguage:getClassroomLanguage}))
+  .then(controller=>{maraController=controller||null;})
+  .catch(error=>{
+    console.warn('Optional Mara guide unavailable',error?.name||'unknown');
+    root.textContent=getClassroomLanguage()==='en'
+      ?'The guide could not load. Refresh the classroom to try again.'
+      :'No pudimos cargar Mara. Actualiza el aula para reintentar.';
+  })
+  .finally(()=>{maraLoading=null;});
+ await maraLoading;
+}
 let currentAulaView='lecciones';
 const aulaViewHistory=[];
 let aulaBackButton=null,aulaCloseButton=null;
@@ -207,6 +224,7 @@ function setAulaView(view,{scroll=true,track=true}={}){
  });
  if(view==='prompts')materialsController?.go('prompts',{track:false});
  if(view==='materiales')materialsController?.go('inicio',{track:false});
+ if(view==='mara')void ensureMara();
  document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
@@ -258,6 +276,7 @@ function refreshClassroomLanguage(){
   if(courseHelpStatus?.dataset.sourceMessage)courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,lang);
   if(lessons.length)setProgressLabels();
   inspirationController?.setLanguage?.();
+  maraController?.setLanguage?.();
   materialsController?.setLanguage?.();
  }
  applyClassroomLanguage();
