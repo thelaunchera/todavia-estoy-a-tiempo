@@ -1,7 +1,7 @@
 /* Recuperación segura del panel de materiales del aula privada.
    No crea accesos públicos ni copia prompts al HTML. */
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v7';
+import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v8';
 let repairing=false,controller=null,studentGallery=null;
 const $=id=>document.getElementById(id);
 const lang=()=> $('aula-language')?.value==='en'?'en':'es';
@@ -55,7 +55,7 @@ async function showStudentResources(button){
   if(ownerPdfs)ownerPdfs.style.display='none';
   const ownerBadge=root.querySelector('.mi-save');
   if(ownerBadge)ownerBadge.style.display='none';
-  const {mountInspiracion}=await import('./inspiracion.js?v=20261102-owner-curation-v4');
+  const {mountInspiracion}=await import('./inspiracion.js?v=20261102-owner-curation-v5');
   if($('inspiration-gallery'))studentGallery=await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
   banner.hidden=true;
   document.querySelector('.aula-side-link[data-aula-view="prompts"]')?.click();
