@@ -7,7 +7,7 @@ export const youtubeBrief = {
   "genre": "Comedia animada para adultos jóvenes / workplace sitcom",
   "originalLanguage": "Inglés estadounidense conversacional",
   "season": "Temporada 1 · 8 episodios",
-  "targetDuration": "6–8 minutos por episodio como objetivo de producción; ajustar al animatic y ritmo de actuación.",
+  "targetDuration": "Edición principal 90–120 segundos, meta 2:00, divertida, educativa y participativa; los guiones antiguos de 6–8 minutos quedan en archivo para referencia.",
   "logline": "Dos mejores amigas dejan una agencia para abrir su propio estudio creativo. Una vive de planes y hojas de cálculo; la otra de ideas imposibles. Entre clientes que quieren resultados virales sin presupuesto, intentan triunfar sin arruinar su amistad.",
   "audience": "Jóvenes adultos 18–35; creadores, freelancers, emprendedores, trabajadores creativos y fans de sitcoms de amistad. Humor accesible incluso sin conocer marketing.",
   "premise": "Nia y Ruby se conocieron en una agencia de publicidad. Tras oír a su jefe exigir viralidad para mañana una vez más, renunciaron y fundaron Fuera de Brief Studio. Cada proyecto trae un problema laboral reconocible y un absurdo inesperado. Los dos talentos son necesarios para resolverlo.",
