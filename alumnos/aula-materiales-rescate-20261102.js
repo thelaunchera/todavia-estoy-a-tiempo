@@ -15,7 +15,7 @@ async function recover(){
  if(root.textContent.trim()&&!/cargando|preparaci[oó]n|no se pudieron cargar/i.test(root.textContent))return;
  repairing=true;
  try{
-  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+  const {createClient}=await import('./supabase-local.js?v=20261102-stable-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
   const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:false}});
   const {data:{user},error}=await db.auth.getUser();
   if(error||!user?.id)throw Error('owner session missing');
@@ -40,7 +40,7 @@ async function showStudentResources(button){
  const root=$('materiales-interactivos'),banner=$('admin-preview-banner');
  button.disabled=true;button.textContent=lang()==='en'?'Opening student view…':'Abriendo vista del alumno…';
  try{
-  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+  const {createClient}=await import('./supabase-local.js?v=20261102-stable-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
   const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:false}});
   const {data:{user}}=await db.auth.getUser();
   const {data:owner}=user?.id?await db.from('podcast_studio_admins').select('role').eq('user_id',user.id).maybeSingle():{data:null};
