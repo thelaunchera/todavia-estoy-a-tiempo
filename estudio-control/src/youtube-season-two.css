@@ -5,3 +5,62 @@
 .yt2-cast-heading>div:last-child{flex:1;min-width:0}
 .yt2-cast-heading{align-items:center}
 @media(max-width:430px){.yt2-cast-photo{flex-basis:100px;width:100px;height:100px}}
+
+/* Season-two screenplay and scene-by-scene shot library */
+.yt2-view-switch{display:flex;flex-wrap:wrap;gap:8px}
+.yt2-view-switch button{border:1px solid #e3e5e2;background:#fff;border-radius:12px;color:#252525;display:flex;gap:8px;align-items:center;justify-content:center;padding:12px 16px;cursor:pointer;font-weight:700;font-size:.83rem}
+.yt2-view-switch button.active{background:#191919;color:#fff;border-color:#191919}
+.yt2-view-switch button:focus-visible,.yt2-picker button:focus-visible,.yt2-actions button:focus-visible,.yt2-shot-buttons button:focus-visible,.yt2-open-ep:focus-visible{outline:3px solid #91bce3;outline-offset:2px}
+.yt2-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:13px 0 21px}
+.yt2-picker button{display:flex;align-items:center;gap:9px;text-align:left;border:1px solid #e4e6e3;background:#f9f8f4;border-radius:10px;padding:10px;cursor:pointer;min-width:0;color:#191919}
+.yt2-picker button.active{background:#fff8d8;border-color:#e9d278}
+.yt2-picker button>span{background:#e5ebf3;border-radius:7px;font:800 .91rem Prompt,Arial,sans-serif;padding:6px;flex-shrink:0}
+.yt2-picker button small{font-size:.77rem;line-height:1.35;font-weight:700}
+.yt2-episode-info{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:18px 19px;background:#faf8f3;border-radius:12px;margin:17px 0}
+.yt2-episode-info h3{margin:6px 0;font-size:1.32rem}
+.yt2-episode-info p{margin:4px 0;font-size:.89rem}
+.yt2-episode-counter{flex-shrink:0;white-space:nowrap;background:#dfeafa;padding:8px 10px;border-radius:30px;font-size:.75rem;font-weight:750}
+.yt2-actions{display:flex;flex-wrap:wrap;gap:9px;margin:17px 0}
+.yt2-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:10px;background:#191919;color:#fff;border:1px solid #191919;font-size:.83rem;font-weight:700;cursor:pointer}
+.yt2-actions button+button{background:#fff;color:#191919;border-color:#d6d8d5}
+.yt2-notice{background:#f0f7f3;border-radius:9px;padding:10px 12px;font-size:.84rem;display:flex;gap:8px;align-items:center}
+.yt2-screenplay{max-width:830px;margin:0 auto;line-height:1.66;padding:18px clamp(8px,3vw,28px)}
+.yt2-screenplay h3{font:750 clamp(1.2rem,2.2vw,1.5rem)/1.3 Prompt,Arial,sans-serif;padding-bottom:10px}
+.yt2-screenplay h4{font:750 1.02rem/1.4 Prompt,Arial,sans-serif;background:#f7f5ef;border-left:3px solid #f2d85b;padding:12px;margin:30px 0 14px;border-radius:0 8px 8px 0}
+.yt2-screenplay-space{height:9px}
+.yt2-screenplay .yt2-script-stage{font-size:.82rem;line-height:1.65;color:#656666;font-style:italic;margin:6px 0}
+.yt2-script-line{display:grid;grid-template-columns:minmax(85px,120px) minmax(0,1fr);gap:12px;margin:6px 0;font-size:.91rem}
+.yt2-script-line strong{font-size:.79rem;letter-spacing:.035em;color:#445b6e}
+.yt2-script-line span{overflow-wrap:anywhere}
+.yt2-open-ep{background:#f9f9f7;border:1px solid #dfe2e4;border-radius:8px;color:#191919;font-weight:700;font-size:.74rem;padding:8px 10px;margin:4px 6px 0 0;cursor:pointer}
+.yt2-open-ep:hover{background:#f4f9fd}
+.yt2-shot-guidance{font-size:.86rem;color:#5d6061}
+.yt2-scenes{display:grid;gap:13px;margin-top:16px}
+.yt2-scene{border:1px solid #e3e5e3;border-radius:12px;overflow:hidden;background:#fff}
+.yt2-scene>summary{display:flex;align-items:center;gap:11px;padding:14px 15px;background:#f9f8f5;cursor:pointer;list-style:none;min-width:0}
+.yt2-scene>summary::-webkit-details-marker{display:none}
+.yt2-scene>summary::after{content:'▾';font-size:1.05rem;margin-left:6px;color:#5f6060}
+.yt2-scene[open]>summary::after{transform:rotate(180deg)}
+.yt2-scene>summary strong{flex:1;font-size:.9rem;min-width:0}
+.yt2-scene>summary small{font-size:.7rem;color:#777;white-space:nowrap}
+.yt2-scene-num{border-radius:8px;background:#f2d85b;font-size:.68rem;font-weight:800;padding:7px 8px;white-space:nowrap}
+.yt2-scene-list{padding:14px;display:grid;gap:12px}
+.yt2-shot{display:grid;grid-template-columns:minmax(155px,34%) minmax(0,1fr);border:1px solid #e7e8e7;border-radius:12px;overflow:hidden}
+.yt2-shot-preview{aspect-ratio:16/9;background:#e9eceb;min-height:165px;display:flex;align-items:center;justify-content:center;gap:7px;flex-direction:column;color:#667275}
+.yt2-shot-preview span{font-size:.81rem;font-weight:750}
+.yt2-shot-preview small{font-size:.62rem;color:#7a8182;text-align:center}
+.yt2-shot-body{padding:14px 16px;min-width:0}
+.yt2-shot-body h5{font:700 .9rem/1.35 Prompt,Arial,sans-serif;margin:9px 0}
+.yt2-shot-body p{font-size:.81rem;line-height:1.55;margin:8px 0}
+.yt2-shot-body .yt2-cue{font-size:.76rem;color:#586477}
+.yt2-shot-buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.yt2-shot-buttons button{border:1px solid #d9dedf;border-radius:8px;background:#fff;color:#191919;display:inline-flex;gap:6px;align-items:center;justify-content:center;padding:8px 9px;font-size:.72rem;font-weight:700;cursor:pointer}
+.yt2-shot-buttons button[aria-pressed=true]{background:#fff8dc;border-color:#e4d171}
+.yt2-full-prompt{margin-top:13px;background:#faf9f5;border-radius:9px;border:1px solid #e9e9e4;padding:11px}
+.yt2-prompt-top{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.yt2-prompt-top strong{font-size:.79rem}
+.yt2-prompt-top button{border:0;background:transparent;color:#4f6070;text-decoration:underline;cursor:pointer}
+.yt2-full-prompt textarea{font:400 .73rem/1.55 ui-monospace,Consolas,monospace;width:100%;background:#fff;color:#252525;border:1px solid #ddd;border-radius:8px;padding:10px;resize:vertical;margin-top:9px}
+@media(max-width:1000px){.yt2-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.yt2-shot{grid-template-columns:1fr}.yt2-shot-preview{min-height:0;aspect-ratio:16/9}.yt2-episode-info{align-items:flex-start;flex-direction:column}.yt2-scene>summary{gap:7px;flex-wrap:wrap}.yt2-scene>summary small{margin-left:auto}.yt2-shot-body{padding:12px}.yt2-view-switch button{flex:1 1 45%;font-size:.76rem}.yt2-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.yt2-script-line{grid-template-columns:77px minmax(0,1fr);gap:8px}}
+@media(max-width:410px){.yt2-picker button{align-items:flex-start;flex-direction:column}.yt2-actions button{flex:1 1 100%}.yt2-cast-photo{height:96px;width:96px}}
