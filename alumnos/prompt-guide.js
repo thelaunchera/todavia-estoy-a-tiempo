@@ -36,6 +36,11 @@ export function promptGuide(code,language='es'){
    when:en?'When you already have one approved product photo and want another design.':'Cuando ya tienes una foto aprobada y quieres otra composición.',
    result:en?'One new composition using the SAME original product photo.':'Una composición nueva con LA MISMA foto original.'};
  }
+ if(code==='bonus_hero_cinematic_scroll')return {
+  purpose:en?'Turn prepared JPEG frames into a cinematic website hero controlled by scrolling.':'Convertir fotogramas JPG preparados en un hero cinematográfico controlado por scroll.',
+  when:en?'After preparing a short product animation and extracting sequential JPG frames.':'Después de preparar un vídeo corto del producto y extraer sus JPG en orden.',
+  result:en?'A responsive scroll-driven canvas animation integrated into your existing website.':'Una animación con canvas adaptable e integrada en tu web existente.'
+ };
  const row=descriptions[code];
  if(row)return {purpose:en?row[1]:row[0],when:en?row[3]:row[2],result:en?row[5]:row[4]};
  if(/^mobile_/.test(code))return {purpose:en?'Improve the mobile version of your site.':'Mejorar la versión móvil de tu web.',when:en?'After building your first draft.':'Después de construir el primer borrador.',result:en?'A specific mobile fix or review.':'Una corrección o revisión móvil concreta.'};
