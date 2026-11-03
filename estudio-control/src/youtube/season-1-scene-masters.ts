@@ -4,7 +4,6 @@
  */
 import {youtubeEpisodes} from './episodes';
 import {youtubePhotoBoard,getYouTubePhotoPrompt,type YouTubePhoto} from './visual-plan';
-import {offBriefBrand} from './off-brief-brand';
 
 export type S1SceneBlock={episode:number;scene:number;title:string;script:string;photos:YouTubePhoto[];needsExtraStill:boolean};
 export const s1DefaultFrameRate=24;
@@ -27,10 +26,6 @@ export function getSeasonOneScenes(episode:number):S1SceneBlock[]{
 }
 export const s1SceneCount=youtubeEpisodes.reduce((sum,ep)=>sum+getSeasonOneScenes(ep.number).length,0);
 export const s1BasePhotoCount=youtubeEpisodes.reduce((sum,ep)=>sum+(youtubePhotoBoard[ep.number]||[]).filter(p=>p.id.includes('-F')).length,0);
-function namedActors(script:string):string[]{
- const voices=[...script.matchAll(/^([A-Z][A-Z0-9 .()'-]{0,40}):\s*/gm)].map(m=>m[1]);
- return [...new Set(voices)];
-}
 function shotMove(photo:YouTubePhoto):string{
  const name=(photo.shot+' '+photo.title).toLowerCase();
  if(/ground|low.angle|floor cam|point of view|pov/.test(name))
