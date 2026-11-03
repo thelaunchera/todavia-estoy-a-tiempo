@@ -1,3 +1,4 @@
+import { wardrobeForShot } from './wardrobe';
 /* Biblia visual: diez frames principales por episodio, uno por ficha y prompt. Imágenes aún no generadas. */
 export type YouTubePhoto = {
  id:string; scene:number; title:string; cast:string; shot:string; action:string; image:string; status:string;
@@ -5,9 +6,9 @@ export type YouTubePhoto = {
 export const photoStyles = {
   "sharedStyle": "CINEMATIC ANIMATED STILL FOR AN ADULT-YOUNG-ADULT WORKPLACE SITCOM. Premium modern 3D feature-film-quality character animation, expressive yet mature faces, realistic fabric/skin shading within stylization, soft global illumination, natural cinematic lensing, believable proportions, sophisticated comedic blocking. The original two attached reference avatars are the ONLY canonical character designs. Use a consistent location layout and props across all scenes of the same episode. For studio scenes, use Nia's immaculate desk and Ruby's cluttered art desk, neutral warm plaster, ivory paper backdrops, a camera, softboxes, a temperamental coffee maker, and a few absurd rubber ducks; for exterior, boutique, loft or corporate scenes follow the scene-specific location description rather than forcing the studio. Do not make a collage or a comic strip. ONE isolated film frame, aspect ratio 16:9, render at 1920x1080 or higher. Do not add captions, watermarks, subtitles, brand logos or legible screen text; typography will be layered in editing.",
   "descriptions": {
-    "N": "NIA is an adult young woman with medium-deep warm brown skin, long dark brown-black hair gathered in a thick over-the-shoulder side braid, expressive dark eyes, small gold hoop earrings. Exact facial identity from the provided Nia blue-blazer avatar. Royal cobalt blue tailored blazer with rolled sleeves, fitted white tank top, dark blue high-waisted very wide-leg jeans, light cream athletic sneakers. Sharp composed dry-witted body language; ALWAYS same hair and face; no replacement actress.",
-    "R": "RUBY is an adult young woman with fair warm skin, voluminous curly copper-red hair in a loose high messy updo, oversized round glasses, expressive hazel-green eyes. Exact facial identity from provided Ruby redhead avatar. Loose sage-green overshirt with rolled sleeves, ivory fitted top, high-waisted relaxed cream trousers, cream sneakers. Energetic clever warm body language; ALWAYS same hair, glasses and face.",
-    "NR": "NIA and RUBY are both present. NIA: medium-deep brown skin, long dark side braid, small gold hoops, royal blue blazer, white tank, blue wide-leg denim, light sneakers, confident deadpan expressions; use exact blue-blazer avatar face. RUBY: fair warm skin, curly copper-red messy updo, round glasses, sage green overshirt, ivory top, cream trousers and shoes, mischievous imaginative expressions; use exact red-haired avatar face. Clearly distinct identities; no face-swapping or outfit swapping.",
+    "N": "NIA is an adult woman with warm medium-deep brown skin, original blue-blazer Nia avatar facial likeness, long dark thick side braid, expressive dark eyes and small gold hoop earrings. Precise facial structure, body proportions and hairstyle from reference. Calm dry wit, poised gestures. Clothes defined separately for each episode.",
+    "R": "RUBY is an adult woman with fair warm skin, original red-haired Ruby avatar facial likeness, voluminous copper-red curly high messy updo, oversized round glasses and expressive hazel-green eyes. Precise facial structure, hair, glasses and body proportions from reference. Clever playful gestures. Clothes defined separately for each episode.",
+    "NR": "NIA AND RUBY, both adult women present and distinctly recognizable: NIA warm medium-deep brown skin, long dark side braid, dark eyes and small gold hoops, original blue-blazer avatar face. RUBY fair warm skin, copper-red curly high updo, round glasses and hazel-green eyes, original sage-overshirt avatar face. Never swap identities; clothing is set per episode and may differ from source avatar clothing.",
     "none": "There are NO visible Nia or Ruby characters in this shot, unless a distant blurred human silhouette is expressly requested in the shot description. The physical world, props, materials and lighting remain consistent with the series."
   },
   "neg": "NEGATIVE: no pigeons or animals replacing the two friends, no male versions of the protagonists, no extra arms, fingers, clones or facial distortions, no childlike chibi bodies, no hypersexualization, no photo-real human face substitution, no generic different hairstyles, no skin-tone changes, no plastic sticker outline, no transparent cutout or flat white sticker background, no 2D anime look, no uncanny doll eyes, no blurry low-res renders, no text, logos, subtitles or watermarks."
@@ -832,6 +833,17 @@ export const youtubePhotoBoard: Record<number,YouTubePhoto[]> = {
 };
 export function getYouTubePhotoPrompt(photo:YouTubePhoto):string {
  const character=photoStyles.descriptions[photo.cast as keyof typeof photoStyles.descriptions]||photoStyles.descriptions.none;
- return [photoStyles.sharedStyle, 'CHARACTER CONTINUITY: '+character,'SHOT ID: '+photo.id+'. Scene '+photo.scene+'. '+photo.title+'.','CAMERA: '+photo.shot+'.','STAGING AND ACTION: '+photo.action,'LIGHTING / QUALITY: detailed intentional light matching the current time of day and scene mood, accurate eye-lines and hands, refined controlled palette, sharp focal point, realistic material response within stylized animation.','FRAME: 16:9, horizontal, single still; full shot, no cropping of important hands or props.',photoStyles.neg].join('\n\n');
+ const styling=wardrobeForShot(photo.id,photo.scene,photo.cast);
+ return [
+ photoStyles.sharedStyle,
+ 'CHARACTER REFERENCE AND FACIAL CONTINUITY: '+character,
+ 'OUTFIT / HOLIDAY / SET CONTINUITY: '+styling.details,
+ 'SHOT ID: '+photo.id+'. Scene '+photo.scene+'. '+photo.title+'.',
+ 'CAMERA: '+photo.shot+'.',
+ 'STAGING AND ACTION: '+photo.action,
+ 'LIGHTING AND QUALITY: intentional light matching time of day and scene mood, believable eyes and hands, cinematic depth of field, refined controlled palette and sharp focal point.',
+ 'FRAME: one horizontal 16:9 still, complete scene composition with essential props visible.',
+ photoStyles.neg
+ ].join('\\n\\n');
 }
 export const youtubeVisualStats={ episodes:8,framesPerEpisode:10,totalFrames:80 } as const;
