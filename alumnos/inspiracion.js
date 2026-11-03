@@ -7,6 +7,12 @@ const safeUrl = value => {
 };
 const enLabel = (es,en,lang) => lang==='en'?en:es;
 
+const spanishStageNames={"casa-brownie":["Empezar desde una página vacía","Identidad y menú de navegación","Portada con una foto fija","Seis fotos individuales de brownies","Catálogo y presentación de sabores","Regalos y fotografías de empaques","Historia y ubicación ficticia","Información de entrega de ejemplo","Interacciones de carrito de demostración","Pie de página y créditos","Revisión final con capturas","Bono opcional: video en la portada"],"crumb":["Crear la estructura inicial","Dirección fotográfica: 14 escenas","Portada y navegación","Seis fotografías individuales","Catálogo de sabores","Regalos, cajas y presentación","Galería de la marca","Armar tu caja: demostración interactiva","Ubicación ilustrativa","Banners e historia de la marca","Pie de página y contacto ilustrativo","Revisión móvil y final"],"aftr":["Dirección visual del local nocturno","Ocho fotografías individuales","Portada, menú y acceso para mayores de 21","Eventos de hoy y programación semanal","Mesas exclusivas y lista de invitados","Entradas y revisión final"],"soluna":["Investigar el negocio y su estilo","Identidad y sistema visual","Ocho fotografías individuales de yoga","Portada y botón principal","Oferta de lanzamiento y clases","Espacios y ubicación","Membresías de demostración","Lista de espera, privacidad y revisión","Publicar y comparar"]};
+const spanishPhotoNames={"casa-brownie":["Portada de brownies","Brownie clásico","Brownie con nueces","Brownie de dulce de leche","Brownie de frambuesa","Brownie de galleta y crema","Brownie edición especial","Regalo con lazo rosa","Bolsas y cajas de regalo"],"crumb":["Fachada de la tienda","Portada principal","Galleta clásica","Galleta doble chocolate","Galleta de caramelo","Galleta de frambuesa","Galleta con nueces","Galleta brownie","Caja para regalos","Empaque de marca","Foto de estilo de vida","Persona preparando galletas","Historia de la marca"],"aftr":["Portada del club","Cabina de DJ","Pista de baile","Entrada","Retrato de moda","Sala exclusiva","Servicio de botellas","Entradas"],"soluna":["Portada","Interior del estudio","Exterior del estudio","Clase lenta","Clase de descanso","Ritual matutino","Clase grupal","Flores","Ropa del estudio","Bebidas del estudio"],"cleaning":["Portada de limpieza residencial"],"jaramillo":["Portada de boutique"]};
+function stageLabel(id,index,original,lang){
+ if(lang==='en')return englishDemoTitle('demo_'+id+'_'+index,original);
+ return spanishStageNames[id]?.[index]||original||'Etapa '+(index+1);
+}
 const englishPhotoNames={
  'casa-brownie':['Brownie hero','Classic brownie','Walnut brownie','Dulce de leche brownie','Raspberry brownie','Cookies & cream brownie','Special edition brownie','Pink-ribbon gift','Gift bags and boxes'],
  crumb:['Storefront','Hero','Classic chocolate chip','Double chocolate','Caramel','Raspberry','Nutty cookie','Brownie cookie','Gift box','Packaging','Lifestyle photo','Baker portrait','Brand story'],
@@ -15,7 +21,7 @@ const englishPhotoNames={
  cleaning:['Cleaning hero'],jaramillo:['Boutique hero']
 };
 function galleryPhotoLabel(demo,index,original,lang){
- if(lang!=='en')return original||'Foto '+(index+1);
+ if(lang!=='en')return spanishPhotoNames[demo]?.[index]||original||'Foto '+(index+1);
  return englishPhotoNames[demo]?.[index]||'Reference photo '+String(index+1).padStart(2,'0');
 }
 
@@ -140,7 +146,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   const list=document.createElement('div');list.className='inspiration-prompt-list';
   for(const [i,p] of prompts.entries()){
    const item=document.createElement('details');item.className='inspiration-prompt';
-   item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(curLang()==='en'?englishDemoTitle('demo_'+d.id+'_'+i,p.title):p.title)+'</strong><small>'+esc(curLang()==='en'?'Step '+(i+1)+' of '+prompts.length:p.step||'')+'</small></summary>';
+   item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(stageLabel(d.id,i,p.title,curLang()))+'</strong><small>'+esc(curLang()==='en'?'Step '+(i+1)+' of '+prompts.length:p.step||'')+'</small></summary>';
    const body=document.createElement('div');body.className='inspiration-prompt-body';
    const promptText=localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
    const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=promptText;
