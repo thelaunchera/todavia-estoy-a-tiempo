@@ -18,8 +18,8 @@ const guides={
  pasos:{kicker:'03 / YOUR FIRST WEBPAGE',title:'Build step by step.',intro:'Use Casa Brownie as a reference while you build ONE website of your own. Finish your first project before starting another.',steps:[
  ['01 — Define the goal','Research your business and ideal customer. Write what the site is for and the one action a visitor should take.'],
  ['02 — Mood board','Choose an original palette, typography, photographic tone and packaging direction if needed.'],
- ['03 — Prepare photos in Google Drive','Connect Google Drive in ChatGPT through Settings → Plugins (or Apps) if available. In the Drive app, create a folder for this single website. Upload and name each photo separately.'],
- ['03B — Check your backup','Open the uploaded photos in Drive before removing any copies from your phone. Connecting the app alone does not move or delete images.'],
+ ['03 — Prepare photos in Google Drive','Create each image with ChatGPT and ask to send it directly to the 02_PHOTOS folder in Drive if uploads are supported. Do not save it to your personal Photos gallery.'],
+ ['03B — Check your backup','If a direct Drive upload is unavailable, use Share or a temporary file in Files, then upload through the Drive app. Open each image from Drive before removing its temporary local copy. Connecting Drive never uploads or deletes photos automatically.'],
  ['04 — Write your content','Create a five-second hero, products/services, relevant process, FAQs and CTA, using verified facts.'],
  ['05 — Build in AppDeploy','Open a blank project and build one section at a time. Upload the correct images to the correct paths.'],
  ['06 — Review mobile first','Check 375 px, phone tap targets, photo cropping, empty cards, form labels and responsive layout.'],
@@ -27,11 +27,11 @@ const guides={
  ['08 — Test and share','Verify links, forms, footer and public access. Keep a record of what passed and what remains untested.']
  ],actions:[['Copy the building prompts','prompts']]},
  organizacion:{kicker:'04 / KEEP YOUR WORK ORGANIZED',title:'Organize your entire project.',intro:'Work on ONE website at a time until you feel confident. Keep its photos, prompts and text in a dedicated Google Drive folder so you do not mix files from different businesses.',steps:[
- ['CONNECT GOOGLE DRIVE','In ChatGPT, open Settings → Plugins (or Apps), find Google Drive, connect your Google account, and review permissions. If saving from ChatGPT is not supported, upload using the Drive app.'],
+ ['CONNECT GOOGLE DRIVE','In ChatGPT, open Settings → Plugins (or Apps), find Google Drive, connect your Google account, and review permissions. If direct saving is supported, ask ChatGPT to send each generated image into Drive → 02_PHOTOS.'],
  ['ONE PROJECT','In the Google Drive app tap + New → Folder. Name it after your first website, and keep only that business’s files inside.'],
  ['00_IDEA','Business goal, ideal customer, real facts and unknown details.'],
  ['01_TEXTS','Headlines, CTA copy, service descriptions, FAQs and confirmations.'],
- ['02_PHOTOS','Upload separate images with clear names such as hero_01, product_01 and detail_01. Check that each file opens in Drive before deleting local copies.'],
+ ['02_PHOTOS','Keep generated images in Drive rather than your personal photo gallery. Request a direct Drive upload if supported. Otherwise share the generated file to Drive, or temporarily save it in Files and upload through the Drive app. Check the uploaded file before deleting the temporary copy. Use names like hero_01 and product_01.'],
  ['03_PROMPTS','Save the precise prompt used for each photo and each construction step.'],
  ['04_DESIGN','Mood board, visual references, colors and font choices.'],
  ['05_WEB','Website URLs and snapshots of each successful section.'],
