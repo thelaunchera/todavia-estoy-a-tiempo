@@ -72,8 +72,8 @@ async function subscribe(user){
  if(!(await isIntendedEmail(email))){
   if(returning){
    const p=document.querySelector('#course-waitlist-pending');
-   document.querySelector('#course-waitlist-pending-title').textContent='El correo aún no está registrado';
-   document.querySelector('#course-waitlist-pending-description').textContent='Este navegador tiene abierta otra cuenta. Solicita un enlace nuevo con el correo que deseas registrar.';
+   document.querySelector('#course-waitlist-pending-title').textContent=localized('El correo aún no está registrado','This email is not registered yet.');
+   document.querySelector('#course-waitlist-pending-description').textContent=localized('Este navegador tiene abierta otra cuenta. Solicita un enlace nuevo con el correo que deseas registrar.','Another account is open in this browser. Request a new link using the email you want to register.');
    form.hidden=true;p.hidden=false;
    p.scrollIntoView({block:'center'});
   }
@@ -104,13 +104,13 @@ async function subscribe(user){
   void manage(user);
  }catch(error){
   submit.disabled=false;
-  message('Tu correo está verificado, pero no pudimos finalizar la inscripción. Vuelve a pulsar «Avísame cuando abra» para reintentarlo.');
+  message(localized('Tu correo está verificado, pero no pudimos finalizar la inscripción. Vuelve a pulsar «Avísame cuando abra» para reintentarlo.','Your email is verified, but registration could not be completed. Tap Join waitlist to try again.'));
   console.error('Class waitlist registration:',error?.code||'unknown');
  }finally{subscribing=false;}
 }
 form.addEventListener('submit',async event=>{
  event.preventDefault();
- if(!consentEl.checked){message('Marca la casilla para recibir las novedades de esta clase.');return;}
+ if(!consentEl.checked){message(localized('Marca la casilla para recibir las novedades de esta clase.','Check the box to receive class updates.'));return;}
  const email=normal(emailEl.value);
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){
   message(localized('Revisa la dirección de correo electrónico.',"Check your email address."));return;
@@ -139,8 +139,8 @@ form.addEventListener('submit',async event=>{
   });
   if(error)throw error;
   const p=document.querySelector('#course-waitlist-pending');
-  document.querySelector('#course-waitlist-pending-title').textContent='Revisa tu correo';
-  document.querySelector('#course-waitlist-pending-description').textContent='Te enviamos un enlace para verificar tu correo. Al abrirlo volverás aquí y verás tu inscripción confirmada.';
+  document.querySelector('#course-waitlist-pending-title').textContent=localized('Revisa tu correo','Check your email');
+  document.querySelector('#course-waitlist-pending-description').textContent=localized('Te enviamos un enlace para verificar tu correo. Al abrirlo volverás aquí y verás tu inscripción confirmada.','We sent you a verification link. Open it to return here and confirm your signup.');
   form.hidden=true;p.hidden=false;
   requestAnimationFrame(()=>p.scrollIntoView({behavior:'smooth',block:'center'}));
  }catch(error){
@@ -164,10 +164,10 @@ async function manage(user){
   const {error}=await db.from('podcast_class_waitlist')
    .update({unsubscribed_at:new Date().toISOString()}).eq('course_id',courseId).eq('email',email);
   if(error){
-   b.disabled=false;message('No pudimos tramitar la baja. Inténtalo de nuevo.');return;
+   b.disabled=false;message(localized('No pudimos tramitar la baja. Inténtalo de nuevo.','We could not cancel your signup. Please try again.'));return;
   }
   b.remove();document.querySelector('#course-waitlist-success').hidden=true;form.hidden=false;submit.disabled=false;consentEl.checked=false;
-  message('Tu solicitud se canceló. No recibirás más avisos sobre esta clase.',true);
+  message(localized('Tu solicitud se canceló. No recibirás más avisos sobre esta clase.','Your signup was canceled. You will no longer receive updates about this class.'),true);
  });
  document.querySelector('#course-waitlist-success-optout').appendChild(b);
 }
@@ -212,7 +212,7 @@ if(returning){
 }
 db.auth.getUser().then(({data:{user}})=>{
  if(user)void detectSession(user);
- else if(returning)message('No encontramos una sesión confirmada. Abre de nuevo el enlace del correo en este navegador.');
+ else if(returning)message(localized('No encontramos una sesión confirmada. Abre de nuevo el enlace del correo en este navegador.','We could not verify your session. Reopen the email link in this browser.'));
 }).catch(()=>{
  if(returning)document.querySelector('#course-waitlist-pending-description').textContent=localized('No pudimos completar la verificación. Solicita otro enlace e inténtalo de nuevo.',"We couldn't complete verification. Please request another link and try again.");
 });
