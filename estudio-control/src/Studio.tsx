@@ -4,6 +4,7 @@ import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
 import ReelsProduction from './ReelsProduction';
+import BrandReelsProduction from './BrandReelsProduction';
 import BonusLibrary from './BonusLibrary';
 import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
@@ -11,6 +12,7 @@ import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import ProductCenter from './ProductCenter';
 import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
+import { BRAND_REELS_SECTIONS } from './brand-reels-plan';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { auth, api, getOwnerClassroomSession, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, uploadClassRecording, getClassRecordingUrl, removeOldClassRecording, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
@@ -62,6 +64,8 @@ type Page =
   | 'inicio'
   | 'episodios'
   | 'reels'
+  | 'reels-clase'
+  | 'reels-lab'
   | 'seamless'
   | 'youtube'
   | 'clases'
@@ -151,13 +155,15 @@ const NAV = [
   { id: 'reels', label: 'Reels del podcast', icon: Film },
   { id: 'cancion', label: 'Canción y escuchas', icon: AudioLines },
   { id: 'clases', label: 'Grabar módulos', icon: Video, group: '🎓 CLASE · AULA Y PRODUCCIÓN' },
+  { id: 'reels-clase', label: 'Reels de la clase', icon: Film },
   { id: 'alumnos', label: 'Aula y estudiantes', icon: BookOpen },
   { id: 'espera', label: 'Inscripciones y espera', icon: Mail },
   { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
   { id: 'club', label: 'Comunidad · Club', icon: Users },
   { id: 'demos', label: 'Demos de la clase', icon: Globe2 },
   { id: 'youtube', label: 'YouTube · Nia y Ruby', icon: Film, group: 'YOUTUBE · SERIE ANIMADA' },
-  { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles, group: '🎨 CREACIÓN DE CONTENIDO' },
+  { id: 'reels-lab', label: 'Reels de Content Lab', icon: Film, group: '🎨 CREACIÓN DE CONTENIDO' },
+  { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
   { id: 'ideas', label: 'Banco de ideas', icon: Lightbulb },
   { id: 'ventas', label: 'Ventas e ingresos', icon: CreditCard, group: '💼 NEGOCIO Y OPERACIONES' },
   { id: 'productos', label: 'Centro de productos', icon: ShoppingBag },
@@ -172,6 +178,8 @@ const LABELS: Record<Page, string> = {
   inicio: 'Mi agenda · Studio',
   episodios: 'Podcast · capítulos y guiones',
   reels: 'Podcast · reels',
+  'reels-clase': 'Clase · reels',
+  'reels-lab': 'Content Lab · reels',
   seamless: 'Carruseles seamless',
   youtube: 'YouTube · Nia y Ruby',
   clases: 'Clase · grabar módulos',
@@ -282,7 +290,7 @@ function App() {
     [error, setError] = useState('');
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'reels-clase' || section === 'reels-lab' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -614,7 +622,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1');
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1');
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -1325,6 +1333,11 @@ function App() {
               await api.post('/api/items/ideas',record);
               await refresh();
             }} />
+          )}
+          {(page === 'reels-clase' || page === 'reels-lab') && (
+            <BrandReelsProduction brand={page === 'reels-clase' ? 'clase' : 'lab'} entries={items.ideas}
+              onSave={async (entry,patch)=>{await api.put('/api/items/ideas/'+entry.id,{...entry,...patch});await refresh();}}
+              onCreate={async (record)=>{await api.post('/api/items/ideas',record);await refresh();}}/>
           )}
           {page === 'calendario' && (
             <>
