@@ -39,6 +39,7 @@ export const BRAND_REELS:Record<Brand,BrandReel[]> = {
       ],
       overlay:'UN SOLO PROMPT → UNA WEB REAL', cover:'UN PROMPT. TU WEB.',
       cta:'Comenta WEB. Entrega por correo de un único prompt; la clase se presenta después dentro del correo.',
+      source:'https://app.notion.com/p/40da68f2ee6e81eb8308c07323903949',
       caption:'Hoy cumplo años y quería compartir algo útil contigo. 🎂 Preparé UN prompt para empezar tu website con ChatGPT + AppDeploy, con secciones para fotos, productos, contacto y más. Comenta WEB y te lo mando por correo. 💌',
     },
     {
