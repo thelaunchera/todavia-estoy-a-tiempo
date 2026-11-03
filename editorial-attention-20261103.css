@@ -1,0 +1,171 @@
+/* Editorial attention pass 2026-11-03
+   Public podcast, class and free-resource pages only.
+   Retain all approved portraits, hero video, matcha galleries,
+   backgrounds, effects, colors, fonts, copy and conversions. */
+
+/* PODCAST: separate one story, one action and one resource clearly. */
+.podcast-episodes-curated .episode-curated-head {
+  margin-bottom: clamp(22px, 3vw, 38px);
+}
+.podcast-episodes-curated .episode-curated-copy h3,
+.podcast-episodes-curated .episode-previous-detail {
+  line-height: 1.48;
+  overflow-wrap: break-word;
+}
+.free-mini-section .free-mini-grid {
+  column-gap: clamp(24px, 5vw, 78px);
+  row-gap: 22px;
+  align-items: start;
+}
+.free-mini-section .free-mini-content h2 {
+  text-wrap: balance;
+  max-width: 15ch;
+  line-height: 1.13;
+}
+.free-mini-section .free-mini-content > p:not(.eyebrow) {
+  max-width: 51ch;
+  line-height: 1.7;
+}
+.free-mini-section .free-mini-form .guide-form {
+  max-width: 100%;
+}
+.free-mini-section .free-mini-form .guide-form > label:not(.podcast-newsletter-optin) {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.free-mini-section .free-mini-form .guide-form :is(input[type="email"], select) {
+  min-height: 50px;
+  font-size: 16px;
+}
+.free-mini-section .free-mini-form .guide-form .form-small-note {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.collection .collection-head > p:not(.eyebrow),
+.learning-section .learning-copy > p:not(.eyebrow),
+.help-section .help-intro > p:not(.eyebrow) {
+  max-width: 55ch;
+  line-height: 1.7;
+}
+.learning-section .learning-copy .learning-action {
+  gap: 14px;
+}
+
+/* CLASE: improvements below its existing cinema/video hero.
+   Spanish and English render exactly the same visual system. */
+.class-page-v2 #de-idea-a-web .class-transform-heading > p:not(.class-eyebrow),
+.class-page-v2 #recorrido .class-section-head > p:not(.class-eyebrow),
+.class-page-v2 #incluye .class-materials-top > p,
+.class-page-v2 #preguntas .class-section-head > p:not(.class-eyebrow) {
+  max-width: 58ch;
+  line-height: 1.7;
+}
+.class-page-v2 #recorrido .class-journey-card .class-journey-content > p {
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+.class-page-v2 #incluye .class-material-description p {
+  max-width: 55ch;
+  line-height: 1.65;
+}
+.class-page-v2 #incluye .class-material-tabs .class-material-tab {
+  min-height: 46px;
+}
+.class-page-v2 :is(#recorrido, #incluye, #preguntas, #lista-espera, #de-idea-a-web) {
+  scroll-margin-top: 112px;
+}
+.class-page-v2 #preguntas details :is(p, li) {
+  line-height: 1.65;
+}
+
+/* FREEBIE — 8 MASTER PROMPTS: keep all matcha photos/slider intact. */
+body.tle-prompts-freebie :is(#como-funciona, #recibir) {
+  scroll-margin-top: 104px;
+}
+body.tle-prompts-freebie .editorial-process p {
+  max-width: 62ch;
+  line-height: 1.7;
+}
+body.tle-prompts-freebie .matcha-email-optin p {
+  line-height: 1.65;
+}
+body.tle-prompts-freebie .matcha-email-form label,
+body.tle-prompts-freebie .panel label {
+  font-size: 14px;
+  line-height: 1.5;
+}
+body.tle-prompts-freebie .matcha-email-form :is(input[type="email"],input[type="text"],select,textarea),
+body.tle-prompts-freebie .panel :is(input[type="text"],select,textarea) {
+  min-height: 50px;
+  font-size: 16px;
+  max-width: 100%;
+}
+body.tle-prompts-freebie .step-help {
+  font-size: 14px;
+  line-height: 1.55;
+}
+body.tle-prompts-freebie .matcha-send-button {
+  min-height: 50px;
+  white-space: normal;
+  text-align: center;
+}
+
+/* Content Lab public discovery: free examples and product explanations only.
+   Not the authenticated editor or paid user interface. */
+body.content-lab-discovery .block :is(.intro, .feature p),
+body.content-lab-discovery .faqs details p,
+body.content-lab-discovery .offer p {
+  line-height: 1.7;
+}
+body.content-lab-discovery .block .intro {
+  max-width: 65ch;
+}
+body.content-lab-discovery :is(#incluye, #precio) {
+  scroll-margin-top: 92px;
+}
+body.content-lab-discovery .features {
+  row-gap: 20px;
+}
+body.content-lab-discovery .faqs summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 767px) {
+  .free-mini-section .free-mini-grid {
+    gap: clamp(18px, 5vw, 28px);
+  }
+  .free-mini-section .free-mini-content > p:not(.eyebrow) {
+    font-size: 16px;
+    line-height: 1.58;
+  }
+  .free-mini-section .free-mini-content h2 {
+    max-width: 100%;
+  }
+  .free-mini-section .free-mini-form .guide-form .form-small-note {
+    font-size: 13px;
+  }
+  .class-page-v2 #recorrido .class-section-head > p:not(.class-eyebrow),
+  .class-page-v2 #incluye .class-materials-top > p,
+  .class-page-v2 #preguntas .class-section-head > p:not(.class-eyebrow) {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .class-page-v2 #recorrido .class-journey-card .class-journey-content > p,
+  .class-page-v2 #incluye .class-material-description p {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  body.tle-prompts-freebie .matcha-email-form label,
+  body.tle-prompts-freebie .panel label {
+    font-size: 14px;
+  }
+  body.content-lab-discovery .block .intro {
+    line-height: 1.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.tle-prompts-freebie .matcha-send-button {
+    transition: none;
+  }
+}
