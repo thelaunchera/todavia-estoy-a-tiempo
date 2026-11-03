@@ -215,25 +215,34 @@ assert.match(podcastCss,/episodes-compact-v2 \.episode-curated-grid/);
 assert.match(podcastHeroCss,/Podcast · mensaje claro en una mirada/);
 assert.match(classPage,/cinematic-hero-20261102[.]css/,'La hoja del hero cinematográfico está enlazada');
 assert.ok(readFileSync('assets/clase-retrato-laptop-real-2026.jpg').byteLength>100_000,'Existe el retrato de laptop');
-console.log('QA: podcast claro, episodios 01 y 02 compactos y fotos aprobadas independientes OK');
+console.log('QA: podcast claro, episodios publicados compactos y fotos aprobadas independientes OK');
 
 
-/* Revisión pública: hero íntegro, contraste claro y episodios cronológicos. */
+/* Revisión pública: hero íntegro, contraste y el episodio publicado más reciente primero. */
 const episodeOrderJs=read('episodios-destacados.js');
 const episodeOrderStart=home.indexOf('<div class="episode-curated-grid">');
 const episodeOrderEnd=home.indexOf('<div class="episode-curated-bottom">',episodeOrderStart);
 const episodeOrderMarkup=home.slice(episodeOrderStart,episodeOrderEnd);
 assert.ok(episodeOrderStart>=0 && episodeOrderEnd>episodeOrderStart);
-assert.ok(episodeOrderMarkup.indexOf('EPISODIO 01')<episodeOrderMarkup.indexOf('EPISODIO 02'),'El episodio 01 aparece primero');
-assert.ok(episodeOrderMarkup.includes('21aYHKY0kodWEzg1835xcD'),'Ep 01 Spotify real');
+assert.ok(episodeOrderMarkup.indexOf('EPISODIO 03')<episodeOrderMarkup.indexOf('EPISODIO 02'),'El estreno 03 debe ser protagonista antes del episodio 02');
+assert.ok(episodeOrderMarkup.includes('5NtsF2XPSEZ2pTzBBQtw3c'),'Ep 03 enlaza al Spotify publicado');
+assert.ok(episodeOrderJs.includes('21aYHKY0kodWEzg1835xcD'),'El ep 01 permanece en el catálogo');
 assert.ok(episodeOrderMarkup.includes('6ICSx9E7BVlU8Qi8rFC0s3'),'Ep 02 Spotify real');
-assert.match(episodeOrderJs,/published\.slice\(0, 2\)\.sort\(\(a, b\) => a\.number - b\.number\)/);
+assert.match(episodeOrderJs,/published\.slice\(0, 2\)/,'El estreno ocupa el primer lugar tras ordenar por número descendente');
+assert.match(home,/assets\/episodio-03-portada\.webp/,'Se muestra la portada del capítulo 3');
+assert.ok(readFileSync('assets/episodio-03-portada.webp').byteLength>1_000,'La portada aprobada se conserva en assets');
+const popupEp03=read('podcast-episode-03-announcement-20261103.js');
+assert.match(home,/id="podcast-ep03-dialog"/,'La landing en español tiene el popup');
+assert.doesNotMatch(read('index-en.html'),/id="podcast-ep03-dialog"/,'La landing en inglés no recibe este aviso');
+assert.match(popupEp03,/2026-11-03T00:00:00-05:00/);
+assert.match(popupEp03,/2026-11-06T00:00:00-05:00/);
+assert.doesNotMatch(popupEp03,/(?:localStorage|sessionStorage)\s*\./,'El popup reaparece en cada nueva visita, sin guardar cierres');
 assert.match(classPage,/cinematic-hero-20261102[.]js/,'El video pausa al salir de pantalla');
 assert.match(newStyles,/object-fit:contain!important/);
 assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
-console.log('QA: ep 01 antes de 02, hero cinematográfico y tipografía contrastada OK');
+console.log('QA: estreno 03 antes de 02, anuncio ES por tres días, hero cinematográfico y tipografía contrastada OK');
 
 
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
