@@ -25,6 +25,16 @@ const safeImageUrl=(value:string)=>{
   } catch{return false;}
 };
 
+function drivePreviewUrl(link?:string):string{
+  if(!link)return '';
+  try{
+    const url=new URL(link);
+    if(url.protocol!=='https:'||url.hostname!=='drive.google.com')return '';
+    const match=/^\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/.exec(url.pathname);
+    return match?'https://drive.google.com/file/d/'+match[1]+'/preview':'';
+  }catch{return '';}
+}
+
 function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged}:{photo:YouTubePhoto,entry?:YouTubeSavedPhoto,privatePhoto?:PrivatePhoto,readOnly?:boolean,onChanged:()=>Promise<void>,onPrivateChanged:()=>Promise<void>}){
   const linked=entry?.art||photo.image;
   const saved=privatePhoto?.url||linked;
