@@ -13,7 +13,7 @@
 <a class="skip" href="#aula">Saltar al aula</a>
 <header class="top">
  <div class="wrap top-inner">
-  <div class="aula-brand-links"><a href="#aula" aria-label="Ir al inicio de mi aula"><img src="../assets/logo-podcast-04.svg" width="726" height="250" alt="Todavía estoy a tiempo"></a><a id="aula-owner-nav" class="aula-owner-nav" aria-label="Volver a mi Studio" hidden>Mi Studio</a></div>
+  <div class="aula-brand-links"><a href="#aula" aria-label="Ir al inicio de mi aula"><img src="../assets/logo-podcast-04.svg" width="726" height="250" alt="Todavía estoy a tiempo"></a><a id="aula-owner-nav" class="aula-owner-nav" aria-label="Volver a administración" hidden>Administración</a></div>
   <span>MI AULA · TU PRIMERA WEB CON IA</span>
   <label class="aula-public-lang" for="aula-public-language"><span aria-hidden="true">🌐</span><select id="aula-public-language" aria-label="Idioma / Language"><option value="es">Español</option><option value="en">English</option></select></label>
   <button id="logout" hidden type="button">Salir de mi cuenta</button>
@@ -336,28 +336,28 @@
       </section>
     </div>
     <div data-aula-panel="bonos" class="aula-panel" hidden>
-      <div class="aula-section-heading"><p class="eyebrow">RECURSOS EXTRA DE TU CLASE</p><h1>Biblioteca de bonos</h1><p>Aquí encontrarás los bonos que se desbloqueen para tu cuenta. Los recursos adicionales se irán incorporando a esta biblioteca.</p></div>
+      <div class="aula-section-heading"><p class="eyebrow">PARA SEGUIR CREANDO</p><h1>Biblioteca de bonos</h1><p>Un lugar para tus recursos extra.</p></div>
       <section id="bonus-library" class="bonus-library" aria-labelledby="bonus-library-heading">
-        <header class="bonus-library-top"><p class="eyebrow">BONOS DESBLOQUEADOS</p><h2 id="bonus-library-heading">Tus recursos extra</h2><p>Los bonos aparecen cuando se activan y asignan a tu cuenta desde el Studio, una vez cumplidos los requisitos de la clase.</p><span id="bonus-library-count" aria-live="polite"></span></header>
+        <header class="bonus-library-top"><p class="eyebrow">TUS BONOS</p><h2 id="bonus-library-heading">Recursos disponibles</h2><span id="bonus-library-count" aria-live="polite"></span></header>
         <div id="bonus-library-items" class="bonus-library-items" aria-live="polite"><p class="bonus-library-message">Cargando recursos…</p></div>
       </section>
          <section class="assigned-bonuses" id="assigned-bonuses" aria-labelledby="assigned-bonuses-heading" hidden>
      <p class="eyebrow">ELEGIDOS PARA TI</p>
-     <h2 id="assigned-bonuses-heading">Tus bonos personales</h2>
-     <p>Estos recursos fueron seleccionados especialmente para tu cuenta.</p>
+     <h2 id="assigned-bonuses-heading">Más recursos para ti</h2>
+     <p>Bonos que tienes disponibles.</p>
      <div id="assigned-bonus-list" class="resource-grid"></div>
    </section>
 
          <section class="student-bonus" aria-labelledby="student-bonus-heading">
-       <p class="eyebrow">UN REGALO POR TU ESFUERZO</p>
-       <h2 id="student-bonus-heading">Desbloquea tu bono</h2>
-       <p>Tu bono se activa <strong>solo cuando hayas terminado la última lección</strong> y hayas publicado tu primera web en <strong>Proyectos</strong>, dentro del Club de Ideas.</p>
+       <p class="eyebrow">UN PASO MÁS</p>
+       <h2 id="student-bonus-heading">Cómo desbloquear tus bonos</h2>
+       <p>Completa estos dos pasos para acceder a tus bonos:</p>
        <div class="student-bonus-checks" aria-live="polite">
-         <p id="bonus-lessons"><span aria-hidden="true">○</span> Terminar todas las lecciones</p>
-         <p id="bonus-project"><span aria-hidden="true">○</span> Compartir tu primera web en el club</p>
+         <p id="bonus-lessons"><span aria-hidden="true">○</span> Termina las lecciones</p>
+         <p id="bonus-project"><span aria-hidden="true">○</span> Comparte tu web en el Club de Ideas</p>
        </div>
-       <p id="bonus-status" class="student-bonus-status">Bono bloqueado · completa los dos pasos para habilitarlo.</p>
-       <div id="bonus-unlocked" class="bonus-unlocked" hidden role="status"><strong>¡Reto completado!</strong><p>Cumpliste los requisitos del bono. El material aparecerá aquí cuando esté publicado.</p></div>
+       <p id="bonus-status" class="student-bonus-status" hidden></p>
+       <div id="bonus-unlocked" class="bonus-unlocked" hidden role="status"><strong>¡Lo lograste!</strong><p>Tus bonos aparecerán arriba cuando estén disponibles.</p></div>
    </section>
 
     </div>
@@ -408,12 +408,12 @@
   if(!msg||!course||!course.hidden||!login||!login.hidden)return;
   const value=(msg.textContent||'').toLowerCase();
   if(!/comprobando el acceso privado|conectando con tu studio|abriendo tu aula privada/.test(value))return;
-  msg.textContent='No se pudo completar la conexión privada. Vuelve al Studio y abre el aula otra vez. Si sigue igual, abre el Studio directamente en Safari e inicia sesión.';
+  msg.textContent='No se pudo abrir el aula. Vuelve a administración e inténtalo de nuevo. Si continúa, abre administración en Safari e inicia sesión.';
   msg.dataset.ok='false';
   msg.hidden=false;
   if(!document.getElementById('aula-retry-link')){
    const a=document.createElement('a');a.id='aula-retry-link';
-   a.href='../estudio/';a.textContent='Volver al Studio para reintentar';
+   a.href='../estudio/';a.textContent='Volver a administración';
    a.style.cssText='display:inline-flex;margin:16px 0 0;padding:12px 18px;border:1px solid #b6cbd7;border-radius:12px;color:#25445c;background:#fff;font-weight:700';
    msg.insertAdjacentElement('afterend',a);
   }
@@ -434,7 +434,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261103-inspiration-recovery-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261103-bonus-copy-v4'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
