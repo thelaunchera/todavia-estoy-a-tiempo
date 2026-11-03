@@ -301,3 +301,21 @@ test('Prompts de secciones conservan imagen real, títulos y versión inglesa',(
  assert.match(styles,/\.inspiration-step-photo/, 'Vista visual del recurso en el iPhone');
  assert.ok(room.includes("const classroomModule='./curso.js?v="),'Safari importa un módulo versionado sin fijar nombres de releases');
 });
+
+
+test('Moodboard aprobado y lotes de nueve fotos, con guía bilingüe y sin tocar originales',()=>{
+ const src=readFileSync('alumnos/inspiracion.js','utf8');
+ const css=readFileSync('alumnos/aula-inspiracion.css','utf8');
+ assert.match(src,/inspiration_workflow_v3/,'La guía independiente se carga junto a los demos sin saturar la biblioteca');
+ assert.match(src,/Promise\.all\(/,'La galería y la guía se consultan juntas');
+ assert.match(src,/fillCreativeWorkflowPrompt/,'Los prompts de moodboard se personalizan por marca y sección');
+ assert.match(src,/Math\.min\(9,Math\.max\(1,/,'No se muestra un lote con más de nueve imágenes');
+ assert.match(src,/inspiration-photo-batch/,'Cada lote muestra su número y fotografías separadas');
+ assert.match(src,/inspiration-photo-directions/,'Cada foto tiene instrucciones propias de ubicación o reutilización');
+ assert.match(src,/guideCase\?\.extra_prompts/,'Casos sin material original reciben las guías educativas sin reemplazar los originales');
+ assert.match(src,/mappedStagePhotos/,'Las fotos de cada prompt proceden de su sección verificada');
+ assert.match(src,/correctedDemoText/,'Se corrigen rutas obsoletas sin alterar el archivo original');
+ assert.match(css,/\.inspiration-workflow-steps/,'Los seis pasos se leen en móvil');
+ assert.match(css,/\.inspiration-photo-batches/,'Los lotes se organizan en el aula');
+ assert.doesNotMatch(src,/service_role|SUPABASE_SERVICE_ROLE_KEY/,'No hay claves privilegiadas en el aula');
+});
