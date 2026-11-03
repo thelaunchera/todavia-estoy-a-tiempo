@@ -1877,6 +1877,7 @@ function App() {
           <footer className="footer">
             <span>TODAVÍA ESTOY A TIEMPO · ESTUDIO 01</span>
             <span>HECHO CON CALMA / 2026</span>
+            <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline',textUnderlineOffset:3}}>Powered by The Launch Era</a>
           </footer>
         </main>
       </div>
