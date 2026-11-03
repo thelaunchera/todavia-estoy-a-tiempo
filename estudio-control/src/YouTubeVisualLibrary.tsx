@@ -25,20 +25,20 @@ const safeImageUrl=(value:string)=>{
   } catch{return false;}
 };
 
-function drivePreviewUrl(link?:string):string{
+function driveOriginalUrl(link?:string):string{
   if(!link)return '';
   try{
     const url=new URL(link);
     if(url.protocol!=='https:'||url.hostname!=='drive.google.com')return '';
     const match=/^\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/.exec(url.pathname);
-    return match?'https://drive.google.com/file/d/'+match[1]+'/preview':'';
+    return match?'https://drive.google.com/file/d/'+match[1]+'/view':'';
   }catch{return '';}
 }
 
 function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged}:{photo:YouTubePhoto,entry?:YouTubeSavedPhoto,privatePhoto?:PrivatePhoto,readOnly?:boolean,onChanged:()=>Promise<void>,onPrivateChanged:()=>Promise<void>}){
   const linked=entry?.art||photo.image;
   const saved=privatePhoto?.url||linked;
-  const drivePreview=!saved?drivePreviewUrl(entry?.link):'';
+  const driveOriginal=driveOriginalUrl(entry?.link);
   const alternativeUrl=linked?.startsWith('https://')?linked:'';
   const [link,setLink]=useState(alternativeUrl);
   const [status,setStatus]=useState('');
@@ -81,11 +81,11 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
   return <article className="yt-frame">
     <div className="yt-frame-image">
       {saved?<img src={saved} loading="lazy" alt={'Escena '+photo.id+' · '+photo.title} onError={event=>{event.currentTarget.style.visibility='hidden';}} onLoad={event=>{event.currentTarget.style.visibility='visible';}}/>:
-      drivePreview?<iframe loading="lazy" title={'Original en Drive · '+photo.id} src={drivePreview} referrerPolicy="no-referrer" />:
+      driveOriginal?<a className="yt-drive-original" href={driveOriginal} target="_blank" rel="noopener noreferrer" aria-label={'Abrir foto original '+photo.id+' en Google Drive'}><Camera size={28}/><strong>Foto original guardada en Drive</strong><small>Se mantiene privada. Toca para verla en Drive.</small><span><Eye size={16}/> Abrir foto</span></a>:
       <div className="yt-frame-placeholder"><Camera size={30}/><strong>{photo.id}</strong><small>Foto pendiente</small></div>}
     </div>
     <div className="yt-frame-body">
-      <div className="yt-frame-meta"><span>{photo.id}</span><span>Escena {photo.scene}</span>{photo.id.includes('-H')&&<span>Especial de temporada</span>}{privatePhoto?.url?<span>Archivo privado</span>:drivePreview?<span>Original vinculado en Drive</span>:saved?<span>Vista previa</span>:null}</div>
+      <div className="yt-frame-meta"><span>{photo.id}</span><span>Escena {photo.scene}</span>{photo.id.includes('-H')&&<span>Especial de temporada</span>}{privatePhoto?.url?<span>Archivo privado</span>:driveOriginal?<span>Original vinculado en Drive</span>:saved?<span>Vista previa</span>:null}</div>
       <h4>{photo.title}</h4>
       <p><b>Plano:</b> {photo.shot}</p>
       <div className="yt-frame-buttons"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} Copiar prompt</button>{entry?.link&&safeImageUrl(entry.link)&&<a href={entry.link} target="_blank" rel="noopener noreferrer"><Eye size={15}/> Ver PNG en Drive</a>}</div>
@@ -100,7 +100,7 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
       <details className="yt-frame-link">
         <summary><ImagePlus size={15}/> {linked?'Editar enlace alternativo':'O guardar enlace HTTPS (alternativa)'}</summary>
         <label htmlFor={'yt-photo-'+photo.id}>URL HTTPS directa de la imagen</label>
-        <div className="yt-frame-save"><input id={'yt-photo-'+photo.id} value={link} onChange={e=>setLink(e.target.value)} placeholder="https://.../imagen.webp" disabled={readOnly||busy}/><button type="button" onClick={save} disabled={readOnly||busy||link.trim()===(linked||'')}><Save size={16}/> Guardar</button></div>
+        <div className="yt-frame-save"><input id={'yt-photo-'+photo.id} value={link} onChange={e=>setLink(e.target.value)} placeholder="https://.../imagen.webp" disabled={readOnly||busy}/><button type="button" onClick={save} disabled={readOnly||busy||link.trim()===alternativeUrl}><Save size={16}/> Guardar</button></div>
         <p className="yt-muted">Este es un enlace alternativo, no una subida de archivo. Si has subido una foto privada, esa imagen tendrá prioridad al mostrar la vista previa.</p>
       </details>
       {status&&<p className="yt-frame-status" role="status">{status}</p>}
@@ -137,7 +137,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     const local=privatePhotos.get(p.id);
     if(local?.url)return {id:p.id,source:'private',fileName:local.file_name,driveUrl};
     if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png',driveUrl};
-    if(drivePreviewUrl(owned.get(p.id)?.link))return {id:p.id,source:'drive',fileName:p.id+'.png',driveUrl};
+    if(driveOriginalUrl(owned.get(p.id)?.link))return {id:p.id,source:'drive',fileName:p.id+'.png',driveUrl};
     return {id:p.id,source:'missing',fileName:p.id+'.png'};
   });
   const ready=available.filter(item=>item.source!=='missing').length;
