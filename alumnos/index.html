@@ -4,6 +4,12 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#172b45">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Aula">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link id="aula-manifest" rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/aula-180.png">
 <meta name="description" content="Sala privada de alumnos de Tu primera web con IA.">
 <title>Mi aula · Tu primera web con IA | Todavía estoy a tiempo</title>
 <link rel="icon" href="../assets/monograma-podcast-04.svg" type="image/svg+xml">
@@ -372,9 +378,37 @@
   </section>
   <section id="soporte-aula" class="course-support-panel" aria-labelledby="course-help-title" hidden>
     <div class="course-support-heading">
-      <div><p class="eyebrow">AYUDA DENTRO DEL AULA</p><h2 id="course-help-title">Cuéntame qué necesitas.</h2><p>Tu clase seguirá aquí cuando termines. Te responderé directamente por correo.</p></div>
+      <div><p class="eyebrow">AYUDA DENTRO DEL AULA</p><h2 id="course-help-title">¿En qué te ayudo?</h2><p>Consulta las instrucciones o escríbeme aquí.</p></div>
       <button type="button" id="close-course-help" class="course-help-close" aria-label="Cerrar ayuda">Cerrar ×</button>
     </div>
+    <section class="aula-install-guide" aria-labelledby="aula-install-title">
+      <header class="aula-install-intro">
+        <p class="aula-install-eyebrow">ACCESO RÁPIDO</p>
+        <h3 id="aula-install-title">Pon el aula en la pantalla de tu teléfono</h3>
+        <p>Abre tus lecciones desde un icono, como una app.</p>
+      </header>
+      <div class="aula-install-platforms">
+        <details class="aula-install-platform">
+          <summary>iPhone · Safari</summary>
+          <ol>
+            <li>Abre el aula en Safari.</li>
+            <li>Toca el menú de página y después <strong>Compartir</strong>.</li>
+            <li>Elige <strong>Añadir a pantalla de inicio</strong>.</li>
+            <li>Activa <strong>Abrir como app</strong> y toca <strong>Añadir</strong>.</li>
+          </ol>
+        </details>
+        <details class="aula-install-platform">
+          <summary>Android · Chrome</summary>
+          <ol>
+            <li>Abre el aula en Chrome.</li>
+            <li>Toca el menú de tres puntos (⋮).</li>
+            <li>Elige <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>.</li>
+            <li>Confirma con <strong>Instalar</strong> o <strong>Añadir</strong>.</li>
+          </ol>
+        </details>
+      </div>
+      <p class="aula-install-note">Es un acceso tipo app, no una descarga de App Store. Necesitas internet y puede que debas iniciar sesión la primera vez.</p>
+    </section>
     <form id="course-help-form" novalidate>
       <div class="course-help-fields">
         <div><label for="course-help-name">Tu nombre</label><input id="course-help-name" name="name" autocomplete="name" maxlength="80" placeholder="Cómo te llamas" required></div>
