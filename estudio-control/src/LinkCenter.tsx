@@ -5,7 +5,7 @@ import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','tle-experience'] as const;
+export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','tle-experience'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -46,6 +46,7 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:'school-jaramillo',title:'Jaramillo Boutique · Demo de moda',url:'https://thelaunchera.github.io/demo-booking-landing-/jaramillo-boutique/',category:'escuela',visibility:'demo',description:'Moda editorial de diseñadora colombiana; bolsa y favoritos de muestra, sin cobros online'},
   {key:'school-yummm',title:'YUMMM · Demo cafetería y bakery',url:'https://thelaunchera.github.io/demo-booking-landing-/yummm/',category:'escuela',visibility:'demo',description:'Café, bakery y cookies con caja interactiva de demostración, sin pedidos reales'},
   {key:'school-soluna',title:'SOLUNA Yoga · Demo de lanzamiento',url:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/',category:'escuela',visibility:'demo',description:'Yoga en Fort Lauderdale, 30% de bienvenida, lista de interés y membresías $10/$15/$25 sin cobros reales'},
+  {key:'school-la-vie-in-pink',title:'La Vie in Pink · European Pâtisserie',url:'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/',category:'escuela',visibility:'demo',description:'Croissants gourmet, desayunos y pastries europeos · website bilingüe ES/EN hecho con AppDeploy; sin cobros reales'},
   {key:'school-aula',title:'Aula de alumnos',url:'https://podcast.thelaunchera.com/alumnos/',category:'escuela',visibility:'interno',description:'Requiere acceso autorizado; la clase aún no está a la venta'},
   {key:'school-club',title:'Club de Ideas',url:'https://podcast.thelaunchera.com/alumnos/comunidad.html',category:'escuela',visibility:'interno',description:'Comunidad privada de alumnos'},
   {key:'school-pdf',title:'Materiales · PDF de la clase',url:'https://drive.google.com/drive/folders/1sR_keLOjf3OuXdKKJ8TAYRwCPI9i5NQq',category:'escuela',visibility:'interno',description:'Carpeta de producción, no enviar a público'},
@@ -86,7 +87,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'pod-home':'publicado','pod-spotify':'publicado','pod-ep1':'publicado','pod-ep2':'publicado',
   'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
   'school-class':'produccion','school-wait':'publicado',
-  'school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo',
+  'school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo','school-la-vie-in-pink':'demo',
   'school-aula':'produccion','school-club':'produccion','school-pdf':'produccion',
   'lab-editor':'produccion','lab-prompts':'publicado','lab-brand-board':'publicado'
 };
