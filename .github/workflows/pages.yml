@@ -103,6 +103,9 @@ jobs:
           npm install --no-audit --no-fund
           ./node_modules/.bin/esbuild student-supabase.entry.js --bundle --platform=browser --format=esm --target=es2020 --minify --outfile=../alumnos/supabase-local.js
           node --check ../alumnos/supabase-local.js
+          # Parse the classroom's complete dependency graph before deployment.
+          ./node_modules/.bin/esbuild ../alumnos/curso.js --bundle --platform=browser --format=esm --target=es2020 --external:https://* --outfile=/tmp/tle-classroom-startup-check.js
+          test -s /tmp/tle-classroom-startup-check.js
           npm run test:spotify-links
           npm run test:editorial-plan
           npm run test:classes
