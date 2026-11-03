@@ -258,3 +258,18 @@ test('Mara se muestra en un panel propio, con datos protegidos y carga opcional'
  assert.doesNotMatch(maraGuide,/SUPABASE_SERVICE_ROLE_KEY|sk_live_|rk_live_|whsec_/);
  assert.ok(workflow.includes("node --check alumnos/mara-guide.js"),'El parser se comprueba en cada publicación');
 });
+
+
+test('Inspiración de demos no puede quedar vacía después de entrar al aula',()=>{
+ const gallery=readFileSync('alumnos/inspiracion.js','utf8');
+ const styles=readFileSync('alumnos/aula-inspiracion.css','utf8');
+ assert.equal((room.match(/id="inspiration-gallery"/g)||[]).length,1,'Una sola galería en el aula');
+ assert.match(course,/if\(view==='inspiracion'\)void ensureInspiracion\(\)/,'Abrir la pestaña activa su carga aunque falle la inicialización previa');
+ assert.match(course,/function ensureInspiracion\(force=false\)/,'La galería puede volver a cargarse');
+ assert.match(course,/function showInspirationRetry\(root\)/,'Hay recuperación visible y botón para reintentar');
+ assert.match(course,/root\.querySelector\('\.inspiration-heading'\)/,'No se considera cargada si quedó vacía');
+ assert.match(gallery,/\.eq\('asset_code','inspiration_gallery_v1'\)/,'Lectura de los demos de la clase');
+ assert.match(gallery,/demos\.filter\(d=>d\.published!==false\)/,'Alumnos solo ven demos autorizados');
+ assert.match(styles,/\.inspiration-recovery/,'La pantalla de error se puede leer en móvil');
+ assert.doesNotMatch(room,/SUPABASE_SERVICE_ROLE_KEY|sk_live_/,'Nada confidencial en HTML');
+});
