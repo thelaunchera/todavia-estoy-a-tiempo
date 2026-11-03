@@ -606,7 +606,8 @@ async function showCourse(email,asAdmin=false){
   try{refreshedSection=sessionStorage.getItem('tle_aula_refresh_view')||'';sessionStorage.removeItem('tle_aula_refresh_view');}catch{}
   bonusLibraryController=null;
   $('bonus-library-items')?.replaceChildren();
-  setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(location.hash==='#prompts'?'prompts':'inicio'),{scroll:false,track:false});
+  const linkSection=location.hash.slice(1);
+  setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(['prompts','bonos'].includes(linkSection)?linkSection:'inicio'),{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage,
