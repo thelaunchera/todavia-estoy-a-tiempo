@@ -1,4 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
+import {courseCopy,translateCourseMessage} from './aula-mensajes.js?v=20261102-v1';
 import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v7';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
@@ -99,7 +100,7 @@ async function isAuthorizedOwner(who){
  if(error)throw error;
  return data?.role==='owner';
 }
-function status(text,ok=false){message.textContent=text;message.dataset.ok=ok?'true':'false';}
+function status(text,ok=false){message.dataset.sourceMessage=String(text??'');message.textContent=translateCourseMessage(text,getClassroomLanguage());message.dataset.ok=ok?'true':'false';}
 function display(panel){
  [login,noAccess,course].forEach(el=>el.hidden=(el!==panel));
  document.body.classList.toggle('aula-member',panel===course);
@@ -248,6 +249,10 @@ function refreshClassroomLanguage(){
   }
   aulaTitle.textContent=(lang==='en'?aulaViewsEn:aulaViews)[currentAulaView];
   updateDashboard();
+  if(!adminPreview)bonusState();
+  if(message?.dataset.sourceMessage)message.textContent=translateCourseMessage(message.dataset.sourceMessage,lang);
+  if(courseHelpStatus?.dataset.sourceMessage)courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,lang);
+  if(lessons.length)setProgressLabels();
   inspirationController?.setLanguage?.();
   materialsController?.setLanguage?.();
  }
@@ -274,9 +279,9 @@ async function refreshPersonalBonuses(){
   (data||[]).filter(item=>item.resource_code.startsWith('bonus_')&&/^https:\/\//.test(item.url||'')).forEach(item=>{
     const link=document.createElement('a');
     link.className='resource';link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
-    escapedText(link,'span','BONO PERSONAL','resource-tag');
+    escapedText(link,'span',courseCopy('BONO PERSONAL','PERSONAL BONUS',getClassroomLanguage()),'resource-tag');
     escapedText(link,'strong',item.title);
-    escapedText(link,'span','Abrir bono','resource-link');
+    escapedText(link,'span',courseCopy('Abrir bono','Open bonus',getClassroomLanguage()),'resource-link');
     list.appendChild(link);
   });
   box.hidden=list.children.length===0;
@@ -305,16 +310,16 @@ function bonusState(){
   $('assigned-bonuses').hidden=true;
  }
  if(eligible){
-  status.textContent='¡Completaste las lecciones y compartiste tu web! Requisitos del bono cumplidos.';
+  status.textContent=courseCopy('¡Completaste las lecciones y compartiste tu web! Requisitos del bono cumplidos.','You finished the lessons and shared your website! Bonus requirements met.',getClassroomLanguage());
   status.dataset.state='earned';
  }else if(allDone){
-  status.textContent='Te falta un paso: publica tu primera web en Proyectos, dentro del Club de Ideas.';
+  status.textContent=courseCopy('Te falta un paso: publica tu primera web en Proyectos, dentro del Club de Ideas.','One step left: share your first website in Projects, inside Ideas Club.',getClassroomLanguage());
   status.dataset.state='progress';
  }else if(projectShared){
-  status.textContent='¡Tu web ya está en el club! Termina las lecciones para activar el bono.';
+  status.textContent=courseCopy('¡Tu web ya está en el club! Termina las lecciones para activar el bono.','Your website is already in the club! Finish the lessons to unlock your bonus.',getClassroomLanguage());
   status.dataset.state='progress';
  }else{
-  status.textContent='Bono bloqueado · termina las lecciones y comparte tu web en el Club de Ideas.';
+  status.textContent=courseCopy('Bono bloqueado · termina las lecciones y comparte tu web en el Club de Ideas.','Bonus locked · finish your lessons and share your website in Ideas Club.',getClassroomLanguage());
   status.dataset.state='pending';
  }
 }
@@ -323,9 +328,13 @@ function updateDashboard(){
   language:getClassroomLanguage(),localizeLesson:item=>translationForLesson(item),onLesson:i=>choose(i),onView:setAulaView});
  applyClassroomLanguage();
 }
+function setProgressLabels(){
+ const {total,completed}=progressStats();
+ $('progress-label').textContent=courseCopy(completed+' de '+total+' lecciones completadas',completed+' of '+total+' lessons completed',getClassroomLanguage());
+}
 function setProgress(){
  const {total,completed,percent}=progressStats();
- $('progress-label').textContent=completed+' de '+total+' lecciones completadas';
+ setProgressLabels();
  $('progress-percent').textContent=percent+'%';
  $('progress-bar').style.width=percent+'%';
  $('student-progress').setAttribute('aria-valuenow',String(percent));
@@ -334,10 +343,10 @@ function setProgress(){
 }
 function congratulate(item){
  const {total,completed}=progressStats();
- $('lesson-celebration-title').textContent='¡Bien hecho! Terminaste una lección.';
+ $('lesson-celebration-title').textContent=courseCopy('¡Bien hecho! Terminaste una lección.','Well done! You finished a lesson.',getClassroomLanguage());
  $('lesson-celebration-description').textContent=total&&completed===total
-  ? '¡Completaste todas las lecciones! Ahora comparte tu primera web en el Club de Ideas para cumplir el reto del bono.'
-  : 'Terminaste «'+item.title+'». Ya llevas '+completed+' de '+total+'. ¡Sigue así!';
+  ? courseCopy('¡Completaste todas las lecciones! Ahora comparte tu primera web en el Club de Ideas para cumplir el reto del bono.','You finished every lesson! Share your first website in Ideas Club to complete the bonus challenge.',getClassroomLanguage())
+  : courseCopy('Terminaste «'+item.title+'». Ya llevas '+completed+' de '+total+'. ¡Sigue así!','You finished “'+translationForLesson(item).title+'”. You have completed '+completed+' of '+total+' lessons. Keep going!',getClassroomLanguage());
  $('lesson-celebration').hidden=false;
 }
 async function loadMemberName(who,asAdmin){
@@ -534,8 +543,9 @@ async function showCourse(email,asAdmin=false){
  generalResources.forEach(item=>{
   const a=document.createElement('a');a.href=item.url||'#';a.rel='noopener noreferrer';a.target='_blank';a.className='resource';
   if(!item.url || !/^https:\/\//i.test(item.url)){a.removeAttribute('href');a.removeAttribute('target');}
-  escapedText(a,'span',asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL','resource-tag');
-  escapedText(a,'strong',item.title);escapedText(a,'span',item.url?'Abrir':'En preparación','resource-link');
+  escapedText(a,'span',getClassroomLanguage()==='en'?(asAdmin?(item.status==='ready'?'APPROVED MATERIAL':'IN PREPARATION'):'GUIDE / MATERIAL'):(asAdmin?(item.status==='ready'?'MATERIAL APROBADO':'EN PREPARACIÓN'):'GUÍA / MATERIAL'),'resource-tag');
+  const resourceTitleEn={prompts:'Prompt library',pdf_00:'Getting started · PDF',pdf_01:'Prompt library · PDF',pdf_02:'Workbook · PDF',pdf_03:'Website guide · PDF',pdf_04:'Final checklist · PDF'};
+  escapedText(a,'strong',getClassroomLanguage()==='en'?(resourceTitleEn[item.resource_code]||'Course resource'):item.title);escapedText(a,'span',getClassroomLanguage()==='en'?(item.url?'Open':'In preparation'):(item.url?'Abrir':'En preparación'),'resource-link');
   resources.appendChild(a);
  });
  $('empty-resources').hidden=Boolean(generalResources.length);
@@ -568,7 +578,7 @@ async function showCourse(email,asAdmin=false){
   if(currentAulaView==='prompts')materialsController?.go('prompts',{track:false});
  }).catch(()=>{
   const root=$('materiales-interactivos');
-  root.textContent='No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.';
+  root.textContent=translateCourseMessage('No se pudieron cargar los materiales. Vuelve a abrir el aula o pide ayuda desde aquí.',getClassroomLanguage());
  });
  void mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage}).then(controller=>{
   inspirationController=controller;
@@ -758,7 +768,8 @@ courseHelpForm.addEventListener('submit',async event=>{
  if(courseHelpForm.querySelector('[name="website"]')?.value)return;
  const endpoint=window.PODCAST_CONFIG?.helpEndpoint;
  if(typeof endpoint!=='string'||!/^https:\/\//.test(endpoint)){
-  courseHelpStatus.textContent='La ayuda no está disponible ahora. Escríbenos a hello@thelaunchera.com.';
+  courseHelpStatus.dataset.sourceMessage='La ayuda no está disponible ahora. Escríbenos a hello@thelaunchera.com.';
+  courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,getClassroomLanguage());
   courseHelpStatus.dataset.state='error';return;
  }
  const button=courseHelpForm.querySelector('button[type="submit"]');
@@ -767,20 +778,22 @@ courseHelpForm.addEventListener('submit',async event=>{
  payload.set('topic',String(title));
  payload.set('message','[Centro de alumnos · Tu primera web con IA]'+
     (lessons[selected]?.title?' [Lección: '+lessons[selected].title+']':'')+'\n'+String(payload.get('message')||''));
- button.disabled=true;button.textContent='Enviando consulta…';
+ button.disabled=true;button.textContent=courseCopy('Enviando consulta…','Sending request…',getClassroomLanguage());
  try{
   const response=await fetch(endpoint,{method:'POST',mode:'cors',headers:{Accept:'application/json'},body:payload});
   if(!response.ok)throw Error('Error de envío');
   const data=await response.json();
   if(data?.ok!==true)throw Error('Sin confirmación');
-  courseHelpStatus.textContent='¡Recibí tu consulta! Te envié una confirmación por correo. Puedes continuar con tu clase.';
+  courseHelpStatus.dataset.sourceMessage='¡Recibí tu consulta! Te envié una confirmación por correo. Puedes continuar con tu clase.';
+  courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,getClassroomLanguage());
   courseHelpStatus.dataset.state='success';
   courseHelpForm.reset();
   if(user?.email)$('course-help-email').value=user.email.trim().toLowerCase();
  }catch{
-  courseHelpStatus.textContent='No pudimos confirmar el envío. Intenta otra vez o escribe a hello@thelaunchera.com.';
+  courseHelpStatus.dataset.sourceMessage='No pudimos confirmar el envío. Intenta otra vez o escribe a hello@thelaunchera.com.';
+  courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,getClassroomLanguage());
   courseHelpStatus.dataset.state='error';
- }finally{button.disabled=false;button.textContent='Enviar mi consulta';}
+ }finally{button.disabled=false;button.textContent=courseCopy('Enviar mi consulta','Send my request',getClassroomLanguage());}
 });
 
 // Suscribir antes de iniciar la lectura de sesión para recibir el evento de recuperación.
