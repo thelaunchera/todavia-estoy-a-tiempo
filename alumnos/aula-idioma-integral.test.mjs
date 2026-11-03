@@ -55,7 +55,8 @@ test('Drive connection instructions and one-project guidance stay available in b
  const english=load('materials-guides-en.js');
  assert.match(home,/Google Drive: conecta la app desde ChatGPT/);
  assert.match(home,/Empieza con una sola web/);
- assert.match(translations,/Google Drive: in ChatGPT open Settings/);
+ assert.match(translations,/Google Drive: save the photos and files for each website/);
+ assert.match(translations,/In ChatGPT, open Settings/);
  assert.match(translations,/Start with one website/);
  assert.match(spanish,/Trabaja en una sola web/);
  assert.match(spanish,/Antes de borrar fotos del teléfono|antes de borrar ninguna copia local/);
