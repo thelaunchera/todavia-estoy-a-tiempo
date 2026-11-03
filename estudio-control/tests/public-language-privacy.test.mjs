@@ -29,7 +29,7 @@ test('public pages do not describe the behind-the-scenes technology stack',()=>{
 test('English and Spanish landing documents declare their own language',()=>{
   for(const page of publicPaths){
     const expected=page==='index-en.html'||page.endsWith('-en.html')||page.includes('/en/')?'en':'es';
-    assert.match(read(page),new RegExp('<html[^>]+lang=["\\']'+expected+'["\\']','i'),page);
+    assert.equal(read(page).match(/<html[^>]*lang=["'](en|es)["']/i)?.[1],expected,page);
   }
 });
 test('public English pages do not regress to known mixed-language labels',()=>{
