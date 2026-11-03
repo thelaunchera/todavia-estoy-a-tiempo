@@ -312,7 +312,7 @@ test('Moodboard aprobado y lotes de nueve fotos, con guía bilingüe y sin tocar
  assert.match(src,/Math\.min\(9,Math\.max\(1,/,'No se muestra un lote con más de nueve imágenes');
  assert.match(src,/inspiration-photo-batch/,'Cada lote muestra su número y fotografías separadas');
  assert.match(src,/inspiration-photo-directions/,'Cada foto tiene instrucciones propias de ubicación o reutilización');
- assert.ok(src.includes('guidePayload?.cases?.[d.id]?.extra_prompts'),'Los casos sin material original reciben guías adicionales sin reemplazar los originales');
+ assert.match(src,/(?:guideCase\?\.extra_prompts|guidePayload\?\.cases\?\.\[d\.id\]\?\.extra_prompts)/,'Los casos sin material original reciben guías adicionales sin reemplazar los originales');
  assert.match(src,/mappedStagePhotos/,'Las fotos de cada prompt proceden de su sección verificada');
  assert.match(src,/correctedDemoText/,'Se corrigen rutas obsoletas sin alterar el archivo original');
  assert.match(css,/\.inspiration-workflow-steps/,'Los seis pasos se leen en móvil');
