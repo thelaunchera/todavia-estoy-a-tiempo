@@ -9,7 +9,9 @@ const publicPaths = [
   'content-lab/public/descubre/index.html',
   'content-lab/public/descubre/en/index.html',
   'content-lab/public/prompts/index.html',
-  'content-lab/public/prompts/en/index.html'
+  'content-lab/public/prompts/en/index.html',
+  'content-lab/public/privacidad.html',
+  'content-lab/public/privacidad-en.html'
 ];
 function visibleCopy(html){
   return html
