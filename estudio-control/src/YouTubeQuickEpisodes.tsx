@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {BookOpen,Check,Clapperboard,Copy,Download,FolderArchive,ImagePlus,MonitorPlay,RefreshCcw,Smartphone,Video,Wallet} from 'lucide-react';
 import {zipSync,strToU8} from 'fflate';
-import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microLimits} from './youtube/micro-production';
+import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microLimits} from './youtube/micro-production';
 import {loadYouTubeSavedPhotos,type YouTubeSavedPhoto} from './supabase-client';
 import './youtube-quick-episodes.css';
 
@@ -54,6 +54,8 @@ export default function YouTubeQuickEpisodes(){
    <div className="mq-actions">
     <button type="button" onClick={()=>downloadZip(prefix+'_DOS_FORMATOS_WINDOWS.zip',microWindowsFiles(season,episode))}><FolderArchive size={16}/> Descargar proyecto para Windows</button>
     <button type="button" onClick={()=>downloadText(prefix+'_GUION_CORTO.txt',microScriptText(q))}><Download size={16}/> Descargar guion corto</button>
+    <button type="button" onClick={()=>downloadText(prefix+'_GUIA_GRABACION.txt',microRecordingChecklist(q))}><Download size={16}/> Guía de grabación</button>
+    <button type="button" onClick={()=>downloadText(prefix+'_VOCES_POR_PERSONAJE.csv',microVoiceCues(q))}><Download size={16}/> Turnos de voz CSV</button>
     <button type="button" onClick={()=>void copy(microScriptText(q),'Guion del capítulo')}><Copy size={16}/> Copiar diálogos</button>
    </div>
    {notice&&<p role="status" className="mq-notice"><Check size={16}/>{notice}</p>}
@@ -86,6 +88,13 @@ export default function YouTubeQuickEpisodes(){
     <div><MonitorPlay size={23}/><b>YouTube horizontal</b><span>1920 × 1080 · 16:9</span><small>Video normal de aproximadamente dos minutos</small></div>
     <div><Smartphone size={23}/><b>TikTok / YouTube Short</b><span>1080 × 1920 · 9:16</span><small>Misma voz y fotos; encuadre vertical con fondo difuminado o recorte</small></div>
    </div>
+   <div className="mq-recording-flow"><h4>Grabación sencilla · orden recomendado</h4><ol>
+   <li><strong>Lee el guion corto</strong> y abre la guía de voces por personaje.</li>
+   <li><strong>Graba las voces primero</strong> con la Grabadora de Windows o tu herramienta gratuita de voz.</li>
+   <li><strong>Usa tres fotos aprobadas</strong> y no vuelvas a generarlas para TikTok.</li>
+   <li><strong>Abre el ZIP en el editor Windows</strong>, selecciona las imágenes y la pista WAV/MP3.</li>
+   <li><strong>Haz una prueba de 12 segundos</strong>, revisa rostros y audio, y exporta ambos MP4.</li>
+   </ol><p>La duración se ajusta a las voces: objetivo 90–120 segundos, sin rellenar silencios artificialmente.</p></div>
    <p>En el PC: descarga el proyecto ZIP de arriba, ábrelo con el complemento Windows «OFF BRIEF · Dos formatos», coloca las tres fotos y un archivo de diálogo WAV/MP3, elige «YouTube + TikTok» y exporta ambos MP4. También puedes hacer tomas animadas extra si lo necesitas.</p>
    <p className="mq-warning"><BookOpen size={16}/> Este sistema usa movimientos de cámara sobre imágenes y montaje gratuito. No crea animación facial completa ni voces automáticamente; las voces se añaden desde los archivos que prepares.</p>
   </section>
