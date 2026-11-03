@@ -31,3 +31,10 @@
 .bonus-library-message{color:#586777;font-size:14px;padding:12px 0}
 @media(max-width:600px){.bonus-library{padding:16px;border-radius:15px}.bonus-library-card-head{padding:14px;gap:10px}.bonus-library-index{flex-basis:32px;height:32px}.bonus-library-card-content{padding:0 14px 17px}.bonus-library-card-title{font-size:17px}.bonus-library-prompt{font-size:12px;max-height:420px}}
 @media(prefers-reduced-motion:reduce){.bonus-library-plus{transition:none}}
+
+
+.bonus-library-example-note{font-size:12px;line-height:1.6;color:#536473;margin:13px 0}
+.bonus-library-actions a{display:inline-flex;align-items:center;justify-content:center;text-align:center;min-height:42px;padding:11px 17px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:800}
+.bonus-library-example-link{color:#25455f;background:#ecf2f5;border:1px solid #cfdee6}
+.bonus-library-actions a:focus-visible{outline:3px solid #8ba5e9;outline-offset:3px}
+.bonus-library-example-link:hover{background:#dceaf0}
