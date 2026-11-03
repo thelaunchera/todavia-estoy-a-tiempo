@@ -195,7 +195,20 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         </details>
       </div>
       <label className="yt-gallery-search"><Search size={17}/><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Buscar un plano o una escena..." aria-label="Buscar imágenes del capítulo"/></label>
-      <div className="yt-photo-grid">{filtered.map(photo=><PhotoCard key={photo.id} photo={photo} entry={owned.get(photo.id)} privatePhoto={privatePhotos.get(photo.id)} readOnly={readOnly} onChanged={onChanged} onPrivateChanged={refreshPrivate}/>)}</div>
+      <div className="yt-production-groups">
+        {blocks.map(block=>{
+          const visible=block.photos.filter(photo=>filtered.some(match=>match.id===photo.id));
+          const count=block.photos.filter(photo=>available.some(asset=>asset.id===photo.id&&asset.source!=='missing')).length;
+          return visible.length?<section className="yt-production-group" key={block.number}>
+            <header><div><span className="yt-small-title">BLOQUE {block.number} DE 3</span><h4>{block.title}</h4><p>{block.detail} · {block.photos.length} espacios para fotos individuales</p></div><strong>{count}/{block.photos.length}</strong></header>
+            <div className="yt-photo-grid">{visible.map(photo=><PhotoCard key={photo.id} photo={photo} entry={owned.get(photo.id)} privatePhoto={privatePhotos.get(photo.id)} readOnly={readOnly} onChanged={onChanged} onPrivateChanged={refreshPrivate}/>)}</div>
+          </section>:null;
+        })}
+        {extras.some(photo=>filtered.some(match=>match.id===photo.id))&&<section className="yt-production-group">
+          <header><div><span className="yt-small-title">EXTRAS OPCIONALES</span><h4>Fotos especiales</h4><p>Separadas de las diez tomas principales.</p></div></header>
+          <div className="yt-photo-grid">{extras.filter(photo=>filtered.some(match=>match.id===photo.id)).map(photo=><PhotoCard key={photo.id} photo={photo} entry={owned.get(photo.id)} privatePhoto={privatePhotos.get(photo.id)} readOnly={readOnly} onChanged={onChanged} onPrivateChanged={refreshPrivate}/>)}</div>
+        </section>}
+      </div>
       {filtered.length===0&&<p className="yt-muted">No hay planos que coincidan con la búsqueda.</p>}
       <p className="yt-gallery-disclaimer">Los espacios en blanco son fotos todavía por generar. Los dos avatares sí están cargados. Nada de esta biblioteca programa publicaciones ni produce videos automáticamente.</p>
     </section>
