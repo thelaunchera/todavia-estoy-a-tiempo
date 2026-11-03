@@ -329,3 +329,10 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
 }
 #aula-layout .aula-rail .aula-owner-student-preview:hover{background:#dcebf3}
 #aula-layout .aula-rail .aula-owner-student-preview:disabled{opacity:.65;cursor:progress}
+
+
+/* Consistent navigation hierarchy and easy targets on mobile. */
+#aula-layout .aula-navigation .aula-nav-group{font-size:10.5px;letter-spacing:.105em;color:#687e8d;margin-top:19px}
+#aula-layout .aula-navigation .aula-side-link{min-height:46px;line-height:1.45}
+#aula-layout .aula-rail .lesson-index button{min-height:44px}
+@media(max-width:759px){#aula-layout .aula-navigation .aula-side-link{min-height:48px;font-size:14px}}
