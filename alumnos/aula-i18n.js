@@ -168,6 +168,44 @@ const translations=[
  ['.bottom a[href*="terminos"]','Terms'],
  ['.aula-rail-close','×']
 ];
+const accessibilityText=[
+ ['.aula-brand-links > a:first-child','aria-label','Go to my classroom home'],
+ ['#aula-owner-nav','aria-label','Back to administration'],
+ ['.aula-auth-modes','aria-label','Sign-in options'],
+ ['#aula-rail','aria-label','Classroom navigation'],
+ ['.aula-rail-brand a','aria-label','Classroom home'],
+ ['#aula-rail-close','aria-label','Close menu'],
+ ['.aula-navigation','aria-label','Class sections'],
+ ['.lesson-index','aria-label','Lesson list'],
+ ['#aula-rail-backdrop','aria-label','Close menu'],
+ ['#aula-menu-open','aria-label','Open classroom menu'],
+ ['#aula-public-language','aria-label','Language'],
+ ['#aula-language','aria-label','Classroom language'],
+ ['.aula-access-note','title','This area is for registered students'],
+ ['.dashboard-hero-actions','aria-label','Get started in my classroom'],
+ ['#student-progress','aria-label','Class progress'],
+ ['.dashboard-support','aria-label','Student help'],
+ ['#lesson-celebration-close','aria-label','Dismiss congratulations'],
+ ['#lesson-prompts-panel','aria-label','Prompts for this lesson'],
+ ['.lesson-navigation','aria-label','Lesson navigation'],
+ ['#mara-guide','aria-label','Mara · your website guide'],
+ ['#materiales-interactivos','aria-label','Practical class materials'],
+ ['#inspiration-gallery','aria-label','Inspiration gallery of finished websites, photos and prompts'],
+ ['.club-aula-actions','aria-label','What would you like to do in Ideas Club'],
+ ['#close-course-help','aria-label','Close help']
+];
+const originalAccessibility=new WeakMap();
+function translateAccessibility(){
+ for(const [selector,attribute,english] of accessibilityText){
+  for(const el of document.querySelectorAll(selector)){
+   let original=originalAccessibility.get(el);
+   if(!original){original={};originalAccessibility.set(el,original);}
+   if(!Object.hasOwn(original,attribute))original[attribute]=el.getAttribute(attribute);
+   const value=language==='en'?english:original[attribute];
+   if(value===null)el.removeAttribute(attribute);else el.setAttribute(attribute,value);
+  }
+ }
+}
 const placeholders=[['#login-email','name@email.com'],['#login-password','Your password'],['#course-help-name','Your name'],['#course-help-email','you@email.com'],['#course-help-message','Tell us what happened and where you need help…']];
 function translateElement(selector,english){
  for(const el of document.querySelectorAll(selector)){
@@ -207,6 +245,23 @@ function translateElement(selector,english){
    }else el.innerHTML=el.dataset.tleOriginalHtml;
    continue;
   }
+  if(selector==='.dashboard-setup-details > summary'){
+   // Keep the expand indicator and any nested accessibility markup intact.
+   const label=[...el.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());
+   if(label){
+    if(!el.dataset.tleSummarySpanish)el.dataset.tleSummarySpanish=label.textContent.trim();
+    label.textContent=(language==='en'?english:el.dataset.tleSummarySpanish)+' ';
+   }
+   continue;
+  }
+  if(selector==='.aula-password-toggle'){
+   const input=document.getElementById(el.dataset.passwordToggle||'');
+   const showing=input?.type==='text';
+   const label=language==='en'?(showing?'Hide':'Show'):(showing?'Ocultar':'Mostrar');
+   el.textContent=label;
+   el.setAttribute('aria-label',language==='en'?(showing?'Hide password':'Show password'):(showing?'Ocultar contraseña':'Mostrar contraseña'));
+   continue;
+  }
   if(selector==='.lesson-completed'){
    const textNode=[...el.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
    if(textNode)textNode.textContent=' '+(language==='en'?english:'Ya terminé esta lección');
@@ -234,6 +289,7 @@ export function applyClassroomLanguage(){
   const link=document.querySelector('.bottom a[href*="'+stem+'"]');
   if(link){link.href='../'+stem+(language==='en'?'-en':'')+'.html';link.hreflang=language;}
  }
+ translateAccessibility();
  updateStaticLanguage(language);
 }
 export function translationForLesson(lesson,lang=language){
