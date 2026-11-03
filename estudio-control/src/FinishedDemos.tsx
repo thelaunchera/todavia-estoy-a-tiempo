@@ -104,6 +104,20 @@ const finishedDemos:Demo[]=[
  },
 
  {
+  id:'la-vie-in-pink',
+  title:'La Vie in Pink · European Pâtisserie',
+  category:'Croissants gourmet, desayunos europeos y pastries · demo bilingüe',
+  description:'Website de pâtisserie europea en español e inglés: fachada editorial, croissants, desayunos, regalos, galería, historia y personas, membresía de muestra y contacto. Construido con AppDeploy.',
+  image:additionalDemoPhotos['la-vie-in-pink'][0].url,
+  url:'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/',
+  source:'https://dashboard.appdeploy.ai/',
+  note:'Demo publicado en AppDeploy, con 10 fotografías originales del proyecto y 4 pasos educativos de reconstrucción. No procesa pedidos ni pagos reales; las funciones de membresía son de demostración.',
+  kind:'other',
+  photos:additionalDemoPhotos['la-vie-in-pink'],
+  promptsFor:'la-vie-in-pink',
+ },
+
+ {
   id:'soluna-yoga',
   title:'SOLUNA Yoga · Fort Lauderdale',
   category:'Estudio de yoga · lanzamiento y membresías',
@@ -171,7 +185,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <div className="finished-demos-grid">
@@ -188,7 +202,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
        }}/>
        <div className="finished-demo-actions">
          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
-         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
+         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">{d.id==='la-vie-in-pink'?'Ver en AppDeploy':'Ver en repositorio'}</a>
        </div>
        <small>{d.note}</small>
        <details className="finished-demo-kit">
