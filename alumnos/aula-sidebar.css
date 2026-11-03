@@ -241,3 +241,78 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
 #aula-layout .aula-refresh:hover{background:#edf3f5}
 #aula-layout .aula-refresh:focus-visible{outline:3px solid #78a8c4;outline-offset:2px}
 @media(max-width:410px){#aula-layout .aula-refresh{padding-inline:10px;gap:6px;font-size:11px}#aula-layout .aula-refresh svg{width:16px;height:16px;flex-basis:16px}}
+
+
+/* 2026-11-03: ONE compact mobile classroom toolbar. No stacked actions or
+   duplicated in-page Back/Close rows; the sidebar remains accessible. */
+@media(max-width:759px){
+  body.aula-member #aula-layout .aula-main-top{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr) auto!important;
+    column-gap:9px!important;row-gap:0!important;
+    flex-wrap:nowrap!important;align-items:center!important;
+    min-height:56px!important;padding:6px 0!important;
+    margin:0 0 3px!important;
+    border-bottom:1px solid #e1e8ea;
+  }
+  body.aula-member #aula-layout #aula-menu-open{
+    grid-column:1;grid-row:1;order:initial!important;
+    display:grid;place-items:center;width:44px;height:44px;
+    min-height:44px;padding:0;border-radius:12px;
+    margin:0!important;
+  }
+  body.aula-member #aula-menu-open span{display:none!important}
+  body.aula-member #aula-layout .aula-main-location{
+    grid-column:2;grid-row:1;order:initial!important;
+    display:flex;align-items:center;flex:initial!important;
+    min-width:0!important;max-width:none!important;
+    margin:0!important;font-size:11px!important;
+    overflow:hidden;white-space:nowrap!important;
+  }
+  body.aula-member #aula-layout .aula-main-location>span{display:none!important}
+  body.aula-member #aula-layout .aula-main-location strong{
+    font-size:clamp(12px,3.5vw,14px)!important;
+    min-width:0;max-width:100%;
+    white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  }
+  body.aula-member #aula-layout .aula-main-actions{
+    grid-column:3;grid-row:1;order:initial!important;
+    display:flex!important;align-items:center!important;justify-content:flex-end;
+    flex:initial!important;flex-wrap:nowrap!important;
+    gap:7px!important;min-width:0!important;margin:0!important;
+  }
+  body.aula-member #aula-layout .aula-section-navigation{display:none!important}
+  body.aula-member #aula-layout .aula-refresh{
+    width:39px;height:42px;min-height:42px;min-width:39px;
+    padding:0!important;border-radius:11px;
+  }
+  body.aula-member #aula-layout .aula-refresh svg{width:19px;height:19px;flex-basis:19px}
+  body.aula-member #aula-layout .aula-refresh span{display:none!important}
+  body.aula-member #aula-layout .aula-lang-control{
+    min-height:42px;min-width:51px;height:42px;
+    padding:0 3px!important;border-radius:11px;gap:0;
+  }
+  body.aula-member #aula-layout .aula-lang-control select{
+    min-height:36px;font-size:12px;padding:0!important;max-width:50px;
+  }
+  body.aula-member #aula-layout .aula-lang-icon,
+  body.aula-member #aula-layout .aula-access-note,
+  body.aula-member #aula-layout .aula-quick-help{display:none!important}
+  body.aula-member #aula-layout .aula-main{padding-top:0}
+  /* The owner already sees an admin preview bar in Studio. Start with the
+     actual student welcome card, rather than a second preview banner. */
+  body.aula-member .admin-preview-banner{display:none!important}
+  body.aula-member .aula-home-dashboard .dashboard-hero{
+    margin-top:12px!important;
+  }
+}
+@media(max-width:380px){
+  body.aula-member #aula-layout .aula-main-top{column-gap:6px!important}
+  body.aula-member #aula-layout .aula-main-actions{gap:5px!important}
+  body.aula-member #aula-layout .aula-lang-control{min-width:47px}
+}
+/* The worksheet has its own Back/Close controls, but hide them when the
+   currently selected material is the root (no previous step). */
+@media(max-width:759px){
+  .mi-view-controls{margin-top:0}
+}
