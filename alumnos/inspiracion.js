@@ -23,9 +23,19 @@ const englishPhotoNames={
  soluna:['Hero','Studio interior','Studio exterior','Slow Flow','Deep Rest','Morning Ritual','Group class','Flowers','Studio apparel','Studio drinks'],
  cleaning:['Cleaning hero'],jaramillo:['Boutique hero']
 };
-function galleryPhotoLabel(demo,index,original,lang){
+function galleryPhotoLabel(demo,index,photo,lang){
+ const explicit=lang==='en'?photo?.label_en:photo?.label_es;
+ if(explicit)return String(explicit);
+ const original=photo?.name;
  if(lang!=='en')return spanishPhotoNames[demo]?.[index]||original||'Foto '+(index+1);
- return englishPhotoNames[demo]?.[index]||'Reference photo '+String(index+1).padStart(2,'0');
+ return englishPhotoNames[demo]?.[index]||original||'Reference photo '+String(index+1).padStart(2,'0');
+}
+function galleryPhotoSection(photo,lang){
+ return lang==='en'?(photo?.section_en||'Reference image'):(photo?.section_es||'Fotografía de referencia');
+}
+function galleryPhotoOrder(photo,index){
+ const position=Number(photo?.display_order);
+ return Number.isFinite(position)&&position>0?position:1000+index;
 }
 
 async function clipboardCopy(value,button,language='es'){
@@ -124,20 +134,31 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',showGallery));root.append(nav);
   root.append(header(d.title,enLabel(d.description_es,d.description_en,curLang())));
   const lead=document.createElement('section');lead.className='inspiration-demo-lead';
-  lead.innerHTML='<div class="inspiration-demo-cover">'+(safeUrl(d.image)?'<img src="'+esc(safeUrl(d.image))+'" loading="lazy" alt="'+esc(d.title)+'">':'')+'</div>'+
+  const coverPhoto=Array.isArray(d.photos)?d.photos.find(p=>safeUrl(p.url)&&safeUrl(p.url)===safeUrl(d.image)):null;
+  const coverIsVerified=coverPhoto?.usage==='hero';
+  const coverLabel=coverIsVerified
+   ?enLabel('Imagen principal del hero','Main hero image',curLang())
+   :enLabel('Imagen de referencia del demo','Demo reference image',curLang());
+  lead.innerHTML='<div class="inspiration-demo-cover">'+(safeUrl(d.image)?'<img src="'+esc(safeUrl(d.image))+'" loading="lazy" alt="'+esc(coverPhoto?galleryPhotoLabel(d.id,0,coverPhoto,curLang()):d.title)+'"><small class="inspiration-cover-caption">'+esc(coverLabel)+'</small>':'')+'</div>'+
    '<div><span class="inspiration-eyebrow">'+esc(enLabel(d.category_es,d.category_en,curLang()))+'</span>'+
    '<p>'+esc(demoNotes(d,curLang()))+'</p>'+
    '<a class="inspiration-demo-open" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.url))+'">'+enLabel('Abrir página completa','Open full website',curLang())+' ↗</a>'+
    (safeUrl(d.video_url)?'<a class="inspiration-demo-open secondary" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.video_url))+'">'+enLabel('Comparar versión con video','Compare video version',curLang())+' ↗</a>':'')+'</div>';
   root.append(lead);
-  const photos=Array.isArray(d.photos)?d.photos.filter(x=>safeUrl(x.url)):[];
+  const photos=Array.isArray(d.photos)
+   ?d.photos.filter(x=>safeUrl(x.url)).map((p,index)=>({p,index}))
+      .sort((a,b)=>galleryPhotoOrder(a.p,a.index)-galleryPhotoOrder(b.p,b.index))
+   :[];
   const photoBlock=document.createElement('section');photoBlock.className='inspiration-photos';
   photoBlock.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Fotografías individuales','Individual photos',curLang())+'</h3><p>'+photos.length+' '+enLabel('imágenes de referencia, sin collages. Ábrelas por separado para guardarlas.','reference images, not collages. Open each separately to save.',curLang())+'</p></div>';
   const gallery=document.createElement('div');gallery.className='inspiration-photo-grid';
-  for(const [photoIndex,p] of photos.entries()){
+  for(const {p,index:photoIndex} of photos){
    const link=document.createElement('a');link.href=safeUrl(p.url);link.rel='noopener noreferrer';link.target='_blank';link.className='inspiration-photo';
-   const label=galleryPhotoLabel(d.id,photoIndex,p.name,curLang());
-   link.innerHTML='<img alt="'+esc(label)+'" loading="lazy" src="'+esc(safeUrl(p.url))+'"><span>'+esc(label)+' ↗</span>';
+   const label=galleryPhotoLabel(d.id,photoIndex,p,curLang());
+   const section=galleryPhotoSection(p,curLang());
+   if(p.usage==='hero')link.classList.add('inspiration-photo-hero');
+   link.setAttribute('aria-label',section+' · '+label);
+   link.innerHTML='<img alt="'+esc(label)+'" loading="lazy" src="'+esc(safeUrl(p.url))+'"><small class="inspiration-photo-section">'+esc(section)+'</small><span>'+esc(label)+'</span>';
    gallery.append(link);
   }
   if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos individuales de este cliente no se comparten.','Individual client photos are not shared.',curLang())+'</p>';
