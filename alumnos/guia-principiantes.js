@@ -16,7 +16,7 @@ const folders=[
  ['07_GASTOS','Costos y renovaciones si algún día compro un servicio.']
 ];
 export function renderWebBasics(content,go){
- header(content,'02 / ENTENDER PARA CONSTRUIR','Tu web tiene una parte visible y otra que trabaja detrás.','Mira qué se ve y qué pasa por detrás. Vamos a entenderlo con Casa Brownie antes de conectar herramientas que todavía no necesitamos.');
+ header(content,'ENTIENDE TU WEB','Tu web tiene una parte visible y otra que trabaja detrás.','Mira qué se ve y qué pasa por detrás. Vamos a entenderlo con Casa Brownie antes de conectar herramientas que todavía no necesitamos.');
  const grid=node('div','mi-structure-grid');
  [
   ['Frontend · la parte visible','Es lo que cualquier persona ve: fotografías, título, menú, colores, botones y diseño para teléfono.','Mira Casa Brownie: la portada pregunta «¿Qué llevo de regalo?» y el botón «Descubrir sabores» te lleva al catálogo.'],
@@ -48,7 +48,7 @@ export function renderWebBasics(content,go){
  const actions=node('div','mi-actions');const next=node('button','mi-primary','Ordenar mi proyecto');next.type='button';next.addEventListener('click',()=>go('organizacion'));actions.append(next);content.append(actions);
 }
 export function renderProjectOrder(content){
- header(content,'03 / UN LUGAR PARA CADA COSA','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en Google Drive. Dentro guarda estas ocho partes y no pierdas tiempo buscando archivos.');
+ header(content,'ORGANIZA TUS ARCHIVOS','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en Google Drive. Dentro guarda estas ocho partes y no pierdas tiempo buscando archivos.');
  content.append(node('p','mi-note','Trabaja en una sola web hasta terminarla y practicar el proceso completo. Así tendrás claras las fotos, los textos y los cambios de ese negocio. Después podrás empezar otra sin mezclar archivos.'));
  const grid=node('div','mi-folder-grid');content.append(grid);
  for(const [title,description] of folders){const item=node('div','mi-folder-card');item.append(node('strong',null,title),node('span',null,description));grid.append(item);}
@@ -71,7 +71,7 @@ export function renderProjectOrder(content){
 
 /* Ruta de ejecución del alumno: su negocio, no la reproducción literal de Casa Brownie. */
 export function renderStudentWebPath(content,go){
- header(content,'TU RUTA / DE LA IDEA AL ENLACE','Construye TU web, paso a paso.','Casa Brownie es el ejemplo que ves en el video. Aquí trabajarás con tu propio producto o servicio. Haz un paso, comprueba el resultado y después continúa.');
+ header(content,'TU RUTA DE CREACIÓN','Construye TU web, paso a paso.','Casa Brownie es el ejemplo que ves en el video. Aquí trabajarás con tu propio producto o servicio. Haz un paso, comprueba el resultado y después continúa.');
  const intro=node('div','mi-path-intro');
  intro.append(node('strong',null,'Tu objetivo: una página clara que puedas abrir desde tu teléfono y compartir con un enlace.'),node('p',null,'No necesitas programar ni comprar un dominio. Para esta primera web basta con una portada, información real, fotografías, un botón que funcione y un pie de página. Los pagos y automatizaciones son opcionales y se ven después.'));
  intro.append(node('p',null,'Orden real de la clase: idea y carpeta → 8 prompts gratis → moodboard → fotografías individuales → textos → AppDeploy → revisar y publicar. Primero definimos la imagen de marca, después construimos la página.'));
