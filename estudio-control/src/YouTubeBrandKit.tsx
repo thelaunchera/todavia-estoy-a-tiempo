@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useMemo,useState} from 'react';
-import {Check,Copy,Download,FileImage,Film,ImagePlus,Palette,RefreshCw,Trash2,UploadCloud,Volume2} from 'lucide-react';
+import {Check,Copy,Download,Film,ImagePlus,Palette,RefreshCw,Trash2,UploadCloud,Volume2} from 'lucide-react';
 import {offBriefBrand,offBriefAssetSlots,offBriefSlogans,type BrandAssetSlot} from './youtube/off-brief-brand';
 import {loadYouTubeBrandVault,removeYouTubeBrandAsset,saveYouTubeBrandCopy,uploadYouTubeBrandAsset,type StudioBrandAsset} from './supabase-client';
 import './youtube-brand-kit.css';
