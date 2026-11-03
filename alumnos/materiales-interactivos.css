@@ -431,3 +431,5 @@
  .mi-owner-test-clear{width:100%;margin-top:5px}
 }
 @media print{.mi-owner-test-note{display:none!important}}
+
+.mi-owner-test-feedback{flex:1 1 100%;width:100%;font-size:12px;line-height:1.5;color:#35617b;margin:6px 0 0}
