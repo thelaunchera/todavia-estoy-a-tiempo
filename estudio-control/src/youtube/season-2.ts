@@ -6,7 +6,7 @@ export const seasonTwo = {
   language:"English",
   audience:"Adulto joven / emprendedores / creadores; comedia familiar y de trabajo",
   seasonLength:8,
-  targetRuntime:"6–8 minutos por capítulo",
+  targetRuntime:"Edición principal: 90–120 segundos; los guiones largos quedan archivados",
   premise:"Después de la primera temporada, Northlight Market finalmente aprueba un piloto importante para el pequeño estudio de Nia y Ruby. Ellas incorporan a un grupo de profesionales creativos que trabajan como freelancers. Cada disciplina soluciona problemas distintos y provoca otros nuevos. La comedia viene de convivir, negociar ideas, equivocarse y sacar adelante una campaña colectiva.",
   stakes:"La amistad de Nia y Ruby sigue siendo el centro. La tensión es cómo crecer sin perder creatividad, honestidad ni tiempo personal. La historia de cada semana alimenta una campaña final y desarrolla el arco de un personaje.",
   castRule:"Dos protagonistas originales + cuatro colaboradores habituales + cuatro recurrentes. Presentar entre dos y tres personajes nuevos en los capítulos iniciales, no a todos a la vez.",
