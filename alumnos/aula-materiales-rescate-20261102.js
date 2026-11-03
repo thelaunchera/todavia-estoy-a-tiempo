@@ -74,10 +74,13 @@ function offerStudentPreview(){
  button.id='aula-student-preview';button.type='button';
  button.textContent=lang()==='en'?'View as student':'Ver como alumno';
  button.title=lang()==='en'?'See published learning resources without editing student progress':'Ver recursos publicados sin modificar el progreso de los alumnos';
- button.style.cssText='display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid #a5bfce;background:#f9fcfd;color:#21455f;font:700 13px/1.3 Arial,sans-serif;cursor:pointer';
+ // Owner-only toggle belongs in the sidebar, never in the compact header.
+ button.className='aula-side-link aula-owner-student-preview';
  button.onclick=()=>void showStudentResources(button);
- const target=document.querySelector('.aula-main-actions')||document.querySelector('.aula-main-top');
- target?.append(button);
+ const navigation=document.querySelector('#aula-rail .aula-navigation');
+ const help=navigation?.querySelector('[data-course-help]');
+ if(help)help.insertAdjacentElement('beforebegin',button);
+ else navigation?.append(button);
 }
 
 function syncPreviewLanguage(){
