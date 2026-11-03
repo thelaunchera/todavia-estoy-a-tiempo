@@ -1,5 +1,5 @@
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-bonus-library-v1';
-import {promptGuide} from './prompt-guide.js?v=20261103-bonus-library-v1';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-command-center-v2';
+import {promptGuide} from './prompt-guide.js?v=20261103-command-center-v2';
 
 /* The existing resource RLS is the sole source of student bonus visibility.
    Bonus prompts are queried separately and never reveal an unassigned resource.
