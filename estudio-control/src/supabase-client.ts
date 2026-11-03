@@ -783,3 +783,75 @@ export async function setClassroomDemoVisibility(
     throw Error('No se pudo comprobar la selección guardada.');
   return returned;
 }
+
+/* OFF BRIEF YouTube channel brand vault; admin-only private storage, no public URLs. */
+const BRAND_BUCKET='podcast-youtube-brand';
+const brandIds=/^(logo_primary|logo_compact|channel_banner|channel_avatar|motif_duck|motif_clapper|lower_third|transition_card|video_bumper|sfx_sting|cover_s[12]_e0[1-8])$/;
+const allowedBrandTypes:Record<string,string>={'image/png':'png','image/jpeg':'jpg','image/webp':'webp','video/mp4':'mp4','video/webm':'webm','audio/mpeg':'mp3','audio/wav':'wav','audio/x-wav':'wav'};
+export type StudioBrandAsset={asset_id:string;object_path:string;file_name:string;mime_type:string;file_size:number;url:string;updated_at:string};
+export type StudioBrandCopy={copy_key:string;content:string;updated_at:string};
+function checkBrandAsset(id:string){if(!brandIds.test(id))throw new Error('Elemento de marca no reconocido.');}
+export async function loadYouTubeBrandVault():Promise<{assets:StudioBrandAsset[];copies:StudioBrandCopy[]}>{
+ if(!client)throw new Error('Abre el Studio con tu sesión de administración.');
+ const who=await owner();
+ const [assetsRes,copiesRes]=await Promise.all([
+ client.from('podcast_youtube_brand_assets').select('asset_id,object_path,file_name,mime_type,file_size,updated_at').eq('user_id',who.id).order('asset_id'),
+ client.from('podcast_youtube_brand_copy').select('copy_key,content,updated_at').eq('user_id',who.id).order('copy_key')
+ ]);
+ if(assetsRes.error)throw new Error('No se pudo leer la biblioteca de identidad: '+assetsRes.error.message);
+ if(copiesRes.error)throw new Error('No se pudieron leer los slogans: '+copiesRes.error.message);
+ const rows=assetsRes.data||[];
+ if(!rows.length)return {assets:[],copies:copiesRes.data||[]};
+ const {data:signed,error}=await client.storage.from(BRAND_BUCKET).createSignedUrls(rows.map(p=>p.object_path),3600);
+ if(error)throw new Error('No se pudieron crear las vistas previas privadas: '+error.message);
+ return {assets:rows.map((p,i)=>({...p,url:signed?.[i]?.signedUrl||''})),copies:copiesRes.data||[]};
+}
+export async function uploadYouTubeBrandAsset(id:string,file:File,maxMb:number):Promise<void>{
+ if(!client)throw new Error('El Studio no está conectado.');
+ checkBrandAsset(id);
+ const ext=allowedBrandTypes[file.type];
+ if(!ext||file.size<=0)throw new Error('Archivo no válido. Usa PNG, JPG, WEBP, MP4, WEBM, MP3 o WAV.');
+ const limit=Math.min(Math.max(1,maxMb),50)*1000000;
+ if(file.size>limit)throw new Error('El archivo supera el límite de '+maxMb+' MB para este elemento.');
+ const who=await owner();
+ const {data:old,error:readError}=await client.from('podcast_youtube_brand_assets').select('object_path')
+  .eq('user_id',who.id).eq('asset_id',id).maybeSingle();
+ if(readError)throw new Error('No se pudo revisar la versión anterior.');
+ const path=who.id+'/'+id+'/'+crypto.randomUUID()+'.'+ext;
+ const {error:uploadError}=await client.storage.from(BRAND_BUCKET).upload(path,file,{contentType:file.type,cacheControl:'3600',upsert:false});
+ if(uploadError)throw new Error('No se pudo subir el archivo: '+uploadError.message);
+ const {error:saveError}=await client.from('podcast_youtube_brand_assets').upsert({
+   user_id:who.id,asset_id:id,object_path:path,file_name:(file.name||id+'.'+ext).slice(0,180),
+   mime_type:file.type,file_size:file.size,updated_at:new Date().toISOString()
+ },{onConflict:'user_id,asset_id'});
+ if(saveError){
+  await client.storage.from(BRAND_BUCKET).remove([path]);
+  throw new Error('No se pudo vincular el archivo al elemento: '+saveError.message);
+ }
+ if(old?.object_path&&old.object_path!==path)await client.storage.from(BRAND_BUCKET).remove([old.object_path]);
+}
+export async function removeYouTubeBrandAsset(id:string):Promise<void>{
+ if(!client)throw new Error('El Studio no está conectado.');
+ checkBrandAsset(id);
+ const who=await owner();
+ const {data:old,error:readError}=await client.from('podcast_youtube_brand_assets')
+ .select('object_path').eq('user_id',who.id).eq('asset_id',id).maybeSingle();
+ if(readError)throw new Error('No se encontró el elemento.');
+ if(!old?.object_path)return;
+ const {error:deleteError}=await client.from('podcast_youtube_brand_assets').delete()
+   .eq('user_id',who.id).eq('asset_id',id);
+ if(deleteError)throw new Error('No se pudo eliminar el elemento: '+deleteError.message);
+ const {error:deleteFileError}=await client.storage.from(BRAND_BUCKET).remove([old.object_path]);
+ if(deleteFileError)throw new Error('La ficha se eliminó, pero no pudo limpiarse el archivo anterior.');
+}
+export async function saveYouTubeBrandCopy(key:string,content:string):Promise<void>{
+ if(!client)throw new Error('El Studio no está conectado.');
+ if(!/^[a-z][a-z0-9_]{1,40}$/.test(key))throw new Error('Clave de texto inválida.');
+ const clean=content.trim();
+ if(!clean||clean.length>1500)throw new Error('Escribe entre 1 y 1500 caracteres.');
+ const who=await owner();
+ const {error}=await client.from('podcast_youtube_brand_copy').upsert({
+  user_id:who.id,copy_key:key,content:clean,updated_at:new Date().toISOString()
+ },{onConflict:'user_id,copy_key'});
+ if(error)throw new Error('No se pudo guardar el slogan: '+error.message);
+}
