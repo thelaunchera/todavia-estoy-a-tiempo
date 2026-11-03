@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { BookOpen, Camera, Check, Clapperboard, Copy, Download, Film, Layers3, Search, Users, Video, WandSparkles } from 'lucide-react';
 import YouTubeVisualLibrary, { type YouTubeSavedPhoto } from './YouTubeVisualLibrary';
+import YouTubeSeasonTwo from './YouTubeSeasonTwo';
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
 import './youtube-studio.css';
 
-type Tab = 'brief' | 'episodes' | 'photos';
+type Tab = 'brief' | 'episodes' | 'photos' | 'season2';
 type Props = { entries: YouTubeSavedPhoto[]; onChanged:()=>Promise<void>; readOnly?:boolean };
 
 function BulletPanel({ title, items }: { title: string; items: readonly string[] }) {
@@ -90,6 +91,7 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
       <button type="button" role="tab" aria-selected={tab === 'brief'} className={tab === 'brief' ? 'active' : ''} onClick={() => setTab('brief')}><BookOpen size={17}/> Brief completo</button>
       <button type="button" role="tab" aria-selected={tab === 'episodes'} className={tab === 'episodes' ? 'active' : ''} onClick={() => setTab('episodes')}><Layers3 size={17}/> Guiones de los 8 capítulos</button>
       <button type="button" role="tab" aria-selected={tab === 'photos'} className={tab === 'photos' ? 'active' : ''} onClick={() => setTab('photos')}><Camera size={17}/> Fotos y prompts</button>
+      <button type="button" role="tab" aria-selected={tab === 'season2'} className={tab === 'season2' ? 'active' : ''} onClick={() => setTab('season2')}><Users size={17}/> Temporada 2 · propuesta</button>
     </div>
 
     {tab === 'brief' ? <div className="yt-brief" role="tabpanel">
@@ -159,7 +161,7 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
         <h4>Referencias visuales</h4><p>{youtubeBrief.characterReferences}</p>
         <p className="yt-muted">{youtubeBrief.format.statusLegend}</p>
       </section>
-    </div> : tab === 'photos' ? <YouTubeVisualLibrary entries={entries} onChanged={onChanged} readOnly={readOnly}/> : <div className="yt-episodes" role="tabpanel">
+    </div> : tab === 'photos' ? <YouTubeVisualLibrary entries={entries} onChanged={onChanged} readOnly={readOnly}/> : tab === 'season2' ? <YouTubeSeasonTwo/> : <div className="yt-episodes" role="tabpanel">
       <aside className="yt-episodes-sidebar">
         <label className="yt-search"><Search size={17}/><input aria-label="Buscar dentro de los guiones" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar capítulo o diálogo..."/></label>
         <div className="yt-episode-list">
