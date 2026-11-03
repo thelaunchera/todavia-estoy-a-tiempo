@@ -1,0 +1,37 @@
+.brand-reels{display:grid;gap:20px;min-width:0;width:100%;color:#191919}
+.brand-reels *{box-sizing:border-box}
+.brand-reels-header{padding:clamp(22px,3vw,34px);background:#faf8f3;border:1px solid #ece7da;border-radius:20px}
+.brand-reels-kicker{display:inline-flex;gap:8px;align-items:center;text-transform:uppercase;letter-spacing:.1em;font-size:11px;font-weight:750;color:#776b46}
+.brand-reels-header h2{font:normal clamp(31px,4.4vw,48px)/1.04 Georgia,serif;margin:12px 0;color:#191919}
+.brand-reels-header p{font-size:14px;line-height:1.65;max-width:640px;color:#555;margin:0 0 10px}
+.brand-reels-header small{font-size:12px;color:#726b5a}
+.brand-reels-grid{display:grid;grid-template-columns:minmax(200px,265px) minmax(0,1fr);gap:18px;align-items:start}
+.brand-reels-list{display:grid;gap:10px;padding:12px;background:#f5f4f0;border-radius:17px}
+.brand-reels-list button{border:1px solid transparent;border-radius:13px;padding:16px 14px;text-align:left;display:grid;gap:8px;background:transparent;cursor:pointer;color:#191919;font-family:inherit}
+.brand-reels-list button.selected{background:white;border-color:#e3d5a0;box-shadow:0 2px 10px #1919190b}
+.brand-reels-list button span{font-size:11px;color:#84723e;font-weight:700}
+.brand-reels-list button strong{font-size:14px;line-height:1.35}
+.brand-reels-list button small{font-size:11px;color:#737373}
+.brand-reels-detail{display:grid;gap:14px;min-width:0}
+.brand-reels-title{display:flex;justify-content:space-between;gap:15px;padding:8px 4px}
+.brand-reels-title h3{font:normal clamp(28px,3vw,36px)/1.16 Georgia,serif;letter-spacing:-.035em;margin:12px 0;color:#191919}
+.brand-reels-title p{font-size:13px;line-height:1.6;color:#666;max-width:650px}
+.brand-reels-private{height:32px;padding:8px 12px;display:inline-flex;gap:6px;align-items:center;background:#f3f2ed;border-radius:50px;color:#686056;font-size:11px;white-space:nowrap}
+.brand-reels-birthday{border:1px solid #ecdda8;background:#fff9e6;padding:15px;border-radius:12px;color:#4d4631;line-height:1.6;font-size:13px;margin:0}
+.brand-reels-panel{border:1px solid #ebe8e0;background:white;border-radius:17px;padding:clamp(16px,2.4vw,24px);display:grid;gap:13px;min-width:0}
+.brand-reels-panel h4{font:normal 23px/1.2 Georgia,serif;margin:0;color:#191919}
+.brand-reels-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand-reels-panel-head button{border:1px solid #dedbd0;background:#faf8f3;border-radius:30px;padding:9px 13px;display:inline-flex;gap:7px;align-items:center;cursor:pointer;color:#333;font-size:12px}
+.brand-reels-panel label{display:grid;gap:7px;font-size:13px;color:#4c4c4c;font-weight:650}
+.brand-reels-panel textarea,.brand-reels-panel input,.brand-reels-panel select{width:100%;min-width:0;border:1px solid #dad8d0;border-radius:10px;background:#fdfcf9;padding:12px 13px;font:normal 14px/1.65 inherit;color:#191919}
+.brand-reels-panel textarea{resize:vertical}
+.brand-reels-note{font-size:12px;color:#777}
+.brand-reels-cta{background:#faf8f3;padding:13px;border-radius:10px;margin:0;font-size:13px;line-height:1.6}
+.brand-reels-panel a{font-size:13px;color:#49688f;display:inline-flex;gap:7px;align-items:center;text-decoration:underline;overflow-wrap:anywhere}
+.brand-reels-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.brand-reels-checks label{display:flex;align-items:center;gap:8px;border:1px solid #ebe8e1;border-radius:9px;padding:10px;font-weight:500;font-size:12px}
+.brand-reels-checks input{width:16px;height:16px;min-width:16px;accent-color:#aa9440}
+.brand-reels-save{background:#191919;color:white;border:0;border-radius:28px;padding:13px 19px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;justify-self:end}
+.brand-reels-save:disabled{opacity:.6}
+@media(max-width:840px){.brand-reels-grid{grid-template-columns:minmax(0,1fr)}.brand-reels-list{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.brand-reels-list button{flex:0 0 210px;scroll-snap-align:start}}
+@media(max-width:460px){.brand-reels-title{display:grid}.brand-reels-checks{grid-template-columns:minmax(0,1fr)}.brand-reels-list button{flex-basis:195px}.brand-reels-save{width:100%}.brand-reels-panel-head button{width:100%;justify-content:center}}
