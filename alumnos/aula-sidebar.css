@@ -316,3 +316,16 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
 @media(max-width:759px){
   .mi-view-controls{margin-top:0}
 }
+
+
+/* Preview as student is an owner-only drawer action, not a header button. */
+#aula-layout .aula-rail .aula-owner-student-preview{
+  display:flex;align-items:center;width:100%;min-height:44px;
+  padding:11px 12px;margin:9px 0 4px;
+  border:1px solid #b9d1df;border-radius:11px;
+  background:#eaf2f6;color:#244d69;
+  font:750 12px/1.4 "DM Sans",Arial,sans-serif;
+  text-align:left;white-space:normal;
+}
+#aula-layout .aula-rail .aula-owner-student-preview:hover{background:#dcebf3}
+#aula-layout .aula-rail .aula-owner-student-preview:disabled{opacity:.65;cursor:progress}
