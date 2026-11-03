@@ -23,6 +23,7 @@ const cats:Record<string,[string,string,string]>={
  'yummm':['food','Cafetería y repostería','Coffee & bakery'],
  'soluna':['wellness','Bienestar y yoga','Wellness & yoga'],
  'ivory-bloom':['food','Pastelería de bodas','Wedding cakes'],
+ 'la-vie-in-pink':['food','Pastelería europea y desayunos','European pâtisserie & breakfast'],
  'cleaning':['services','Servicios de limpieza','Residential cleaning']
 };
 const english:Record<string,string>={
@@ -33,6 +34,7 @@ const english:Record<string,string>={
  'yummm':'Creative bakery and coffee website with product photos and non-transactional checkout examples.',
  'soluna':'Yoga studio concept with class sections, studio photography and example memberships.',
  'ivory-bloom':'Wedding cake atelier with original cake photos, an editorial gallery and example inquiries.',
+ 'la-vie-in-pink':'Bilingual European pâtisserie concept with gourmet croissants, breakfasts, pastry gifts, original imagery and a preview-only membership.',
  'cleaning':'Cleaning company demo with an example booking journey and no real charges.'
 };
 function toEntry(d:PublishableDemo):ClassroomDemoEntry{
