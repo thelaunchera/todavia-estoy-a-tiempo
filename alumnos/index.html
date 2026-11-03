@@ -304,7 +304,7 @@
         <p id="empty-resources"></p>
       </div>
     </div>
-    <div data-aula-panel="inspiracion" class="aula-panel" hidden><div id="inspiration-gallery" aria-label="Galería privada de demos, fotografías y prompts"></div></div>
+    <div data-aula-panel="inspiracion" class="aula-panel" hidden><div id="inspiration-gallery" aria-label="Galería privada de demos, fotografías y prompts"><p class="inspiration-loading" role="status">Cargando demos terminados…</p></div></div>
     <div data-aula-panel="comunidad" class="aula-panel" hidden>
       <section class="club-aula-hub" aria-labelledby="club-aula-heading">
         <div class="club-aula-hub-heading">
@@ -434,7 +434,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261103-owner-gated-v3'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261103-inspiration-recovery-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
