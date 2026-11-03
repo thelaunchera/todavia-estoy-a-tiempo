@@ -32,7 +32,8 @@ const podcastClassPos=home.indexOf('<section class="learning-section" id="aprend
 assert.ok(podcastGiftPos>0&&podcastCollectionPos>podcastGiftPos&&podcastClassPos>podcastGiftPos,'El freebie emocional aparece antes de los productos y la clase');
 assert.match(home,/href="#regalo" class="fine-link">Recibir las 5 preguntas gratis/,'El hero lleva al recurso propio del podcast');
 assert.equal((home.match(/id="regalo"/g)||[]).length,1,'El regalo emocional no se duplica');
-assert.doesNotMatch(home,/id="matcha-gratis"|id="freebie-prompts-inicio"|Powered by <a href="https:\/\/thelaunchera\.com/,'La portada del podcast no promociona el Content Lab ni muestra créditos antiguos');
+assert.doesNotMatch(home,/id="matcha-gratis"|id="freebie-prompts-inicio"/,'La portada del podcast no promociona el Content Lab');
+assert.match(home,/Powered by <a href="https:\/\/thelaunchera\.com\//,'El footer conserva el crédito oficial Powered by The Launch Era');
 const matchaFreebie=read('content-lab/public/prompts/index.html');
 assert.ok(matchaFreebie.includes('matcha-01.jpg'),'El regalo creativo conserva su fotografía dentro de su propio landing');
 assert.match(matchaFreebie,/id="recibir"/,'El formulario de ocho prompts sigue disponible');
