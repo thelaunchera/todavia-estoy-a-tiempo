@@ -139,7 +139,7 @@ export function microPilotChecklist(season:number,episode:number):string{
  '',
  'BLOCKERS TO REAL VIDEO: three actual approved PNG images; approved character voice audio; Windows FFmpeg/Python environment tested.',
  'PASS RULE: Do not claim complete until the actual full MP4s exist and are watched in both ratios.'
- ].join('\\r\\n');
+ ].join('\r\n');
 }
 
 export function microEpisodeMasterPrompt(season:number,episode:number):string{
