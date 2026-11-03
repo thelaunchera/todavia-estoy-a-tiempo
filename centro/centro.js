@@ -129,7 +129,7 @@ function setCourseActions(){
   if(owner){
    state.textContent='VISTA ADMINISTRATIVA';
    if(code==='web-class'){
-    el.disabled=false;el.textContent='Abrir mi Estudio para revisar';
+    el.disabled=false;el.textContent='Abrir administración para revisar';
     el.onclick=()=>location.assign('../estudio/');
    }else{
     el.disabled=false;el.textContent='Entrar a mi Lab';
@@ -333,7 +333,7 @@ const productInformation=Object.freeze({
  'web-class':{
   title:'Tu primera web con IA',type:'MASTERCLASS PRÁCTICA',summary:'Aprende a construir tu primera web paso a paso, sin experiencia programando.',
   price:'Oferta de lanzamiento al abrir inscripciones',audience:'Personas que quieren crear una página para su idea o negocio y necesitan instrucciones sencillas, desde cero.',
-  includes:['Lecciones con audio en español; subtítulos ES/EN al publicarse las pistas revisadas.','Ejemplo práctico de página y demostraciones de diseño.','Biblioteca de prompts y materiales que acompañan los ejercicios.','Cuaderno, lista de revisión y centro de ayuda del aula.'],
+  includes:['Aula y materiales en español e inglés; audio y subtítulos disponibles por lección cuando estén listos.','Ejemplo práctico de página y demostraciones de diseño.','Biblioteca de prompts y materiales que acompañan los ejercicios.','Cuaderno, lista de revisión y centro de ayuda del aula.'],
   delivery:'Cuando la clase se lance y tu compra esté verificada, entrarás desde este centro con tu correo y contraseña. Puedes retomar tus lecciones y guardar avances.',
   note:'La clase sigue en preparación. La lista de espera no es una compra y el acceso permanece cerrado.'
  },
@@ -341,9 +341,9 @@ const productInformation=Object.freeze({
   title:'Content Lab',type:'TU ESPACIO CREATIVO',
   summary:'Deja de empezar cada post desde cero.',
   price:'$10 USD · un solo pago',audience:'Para darle forma a tus ideas y ver tu contenido antes de publicarlo.',
-  includes:['Diseña posts, carruseles y portadas para reels e historias en PNG.','Bibliotecas de fondos, stickers, ideas y prompts para ChatGPT.','Visualiza un feed 3×3 vivo, conectado al calendario y a tu historial de publicaciones.'],
+  includes:['Diseña posts, carruseles y portadas para reels e historias en PNG.','Biblioteca de fondos, stickers, ideas y prompts que puedes copiar y adaptar.','Visualiza un feed 3×3 vivo, conectado al calendario y a tu historial de publicaciones.'],
   delivery:'Te enviaremos el acceso al correo de tu compra.',
-  note:'Pago único. El Lab permite diseñar imágenes y planificar publicaciones. Los prompts se utilizan en herramientas externas como ChatGPT; no genera fotos ni edita videos, y no publica automáticamente.',
+  note:'Pago único. El Lab permite diseñar imágenes y planificar publicaciones. Los prompts pueden utilizarse en herramientas de IA externas; esta aplicación no genera fotos ni edita videos, y no publica automáticamente.',
   checkout:'https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z'
  },
  'booking-flow':{
