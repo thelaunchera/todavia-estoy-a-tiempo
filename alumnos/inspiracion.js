@@ -14,7 +14,7 @@ function stageLabel(id,index,original,lang,prompt){
  if(lang==='en')return englishDemoTitle('demo_'+id+'_'+index,original);
  return spanishStageNames[id]?.[index]||original||'Etapa '+(index+1);
 }
-const spanishDescriptions={"aftr":["Identidad visual de un club nocturno ficticio, con portada, eventos, áreas exclusivas y fotografías editoriales.","Concepto educativo para mayores de 21 años. No se venden entradas ni se reservan mesas."],"casa-brownie":["Página de repostería con portada de foto fija, sabores, fotografías individuales, regalos y contacto. Es el ejemplo principal del curso.","Ejemplo ficticio. No recibe pedidos ni pagos reales. La portada con video es opcional."],"cb-depot":["Ejemplo real de negocio de servicios, con reservas y presentación cuidada. Se muestra solo su página pública.","Proyecto de un cliente real. No se comparten sus fotografías ni instrucciones privadas."],"cleaning":["Reservas de limpieza residencial y solicitudes de presupuesto comercial. Estudia sus servicios y recorrido del cliente.","Demostración pública de servicios para el hogar. No se comparten datos internos ni automatizaciones."],"crumb":["Tienda de galletas con fotografía editorial, productos, cajas, empaques, historia de marca y diseño móvil.","Proyecto ficticio. No procesa pagos ni promete entregas reales."],"jaramillo":["Ejemplo de boutique de moda que presenta a su diseñadora y sus colecciones, sin proceso de pago.","Concepto de boutique. No reutilices la imagen ni identidad de la diseñadora."],"soluna":["Estudio de yoga: investigación, identidad, clases, oferta de lanzamiento, lista de espera y revisión final.","Ejemplo educativo. Los formularios y membresías son demostrativos; no se cobran pagos."],"yummm":["Cafetería y repostería: fotografías de postres, menú, empaques para llevar y página con identidad de marca.","Galería de 20 imágenes. Los prompts originales del estudio aún no están incorporados, por lo que no se presentan como verificados."]};
+const spanishDescriptions={"aftr":["Identidad visual de un club nocturno ficticio, con portada, eventos, áreas exclusivas y fotografías editoriales.","Concepto educativo para mayores de 21 años. No se venden entradas ni se reservan mesas."],"casa-brownie":["Página de repostería con portada de foto fija, sabores, fotografías individuales, regalos y contacto. Es el ejemplo principal del curso.","Ejemplo ficticio. No recibe pedidos ni pagos reales. La portada con video es opcional."],"cb-depot":["Ejemplo real de negocio de servicios, con reservas y presentación cuidada. Se muestra solo su página pública.","Proyecto de un cliente real. No se comparten sus fotografías ni instrucciones privadas."],"cleaning":["Reservas de limpieza residencial y solicitudes de presupuesto comercial. Estudia sus servicios y recorrido del cliente.","Demostración pública de servicios para el hogar. No se comparten datos internos ni automatizaciones."],"crumb":["Tienda de galletas con fotografía editorial, productos, cajas, empaques, historia de marca y diseño móvil.","Proyecto ficticio. No procesa pagos ni promete entregas reales."],"jaramillo":["Ejemplo de boutique de moda que presenta a su diseñadora y sus colecciones, sin proceso de pago.","Concepto de boutique. No reutilices la imagen ni identidad de la diseñadora."],"soluna":["Estudio de yoga: investigación, identidad, clases, oferta de lanzamiento, lista de espera y revisión final.","Ejemplo educativo. Los formularios y membresías son demostrativos; no se cobran pagos."],"yummm":["Cafetería y repostería: fotografías de postres, menú, empaques para llevar y página con identidad de marca.","Galería de 20 fotografías y guía educativa de práctica con instrucciones por sección."]};
 function demoDescription(d,language){return language==='en'?(d.description_en||''):(spanishDescriptions[d.id]?.[0]||d.description_es||'');}
 function demoNotes(d,language){return language==='en'?(d.notes_en||''):(spanishDescriptions[d.id]?.[1]||d.notes_es||'');}
 function galleryPhotoLabel(demo,index,photo,lang){
@@ -224,7 +224,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   }
   if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos privadas de clientes no se comparten. Usa imágenes propias autorizadas para tu práctica.','Private client photos are not shared. Use your own authorized practice images.',curLang())+'</p>';
   photoBlock.append(gallery);root.append(photoBlock);
-  const prompts=Array.isArray(d.prompts)?d.prompts:[];
+  const prompts=Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guideCase?.extra_prompts)?guideCase.extra_prompts:[]);
   const pSection=document.createElement('section');pSection.className='inspiration-prompts';
   pSection.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Prompts por etapa','Step-by-step prompts',curLang())+'</h3>'+
    '<p>'+enLabel('Pega un prompt por vez. Sustituye los datos de ejemplo por los de tu negocio. Los comandos originales pueden estar en español.','Open a step and copy its US-English learning adaptation. Adjust your own facts and photos; do not copy the demo brand.',curLang())+'</p></div>';
@@ -233,10 +233,20 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
    const item=document.createElement('details');item.className='inspiration-prompt';
    item.innerHTML='<summary><span>'+String(i+1).padStart(2,'0')+'</span><strong>'+esc(stageLabel(d.id,i,p.title,curLang(),p))+'</strong><small>'+esc(curLang()==='en'?'Step '+(i+1)+' of '+prompts.length:p.step||'')+'</small></summary>';
    const body=document.createElement('div');body.className='inspiration-prompt-body';
-   const promptText=curLang()==='en'&&p.body_en?p.body_en:localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
+   const original=curLang()==='en'&&p.body_en?p.body_en:localizedPrompt('demo_'+d.id+'_'+i,p.body||'',curLang(),d.title);
+   const promptText=correctedDemoText(original,guideCase);
+   const mappedStagePhotos=Array.isArray(guideCase?.stage_files?.[String(i+1)])?guideCase.stage_files[String(i+1)]:[];
+   const usedPhotos=mappedStagePhotos.length
+    ?mappedStagePhotos.map(file=>photos.find(row=>studioPhotoFile(row.p.url)===file)?.p).filter(Boolean)
+    :photos.map(row=>row.p).filter(photo=>typeof p.body==='string'&&p.body.includes(photo.url));
+   const placement=usedPhotos.length
+    ?(curLang()==='en'?'APPROVED PHOTOS FOR THIS STEP: ':'FOTOS APROBADAS PARA ESTA ETAPA: ')+usedPhotos.map(img=>studioPhotoFile(img.url)+' → '+galleryPhotoSection(img,curLang())).join('; ')+
+      (curLang()==='en'?'. Use ONLY these originals in their sections. Do not replace the hero with a product photo.':'. Usa SOLO estos originales en las secciones indicadas. No cambies el hero por fotos de productos.')
+    :enLabel('Esta etapa no necesita fotos nuevas. Conserva las imágenes ya aprobadas y espera el moodboard antes de crear otras.','This step needs no new photos. Keep approved images and wait for moodboard approval before making new ones.',curLang());
    const pre=document.createElement('p');pre.className='inspiration-prompt-text';pre.textContent=promptText;
-   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';copy.textContent=enLabel('Copiar instrucciones','Copy practice instructions',curLang());copy.addEventListener('click',()=>clipboardCopy(promptText,copy,curLang()));
-   const usedPhotos=photos.map(row=>row.p).filter(photo=>typeof p.body==='string'&&p.body.includes(photo.url));
+   const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';
+   copy.textContent=enLabel('Copiar instrucciones y ubicación de fotos','Copy steps and photo placement',curLang());
+   copy.addEventListener('click',()=>clipboardCopy(promptText+'\n\n'+placement,copy,curLang()));
    if(usedPhotos.length){
     const photoRefs=document.createElement('div');photoRefs.className='inspiration-step-photos';
     for(const img of usedPhotos){
@@ -248,11 +258,13 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
     }
     body.append(photoRefs);
    }
-   body.append(pre,copy);
+   const placementNote=document.createElement('p');placementNote.className='inspiration-prompt-placement';placementNote.textContent=placement;
+   body.append(pre,placementNote,copy);
    for(const pic of Array.isArray(p.photos)?p.photos:[]){
     const photo=document.createElement('details');photo.className='inspiration-photo-prompt';
     const sum=document.createElement('summary');sum.textContent=(curLang()==='en'?'Photo prompt: ':'Prompt de foto: ')+(curLang()==='en'?(pic.title_en||englishDemoPhotoTitle('demo-photo_'+d.id+'_'+i+'_'+(Array.isArray(p.photos)?p.photos.indexOf(pic):0),pic.title)):pic.title||'');
-    const photoText=curLang()==='en'&&pic.body_en?pic.body_en:localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
+    const basePhotoText=curLang()==='en'&&pic.body_en?pic.body_en:localizedPrompt('demo-photo_'+d.id+'_'+i,pic.body||'',curLang(),d.title);
+    const photoText=correctedDemoText(basePhotoText,guideCase)+'\n\n'+enLabel('Una fotografía por archivo. Organiza la producción en lotes de hasta 9 imágenes independientes; no collage. Solo generar después del moodboard aprobado.','One photo per file. Plan batches of up to 9 independent images; never a collage. Generate only after the moodboard is approved.',curLang());
     const txt=document.createElement('p');txt.textContent=photoText;
     const cp=document.createElement('button');cp.type='button';cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());cp.addEventListener('click',()=>clipboardCopy(photoText,cp,curLang()));
     photo.append(sum,txt,cp);body.append(photo);
