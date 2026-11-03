@@ -216,7 +216,7 @@ export function applyClassroomLanguage(){
  for(const selector of ['aula-language','aula-public-language']){
   const el=document.getElementById(selector);if(el&&el.value!==language)el.value=language;
  }
- for(const [selector,en] of translations)translateElement(selector,en);
+ for(const [selector,en] of translations){try{translateElement(selector,en);}catch(error){console.warn('Optional classroom label skipped',selector,error?.name||'unknown');}}
  const refresh=document.getElementById('aula-refresh');
  if(refresh){refresh.setAttribute('aria-label',language==='en'?'Refresh classroom page':'Actualizar la página del aula');refresh.title=refresh.getAttribute('aria-label');}
  for(const [selector,en] of placeholders){
@@ -236,5 +236,5 @@ export function bindClassroomLanguages(onChange){
   select.value=language;
   select.addEventListener('change',()=>{setClassroomLanguage(select.value);onChange?.(language);});
  });
- applyClassroomLanguage();
+ try{applyClassroomLanguage();}catch(error){document.documentElement.lang=language;console.warn('Classroom labels failed but access remains available',error?.name||'unknown');}
 }
