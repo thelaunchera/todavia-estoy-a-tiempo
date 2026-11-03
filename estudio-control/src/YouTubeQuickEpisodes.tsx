@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useMemo,useState} from 'react';
 import {BookOpen,Check,Clapperboard,Copy,Download,FolderArchive,ImagePlus,MonitorPlay,RefreshCcw,Smartphone,Video,Wallet} from 'lucide-react';
 import {zipSync,strToU8} from 'fflate';
-import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microLimits} from './youtube/micro-production';
+import {getMicroEpisode,microEpisodes,microFrames,microScriptText,microWindowsFiles,microRecordingChecklist,microVoiceCues,microEpisodeMasterPrompt,microPilotChecklist,microLimits} from './youtube/micro-production';
 import {loadYouTubeSavedPhotos,type YouTubeSavedPhoto} from './supabase-client';
 import './youtube-quick-episodes.css';
 
@@ -53,6 +53,7 @@ export default function YouTubeQuickEpisodes(){
    <div className="mq-intro"><div><small>TEMPORADA {season} · CAPÍTULO {String(episode).padStart(2,'0')}</small><h3>{q.title}</h3><p><b>Gancho:</b> {q.hook}</p><p><b>Aprendizaje:</b> {q.lesson}</p><p><b>Interacción:</b> {q.question}</p></div><strong>~2:00</strong></div>
    <div className="mq-actions">
     <button type="button" onClick={()=>void copy(microEpisodeMasterPrompt(season,episode),'Master Prompt completo')}><Copy size={16}/> Copiar Master Prompt completo</button>
+    {season===1&&episode===1&&<button type="button" onClick={()=>downloadText(prefix+'_PRUEBA_PILOTO_QA.txt',microPilotChecklist(season,episode))}><Download size={16}/> Descargar prueba piloto</button>}
     <button type="button" onClick={()=>downloadText(prefix+'_MASTER_PROMPT_COMPLETO.txt',microEpisodeMasterPrompt(season,episode))}><Download size={16}/> Descargar Master Prompt completo</button>
     <button type="button" onClick={()=>downloadZip(prefix+'_DOS_FORMATOS_WINDOWS.zip',microWindowsFiles(season,episode))}><FolderArchive size={16}/> Descargar proyecto para Windows</button>
     <button type="button" onClick={()=>downloadText(prefix+'_GUION_CORTO.txt',microScriptText(q))}><Download size={16}/> Descargar guion corto</button>
