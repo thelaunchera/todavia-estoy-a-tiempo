@@ -15,20 +15,23 @@ const guides={
  ['Online checkout','Only add payments if the product and provider support them. Test payment, failure and fulfillment before claiming it works.'],
  ['Owner operations','Quotes, jobs and follow-up are internal workflows; a public demo must not expose private business or customer data.']
  ],actions:[['Investigate my business','prompts']]},
- pasos:{kicker:'03 / YOUR FIRST WEBPAGE',title:'Build step by step.',intro:'Practice with Casa Brownie, then apply the same process to your own business or a customer business.',steps:[
+ pasos:{kicker:'03 / YOUR FIRST WEBPAGE',title:'Build step by step.',intro:'Use Casa Brownie as a reference while you build ONE website of your own. Finish your first project before starting another.',steps:[
  ['01 — Define the goal','Research your business and ideal customer. Write what the site is for and the one action a visitor should take.'],
  ['02 — Mood board','Choose an original palette, typography, photographic tone and packaging direction if needed.'],
- ['03 — Generate individual images','Plan one image for each section. Generate or choose images separately; use real product details and name each file.'],
+ ['03 — Prepare photos in Google Drive','Connect Google Drive in ChatGPT through Settings → Plugins (or Apps) if available. In the Drive app, create a folder for this single website. Upload and name each photo separately.'],
+ ['03B — Check your backup','Open the uploaded photos in Drive before removing any copies from your phone. Connecting the app alone does not move or delete images.'],
  ['04 — Write your content','Create a five-second hero, products/services, relevant process, FAQs and CTA, using verified facts.'],
  ['05 — Build in AppDeploy','Open a blank project and build one section at a time. Upload the correct images to the correct paths.'],
  ['06 — Review mobile first','Check 375 px, phone tap targets, photo cropping, empty cards, form labels and responsive layout.'],
  ['07 — Set up the next step','For a real business, test contact, booking, quote or payment flows only when appropriate. Do not collect payments in the practice demo.'],
  ['08 — Test and share','Verify links, forms, footer and public access. Keep a record of what passed and what remains untested.']
  ],actions:[['Copy the building prompts','prompts']]},
- organizacion:{kicker:'04 / KEEP YOUR WORK ORGANIZED',title:'Organize your entire project.',intro:'A clear folder structure prevents lost pictures, mismatched files and repeated work.',steps:[
+ organizacion:{kicker:'04 / KEEP YOUR WORK ORGANIZED',title:'Organize your entire project.',intro:'Work on ONE website at a time until you feel confident. Keep its photos, prompts and text in a dedicated Google Drive folder so you do not mix files from different businesses.',steps:[
+ ['CONNECT GOOGLE DRIVE','In ChatGPT, open Settings → Plugins (or Apps), find Google Drive, connect your Google account, and review permissions. If saving from ChatGPT is not supported, upload using the Drive app.'],
+ ['ONE PROJECT','In the Google Drive app tap + New → Folder. Name it after your first website, and keep only that business’s files inside.'],
  ['00_IDEA','Business goal, ideal customer, real facts and unknown details.'],
  ['01_TEXTS','Headlines, CTA copy, service descriptions, FAQs and confirmations.'],
- ['02_PHOTOS','Separate, correctly named images: hero, products, gifts, story and details.'],
+ ['02_PHOTOS','Upload separate images with clear names such as hero_01, product_01 and detail_01. Check that each file opens in Drive before deleting local copies.'],
  ['03_PROMPTS','Save the precise prompt used for each photo and each construction step.'],
  ['04_DESIGN','Mood board, visual references, colors and font choices.'],
  ['05_WEB','Website URLs and snapshots of each successful section.'],
