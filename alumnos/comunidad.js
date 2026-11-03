@@ -1,5 +1,5 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {bindCommunityLanguage,applyCommunityLanguage,communityLanguage,communityText} from './comunidad-i18n.js?v=20261102-v1';
+import {bindCommunityLanguage,applyCommunityLanguage,communityLanguage,communityText} from './comunidad-i18n.js?v=20261102-v2';
 const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
