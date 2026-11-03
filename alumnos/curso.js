@@ -1,14 +1,14 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {courseCopy,translateCourseMessage} from './aula-mensajes.js?v=20261102-v1';
-import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v8';
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
-import {renderAulaInicio} from './dashboard-inicio.js?v=20261102-student-v2';
-import {mountInspiracion} from './inspiracion.js?v=20261102-owner-curation-v5';
-import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261102-refresh-v7';
+import {courseCopy,translateCourseMessage} from './aula-mensajes.js?v=20261103-safari-restore-v1';
+import {mountMateriales} from './materiales-interactivos.js?v=20261103-safari-restore-v1';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-safari-restore-v1';
+import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-safari-restore-v1';
+import {mountInspiracion} from './inspiracion.js?v=20261103-safari-restore-v1';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-safari-restore-v1';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
- supabaseModule=await import('./supabase-local.js?v=20261102-stable-v1');
+ supabaseModule=await import('./supabase-local.js?v=20261103-safari-restore-v1');
 }catch(localError){
  console.warn('Classroom local auth unavailable; attempting online recovery');
  try{

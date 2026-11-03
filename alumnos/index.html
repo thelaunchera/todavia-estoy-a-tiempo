@@ -423,13 +423,20 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
  window.location.reload();
 });
 </script>
-<script type="module" src="./aula-materiales-rescate-20261102.js?v=7"></script>
+<script type="module" src="./aula-materiales-rescate-20261102.js?v=20261103-safari-restore-v1"></script>
 <script type="module">
-import('./curso.js?v=20261102-stable-v26').catch(error=>{
+// Versioned on every release to prevent Safari from mixing outdated modules.
+const retryToken=new URL(location.href).searchParams.get('aula_retry');
+const classroomModule='./curso.js?v=20261103-safari-restore-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
   msg.hidden=false;
-  let english=false;try{english=localStorage.getItem('tle_classroom_language_v1')==='en';}catch{}
+  const selects=['aula-language','aula-public-language'].map(id=>document.getElementById(id)).filter(Boolean);
+   const visibleSelect=selects.find(select=>!select.hidden&&select.getClientRects().length>0);
+   const currentLang=visibleSelect?.value||selects[0]?.value;
+   let english=currentLang==='en';
+   if(!currentLang){try{english=localStorage.getItem('tle_classroom_language_v1')==='en';}catch{}}
   msg.textContent=english?'The classroom could not finish loading (AULA-MODULE). Your saved work was not changed. Try reloading the classroom.':'El aula no pudo terminar de cargar (AULA-MODULE). No se modificaron tus materiales guardados. Intenta abrir el aula de nuevo.';
   if(!document.getElementById('aula-retry-load')){
    const retry=document.createElement('button');retry.id='aula-retry-load';retry.type='button';

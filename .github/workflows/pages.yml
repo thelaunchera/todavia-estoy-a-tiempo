@@ -87,6 +87,8 @@ jobs:
           node --check alumnos/comunidad.js
           node --check alumnos/aula-i18n.js
           node --check alumnos/aula-textos-estaticos.js
+          node --check alumnos/curso.js
+          node --check alumnos/aula-materiales-rescate-20261102.js
           node --test alumnos/aula-prompt-bilingual.test.mjs alumnos/aula-idioma-integral.test.mjs
           node --check centro/centro.js
           node --check centro/interacciones.js
@@ -161,6 +163,12 @@ jobs:
           test -s _podcast_pages/alumnos/index.html
           test -s _podcast_pages/alumnos/curso.js
           test -s _podcast_pages/alumnos/supabase-local.js
+          test -s _podcast_pages/alumnos/aula-mensajes.js
+          test -s _podcast_pages/alumnos/materiales-interactivos.js
+          test -s _podcast_pages/alumnos/prompt-english.js
+          test -s _podcast_pages/alumnos/dashboard-inicio.js
+          test -s _podcast_pages/alumnos/inspiracion.js
+          test -s _podcast_pages/alumnos/aula-i18n.js
           test -s _podcast_pages/alumnos/comunidad.html
           test -s _podcast_pages/alumnos/comunidad.js
           test -s _podcast_pages/alumnos/comunidad.css

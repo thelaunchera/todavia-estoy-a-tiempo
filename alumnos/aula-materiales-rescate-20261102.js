@@ -1,7 +1,7 @@
 /* Recuperación segura del panel de materiales del aula privada.
    No crea accesos públicos ni copia prompts al HTML. */
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
-import {mountMateriales} from './materiales-interactivos.js?v=20261102-library-es-en-v8';
+import {mountMateriales} from './materiales-interactivos.js?v=20261103-safari-restore-v1';
 let repairing=false,controller=null,studentGallery=null;
 const $=id=>document.getElementById(id);
 const lang=()=> $('aula-language')?.value==='en'?'en':'es';
@@ -15,7 +15,7 @@ async function recover(){
  if(root.textContent.trim()&&!/cargando|preparaci[oó]n|no se pudieron cargar/i.test(root.textContent))return;
  repairing=true;
  try{
-  const {createClient}=await import('./supabase-local.js?v=20261102-stable-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
+  const {createClient}=await import('./supabase-local.js?v=20261103-safari-restore-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
   const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:false}});
   const {data:{user},error}=await db.auth.getUser();
   if(error||!user?.id)throw Error('owner session missing');
@@ -40,7 +40,7 @@ async function showStudentResources(button){
  const root=$('materiales-interactivos'),banner=$('admin-preview-banner');
  button.disabled=true;button.textContent=lang()==='en'?'Opening student view…':'Abriendo vista del alumno…';
  try{
-  const {createClient}=await import('./supabase-local.js?v=20261102-stable-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
+  const {createClient}=await import('./supabase-local.js?v=20261103-safari-restore-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
   const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:false}});
   const {data:{user}}=await db.auth.getUser();
   const {data:owner}=user?.id?await db.from('podcast_studio_admins').select('role').eq('user_id',user.id).maybeSingle():{data:null};
@@ -55,7 +55,7 @@ async function showStudentResources(button){
   if(ownerPdfs)ownerPdfs.style.display='none';
   const ownerBadge=root.querySelector('.mi-save');
   if(ownerBadge)ownerBadge.style.display='none';
-  const {mountInspiracion}=await import('./inspiracion.js?v=20261102-owner-curation-v5');
+  const {mountInspiracion}=await import('./inspiracion.js?v=20261103-safari-restore-v1');
   if($('inspiration-gallery'))studentGallery=await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
   banner.hidden=true;
   document.querySelector('.aula-side-link[data-aula-view="prompts"]')?.click();
