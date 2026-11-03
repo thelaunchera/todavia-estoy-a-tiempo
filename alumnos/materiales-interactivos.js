@@ -1,9 +1,9 @@
-import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-drive-v1';
+import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-direct-drive-v3';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
-import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261102-v3';
-import {promptGuide} from './prompt-guide.js?v=20261102-v1';
+import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-command-center-v2';
+import {promptGuide} from './prompt-guide.js?v=20261103-command-center-v2';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
-import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261103-drive-v2';
+import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261103-direct-drive-v3';
 /* Tu primera web con IA · Materiales activos de la clase
    Español y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
