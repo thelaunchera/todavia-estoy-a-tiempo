@@ -36,6 +36,11 @@ export function promptGuide(code,language='es'){
    when:en?'When you already have one approved product photo and want another design.':'Cuando ya tienes una foto aprobada y quieres otra composición.',
    result:en?'One new composition using the SAME original product photo.':'Una composición nueva con LA MISMA foto original.'};
  }
+ if(code==='bonus_content_command_notion')return {
+  purpose:en?'Plan content in Notion, schedule only approved posts in Metricool, and review Google search results in GSC Wizard.':'Planear contenido en Notion, programar solo posts aprobados en Metricool y revisar las búsquedas de Google con GSC Wizard.',
+  when:en?'When you are ready to plan posts and measure your website in a simple weekly routine.':'Cuando quieras organizar publicaciones y medir tu web con una rutina semanal sencilla.',
+  result:en?'One Notion command center with a content calendar, Drive links, and an honest performance review.':'Un centro de comando en Notion con calendario, enlaces de Drive y revisión real de resultados.'
+ };
  if(code==='bonus_hero_cinematic_scroll')return {
   purpose:en?'Turn prepared JPEG frames into a cinematic website hero controlled by scrolling.':'Convertir fotogramas JPG preparados en un hero cinematográfico controlado por scroll.',
   when:en?'After preparing a short product animation and extracting sequential JPG frames.':'Después de preparar un vídeo corto del producto y extraer sus JPG en orden.',
