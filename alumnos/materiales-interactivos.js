@@ -15,7 +15,7 @@ const headers=[
  ['funciona','Cómo funciona mi web','Distingue el diseño de los procesos internos.'],
  ['pasos','Paso a paso: mi propia web','De la idea a una página real con tu marca.'],
  ['organizacion','Mi proyecto organizado','Todo en una sola carpeta, sin perder archivos.'],
- ['prompts','Biblioteca de prompts','Incluye el bonus para diseñar desde tu celular.'],
+ ['prompts','Biblioteca de prompts','Instrucciones para cada etapa de tu web.'],
  ['make','Make gratis','Escenarios con Gmail, paso a paso.'],
  ['conectores','Comandos de conectores','Cada servicio explicado sin programación.'],
  ['seguridad','Contraseñas y claves','Tus accesos siempre privados.'],
@@ -25,10 +25,10 @@ const headers=[
  ['revision','Antes de publicar','Comprueba cada paso en tu proyecto.']
 ];
 const materialGroups=[
- {id:'empezar',title:'Empieza aquí',views:['inicio','funciona','organizacion']},
- {id:'construir',title:'Crea tu web',views:['pasos','ejemplo','make','conectores']},
- {id:'recursos',title:'Tus recursos',views:['prompts','cuaderno','seguridad','legal']},
- {id:'publicar',title:'Antes de publicar',views:['revision']}
+ {id:'empezar',title:'01 · Empieza aquí',views:['inicio','organizacion','funciona']},
+ {id:'construir',title:'02 · Prepara tu web',views:['pasos','prompts','ejemplo']},
+ {id:'recursos',title:'03 · Herramientas',views:['cuaderno','conectores','make']},
+ {id:'publicar',title:'04 · Revisa y publica',views:['revision','seguridad','legal']}
 ];
 let running=0;
 export async function mountMateriales(root,{db,user,courseId,adminPreview=false,onGoLessons,onCloseMaterials,getLanguage=()=> 'es'}){
@@ -211,17 +211,17 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   for(const groupButton of tabs.querySelectorAll('button[data-group]')){
    const group=materialGroups.find(g=>g.id===groupButton.dataset.group);
    if(group)groupButton.textContent=getLanguage()==='en'?({
-    empezar:'Start here',construir:'Build your website',recursos:'Your resources',publicar:'Before publishing'
+    empezar:'01 · Start here',construir:'02 · Prepare your website',recursos:'03 · Tools',publicar:'04 · Review and publish'
    }[group.id]||group.title):group.title;
   }
   const headline=app.querySelector('.mi-header h2');
   const intro=app.querySelector('.mi-header p');
   if(headline)headline.textContent=getLanguage()==='en'
-  ?view==='prompts'?'Prompt library.':'Your creative desk.'
-  :view==='prompts'?'Biblioteca de prompts.':'Tu mesa de trabajo.';
+  ?view==='prompts'?'Prompt library':'Your learning materials'
+  :view==='prompts'?'Biblioteca de prompts':'Tus materiales de apoyo';
   if(intro)intro.textContent=getLanguage()==='en'
- ?view==='prompts'?'Copy and personalize prompts for your business and see mobile-friendly examples.':'Open a resource, complete one exercise and keep building, step by step.'
- :view==='prompts'?'Prompts para copiar, adaptar y usar, incluyendo un bonus para quienes trabajan desde el teléfono.':'Abre un material, haz una actividad y sigue con tu proyecto. Todo está explicado sin palabras complicadas.';
+ ?view==='prompts'?'Choose the prompt for your next step. Copy it and make it yours.':'Choose one topic and practice at your own pace.'
+ :view==='prompts'?'Busca el prompt que necesitas, cópialo y hazlo tuyo.':'Elige un tema y practica a tu ritmo.';
   const activeGroup=materialGroups.find(group=>group.views.includes(view));
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.group===activeGroup?.id?'page':'false'));
   subtabs.replaceChildren();
@@ -274,7 +274,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   content.append(head);
  }
  function renderStart(){
-  section('01 / PRIMERO LO IMPORTANTE','Antes de empezar, aclara tu idea.','Vamos a construir una página sencilla para presentar tu producto o servicio y explicar cómo dar el siguiente paso.');
+  section('01 / EMPIEZA AQUÍ','Primero, una idea clara.','Una web, un objetivo y una acción para tus visitantes.');
   const stage=el('div','mi-start-hero');
   stage.innerHTML='<div><span class="mi-eyebrow">TÚ VAS A CREAR</span><h4>Una página que alguien pueda entender y usar.</h4><p>No hace falta saber programar. Primero decides qué ofreces, después lo escribes y al final compruebas que funcione.</p></div><div class="mi-start-index"><strong>01</strong><span>Idea</span><strong>02</strong><span>Texto y fotos</span><strong>03</strong><span>Página</span><strong>04</strong><span>Revisión</span></div>';
   content.append(stage);
@@ -288,7 +288,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   for(const [i,item] of items.entries()){
    const c=el('article','mi-step');c.innerHTML='<span>0'+(i+1)+'</span><h4>'+esc(item[0])+'</h4><p>'+esc(item[1])+'</p>';grid.append(c);
   }content.append(grid);
-  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="pasos">Construir mi web paso a paso</button><button type="button" class="mi-quiet" data-go="mara">Configurar mi guía web</button><button type="button" class="mi-quiet" data-go="funciona">Entender mi web</button>';content.append(actions);
+  const actions=el('div','mi-actions');actions.innerHTML='<button type="button" class="mi-primary" data-go="pasos">Ver mi guía paso a paso</button><button type="button" class="mi-quiet" data-go="organizacion">Organizar mis fotos</button>';content.append(actions);
   actions.addEventListener('click',e=>{
     const b=e.target.closest('[data-go]');if(!b)return;
     if(b.dataset.go==='mara'){document.querySelector('.aula-side-link[data-aula-view="mara"]')?.click();return;}
@@ -301,7 +301,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const t=(es,en)=>lang==='en'?en:es;
   section(t('02 / BIBLIOTECA DE PROMPTS','02 / PROMPT LIBRARY'),
    t('Una biblioteca para cualquier negocio.','One library for every business.'),
-   t('Empieza con 1 foto · 8 prompts · 1 marca. Después investiga tu negocio, crea tu identidad, organiza tus fotos y construye la web. Los demos muestran los comandos originales por etapa.','Start with 1 Photo · 8 Prompts · 1 Brand. Then research your business, build a visual identity, plan individual photos and create your website. Demo packs include their original step-by-step commands.'));
+   t('Elige el prompt según lo que necesitas hacer ahora. Cambia los datos entre corchetes por los tuyos.','Choose the prompt for your next task. Replace the bracketed examples with your own details.'));
   const originals=new Map([
    ['idea',0],['cliente',1],['estructura',2],['referencias',3],['imagenes',4],['hero',5],
    ['copy',6],['construccion',7],['formularios',8],['pagos',9],['movil',10],['auditoria',11]
