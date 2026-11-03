@@ -440,7 +440,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261103-demo-inventory-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261103-demo-inventory-clarity-v2'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
