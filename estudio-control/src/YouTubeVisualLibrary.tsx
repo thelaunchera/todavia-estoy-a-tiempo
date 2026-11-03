@@ -169,8 +169,8 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     </section>
     <section className="yt-paper">
       <div className="yt-visual-heading">
-        <div><div className="yt-small-title"><Film size={16}/> STORYBOARD Y FOTOS POR CAPÍTULO</div><h3>Galería de producción</h3><p>Una imagen por plano. Cada ficha incluye encuadre, acción, vestuario y prompt cinematográfico individual en inglés.</p></div>
-        <div className="yt-visual-counter">{ready}/{photos.length}<small>imágenes vinculadas</small></div>
+        <div><div className="yt-small-title"><Film size={16}/> STORYBOARD Y FOTOS POR CAPÍTULO</div><h3>Un capítulo · 10 fotos · 1 Master Prompt</h3><p>Guarda las diez tomas individuales. Se ordenan en tres bloques narrativos, sin limitar la cantidad de fotos por escena. Cada toma conserva su ID y prompt original.</p></div>
+        <div className="yt-visual-counter">{ready}/{corePhotos.length}<small>fotos principales vinculadas</small></div>
       </div>
       <div className="yt-visual-batch"><button type="button" onClick={copyAll}><Copy size={16}/> Copiar prompts del capítulo</button><button type="button" onClick={downloadAll}><Save size={16}/> Descargar prompts TXT</button><button type="button" onClick={()=>void refreshPrivate()} disabled={loadingPhotos}><RefreshCcw size={16}/> {loadingPhotos?'Actualizando...':'Actualizar fotos'}</button>{batchStatus&&<small role="status">{batchStatus}</small>}</div>
       {privateError&&<p role="alert" className="yt-private-error">{privateError}</p>}
