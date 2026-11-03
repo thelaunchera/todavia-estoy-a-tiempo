@@ -36,7 +36,7 @@ function PhotoCard({photo,entry,privatePhoto,readOnly,onChanged,onPrivateChanged
     try { await navigator.clipboard.writeText(prompt);setCopied(true);setStatus('Prompt copiado.'); }
     catch{setStatus('No se pudo copiar. Selecciona el texto del prompt.');}
   };
-  const canUpload=/^E0[1-8]-F(0[1-9]|10)$/.test(photo.id);
+  const canUpload=/^E0[1-8]-F(0[1-9]|10)$|^E0(5|8)-H0[1-4]$/.test(photo.id);
   const uploadFile=async(file:File)=>{
     if(readOnly){setStatus('Sal del modo grabación para guardar fotos.');return;}
     setBusy(true);setStatus('');
