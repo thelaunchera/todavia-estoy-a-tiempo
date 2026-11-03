@@ -9,13 +9,13 @@ export type S2Scene = {
  title:string; location:string; time:string;
  shots: readonly [ShotDraft,ShotDraft,ShotDraft];
 };
-export type ShotDraft = {cast:readonly string[];camera:string;action:string;motion:string;cue:string};
+export type ShotDraft = {cast:readonly string[];camera:string;action:string;motion:string;dialogueCue:string};
 export function expandSeasonTwoScenes(episode:number,scenes:readonly S2Scene[]):SeasonTwoShot[]{
  return scenes.flatMap((scene,i)=>scene.shots.map((shot,j)=>({
  id:'S2-E'+String(episode).padStart(2,'0')+'-S'+String(i+1).padStart(2,'0')+'-P'+String(j+1).padStart(2,'0'),
  episode,scene:i+1,shot:j+1,title:scene.title,
  location:scene.location,time:scene.time,
- cast:shot.cast,camera:shot.camera,action:shot.action,motion:shot.motion,dialogueCue:shot.cue,
+ cast:shot.cast,camera:shot.camera,action:shot.action,motion:shot.motion,dialogueCue:shot.dialogueCue,
  stillStatus:'pendiente' as const,videoStatus:'pendiente' as const
  })));
 }
