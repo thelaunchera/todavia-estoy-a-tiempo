@@ -716,79 +716,121 @@ export async function removeYouTubePhoto(shotId:string):Promise<void>{
    RLS restricts UPDATE to podcast_studio_admins.role='owner'; students have
    read-only access to ready course resources, never the publishing controls. */
 const CLASSROOM_COURSE_ID='primera-landing-ia-01';
-type ClassroomDemoPhoto={name:string;url:string;order:number;label_es?:string;label_en?:string;section_es?:string;section_en?:string;usage?:'hero'|'section'|'reference';display_order?:number};
+type ClassroomDemoPhoto={name:string;url:string;order:number;label_es?:string;label_en?:string;section_es?:string;section_en?:string;usage?:'hero'|'section'|'reference'|'graphic';display_order?:number};
 type ClassroomDemoStep={title:string;step:string;body:string;order:number;photos:{title:string;body:string}[]};
 export type ClassroomDemoEntry={
-  id:string; title:string; category:string;category_es:string;category_en:string;
-  url:string;image:string; description_es:string;description_en:string;
-  notes_es:string;notes_en:string;published:boolean;
-  photos:ClassroomDemoPhoto[];prompts:ClassroomDemoStep[];
-  video_url?:string;
+ id:string;title:string;category:string;category_es:string;category_en:string;
+ url:string;image:string;description_es:string;description_en:string;
+ notes_es:string;notes_en:string;published:boolean;
+ photos:ClassroomDemoPhoto[];prompts:ClassroomDemoStep[];video_url?:string;
+ graphics?:ClassroomDemoPhoto[];
 };
 type ClassroomGalleryPayload={version?:number;demos:ClassroomDemoEntry[];[key:string]:unknown};
+type ClassroomExtraCase={
+ replacePhotos?:boolean;photos?:ClassroomDemoPhoto[];prompts?:ClassroomDemoStep[];
+ graphics?:ClassroomDemoPhoto[];[key:string]:unknown;
+};
+type ClassroomExtras={version:number;cases:Record<string,ClassroomExtraCase>;[key:string]:unknown};
+const CLASSROOM_EXTRAS='inspiration_gallery_extras_v1';
+const fileKey=(url:string)=>String(url||'').split('?')[0];
+function reconcileClassroomPhotos(primary:ClassroomDemoPhoto[],additional:ClassroomDemoPhoto[]){
+ const current=[...primary],existing=new Set(current.map(p=>fileKey(p.url)));
+ for(const photo of additional){
+  const id=fileKey(photo.url);
+  if(!/^https:\/\//.test(id)||existing.has(id))continue;
+  current.push(photo);existing.add(id);
+ }
+ return current;
+}
 async function readClassroomDemoPayload():Promise<ClassroomGalleryPayload>{
-  if(!client)throw Error('El Studio no está conectado.');
-  await owner();
-  const {data,error}=await client.from('podcast_class_learning_assets')
-   .select('payload').eq('course_id',CLASSROOM_COURSE_ID)
-   .eq('asset_code','inspiration_gallery_v1').eq('status','ready').single();
-  if(error||!data?.payload)throw Error('No se pudo consultar Inspiración del aula.');
-  const payload=data.payload as ClassroomGalleryPayload;
-  if(!Array.isArray(payload.demos))throw Error('La biblioteca de demos del aula no es válida.');
-  return payload;
+ if(!client)throw Error('El Studio no está conectado.');
+ await owner();
+ const {data,error}=await client.from('podcast_class_learning_assets')
+  .select('payload').eq('course_id',CLASSROOM_COURSE_ID)
+  .eq('asset_code','inspiration_gallery_v1').eq('status','ready').single();
+ if(error||!data?.payload)throw Error('No se pudo consultar Inspiración del aula.');
+ const payload=data.payload as ClassroomGalleryPayload;
+ if(!Array.isArray(payload.demos))throw Error('La biblioteca de demos del aula no es válida.');
+ return payload;
+}
+async function readClassroomExtras():Promise<ClassroomExtras>{
+ if(!client)throw Error('El Studio no está conectado.');
+ await owner();
+ const {data,error}=await client.from('podcast_class_learning_assets')
+  .select('payload').eq('course_id',CLASSROOM_COURSE_ID)
+  .eq('asset_code',CLASSROOM_EXTRAS).eq('status','ready').maybeSingle();
+ if(error)throw Error('No se pudieron consultar las fotografías complementarias.');
+ const value=data?.payload as ClassroomExtras|undefined;
+ return value&&value.cases?value:{version:1,cases:{}};
+}
+function mergeClassroomGallery(demos:ClassroomDemoEntry[],extra:ClassroomExtras):ClassroomDemoEntry[]{
+ return demos.map(d=>{
+  const e=extra.cases[d.id];
+  if(!e)return d;
+  const originals=Array.isArray(d.photos)?d.photos:[];
+  const photoExtras=Array.isArray(e.photos)?e.photos:[];
+  return {...d,
+   photos:e.replacePhotos?photoExtras:reconcileClassroomPhotos(originals,photoExtras),
+   prompts:(d.prompts?.length||0)>0?d.prompts:(e.prompts||[]),
+   graphics:Array.isArray(e.graphics)?e.graphics:[]
+  };
+ });
 }
 export async function getClassroomDemoCatalog():Promise<ClassroomDemoEntry[]>{
-  const payload=await readClassroomDemoPayload();
-  return payload.demos;
+ const [main,extra]=await Promise.all([readClassroomDemoPayload(),readClassroomExtras()]);
+ return mergeClassroomGallery(main.demos,extra);
 }
-export async function setClassroomDemoVisibility(
-  entry:ClassroomDemoEntry,visible:boolean
-):Promise<ClassroomDemoEntry[]>{
-  if(!client)throw Error('No hay conexión con la biblioteca del aula.');
-  if(!entry?.id||!entry?.url?.startsWith('https://'))throw Error('El demo no tiene enlace público válido.');
-  // Fetch latest payload before patching. Do not overwrite other course assets.
-  const payload=await readClassroomDemoPayload();
-  const demos=[...payload.demos];
-  const index=demos.findIndex(d=>d.id===entry.id);
-  if(index===-1&&!visible)throw Error('Este demo todavía no está añadido al aula.');
-  if(index<0) {
-    demos.push({...entry,published:true});
-  } else {
-    const old=demos[index];
-    const enriched=visible?{
-      ...old,
-      // Preserve original verified student prompts and approved photos when present.
-      // Keep verified section labels and hero classification on existing photos.
-      // Append any new Studio photos without replacing the curated gallery.
-      photos:[
-        ...(Array.isArray(old.photos)?old.photos:[]),
-        ...(Array.isArray(entry.photos)?entry.photos:[]).filter(photo=>
-          !Array.isArray(old.photos)||!old.photos.some(saved=>
-            saved.url?.split('?')[0]===photo.url?.split('?')[0]))
-      ],
-      prompts:(old.prompts?.length||0)>0?old.prompts:entry.prompts,
-      description_en:old.description_en||entry.description_en,
-      description_es:old.description_es||entry.description_es,
-      category_en:old.category_en||entry.category_en,
-      category_es:old.category_es||entry.category_es,
-      image:old.image||entry.image,
-      url:old.url||entry.url,
-      notes_es:old.notes_es||entry.notes_es,
-      notes_en:old.notes_en||entry.notes_en,
-    }:old;
-    demos[index]={...enriched,published:visible};
-  }
-  const {data,error}=await client.from('podcast_class_learning_assets')
-    .update({payload:{...payload,demos}})
-    .eq('course_id',CLASSROOM_COURSE_ID)
-    .eq('asset_code','inspiration_gallery_v1')
-    .eq('status','ready')
-    .select('payload').single();
-  if(error||!data?.payload)throw Error('No se guardó la selección. Verifica que eres administradora y vuelve a intentarlo.');
-  const returned=(data.payload as ClassroomGalleryPayload).demos;
-  if(!Array.isArray(returned)||returned.find(d=>d.id===entry.id)?.published!==visible)
-    throw Error('No se pudo comprobar la selección guardada.');
-  return returned;
+async function updateClassroomExtras(payload:ClassroomExtras):Promise<void>{
+ if(!client)throw Error('El Studio no está conectado.');
+ const {data,error}=await client.from('podcast_class_learning_assets')
+  .update({payload}).eq('course_id',CLASSROOM_COURSE_ID)
+  .eq('asset_code',CLASSROOM_EXTRAS).eq('status','ready')
+  .select('payload').single();
+ if(error||!data?.payload)throw Error('No se pudieron guardar las fotos complementarias.');
+}
+export async function setClassroomDemoVisibility(entry:ClassroomDemoEntry,visible:boolean):Promise<ClassroomDemoEntry[]>{
+ if(!client)throw Error('No hay conexión con la biblioteca del aula.');
+ if(!entry?.id||!entry?.url?.startsWith('https://'))throw Error('El demo no tiene enlace público válido.');
+ const [main,extras]=await Promise.all([readClassroomDemoPayload(),readClassroomExtras()]);
+ const demos=[...main.demos];
+ const index=demos.findIndex(d=>d.id===entry.id);
+ if(index===-1&&!visible)throw Error('Este demo todavía no está añadido al aula.');
+ if(visible){
+  const original=index>=0?demos[index]:null;
+  const ex=extras.cases[entry.id]||{};
+  const existing=Array.isArray(original?.photos)?original.photos:[];
+  const saved=Array.isArray(ex.photos)?ex.photos:[];
+  const extrasToAdd=(entry.photos||[]).filter(p=>!existing.some(x=>fileKey(x.url)===fileKey(p.url)));
+  const photos=reconcileClassroomPhotos(saved,extrasToAdd);
+  // Preserve curated labels, active-photo sets and archive exclusions; never
+  // reconstruct historical imagery by synchronizing a larger Studio kit.
+  const originalPrompts=original?.prompts||[];
+  const prompts=originalPrompts.length?ex.prompts:(ex.prompts?.length?ex.prompts:entry.prompts);
+  const revised={...extras,cases:{...extras.cases,[entry.id]:{...ex,photos,prompts}}};
+  if(JSON.stringify(revised)!==JSON.stringify(extras))await updateClassroomExtras(revised);
+ }
+ if(index<0){
+  // New demos store only compact metadata in the limited-size main gallery;
+  // verified photos and prompts are stored independently, avoiding overflow.
+  demos.push({...entry,published:true,photos:[],prompts:[]});
+ }else{
+  const old=demos[index];
+  demos[index]={...old,published:visible,
+   // Preserve existing source-of-truth and metadata instead of overwriting
+   // site photography with stale Studio file lists.
+   description_es:old.description_es||entry.description_es,
+   description_en:old.description_en||entry.description_en
+  };
+ }
+ const {data,error}=await client.from('podcast_class_learning_assets')
+  .update({payload:{...main,demos}})
+  .eq('course_id',CLASSROOM_COURSE_ID).eq('asset_code','inspiration_gallery_v1')
+  .eq('status','ready').select('payload').single();
+ if(error||!data?.payload)throw Error('No se pudo guardar la selección. No se alteraron los originales.');
+ const returned=(data.payload as ClassroomGalleryPayload).demos;
+ if(!Array.isArray(returned)||returned.find(d=>d.id===entry.id)?.published!==visible)
+  throw Error('No se pudo comprobar la selección guardada.');
+ return getClassroomDemoCatalog();
 }
 
 /* OFF BRIEF YouTube channel brand vault; admin-only private storage, no public URLs. */
