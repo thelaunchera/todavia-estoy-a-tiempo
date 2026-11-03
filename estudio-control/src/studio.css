@@ -2344,3 +2344,21 @@ a:focus-visible {
  .studio-aula-mobile-link span{display:none}
  .studio-aula-preview-identity{font-size:12px}
 }
+
+
+/* Compact Studio's frame when previewing the classroom on a phone.
+   The classroom already has its own menu. */
+@media(max-width:720px){
+  .studio-aula-preview-bar{
+    min-height:45px!important;
+    padding:calc(env(safe-area-inset-top,0px) + 4px) 12px 5px!important;
+    gap:8px!important;
+  }
+  .studio-aula-preview-identity{font-size:12px!important;gap:6px!important}
+  .studio-aula-preview-identity svg{width:16px;height:16px}
+  .studio-aula-preview-bar>button{
+    min-height:36px!important;
+    padding:6px 10px!important;
+    border-radius:10px!important;font-size:11px!important;
+  }
+}
