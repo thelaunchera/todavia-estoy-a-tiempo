@@ -622,7 +622,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1');
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1' && x.section !== 'youtube-s1e02-idea-accion-v1');
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
