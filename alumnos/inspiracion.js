@@ -189,17 +189,40 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
    :[];
   const photoBlock=document.createElement('section');photoBlock.className='inspiration-photos';
   photoBlock.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Fotografías individuales','Individual photos',curLang())+'</h3><p>'+photos.length+' '+enLabel('imágenes de referencia, sin collages. Ábrelas por separado para guardarlas.','reference images, not collages. Open each separately to save.',curLang())+'</p></div>';
-  const gallery=document.createElement('div');gallery.className='inspiration-photo-grid';
-  for(const {p,index:photoIndex} of photos){
-   const link=document.createElement('a');link.href=safeUrl(p.url);link.rel='noopener noreferrer';link.target='_blank';link.className='inspiration-photo';
-   const label=galleryPhotoLabel(d.id,photoIndex,p,curLang());
-   const section=galleryPhotoSection(p,curLang());
-   if(p.usage==='hero')link.classList.add('inspiration-photo-hero');
-   link.setAttribute('aria-label',section+' · '+label);
-   link.innerHTML='<img alt="'+esc(label)+'" loading="lazy" src="'+esc(safeUrl(p.url))+'"><small class="inspiration-photo-section">'+esc(section)+'</small><span>'+esc(label)+'</span>';
-   gallery.append(link);
+  const gallery=document.createElement('div');gallery.className='inspiration-photo-batches';
+  const batchSize=Math.min(9,Math.max(1,Number(guidePayload?.photo_batch_size)||9));
+  for(let start=0;start<photos.length;start+=batchSize){
+   const batch=photos.slice(start,start+batchSize);
+   const batchWrap=document.createElement('section');batchWrap.className='inspiration-photo-batch';
+   const heading=document.createElement('h4');heading.className='inspiration-photo-batch-title';
+   heading.textContent=curLang()==='en'
+    ?'Batch '+String(Math.floor(start/batchSize)+1).padStart(2,'0')+' · photos '+(start+1)+'–'+(start+batch.length)
+    :'Lote '+String(Math.floor(start/batchSize)+1).padStart(2,'0')+' · fotos '+(start+1)+'–'+(start+batch.length);
+   const grid=document.createElement('div');grid.className='inspiration-photo-grid';
+   for(const {p,index:photoIndex} of batch){
+    const label=galleryPhotoLabel(d.id,photoIndex,p,curLang());
+    const section=galleryPhotoSection(p,curLang());
+    const item=document.createElement('div');item.className='inspiration-photo-item';
+    const link=document.createElement('a');link.href=safeUrl(p.url);
+    link.rel='noopener noreferrer';link.target='_blank';link.className='inspiration-photo';
+    if(p.usage==='hero')link.classList.add('inspiration-photo-hero');
+    link.setAttribute('aria-label',section+' · '+label);
+    link.innerHTML='<img alt="'+esc(label)+'" loading="lazy" src="'+esc(safeUrl(p.url))+'"><small class="inspiration-photo-section">'+esc(section)+'</small><span>'+esc(label)+'</span>';
+    item.append(link);
+    const directions=document.createElement('details');directions.className='inspiration-photo-directions';
+    const sum=document.createElement('summary');sum.textContent=enLabel('Cómo usar esta foto','How to use this photo',curLang());
+    const photoInstruction=curLang()==='en'
+     ?'For '+d.title+' and my APPROVED moodboard ('+(guideCase?.style_en||'approved visual style')+'), use the ORIGINAL authorized photo '+studioPhotoFile(p.url)+' in '+section+': '+label+'. Do NOT regenerate an existing approved or owned photo. If I explicitly request a replacement, create ONE separate image for this section, never a collage, and ask me to approve it before changing the page. Preserve other images and quality.'
+     :'Para '+d.title+' y mi MOODBOARD APROBADO ('+(guideCase?.style_es||'dirección visual aprobada')+'), usa la foto ORIGINAL autorizada '+studioPhotoFile(p.url)+' en '+section+': '+label+'. NO regeneres fotos propias ni aprobadas. Solo si solicito una alternativa, crea UNA foto individual para esta sección, nunca un collage, y espera mi aprobación antes de reemplazar la imagen. Conserva las demás fotos y su calidad.';
+    const explanation=document.createElement('p');explanation.textContent=photoInstruction;
+    const cp=document.createElement('button');cp.type='button';cp.className='inspiration-copy';
+    cp.textContent=enLabel('Copiar prompt de foto','Copy photo prompt',curLang());
+    cp.addEventListener('click',()=>clipboardCopy(photoInstruction,cp,curLang()));
+    directions.append(sum,explanation,cp);item.append(directions);grid.append(item);
+   }
+   batchWrap.append(heading,grid);gallery.append(batchWrap);
   }
-  if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos individuales de este cliente no se comparten.','Individual client photos are not shared.',curLang())+'</p>';
+  if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos privadas de clientes no se comparten. Usa imágenes propias autorizadas para tu práctica.','Private client photos are not shared. Use your own authorized practice images.',curLang())+'</p>';
   photoBlock.append(gallery);root.append(photoBlock);
   const prompts=Array.isArray(d.prompts)?d.prompts:[];
   const pSection=document.createElement('section');pSection.className='inspiration-prompts';
