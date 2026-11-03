@@ -12,8 +12,8 @@ export type YouTubeSavedPhoto = {id:string;title:string;section?:string;art?:str
 type Props={ entries:YouTubeSavedPhoto[]; onChanged:()=>Promise<void>;readOnly?:boolean };
 const base=import.meta.env.BASE_URL;
 const avatarImages:Record<string,string> = {
-  Nia:base+'youtube/nia-avatar.webp',
-  Ruby:base+'youtube/ruby-avatar.webp'
+  Nia:base+'youtube/characters/nia.webp',
+  Ruby:base+'youtube/characters/ruby.webp'
 };
 const episodeNum=(n:number)=>String(n).padStart(2,'0');
 const safeImageUrl=(value:string)=>{
