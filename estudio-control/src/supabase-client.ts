@@ -702,3 +702,76 @@ export async function removeYouTubePhoto(shotId:string):Promise<void>{
  const {error:storageError}=await client.storage.from(YOUTUBE_PHOTO_BUCKET).remove([old.object_path]);
  if(storageError)throw new Error('Se quitó la foto del capítulo, pero no se pudo limpiar su archivo privado.');
 }
+
+
+/* Class inspiration gallery — edited only by a verified Studio owner.
+   RLS restricts UPDATE to podcast_studio_admins.role='owner'; students have
+   read-only access to ready course resources, never the publishing controls. */
+const CLASSROOM_COURSE_ID='primera-landing-ia-01';
+type ClassroomDemoPhoto={name:string;url:string;order:number};
+type ClassroomDemoStep={title:string;step:string;body:string;order:number;photos:{title:string;body:string}[]};
+export type ClassroomDemoEntry={
+  id:string; title:string; category:string;category_es:string;category_en:string;
+  url:string;image:string; description_es:string;description_en:string;
+  notes_es:string;notes_en:string;published:boolean;
+  photos:ClassroomDemoPhoto[];prompts:ClassroomDemoStep[];
+  video_url?:string;
+};
+type ClassroomGalleryPayload={version?:number;demos:ClassroomDemoEntry[];[key:string]:unknown};
+async function readClassroomDemoPayload():Promise<ClassroomGalleryPayload>{
+  if(!client)throw Error('El Studio no está conectado.');
+  await owner();
+  const {data,error}=await client.from('podcast_class_learning_assets')
+   .select('payload').eq('course_id',CLASSROOM_COURSE_ID)
+   .eq('asset_code','inspiration_gallery_v1').eq('status','ready').single();
+  if(error||!data?.payload)throw Error('No se pudo consultar Inspiración del aula.');
+  const payload=data.payload as ClassroomGalleryPayload;
+  if(!Array.isArray(payload.demos))throw Error('La biblioteca de demos del aula no es válida.');
+  return payload;
+}
+export async function getClassroomDemoCatalog():Promise<ClassroomDemoEntry[]>{
+  const payload=await readClassroomDemoPayload();
+  return payload.demos;
+}
+export async function setClassroomDemoVisibility(
+  entry:ClassroomDemoEntry,visible:boolean
+):Promise<ClassroomDemoEntry[]>{
+  if(!client)throw Error('No hay conexión con la biblioteca del aula.');
+  if(!entry?.id||!entry?.url?.startsWith('https://'))throw Error('El demo no tiene enlace público válido.');
+  // Fetch latest payload before patching. Do not overwrite other course assets.
+  const payload=await readClassroomDemoPayload();
+  const demos=[...payload.demos];
+  const index=demos.findIndex(d=>d.id===entry.id);
+  if(index===-1&&!visible)throw Error('Este demo todavía no está añadido al aula.');
+  if(index<0) {
+    demos.push({...entry,published:true});
+  } else {
+    const old=demos[index];
+    const enriched=visible?{
+      ...old,
+      // Preserve original verified student prompts and approved photos when present.
+      photos:(old.photos?.length||0)>=(entry.photos?.length||0)?old.photos:entry.photos,
+      prompts:(old.prompts?.length||0)>0?old.prompts:entry.prompts,
+      description_en:old.description_en||entry.description_en,
+      description_es:old.description_es||entry.description_es,
+      category_en:old.category_en||entry.category_en,
+      category_es:old.category_es||entry.category_es,
+      image:old.image||entry.image,
+      url:old.url||entry.url,
+      notes_es:old.notes_es||entry.notes_es,
+      notes_en:old.notes_en||entry.notes_en,
+    }:old;
+    demos[index]={...enriched,published:visible};
+  }
+  const {data,error}=await client.from('podcast_class_learning_assets')
+    .update({payload:{...payload,demos}})
+    .eq('course_id',CLASSROOM_COURSE_ID)
+    .eq('asset_code','inspiration_gallery_v1')
+    .eq('status','ready')
+    .select('payload').single();
+  if(error||!data?.payload)throw Error('No se guardó la selección. Verifica que eres administradora y vuelve a intentarlo.');
+  const returned=(data.payload as ClassroomGalleryPayload).demos;
+  if(!Array.isArray(returned)||returned.find(d=>d.id===entry.id)?.published!==visible)
+    throw Error('No se pudo comprobar la selección guardada.');
+  return returned;
+}
