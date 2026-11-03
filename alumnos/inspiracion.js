@@ -13,6 +13,9 @@ function stageLabel(id,index,original,lang){
  if(lang==='en')return englishDemoTitle('demo_'+id+'_'+index,original);
  return spanishStageNames[id]?.[index]||original||'Etapa '+(index+1);
 }
+const spanishDescriptions={"aftr":["Identidad visual de un club nocturno ficticio, con portada, eventos, áreas exclusivas y fotografías editoriales.","Concepto educativo para mayores de 21 años. No se venden entradas ni se reservan mesas."],"casa-brownie":["Página de repostería con portada de foto fija, sabores, fotografías individuales, regalos y contacto. Es el ejemplo principal del curso.","Ejemplo ficticio. No recibe pedidos ni pagos reales. La portada con video es opcional."],"cb-depot":["Ejemplo real de negocio de servicios, con reservas y presentación cuidada. Se muestra solo su página pública.","Proyecto de un cliente real. No se comparten sus fotografías ni instrucciones privadas."],"cleaning":["Reservas de limpieza residencial y solicitudes de presupuesto comercial. Estudia sus servicios y recorrido del cliente.","Demostración pública de servicios para el hogar. No se comparten datos internos ni automatizaciones."],"crumb":["Tienda de galletas con fotografía editorial, productos, cajas, empaques, historia de marca y diseño móvil.","Proyecto ficticio. No procesa pagos ni promete entregas reales."],"jaramillo":["Ejemplo de boutique de moda que presenta a su diseñadora y sus colecciones, sin proceso de pago.","Concepto de boutique. No reutilices la imagen ni identidad de la diseñadora."],"soluna":["Estudio de yoga: investigación, identidad, clases, oferta de lanzamiento, lista de espera y revisión final.","Ejemplo educativo. Los formularios y membresías son demostrativos; no se cobran pagos."],"yummm":["Cafetería y repostería: fotografías de postres, menú, empaques para llevar y página con identidad de marca.","Galería de 20 imágenes. Los prompts originales del estudio aún no están incorporados, por lo que no se presentan como verificados."]};
+function demoDescription(d,language){return language==='en'?(d.description_en||''):(spanishDescriptions[d.id]?.[0]||d.description_es||'');}
+function demoNotes(d,language){return language==='en'?(d.notes_en||''):(spanishDescriptions[d.id]?.[1]||d.notes_es||'');}
 const englishPhotoNames={
  'casa-brownie':['Brownie hero','Classic brownie','Walnut brownie','Dulce de leche brownie','Raspberry brownie','Cookies & cream brownie','Special edition brownie','Pink-ribbon gift','Gift bags and boxes'],
  crumb:['Storefront','Hero','Classic chocolate chip','Double chocolate','Caramel','Raspberry','Nutty cookie','Brownie cookie','Gift box','Packaging','Lifestyle photo','Baker portrait','Brand story'],
@@ -102,7 +105,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
     const card=document.createElement('button');card.type='button';card.className='inspiration-card';
     card.innerHTML='<div class="inspiration-card-image">'+(safeUrl(d.image)?'<img src="'+esc(safeUrl(d.image))+'" alt="'+esc(d.title)+'" loading="lazy">':'<span class="inspiration-no-photo">'+esc(d.title)+'</span>')+'</div>'+
     '<div class="inspiration-card-meta"><small>'+esc(enLabel(d.category_es,d.category_en,curLang()))+'</small><h3>'+esc(d.title)+'</h3>'+
-    '<p>'+esc(enLabel(d.description_es,d.description_en,curLang()))+'</p>'+
+    '<p>'+esc(demoDescription(d,curLang()))+'</p>'+
     '<span class="inspiration-card-numbers">'+(d.photos?.length||0)+' '+enLabel('fotos','photos',curLang())+' · '+(d.prompts?.length||0)+' '+enLabel('etapas','steps',curLang())+'</span>'+
     '<span class="inspiration-card-link">'+enLabel('Explorar este caso','Explore case study',curLang())+' →</span></div>';
     card.addEventListener('click',()=>showDemo(d.id));grid.append(card);
@@ -123,7 +126,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   const lead=document.createElement('section');lead.className='inspiration-demo-lead';
   lead.innerHTML='<div class="inspiration-demo-cover">'+(safeUrl(d.image)?'<img src="'+esc(safeUrl(d.image))+'" loading="lazy" alt="'+esc(d.title)+'">':'')+'</div>'+
    '<div><span class="inspiration-eyebrow">'+esc(enLabel(d.category_es,d.category_en,curLang()))+'</span>'+
-   '<p>'+esc(enLabel(d.notes_es,d.notes_en,curLang()))+'</p>'+
+   '<p>'+esc(demoNotes(d,curLang()))+'</p>'+
    '<a class="inspiration-demo-open" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.url))+'">'+enLabel('Abrir página completa','Open full website',curLang())+' ↗</a>'+
    (safeUrl(d.video_url)?'<a class="inspiration-demo-open secondary" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.video_url))+'">'+enLabel('Comparar versión con video','Compare video version',curLang())+' ↗</a>':'')+'</div>';
   root.append(lead);
