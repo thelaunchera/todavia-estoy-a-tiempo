@@ -87,6 +87,7 @@ export function englishDemoStep(code,brand=''){
 }
 
 export function englishTitle(code,defaultTitle=''){
+ if(code==='bonus_content_command_notion')return 'BONUS · Notion command center + Metricool + GSC Wizard';
  if(code==='bonus_hero_cinematic_scroll')return 'BONUS · Cinematic scroll hero';
  if(core[code])return core[code][0];
  const guide=promptGuide(code,'en');if(/^freebie_1photo8_/.test(String(code)))return guide.name;
