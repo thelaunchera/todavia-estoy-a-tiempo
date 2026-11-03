@@ -4,7 +4,7 @@ let translationTask=null;
 function updateStaticLanguage(lang){
  try{translateStaticClassroomText(lang);}catch(error){console.warn('Optional classroom translations unavailable',error?.name||'unknown');}
  if(translationTask)return;
- translationTask=import('./aula-textos-estaticos.js?v=20261103-short-copy-v4')
+ translationTask=import('./aula-textos-estaticos.js?v=20261103-classroom-tools-v5')
   .then(mod=>{if(typeof mod.translateStaticClassroomText==='function'){translateStaticClassroomText=mod.translateStaticClassroomText;try{translateStaticClassroomText(language);}catch(error){console.warn('Optional classroom translation failed',error?.name||'unknown');}}})
   .catch(error=>console.warn('Optional classroom language module unavailable',error?.name||'unknown'));
 }
@@ -95,11 +95,12 @@ const translations=[
  ['#admin-preview-banner p','Only the owner can review drafts. Students never see this notice.'],
  ['.dashboard-hero .dashboard-overline','MY LEARNING SPACE'],
  ['.dashboard-progress-heading','YOUR JOURNEY'],
- ['#lesson-unavailable','This video is still being prepared. It will appear here after approval.'],
- ['#empty-lessons','Lesson videos are being prepared. Meanwhile, explore prompts, materials and finished demos.'],
+ ['#lesson-unavailable','This video is not available yet. It will appear here when ready.'],
+ ['#empty-lessons','Videos will appear here when ready. You can explore the materials in the meantime.'],
  ['.course-captions label','Video subtitles'],
- ['#course-caption-help','Lessons will be recorded in Spanish unless an English audio track is supplied. Reviewed subtitles will appear after video publication. You can also change subtitles in YouTube settings.'],
- ['.lesson-guidance','Watch, practice in your project, then mark this lesson complete.'],
+ ['#course-caption-language option[value="auto"]','Choose in the video player'],
+ ['#course-caption-help','Changing the classroom language does not change video audio. Audio and subtitle options will appear as they become available. Choose them in the player.'],
+ ['.lesson-guidance','Watch, practice, and mark the lesson complete when you finish.'],
  ['.lesson-completed','I finished this lesson'],
  ['.lesson-module-prompts-eyebrow','PRACTICE THIS LESSON'],
  ['#student-bonus-heading','How to unlock your bonuses'],
@@ -136,7 +137,7 @@ const translations=[
  ['[data-aula-panel="lecciones"] .aula-section-heading > p:last-child','Choose a lesson from the menu. Your progress is saved to your account.'],
  ['[data-aula-panel="lecciones"] .eyebrow','LEARN STEP BY STEP'],
  ['#lesson-prompts-panel h4','Prompts for this lesson'],
- ['#lesson-prompts-panel .lesson-module-prompts-heading > p','Research the business needs first. Open a prompt, copy it, and replace every bracketed placeholder with your business details.'],
+ ['#lesson-prompts-panel .lesson-module-prompts-heading > p','Research the business first. Then copy the prompt and fill in the details in brackets.'],
  ['[data-aula-panel="bonos"] .aula-section-heading .eyebrow','KEEP CREATING'],
  ['[data-aula-panel="bonos"] .aula-section-heading h1','Bonus library'],
  ['[data-aula-panel="bonos"] .aula-section-heading p:last-child','A place for your extra resources.'],
