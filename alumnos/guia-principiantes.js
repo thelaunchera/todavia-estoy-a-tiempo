@@ -43,21 +43,21 @@ export function renderWebBasics(content,go){
  }
  simple.addEventListener('click',()=>toggle(false));sell.addEventListener('click',()=>toggle(true));toggle(false);
  content.append(node('p','mi-note','Para empezar puedes usar ChatGPT gratis dentro de sus límites. AppDeploy también ofrece un plan Free con créditos limitados; poder conectarlo como plugin dentro de ChatGPT depende de tu plan y permisos. Plus es opcional para tener más capacidad, no una compra obligatoria para practicar ideas, textos y fotos.')); 
- content.append(node('p','mi-note','Un plugin es una conexión entre ChatGPT y otra herramienta: busca AppDeploy, Google/Gmail, Make o Stripe en Plugins y revisa qué permite tu cuenta. Make tiene plan Free con límites; Gmail personal puede ser gratuito; Stripe cobra comisiones cuando se procesan pagos. Instalar un plugin y contratar un servicio son cosas distintas.'));
+ content.append(node('p','mi-note','Un plugin es una conexión entre ChatGPT y otra herramienta: busca AppDeploy, Google Drive, Gmail, Make o Stripe en Plugins y revisa qué permite tu cuenta. Make tiene plan Free con límites; Gmail personal puede ser gratuito; Stripe cobra comisiones cuando se procesan pagos. Instalar un plugin y contratar un servicio son cosas distintas.'));
  content.append(node('p','mi-note','Nunca coloques contraseñas, claves bancarias ni datos privados en los textos o código visible de la web. Los servicios que manejan pagos y cuentas deben mantenerlos protegidos.'));
  const actions=node('div','mi-actions');const next=node('button','mi-primary','Ordenar mi proyecto');next.type='button';next.addEventListener('click',()=>go('organizacion'));actions.append(next);content.append(actions);
 }
 export function renderProjectOrder(content){
  header(content,'03 / UN LUGAR PARA CADA COSA','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en Google Drive. Dentro guarda estas ocho partes y no pierdas tiempo buscando archivos.');
- content.append(node('p','mi-note','Organízate por bloques: por la mañana prepara tus fotografías de marca, textos y referencias; por la tarde construye y prueba en AppDeploy. La profesora ha logrado crear hasta tres webs en un día con este método, según los límites de sus herramientas y la complejidad de cada proyecto. No es una cuota garantizada.'));
+ content.append(node('p','mi-note','Trabaja en una sola web hasta terminarla y practicar el proceso completo. Así tendrás claras las fotos, los textos y los cambios de ese negocio. Después podrás empezar otra sin mezclar archivos.'));
  const grid=node('div','mi-folder-grid');content.append(grid);
  for(const [title,description] of folders){const item=node('div','mi-folder-card');item.append(node('strong',null,title),node('span',null,description));grid.append(item);}
  const rules=node('div','mi-structure-example');
  rules.append(node('strong',null,'Tres reglas sencillas'));
  const list=node('ol');
- ['No cambies de negocio durante la clase: empieza y termina con la misma idea.','Antes de cambiar algo, guarda la versión anterior de la foto, el texto o la web.','Las contraseñas, claves, documentos bancarios y datos de clientes no se guardan en carpetas compartidas.'].forEach(line=>{list.append(node('li',null,line));});
+ ['Una web a la vez: usa una sola carpeta principal y mantén allí únicamente los archivos de ese negocio.','Guarda las fotos en Drive, comprueba que se abran y conserva la versión anterior antes de reemplazar algo. No borres originales del teléfono sin verificar la copia.','Las contraseñas, claves, documentos bancarios y datos de clientes no se guardan en carpetas compartidas.'].forEach(line=>{list.append(node('li',null,line));});
  rules.append(list);content.append(rules);
- const prompt='Ayúdame a organizar una primera web para [NOMBRE DEL NEGOCIO]. Crea un plan de ocho carpetas: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS. Explica qué va en cada una y cómo guardar versiones. Evita contraseñas y datos privados. Todo en español claro para alguien que nunca hizo una web.';
+ const prompt='Voy a trabajar en UN SOLO proyecto por ahora: [NOMBRE DEL NEGOCIO]. Ayúdame a organizar su carpeta en Google Drive. Crea un plan de ocho carpetas: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS. Explica qué va en cada una y cómo guardar versiones. Evita contraseñas y datos privados. Todo en español claro para alguien que nunca hizo una web.';
  const promptCard=node('div','mi-structure-prompt');
  promptCard.append(node('h4',null,'Instrucción lista para ChatGPT'),node('p',null,prompt));
  const button=node('button',null,'Copiar instrucción');button.type='button';
@@ -75,6 +75,7 @@ export function renderStudentWebPath(content,go){
  const intro=node('div','mi-path-intro');
  intro.append(node('strong',null,'Tu objetivo: una página clara que puedas abrir desde tu teléfono y compartir con un enlace.'),node('p',null,'No necesitas programar ni comprar un dominio. Para esta primera web basta con una portada, información real, fotografías, un botón que funcione y un pie de página. Los pagos y automatizaciones son opcionales y se ven después.'));
  intro.append(node('p',null,'Orden real de la clase: idea y carpeta → 8 prompts gratis → moodboard → fotografías individuales → textos → AppDeploy → revisar y publicar. Primero definimos la imagen de marca, después construimos la página.'));
+ intro.append(node('p',null,'Una web a la vez hasta que tengas práctica. Si necesitas más espacio en tu teléfono, sube las fotos a Google Drive, comprueba que estén guardadas y después decide qué copias locales puedes quitar. Conectar el plugin no mueve ni elimina tus fotos automáticamente.'));
  content.append(intro);
  const steps=[
   {title:'Define tu negocio y el objetivo de la página',time:'Módulos 00 y 01',
@@ -83,9 +84,9 @@ export function renderStudentWebPath(content,go){
    save:'Guarda tu ficha en 00_IDEA.',check:'Puedes explicar tu web en una sola frase.',
    prompt:'Voy a crear mi primera web para [NOMBRE DEL NEGOCIO]. Vendo u ofrezco [PRODUCTO O SERVICIO], ayudo a [TIPO DE CLIENTE] y quiero que el visitante [ACCIÓN PRINCIPAL]. Hazme cinco preguntas sencillas, una por una, para definir la estructura de una página. No inventes datos, precios ni reseñas.'},
   {title:'Ordena tus archivos antes de diseñar',time:'Módulo 01',
-   actions:['Entra en Google Drive desde el teléfono y toca Nuevo → Carpeta. Ponle el nombre de tu negocio.','Dentro crea: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS.','Guarda cada imagen por separado y no mezcles fotos de muestra con las de tu negocio.'],
+   actions:['En ChatGPT abre Configuración → Plugins (o Apps, según tu versión). Busca Google Drive, pulsa Conectar, entra en tu cuenta Google y revisa los permisos.','Abre la app de Google Drive en tu teléfono, toca + Nuevo → Carpeta y ponle el nombre de UN SOLO negocio.','Dentro crea: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS.','Sube a 02_FOTOS las imágenes de este negocio, por separado y con nombres claros: hero_01, producto_01, detalle_01.','Comprueba que las fotos se pueden abrir desde Drive antes de borrar ninguna copia local. Si ChatGPT no permite guardar fotos directamente en Drive, súbelas con la app de Drive.'],
    example:'En el video verás las carpetas de Casa Brownie; tú usa el nombre de tu propio proyecto.',
-   save:'Crea las ocho carpetas; no subas contraseñas ni datos privados.',check:'Encuentras una foto y un texto en menos de un minuto.',
+   save:'Una carpeta principal en Drive con las ocho secciones y fotos subidas de ese negocio.',check:'Encuentras una foto en Drive, la abres y sabes exactamente a qué sección de tu web pertenece.',
    prompt:'Ayúdame a preparar una lista muy sencilla de los archivos que necesito para la web de [NEGOCIO]. Separa textos, fotos, diseño y pruebas. Dime cómo nombrar cada archivo para encontrarlo desde mi teléfono.'},
   {title:'Moodboard con los 8 Master Prompts gratuitos',time:'Módulo 02 · Primero la dirección visual',
    actions:['Abre los 8 Master Prompts originales en el freebie gratuito de Content Lab. Si todavía no tienes acceso, usa el flujo de correo del freebie para obtenerlos.','Explora los ocho estilos: Asymmetric Editorial, Monumental Center, Type Behind Product, Side-Cropped Close-Up, Offset Negative Space, Diagonal Visual Flow, Vertical Editorial Stack y Magazine Column Split. Son composiciones, no ocho fotos obligatorias.','Elige dos estilos que tengan sentido para tu negocio. Con ChatGPT y tus referencias crea un moodboard con colores, tipografías, luz, materiales y encuadres.','Decide tres reglas que mantendrás en todas las fotografías y guárdalas. El moodboard orienta el diseño; no es la imagen que se pone entera en el hero.'],
