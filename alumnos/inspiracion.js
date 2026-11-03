@@ -77,6 +77,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
  }
  const demos=Array.isArray(data.payload.demos)?data.payload.demos.filter(d=>d&&d.id&&d.title&&safeUrl(d.url)):[];
  const visibleDemos=()=>adminPreview?demos:demos.filter(d=>d.published!==false);
+ const demoPrompts=d=>Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guidePayload?.cases?.[d.id]?.extra_prompts)?guidePayload.cases[d.id].extra_prompts:[]);
  let currentId=null,category='all',search='';
  const categoryNames={
   all:['Todas','All'],food:['Repostería y comida','Food & bakery'],
@@ -134,7 +135,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
     card.innerHTML='<div class="inspiration-card-image">'+(safeUrl(d.image)?'<img src="'+esc(safeUrl(d.image))+'" alt="'+esc(d.title)+'" loading="lazy">':'<span class="inspiration-no-photo">'+esc(d.title)+'</span>')+'</div>'+
     '<div class="inspiration-card-meta"><small>'+esc(enLabel(d.category_es,d.category_en,curLang()))+'</small><h3>'+esc(d.title)+'</h3>'+
     '<p>'+esc(demoDescription(d,curLang()))+'</p>'+
-    '<span class="inspiration-card-numbers">'+(d.photos?.length||0)+' '+enLabel('fotos','photos',curLang())+' · '+(d.prompts?.length||0)+' '+enLabel('etapas','steps',curLang())+'</span>'+
+    '<span class="inspiration-card-numbers">'+(d.photos?.length||0)+' '+enLabel('fotos','photos',curLang())+' · '+demoPrompts(d).length+' '+enLabel('etapas','steps',curLang())+'</span>'+
     '<span class="inspiration-card-link">'+enLabel('Explorar este caso','Explore case study',curLang())+' →</span></div>';
     card.addEventListener('click',()=>showDemo(d.id));grid.append(card);
    }
@@ -224,7 +225,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   }
   if(!photos.length)gallery.innerHTML='<p>'+enLabel('Las fotos privadas de clientes no se comparten. Usa imágenes propias autorizadas para tu práctica.','Private client photos are not shared. Use your own authorized practice images.',curLang())+'</p>';
   photoBlock.append(gallery);root.append(photoBlock);
-  const prompts=Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guideCase?.extra_prompts)?guideCase.extra_prompts:[]);
+  const prompts=demoPrompts(d);
   const pSection=document.createElement('section');pSection.className='inspiration-prompts';
   pSection.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Prompts por etapa','Step-by-step prompts',curLang())+'</h3>'+
    '<p>'+enLabel('Pega un prompt por vez. Sustituye los datos de ejemplo por los de tu negocio. Los comandos originales pueden estar en español.','Open a step and copy its US-English learning adaptation. Adjust your own facts and photos; do not copy the demo brand.',curLang())+'</p></div>';
