@@ -81,3 +81,6 @@
 .yt-look-tools button{display:inline-flex;gap:7px;align-items:center;border:1px solid #cad8e4;color:#233c54;background:#fff;border-radius:9px;padding:9px 11px;font-size:.78rem;font-weight:700;cursor:pointer}
 .yt-look-tools button:hover{background:#e5f0f9}
 @media(max-width:480px){.yt-look-tools button{width:100%;justify-content:center}}
+
+.yt-frame-buttons a{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;background:#fff;color:#191919;text-decoration:none;border:1px solid #cfd5d8;border-radius:9px;font-weight:700;font-size:.8rem;min-height:40px}
+.yt-frame-buttons a:hover{background:#f6f5f1}
