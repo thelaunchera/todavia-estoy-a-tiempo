@@ -47,3 +47,19 @@ test('the help form, prompts and navigation include English UI translations',()=
  }
  assert.match(s,/privacy\.textContent='Privacy policy'/);
 });
+
+test('Drive connection instructions and one-project guidance stay available in both classroom languages',()=>{
+ const home=load('index.html');
+ const translations=load('aula-textos-estaticos.js');
+ const spanish=load('guia-principiantes.js');
+ const english=load('materials-guides-en.js');
+ assert.match(home,/Google Drive: conecta la app desde ChatGPT/);
+ assert.match(home,/Empieza con una sola web/);
+ assert.match(translations,/Google Drive: in ChatGPT open Settings/);
+ assert.match(translations,/Start with one website/);
+ assert.match(spanish,/Trabaja en una sola web/);
+ assert.match(spanish,/Antes de borrar fotos del teléfono|antes de borrar ninguna copia local/);
+ assert.match(english,/Work on ONE website at a time/);
+ assert.match(english,/Settings → Plugins \(or Apps\)/);
+ assert.match(english,/before removing any copies from your phone/);
+});
