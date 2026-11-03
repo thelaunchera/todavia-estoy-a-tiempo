@@ -240,7 +240,10 @@ assert.match(home,/assets\/episodio-03-portada\.webp/,'Se muestra la portada del
 assert.ok(readFileSync('assets/episodio-03-portada.webp').byteLength>1_000,'La portada aprobada se conserva en assets');
 const popupEp03=read('podcast-episode-03-announcement-20261103.js');
 assert.match(home,/id="podcast-ep03-dialog"/,'La landing en español tiene el popup');
-assert.doesNotMatch(read('index-en.html'),/id="podcast-ep03-dialog"/,'La landing en inglés no recibe este aviso');
+assert.match(read('index-en.html'),/id="podcast-ep03-dialog"/,'La landing en inglés también presenta el aviso');
+assert.match(read('index-en.html'),/A NEW EPISODE IS HERE · 03/,'El aviso inglés está traducido');
+assert.match(read('index-en.html'),/Listen to episode 03/,'El CTA del aviso inglés está traducido');
+assert.doesNotMatch(read('index-en.html'),/YA SALIÓ UN NUEVO EPISODIO/,'Sin copiar mensajes españoles al popup inglés');
 assert.match(popupEp03,/2026-11-03T00:00:00-05:00/);
 assert.match(popupEp03,/2026-11-06T00:00:00-05:00/);
 assert.doesNotMatch(popupEp03,/(?:localStorage|sessionStorage)\s*\./,'El popup reaparece en cada nueva visita, sin guardar cierres');
@@ -249,7 +252,7 @@ assert.match(newStyles,/object-fit:contain!important/);
 assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
-console.log('QA: capítulos 03, 02 y 01 visibles, título vigente de influencer y aviso ES temporal correctos');
+console.log('QA: capítulos 03, 02 y 01 visibles, título vigente de influencer y aviso ES/EN temporal correctos');
 
 
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
