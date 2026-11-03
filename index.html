@@ -14,7 +14,7 @@
   <title>Todavía estoy a tiempo | Podcast en español con Dailin</title>
   <link rel="icon" href="assets/monograma-podcast-04.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles-redesign.css?v=20261101-matcha-hero-photo-v3">
-  <link rel="stylesheet" href="episodios-destacados.css?v=20261103-three-episodes">
+  <link rel="stylesheet" href="episodios-destacados.css?v=20261103-equal-cards-v3">
   <link rel="stylesheet" href="theme-song-compact.css?v=20261028-editorial-v2">
   <link rel="stylesheet" href="visitor-mode.css?v=20261023-prueba-v1">
   <link rel="stylesheet" href="clases/clases.css?v=20261030-podcast-ayuda-boton-v2">
@@ -46,8 +46,8 @@
     @media(max-width:380px){.podcast-freebie-topbar__inner{flex-direction:column;gap:8px}.podcast-freebie-topbar__text{text-align:center}.podcast-freebie-topbar__button{align-self:center}}
   </style>
 <link rel="stylesheet" href="/editorial-attention-20261103.css?v=1">
-<link rel="stylesheet" href="podcast-episode-03-announcement-20261103.css?v=2">
-<script defer src="podcast-episode-03-announcement-20261103.js?v=1"></script>
+<link rel="stylesheet" href="podcast-episode-03-announcement-20261103.css?v=3">
+<script defer src="podcast-episode-03-announcement-20261103.js?v=3"></script>
 </head>
 <body>
   <span class="scroll-sentinel" aria-hidden="true"></span>
@@ -157,7 +157,7 @@
             <div class="episode-curated-copy">
               <p class="episode-curated-kicker" data-ep-kicker>EPISODIO 03</p>
               <h3 data-ep-title>No quiero ser influencer para vender lo que hago</h3>
-              <a class="episode-curated-button" data-ep-link href="https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 03 en Spotify">Escuchar <span aria-hidden="true">↗</span></a>
+              <a class="episode-curated-button" data-ep-link href="https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c" target="_blank" rel="noopener noreferrer" aria-label="Escuchar episodio 03 en Spotify">Escuchar en Spotify</a>
             </div>
           </article>
           <aside class="episode-previous episode-mini-card" data-ep-previous aria-label="Episodio 02">
@@ -167,7 +167,7 @@
             <div class="episode-previous-detail">
               <p class="episode-previous-kicker" data-ep-previous-number>EPISODIO 02</p>
               <a class="episode-previous-link" data-ep-previous-title href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer">Estoy cansada de ser fuerte todo el tiempo</a>
-              <a class="episode-previous-cta" href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer">Escuchar <span aria-hidden="true">↗</span></a>
+              <a class="episode-previous-cta" href="https://open.spotify.com/episode/6ICSx9E7BVlU8Qi8rFC0s3?si=pYWZUm-8TIuCsoRsY4zkdQ" target="_blank" rel="noopener noreferrer">Escuchar en Spotify</a>
             </div>
           </aside>
           <article class="episode-previous episode-mini-card episode-earlier" data-ep-earlier aria-label="Episodio 01">
@@ -206,7 +206,7 @@
           <p class="theme-song-story-kicker">UN MOMENTO SOLO PARA TI</p>
           <h3>Una canción para <em>bajar el ruido.</em></h3>
           <p>No hace falta tener todo resuelto para darte unos minutos. Esta canción es una pequeña pausa entre tantas cosas que llevamos dentro.</p>
-          <a href="#escuchar">Después, seguimos conversando <span aria-hidden="true">↗</span></a>
+          <a href="#escuchar">Después, seguimos conversando </a>
         </div>
       </div>
     </section>
@@ -409,15 +409,16 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <dialog id="podcast-ep03-dialog" aria-labelledby="ep03-popup-title" aria-describedby="ep03-popup-desc">
-    <button type="button" class="ep03-close" data-ep03-close aria-label="Cerrar anuncio del capítulo 3">×</button>
+    <button type="button" class="ep03-close" data-ep03-close aria-label="Cerrar anuncio del capítulo">×</button>
     <figure class="ep03-art">
-      <img src="assets/episodio-03-portada.webp" width="1080" height="1080" alt="Portada oficial del episodio 3: No quiero ser influencer para vender lo que hago" decoding="async">
+      <img src="assets/episodio-03-portada.webp" width="1080" height="1080" alt="Portada oficial de Todavía estoy a tiempo" decoding="async">
     </figure>
     <div class="ep03-copy">
-      <span class="ep03-eyebrow">YA DISPONIBLE · CAPÍTULO 03</span>
-      <h2 id="ep03-popup-title">No quiero ser influencer para vender lo que hago.</h2>
-      <p id="ep03-popup-desc" class="ep03-description">¿Hay que convertirte en influencer para vender algo tuyo? Hablamos de esa presión de mostrarte en redes y de cómo compartir lo que haces a tu manera. El nuevo capítulo de <em>Todavía estoy a tiempo</em> ya está en Spotify.</p>
-      <a class="ep03-cta" href="https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c" target="_blank" rel="noopener noreferrer" aria-label="Escuchar el capítulo 3 en Spotify, abre otra pestaña">Escuchar el capítulo en Spotify</a>
+      <span class="ep03-eyebrow">YA SALIÓ UN NUEVO EPISODIO · 03</span>
+      <h2 id="ep03-popup-title">¿De verdad tengo que ser influencer para vender lo que hago?</h2>
+      <p id="ep03-popup-desc" class="ep03-description">Emprendiste para hacer algo tuyo, no para tener que grabar tu vida entera. Pero a veces parece que, si no te muestras todo el tiempo, nadie ve lo que haces. Si te ha pasado, este episodio es para ti.</p>
+      <a class="ep03-cta" href="https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c" target="_blank" rel="noopener noreferrer">Escuchar el episodio 03</a>
+      <button type="button" class="ep03-later" data-ep03-close>Ahora no, quiero seguir mirando</button>
     </div>
   </dialog>
 </body>
