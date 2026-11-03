@@ -98,7 +98,7 @@
     clock.querySelector('.class-flip-timer')?.setAttribute(
       'aria-label',
       groups.map(key => values[key] + ' ' + display[key]).join(', ') +
-      (en?' until launch':' para el lanzamiento')
+      (en?' until launch':(lang==='en'?' until launch':' para el lanzamiento'))
     );
   }
 
