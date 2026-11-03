@@ -7,6 +7,7 @@ const room=readFileSync('alumnos/index.html','utf8');
 const course=readFileSync('alumnos/curso.js','utf8');
 const materials=readFileSync('alumnos/materiales-interactivos.js','utf8');
 const materialsCss=readFileSync('alumnos/materiales-interactivos.css','utf8');
+const maraGuide=readFileSync('alumnos/mara-guide.js','utf8');
 const workflow=readFileSync('.github/workflows/pages.yml','utf8');
 
 test('biblioteca única: el sidebar comparte la misma pantalla de materiales, sin duplicar prompts',()=>{
@@ -230,4 +231,18 @@ test('Cuatro portadas originales: clase, Lab y dos productos digitales del podca
  assert.match(script,/from\('podcast_hub_entitlements'\)/,'Acceso por compra verificada');
  assert.match(script,/checkout:'\.\.\/productos\/no-voy-tarde\.html'/,'Página original del diario');
  assert.match(script,/checkout:'\.\.\/productos\/empezar-de-nuevo\.html'/,'Página original del cuaderno');
+});
+
+test('Mara se muestra en un panel propio, con datos protegidos y carga opcional',()=>{
+ assert.equal((room.match(/data-aula-view="mara"/g)||[]).length,1,'Un solo enlace de Mara en el sidebar');
+ assert.equal((room.match(/data-aula-panel="mara"/g)||[]).length,1,'Una pantalla dedicada');
+ assert.ok(course.includes("if(view==='mara')void ensureMara()"),'Mara solo se carga al navegar a su pantalla');
+ assert.ok(course.includes("import('./mara-guide.js?v="),'La carga de Mara no bloquea el inicio del aula');
+ assert.ok(maraGuide.includes("db.from('podcast_class_learning_assets')"),'Carga instrucciones desde el recurso privado');
+ assert.ok(maraGuide.includes(".eq('course_id',courseId)"),'Consulta acotada al curso');
+ assert.ok(maraGuide.includes("agent.instructions_en"),'Contenido en inglés');
+ assert.ok(maraGuide.includes("agent.setup_en"),'Configuración en inglés');
+ assert.ok(maraGuide.includes("navigator.clipboard"),'Los botones copiar están implementados');
+ assert.doesNotMatch(maraGuide,/SUPABASE_SERVICE_ROLE_KEY|sk_live_|rk_live_|whsec_/);
+ assert.ok(workflow.includes("node --check alumnos/mara-guide.js"),'El parser se comprueba en cada publicación');
 });
