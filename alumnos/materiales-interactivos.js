@@ -1,9 +1,9 @@
-import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-hero-appdeploy-v3';
+import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-ai-first-v4';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
 import {promptGuide} from './prompt-guide.js?v=20261103-typography-library-v1';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
-import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261103-hero-appdeploy-v3';
+import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261103-ai-first-v4';
 /* Tu primera web con IA · Materiales activos de la clase
    Español y trabajo por alumno. No instala enlaces públicos a los PDF antiguos. */
 /* Los prompts y ejercicios se leen de Supabase solo tras validar el acceso. */
