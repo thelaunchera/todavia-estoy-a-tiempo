@@ -21,6 +21,21 @@ export function wardrobeForShot(id:string,scene:number,cast:string){
  const people=cast==='N'?'NIA CLOTHING: '+nia:cast==='R'?'RUBY CLOTHING: '+ruby:cast==='NR'?'NIA CLOTHING: '+nia+'. RUBY CLOTHING: '+ruby:'No people appear; wardrobe not relevant to this product insert.';
  return {episode,season:look.season,mood:look.mood,details:people+'. SEASONAL SET: '+look.setting+'. CONTINUITY: '+look.note};
 }
+/** Prompt reutilizable para una foto de referencia de outfit (no una escena). */
+export function getCharacterLookPrompt(episode:number,who:'nia'|'ruby'):string{
+ const look=youtubeWardrobe[episode]||youtubeWardrobe[1];
+ const identity=who==='nia'
+  ? 'NIA, same exact original avatar face: adult woman with medium-deep warm brown skin, long dark over-the-shoulder side braid, dark expressive eyes and small gold hoop earrings. Keep hair, complexion, face and body proportions unchanged.'
+  : 'RUBY, same exact original avatar face: adult woman with warm fair skin, copper-red curly messy high updo, oversized round glasses and hazel-green eyes. Keep hair, glasses, complexion, face and body proportions unchanged.';
+ const clothes=who==='nia'?look.nia:look.ruby;
+ return ['CHARACTER WARDROBE REFERENCE · EP '+String(episode).padStart(2,'0')+' · '+who.toUpperCase(),
+ 'Use the original supplied '+who.toUpperCase()+' avatar as identity reference, not the outfit. Preserve identical 3D adult animated character model and face.',
+ identity,
+ 'NEW OUTFIT: '+clothes,
+ 'SEASON: '+look.mood+'. '+look.setting,
+ 'ONE full-body image in a natural standing three-quarter pose, footwear visible, neutral warm studio background, fine fabric details, premium cinematic 3D animation, soft even lighting, no text, no collage, no watermarks, 3:4 vertical.',
+ 'No face swap, no changed hairstyle, no childlike stylization, no new glasses for Nia, never remove Ruby glasses, no swapped clothing or identities.'].join('\\n\\n');
+}
 /** Pack estacional opcional. No establece fecha ni frecuencia de publicaciones. */
 export const youtubeHolidayFrames = [
 {id:'E05-H01',scene:4,title:'Thanksgiving · mesa de producto',cast:'none',shot:'Cinematic product still, 50mm lens',action:'The single reusable cobalt-blue bottle on a beautifully restrained Friendsgiving table with rust linen, amber glassware, miniature pumpkin and warm maple leaves, no family or Thanksgiving text. Authentic editorial fall mood.',image:'',status:'por producir'},
