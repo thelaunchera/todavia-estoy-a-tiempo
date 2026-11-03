@@ -226,6 +226,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <div className="yt-visual-batch">
           <button type="button" onClick={()=>void copyVideoMaster()}><Copy size={16}/> Copiar Master Prompt completo</button>
           <button type="button" onClick={downloadVideoMaster}><Save size={16}/> Descargar Master Prompt TXT</button>
+          <button type="button" disabled={packageBusy||ready!==corePhotos.length} onClick={()=>void exportEpisodePackage()}><ImagePlus size={16}/> {packageBusy?'Preparando paquete...':'Descargar 10 fotos + prompt ZIP'}</button>
         </div>
         {ready<corePhotos.length&&<p className="yt-production-alert">Faltan {corePhotos.length-ready} imágenes por vincular. Sus espacios están disponibles abajo; no se dan por producidas.</p>}
         <details className="yt-production-master-preview">
