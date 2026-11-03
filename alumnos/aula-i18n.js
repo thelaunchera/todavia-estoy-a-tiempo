@@ -152,8 +152,21 @@ const translations=[
  ['.club-aula-action:nth-child(2) strong','Ask a question'],
  ['.club-aula-action:nth-child(3) strong','Explore projects'],
  ['.course-support-heading .eyebrow','HELP INSIDE YOUR CLASSROOM'],
- ['#course-help-title','Tell me what you need.'],
- ['.course-support-heading p:not(.eyebrow)','Your class will still be here when you finish. We will reply directly by email.'],
+ 
+ ['.aula-install-eyebrow','QUICK ACCESS'],
+ ['#aula-install-title','Add your classroom to your Home Screen'],
+ ['.aula-install-intro > p:last-child','Open your lessons from an icon, just like an app.'],
+ ['.aula-install-platform:nth-child(1) li:nth-child(1)','Open the classroom in Safari.'],
+ ['.aula-install-platform:nth-child(1) li:nth-child(2)','Tap the Page Menu, then Share.'],
+ ['.aula-install-platform:nth-child(1) li:nth-child(3)','Choose Add to Home Screen.'],
+ ['.aula-install-platform:nth-child(1) li:nth-child(4)','Turn on Open as Web App, then tap Add.'],
+ ['.aula-install-platform:nth-child(2) li:nth-child(1)','Open the classroom in Chrome.'],
+ ['.aula-install-platform:nth-child(2) li:nth-child(2)','Tap the three-dot menu (⋮).'],
+ ['.aula-install-platform:nth-child(2) li:nth-child(3)','Choose Install app or Add to Home screen.'],
+ ['.aula-install-platform:nth-child(2) li:nth-child(4)','Confirm with Install or Add.'],
+ ['.aula-install-note','This is a home-screen web app, not an App Store download. You need internet, and you may have to sign in again the first time.'],
+ ['#course-help-title','How can I help?'],
+ ['.course-support-heading p:not(.eyebrow)','Read the steps below or send me a message.'],
  ['#close-course-help','Close ×'],
  ['#course-help-form label[for="course-help-name"]','Your name'],
  ['#course-help-form label[for="course-help-email"]','Your email address'],
@@ -278,6 +291,10 @@ function translateElement(selector,english){
 export function applyClassroomLanguage(){
  document.documentElement.lang=language;
  document.title=language==='en'?'My classroom · Your First Website With AI | Todavía estoy a tiempo':'Mi aula · Tu primera web con IA | Todavía estoy a tiempo';
+ const manifestLink=document.getElementById('aula-manifest');
+ if(manifestLink)manifestLink.setAttribute('href',language==='en'?'./manifest-en.webmanifest':'./manifest.webmanifest');
+ const appTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+ if(appTitle)appTitle.setAttribute('content',language==='en'?'My Classroom':'Mi Aula');
  for(const selector of ['aula-language','aula-public-language']){
   const el=document.getElementById(selector);if(el&&el.value!==language)el.value=language;
  }
