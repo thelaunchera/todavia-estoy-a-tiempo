@@ -110,5 +110,11 @@
 @media(max-width:690px){.yt-production-master,.yt-production-group{padding:13px}.yt-production-group>header{gap:8px}.yt-production-references>.yt-paper{margin:8px}.yt-production-master .yt-visual-batch button{width:100%;justify-content:center}}
 
 /* Private Drive originals: embedded preview is not a copy or a public file. */
-.yt-frame-image iframe{display:block;width:100%;height:100%;min-height:205px;border:0;background:#faf8f3}
+.yt-drive-original{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;min-height:190px;padding:16px;background:#f6f6f2;color:#202a31;text-align:center;text-decoration:none;border:1px dashed #d2dadc;border-radius:10px}
+.yt-drive-original strong{font-weight:750;font-size:.88rem}
+.yt-drive-original small{color:#526272;font-size:.75rem;line-height:1.45}
+.yt-drive-original span{display:inline-flex;align-items:center;gap:6px;margin-top:4px;background:#fff;padding:8px 12px;border:1px solid #d9dfe1;border-radius:8px;font-size:.78rem;font-weight:700}
+.yt-drive-original:hover,.yt-drive-original:focus-visible{background:#eff5f8;border-color:#9fb6c2}
+.yt-drive-original:focus-visible{outline:2px solid #486983;outline-offset:2px}
+
 .yt-visual-counter small{display:block}
