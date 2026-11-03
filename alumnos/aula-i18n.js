@@ -75,6 +75,8 @@ const translations=[
  ['.aula-side-link[data-aula-view="inicio"] > span:last-child','My home'],
  ['.aula-side-link[data-aula-view="lecciones"] > span:last-child','My lessons'],
  ['.aula-side-link[data-aula-view="prompts"] > span:last-child','Prompt library'],
+ ['[data-mara-nav-group]','YOUR ASSISTANT'],
+ ['.aula-side-link[data-aula-view="mara"] > span:last-child','Mara · your web guide'],
  ['.aula-side-link[data-aula-view="inspiracion"] > span:last-child','Inspiration · Demos'],
  ['.aula-side-link[data-aula-view="materiales"] > span:last-child','Materials'],
  ['.aula-side-link[data-aula-view="bonos"] > span:last-child','My bonuses'],
