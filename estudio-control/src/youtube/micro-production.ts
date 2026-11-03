@@ -116,6 +116,36 @@ export function microRecordingChecklist(q:MicroEpisode):string{
  ].join('\r\n');
 }
 
+export function microEpisodeMasterPrompt(season:number,episode:number):string{
+ const q=getMicroEpisode(season,episode);
+ if(!q)return '';
+ const frames=microFrames(season,episode);
+ return [
+ 'OFF BRIEF — MASTER PROMPT / COMPLETE 2-MINUTE EPISODE',
+ 'SEASON '+season+' / EPISODE '+episode+' — '+q.title,
+ '',
+ 'ROLE: You are the animation director, continuity supervisor and video editor for this ORIGINAL 3D workplace comedy.',
+ 'GOAL: Assemble one entertaining, educational, interactive episode from ONLY the three approved reference stills, the script below, and the provided dialogue audio. Do not generate extra photos or change the characters.',
+ 'LENGTH: Target 90–120 seconds, following the actual dialogue pace. No padding with artificial silence. Start with a distinct cold open; end with one practical takeaway and one viewer question.',
+ 'CAST: Maintain identical faces, hairstyle, wardrobe, props and location across shots. Preserve original character identity and proportions. No invented characters, spoken lines, claims or on-screen captions.',
+ 'VISUAL STYLE: Premium stylized 3D animated sitcom, warm ivory, butter yellow, soft black and soft blue. Light comedic timing, readable expressions, clean edits, not generic stock footage.',
+ 'INPUT STILLS (approved images, reuse throughout the episode):',
+ ...frames.map((p,i)=>(i+1)+'. '+p.id+' — '+p.title+'; '+p.imagePrompt),
+ '',
+ 'ANIMATION: Treat the stills as locked references. Create restrained 4–8 second image-to-video shots where the chosen tool genuinely supports them. Otherwise simulate movement with free 2D keyframe pans, gentle push-ins, cuts and reaction zooms. Do not claim a still-image editor performs facial animation or lip-sync.',
+ 'AUDIO: Use the supplied English voice tracks. Match scene transitions to dialogue. Do not synthesize or imitate real people without permission. Keep dialogue audible and background music subtle.',
+ 'SCENE-BY-SCENE EDIT PLAN:',
+ ...q.beats.map((b,i)=>'BEAT '+(i+1)+' / '+b.start+'–'+b.end+' sec / '+b.label+' / SOURCE '+(frames[Math.min(i,2)]?.id||'APPROVED STILL')+'\nDIALOGUE: '+b.script+'\nDIRECTION: Keep the speaker visible when possible, alternate crops from the same image, add a brief reaction hold at jokes, and do not fabricate lip sync.'),
+ '',
+ 'ENDING TAKEAWAY: '+q.lesson,
+ 'ENDING VIEWER QUESTION: '+q.question,
+ 'EXPORT A: YouTube landscape 1920x1080, 16:9, H.264 MP4, AAC audio.',
+ 'EXPORT B: TikTok and Shorts portrait 1080x1920, 9:16, H.264 MP4, AAC audio. Reframe SAME stills with safe-fit blur background or a manually approved crop. No extra generated photographs.',
+ 'QUALITY CONTROL: Check character continuity, shot framing, voice timing, caption spelling, audio peaks and the final question. Review both exports before uploading.',
+ 'DELIVERABLE: One coherent edited episode and two platform-specific MP4 exports. If the current tool cannot generate or export a video, return an executable edit plan rather than falsely claiming the video was rendered.'
+ ].join('\n\n');
+}
+
 export function microWindowsFiles(season:number,episode:number):Record<string,string>{
  const q=getMicroEpisode(season,episode);if(!q)return {};
  const frames=microFrames(season,episode);
@@ -123,6 +153,7 @@ export function microWindowsFiles(season:number,episode:number):Record<string,st
  const files:Record<string,string>={
   'project.json':JSON.stringify(manifest,null,2),
   'scripts/2-minute-cut.txt':microScriptText(q),
+  'prompts/MASTER-PROMPT-VIDEO-COMPLETO.txt':microEpisodeMasterPrompt(season,episode),
   'scripts/voice-cues.csv':microVoiceCues(q),
   'scripts/GRABACION-PASO-A-PASO.txt':microRecordingChecklist(q),
   'media/stills/PUT-YOUR-THREE-APPROVED-PNGS-HERE.txt':'Create or copy only the 3 image files required by project.json. Use the same originals for YouTube and TikTok.\r\n',
