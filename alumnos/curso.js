@@ -1,6 +1,7 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {courseCopy,translateCourseMessage} from './aula-mensajes.js?v=20261103-safari-restore-v1';
 import {mountMateriales} from './materiales-interactivos.js?v=20261103-owner-test-v1';
+import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-v1';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-safari-restore-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-safari-restore-v1';
 import {mountInspiracion} from './inspiracion.js?v=20261103-safari-restore-v1';
@@ -131,10 +132,21 @@ const aulaBack=$('aula-rail-backdrop');
 const aulaSidebar=$('aula-rail');
 const aulaViews={
  inicio:'Mi inicio', lecciones:'Mis lecciones', prompts:'Biblioteca de prompts', materiales:'Mis materiales', mara:'Mara · tu guía web',
- bonos:'Mis bonos', comunidad:'Club de Ideas', inspiracion:'Inspiración · Demos'
+ bonos:'Biblioteca de bonos', comunidad:'Club de Ideas', inspiracion:'Inspiración · Demos'
 };
-const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'My bonuses',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos',mara:'Mara · your web guide'};
+const aulaViewsEn={inicio:'My home',lecciones:'My lessons',prompts:'Prompt library',materiales:'My materials',bonos:'Bonus library',comunidad:'Ideas Club',inspiracion:'Inspiration · Demos',mara:'Mara · your web guide'};
 let inspirationController=null;
+let bonusLibraryController=null,bonusLibraryLoading=null;
+function ensureBonusLibrary(){
+ if(bonusLibraryController||bonusLibraryLoading||!user||course.hidden)return;
+ const root=$('bonus-library-items');if(!root)return;
+ bonusLibraryLoading=mountBonusLibrary(root,{db,courseId,getLanguage:getClassroomLanguage})
+  .then(controller=>{bonusLibraryController=controller||null;})
+  .catch(error=>{
+   console.warn('Optional bonus library unavailable',error?.name||'unknown');
+   root.textContent=courseCopy('No pudimos abrir la biblioteca. Actualiza el aula.','We could not open the library. Refresh the classroom.',getClassroomLanguage());
+  }).finally(()=>{bonusLibraryLoading=null;});
+}
 let maraController=null,maraLoading=null;
 async function ensureMara(){
  if(maraController||maraLoading||!user||course.hidden)return;
@@ -225,6 +237,7 @@ function setAulaView(view,{scroll=true,track=true}={}){
  if(view==='prompts')materialsController?.go('prompts',{track:false});
  if(view==='materiales')materialsController?.go('inicio',{track:false});
  if(view==='mara')void ensureMara();
+ if(view==='bonos')void ensureBonusLibrary();
  document.querySelectorAll('.aula-side-link[data-aula-view]').forEach(control=>{
   const selected=control.dataset.aulaView===view;
   control.setAttribute('aria-current',selected?'page':'false');
@@ -278,6 +291,7 @@ function refreshClassroomLanguage(){
   inspirationController?.setLanguage?.();
   maraController?.setLanguage?.();
   materialsController?.setLanguage?.();
+  bonusLibraryController?.setLanguage?.();
  }
  applyClassroomLanguage();
 }
@@ -590,6 +604,8 @@ async function showCourse(email,asAdmin=false){
  aulaViewHistory.length=0;
  let refreshedSection='';
   try{refreshedSection=sessionStorage.getItem('tle_aula_refresh_view')||'';sessionStorage.removeItem('tle_aula_refresh_view');}catch{}
+  bonusLibraryController=null;
+  $('bonus-library-items')?.replaceChildren();
   setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(location.hash==='#prompts'?'prompts':'inicio'),{scroll:false,track:false});
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
