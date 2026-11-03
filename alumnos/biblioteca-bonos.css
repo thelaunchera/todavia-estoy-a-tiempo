@@ -1,0 +1,33 @@
+/* Classroom bonus shelf: accessible resources, independent of earned rewards. */
+.bonus-library{margin:0 0 26px;background:#faf8f3;border:1px solid #e9e2d4;border-radius:20px;padding:clamp(18px,3vw,30px);color:#191919}
+.bonus-library-top{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.bonus-library-top .eyebrow{margin:0;color:#53687c}
+.bonus-library-top h2{margin:0;font-size:clamp(20px,2.2vw,27px);line-height:1.2;letter-spacing:-.035em}
+.bonus-library-top p{margin:3px 0 0;max-width:62ch;color:#57616b;line-height:1.55}
+#bonus-library-count{font-size:12px;color:#53687c;font-weight:700}
+.bonus-library-items{display:grid;gap:12px}
+.bonus-library-card{min-width:0;border:1px solid #e6dfd3;border-radius:15px;background:#fff;overflow:hidden}
+.bonus-library-card-head{display:flex;gap:13px;align-items:flex-start;cursor:pointer;padding:18px;list-style:none}
+.bonus-library-card-head::-webkit-details-marker{display:none}
+.bonus-library-card-head:focus-visible{outline:3px solid #a2b8ed;outline-offset:-3px}
+.bonus-library-index{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:11px;background:#f2d85b;color:#191919;font-size:13px;font-weight:800}
+.bonus-library-card-titles{display:grid;gap:5px;min-width:0;flex:1}
+.bonus-library-tag{font-size:10px;letter-spacing:.1em;font-weight:800;color:#596b7d}
+.bonus-library-card-title{font-size:clamp(16px,1.6vw,20px);line-height:1.25}
+.bonus-library-card-summary{font-size:13px;line-height:1.55;color:#65717d}
+.bonus-library-plus{font-size:24px;font-weight:400;color:#74818a;line-height:1.1}
+.bonus-library-card[open] .bonus-library-plus{transform:rotate(45deg)}
+.bonus-library-card-content{padding:0 18px 20px 67px}
+.bonus-library-guide{border-top:1px solid #eee8df;padding-top:12px}
+.bonus-library-guide p{margin:7px 0;color:#505b66;font-size:13px;line-height:1.55}
+.bonus-library-subheading{font-size:13px;font-weight:800;margin:20px 0 8px}
+.bonus-library-prep{white-space:pre-wrap;font:inherit;font-size:13px;line-height:1.7;color:#39434e}
+.bonus-library-prompt{white-space:pre-wrap;overflow-wrap:anywhere;max-height:520px;overflow-y:auto;padding:17px;background:#f7f7f5;border:1px solid #e6e5e0;border-radius:12px;font:inherit;font-size:13px;line-height:1.7;color:#232323}
+.bonus-library-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.bonus-library-copy{min-height:42px;padding:11px 19px;border:0;border-radius:999px;background:#191919;color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.bonus-library-copy:hover{background:#333}
+.bonus-library-copy:focus-visible{outline:3px solid #8ba5e9;outline-offset:3px}
+.bonus-library-copy-state{font-size:12px;color:#39434e}
+.bonus-library-message{color:#586777;font-size:14px;padding:12px 0}
+@media(max-width:600px){.bonus-library{padding:16px;border-radius:15px}.bonus-library-card-head{padding:14px;gap:10px}.bonus-library-index{flex-basis:32px;height:32px}.bonus-library-card-content{padding:0 14px 17px}.bonus-library-card-title{font-size:17px}.bonus-library-prompt{font-size:12px;max-height:420px}}
+@media(prefers-reduced-motion:reduce){.bonus-library-plus{transition:none}}
