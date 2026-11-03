@@ -98,7 +98,7 @@ RUBY: Exactly.
 ### SCENE 6 — SMALL CLIENT, BIG RELIEF
 **SHOT:** The phone rings. Mrs. Vell's name appears.
 
-MRS. VELL (VOICE MESSAGE): Hello, girls! My sister runs a little bookstore. She saw your candle work. She'd like a holiday campaign. Proper budget, no rush. Can you call her?
+MRS. VELL (VOICE MESSAGE): Hello, girls! My sister runs a little bookstore. She saw your candle work. She'd like a cozy Christmas bookstore campaign. Proper budget, no rush. Can you call her?
 RUBY: A real budget. Did you hear that?
 NIA: I heard "no rush." I want to frame it.
 RUBY: We can say yes, but with the new process.
@@ -109,7 +109,7 @@ RUBY: I like that.
 **ACTION:** Nia and Ruby sit side by side and draft a clear response together.
 
 ### SCENE 7 — THE PROMISE
-**SHOT:** Their studio is still messy, but the gear is organized and the idea wall is back.
+**SHOT:** Their studio is still messy, but the gear is organized, the idea wall is back, and a few warm Christmas fairy lights frame the window.
 
 NIA: We need a rule for the next year.
 RUBY: No clients who say "make it viral" with a fifty-dollar budget?
