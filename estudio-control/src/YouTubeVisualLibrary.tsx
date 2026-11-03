@@ -106,7 +106,7 @@ function ExtraMoodboardPhoto({entry}:{entry:YouTubeSavedPhoto}){
    </div>
    <div className="yt-frame-body">
      <div className="yt-frame-meta"><span>Serie 1</span><span>Capítulo 02</span></div>
-     <h4>{entry.title.replace(/^S1E02-\\d+ · /,'')}</h4>
+     <h4>{entry.title.replace(/^S1E02-\d+ · /,'')}</h4>
      <p>Moodboard «De la idea a la acción» · imagen individual</p>
      {driveLink&&<div className="yt-frame-buttons"><a href={driveLink} target="_blank" rel="noopener noreferrer"><Eye size={15}/> Abrir PNG en Drive</a></div>}
    </div>
