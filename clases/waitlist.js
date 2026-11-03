@@ -158,7 +158,7 @@ async function manage(user){
  if(document.querySelector('#course-unsubscribe'))return;
  const b=document.createElement('button');
  b.type='button';b.id='course-unsubscribe';b.className='class-waitlist-optout';
- b.textContent='Darme de baja de esta lista';
+ b.textContent=localized('Darme de baja de esta lista','Unsubscribe from this waitlist');
  b.addEventListener('click',async()=>{
   b.disabled=true;
   const {error}=await db.from('podcast_class_waitlist')
