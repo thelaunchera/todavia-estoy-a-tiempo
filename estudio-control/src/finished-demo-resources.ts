@@ -57,276 +57,201 @@ const photoData={
   "crumb": {
     "base": "https://thelaunchera.com/demos/crumb/assets/",
     "brand": "CRUMB",
-    "style": "fotografía premium de cookies, estética azul mantequilla, embalajes de regalo, texturas deliciosas, luz natural",
+    "style": "Identidad CRUMB Blue #477BB3 y Powder Blue #C9E2F4, Warm Ivory #FAF8F3. Fotos aprobadas azul boutique; galletas en colores naturales; empaques kraft con marca azul. No usar imágenes antiguas beige/marrones, hero.webp ni brand-*.webp.",
     "items": [
       [
         "CRUMB_Storefront_Approved_20261030.webp",
-        "Fachada aprobada CRUMB",
-        "Hero · identidad de tienda"
-      ],
-      [
-        "CRUMB_Our_Story_Approved_20261030.webp",
-        "Nuestra historia",
-        "Sección de marca"
-      ],
-      [
-        "hero.webp",
-        "Cookies de portada",
-        "Hero alternativo"
-      ],
-      [
-        "hero-mobile.webp",
-        "Hero móvil",
-        "Portada móvil"
+        "Fachada azul aprobada de CRUMB",
+        "Hero · fachada azul"
       ],
       [
         "classic.webp",
-        "Classic Cookie",
-        "Catálogo · clásico"
+        "Classic Chocolate Chip",
+        "Cookie Edit · producto Classic Chocolate Chip"
       ],
       [
         "double.webp",
         "Double Chocolate",
-        "Catálogo · chocolate"
+        "Cookie Edit · producto Double Chocolate"
       ],
       [
         "caramel.webp",
         "Salted Caramel",
-        "Catálogo · caramelo"
+        "Cookie Edit · producto Salted Caramel"
       ],
       [
         "raspberry.webp",
-        "Raspberry Cookie",
-        "Catálogo · frambuesa"
+        "White Chocolate Raspberry",
+        "Cookie Edit · producto White Chocolate Raspberry"
       ],
       [
         "nutty.webp",
-        "Nutty Cookie",
-        "Catálogo · nueces"
+        "Nutty Dream",
+        "Cookie Edit · producto Nutty Dream"
       ],
       [
         "brownie.webp",
-        "Brownie Cookie",
-        "Catálogo · brownie"
-      ],
-      [
-        "classic-cutout-v1.webp",
-        "Classic · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "double-cutout-v1.webp",
-        "Double · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "caramel-cutout-v1.webp",
-        "Caramel · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "raspberry-cutout-v1.webp",
-        "Raspberry · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "nutty-cutout-v1.webp",
-        "Nutty · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "brownie-cutout-v1.webp",
-        "Brownie · recorte",
-        "Vitrina transparente"
-      ],
-      [
-        "brand-storefront.webp",
-        "Exterior de la marca",
-        "Galería editorial"
-      ],
-      [
-        "brand-packaging.webp",
-        "Packaging CRUMB",
-        "Galería editorial"
-      ],
-      [
-        "brand-lifestyle.webp",
-        "Momentos con cookies",
-        "Galería editorial"
-      ],
-      [
-        "brand-maker.webp",
-        "Proceso artesanal",
-        "Galería editorial"
-      ],
-      [
-        "brand-tasting.webp",
-        "Degustación",
-        "Galería editorial"
-      ],
-      [
-        "brand-gifts.webp",
-        "Caja regalo editorial",
-        "Galería editorial"
-      ],
-      [
-        "gift-box.webp",
-        "Caja personalizada",
-        "Sección de regalos"
-      ],
-      [
-        "lifestyle.webp",
-        "Momento lifestyle",
-        "Sección experiencia"
-      ],
-      [
-        "CRUMB_02_Bolsa_Azul.png",
-        "Bolsa azul CRUMB",
-        "Embalaje"
+        "Brownie Chip",
+        "Cookie Edit · producto Brownie Chip"
       ],
       [
         "CRUMB_03_Gift_Box_Azul.png",
-        "Gift box azul",
-        "Embalaje"
+        "Caja CRUMB azul y kraft",
+        "Gifts · caja de cookies"
+      ],
+      [
+        "CRUMB_Inside_Cookie_Moment_Blue.svg",
+        "The cookie moment · detalles azules",
+        "Inside CRUMB · imagen 1"
+      ],
+      [
+        "CRUMB_Inside_Made_With_Care_Blue.svg",
+        "Made with care · equipo CRUMB",
+        "Inside CRUMB · imagen 2"
+      ],
+      [
+        "CRUMB_02_Bolsa_Azul.png",
+        "Beautifully boxed · bolsa azul",
+        "Inside CRUMB · imagen 3"
+      ],
+      [
+        "CRUMB_Our_Story_Approved_20261030.webp",
+        "Our Story · clienta frente a la tienda azul",
+        "Our Story · escena editorial"
+      ],
+      [
+        "classic-cutout-v1.webp",
+        "Classic Chocolate Chip · recorte individual",
+        "Build Your Box · imagen de producto recortada"
+      ],
+      [
+        "double-cutout-v1.webp",
+        "Double Chocolate · recorte individual",
+        "Build Your Box · imagen de producto recortada"
+      ],
+      [
+        "caramel-cutout-v1.webp",
+        "Salted Caramel · recorte individual",
+        "Build Your Box · imagen de producto recortada"
+      ],
+      [
+        "raspberry-cutout-v1.webp",
+        "White Chocolate Raspberry · recorte individual",
+        "Build Your Box · imagen de producto recortada"
+      ],
+      [
+        "nutty-cutout-v1.webp",
+        "Nutty Dream · recorte individual",
+        "Build Your Box · imagen de producto recortada"
+      ],
+      [
+        "brownie-cutout-v1.webp",
+        "Brownie Chip · recorte individual",
+        "Build Your Box · imagen de producto recortada"
       ]
     ]
   },
   "aftr": {
     "base": "https://thelaunchera.com/demos/aftr/assets/",
     "brand": "AFTR. Las Vegas",
-    "style": "club nocturno futurista con cromo, azul eléctrico, luz realista, negros profundos, cinematográfico premium",
+    "style": "Chrome Afterglow, negro profundo, violeta y luces cinematográficas. Solo imágenes activas en web, no versiones anteriores.",
     "items": [
       [
-        "hero-20261031.webp",
-        "Hero Chrome Afterglow",
-        "Portada"
+        "hero-real-20261031.webp",
+        "AFTR. · hero cinematográfico",
+        "Hero · portada"
       ],
       [
         "aftr-approved-las-vegas-banner-20261031.webp",
-        "Banner Las Vegas aprobado",
-        "Identidad"
+        "Banner aprobado Las Vegas",
+        "Ticker · campaña"
       ],
       [
-        "dj-20261031.webp",
-        "DJ en cabina",
-        "Lineup"
-      ],
-      [
-        "dancefloor.webp",
-        "Pista de baile",
-        "Experiencia"
+        "dj-real-20261031.webp",
+        "DJ de la noche",
+        "Eventos · lineup"
       ],
       [
         "vip-lounge.webp",
-        "VIP Lounge",
-        "Zona VIP"
+        "VIP lounge",
+        "VIP · salón"
+      ],
+      [
+        "model.webp",
+        "Invitada",
+        "Experiencias · guest list"
       ],
       [
         "bottle-service.webp",
         "Bottle Service",
-        "Experiencia VIP"
-      ],
-      [
-        "entry.webp",
-        "Acceso al club",
-        "Entradas"
-      ],
-      [
-        "model.webp",
-        "Campaña editorial",
-        "Galería"
+        "Experiencias · bebidas"
       ],
       [
         "tickets.webp",
         "Tickets",
-        "Entradas"
+        "Experiencias · acceso"
+      ],
+      [
+        "dancefloor.webp",
+        "Pista de baile",
+        "Cierre · experiencias"
       ]
     ]
   },
   "jaramillo-boutique": {
     "base": "https://thelaunchera.github.io/demo-booking-landing-/jaramillo-boutique/assets/",
     "brand": "Jaramillo Boutique",
-    "style": "campaña editorial de boutique femenina de diseñadora colombiana en Nueva York, fotografía realista, marfil, editorial de moda, sin alterar retrato de diseñadora",
+    "style": "Moda editorial marfil y burdeos; usar exclusivamente hero-editorial-user.jpg en portada, y fotos publicadas en colecciones.",
     "items": [
       [
-        "hero-model-v2.webp",
-        "Modelo editorial del hero",
-        "Hero · modelo campaña"
-      ],
-      [
-        "designer-portrait-v2.webp",
-        "Retrato de la diseñadora",
-        "Sobre la diseñadora · foto original"
-      ],
-      [
-        "designer-real.webp",
-        "Retrato alternativo",
-        "Perfil de la diseñadora"
-      ],
-      [
-        "model-cutout.webp",
-        "Modelo sin fondo",
-        "Composición editorial sobre hero"
-      ],
-      [
         "hero-editorial-user.jpg",
-        "Referencia de portada",
-        "Referencia original"
+        "Campaña editorial · modelo burdeos",
+        "Hero · portada actual"
       ],
       [
-        "atelier.webp",
-        "Atelier",
-        "Historia"
+        "corse.webp",
+        "Corsé editorial",
+        "Colecciones · foto publicada"
       ],
       [
         "colombian-jeans.webp",
         "Jeans colombianos",
-        "Colección"
-      ],
-      [
-        "blusas.webp",
-        "Blusas",
-        "Colección"
-      ],
-      [
-        "corse.webp",
-        "Corsé",
-        "Colección"
-      ],
-      [
-        "fajas.webp",
-        "Shapewear",
-        "Colección"
+        "Colecciones · foto publicada"
       ],
       [
         "noche.webp",
         "Looks de noche",
-        "Colección"
+        "Colecciones · foto publicada"
+      ],
+      [
+        "fajas.webp",
+        "Shapewear",
+        "Colecciones · foto publicada"
       ],
       [
         "plataformas.webp",
         "Plataformas",
-        "Accesorios"
+        "Colecciones · foto publicada"
       ],
       [
-        "sandalias.webp",
-        "Sandalias",
-        "Accesorios"
-      ],
-      [
-        "shoes.webp",
-        "Calzado",
-        "Accesorios"
-      ],
-      [
-        "summer.webp",
-        "Colección verano",
-        "Temporadas"
+        "blusas.webp",
+        "Blusas",
+        "Colecciones · foto publicada"
       ],
       [
         "winter.webp",
-        "Colección invierno",
-        "Temporadas"
+        "Winter Edit",
+        "Colecciones · foto publicada"
+      ],
+      [
+        "summer.webp",
+        "Summer Edit",
+        "Colecciones · foto publicada"
+      ],
+      [
+        "atelier.webp",
+        "Atelier de moda",
+        "Contacto · espacio de la boutique"
       ]
     ]
   },
