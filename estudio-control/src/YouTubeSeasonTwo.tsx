@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Camera, Check, Clapperboard, Copy, Download, ImagePlus, Play, Users } from 'lucide-react';
+import { BookOpen, Camera, Check, Clapperboard, Copy, Download, FolderArchive, ImagePlus, Play, Users, WandSparkles } from 'lucide-react';
+import { zipSync, strToU8 } from 'fflate';
 import { seasonTwo } from './youtube/season-2';
 import { seasonTwoScriptForEpisode } from './youtube/season-2-scripts';
 import { getSeasonTwoShots, seasonTwoShotTotal } from './youtube/season-2-shots';
 import { promptForSeasonTwoStill, promptForSeasonTwoMotion, type SeasonTwoShot } from './youtube/season-2-shot-model';
+import { masterPromptForSeasonTwoScene, masterPromptForSeasonTwoEpisode, seasonTwoProjectTextFiles } from './youtube/season-2-scene-masters';
 import './youtube-season-two.css';
 
-type Section = 'synopsis'|'dialogue'|'shots';
+type Section = 'synopsis'|'dialogue'|'shots'|'masters';
 type PromptKind = 'image'|'video';
 
 const groups = ['Protagonista original','Equipo principal','Recurrente'] as const;
@@ -60,6 +62,7 @@ function ShotCard({shot,onCopy}:{shot:SeasonTwoShot,onCopy:(text:string,message:
 export default function YouTubeSeasonTwo(){
  const [view,setView]=useState<Section>('synopsis');
  const [episode,setEpisode]=useState(1);
+ const [masterScene,setMasterScene]=useState(1);
  const [notice,setNotice]=useState('');
  const selected=seasonTwo.episodes.find(ep=>ep.number===episode)||seasonTwo.episodes[0];
  const script=seasonTwoScriptForEpisode(episode);
@@ -73,6 +76,18 @@ export default function YouTubeSeasonTwo(){
  const copy=async(text:string,message:string)=>{
    try{await navigator.clipboard.writeText(text);setNotice(message)}
    catch{setNotice('No se pudo copiar automáticamente. Usa Descargar TXT.')}
+ };
+ const downloadWindowsPack=()=>{
+   const files=seasonTwoProjectTextFiles(episode);
+   const packed=zipSync(Object.fromEntries(Object.entries(files).map(([name,content])=>[name,strToU8(content)])),{level:6});
+   const bytes=new Uint8Array(packed);
+   const blob=new Blob([bytes],{type:'application/zip'});
+   const url=URL.createObjectURL(blob);
+   const link=document.createElement('a');
+   link.href=url;link.download='OFF-BRIEF-S02-E'+String(episode).padStart(2,'0')+'-WINDOWS-PRODUCTION.zip';
+   link.click();
+   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+   setNotice('Paquete ZIP de guiones, prompts y estructura de carpetas preparado. No contiene vídeos generados.');
  };
  const downloadAll=(kind:'image'|'video')=>{
    const text=shots.map(s=>'=== '+s.id+' | ESCENA '+s.scene+' PLANO '+s.shot+' ===\n\n'+promptText(s,kind)).join('\n\n-----------------------------\n\n');
@@ -96,6 +111,7 @@ export default function YouTubeSeasonTwo(){
      <button type="button" role="tab" aria-selected={view==='synopsis'} className={view==='synopsis'?'active':''} onClick={()=>setView('synopsis')}><Users size={16}/> Personajes e historia</button>
      <button type="button" role="tab" aria-selected={view==='dialogue'} className={view==='dialogue'?'active':''} onClick={()=>setView('dialogue')}><BookOpen size={16}/> Guiones completos</button>
      <button type="button" role="tab" aria-selected={view==='shots'} className={view==='shots'?'active':''} onClick={()=>setView('shots')}><Clapperboard size={16}/> Storyboard y prompts</button>
+     <button type="button" role="tab" aria-selected={view==='masters'} className={view==='masters'?'active':''} onClick={()=>setView('masters')}><WandSparkles size={16}/> Master Prompts · Video Studio</button>
    </div>
    {view==='synopsis' ? <>
      <section className="yt-paper">
@@ -134,11 +150,11 @@ export default function YouTubeSeasonTwo(){
      <section className="yt-paper"><h3>Reglas creativas</h3><p>{seasonTwo.castRule}</p><p>{seasonTwo.visualRule}</p><p className="yt2-note">Los guiones están en primera versión completa, pendientes de lectura de mesa y animatic. No se ha programado su publicación.</p></section>
    </> : <>
      <section className="yt-paper">
-      <div className="yt-small-title">{view==='dialogue'?'GUIÓN Y DIÁLOGOS':'STORYBOARD · IMAGEN + VIDEO'}</div>
+      <div className="yt-small-title">{view==='dialogue'?'GUIÓN Y DIÁLOGOS':view==='masters'?'PRODUCCIÓN COMPLETA DE VIDEO · WINDOWS':'STORYBOARD · IMAGEN + VIDEO'}</div>
       <h3>Selecciona el capítulo</h3>{episodePicker}
       <div className="yt2-episode-info">
         <div><span className="yt-small-title">CAPÍTULO {String(selected.number).padStart(2,'0')}</span><h3>{selected.title}</h3><p>{selected.plot}</p></div>
-        <span className="yt2-episode-counter">{view==='dialogue'?'8 escenas':shots.length+' planos clave'}</span>
+        <span className="yt2-episode-counter">{view==='dialogue'?'8 escenas':view==='masters'?'8 Master Prompts':shots.length+' planos clave'}</span>
       </div>
       {notice&&<p className="yt2-notice" role="status"><Check size={15}/>{notice}</p>}
       {view==='dialogue'?<>
@@ -147,6 +163,24 @@ export default function YouTubeSeasonTwo(){
           <button type="button" onClick={()=>downloadText('off-brief-s02-e'+String(episode).padStart(2,'0')+'-dialogos.txt',script)}><Download size={16}/> Descargar guion TXT</button>
         </div>
         <Screenplay content={script}/>
+      </>:view==='masters'?<>
+        <p className="yt2-shot-guidance">Cada Master Prompt reúne el diálogo completo, los personajes, los planos y las instrucciones para crear una escena en clips cortos y montarla con el editor gratuito en Windows. No convierte automáticamente texto en video: para eso necesitas generar o grabar los recursos.</p>
+        <div className="yt2-actions">
+          <button type="button" onClick={()=>downloadText('off-brief-s02-e'+String(episode).padStart(2,'0')+'-8-MASTER-PROMPTS.txt',masterPromptForSeasonTwoEpisode(episode))}><Download size={16}/> Descargar 8 Master Prompts</button>
+          <button type="button" onClick={downloadWindowsPack}><FolderArchive size={16}/> Paquete completo para Windows ZIP</button>
+        </div>
+        <div className="yt2-master-selector" role="group" aria-label="Seleccionar escena para producción">
+          {Array.from({length:8},(_,i)=>i+1).map(i=><button key={i} type="button" className={masterScene===i?'active':''} aria-pressed={masterScene===i} onClick={()=>setMasterScene(i)}>Escena {String(i).padStart(2,'0')}</button>)}
+        </div>
+        <section className="yt2-master-pane">
+          <div className="yt2-master-heading"><div><span className="yt-small-title">MASTER PROMPT COMPLETO · EP {String(episode).padStart(2,'0')} · ESCENA {String(masterScene).padStart(2,'0')}</span><h4>{sceneGroups[masterScene-1]?.shots[0]?.title}</h4></div></div>
+          <textarea rows={18} readOnly aria-label={'Master Prompt de episodio '+episode+' escena '+masterScene} value={masterPromptForSeasonTwoScene(episode,masterScene)}/>
+          <div className="yt2-actions">
+            <button type="button" onClick={()=>void copy(masterPromptForSeasonTwoScene(episode,masterScene),'Master Prompt de escena '+masterScene)}><Copy size={16}/> Copiar Master Prompt</button>
+            <button type="button" onClick={()=>downloadText('OFF-BRIEF-S02-E'+String(episode).padStart(2,'0')+'-SCENE-'+String(masterScene).padStart(2,'0')+'-MASTER.txt',masterPromptForSeasonTwoScene(episode,masterScene))}><Download size={16}/> Descargar escena</button>
+          </div>
+        </section>
+        <p className="yt2-shot-guidance"><b>En Windows:</b> descarga el ZIP, extráelo, crea o importa fotografías y clips en las carpetas indicadas y abre el editor. El archivo <code>project.json</code> sirve de guía de producción; no es una importación automática garantizada.</p>
       </>:<>
         <p className="yt2-shot-guidance">Cada escena tiene tres planos base: establecimiento, acción y reacción. Cada plano incluye una indicación de encuadre, el diálogo de referencia y prompts distintos para generar la imagen y animarla. No se han generado imágenes todavía.</p>
         <div className="yt2-actions">
