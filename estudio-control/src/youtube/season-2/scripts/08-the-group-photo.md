@@ -9,7 +9,7 @@
 **SHOT:** Full-team portrait setup in front of the studio backdrop. Val holds the remote shutter.
 **SFX:** Self-timer beeps. CLICK.
 VAL: Someone blinked.
-**ACTION:** Everyone resets. CLICK. Matteo is half outside the frame.
+**ACTION:** Everyone resets. CLICK. Mateo is half outside the frame.
 MATEO: I was edited out in real life.
 **ACTION:** Reset. CLICK. Ruby loses her balance on a folding chair; Jules catches her.
 NIA: ONE. NORMAL. PHOTO.
