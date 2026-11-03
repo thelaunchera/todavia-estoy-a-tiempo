@@ -9,6 +9,7 @@ export type EpisodePhotoAvailability = {
   id: string;
   source: 'private' | 'studio' | 'drive' | 'missing';
   fileName?: string;
+  driveUrl?: string;
 };
 
 export const getEpisodeProductionBlocks = (photos: readonly YouTubePhoto[]) => {
@@ -38,7 +39,8 @@ export function getEpisodeProductionMaster(episodeNumber: number, availability: 
         '  Escena oficial: ' + photo.scene,
         '  Plano/cámara: ' + photo.shot,
         '  Acción aprobada: ' + photo.action,
-        '  Archivo esperado: ' + (asset?.fileName || photo.id + '.png')
+        '  Archivo esperado: ' + (asset?.fileName || photo.id + '.png'),
+        '  Original en Google Drive: ' + (asset?.driveUrl || 'Sin enlace guardado')
       ].join('\n');
     })
   ]).join('\n\n');
@@ -49,7 +51,7 @@ export function getEpisodeProductionMaster(episodeNumber: number, availability: 
     'ROL: Actúa como director de animación cinematográfica 3D, supervisor de continuidad, editor y productor de video.',
     'MISIÓN: Construye un episodio ANIMADO completo en INGLÉS, de aproximadamente 90–120 segundos, utilizando las DIEZ fotografías individuales oficiales de este episodio en el orden indicado. Las tres secciones que verás abajo son BLOQUES NARRATIVOS de organización, no un límite de imágenes ni un reemplazo del storyboard original.',
     '',
-    'ACCESO A ARCHIVOS: Antes de producir, recupera las fotografías realmente adjuntas en el chat o accesibles desde el Studio/Google Drive conectado, identifica cada una por su ID E##-F## y confirma la lista. Un nombre de archivo o una vista previa NO transfiere los píxeles a la herramienta de video. No inventes imágenes ausentes, no sustituyas Nia ni Ruby, no declares que se generó un video si solo entregaste texto.',
+    'ACCESO A ARCHIVOS: Usa el conector Google Drive para abrir los enlaces originales de cada ficha que aparecen abajo; no dependas de vistas previas. Antes de producir, recupera las fotografías realmente adjuntas en el chat o accesibles desde el Studio/Google Drive conectado, identifica cada una por su ID E##-F## y confirma la lista. Un nombre de archivo o una vista previa NO transfiere los píxeles a la herramienta de video. No inventes imágenes ausentes, no sustituyas Nia ni Ruby, no declares que se generó un video si solo entregaste texto.',
     'CONTINUIDAD: Usa exclusivamente los avatares originales aprobados de Nia y Ruby, su identidad facial, proporciones, cabello, vestuario específico del episodio, escenografía, utilería y moodboard. Mantén consistencia de ubicación, lado de cámara, iluminación y color entre tomas. No agregues personajes, subtítulos ni logotipos dentro de los fotogramas salvo que estén indicados en los recursos oficiales.',
     '',
     'ORDEN DE LAS DIEZ FOTOGRAFÍAS:',
