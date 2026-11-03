@@ -209,22 +209,19 @@
 
       <section class="dashboard-setup" aria-labelledby="dashboard-setup-title">
         <div class="dashboard-setup-heading">
-          <p class="dashboard-overline">CUANDO LO NECESITES</p>
-          <h2 id="dashboard-setup-title">Prepara tus herramientas.</h2>
-          <p>Empieza con tu lección. Aquí tienes las instrucciones para preparar las herramientas cuando toque utilizarlas.</p>
+          <p class="dashboard-overline">ANTES DE EMPEZAR</p>
+          <h2 id="dashboard-setup-title">Ten esto a mano.</h2>
+          <p>Solo necesitas una idea y ganas de practicar.</p>
         </div>
         <details class="dashboard-setup-details">
-          <summary>Ver qué herramientas necesitas <span class="dashboard-setup-expand" aria-hidden="true">+</span></summary>
+          <summary>Qué preparar <span class="dashboard-setup-expand" aria-hidden="true">+</span></summary>
           <div class="dashboard-setup-expanded">
-            <strong>Comienza gratis · Plus es opcional</strong>
-            <p>Primero vamos a organizar tu idea y crear los textos y fotos con <b>ChatGPT Free</b>, dentro de sus límites. También veremos el plan gratuito de <b>AppDeploy</b>. La disponibilidad del plugin AppDeploy en ChatGPT depende de los permisos y del plan de cada cuenta; revisaremos esa conexión antes de construir.</p>
             <ol>
-              <li>Abre <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT</a> desde tu teléfono y utiliza tu cuenta gratuita para la primera lección.</li>
-              <li>En <b>Plugins</b>, busca AppDeploy, Google/Gmail, Make y Stripe. Lee qué permisos requiere cada conexión; no todas sus funciones están incluidas en todos los planes.</li>
-              <li>Prepara las fotos de marca, textos y secciones antes de construir. En la clase verás el método: mañana para crear, tarde para montar la web.</li>
-              <li>Cuando lleguemos a AppDeploy, comprueba sus créditos disponibles y si tu plan de ChatGPT permite conectar el plugin. <b>No tienes que comprar Plus para empezar</b>; puedes considerarlo después si necesitas más capacidad.</li>
+              <li>Piensa qué negocio o proyecto quieres presentar.</li>
+              <li>Reúne las fotos y los datos que tengas permiso de utilizar.</li>
+              <li>Abre la primera lección. Te guiaré paso a paso.</li>
             </ol>
-            <p>Aprender a crear webs puede ayudarte a ofrecer servicios o a presentar tu negocio. Las ventas requieren una oferta real, promoción y seguimiento: no están garantizadas por publicar una página.</p>
+            <p>Puedes empezar sin contratar herramientas de pago. Si algún paso tiene un costo, te lo explicaré antes.</p>
           </div>
         </details>
       </section>
@@ -267,12 +264,12 @@
         <select id="course-caption-language" aria-describedby="course-caption-help">
           <option value="es">Español</option>
           <option value="en">English</option>
-          <option value="auto">Controlar en YouTube (incluye desactivar)</option>
+          <option value="auto">Elegir en el reproductor</option>
         </select>
-        <p id="course-caption-help"><strong>La voz de las lecciones es en español, también al seleccionar English.</strong> Esta opción solo solicita subtítulos: estarán disponibles cuando se publiquen las pistas revisadas de cada video. Si no aparecen, comprueba ⚙️ → Subtítulos en YouTube. Cambiar esta opción reinicia el video.</p>
+        <p id="course-caption-help">El idioma del aula no cambia el audio. Las versiones de audio y subtítulos aparecerán a medida que estén listas. Puedes ajustarlas desde el reproductor.</p>
       </div>
-      <p id="lesson-unavailable" class="empty" hidden>Este video todavía está en preparación. Cuando se publique su enlace aprobado aparecerá aquí, sin cambiar el diseño del aula.</p>
-      <p id="empty-lessons" class="empty">Las lecciones aún están en preparación. Encontrarás aquí los videos aprobados cuando se habilite el curso.</p>
+      <p id="lesson-unavailable" class="empty" hidden>Este video aún no está disponible. Aparecerá aquí cuando esté listo.</p>
+      <p id="empty-lessons" class="empty">Los videos se añadirán aquí cuando estén listos. Puedes explorar los materiales mientras tanto.</p>
       <div id="lesson-info" hidden>
        <p class="eyebrow" id="lesson-number"></p>
        <h3 id="lesson-title"></h3>
@@ -281,11 +278,11 @@
           <div class="lesson-module-prompts-heading">
             <span class="lesson-module-prompts-eyebrow">APLICA LO APRENDIDO</span>
             <h4>Prompts para este módulo</h4>
-            <p>Empieza por investigar qué necesita tu negocio. Si estás creando una página para alguien más, primero investiga su negocio y confirma los datos con la persona. Abre un prompt, cópialo y completa lo que aparece entre corchetes.</p>
+            <p>Investiga primero el negocio. Después copia el prompt y completa los datos entre corchetes.</p>
           </div>
           <div id="lesson-prompts-list" class="lesson-module-prompts-list"></div>
         </section>
-       <p class="lesson-guidance">Mira el video, prueba lo aprendido en tu proyecto y marca la lección cuando termines.</p>
+       <p class="lesson-guidance">Mira, practica y marca la lección cuando termines.</p>
        <label class="lesson-completed"><input type="checkbox" id="lesson-done"> Ya terminé esta lección</label>
        <div class="lesson-navigation" aria-label="Navegación entre lecciones">
          <button type="button" id="lesson-prev" class="lesson-nav-secondary">← Anterior</button>
@@ -434,7 +431,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261103-photo-prompts-v2'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261103-classroom-language-audit-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
