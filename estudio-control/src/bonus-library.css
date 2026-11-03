@@ -35,3 +35,15 @@
 .bonus-hero-demo span{display:block;font-size:.78rem;font-weight:750;color:#314c5d;margin-bottom:10px}
 .bonus-hero-demo video{display:block;width:100%;max-height:240px;object-fit:cover;border-radius:10px;background:#131313}
 .bonus-hero-demo small{display:block;font-size:.73rem;color:#596b75;line-height:1.45;margin-top:10px}
+
+
+/* Owner-only bilingual prompt preview */
+.studio-bonus-prompt-preview{margin:0 0 16px;border:1px solid #d9e3e7;border-radius:12px;overflow:hidden;background:#f6f8f8}
+.studio-bonus-prompt-preview>summary{list-style:none;padding:13px 15px;font-weight:800;font-size:.83rem;color:#29475b;cursor:pointer}
+.studio-bonus-prompt-preview>summary::-webkit-details-marker{display:none}
+.studio-bonus-prompt-preview>summary:focus-visible{outline:3px solid #90a9d7;outline-offset:-3px}
+.studio-bonus-prompt-language{padding:12px;border-top:1px solid #dde8eb}
+.studio-bonus-prompt-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.studio-bonus-prompt-bar strong{font-size:.72rem;color:#566d7b;letter-spacing:.08em}
+.studio-bonus-prompt-bar button{border:1px solid #d1dee7;background:#fff;border-radius:999px;padding:8px 11px;color:#254b63;font-weight:750;cursor:pointer}
+.studio-bonus-prompt-language pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow-y:auto;font:inherit;font-size:.74rem;line-height:1.65;color:#2a3b47;margin:0}
