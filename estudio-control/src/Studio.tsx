@@ -1432,7 +1432,7 @@ function App() {
               <nav className="studio-student-tabs" aria-label="Centro de alumnos: administración y vista del aula">
                 <span className="studio-student-tab-current"><Users size={17}/> Alumnos y bonos</span>
                 <button type="button" className="studio-student-tab-link" onClick={openAulaPreview}
-                  aria-label="Ver aula completa dentro del Studio, sin realizar compras ni alterar el progreso">
+                  aria-label="Ver aula completa desde administración, sin realizar compras ni alterar el progreso">
                   <BookOpen size={17}/> Ver aula completa <ExternalLink size={15}/>
                 </button>
               </nav>
