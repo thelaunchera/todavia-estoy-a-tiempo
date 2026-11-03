@@ -5,7 +5,7 @@ import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-command-center
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-bonus-owner-gated-v2';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-learning-clarity-v1';
 import {mountInspiracion} from './inspiracion.js?v=20261103-demo-inventory-v1';
-import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-learning-clarity-v1';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-home-install-v1';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
@@ -854,7 +854,7 @@ function toggleCourseHelp(open) {
   const firstName=String(user?.user_metadata?.full_name||user?.user_metadata?.name||'').slice(0,80);
   if(firstName && !$('course-help-name').value)$('course-help-name').value=firstName;
   courseHelpPanel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
-  $('course-help-name').focus({preventScroll:true});
+  $('course-help-title').focus({preventScroll:true});
  }else{
   lastHelpTrigger?.focus({preventScroll:true});
  }
