@@ -1435,6 +1435,10 @@ function App() {
                   aria-label="Ver aula completa desde administración, sin realizar compras ni alterar el progreso">
                   <BookOpen size={17}/> Ver aula completa <ExternalLink size={15}/>
                 </button>
+                <a className="studio-student-tab-link" href="../alumnos/#prompts" target="_blank" rel="noopener noreferrer"
+                  aria-label="Abrir biblioteca de prompts del aula en otra pestaña">
+                  <BookOpen size={17}/> Biblioteca de prompts <ExternalLink size={15}/>
+                </a>
               </nav>
               <StudentManager />
               <p className="studio-student-qa-note">Abre aquí el aula tal como la ven tus alumnos. Puedes regresar a administración sin perder tu lugar.</p>
