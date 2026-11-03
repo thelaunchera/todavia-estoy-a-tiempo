@@ -142,6 +142,8 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     setBatchStatus('Master Prompt de video descargado.');
   };
   return <div className="yt-visual">
+    <details className="yt-production-references">
+      <summary><Users size={16}/> Abrir referencias de personajes y vestuario</summary>
     <section className="yt-paper">
       <div className="yt-small-title"><Users size={17}/> BIBLIA DE PERSONAJES</div>
       <h3>Nia y Ruby · Avatares originales</h3>
@@ -167,6 +169,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
       </button>)}</div>
       <div className="yt-look-tools"><span>EP {episodeNum(selected)} · {look.mood}</span><button type="button" onClick={()=>copyLook('nia')}><Copy size={15}/> Prompt look Nia</button><button type="button" onClick={()=>copyLook('ruby')}><Copy size={15}/> Prompt look Ruby</button></div>
     </section>
+    </details>
     <section className="yt-paper">
       <div className="yt-visual-heading">
         <div><div className="yt-small-title"><Film size={16}/> STORYBOARD Y FOTOS POR CAPÍTULO</div><h3>Un capítulo · 10 fotos · 1 Master Prompt</h3><p>Guarda las diez tomas individuales. Se ordenan en tres bloques narrativos, sin limitar la cantidad de fotos por escena. Cada toma conserva su ID y prompt original.</p></div>
