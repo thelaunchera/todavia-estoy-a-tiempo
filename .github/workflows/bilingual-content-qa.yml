@@ -18,6 +18,8 @@ on:
       - 'tus-datos*.html'
       - 'baja*.html'
       - 'scripts/qa-bilingual-content-and-captions.mjs'
+      - 'estudio-control/tests/public-language-privacy.test.mjs'
+      - 'alumnos/guia-principiantes.js'
       - '.github/workflows/bilingual-content-qa.yml'
   workflow_dispatch:
 permissions:
@@ -37,3 +39,5 @@ jobs:
           node --check scripts/qa-bilingual-content-and-captions.mjs
       - name: Verify bilingual sales and legal pages
         run: node scripts/qa-bilingual-content-and-captions.mjs
+      - name: Prevent public internal-tool disclosures and mixed-language copy
+        run: node --test estudio-control/tests/public-language-privacy.test.mjs
