@@ -201,6 +201,7 @@ function translateElement(selector,english){
 }
 export function applyClassroomLanguage(){
  document.documentElement.lang=language;
+ document.title=language==='en'?'My classroom · Your First Website With AI | Todavía estoy a tiempo':'Mi aula · Tu primera web con IA | Todavía estoy a tiempo';
  for(const selector of ['aula-language','aula-public-language']){
   const el=document.getElementById(selector);if(el&&el.value!==language)el.value=language;
  }
