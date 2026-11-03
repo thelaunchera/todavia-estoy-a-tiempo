@@ -846,4 +846,4 @@ export function getYouTubePhotoPrompt(photo:YouTubePhoto):string {
  photoStyles.neg
  ].join('\n\n');
 }
-export const youtubeVisualStats={ episodes:8,framesPerEpisode:10,totalFrames:80 } as const;
+export const youtubeVisualStats={ episodes:8,framesPerEpisode:10,baseFrames:80,seasonalExtras:8,totalFrames:88 } as const;
