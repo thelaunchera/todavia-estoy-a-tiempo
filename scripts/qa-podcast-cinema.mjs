@@ -33,6 +33,13 @@ try {
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:45000});
+  // On launch days, the expected modal temporarily covers the hero.
+  // Close it as a visitor would before testing hero controls.
+  const chapterAnnouncement=page.locator('#podcast-ep03-dialog');
+  if(await chapterAnnouncement.isVisible()){
+   await chapterAnnouncement.locator('[data-ep03-close]').click();
+   assert(!(await chapterAnnouncement.isVisible()),width+': close should restore navigation');
+  }
   await page.locator('.podcast-film-captions').waitFor({state:'visible',timeout:10000});
   await page.screenshot({path:'artifacts/podcast-cinema/hero-'+width+'.png',fullPage:false});
   const state=await page.evaluate(()=>{
