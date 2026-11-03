@@ -1,6 +1,5 @@
-/* Una sección de escucha en orden cronológico, no una lista infinita.
-   Añadir cada episodio publicado a este catálogo; la portada muestra automáticamente
-   el más reciente y el anterior. Los demás se descubren en el enlace a Spotify.
+/* Catálogo de los tres capítulos publicados más recientes.
+   El más reciente va primero y cada episodio conserva su propia portada y enlace.
    Nunca añadir borradores ni enlaces de la página general a este catálogo. */
 (() => {
   'use strict';
@@ -25,10 +24,10 @@
     },
     {
       number: 3,
-      title: 'Me alegro por ti, pero también me duele',
-      titleEn: "I'm happy for you, but it still hurts",
-      summary: 'Una conversación sobre la comparación y lo que sentimos cuando otra persona alcanza algo que también deseábamos.',
-      summaryEn: 'A conversation about comparison and what we feel when someone else reaches something we hoped for.',
+      title: 'No quiero ser influencer para vender lo que hago',
+      titleEn: "I don't want to be an influencer to sell what I do",
+      summary: 'La presión de exponerse en redes cuando solo querías vender un producto o servicio; maneras reales de mostrar lo que haces sin actuar frente a una cámara.',
+      summaryEn: 'The pressure to be visible online when all you wanted was to sell your work, and ways to show what you do without performing on camera.',
       url: 'https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c',
       art: 'assets/episodio-03-portada.webp',
       published: true
@@ -39,10 +38,11 @@
     Number.isInteger(e.number) && spotifyEpisode.test(e.url))
     .sort((a, b) => b.number - a.number);
   if (!published.length) return;
-  // Presentar el estreno como protagonista y el episodio inmediatamente anterior al lado.
-  const visible = published.slice(0, 2);
+  // Tres episodios visibles (03, 02, 01), siempre ordenados por estreno reciente.
+  const visible = published.slice(0, 3);
   const latest = visible[0];
   const previous = visible[1];
+  const earlier = visible[2];
   const section = document.getElementById('escuchar');
   if (!section) return;
   const english = document.documentElement.lang === 'en';
@@ -110,6 +110,29 @@
         image.src = 'assets/logo-podcast-04.svg';
         image.alt = 'Logo del podcast Todavía estoy a tiempo';
         image.hidden = false;
+      }
+    }
+  }
+  const earlierCard = section.querySelector('[data-ep-earlier]');
+  if (earlierCard) {
+    if (!earlier) {
+      earlierCard.hidden = true;
+    } else {
+      earlierCard.hidden = false;
+      const earlierNumber = earlierCard.querySelector('[data-ep-earlier-number]');
+      const earlierTitle = earlierCard.querySelector('[data-ep-earlier-title]');
+      if (earlierNumber) earlierNumber.textContent = labelFor(earlier.number);
+      if (earlierTitle) earlierTitle.textContent = titleFor(earlier);
+      for (const link of earlierCard.querySelectorAll('a')) {
+        link.href = earlier.url;
+        link.setAttribute('aria-label', linkLabelFor(earlier));
+      }
+      const earlierImage = earlierCard.querySelector('img');
+      if (earlierImage && earlier.art) {
+        earlierImage.src = earlier.art;
+        earlierImage.alt = english
+          ? `Artwork for episode ${earlier.number} of Todavía estoy a tiempo`
+          : `Portada del episodio ${earlier.number} de Todavía estoy a tiempo`;
       }
     }
   }
