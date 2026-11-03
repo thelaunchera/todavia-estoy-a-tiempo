@@ -44,11 +44,33 @@ async function clipboardCopy(value,button,language='es'){
  }
  button.textContent=language==='en'?(copied?'Copied!':'Select text to copy'):(copied?'¡Copiado!':'Selecciona el texto para copiarlo');
 }
+function fillCreativeWorkflowPrompt(template,demo,spec){
+ const vars={'{{DEMO}}':demo.title,'{{STYLE_ES}}':spec?.style_es||'', '{{STYLE_EN}}':spec?.style_en||'',
+  '{{SECTIONS_ES}}':spec?.sections_es||'','{{SECTIONS_EN}}':spec?.sections_en||''};
+ let result=String(template||'');
+ for(const [token,value] of Object.entries(vars))result=result.replaceAll(token,String(value));
+ if(spec?.private)result+='\nDo not reuse or share a real client’s private materials.';
+ return result;
+}
+function studioPhotoFile(url){return String(url||'').split(/[?#]/)[0].split('/').pop()||'';}
+function correctedDemoText(text,spec){
+ let value=String(text||'');
+ for(const rule of Array.isArray(spec?.replace_rules)?spec.replace_rules:[]){
+  if(Array.isArray(rule)&&rule.length===2)value=value.replaceAll(String(rule[0]),String(rule[1]));
+ }
+ return value;
+}
 export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
  root.innerHTML='<p class="inspiration-loading" role="status">'+(getLanguage()==='en'?'Loading projects…':'Cargando proyectos…')+'</p>';
- const {data,error}=await db.from('podcast_class_learning_assets')
-  .select('payload,status').eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1').maybeSingle();
+ const [galleryResponse,workflowResponse]=await Promise.all([
+  db.from('podcast_class_learning_assets').select('payload,status')
+    .eq('course_id',courseId).eq('asset_code','inspiration_gallery_v1').maybeSingle(),
+  db.from('podcast_class_learning_assets').select('payload,status')
+    .eq('course_id',courseId).eq('asset_code','inspiration_workflow_v3').maybeSingle()
+ ]);
+ const {data,error}=galleryResponse;
+ const guidePayload=workflowResponse?.data?.status==='ready'?workflowResponse.data.payload:null;
  if(error||!data?.payload||data.status!=='ready'){
   root.textContent=getLanguage()==='en'?'Your inspiration gallery is being prepared.':'Tu galería de inspiración se está preparando.';
   return {setLanguage(){}};
@@ -141,6 +163,26 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
    '<a class="inspiration-demo-open" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.url))+'">'+enLabel('Abrir página completa','Open full website',curLang())+' ↗</a>'+
    (safeUrl(d.video_url)?'<a class="inspiration-demo-open secondary" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(d.video_url))+'">'+enLabel('Comparar versión con video','Compare video version',curLang())+' ↗</a>':'')+'</div>';
   root.append(lead);
+  const guideCase=guidePayload?.cases?.[d.id];
+  if(guideCase&&Array.isArray(guidePayload?.templates)){
+   const work=document.createElement('section');work.className='inspiration-workflow';
+   work.innerHTML='<div class="inspiration-section-title"><h3>'+enLabel('Primero el moodboard. Después las fotos.','Moodboard first. Photos second.',curLang())+'</h3><p>'+enLabel('Aprueba el estilo, prepara lotes de máximo 9 fotos independientes y colócalas por sección.','Approve the style, plan batches of up to 9 separate photos and place them by section.',curLang())+'</p></div>';
+   const list=document.createElement('div');list.className='inspiration-workflow-steps';
+   for(const step of guidePayload.templates){
+    const item=document.createElement('details');item.className='inspiration-workflow-step';
+    const title=curLang()==='en'?step.title_en:step.title_es;
+    const description=curLang()==='en'?step.description_en:step.description_es;
+    const promptText=fillCreativeWorkflowPrompt(curLang()==='en'?step.prompt_en:step.prompt_es,d,guideCase);
+    const summary=document.createElement('summary');summary.innerHTML='<strong>'+esc(title)+'</strong><small>'+esc(description||'')+'</small>';
+    const inner=document.createElement('div');inner.className='inspiration-workflow-body';
+    const paragraph=document.createElement('p');paragraph.className='inspiration-workflow-prompt';paragraph.textContent=promptText;
+    const copy=document.createElement('button');copy.type='button';copy.className='inspiration-copy';
+    copy.textContent=enLabel('Copiar este prompt','Copy this prompt',curLang());
+    copy.addEventListener('click',()=>clipboardCopy(promptText,copy,curLang()));
+    inner.append(paragraph,copy);item.append(summary,inner);list.append(item);
+   }
+   work.append(list);root.append(work);
+  }
   const photos=Array.isArray(d.photos)
    ?d.photos.filter(x=>safeUrl(x.url)).map((p,index)=>({p,index}))
       .sort((a,b)=>galleryPhotoOrder(a.p,a.index)-galleryPhotoOrder(b.p,b.index))
