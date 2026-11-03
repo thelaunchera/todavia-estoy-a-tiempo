@@ -433,3 +433,13 @@
 @media print{.mi-owner-test-note{display:none!important}}
 
 .mi-owner-test-feedback{flex:1 1 100%;width:100%;font-size:12px;line-height:1.5;color:#35617b;margin:6px 0 0}
+
+
+/* Four ordered learning stages: readable without cramped or tiny tabs. */
+#materiales-interactivos .mi-tabs{gap:8px}
+#materiales-interactivos .mi-tabs button{min-height:46px;padding:11px 12px;border-radius:11px;font-size:12.5px;line-height:1.4}
+#materiales-interactivos .mi-subtabs{gap:8px;margin-top:-10px;margin-bottom:19px}
+#materiales-interactivos .mi-subtabs button{min-height:44px;font-size:12px;padding:10px 14px}
+#materiales-interactivos .mi-header{margin-bottom:20px}
+#materiales-interactivos .mi-section-head p{max-width:63ch;line-height:1.6}
+@media(max-width:600px){#materiales-interactivos .mi-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}#materiales-interactivos .mi-tabs button{min-height:50px;font-size:12px}#materiales-interactivos .mi-subtabs button{font-size:12px}}
