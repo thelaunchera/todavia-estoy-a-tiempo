@@ -1,6 +1,6 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {bindCommunityLanguage,applyCommunityLanguage,communityLanguage,communityText} from './comunidad-i18n.js?v=20261102-v2';
-const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+const {createClient}=await import('./supabase-local.js?v=20261102-stable-v1').catch(()=>import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm'));
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const state={user:null,owner:false,courses:[],profile:null,channel:'charla',scope:'all',posts:[],comments:[],likes:[],profiles:new Map(),images:new Map(),reports:[],busy:false};
