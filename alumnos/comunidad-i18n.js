@@ -12,9 +12,10 @@ const translations=[
  ['.club-hero-mark > span','SHARE · LEARN · GROW'],
  ['.club-hero-mark > strong','Ideas become real.'],
  ['#club-locked h2','This space is private.'],
+ ['#club-locked-message','This space is for members with community access.'],
  ['#club-locked > a','Back to my classroom'],
  ['#club-admin-banner > span','Owner preview · review and moderate conversations.'],
- ['#club-admin-return','Back to Studio'],
+ ['#club-admin-return','Back to administration'],
  ['.club-welcome .club-overline','YOUR CREATIVE SPACE'],
  ['.club-welcome h2','Learn by sharing.'],
  ['.club-welcome div:first-child > p:not(.club-private-note)','Post a screenshot, share your progress, or ask for feedback. Your classmates can see only content shared to their authorized space.'],
@@ -55,8 +56,8 @@ const translations=[
  ['.club-aside .club-other-classes h3','Learn and share in one space.'],
  ['.club-aside .club-other-classes > a','Your First AI Website'],
  ['.club-aside .club-other-classes > small','More workshops will appear here if and when they are available.'],
- ['.club-footer a[href="../privacidad.html"]','Privacy'],
- ['.club-footer a[href="../terminos.html"]','Terms']
+ ['.club-footer a[href*="privacidad"]','Privacy'],
+ ['.club-footer a[href*="terminos"]','Terms']
 ];
 export const communityLanguage=()=>language;
 export const communityText=(es,en)=>language==='en'?en:es;
@@ -84,6 +85,14 @@ export function applyCommunityLanguage(){
  const intro=foot&&[...foot.childNodes].find(x=>x.nodeType===Node.TEXT_NODE);
  if(intro)intro.textContent=language==='en'?'Members only · ':'Solo para miembros · ';
  for(const [selector,en] of translations)setText(selector,en);
+ // The selected language must also apply to legal destinations, not just link labels.
+ for(const [stem,label] of [['privacidad','Privacy'],['terminos','Terms']]){
+  const link=document.querySelector('.club-footer a[href*="'+stem+'"]');
+  if(link){
+   link.href='../'+stem+(language==='en'?'-en':'')+'.html';
+   link.hreflang=language;
+  }
+ }
  const placeholders={
   'club-display-name':['Tu nombre o apodo','Your display name'],
   'club-post-body':['Hoy avancé con mi primera web…','Today I worked on my first webpage…'],
