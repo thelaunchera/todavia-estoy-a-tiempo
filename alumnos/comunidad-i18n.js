@@ -54,7 +54,9 @@ const translations=[
  ['.club-aside .club-other-classes .club-overline','YOUR CLASS'],
  ['.club-aside .club-other-classes h3','Learn and share in one space.'],
  ['.club-aside .club-other-classes > a','Your First AI Website'],
- ['.club-aside .club-other-classes > small','More workshops will appear here if and when they are available.']
+ ['.club-aside .club-other-classes > small','More workshops will appear here if and when they are available.'],
+ ['.club-footer a[href="../privacidad.html"]','Privacy'],
+ ['.club-footer a[href="../terminos.html"]','Terms']
 ];
 export const communityLanguage=()=>language;
 export const communityText=(es,en)=>language==='en'?en:es;
@@ -77,6 +79,10 @@ function setText(selector,en){
 }
 export function applyCommunityLanguage(){
  document.documentElement.lang=language;
+ document.title=language==='en'?'Ideas Club · Your First Website With AI':'Club de Ideas · Todavía estoy a tiempo';
+ const foot=document.querySelector('.club-footer span:last-child');
+ const intro=foot&&[...foot.childNodes].find(x=>x.nodeType===Node.TEXT_NODE);
+ if(intro)intro.textContent=language==='en'?'Members only · ':'Solo para miembros · ';
  for(const [selector,en] of translations)setText(selector,en);
  const placeholders={
   'club-display-name':['Tu nombre o apodo','Your display name'],
