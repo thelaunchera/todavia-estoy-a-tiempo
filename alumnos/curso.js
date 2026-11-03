@@ -359,7 +359,11 @@ async function refreshPersonalBonuses(){
     const link=document.createElement('a');
     link.className='resource';link.href=item.url;link.target='_blank';link.rel='noopener noreferrer';
     escapedText(link,'span',courseCopy('BONO PERSONAL','PERSONAL BONUS',getClassroomLanguage()),'resource-tag');
-    escapedText(link,'strong',item.title);
+    escapedText(link,'strong',item.resource_code==='bonus_hero_cinematic_scroll'
+      ? courseCopy('Hero cinematográfico','Cinematic hero',getClassroomLanguage())
+      : item.resource_code==='bonus_motion_studio'
+        ? courseCopy('Biblioteca de efectos web','Website effects library',getClassroomLanguage())
+        : item.title);
     escapedText(link,'span',courseCopy('Abrir bono','Open bonus',getClassroomLanguage()),'resource-link');
     list.appendChild(link);
   });
@@ -389,16 +393,20 @@ function bonusState(){
   $('assigned-bonuses').hidden=true;
  }
  if(eligible){
-  status.textContent=courseCopy('¡Completaste las lecciones y compartiste tu web! Requisitos del bono cumplidos.','You finished the lessons and shared your website! Bonus requirements met.',getClassroomLanguage());
+  status.hidden=true;
+  status.textContent='';
   status.dataset.state='earned';
  }else if(allDone){
-  status.textContent=courseCopy('Te falta un paso: publica tu primera web en Proyectos, dentro del Club de Ideas.','One step left: share your first website in Projects, inside Ideas Club.',getClassroomLanguage());
+  status.hidden=false;
+  status.textContent=courseCopy('Solo falta compartir tu web.','Just share your website to finish.',getClassroomLanguage());
   status.dataset.state='progress';
  }else if(projectShared){
-  status.textContent=courseCopy('¡Tu web ya está en el club! Termina las lecciones para activar el bono.','Your website is already in the club! Finish the lessons to unlock your bonus.',getClassroomLanguage());
+  status.hidden=false;
+  status.textContent=courseCopy('¡Tu web está compartida! Sigue con las lecciones.','Your website is shared! Keep going with the lessons.',getClassroomLanguage());
   status.dataset.state='progress';
  }else{
-  status.textContent=courseCopy('Bono bloqueado · termina las lecciones y comparte tu web en el Club de Ideas.','Bonus locked · finish your lessons and share your website in Ideas Club.',getClassroomLanguage());
+  status.hidden=true;
+  status.textContent='';
   status.dataset.state='pending';
  }
 }
@@ -671,7 +679,7 @@ async function refreshAuth(){
  if(recoveryMode){out.hidden=true;display(login);setAuthMode('newPassword');authNotice('Enlace de recuperación verificado. Escribe tu nueva contraseña.');return;}
  // La vista dentro del Studio no debe pedir otra compra ni contraseña.
  if(STUDIO_EMBEDDED_OWNER&&!studioSessionReady){
-  out.hidden=true;display(null);status('Abriendo tu aula privada desde el Studio…');return;
+  out.hidden=true;display(null);status('Abriendo tu aula…');return;
  }
  let ownerConfirmed=false;
  let stage='sesión';
@@ -680,7 +688,7 @@ async function refreshAuth(){
   if(error && !/Auth session missing/i.test(error.message||''))throw error;
   if(!who){
    user=null;out.hidden=true;display(STUDIO_EMBEDDED_OWNER?null:login);
-   status(STUDIO_EMBEDDED_OWNER?'El Studio aún no ha confirmado tu sesión.':'Entra con tu correo y contraseña.');return;
+   status(STUDIO_EMBEDDED_OWNER?'Tu acceso desde administración aún no está confirmado.':'Entra con tu correo y contraseña.');return;
   }
   stage='permiso de administradora';
   const owner=await isAuthorizedOwner(who);
@@ -706,10 +714,10 @@ async function refreshAuth(){
    // Rol owner confirmado por RLS. No mostrar la pantalla de pago.
    adminPreview=true;out.hidden=true;display(course);
    $('admin-preview-banner').hidden=false;
-   status('Tu sesión de administradora está verificada, pero falló la carga de '+stage+'. Regresa al Studio y abre de nuevo el aula.');
+   status('No se pudo cargar '+stage+'. Vuelve a administración y abre el aula de nuevo.');
   }else if(STUDIO_EMBEDDED_OWNER){
    out.hidden=true;display(null);
-   status('No se pudo confirmar la sesión privada. Regresa al Studio y vuelve a pulsar Aula.');
+   status('No se pudo confirmar el acceso. Vuelve a administración y abre el aula otra vez.');
   }else{
    display(login);status('No pudimos comprobar el acceso. Actualiza la página o pide ayuda si continúa.');
   }
@@ -931,12 +939,12 @@ if(STUDIO_EMBEDDED_OWNER){
   }catch(e){
    studioSessionReady=false;out.hidden=true;display(null);
    const reason=e?.code==='PGRST301'?' (sesión caducada)':'';
-   status('No se pudo verificar la sesión de administradora'+reason+'. Vuelve al Studio e inténtalo otra vez.');
+   status('No se pudo confirmar tu acceso'+reason+'. Vuelve a administración e inténtalo de nuevo.');
    console.error('Owner classroom bridge verification failed',e?.code||e?.name||'unknown');
   }finally{studioSessionLoading=false;}
  });
  out.hidden=true;display(null);
- status('Conectando con tu Studio privado…');
+ status('Conectando con administración…');
  // On the same origin, Supabase may already have a valid Studio session.
  // Verify the real owner role immediately instead of waiting for the bridge.
  // The message bridge remains available for isolated browser contexts.
@@ -951,7 +959,7 @@ if(STUDIO_EMBEDDED_OWNER){
    }
   }catch(e){console.warn('Studio session fallback unavailable',e?.name||'unknown');}
   out.hidden=true;display(null);
-  status('No se pudo verificar tu acceso de administradora. Vuelve al Studio y abre el aula otra vez. Si continúa, inicia sesión en el Studio de nuevo.');
+  status('No se pudo verificar tu acceso. Vuelve a administración y abre el aula otra vez.');
  };
  void checkExistingOwner();
  setTimeout(()=>{if(!studioSessionReady&&!studioSessionLoading)void checkExistingOwner();},6500);
