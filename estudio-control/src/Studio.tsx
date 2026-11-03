@@ -291,7 +291,7 @@ function App() {
     [error, setError] = useState('');
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'reels-clase' || section === 'reels-lab' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -662,7 +662,7 @@ function App() {
     setMobileNav(false);
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube') nextUrl.searchParams.set('seccion',p);
+    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
