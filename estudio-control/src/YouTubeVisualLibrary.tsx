@@ -143,6 +143,40 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     window.setTimeout(()=>URL.revokeObjectURL(url),1000);
     setBatchStatus('Master Prompt de video descargado.');
   };
+  const exportEpisodePackage=async()=>{
+    if(packageBusy||ready!==corePhotos.length)return;
+    setPackageBusy(true);setBatchStatus('');
+    const files:Record<string,Uint8Array>={};
+    const inaccessible:string[]=[];
+    try{
+      for(const photo of corePhotos){
+        const src=privatePhotos.get(photo.id)?.url||owned.get(photo.id)?.art||photo.image;
+        if(!src||(!src.startsWith('data:image/')&&!src.startsWith('https://'))){inaccessible.push(photo.id);continue;}
+        try{
+          const response=await fetch(src,{credentials:'omit'});
+          if(!response.ok)throw new Error('HTTP '+response.status);
+          const blob=await response.blob();
+          if(!blob.size||(!blob.type.startsWith('image/')&&blob.type!=='application/octet-stream'))throw new Error('Formato de imagen inválido');
+          const fileName=privatePhotos.get(photo.id)?.file_name||photo.id+'.png';
+          const ext=(blob.type==='image/webp'?'webp':blob.type==='image/jpeg'?'jpg':blob.type==='image/png'?'png':fileName.toLowerCase().split('.').pop()==='webp'?'webp':'png');
+          files['FOTOS/'+photo.id+'.'+ext]=new Uint8Array(await blob.arrayBuffer());
+        }catch{inaccessible.push(photo.id);}
+      }
+      if(inaccessible.length){
+        setBatchStatus('No se descargó un paquete incompleto. Verifica los archivos de: '+inaccessible.join(', '));
+        return;
+      }
+      files['MASTER-PROMPT-VIDEO.txt']=strToU8(masterVideoPrompt);
+      files['LEEME.txt']=strToU8('OFF BRIEF — EP '+episodeNum(selected)+'\\nLas diez fotos originales y un solo Master Prompt de producción.\\nLa herramienta que genere el video debe recibir los archivos de FOTOS/ y el prompt. El ZIP no renderiza videos automáticamente.');
+      const archive=zipSync(files,{level:0});
+      const blob=new Blob([new Uint8Array(archive)],{type:'application/zip'});
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='OFF-BRIEF-E'+episodeNum(selected)+'-10-FOTOS-Y-MASTER.zip';
+      document.body.appendChild(a);a.click();a.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+      setBatchStatus('Paquete con las diez imágenes y el Master Prompt creado.');
+    }finally{setPackageBusy(false);}
+  };
   return <div className="yt-visual">
     <details className="yt-production-references">
       <summary><Users size={16}/> Abrir referencias de personajes y vestuario</summary>
