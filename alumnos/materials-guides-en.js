@@ -20,8 +20,8 @@ const guides={
  ['02 — Mood board','Choose an original palette, typography, photographic tone and packaging direction if needed.'],
  ['03 — Prepare photos in Google Drive','Create each image with ChatGPT and ask to send it directly to the 02_PHOTOS folder in Drive if uploads are supported. Do not save it to your personal Photos gallery.'],
  ['03B — Check your backup','If a direct Drive upload is unavailable, use Share or a temporary file in Files, then upload through the Drive app. Open each image from Drive before removing its temporary local copy. Connecting Drive never uploads or deletes photos automatically.'],
- ['04 — Write your content','Create a five-second hero, products/services, relevant process, FAQs and CTA, using verified facts.'],
- ['05 — Build in AppDeploy','Open a blank project and build one section at a time. Upload the correct images to the correct paths.'],
+ ['04 — Write your content','Write a clear hero headline that immediately communicates what matters most about your business: what you offer, who it helps and why it matters. Add products/services, useful information, FAQs and one clear CTA. A hero video is an optional bonus, not a requirement.'],
+ ['05 — Create your first mockup with ChatGPT + AppDeploy','In this ChatGPT conversation, ask the connected AppDeploy plugin to create the first website mockup using your approved business information. ChatGPT handles the build and provides a preview URL when it is ready. Open that link, review the result, then ask ChatGPT to fix specific sections and add the correct photos one by one. You do not need to build manually inside the AppDeploy app.'],
  ['06 — Review mobile first','Check 375 px, phone tap targets, photo cropping, empty cards, form labels and responsive layout.'],
  ['07 — Set up the next step','For a real business, test contact, booking, quote or payment flows only when appropriate. Do not collect payments in the practice demo.'],
  ['08 — Test and share','Verify links, forms, footer and public access. Keep a record of what passed and what remains untested.']
