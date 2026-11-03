@@ -638,7 +638,7 @@ export async function getPodcastReelAudioUrl(path:string):Promise<string>{
 const YOUTUBE_PHOTO_BUCKET='podcast-youtube-storyboard';
 const YOUTUBE_PHOTO_MAX_BYTES=15_000_000;
 export type YouTubeSavedPhoto={shot_id:string;episode:number;object_path:string;file_name:string;file_size:number;url:string};
-const youtubeShotPattern=/^E(0[1-8])-F(0[1-9]|10)$/;
+const youtubeShotPattern=/^E(0[1-8])-(?:F(?:0[1-9]|10)|H0[1-4])$/;
 function validatedYouTubeShot(id:string):number{
  const match=youtubeShotPattern.exec(id);
  if(!match)throw new Error('El identificador de foto no es válido.');
