@@ -226,3 +226,20 @@ button.student-catalog-program{cursor:pointer}
 @media(max-width:1050px){.dashboard-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.dashboard-hero{grid-template-columns:1fr;min-height:0;padding:23px}.dashboard-hero-actions{width:100%}.dashboard-hero-primary{flex:1 1 100%}.dashboard-hero-secondary{flex:1 1 35%}.dashboard-progress-card{padding:18px}.dashboard-hero h1{font-size:clamp(31px,8vw,44px)}}
 @media(max-width:420px){.dashboard-hero-secondary{flex-basis:100%}.dashboard-tools-grid{grid-template-columns:1fr 1fr;gap:8px}.dashboard-tool{padding:14px;min-height:125px}.dashboard-tool strong{font-size:12px}}
+
+
+/* 2026-11-03 · Calmer, beginner-first welcome. One focal action. */
+.aula-home-dashboard .dashboard-hero{background:#233d52;min-height:0;gap:clamp(16px,3vw,28px);padding:clamp(22px,3.2vw,38px);box-shadow:none}
+.aula-home-dashboard .dashboard-hero::before,.aula-home-dashboard .dashboard-hero::after{display:none}
+.aula-home-dashboard .dashboard-hero-actions{margin-top:20px}
+.aula-home-dashboard .dashboard-hero-primary{background:#f2d85b;color:#191919;border-color:#f2d85b;font-weight:800;padding:13px 22px;min-height:46px}
+.aula-home-dashboard .dashboard-hero-primary:hover{background:#f7e48e}
+.aula-home-dashboard .dashboard-welcome-note{margin-top:15px}
+.aula-home-dashboard .dashboard-learning-route{background:#faf8f3}
+.aula-home-dashboard .dashboard-learning-steps>button{min-height:62px;background:#fff;border-color:#e4e5df}
+.aula-home-dashboard .dashboard-learning-steps strong{font-size:13px;color:#1c303c}
+.aula-home-dashboard .dashboard-learning-steps small{font-size:12px;color:#566979}
+.aula-home-dashboard .dashboard-setup{margin-top:22px}
+.aula-home-dashboard .dashboard-setup-details>summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
+.aula-home-dashboard .dashboard-tools-heading p{line-height:1.6}
+@media(max-width:760px){.aula-home-dashboard .dashboard-hero{padding:24px 21px}.aula-home-dashboard .dashboard-hero-primary{width:100%}.aula-home-dashboard .dashboard-learning-steps>button{padding:13px}}
