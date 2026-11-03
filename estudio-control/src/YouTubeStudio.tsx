@@ -167,7 +167,7 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
         <h4>Referencias visuales</h4><p>{youtubeBrief.characterReferences}</p>
         <p className="yt-muted">{youtubeBrief.format.statusLegend}</p>
       </section>
-    </div> : tab === 'photos' ? <YouTubeVisualLibrary entries={entries} onChanged={onChanged} readOnly={readOnly}/> : tab === 'season1video' ? <YouTubeSeasonOneVideo/> : tab === 'season2' ? <YouTubeSeasonTwo/> : tab === 'brand' ? <YouTubeBrandKit/> : <div className="yt-episodes" role="tabpanel">
+    </div> : tab === 'photos' ? <YouTubeVisualLibrary entries={entries} onChanged={onChanged} readOnly={readOnly}/> : tab === 'season1video' ? <YouTubeSeasonOneVideo/> : tab === 'season2' ? <YouTubeSeasonTwo/> : tab === 'brand' ? <YouTubeBrandKit entries={entries}/> : <div className="yt-episodes" role="tabpanel">
       <aside className="yt-episodes-sidebar">
         <label className="yt-search"><Search size={17}/><input aria-label="Buscar dentro de los guiones" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar capítulo o diálogo..."/></label>
         <div className="yt-episode-list">

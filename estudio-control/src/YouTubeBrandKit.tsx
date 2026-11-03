@@ -16,7 +16,7 @@ function showPreview(asset:StudioBrandAsset|undefined){
  if(asset.mime_type.startsWith('audio/'))return <audio src={asset.url} controls preload="metadata"/>;
  return <img src={asset.url} alt={asset.file_name} loading="lazy"/>;
 }
-export default function YouTubeBrandKit(){
+export default function YouTubeBrandKit({entries}:{entries:{title:string;section?:string;art?:string;link?:string}[]}){
  const [files,setFiles]=useState<Record<string,StudioBrandAsset>>({});
  const [savedCopy,setSavedCopy]=useState<Record<string,string>>({});
  const [draftCopy,setDraftCopy]=useState<Record<string,string>>({});
@@ -62,11 +62,12 @@ export default function YouTubeBrandKit(){
  };
  const renderCard=(slot:BrandAssetSlot)=>{
   const asset=files[slot.id];
+  const linked=entries.find(entry=>entry.section==='youtube-storyboards-v1' && entry.title==='OFF BRIEF brand: '+slot.id);
   const accept=slot.kind==='image'?'image/png,image/jpeg,image/webp':slot.kind==='video'?'video/mp4,video/webm':'audio/mpeg,audio/wav,audio/x-wav';
   return <article key={slot.id} className="ob-kit-card">
    <div className="ob-kit-preview">
-    {asset?.url?showPreview(asset):<div className="ob-kit-blank">{getIcon(slot)}<span>Pendiente de subir</span></div>}
-    <span className="ob-kit-state">{asset?'Archivo guardado':'Sin archivo'}</span>
+    {asset?.url?showPreview(asset):linked?.art?<img src={linked.art} alt={slot.title} loading="lazy"/>:<div className="ob-kit-blank">{getIcon(slot)}<span>Pendiente de subir</span></div>}
+    <span className="ob-kit-state">{asset||linked?'Archivo guardado':'Sin archivo'}</span>
    </div>
    <div className="ob-kit-card-body">
     <h4>{slot.title}</h4>
@@ -80,6 +81,7 @@ export default function YouTubeBrandKit(){
      <input className="ob-kit-file" type="file" id={'offbrief-'+slot.id} accept={accept}
        disabled={busy===slot.id||loading} onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';if(file)void upload(slot,file);}}/>
      {asset&&<a href={asset.url} target="_blank" rel="noopener noreferrer">Ver</a>}
+     {!asset&&linked?.link&&<a href={linked.link} target="_blank" rel="noopener noreferrer">Ver original en Drive</a>}
      {asset&&<button type="button" onClick={()=>void remove(slot)} disabled={busy===slot.id} aria-label={'Eliminar '+slot.title}><Trash2 size={15}/></button>}
     </div>
     <button type="button" className="ob-kit-toggle" onClick={()=>setOpenPrompts(old=>({...old,[slot.id]:!old[slot.id]}))}>{openPrompts[slot.id]?'Ocultar':'Ver'} Master Prompt visual</button>
@@ -93,7 +95,7 @@ export default function YouTubeBrandKit(){
     <h3>Identidad, slogans y portadas de la serie</h3>
     <p>Tu biblioteca privada de producción. Cada archivo queda asociado a su función, a su prompt original y a la temporada correspondiente. No se publica en YouTube automáticamente.</p>
     <div className="ob-kit-summary"><strong>{done}/{offBriefAssetSlots.length}</strong> archivos guardados <button type="button" disabled={loading} onClick={()=>void reload()}><RefreshCw size={15}/>{loading?'Actualizando...':'Actualizar'}</button>
-     <button type="button" onClick={()=>saveJson('OFF-BRIEF-brand-guide.json',{brand:offBriefBrand,slogans:offBriefSlogans.map(s=>({...s,text:savedCopy[s.id]??s.text})),assets:offBriefAssetSlots.map(s=>({...s,stored:Boolean(files[s.id])}))})}><Download size={15}/> Guía JSON</button>
+     <button type="button" onClick={()=>saveJson('OFF-BRIEF-brand-guide.json',{brand:offBriefBrand,slogans:offBriefSlogans.map(s=>({...s,text:savedCopy[s.id]??s.text})),assets:offBriefAssetSlots.map(s=>({...s,stored:Boolean(files[s.id]||entries.some(entry=>entry.section==='youtube-storyboards-v1'&&entry.title==='OFF BRIEF brand: '+s.id))}))})}><Download size={15}/> Guía JSON</button>
     </div>
     {notice&&<p className="ob-kit-success" role="status"><Check size={15}/>{notice}</p>}
     {error&&<p className="ob-kit-error" role="alert">{error}</p>}
