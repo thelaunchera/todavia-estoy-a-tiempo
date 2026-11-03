@@ -55,7 +55,7 @@ async function showStudentResources(button){
   if(ownerPdfs)ownerPdfs.style.display='none';
   const ownerBadge=root.querySelector('.mi-save');
   if(ownerBadge)ownerBadge.style.display='none';
-  const {mountInspiracion}=await import('./inspiracion.js?v=20261103-photo-roles-v1');
+  const {mountInspiracion}=await import('./inspiracion.js?v=20261103-photo-prompts-v2');
   if($('inspiration-gallery'))studentGallery=await mountInspiracion($('inspiration-gallery'),{db,courseId,adminPreview:false,getLanguage:lang});
   banner.hidden=true;
   document.querySelector('.aula-side-link[data-aula-view="prompts"]')?.click();
