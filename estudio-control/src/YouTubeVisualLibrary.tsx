@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Camera, Check, Copy, ImagePlus, Save, Users, X, CalendarDays, Film, Shirt, Search } from 'lucide-react';
+import { Camera, Check, Copy, ImagePlus, Save, Users, CalendarDays, Film, Shirt, Search } from 'lucide-react';
 import { api } from './supabase-client';
 import { youtubeBrief } from './youtube/brief';
 import { youtubeEpisodes } from './youtube/episodes';
