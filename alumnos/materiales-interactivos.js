@@ -405,8 +405,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
  function renderWorkbook(){
   if(getLanguage()==='en')section('03 / WORKBOOK','One idea at a time.','Write your answers and use them to plan your webpage. Come back anytime.');
   else section('03 / MI CUADERNO','Una idea a la vez.','Escribe tus respuestas. Lo que anotes aquí servirá para preparar tu página. No hace falta completarlo todo hoy.');
-  if(ownerPreview){content.append(el('p','mi-note',t('Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.','This is an admin preview. Students’ private answers are not shown here.'));}
-  else{content.append(el('p','mi-note',t('Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.','Your answers are saved to your account. Do not enter passwords or private customer information.'));}
+  if(ownerPreview){content.append(el('p','mi-note',t('Esta es una vista de administración. Las respuestas de estudiantes no aparecen aquí.','This is an admin preview. Students’ private answers are not shown here.')));}
+  else{content.append(el('p','mi-note',t('Tus respuestas se guardan en tu cuenta. No escribas contraseñas ni información privada de tus clientes.','Your answers are saved to your account. Do not enter passwords or private customer information.')));}
   const summary=el('div','mi-work-summary');content.append(summary);
   const grid=el('div','mi-workbook-sections');content.append(grid);
   translateWorkbookBlocks(WORKBOOK,getLanguage()).forEach((block,i)=>{
