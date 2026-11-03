@@ -58,3 +58,9 @@
 @media(max-width:1200px){.yt-wardrobe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yt-avatar-cards{grid-template-columns:1fr}}
 @media(max-width:690px){.yt-photo-grid{grid-template-columns:1fr}.yt-wardrobe-grid{grid-template-columns:1fr}.yt-avatar-card{grid-template-columns:120px minmax(0,1fr)}.yt-visual-heading{flex-direction:column}.yt-visual-counter{font-size:1rem}.yt-visual-episode-header{flex-direction:column}.yt-look-label{white-space:normal}.yt-gallery-search{max-width:none}}
 @media(max-width:410px){.yt-avatar-card{grid-template-columns:1fr}.yt-avatar-photo{aspect-ratio:4/3}.yt-avatar-photo img{max-width:250px}.yt-frame-save button{width:100%}}
+
+.yt-visual-batch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 0}
+.yt-visual-batch button{display:inline-flex;align-items:center;gap:8px;border:1px solid #dcdedb;border-radius:9px;background:#fff;color:#191919;padding:10px 13px;font-size:.8rem;font-weight:750;cursor:pointer}
+.yt-visual-batch button:hover{background:#f2f7fb;border-color:#b2c9d8}
+.yt-visual-batch small{color:#556777;font-size:.75rem}
+@media(max-width:420px){.yt-visual-batch button{width:100%;justify-content:center}}
