@@ -129,6 +129,18 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
   const copyAll=async()=>{try{await navigator.clipboard.writeText(batchText);setBatchStatus('Todos los prompts del capítulo copiados.');}catch{setBatchStatus('Usa Descargar TXT para guardar todos los prompts.');}};
   const copyLook=async(who:'nia'|'ruby')=>{try{await navigator.clipboard.writeText(getCharacterLookPrompt(selected,who));setBatchStatus('Prompt del look de '+(who==='nia'?'Nia':'Ruby')+' copiado.');}catch{setBatchStatus('No se pudo copiar el prompt del vestuario.');}};
+  const copyVideoMaster=async()=>{
+    try{await navigator.clipboard.writeText(masterVideoPrompt);setBatchStatus('Master Prompt único de video copiado con las diez fotos del capítulo.');}
+    catch{setBatchStatus('No se pudo copiar automáticamente. Abre el texto completo del Master Prompt.');}
+  };
+  const downloadVideoMaster=()=>{
+    const blob=new Blob([masterVideoPrompt],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='OFF-BRIEF-E'+episodeNum(selected)+'-VIDEO-MASTER-10-FOTOS.txt';
+    document.body.appendChild(a);a.click();a.remove();
+    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+    setBatchStatus('Master Prompt de video descargado.');
+  };
   return <div className="yt-visual">
     <section className="yt-paper">
       <div className="yt-small-title"><Users size={17}/> BIBLIA DE PERSONAJES</div>
