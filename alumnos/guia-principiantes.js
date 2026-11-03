@@ -9,7 +9,7 @@ const folders=[
  ['00_IDEA','Qué ofrezco, para quién y el objetivo de mi web.'],
  ['01_TEXTOS','Titular, descripción, preguntas frecuentes y texto del botón.'],
  ['02_FOTOS','Guarda cada foto por separado; en Casa Brownie usamos hero estático, seis sabores y dos regalos.'],
- ['03_PROMPTS','Instrucciones de ChatGPT que dieron buen resultado.'],
+ ['03_PROMPTS','Instrucciones de IA que dieron buen resultado.'],
  ['04_DISENO','Colores, letras y referencias aprobadas.'],
  ['05_WEB','Enlace público y versión revisada de mi página.'],
  ['06_PRUEBAS','Capturas del teléfono, botones probados y cambios pendientes.'],
@@ -19,8 +19,8 @@ export function renderWebBasics(content,go){
  header(content,'02 / ENTENDER PARA CONSTRUIR','Tu web tiene una parte visible y otra que trabaja detrás.','Mira qué se ve y qué pasa por detrás. Vamos a entenderlo con Casa Brownie antes de conectar herramientas que todavía no necesitamos.');
  const grid=node('div','mi-structure-grid');
  [
-  ['Frontend · la parte visible','Es lo que cualquier persona ve: fotografías, título, menú, colores, botones y diseño para teléfono.','Mira Casa Brownie: la portada pregunta «¿Qué llevo de regalo?» y el botón «Descubrir sabores» te lleva al catálogo.'],
-  ['Backend · los procesos internos','Es lo que ocurre cuando hay que guardar datos, confirmar un pago, proteger una cuenta o enviar un mensaje automático.','Más adelante, Stripe puede verificar el pago, Make organizar el paso siguiente y Gmail enviar el correo.']
+  ['La parte visible','Es lo que cualquier persona ve: fotografías, título, menú, colores, botones y diseño para teléfono.','Mira Casa Brownie: la portada pregunta «¿Qué llevo de regalo?» y el botón «Descubrir sabores» te lleva al catálogo.'],
+  ['Lo que ocurre detrás','Es lo que ocurre cuando hay que guardar datos, confirmar un pago, proteger una cuenta o enviar un mensaje automático.','Para vender en una web real, el pago debe confirmarse de forma segura y el cliente debe recibir una respuesta clara.']
  ].forEach(([title,body,example])=>{
   const card=node('article','mi-structure-card');card.append(node('h4',null,title),node('p',null,body),node('small',null,example));grid.append(card);
  });content.append(grid);
@@ -34,22 +34,22 @@ export function renderWebBasics(content,go){
   simple.setAttribute('aria-pressed',String(!selling));sell.setAttribute('aria-pressed',String(selling));
   outcome.replaceChildren();
   if(selling){
-   outcome.append(node('strong',null,'Página → pago protegido → pago confirmado → Make → Gmail'),
-    node('p',null,'Cuando el negocio sea real, Stripe gestiona la tarjeta en su página segura. Make solo continúa si el pago fue confirmado y no está repetido. Gmail envía el correo. Hay que configurar y probar cada servicio, no ocurre automáticamente.'));
+   outcome.append(node('strong',null,'Página → pago seguro → confirmación → aviso al cliente'),
+    node('p',null,'Si tu web va a cobrar, utiliza una opción de pago segura. Prueba la compra completa, la confirmación y el aviso antes de abrirla al público. Nada de esto se activa por sí solo.'));
   }else{
-   outcome.append(node('strong',null,'Página pública con AppDeploy + fotografías + textos + botón informativo'),
+   outcome.append(node('strong',null,'Página pública + fotografías + textos + botón claro'),
     node('p',null,'Eso basta para empezar. Una web de presentación no necesita usuarios, base de datos ni un sistema de pagos propio. Puedes compartir su dirección pública sin comprar dominio.'));
   }
  }
  simple.addEventListener('click',()=>toggle(false));sell.addEventListener('click',()=>toggle(true));toggle(false);
- content.append(node('p','mi-note','Para empezar puedes usar ChatGPT gratis dentro de sus límites. AppDeploy también ofrece un plan Free con créditos limitados; poder conectarlo como plugin dentro de ChatGPT depende de tu plan y permisos. Plus es opcional para tener más capacidad, no una compra obligatoria para practicar ideas, textos y fotos.')); 
- content.append(node('p','mi-note','Un plugin es una conexión entre ChatGPT y otra herramienta: busca AppDeploy, Google/Gmail, Make o Stripe en Plugins y revisa qué permite tu cuenta. Make tiene plan Free con límites; Gmail personal puede ser gratuito; Stripe cobra comisiones cuando se procesan pagos. Instalar un plugin y contratar un servicio son cosas distintas.'));
+ content.append(node('p','mi-note','Puedes empezar con una herramienta gratuita de IA, dentro de sus límites. No compres un plan antes de comprobar qué necesitas para tu proyecto.')); 
+ content.append(node('p','mi-note','Cuando necesites un formulario, correo o cobro, elige primero qué debe ocurrir y prueba el resultado. Los servicios opcionales pueden tener costos y límites; revísalos antes de activarlos.'));
  content.append(node('p','mi-note','Nunca coloques contraseñas, claves bancarias ni datos privados en los textos o código visible de la web. Los servicios que manejan pagos y cuentas deben mantenerlos protegidos.'));
  const actions=node('div','mi-actions');const next=node('button','mi-primary','Ordenar mi proyecto');next.type='button';next.addEventListener('click',()=>go('organizacion'));actions.append(next);content.append(actions);
 }
 export function renderProjectOrder(content){
- header(content,'03 / UN LUGAR PARA CADA COSA','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en Google Drive. Dentro guarda estas ocho partes y no pierdas tiempo buscando archivos.');
- content.append(node('p','mi-note','Organízate por bloques: por la mañana prepara tus fotografías de marca, textos y referencias; por la tarde construye y prueba en AppDeploy. La profesora ha logrado crear hasta tres webs en un día con este método, según los límites de sus herramientas y la complejidad de cada proyecto. No es una cuota garantizada.'));
+ header(content,'03 / UN LUGAR PARA CADA COSA','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en tu dispositivo o almacenamiento habitual. Dentro guarda estas ocho partes.');
+ content.append(node('p','mi-note','Primero prepara tus fotografías, textos y referencias. Después construye y revisa la página. Es más fácil corregir una sección a la vez.'));
  const grid=node('div','mi-folder-grid');content.append(grid);
  for(const [title,description] of folders){const item=node('div','mi-folder-card');item.append(node('strong',null,title),node('span',null,description));grid.append(item);}
  const rules=node('div','mi-structure-example');
@@ -64,7 +64,7 @@ export function renderProjectOrder(content){
  const feedback=node('small',null,'');
  button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(prompt);feedback.textContent='Copiado. Ahora puedes pegarlo en ChatGPT.';}catch{feedback.textContent='Selecciona el texto de arriba y cópialo manualmente.';}});
  promptCard.append(button,feedback);content.append(promptCard);
- content.append(node('p','mi-note','Publica primero con la dirección gratuita que te dé AppDeploy. Comprar un dominio propio es una decisión posterior, no un requisito para terminar la clase.'));
+ content.append(node('p','mi-note','Si tu constructor incluye una dirección gratuita, puedes empezar por ahí. Comprar un dominio propio es una decisión posterior, no un requisito para terminar la clase.'));
  content.append(node('p','mi-note','Aprender a crear webs puede convertirse en un servicio de pago o ayudar a un negocio a conseguir consultas. Las ventas dependen de una oferta real, difusión y seguimiento; no aparecen automáticamente ni de un día para otro.'));
 }
 
@@ -74,7 +74,7 @@ export function renderStudentWebPath(content,go){
  header(content,'TU RUTA / DE LA IDEA AL ENLACE','Construye TU web, paso a paso.','Casa Brownie es el ejemplo que ves en el video. Aquí trabajarás con tu propio producto o servicio. Haz un paso, comprueba el resultado y después continúa.');
  const intro=node('div','mi-path-intro');
  intro.append(node('strong',null,'Tu objetivo: una página clara que puedas abrir desde tu teléfono y compartir con un enlace.'),node('p',null,'No necesitas programar ni comprar un dominio. Para esta primera web basta con una portada, información real, fotografías, un botón que funcione y un pie de página. Los pagos y automatizaciones son opcionales y se ven después.'));
- intro.append(node('p',null,'Orden real de la clase: idea y carpeta → 8 prompts gratis → moodboard → fotografías individuales → textos → AppDeploy → revisar y publicar. Primero definimos la imagen de marca, después construimos la página.'));
+ intro.append(node('p',null,'Orden real de la clase: idea y carpeta → 8 prompts gratis → moodboard → fotografías individuales → textos → construir → revisar y publicar. Primero definimos la imagen de marca, después construimos la página.'));
  content.append(intro);
  const steps=[
   {title:'Define tu negocio y el objetivo de la página',time:'Módulos 00 y 01',
@@ -83,16 +83,16 @@ export function renderStudentWebPath(content,go){
    save:'Guarda tu ficha en 00_IDEA.',check:'Puedes explicar tu web en una sola frase.',
    prompt:'Voy a crear mi primera web para [NOMBRE DEL NEGOCIO]. Vendo u ofrezco [PRODUCTO O SERVICIO], ayudo a [TIPO DE CLIENTE] y quiero que el visitante [ACCIÓN PRINCIPAL]. Hazme cinco preguntas sencillas, una por una, para definir la estructura de una página. No inventes datos, precios ni reseñas.'},
   {title:'Ordena tus archivos antes de diseñar',time:'Módulo 01',
-   actions:['Entra en Google Drive desde el teléfono y toca Nuevo → Carpeta. Ponle el nombre de tu negocio.','Dentro crea: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS.','Guarda cada imagen por separado y no mezcles fotos de muestra con las de tu negocio.'],
+   actions:['Desde el teléfono, abre Archivos o tu almacenamiento habitual y crea una carpeta con el nombre del negocio.','Dentro crea: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS.','Guarda cada imagen por separado y no mezcles fotos de muestra con las de tu negocio.'],
    example:'En el video verás las carpetas de Casa Brownie; tú usa el nombre de tu propio proyecto.',
    save:'Crea las ocho carpetas; no subas contraseñas ni datos privados.',check:'Encuentras una foto y un texto en menos de un minuto.',
    prompt:'Ayúdame a preparar una lista muy sencilla de los archivos que necesito para la web de [NEGOCIO]. Separa textos, fotos, diseño y pruebas. Dime cómo nombrar cada archivo para encontrarlo desde mi teléfono.'},
   {title:'Moodboard con los 8 Master Prompts gratuitos',time:'Módulo 02 · Primero la dirección visual',
    actions:['Abre los 8 Master Prompts originales en el freebie gratuito de Content Lab. Si todavía no tienes acceso, usa el flujo de correo del freebie para obtenerlos.','Explora los ocho estilos: Asymmetric Editorial, Monumental Center, Type Behind Product, Side-Cropped Close-Up, Offset Negative Space, Diagonal Visual Flow, Vertical Editorial Stack y Magazine Column Split. Son composiciones, no ocho fotos obligatorias.','Elige dos estilos que tengan sentido para tu negocio. Con ChatGPT y tus referencias crea un moodboard con colores, tipografías, luz, materiales y encuadres.','Decide tres reglas que mantendrás en todas las fotografías y guárdalas. El moodboard orienta el diseño; no es la imagen que se pone entera en el hero.'],
    example:'Casa Brownie: Offset Negative Space puede orientar una portada con espacio para el texto, y Side-Cropped Close-Up puede destacar la textura de un brownie.',
-   save:'Moodboard en 04_DISENO y estilos seleccionados en 03_PROMPTS.',check:'Sabes explicar cómo quieres que se vea tu marca antes de abrir AppDeploy.',
+   save:'Moodboard en 04_DISENO y estilos seleccionados en 03_PROMPTS.',check:'Sabes explicar cómo quieres que se vea tu marca antes de construir la página.',
    prompt:'Estoy creando mi primera web para [NEGOCIO] dirigida a [CLIENTE]. Tengo acceso a los 8 Master Prompts gratuitos y he elegido [ESTILO 1] y [ESTILO 2] para mi dirección visual. Quiero un moodboard original que defina paleta de 3 colores, dos estilos tipográficos, iluminación, fondos, superficies y composición de la portada. Usa solo las referencias que adjunte y no inventes marca, fotos, etiquetas ni reseñas. Explica cómo esas decisiones servirán a la web, no solo a un post.'},
-  {title:'Fotos principales a partir del moodboard',time:'Módulo 03 · Antes de AppDeploy',
+  {title:'Fotos principales a partir del moodboard',time:'Módulo 03 · Antes de construir',
    actions:['Abre tu moodboard aprobado y la foto real del producto o servicio que quieras mostrar.','Prepara una fotografía principal para la portada, con espacio limpio donde luego pondremos el título; no necesitas usar los ocho estilos ni generar ocho imágenes.','Crea o selecciona fotografías individuales de los productos o servicios que aparecerán en tu web. Si usas ChatGPT, genera una imagen por solicitud y revisa realismo, textura y etiquetas.','Guarda cada foto individual en tu teléfono con nombre claro y en 02_FOTOS. Después pasamos a escribir los textos y construir la web.'],
    example:'Casa Brownie: hero sin video, seis fotos de sabores y dos regalos; tu negocio solo necesita las fotos de sus propios productos o servicios.',
    save:'HERO_ESTATICO y fotos individuales en 02_FOTOS.',check:'Fotos coherentes con el moodboard, separadas, bien encuadradas y con permiso de uso.',
@@ -102,23 +102,23 @@ export function renderStudentWebPath(content,go){
    example:'En Casa Brownie aparece «¿Qué llevo de regalo?». Para tu negocio el título debe hablarle a TU cliente.',
    save:'Pon cada texto aprobado en 01_TEXTOS.',check:'Ninguna frase promete algo que no puedas cumplir.',
    prompt:'Escribe los textos de una web de una página para [NEGOCIO], dirigida a [CLIENTE]. Usa SOLO estos datos confirmados: [DATOS]. Entrega: menú, título de portada, subtítulo breve, botón principal, servicios o productos, cómo funciona, FAQ y footer. Lenguaje claro y humano. Marca como PENDIENTE cualquier dato que falte.'},
-  {title:'Abre AppDeploy y crea un proyecto nuevo',time:'Módulo 05 · Inicio',
-   actions:['En ChatGPT abre Plugins desde el menú y busca AppDeploy. Comprueba si aparece y si tu cuenta y plan permiten conectarlo; revisa los permisos.','Si está disponible, conecta tu cuenta y crea un proyecto NUEVO para tu negocio. No abras la demo de Casa Brownie para editarla.','Si no te aparece o no permite construir, revisa las opciones y límites actuales de AppDeploy antes de pagar. Conserva los prompts para continuar cuando tengas acceso.'],
+  {title:'Abre tu constructor y crea un proyecto nuevo',time:'Módulo 05 · Inicio',
+   actions:['Abre el constructor de páginas que estés usando y busca la opción para crear un proyecto nuevo.','Crea un proyecto NUEVO con el nombre de tu negocio. No edites el ejemplo de Casa Brownie: sirve solo como referencia.','Si la herramienta no permite continuar gratis, guarda tus textos e imágenes antes de decidir si necesitas otro plan.'],
    example:'La profesora trabaja en su práctica independiente de Casa Brownie. Tú construyes un proyecto distinto con tu propia marca.',
    save:'Nombre del proyecto y primera captura en 05_WEB.',check:'El proyecto nuevo abre y no contiene información de otro negocio.',
-   prompt:'Quiero comenzar un proyecto NUEVO en AppDeploy para [NEGOCIO]. Mi web será informativa, de una página, sin pagos ni pedidos activos. Primero crea solo la ESTRUCTURA VACÍA: encabezado, espacio para portada, sección de servicios/productos, sección de información y footer. No añadas imágenes ni datos inventados. Muéstrame el resultado para aprobar antes de seguir.'},
+   prompt:'Quiero comenzar un proyecto NUEVO en mi constructor web para [NEGOCIO]. Mi web será informativa, de una página, sin pagos ni pedidos activos. Primero crea solo la ESTRUCTURA VACÍA: encabezado, espacio para portada, sección de servicios/productos, sección de información y footer. No añadas imágenes ni datos inventados. Muéstrame el resultado para aprobar antes de seguir.'},
   {title:'Construye una sección cada vez',time:'Módulo 05 · Construcción',
    actions:['En el mismo proyecto, añade el menú y comprueba que funcione. Después agrega la portada con tu título y foto real.','Continúa con productos o servicios, información útil, preguntas frecuentes y footer. Usa un prompt por sección; no pegues todo de una vez.','Tras cada cambio abre la vista previa, comprueba el resultado y guarda la versión anterior si vas a modificar algo importante.'],
    example:'En el video se añaden sabores y regalos. En tu página sustituye esas secciones por lo que tú vendes u ofreces.',
    save:'Capturas de portada, sección principal y footer en 06_PRUEBAS.',check:'Todas las secciones muestran TU contenido y un mismo estilo.',
-   prompt:'Continúa mi proyecto EXISTENTE de AppDeploy para [NEGOCIO]. Modifica ÚNICAMENTE [SECCIÓN], utilizando este texto aprobado [TEXTO] y esta imagen que adjunto [IMAGEN]. Mantén todo lo demás igual. Diseño móvil primero, sin desbordes, botón legible y sin inventar información. Enséñame el cambio antes de continuar.'},
+   prompt:'Continúa mi proyecto web EXISTENTE para [NEGOCIO]. Modifica ÚNICAMENTE [SECCIÓN], utilizando este texto aprobado [TEXTO] y esta imagen que adjunto [IMAGEN]. Mantén todo lo demás igual. Diseño móvil primero, sin desbordes, botón legible y sin inventar información. Enséñame el cambio antes de continuar.'},
   {title:'Prueba la web desde tu teléfono y corrige',time:'Módulo 06',
    actions:['Copia la URL de la vista publicada o de prueba y ábrela en Safari o Chrome, como si fueras una visita nueva.','Revisa que nada se salga de la pantalla, que las fotos carguen y que el texto se lea. Toca menú, botones, enlaces y contacto.','Si un botón falla, haz una captura. Pide que se corrija solo ese problema, sin cambiar el resto. Comprueba otra vez después.'],
    example:'La profesora compara su práctica con Casa Brownie; tú comparas tu web con tu propia ficha de contenido.',
    save:'Antes y después de los cambios en 06_PRUEBAS.',check:'El menú, el CTA y el contacto funcionan en el teléfono. Si tienes acceso a pruebas de otros tamaños, revisa 375 px, tableta y escritorio.',
    prompt:'Revisa la web de mi negocio [URL] desde un enfoque móvil primero. Tengo este problema [DESCRIBIR Y ADJUNTAR CAPTURA]. Corrige únicamente ese problema y conserva colores, textos y fotografías. No afirmes que probaste el enlace si no pudiste abrirlo. Dime cómo verificar el arreglo en mi teléfono.'},
   {title:'Publica, guarda el enlace y presenta tu proyecto',time:'Módulos 07 y 08',
-   actions:['Si todo funciona, publica con la dirección disponible de AppDeploy. No necesitas comprar un dominio para terminar esta práctica.','Comprueba que el contacto y los enlaces legales correspondan a los datos que realmente recoge tu web. No actives pagos reales en el ejercicio.','Copia la URL y guarda capturas. Compártelas en Proyectos del Club de Ideas con una pregunta específica si quieres comentarios; usa Ayuda para problemas técnicos.'],
+   actions:['Si todo funciona, publica con la dirección disponible de tu constructor. No necesitas comprar un dominio para terminar esta práctica.','Comprueba que el contacto y los enlaces legales correspondan a los datos que realmente recoge tu web. No actives pagos reales en el ejercicio.','Copia la URL y guarda capturas. Compártelas en Proyectos del Club de Ideas con una pregunta específica si quieres comentarios; usa Ayuda para problemas técnicos.'],
    example:'Casa Brownie no procesa pagos. Tu primera web también puede ser solamente informativa; vender y automatizar son lecciones posteriores.',
    save:'URL final en 05_WEB y capturas finales en 06_PRUEBAS.',check:'Puedes abrir el enlace desde otra pestaña y explicar qué hace el botón principal.',
    prompt:'Hazme una revisión final de mi primera web [URL Y CAPTURAS]. Comprueba estructura, lectura móvil, fotos, botones, contacto y footer solo con la evidencia disponible. Separa errores comprobados de sugerencias. Dame una lista corta para publicar sin activar cobros ni recopilar datos innecesarios.'}
