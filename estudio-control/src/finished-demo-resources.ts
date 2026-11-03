@@ -505,8 +505,64 @@ const photoData={
         "Cierre · foto"
       ]
     ]
+  },
+  "la-vie-in-pink": {
+    "base": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/",
+    "brand": "La Vie in Pink",
+    "style": "fotografía editorial de pastelería europea premium, croissants gourmet, panadería artesanal, porcelana cálida, marrón oscuro, rojo vino, blanco marfil y olivo; luz natural auténtica, personas reales y escenas diferentes",
+    "items": [
+      [
+        "36a1bfe5-3660-4b7e-964d-8031fe824941.png",
+        "Fachada de La Vie in Pink",
+        "Hero · fachada de la tienda"
+      ],
+      [
+        "8572492e-4032-4e82-a5d3-7e087ec38613.png",
+        "Croissant gourmet",
+        "Colección · croissants"
+      ],
+      [
+        "28efa0a2-eefe-40b3-9398-b25bb8e0532a.png",
+        "Desayuno europeo",
+        "Colección · desayunos"
+      ],
+      [
+        "3ab35897-f8f3-4dcb-bc98-3ed74cc6aa16.png",
+        "Pâtisserie artesanal",
+        "Colección · pastries"
+      ],
+      [
+        "4d3f2997-94a4-4af4-826d-bd40f493cb62.png",
+        "Persona del equipo en el obrador",
+        "Historia · equipo"
+      ],
+      [
+        "0a8472e4-57b2-4259-81cb-0b3e156e09c6.png",
+        "Interior de la boutique",
+        "Historia · local"
+      ],
+      [
+        "07f9bcb7-9784-42d5-b155-cd42ec3d207c.png",
+        "Personas en la cafetería",
+        "Experiencia · clientes"
+      ],
+      [
+        "d27af730-b413-4fa8-8502-84431ef687eb.png",
+        "Pasteles para regalar",
+        "Colección · gifting"
+      ],
+      [
+        "bdea766e-ea26-4756-9a9f-659d473627ef.png",
+        "Desayuno para dos",
+        "Colección · compartir"
+      ],
+      [
+        "3674f67a-abe7-4116-b01c-19afb41ae3d5.png",
+        "Brunch europeo",
+        "Colección · hero de desayunos"
+      ]
+    ]
   }
-
 } as const;
 export const additionalDemoPhotos:Record<string,FinishedDemoPhoto[]> = Object.fromEntries(
  Object.entries(photoData).map(([id,collection])=>[id,collection.items.map((photo,index)=>({
@@ -518,7 +574,7 @@ export const additionalDemoPhotos:Record<string,FinishedDemoPhoto[]> = Object.fr
  }))])
 );
 
-export const additionalDemoPrompts:Record<'jaramillo-boutique'|'yummm'|'experience-cleaning'|'cb-depot',DemoRebuildPrompt[]> = {
+export const additionalDemoPrompts:Record<'jaramillo-boutique'|'yummm'|'experience-cleaning'|'cb-depot'|'la-vie-in-pink',DemoRebuildPrompt[]> = {
   "jaramillo-boutique": [
     {
       "title": "01 · Preparar el proyecto de práctica",
@@ -714,6 +770,36 @@ export const additionalDemoPrompts:Record<'jaramillo-boutique'|'yummm'|'experien
       "say": "Antes de terminar revisamos qué enlaces siguen siendo solo de práctica.",
       "show": "Inspeccionar rutas, botones y consola a 375px.",
       "prompt": "Prueba 375px, tablets, fotos, textos, focus, menú y simulación del formulario; comprueba que no haya URLs de producción, webhooks, claves, datos de clientes ni destinos de correo. Mostrar aviso visible: Ejercicio ficticio, no aceptar citas."
+    }
+  ],
+  "la-vie-in-pink": [
+    {
+      "title": "01 · Crear el website en un solo prompt",
+      "step": "01 · Prompt maestro",
+      "say": "Voy a pedirle a ChatGPT que construya la web completa usando AppDeploy. No voy a instalar ni programar nada manualmente.",
+      "show": "Pegar el prompt maestro en ChatGPT con AppDeploy conectado; abrir la primera URL de vista previa y comprobar que existe el website.",
+      "prompt": "Actúa como diseñador web senior, director de arte y desarrollador de apps. Usa el conector de AppDeploy en ChatGPT para CONSTRUIR Y PUBLICAR la primera versión de un website responsive llamado LA VIE IN PINK. No me des solo código o instrucciones: haz la web y entrega una URL visible. Es una demostración de pâtisserie europea con croissants gourmet, desayunos europeos, pastries y regalos. Audiencia: personas que extrañan sabores europeos. Estilo premium, editorial y humano; paleta marrón oscuro, rojo vino, blanco marfil y acentos oliva. Móvil primero (375 px), fotografía como punto focal. Secciones: header con selector EN/ES, hero que exprese qué ofrece la tienda, categorías/productos con fotos individuales, desayunos para compartir, historia y equipo, ambiente de la tienda, propuesta de membresía SOLO como vista previa, preguntas frecuentes, contacto por botón (no sheet flotante) y footer con 'Powered by The Launch Era'. Copy completo y natural en ambos idiomas, sin inventar testimonios, direcciones, horarios ni precios finales. No activar pagos, pedidos reales, email, automatizaciones ni formularios que envíen datos. El video en el hero sería un bono posterior, NO forma parte de la web base. Completa una primera versión y devuelve la URL."
+    },
+    {
+      "title": "02 · Colocar las 10 fotos originales del demo",
+      "step": "02 · Fotografía",
+      "say": "Ahora usamos las fotos que ya existen, una para cada sección. Las imágenes no se confunden ni se sustituyen por otras al azar.",
+      "show": "Abrir la colección de 10 fotografías de este kit y sustituir cada imagen por su URL original en AppDeploy.",
+      "prompt": "Actualiza únicamente las imágenes de LA VIE IN PINK en AppDeploy. Utiliza las DIEZ URLs del kit de fotos de este proyecto, respetando su ubicación original: fachada en hero, croissant, desayuno, pastry, equipo, interior, clientes, regalo, desayuno para dos y brunch. Cada foto debe ser individual y distinta. Preserva textos, layouts, selector ES/EN y demás funcionalidades. Añade alt text, recorte mobile natural y lazy loading donde corresponda. No crees collages, no generes imágenes nuevas y no edites otros demos."
+    },
+    {
+      "title": "03 · Comprobar idiomas, colección y contacto",
+      "step": "03 · Interacción",
+      "say": "La tienda debe poder verse en español e inglés de principio a fin, y los botones tienen que llevar a una sección real.",
+      "show": "Cambiar EN/ES, explorar categorías, probar botones y abrir contacto.",
+      "prompt": "Revisa LA VIE IN PINK a 375px y escritorio. Comprueba que menú, títulos, descripciones, colección, FAQ, membresía demostrativa, botones y footer cambien completamente entre español e inglés, sin mezclar idiomas. Conecta los botones a sus secciones; el botón Contact debe abrir una sección de contacto dentro del website, no un sheet. Señala con claridad que la membresía, pedidos y pagos son vistas demostrativas y que no existen compras activadas. No alteres el arte visual aprobado."
+    },
+    {
+      "title": "04 · QA y entrega",
+      "step": "04 · Publicación",
+      "say": "Cierro tocando cada enlace y comparando la versión publicada con las fotografías de referencia. Solo después comparto la URL.",
+      "show": "Probar menú, galería, responsive y URL https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/.",
+      "prompt": "Haz QA de LA VIE IN PINK: enlaces, contacto, navegación por teclado, contraste, tamaño de botones, ausencia de scroll horizontal, carga de las diez imágenes y traducción bilingüe. Comprueba que en 375px no se recorte el croissant ni se superpongan títulos. Mantén footer 'Powered by The Launch Era'. Corrige únicamente errores encontrados y entrégame la URL final. No habilites cobros ni mensajes reales."
     }
   ]
 };
