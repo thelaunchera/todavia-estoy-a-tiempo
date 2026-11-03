@@ -103,6 +103,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const [privatePhotos,setPrivatePhotos]=useState<Map<string,PrivatePhoto>>(new Map());
   const [privateError,setPrivateError]=useState('');
   const [loadingPhotos,setLoadingPhotos]=useState(false);
+  const [packageBusy,setPackageBusy]=useState(false);
   const refreshPrivate=useCallback(async()=>{
     setLoadingPhotos(true);setPrivateError('');
     try{const saved=await loadYouTubeSavedPhotos();setPrivatePhotos(new Map(saved.map(p=>[p.shot_id,p])));}
