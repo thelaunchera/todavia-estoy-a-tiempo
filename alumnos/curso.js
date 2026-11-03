@@ -8,10 +8,14 @@ import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,trans
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
- supabaseModule=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
-}catch(primaryError){
- console.warn('Primary classroom auth module unavailable; trying alternate CDN');
- supabaseModule=await import('https://esm.sh/@supabase/supabase-js@2.118.0');
+ supabaseModule=await import('./supabase-local.js?v=20261102-stable-v1');
+}catch(localError){
+ console.warn('Classroom local auth unavailable; attempting online recovery');
+ try{
+  supabaseModule=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/+esm');
+ }catch(primaryError){
+  supabaseModule=await import('https://esm.sh/@supabase/supabase-js@2.118.0');
+ }
 }
 const {createClient}=supabaseModule;
 const db=createClient(supabaseUrl,supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
