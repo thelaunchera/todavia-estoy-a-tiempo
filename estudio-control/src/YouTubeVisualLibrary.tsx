@@ -117,7 +117,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
   const corePhotos=youtubePhotoBoard[selected]||[];
   const blocks=getEpisodeProductionBlocks(corePhotos);
   const extras=photos.filter(photo=>photo.id.includes('-H'));
-  const available:EpisodePhotoAvailability[]=corePhotos.map(p=>{
+  const available:EpisodePhotoAvailability[]=corePhotos.map((p):EpisodePhotoAvailability=>{
     const local=privatePhotos.get(p.id);
     if(local?.url)return {id:p.id,source:'private',fileName:local.file_name};
     if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png'};
