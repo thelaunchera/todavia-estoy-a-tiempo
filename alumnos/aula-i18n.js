@@ -1,4 +1,14 @@
-import {translateStaticClassroomText} from './aula-textos-estaticos.js?v=20261102-v1';
+/* Additional translations are progressive enhancements: they must never block classroom access. */
+let translateStaticClassroomText=()=>{};
+let translationTask=null;
+function updateStaticLanguage(lang){
+ try{translateStaticClassroomText(lang);}catch(error){console.warn('Optional classroom translations unavailable',error?.name||'unknown');}
+ if(translationTask)return;
+ translationTask=import('./aula-textos-estaticos.js?v=20261102-v2')
+  .then(mod=>{if(typeof mod.translateStaticClassroomText==='function'){translateStaticClassroomText=mod.translateStaticClassroomText;try{translateStaticClassroomText(language);}catch(error){console.warn('Optional classroom translation failed',error?.name||'unknown');}}})
+  .catch(error=>console.warn('Optional classroom language module unavailable',error?.name||'unknown'));
+}
+
 /* Español / US English — classroom UI only.
    Language changes presentation; never changes authentication or data visibility. */
 const KEY='tle_classroom_language_v1';
@@ -214,7 +224,7 @@ export function applyClassroomLanguage(){
   if(!el.dataset.tleOriginalPlaceholder)el.dataset.tleOriginalPlaceholder=el.placeholder;
   el.placeholder=language==='en'?en:el.dataset.tleOriginalPlaceholder;
  }
- translateStaticClassroomText(language);
+ updateStaticLanguage(language);
 }
 export function translationForLesson(lesson,lang=language){
  const en=lessonTranslations[lesson?.lesson_code];
