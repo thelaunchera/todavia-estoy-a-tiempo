@@ -86,7 +86,10 @@ export function englishDemoStep(code,brand=''){
  return '';
 }
 
+const typographyEnglishTitles=["Bold Contemporary Sans Serif","Elegant High-Contrast Serif","Ultra-Condensed Display Typography","Retro Editorial Serif","Minimal Geometric Sans Serif","Heavy Vintage Slab Serif","Expressive Editorial Italic","Rounded Contemporary Display","Swiss Monospaced Typography","Art Deco Luxury Typography","Contemporary Gothic Blackletter","Expressive Hand-Painted Brush","Bauhaus Modular Typography","Classical Roman Inscription Serif","Futuristic Extended Sans Serif","Soft Organic Retro Display"];
 export function englishTitle(code,defaultTitle=''){
+ if(code==='typography_master_16')return '00 · Master prompt · 16 typography styles';
+ if(/^typography_(0[1-9]|1[0-6])$/.test(code))return code.slice(-2)+' · '+typographyEnglishTitles[Number(code.slice(-2))-1];
  if(code==='bonus_content_command_notion')return 'BONUS · Notion command center + Metricool + GSC Wizard';
  if(code==='bonus_hero_cinematic_scroll')return 'BONUS · Cinematic scroll hero';
  if(core[code])return core[code][0];
