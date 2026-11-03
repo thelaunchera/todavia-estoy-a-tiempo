@@ -1,12 +1,12 @@
 /* Practical English pages for the course's built-in material tabs.
    Every section is educational and describes only capabilities verified in class. */
 const guides={
- inicio:{kicker:'START HERE',title:'Before you build, understand your idea.',intro:'You do not need coding experience. Start by choosing a business and a single visitor action.',steps:[
+ inicio:{kicker:'START HERE',title:'Before you build, understand your idea.',intro:'You direct the AI; ChatGPT does the work through connected, authorized tools. Describe your business, connect the needed apps, approve the mockup and verify the result. No manual coding is required.',steps:[
  ['Choose one business','Use your own business or a clearly fictional practice project. Write what it offers and where it operates.'],
  ['Research the real need','Does the owner want more visibility, contact inquiries, bookings, estimates or online sales? Ask before deciding.'],
  ['Make a simple brief','Write the ideal customer, the offer, the main benefit, the primary CTA and the facts you still need to confirm.'],
  ['Plan the visual system','Create a brand board and list individual photos for each section before building your site.'],
- ['Build, test, then publish','Create one section at a time. Test the real links, readability and safe customer journey.']
+ ['Ask ChatGPT to build, fix and publish','Use the connected AppDeploy plugin for the first mockup and preview URL. Then request fixes and photo placement in chat. Ask for Make automations only when the business actually needs them and approve each connection or action. Verify real links and customer journeys.']
  ],actions:[['Start my prompt library','prompts'],['Plan my webpage','pasos']]},
  funciona:{kicker:'HOW A WEBSITE WORKS',title:'How your website really works.',intro:'A good-looking webpage is only one part. Plan what happens when somebody clicks the main action.',steps:[
  ['Page structure','Hero, offer, helpful proof, process, FAQs, contact and footer are common building blocks. Use only the ones your business needs.'],
@@ -21,7 +21,7 @@ const guides={
  ['03 — Prepare photos in Google Drive','Create each image with ChatGPT and ask to send it directly to the 02_PHOTOS folder in Drive if uploads are supported. Do not save it to your personal Photos gallery.'],
  ['03B — Check your backup','If a direct Drive upload is unavailable, use Share or a temporary file in Files, then upload through the Drive app. Open each image from Drive before removing its temporary local copy. Connecting Drive never uploads or deletes photos automatically.'],
  ['04 — Write your content','Write a clear hero headline that immediately communicates what matters most about your business: what you offer, who it helps and why it matters. Add products/services, useful information, FAQs and one clear CTA. A hero video is an optional bonus, not a requirement.'],
- ['05 — Create your first mockup with ChatGPT + AppDeploy','In this ChatGPT conversation, ask the connected AppDeploy plugin to create the first website mockup using your approved business information. ChatGPT handles the build and provides a preview URL when it is ready. Open that link, review the result, then ask ChatGPT to fix specific sections and add the correct photos one by one. You do not need to build manually inside the AppDeploy app.'],
+ ['05 — Let ChatGPT build with connected apps','Connect AppDeploy in ChatGPT and ask the AI to build your first website mockup using approved business information. ChatGPT should give you a preview URL when ready. Ask for changes and photo placement in the same chat. Use Google Drive for files and Make for approved automations only when needed. You give instructions, authorize connections, approve and test; you do not manually build inside AppDeploy.'],
  ['06 — Review mobile first','Check 375 px, phone tap targets, photo cropping, empty cards, form labels and responsive layout.'],
  ['07 — Set up the next step','For a real business, test contact, booking, quote or payment flows only when appropriate. Do not collect payments in the practice demo.'],
  ['08 — Test and share','Verify links, forms, footer and public access. Keep a record of what passed and what remains untested.']
