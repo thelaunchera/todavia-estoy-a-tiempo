@@ -1251,7 +1251,7 @@ function App() {
         </nav>
 
         <div className="side-footer">
-          
+          <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer" style={{display:'block',fontSize:11,textAlign:'center',color:'inherit',opacity:.7,margin:'4px 0 14px'}}>Powered by The Launch Era</a>
           <div className="side-inspo">
             <Sparkles size={21} />
             <strong>{t('Good content starts with intention.')}</strong>
