@@ -16,7 +16,7 @@ function stageLabel(id,index,original,lang,prompt){
 }
 const spanishDescriptions={"aftr":["Identidad visual de un club nocturno ficticio, con portada, eventos, áreas exclusivas y fotografías editoriales.","Concepto educativo para mayores de 21 años. No se venden entradas ni se reservan mesas."],"casa-brownie":["Página de repostería con portada de foto fija, sabores, fotografías individuales, regalos y contacto. Es el ejemplo principal del curso.","Ejemplo ficticio. No recibe pedidos ni pagos reales. La portada con video es opcional."],"cb-depot":["Ejemplo real de negocio de servicios, con reservas y presentación cuidada. Se muestra solo su página pública.","Proyecto de un cliente real. No se comparten sus fotografías ni instrucciones privadas."],"cleaning":["Reservas de limpieza residencial y solicitudes de presupuesto comercial. Estudia sus servicios y recorrido del cliente.","Demostración pública de servicios para el hogar. No se comparten datos internos ni automatizaciones."],"crumb":["Tienda de galletas con fotografía editorial, productos, cajas, empaques, historia de marca y diseño móvil.","Proyecto ficticio. No procesa pagos ni promete entregas reales."],"jaramillo":["Ejemplo de boutique de moda que presenta a su diseñadora y sus colecciones, sin proceso de pago.","Concepto de boutique. No reutilices la imagen ni identidad de la diseñadora."],"soluna":["Estudio de yoga: investigación, identidad, clases, oferta de lanzamiento, lista de espera y revisión final.","Ejemplo educativo. Los formularios y membresías son demostrativos; no se cobran pagos."],"yummm":["Cafetería y repostería: fotografías de postres, menú, empaques para llevar y página con identidad de marca.","Galería de 20 fotografías y guía educativa de práctica con instrucciones por sección."]};
 function demoDescription(d,language){return language==='en'?(d.description_en||''):(spanishDescriptions[d.id]?.[0]||d.description_es||'');}
-function demoNotes(d,language){return language==='en'?(d.notes_en||''):(spanishDescriptions[d.id]?.[1]||d.notes_es||'');}
+function demoNotes(d,language){if(d.id==='yummm')return language==='en'?'20 individual photos and an eight-step educational guide, organized by real website sections.':'20 fotografías individuales y una guía educativa de ocho etapas, ordenada por secciones reales de la web.';return language==='en'?(d.notes_en||''):(spanishDescriptions[d.id]?.[1]||d.notes_es||'');}
 function galleryPhotoLabel(demo,index,photo,lang){
  const explicit=lang==='en'?photo?.label_en:photo?.label_es;
  if(explicit)return String(explicit);
@@ -44,12 +44,12 @@ async function clipboardCopy(value,button,language='es'){
  }
  button.textContent=language==='en'?(copied?'Copied!':'Select text to copy'):(copied?'¡Copiado!':'Selecciona el texto para copiarlo');
 }
-function fillCreativeWorkflowPrompt(template,demo,spec){
+function fillCreativeWorkflowPrompt(template,demo,spec,language){
  const vars={'{{DEMO}}':demo.title,'{{STYLE_ES}}':spec?.style_es||'', '{{STYLE_EN}}':spec?.style_en||'',
   '{{SECTIONS_ES}}':spec?.sections_es||'','{{SECTIONS_EN}}':spec?.sections_en||''};
  let result=String(template||'');
  for(const [token,value] of Object.entries(vars))result=result.replaceAll(token,String(value));
- if(spec?.private)result+='\nDo not reuse or share a real client’s private materials.';
+ if(spec?.private)result+='\n'+(language==='en'?'Do not reuse or share a real client’s private material.':'No reutilices ni compartas recursos privados de un cliente real.');
  return result;
 }
 function studioPhotoFile(url){return String(url||'').split(/[?#]/)[0].split('/').pop()||'';}
@@ -172,7 +172,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
     const item=document.createElement('details');item.className='inspiration-workflow-step';
     const title=curLang()==='en'?step.title_en:step.title_es;
     const description=curLang()==='en'?step.description_en:step.description_es;
-    const promptText=fillCreativeWorkflowPrompt(curLang()==='en'?step.prompt_en:step.prompt_es,d,guideCase);
+    const promptText=fillCreativeWorkflowPrompt(curLang()==='en'?step.prompt_en:step.prompt_es,d,guideCase,curLang());
     const summary=document.createElement('summary');summary.innerHTML='<strong>'+esc(title)+'</strong><small>'+esc(description||'')+'</small>';
     const inner=document.createElement('div');inner.className='inspiration-workflow-body';
     const paragraph=document.createElement('p');paragraph.className='inspiration-workflow-prompt';paragraph.textContent=promptText;
