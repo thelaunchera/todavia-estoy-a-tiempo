@@ -304,7 +304,7 @@ function App() {
       target.postMessage({type:'TLE_OWNER_SESSION_RESPONSE',...tokens},window.location.origin);
       setAulaPreviewError('');
     }catch{
-      setAulaPreviewError('No se pudo confirmar la sesión privada. Cierra esta vista y comprueba tu acceso al Studio.');
+      setAulaPreviewError('No se pudo confirmar el acceso. Cierra esta vista y revisa tu sesión de administración.');
     }
   },[aulaPreviewOpen,account,denied]);
   useEffect(()=>{
@@ -332,7 +332,7 @@ function App() {
       const content=doc?.getElementById('class-content');
       const message=doc?.getElementById('room-message');
       if(content?.hidden && !aulaPreviewError){
-        setAulaPreviewError('El aula sigue esperando la conexión privada. Puedes cerrar y reabrir esta vista; el Studio permanece conectado.');
+        setAulaPreviewError('El aula sigue intentando conectarse. Cierra esta vista y ábrela otra vez.');
       }
       if(!doc || !message){
         setAulaPreviewError('El aula no terminó de cargar. Comprueba la conexión e inténtalo otra vez.');
@@ -1437,7 +1437,7 @@ function App() {
                 </button>
               </nav>
               <StudentManager />
-              <p className="studio-student-qa-note">La vista del aula se abre aquí mismo, usando tu sesión privada del Studio. No requiere comprar ni iniciar sesión en otro navegador. Regresas con «Volver al Studio».</p>
+              <p className="studio-student-qa-note">Abre aquí el aula tal como la ven tus alumnos. Puedes regresar a administración sin perder tu lugar.</p>
             </section>
           )}
           {page === 'espera' && <WaitlistManager />}
@@ -2121,7 +2121,7 @@ function App() {
           <header className="studio-aula-preview-bar">
             <div className="studio-aula-preview-identity"><BookOpen size={18}/><span>Vista del aula</span><small>Administración · sin compras</small></div>
             <button type="button" onClick={() => setAulaPreviewOpen(false)}
-              aria-label="Cerrar vista previa y volver al Studio"><X size={17}/> Volver al Studio</button>
+              aria-label="Cerrar vista del aula y volver a administración"><X size={17}/> Volver a administración</button>
           </header>
           {aulaPreviewError && <p className="studio-aula-preview-error" role="alert">{aulaPreviewError}</p>}
           <iframe ref={aulaFrameRef} onLoad={()=>void sendClassroomSession()}
