@@ -1,4 +1,4 @@
-import type {S2Scene} from '../season-2-shot-model';
+import type {S2Scene} from '../../season-2-shot-model';
 /** Season two episode 1: 8 screenplay scenes x 3 individually directed shots. */
 export const sceneShots01:S2Scene[]=[
   {
