@@ -1,6 +1,6 @@
 import {seasonTwoScriptForEpisode} from './season-2-scripts';
 import {getSeasonTwoShots} from './season-2-shots';
-import {promptForSeasonTwoMotion,promptForSeasonTwoStill,type SeasonTwoShot} from './season-2-shot-model';
+import {promptForSeasonTwoMotion,promptForSeasonTwoStill} from './season-2-shot-model';
 import {offBriefBrand} from './off-brief-brand';
 
 export function getSeasonTwoSceneScript(episode:number,scene:number):string{
