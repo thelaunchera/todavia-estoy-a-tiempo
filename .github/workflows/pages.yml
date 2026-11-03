@@ -82,6 +82,7 @@ jobs:
           node --check alumnos/prompt-guide.js
           node --check alumnos/prompt-english.js
           node --check alumnos/materiales-interactivos.js
+          node --check alumnos/biblioteca-bonos.js
           node --check alumnos/mara-guide.js
           node --check alumnos/inspiracion.js
           node --check alumnos/aula-mensajes.js
