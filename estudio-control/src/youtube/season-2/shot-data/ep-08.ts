@@ -1,4 +1,4 @@
-import type {S2Scene} from '../season-2-shot-model';
+import type {S2Scene} from '../../season-2-shot-model';
 /** Episode 8: all eight narrative scenes, three individually specified cinematic keyframes and motion prompts per scene. */
 export const sceneShots08:S2Scene[]=[
   {
