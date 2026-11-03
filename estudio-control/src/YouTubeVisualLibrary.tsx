@@ -136,9 +136,12 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     const local=privatePhotos.get(p.id);
     if(local?.url)return {id:p.id,source:'private',fileName:local.file_name};
     if(owned.get(p.id)?.art||p.image)return {id:p.id,source:'studio',fileName:p.id+'.png'};
+    if(drivePreviewUrl(owned.get(p.id)?.link))return {id:p.id,source:'drive',fileName:p.id+'.png'};
     return {id:p.id,source:'missing',fileName:p.id+'.png'};
   });
   const ready=available.filter(item=>item.source!=='missing').length;
+  const originalFiles=available.filter(item=>item.source==='private').length;
+  const zipReady=originalFiles===corePhotos.length;
   const masterVideoPrompt=getEpisodeProductionMaster(selected,available);
   const batchText=useMemo(()=>photos.map(p=>'=== '+p.id+' · '+p.title+' ===\n'+getYouTubePhotoPrompt(p)).join('\n\n-----------------------\n\n'),[photos]);
   const downloadAll=()=>{ const b=new Blob([batchText],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='off-brief-ep-'+episodeNum(selected)+'-photo-prompts.txt';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setBatchStatus('Archivo TXT creado.'); };
@@ -157,7 +160,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     setBatchStatus('Master Prompt de video descargado.');
   };
   const exportEpisodePackage=async()=>{
-    if(packageBusy||ready!==corePhotos.length)return;
+    if(packageBusy||!zipReady)return;
     setPackageBusy(true);setBatchStatus('');
     const files:Record<string,Uint8Array>={};
     const inaccessible:string[]=[];
@@ -222,7 +225,7 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
     <section className="yt-paper">
       <div className="yt-visual-heading">
         <div><div className="yt-small-title"><Film size={16}/> STORYBOARD Y FOTOS POR CAPÍTULO</div><h3>Un capítulo · 10 fotos · 1 Master Prompt</h3><p>Guarda las diez tomas individuales. Se ordenan en tres bloques narrativos, sin limitar la cantidad de fotos por escena. Cada toma conserva su ID y prompt original.</p></div>
-        <div className="yt-visual-counter">{ready}/{corePhotos.length}<small>fotos principales vinculadas</small></div>
+        <div className="yt-visual-counter">{ready}/{corePhotos.length}<small>referencias vinculadas</small><small>{originalFiles}/{corePhotos.length} archivos privados</small></div>
       </div>
       <div className="yt-visual-batch"><button type="button" onClick={copyAll}><Copy size={16}/> Copiar prompts del capítulo</button><button type="button" onClick={downloadAll}><Save size={16}/> Descargar prompts TXT</button><button type="button" onClick={()=>void refreshPrivate()} disabled={loadingPhotos}><RefreshCcw size={16}/> {loadingPhotos?'Actualizando...':'Actualizar fotos'}</button>{batchStatus&&<small role="status">{batchStatus}</small>}</div>
       {privateError&&<p role="alert" className="yt-private-error">{privateError}</p>}
@@ -239,9 +242,9 @@ export default function YouTubeVisualLibrary({entries,onChanged,readOnly=false}:
         <div className="yt-visual-batch">
           <button type="button" onClick={()=>void copyVideoMaster()}><Copy size={16}/> Copiar Master Prompt completo</button>
           <button type="button" onClick={downloadVideoMaster}><Save size={16}/> Descargar Master Prompt TXT</button>
-          <button type="button" disabled={packageBusy||ready!==corePhotos.length} onClick={()=>void exportEpisodePackage()}><ImagePlus size={16}/> {packageBusy?'Preparando paquete...':'Descargar 10 fotos + prompt ZIP'}</button>
+          <button type="button" disabled={packageBusy||!zipReady} onClick={()=>void exportEpisodePackage()}><ImagePlus size={16}/> {packageBusy?'Preparando paquete...':'Descargar 10 fotos + prompt ZIP'}</button>
         </div>
-        {ready<corePhotos.length&&<p className="yt-production-alert">Faltan {corePhotos.length-ready} imágenes por vincular. Sus espacios están disponibles abajo; no se dan por producidas.</p>}
+        {ready<corePhotos.length?<p className="yt-production-alert">Faltan {corePhotos.length-ready} imágenes por localizar. Los espacios de cada toma siguen disponibles.</p>:!zipReady?<p className="yt-production-alert">Las diez fotos ya tienen referencia. Los originales están en Google Drive; para un ZIP de archivos sin reducción de calidad hace falta su carga en el almacenamiento privado del Studio. El Master Prompt sí está disponible.</p>:null}
         <details className="yt-production-master-preview">
           <summary>Ver el Master Prompt de este episodio</summary>
           <textarea readOnly rows={14} value={masterVideoPrompt} aria-label={'Master Prompt de producción del episodio '+selected}/>
