@@ -1,4 +1,4 @@
-import {promptGuide} from './prompt-guide.js';
+import {promptGuide} from './prompt-guide.js?v=20261103-typography-library-v1';
 /* English equivalents of the original 12 core + 12 module prompts.
    Adaptations preserve learning objectives; original Spanish remains available. */
 const core={
