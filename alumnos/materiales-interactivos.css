@@ -291,3 +291,121 @@
 .mi-prompt-label small b{color:#294a60;font-weight:800}
 .mi-prompt-label small{overflow-wrap:anywhere}
 @media(max-width:600px){.mi-prompt-itinerary{padding:16px}.mi-prompt-guide{padding:12px}.mi-prompt>summary{align-items:start}.mi-prompt-label small{font-size:12px}}
+
+
+/* PRINT / PDF: one clean, letter-size handout, not screenshots of the app.
+   All controls, nested menus, Studio chrome and other panels stay out. */
+@page{size:letter portrait;margin:15mm 15mm 17mm}
+@media print{
+  html,body,body.aula-member{
+    width:100%!important;min-height:0!important;height:auto!important;
+    overflow:visible!important;background:#fff!important;color:#161616!important;
+    margin:0!important;padding:0!important;
+    -webkit-print-color-adjust:economy;print-color-adjust:economy;
+  }
+  body.aula-print-material :is(.top,.bottom,.aula-entry,.aula-rail,.aula-rail-backdrop,
+    .aula-main-top,.admin-preview-banner,.mi-header,.mi-tabs,.mi-subtabs,
+    .mi-toolbar,.mi-view-controls,.mi-footer,.mi-actions,.mi-filter,
+    .mi-copy,.mi-save,.mi-owner-pdfs,.mi-print,.mi-demo-controls,
+    .mi-path-prompt button,.mi-extras-copy,.mi-extras-open,
+    .mara-app,.course-support-panel,#room-message){display:none!important}
+  body.aula-print-material #aula,body.aula-print-material #aula>.wrap,
+  body.aula-print-material #class-content,
+  body.aula-print-material #aula-layout.room-grid,
+  body.aula-print-material #aula-layout .aula-main,
+  body.aula-print-material #materiales-interactivos,
+  body.aula-print-material #materiales-interactivos .mi-app,
+  body.aula-print-material #materiales-interactivos .mi-content{
+    display:block!important;width:100%!important;max-width:none!important;
+    min-width:0!important;min-height:0!important;
+    height:auto!important;margin:0!important;padding:0!important;
+    border:0!important;background:#fff!important;
+    box-shadow:none!important;transform:none!important;
+    overflow:visible!important;
+  }
+  body.aula-print-material #aula-layout .aula-panel{
+    display:none!important;
+  }
+  body.aula-print-material #aula-layout .aula-panel[data-aula-panel="materiales"]:not([hidden]){
+    display:block!important;visibility:visible!important;
+  }
+  body.aula-print-material #materiales-interactivos .mi-content{
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:10pt!important;line-height:1.45!important;
+    color:#191919!important;
+  }
+  body.aula-print-material #materiales-interactivos .mi-section-head{
+    break-after:avoid!important;page-break-after:avoid!important;
+    padding:0 0 8pt!important;margin:0 0 16pt!important;
+    border-bottom:1pt solid #d5d5d5!important;
+  }
+  body.aula-print-material #materiales-interactivos .mi-section-head :is(h2,h3){
+    font:700 19pt/1.25 Georgia,serif!important;color:#151515!important;
+    margin:5pt 0 6pt!important;letter-spacing:0!important;
+  }
+  body.aula-print-material #materiales-interactivos .mi-section-head p{
+    font:10pt/1.45 Arial,sans-serif!important;color:#3d3d3d!important;
+  }
+  body.aula-print-material #materiales-interactivos .mi-eyebrow{
+    font:700 8pt/1.3 Arial,sans-serif!important;color:#4b4b4b!important;
+  }
+  body.aula-print-material #materiales-interactivos :is(
+   .mi-work-step,.mi-prompt,.mi-check,.mi-path-step,.mi-extras-card,
+   .mi-structure-card,.mi-step,.mi-folder-card,.mi-structure-example){
+    box-shadow:none!important;border:1px solid #d8d8d8!important;
+    background:#fff!important;color:#171717!important;
+    margin:0 0 11pt!important;border-radius:5pt!important;
+  }
+  /* Long workbook sections may span paper sheets. Keep individual questions together. */
+  body.aula-print-material .mi-work-step{
+    break-inside:auto!important;page-break-inside:auto!important;
+    overflow:visible!important;
+  }
+  body.aula-print-material .mi-work-step>summary{
+    break-after:avoid!important;page-break-after:avoid!important;
+    padding:8pt 10pt!important;min-height:0!important;
+    background:#f4f4f4!important;
+  }
+  body.aula-print-material .mi-work-step .mi-work-body{
+    display:block!important;visibility:visible!important;
+    height:auto!important;overflow:visible!important;
+    padding:8pt 11pt!important;
+  }
+  body.aula-print-material .mi-work-step :is(.mi-plus,.mi-work-summary .mi-bar){display:none!important}
+  body.aula-print-material .mi-field{
+    display:block!important;break-inside:avoid!important;
+    page-break-inside:avoid!important;margin:0 0 11pt!important;
+  }
+  body.aula-print-material .mi-field label{
+    display:block!important;font:700 9.5pt/1.3 Arial,sans-serif!important;
+    color:#161616!important;margin:0 0 5pt!important;
+  }
+  body.aula-print-material .mi-field textarea{
+    display:block!important;width:100%!important;max-width:100%!important;
+    box-sizing:border-box!important;min-height:46pt!important;
+    height:auto!important;max-height:none!important;resize:none!important;
+    overflow:visible!important;padding:7pt!important;margin:0!important;
+    background:#fff!important;color:#171717!important;
+    border:1px solid #c9c9c9!important;border-radius:4pt!important;
+    font:9pt/1.4 Arial,sans-serif!important;
+    opacity:1!important;-webkit-text-fill-color:#171717!important;
+  }
+  body.aula-print-material .mi-field textarea::placeholder{
+    color:transparent!important;-webkit-text-fill-color:transparent!important;
+  }
+  body.aula-print-material #materiales-interactivos :is(.mi-prompt-body,.mi-path-body,
+   .mi-extras-prompt-text,.mi-explain p){
+    display:block!important;max-height:none!important;
+    height:auto!important;overflow:visible!important;color:#222!important;
+  }
+  body.aula-print-material #materiales-interactivos :is(h4,h5,strong,p,li,small,span){
+    overflow-wrap:break-word!important;
+  }
+  body.aula-print-material #materiales-interactivos :is(
+    .mi-field,.mi-check,.mi-path-prompt,.mi-structure-card){
+    break-inside:avoid!important;page-break-inside:avoid!important;
+  }
+  body.aula-print-material #materiales-interactivos a{
+    color:#111!important;text-decoration:underline!important;
+  }
+}
