@@ -133,3 +133,62 @@
  .inspiration-step-photos{grid-template-columns:repeat(2,minmax(0,1fr));}
  .inspiration-step-photo img{height:92px}
 }
+
+
+/* Moodboard-first workflow and independent batches of up to nine photos. */
+.inspiration-workflow{display:grid;gap:17px;margin:25px 0 33px}
+.inspiration-workflow-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.inspiration-workflow-step{
+ border:1px solid #d7e4e9;background:#fcfcfa;border-radius:16px;overflow:hidden;
+ min-width:0;align-self:start;
+}
+.inspiration-workflow-step:first-child{grid-column:1 / -1;background:#edf3f6;border-color:#c6dae5}
+.inspiration-workflow-step>summary{
+ list-style:none;display:grid;gap:7px;cursor:pointer;padding:17px 18px;
+ min-height:64px;color:#1e3d54;
+}
+.inspiration-workflow-step>summary::-webkit-details-marker{display:none}
+.inspiration-workflow-step>summary strong{font:750 14px/1.3 "DM Sans",Arial,sans-serif}
+.inspiration-workflow-step>summary small{font:450 12px/1.5 "DM Sans",Arial,sans-serif;color:#627e8d}
+.inspiration-workflow-step>summary:after{content:"+";font:600 18px Georgia,serif;align-self:start;position:absolute;right:16px;top:14px}
+.inspiration-workflow-step>summary{position:relative;padding-right:43px}
+.inspiration-workflow-step[open]>summary:after{content:"−"}
+.inspiration-workflow-body{display:grid;gap:13px;padding:4px 17px 17px}
+.inspiration-workflow-prompt{margin:0;white-space:pre-line;overflow-wrap:anywhere;line-height:1.65;font-size:13px;color:#43657b}
+.inspiration-workflow-body>.inspiration-copy{justify-self:start}
+.inspiration-photo-batches{display:grid;gap:26px;width:100%}
+.inspiration-photo-batch{min-width:0}
+.inspiration-photo-batch-title{
+ font:800 11px/1.4 "DM Sans",Arial,sans-serif;letter-spacing:.07em;
+ text-transform:uppercase;color:#486d82;margin:0 0 12px;padding-bottom:10px;
+ border-bottom:1px solid #d8e5ea;
+}
+.inspiration-photo-item{display:grid;align-content:start;gap:7px;min-width:0}
+.inspiration-photo-item .inspiration-photo{display:grid;gap:5px;min-width:0}
+.inspiration-photo-directions{border-top:1px solid #dce8ed;padding:7px 0 0;min-width:0}
+.inspiration-photo-directions>summary{
+ cursor:pointer;color:#31566d;font:750 11px/1.4 "DM Sans",Arial,sans-serif;
+ padding:5px 0;
+}
+.inspiration-photo-directions>p{font:400 11px/1.6 "DM Sans",Arial,sans-serif;color:#53758b;white-space:pre-line;overflow-wrap:anywhere;margin:7px 0}
+.inspiration-photo-directions .inspiration-copy{font-size:11px;min-height:40px;max-width:100%;padding:8px 10px}
+.inspiration-prompt-placement{
+ font:650 12px/1.6 "DM Sans",Arial,sans-serif;
+ color:#315a71;background:#eff5f7;border:1px solid #d1e2e9;
+ border-radius:11px;padding:12px 13px;margin:10px 0 12px;
+ overflow-wrap:anywhere;
+}
+@media(max-width:700px){
+ .inspiration-workflow-steps{grid-template-columns:1fr;gap:10px}
+ .inspiration-workflow-step:first-child{grid-column:auto}
+ .inspiration-workflow-step>summary{padding:14px 39px 14px 14px}
+ .inspiration-workflow-body{padding:2px 14px 15px}
+ .inspiration-workflow-body>.inspiration-copy{width:100%;justify-self:stretch}
+ .inspiration-photo-batches{gap:21px}
+ .inspiration-photo-directions .inspiration-copy{width:100%}
+}
+@media print{
+ .inspiration-workflow-step{break-inside:avoid}
+ .inspiration-workflow-step>summary:after{display:none}
+ .inspiration-photo-item{break-inside:avoid}
+}
