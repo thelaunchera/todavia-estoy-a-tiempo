@@ -595,13 +595,14 @@ export default function SeamlessEditor(){
    </div>
   </div>
   <div role="toolbar" aria-label="Herramientas táctiles del carrusel seamless"
-    style={{display:'grid',gridTemplateColumns:'repeat(5,minmax(0,1fr))',gap:4,padding:5,position:'sticky',
+    style={{display:'grid',gridTemplateColumns:'repeat(6,minmax(0,1fr))',gap:4,padding:5,position:'sticky',
       bottom:'auto',zIndex:10,border:'1px solid #dce5e5',
       borderRadius:15,background:'#fff',boxShadow:'0 -4px 16px #142c3c20'}}>
     {([
       {label:'Fotos',action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
       {label:'Texto',action:()=>addText('paragraph')},
       {label:'Elementos',action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
+       {label:'Stickers',action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
       {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
       {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
     ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
