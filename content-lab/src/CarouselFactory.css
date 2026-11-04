@@ -586,3 +586,20 @@
  .factory-canvas-active .factory-app-header-actions .btn svg{width:14px;height:14px}
 }
 @media(max-width:365px){.factory-canvas-active .factory-app-header-actions .btn svg{display:none}}
+
+/* Mobile-first canvas mode: match private Studio's canvas-first workspace. */
+@media(max-width:760px){
+ .factory-canvas-active .factory-header{position:relative;z-index:1}
+ .factory-canvas-active .factory-studio-tabs.factory-cata-nav{overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+ .factory-canvas-active .factory-studio-tabs .factory-step-rail{display:flex;flex-wrap:nowrap;min-width:max-content}
+ .factory-canvas-active .factory-studio-tabs .factory-step-rail>button{white-space:nowrap}
+ .factory-canvas-active .factory-ia-entry{flex-shrink:0}
+ .factory-canvas-active .factory-slide-actions{position:relative;z-index:1}
+ .factory-canvas-active .factory-mobile-preview-trigger{display:none}
+ .factory-canvas-active .factory-step-footer{display:none}
+ .factory-canvas-active .factory-app-header-actions{display:flex;flex-wrap:nowrap}
+ .factory-canvas-active .factory-app-header-actions .btn{width:auto;flex:0 0 auto}
+ .factory-canvas-active .factory-app-header-actions .btn svg{flex-shrink:0}
+ .factory-canvas-active .factory-photo-extra{margin-top:8px}
+ .factory-canvas-active .panorama-editor{scroll-margin-top:90px}
+}
