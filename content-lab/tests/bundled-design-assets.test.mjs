@@ -12,14 +12,16 @@ const moduleSource=read('src/BundledDesignAssets.ts').replace('import.meta.env.B
 const compiled=ts.transpileModule(moduleSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const bundle=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
 
-test('Release delivers 20 original inspiring PNG stickers with alpha and 20 individual portrait backgrounds',()=>{
+test('Release preserves 20 original stickers, 20 portrait backgrounds, and adds 19 transparent premium stickers',()=>{
  const files=bundle.BUNDLED_DESIGN_ASSETS;
- assert.equal(files.filter(x=>x.category==='sticker').length,20);
+ assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Inspiración').length,20);
+ assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/premium-stickers-2026-11/')).length,19);
+ assert.equal(files.filter(x=>x.category==='sticker').length,39);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,40);
- assert.equal(new Set(files.map(x=>x.sha256)).size,40);
+ assert.equal(new Set(files.map(x=>x.id)).size,59);
+ assert.equal(new Set(files.map(x=>x.sha256)).size,59);
  for(const file of files){
-  assert.match(file.file,/^resources\/editorial-2026-11\/(stickers|backgrounds)\/[a-z0-9-]+\.png$/);
+  assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
   assert.equal(bytes.length,file.sizeBytes);
@@ -27,16 +29,23 @@ test('Release delivers 20 original inspiring PNG stickers with alpha and 20 indi
   const w=bytes.readUInt32BE(16),h=bytes.readUInt32BE(20);
   assert.equal(w,file.width);assert.equal(h,file.height);assert.ok(w>=1080&&h>=1080);
   if(file.category==='sticker'){
-   assert.equal(bytes[25],6,'stickers must be RGBA PNGs');
-   assert.ok(file.phrase&&file.name===file.phrase);
-   assert.equal(file.stickerGroup,'Inspiración');
+   if(file.file.startsWith('resources/premium-stickers-2026-11/')){
+    assert.ok(bytes[25]===6||(bytes[25]===3&&bytes.includes(Buffer.from('tRNS'))),'premium stickers must retain alpha transparency');
+    assert.equal(w,1536);assert.equal(h,1536);
+    assert.ok(['Avatares','Animales','Creación','Negocios'].includes(file.stickerGroup));
+    assert.ok(file.name.trim());
+   }else{
+    assert.equal(bytes[25],6,'original stickers must be RGBA PNGs');
+    assert.ok(file.phrase&&file.name===file.phrase);
+    assert.equal(file.stickerGroup,'Inspiración');
+   }
   }else assert.ok(Math.abs(w/h-.8)<.002,'backgrounds must be individual 4:5 compositions');
  }
 });
 
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,19);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,38);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);
