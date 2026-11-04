@@ -5,6 +5,20 @@
  */
 export type LabLanguage='es'|'en';
 const pairs:[string,string][]=[
+ ['Saved','Guardado'],['Saving…','Guardando…'],['Export PNG','Exportar PNG'],['Preparing…','Preparando…'],
+ ['Normal carousel · 4 independent slides','Carrusel normal · 4 slides independientes'],
+ ['Auto align','Alinear automáticamente'],['Expand canvas','Ampliar lienzo'],
+ ['View all elements (0)','Ver todos los elementos (0)'],['Carousel text (0) · delete','Textos del carrusel (0) · borrar'],
+ ['Swipe to change slides. Nothing will move.','Desliza para cambiar de slide. Nada se moverá.'],
+ ['Next: typography','Siguiente: tipografía'],['Photos','Fotos'],['Elements','Elementos'],
+ ['Layers','Capas'],['Background','Fondo'],['Add slide','Añadir slide'],
+ ['Photo, layout, and frames for this slide','Fotos, composición y marcos de este slide'],
+ ['View design','Ver diseño'],['AI ideas','Ideas con IA'],['Typography','Tipografía'],
+ ['Photos and design','Fotos y diseño'],['Backgrounds and stickers','Fondos y stickers'],
+ ['Preview','Vista previa'],['Download','Descargar'],['Save','Guardar'],
+ ['Swipe','Deslizar'],['Edit','Editar'],['Next: photos and designs','Siguiente: fotos y diseños'],
+ ['Your carousel is saved','Tu carrusel está guardado'],['All elements','Todos los elementos'],
+
  ['Overview','Inicio'],['Create content','Crear contenido'],['Carousel Factory','Fábrica de carruseles'],
  ['1 Photo → 9 Posts','1 foto → 9 posts'],['Stickers PNG · gratis','Stickers · gratis'],
  ['Backgrounds · gratis','Fondos · gratis'],['Prompt Studio · 30 Recipes','Estudio de prompts · 30 recetas'],

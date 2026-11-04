@@ -1406,36 +1406,36 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   );
   return <div className={'factory'+(studioTab==='canvas'?' factory-canvas-active':'')}>
     <div className="factory-header">
-      <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
+      <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>From one idea to every slide. Each design ready for Instagram.</p></div>
       <div className="factory-app-header-actions">
         <button className="btn ghost" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar'}</button>
         <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy}><ImagePlus size={16}/> {busy?'Preparando…':'Exportar PNG'}</button>
       </div>
     </div>
 
-    <div className="factory-format-switch" role="group" aria-label="Tipo de carrusel">
+    <div className="factory-format-switch" role="group" aria-label="Carousel type">
       <button type="button" className={!style.seamlessEnabled?'active':''}
         aria-pressed={!style.seamlessEnabled} onClick={()=>chooseCarouselMode(false)}>
         <span className="factory-mode-icon" aria-hidden="true">▣ ▣</span><span><strong>Normal</strong>
-        <small>Cada slide tiene su propio diseño</small></span>
+        <small>Each slide has its own design</small></span>
       </button>
       <button type="button" className={style.seamlessEnabled?'active':''}
         aria-pressed={style.seamlessEnabled} onClick={()=>chooseCarouselMode(true)}>
         <span className="factory-mode-icon" aria-hidden="true">▤</span><span><strong>Seamless</strong>
-        <small>Una imagen continúa y se corta entre slides</small></span>
+        <small>One image flows across multiple slides</small></span>
       </button>
     </div>
     {studioTab==='canvas'&&<p className="factory-mode-hint">{style.seamlessEnabled
       ?'✓ Lienzo continuo: coloca una foto sobre la línea entre dos slides. El corte se hace al descargar.'
       :'Para poner una foto entre dos slides, muévela sobre la línea de corte o pulsa «Foto entre slides». Activaremos Seamless automáticamente.'}</p>}
-    <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
+    <nav className="factory-studio-tabs factory-cata-nav" aria-label="Carousel creation steps">
       <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
         {([
-          {id:'style',name:'Fondos y stickers'},
-          {id:'canvas',name:'Fotos y diseño'},
-          {id:'slides',name:'Tipografía'},
-          {id:'review',name:'Vista previa'},
-          {id:'download',name:'Descargar'},
+          {id:'style',name:'Backgrounds & stickers'},
+          {id:'canvas',name:'Photos & design'},
+          {id:'slides',name:'Typography'},
+          {id:'review',name:'Preview'},
+          {id:'download',name:'Download'},
         ] as const).map((item,n)=><button key={item.id} type="button" role="tab"
           aria-selected={studioTab===item.id} className={studioTab===item.id?'active':''}
           onClick={()=>setStudioTab(item.id)}>
@@ -1443,7 +1443,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           </button>)}
       </div>
       <button type="button" className={'factory-ia-entry'+(studioTab==='ai'?' active':'')}
-        aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>Ideas con IA</button>
+        aria-current={studioTab==='ai'?'step':undefined} onClick={()=>setStudioTab('ai')}>AI ideas</button>
     </nav>
     <div className="factory-design-flow"><span>FONDOS Y STICKERS</span><span>FOTOS Y DISEÑO</span><span>TIPOGRAFÍA</span><span>VISTA PREVIA</span><span>DESCARGAR</span></div>
     {(['style','canvas','slides'] as const).includes(studioTab as 'style'|'canvas'|'slides')&&
@@ -1568,7 +1568,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           </details>
           
       </details>
-      <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Siguiente: tipografía <ArrowRight size={16}/></button></div>
+      <div className="factory-step-footer"><button type="button" className="btn dark" onClick={()=>setStudioTab('slides')}>Next: typography <ArrowRight size={16}/></button></div>
     </>}
     {studioTab==='style'&&<>
           <section className="factory-style-panel" aria-label="Estilo maestro del carrusel">
