@@ -34,6 +34,6 @@ assert.ok(studioAuth.includes("if(error)throw new Error('La conexión no permite
 assert.ok(studioAuth.includes("if(!user)return null;"),'only missing auth user returns a logged-out state');
 assert.ok(studioAuth.includes("if(roleError)throw new Error('No se pudo verificar el permiso"),'temporary role lookup errors do not revoke permissions');
 assert.ok(studio.includes("if(unauthorized)setDenied(true)"),'only confirmed access denial hides the private studio');
-assert.ok(!studio.includes("} catch {\\n      setDenied(true);"),'network failures must not look like access removal');
+assert.ok(!/catch\s*\{\s*setDenied\(true\)/.test(studio),'network failures must not look like access removal');
 assert.ok(worker.includes("request.mode === 'navigate'"),'navigation keeps using online HTML to avoid stale menus');
 console.log('Podcast PWA: manifest, iOS, iconos, scope y cache seguro comprobados.');
