@@ -12,8 +12,12 @@ test('Golden Grid keeps its nine individual approved elements',()=>{
  assert.equal(new Set(golden.map(a=>a.id)).size,9);
  for(const asset of golden)assert.ok(existsSync(new URL('../public/brand-kits/golden-grid/'+asset.file,import.meta.url)));
 });
-test('Twenty reusable transparent editorial stickers each have their own SVG',()=>{
- assert.equal(editorial.length,20);
+test('Thirty reusable transparent editorial stickers each have their own SVG',()=>{
+ assert.equal(editorial.length,30);
+ assert.equal(new Set(editorial.map(a=>a.id)).size,30);
+ assert.equal(new Set(editorial.map(a=>a.file)).size,30);
+ const additions=['asterisco-negro-organico','banner-negro-ondulado','sello-circular-tinta','cinta-negra-rasgada','destellos-trio-negro','sello-flor-festoneada','marco-negro-expresivo','subrayado-loop-negro','etiqueta-negra-perforada','rayos-minimalistas-negros'];
+ for(const id of additions)assert.ok(editorial.some(a=>a.id===id),'missing '+id);
  assert.equal(new Set(editorial.map(a=>a.id)).size,20);
  for(const a of editorial){
   assert.ok(a.name&&a.category&&a.width>0);
