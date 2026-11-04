@@ -191,7 +191,7 @@ test('mobile editing has collapsible libraries, draggable text, collage, snappin
  assert.ok(palette.includes('setExpanded'));
  assert.ok(editor.includes('setLibraryOpen'));
  assert.ok(editor.includes("onAddLayer('text')"));
- assert.ok(editor.includes("onAddLayer('shape','tape')"));
+ assert.ok(editor.includes("addFromElements('shape','tape')"));
  assert.ok(canvas.includes('touch-editor-free-text'));
  assert.ok(canvas.includes('applySmartSnap'));
  assert.ok(factory.includes('restoreHistory'));
