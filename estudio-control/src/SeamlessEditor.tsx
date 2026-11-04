@@ -642,7 +642,7 @@ export default function SeamlessEditor(){
       {label:'Elementos',icon:<Shapes size={19}/>,action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
       {label:'Fondo',icon:<Palette size={19}/>,action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')},
       {label:'Capas',icon:<Layers3 size={19}/>,action:()=>setQuickPanel(p=>p==='capas'?null:'capas')}
-    ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
+    ]).map(tool=><button type="button" key={tool.label} onClick={tool.action}
       aria-pressed={tool.label==='Texto'?undefined:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())}
       style={{border:0,background:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
