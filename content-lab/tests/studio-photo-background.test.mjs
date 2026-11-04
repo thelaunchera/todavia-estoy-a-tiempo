@@ -29,11 +29,15 @@ test('original photo remains available for restoring across saved project sessio
  assert.match(moduleSource,/readAsDataURL\(blob\)/);
 });
 
-test('image alpha is applied to original resolution rather than preview resolution',()=>{
- assert.match(moduleSource,/drawImage\(source,0,0,out\.width,out\.height\)/);
- assert.match(moduleSource,/globalCompositeOperation='destination-in'/);
- assert.match(moduleSource,/drawImage\(mask,0,0,out\.width,out\.height\)/);
- assert.match(moduleSource,/toBlob\(blob=>blob\?resolve\(blob\)/);
+test('background removal avoids double compositing and large mobile canvases',()=>{
+ assert.match(moduleSource,/const maxPixels=mobile\?2_400_000:8_000_000/);
+ assert.match(moduleSource,/const maxSide=mobile\?2048:4096/);
+ assert.match(moduleSource,/const prepared=await prepareRemovalPhoto\(original\)/);
+ assert.match(moduleSource,/removeBackground\(prepared/);
+ assert.match(moduleSource,/fileToDataUrl\(result\.blob\)/,'BG0 returns a finished transparent PNG');
+ assert.match(moduleSource,/bitmap\.close\(\)/,'source pixels are released before AI inference');
+ assert.match(moduleSource,/canvas\.width=1;canvas\.height=1/,'intermediate canvas is released');
+ assert.doesNotMatch(moduleSource,/globalCompositeOperation='destination-in'/,'avoid a duplicate full-size compositing pass');
  assert.match(moduleSource,/quality:'quality'/);
  assert.doesNotMatch(moduleSource,/model:'lite'/,'BG0 chooses the supported model automatically');
 });
