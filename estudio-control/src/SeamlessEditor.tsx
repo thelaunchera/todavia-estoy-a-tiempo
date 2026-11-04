@@ -710,9 +710,9 @@ export default function SeamlessEditor(){
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
   </div>}
 
-  <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
-  <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
-   <summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Carruseles pendientes ({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</summary>
+  <details className="studio-app-pending" aria-label="Administrar carruseles pendientes">
+   <summary><span>Carruseles pendientes <strong>({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</strong></span><span className="studio-app-pending-hint">Ver y quitar</span></summary>
+
    <p style={{fontSize:13}}>Ocultar un borrador de esta lista no lo borra de Notion ni elimina proyectos guardados.</p>
    <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
     <label style={{fontSize:13}}>Marca <select value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} style={{...control,marginLeft:8}}><option value="todos">Todas</option><option value="tle">The Launch Era</option><option value="podcast">Podcast</option><option value="clase">Clase</option><option value="lab">Content Lab</option></select></label>
@@ -731,7 +731,9 @@ export default function SeamlessEditor(){
     </div>)}
     {!EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<p style={{fontSize:13}}>No quedan borradores visibles. Puedes restaurarlos cuando quieras.</p>}
    </div>
+
   </details>
+  <details className="studio-app-admin"><summary>Proyectos y herramientas avanzadas</summary>
   {activeBrief&&<details open style={{border:'1px solid #D6D8DD',borderRadius:12,padding:12,marginBottom:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Guion activo · {activeBrief.title}</summary><p style={{fontSize:13}}><b>Dirección visual:</b> {activeBrief.direction}</p><p style={{fontSize:13}}><b>CTA:</b> {activeBrief.cta}</p><p style={{fontSize:12}}>Los textos están en las cuatro láminas y se pueden mover o editar. La portada requiere fotografía real.</p></details>}
   <details style={{marginBottom:12,border:'1px solid #ddd',borderRadius:14,padding:'10px 12px',background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Herramientas y botones · tocar para abrir o recoger</summary><div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:12,marginBottom:8,alignItems:'center'}}>
    <label>Slides <select aria-label="Cantidad de slides" style={control} value={doc.count} onChange={e=>setDoc(d=>({...d,count:Number(e.target.value)}))}>{[2,3,4,5,6,7,8,9,10].map(n=><option key={n}>{n}</option>)}</select></label>

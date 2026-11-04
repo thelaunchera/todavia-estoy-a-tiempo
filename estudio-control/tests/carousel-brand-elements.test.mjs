@@ -71,3 +71,13 @@ test('Studio displays a canvas-first app workspace with the shared six-tool dock
  assert.match(editor,/onClick=\{\(\)=>void downloadSlide\(slide\)\}/);
  assert.equal((editor.match(/ref=\{photoInput\}/g)||[]).length,1);
 });
+
+test('pending carousels are directly accessible and individually removable without deleting Notion data',()=>{
+ assert.match(editor,/className="studio-app-pending"/);
+ assert.match(editor,/Carruseles pendientes/);
+ assert.match(editor,/Quitar de pendientes/);
+ assert.match(editor,/Quitar todos de la lista/);
+ assert.match(editor,/Restaurar ocultos/);
+ assert.ok(editor.indexOf('className="studio-app-pending"')<editor.indexOf('className="studio-app-admin"'));
+ assert.match(editor,/studio-hidden-carousel-drafts-v1/);
+});
