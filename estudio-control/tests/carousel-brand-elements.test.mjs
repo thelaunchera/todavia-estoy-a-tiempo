@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const parse=(file,symbol)=>JSON.parse(read(file).match(new RegExp(symbol+' = (\\\\[[\\\\s\\\\S]*?\\\\]) as const'))[1]);
+const parse=(file,symbol)=>{const source=read(file);const marker=symbol+' = ';const start=source.indexOf(marker);assert.ok(start>=0);const tail=source.slice(start+marker.length);return JSON.parse(tail.slice(0,tail.indexOf(' as const;')))};
 const golden=parse('src/golden-grid-carousel-assets.ts','GOLDEN_GRID_CAROUSEL_ASSETS');
 const editorial=parse('src/editorial-sticker-assets.ts','EDITORIAL_STICKER_ASSETS');
 const editor=read('src/SeamlessEditor.tsx');
