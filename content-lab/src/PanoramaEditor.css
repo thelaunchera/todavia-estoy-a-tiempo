@@ -255,3 +255,18 @@
  .panorama-editor.expanded .panorama-quicktools{bottom:calc(84px + env(safe-area-inset-bottom))!important}
 }
 @media(max-width:360px){.panorama-primary-actions>button span{font-size:9px!important}}
+
+/* The Lab already has a separate app-navigation dock: editing tools stay above it.
+   Preview modals must remain above the editor dock and drawers. */
+@media(max-width:799px){
+ .panorama-editor>.panorama-primary-actions{bottom:calc(81px + env(safe-area-inset-bottom))!important;z-index:20!important}
+ .panorama-body:not(.panorama-library-collapsed)>.panorama-library,
+ .panorama-mobile-layer-panel,.panorama-background-sheet,.panorama-quicktools{
+  bottom:calc(154px + env(safe-area-inset-bottom))!important;z-index:24!important}
+ .panorama-upload-pending{bottom:calc(154px + env(safe-area-inset-bottom))!important;z-index:25!important}
+ .panorama-editor.expanded>.panorama-primary-actions{bottom:calc(9px + env(safe-area-inset-bottom))!important}
+ .panorama-editor.expanded .panorama-body:not(.panorama-library-collapsed)>.panorama-library,
+ .panorama-editor.expanded .panorama-mobile-layer-panel,
+ .panorama-editor.expanded .panorama-background-sheet,
+ .panorama-editor.expanded .panorama-quicktools{bottom:calc(84px + env(safe-area-inset-bottom))!important}
+}
