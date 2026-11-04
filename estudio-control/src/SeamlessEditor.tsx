@@ -9,6 +9,8 @@ import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
+import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
+import {zipSync} from 'fflate';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
@@ -80,7 +82,36 @@ export default function SeamlessEditor(){
  useEffect(()=>()=>{if(transformFrame.current!==null)cancelAnimationFrame(transformFrame.current)},[]);
  const images=useRef(new Map<string,HTMLImageElement>());
  const width=doc.count*W;
- useEffect(()=>{const timer=window.setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(doc))}catch{setMessage('El navegador no tiene espacio para guardar. Exporta tus imágenes.')}},450);return()=>window.clearTimeout(timer)},[doc]);
+ const [storageReady,setStorageReady]=useState(false);
+ const [saveStatus,setSaveStatus]=useState('Buscando tu último diseño guardado…');
+ const saveQueue=useRef<Promise<void>>(Promise.resolve());
+ const persistDraft=(snapshot:typeof defaults):Promise<void>=>{
+  const task=saveQueue.current.catch(()=>{}).then(()=>writeEditorRecord(KEY,snapshot));
+  saveQueue.current=task.catch(()=>{});
+  return task;
+ };
+ useEffect(()=>{
+  let live=true;
+  void Promise.all([readEditorRecord<typeof defaults>(KEY),readEditorRecord<typeof projects>(PROJECTS_KEY)])
+   .then(([savedDoc,savedProjects])=>{
+    if(!live)return;
+    if(savedDoc)setDoc(savedDoc);
+    if(savedProjects)setProjects(savedProjects);
+    setSaveStatus('Guardado automático activado');
+   })
+   .catch(()=>{if(live)setSaveStatus('No se pudo abrir el guardado automático. No cierres el editor sin exportar tu trabajo.');})
+   .finally(()=>{if(live)setStorageReady(true)});
+  return()=>{live=false};
+ },[]);
+ useEffect(()=>{
+  if(!storageReady)return;
+  setSaveStatus('Guardando cambios…');
+  const timer=window.setTimeout(()=>{
+   void persistDraft(doc).then(()=>setSaveStatus('Cambios guardados en este dispositivo'))
+    .catch(()=>setSaveStatus('No se guardaron los cambios. Libera espacio antes de salir.'));
+  },350);
+  return()=>window.clearTimeout(timer);
+ },[doc,storageReady]);
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
@@ -316,52 +347,82 @@ export default function SeamlessEditor(){
    try{const im=await loadImage(src);factor=Math.max(factor,Math.ceil(Math.max(im.naturalWidth/W,im.naturalHeight/H)))}
    catch{/* Renderer handles missing photos. */}
   }
-  factor=Math.min(4,factor);
+  factor=Math.min(/iPad|iPhone|iPod/.test(navigator.userAgent)?2:4,factor);
   const out=document.createElement('canvas');out.width=W*factor;out.height=H*factor;
   const ctx=out.getContext('2d');if(!ctx)throw Error('Canvas');
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   await paint(ctx,factor,i*W,W);
   return out;
  };
- const downloadSlide=async(i:number)=>{setBusy(true);setMessage('Preparando imagen para tu teléfono…');try{const cv=await renderExportSlide(i);const blob=await new Promise<Blob>((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const filename='carrusel-slide-'+String(i+1).padStart(2,'0')+'.png';const file=new File([blob],filename,{type:'image/png'});if(typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Slide '+(i+1)});setMessage('Elige «Guardar imagen» en el menú de tu teléfono.');return}catch(error){if((error as Error)?.name==='AbortError'){setMessage('No se guardó la imagen.');return}}}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage('PNG descargado. En iPhone, si no aparece en Fotos, abre Archivos → Descargas y guarda la imagen.')}catch{setMessage('No se pudo preparar la imagen. Inténtalo de nuevo.')}finally{setBusy(false)}};
- const exportSlides=async()=>{setBusy(true);setMessage('Preparando PNG…');try{for(let i=0;i<doc.count;i++){const c=await renderExportSlide(i);const blob=await new Promise<Blob>((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const url=URL.createObjectURL(blob);const a=document.createElement('a');a.download='seamless-slide-'+String(i+1).padStart(2,'0')+'-'+c.width+'x'+c.height+'.png';a.href=url;a.click();c.width=1;c.height=1;setTimeout(()=>URL.revokeObjectURL(url),90000);await new Promise(r=>setTimeout(r,280))}setMessage('Se generaron '+doc.count+' imágenes PNG. Revisa las descargas del navegador.')}catch{setMessage('No se pudo exportar. Inténtalo de nuevo.')}finally{setBusy(false)}};
- const prepareEditorial=(draft:EditorialDraft)=>{
+ const downloadSlide=async(i:number)=>{setBusy(true);setMessage('Guardando copia antes de descargar…');try{if(!(await saveProject(true)))return;const cv=await renderExportSlide(i);const blob=await new Promise<Blob>((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));const filename='carrusel-slide-'+String(i+1).padStart(2,'0')+'.png';const file=new File([blob],filename,{type:'image/png'});if(typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Slide '+(i+1)});setMessage('Elige «Guardar imagen» en el menú de tu teléfono.');return}catch(error){if((error as Error)?.name==='AbortError'){setMessage('No se guardó la imagen.');return}}}const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setMessage('PNG descargado. En iPhone, si no aparece en Fotos, abre Archivos → Descargas y guarda la imagen.')}catch{setMessage('No se pudo preparar la imagen. Inténtalo de nuevo.')}finally{setBusy(false)}};
+ const exportSlides=async()=>{
+  if(busy)return;
+  setBusy(true);setMessage('Guardando proyecto y preparando ZIP…');
+  try{
+   if(!(await saveProject(true)))return;
+   const files:Record<string,Uint8Array>={};
+   for(let i=0;i<doc.count;i++){
+    const cv=await renderExportSlide(i);
+    try{
+     const blob=await new Promise<Blob>((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(Error('PNG')),'image/png'));
+     files['seamless-slide-'+String(i+1).padStart(2,'0')+'.png']=new Uint8Array(await blob.arrayBuffer());
+    }finally{cv.width=1;cv.height=1;}
+   }
+   const zip=zipSync(files,{level:0});
+   const url=URL.createObjectURL(new Blob([zip],{type:'application/zip'}));
+   const a=document.createElement('a');a.download='carrusel-completo.zip';a.href=url;
+   document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),90000);
+   setMessage('Proyecto guardado. El ZIP contiene '+doc.count+' PNG individuales.');
+  }catch{setMessage('No se pudo exportar el ZIP. El proyecto guardado sigue disponible.')}
+  finally{setBusy(false);}
+ };
+ const prepareEditorial=async(draft:EditorialDraft)=>{
   if(busy){setMessage('Termina de procesar la foto antes de cambiar el carrusel.');return;}
   backgroundGeneration.current+=1;
   const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
-  if(hasWork&&!saveProject())return;
+  if(hasWork&&!(await saveProject()))return;
  const base=draft.brand==='tle'?'#FAF8F3':draft.brand==='lab'?'#FFF8EC':'#F7F3EB';
  const color=draft.brand==='tle'?'#191919':'#243348';
  const items:Item[]=draft.slides.map((txt,i)=>({id:++nextId.current,kind:'text',text:txt,textStyle:i===0?'hook':'title',x:i*W+90,y:i===0?310:360,width:900,fontSize:i===0?76:66,color}));
  setDoc({count:4,background:base,backgroundImages:{},items});setSlide(0);setSelected(null);setActiveProjectId(null);setRecentlyDeleted(null);setProjectName(draft.title);setActiveBrief(draft);setMessage('Guion cargado: 4 slides editables. Añade fotografías auténticas antes de exportar.');};
- const saveProject=():boolean=>{
-   const name=projectName.trim()||'Mi carrusel';
-   const id=activeProjectId&&projects.some(p=>p.id===activeProjectId)?activeProjectId:String(Date.now());
-   const next=[{id,name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects.filter(p=>p.id!==id)];
-   try{
-     localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));
-     setProjects(next);setActiveProjectId(id);setProjectName(name);
-     setMessage('Proyecto «'+name+'» guardado en este dispositivo.');return true;
-   }catch{
-     setMessage('No se pudo guardar: falta espacio en este navegador. El diseño permanece abierto; exporta las fotos antes de salir.');return false;
-   }
+ const saveProject=async(silent=false):Promise<boolean>=>{
+  const name=projectName.trim()||'Mi carrusel';
+  const id=activeProjectId&&projects.some(p=>p.id===activeProjectId)?activeProjectId:String(Date.now());
+  const next=[{id,name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects.filter(p=>p.id!==id)];
+  try{
+   await persistDraft(doc);
+   await writeEditorRecord(PROJECTS_KEY,next);
+   setProjects(next);setActiveProjectId(id);setProjectName(name);
+   setSaveStatus('Cambios guardados en este dispositivo');
+   if(!silent)setMessage('Proyecto «'+name+'» guardado en este dispositivo.');
+   return true;
+  }catch{
+   setSaveStatus('No se pudo guardar el carrusel.');
+   setMessage('No se pudo guardar el proyecto. No cierres la página; comprueba el espacio del dispositivo.');
+   return false;
+  }
  };
- const startNewProject=()=>{
+ const startNewProject=async()=>{
    if(busy){setMessage('Termina de procesar la foto antes de crear otro proyecto.');return;}
    backgroundGeneration.current+=1;
    const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
-   if(hasWork&&!saveProject())return;
+   if(hasWork&&!(await saveProject()))return;
    setDoc({...defaults,backgroundImages:{},items:[]});
    setProjectName('Mi carrusel nuevo');setActiveProjectId(null);setSlide(0);
    setSelected(null);setEditingText(null);setRecentlyDeleted(null);
    setActiveBrief(null);setQuickPanel(null);viewport.current?.scrollTo({left:0});
    setMessage(hasWork?'El carrusel anterior quedó guardado en Mis proyectos. Ya puedes crear uno nuevo.':'Nuevo carrusel vacío. Puedes empezar a diseñar.');
  };
- const removeProject=(id:string)=>{
-   const project=projects.find(p=>p.id===id);
-   if(!window.confirm('¿Eliminar el proyecto guardado «'+(project?.name||'')+'»? Esta acción no se puede deshacer.'))return;
-   const next=projects.filter(p=>p.id!==id);
-   try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(next));setProjects(next);if(activeProjectId===id)setActiveProjectId(null);setMessage('Proyecto guardado eliminado.')}catch{setMessage('No se pudo eliminar el proyecto.')}
+ const removeProject=async(id:string)=>{
+  const project=projects.find(p=>p.id===id);
+  if(!window.confirm('¿Eliminar el proyecto guardado «'+(project?.name||'')+'»? Esta acción no se puede deshacer.'))return;
+  const next=projects.filter(p=>p.id!==id);
+  try{
+   await writeEditorRecord(PROJECTS_KEY,next);
+   setProjects(next);if(activeProjectId===id)setActiveProjectId(null);
+   setMessage('Proyecto guardado eliminado.');
+  }catch{setMessage('No se pudo eliminar el proyecto.');}
  };
  const deleteElement=(id:number)=>{
    const index=doc.items.findIndex(it=>it.id===id);
@@ -452,7 +513,7 @@ export default function SeamlessEditor(){
    <label style={{display:'flex',alignItems:'center',flex:'1 1 210px',gap:8,fontWeight:650,fontSize:13}}>Proyecto
     <input aria-label="Nombre del proyecto actual" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,minWidth:0,width:'100%',boxSizing:'border-box'}}/>
    </label>
-   <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} onClick={saveProject}>Guardar</button>
+   <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} onClick={()=>void saveProject()}>Guardar</button>
    <button type="button" style={{...control,fontWeight:750}} onClick={startNewProject}>+ Nuevo proyecto</button>
   </div>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
@@ -483,7 +544,7 @@ export default function SeamlessEditor(){
    <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}><button style={{...control,background:'#F2D85B',fontWeight:700}} onClick={()=>addText('paragraph')}>+ Texto libre</button><button style={control} onClick={()=>addText('hook')}>+ Hook</button><button style={control} onClick={()=>addText('title')}>+ Título</button><button style={control} onClick={()=>addText('caption')}>+ Texto pequeño</button></div>
    <input ref={photoInput} type="file" accept="image/*" onChange={onFile}  style={{position:'absolute',width:1,height:1,opacity:0}} aria-label="Elegir foto del dispositivo"/><button style={control} type="button" onClick={()=>{replacePhotoId.current=null;photoInput.current?.click()}}>+ Abrir fotos</button>
    <button style={{...control,background:'#F2D85B',fontWeight:700}} disabled={busy} onClick={()=>void downloadSlide(slide)}>{busy?'Preparando…':'Guardar slide '+(slide+1)+' en mi teléfono'}</button>
-   <button style={control} disabled={busy} onClick={()=>void exportSlides()}>Descargar todos los PNG</button>
+   <button style={control} disabled={busy} onClick={()=>void exportSlides()}>Descargar carrusel completo (ZIP)</button>
   </div></details>
   {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
     {current&&<label style={{display:'flex',alignItems:'center',gap:6}}>Girar <input aria-label="Girar elemento" type="range" min="-180" max="180" step="1" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/><output>{current.rotation||0}°</output></label>}{current.kind==='text'&&<><div style={{flex:'1 1 100%',padding:12,background:'#FAF8F3',borderRadius:12}}><label htmlFor="seamless-text-editor" style={{display:'block',fontWeight:700,marginBottom:6}}>Escribe o edita este texto</label><textarea ref={textEditor} id="seamless-text-editor" aria-label="Escribir texto de la diapositiva" rows={6} placeholder="Escribe aquí todo lo que quieras explicar. Puedes añadir párrafos y saltos de línea…" style={{...control,width:'100%',boxSizing:'border-box',resize:'vertical',fontFamily:'inherit'}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><div style={{fontSize:12,marginTop:5}}>Cada texto es independiente. El párrafo se ajusta automáticamente al ancho del bloque.</div><label style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>Ancho del texto <input aria-label="Ancho del párrafo" type="range" min="200" max="1000" step="20" value={current.width||900} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label></div><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
@@ -662,7 +723,7 @@ export default function SeamlessEditor(){
   </div>}
   <p style={{fontSize:12,fontWeight:600}}>Un toque: selecciona y mueve. Dos toques rápidos sobre el mismo elemento: aparece la × para borrarlo. Toca fuera y la × desaparece. Selecciona un texto para curvarlo como un círculo y ajustar la separación entre letras.</p>
   <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para cambiar de slide. Usa dos dedos sobre el elemento para cambiar su tamaño; para girarlo utiliza «Más ajustes». Los botones Anterior y Siguiente son opcionales.</p>
-  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
-  <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
+  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={()=>void saveProject()}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>void removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
+  <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El carrusel se guarda automáticamente en este dispositivo. El ZIP contiene las imágenes individuales; todavía no se sincroniza entre dispositivos.</p>
  </section>;
 }
