@@ -635,17 +635,17 @@ export default function SeamlessEditor(){
       bottom:'auto',zIndex:10,border:'1px solid #dce5e5',
       borderRadius:15,background:'#fff',boxShadow:'0 -4px 16px #142c3c20'}}>
     {([
-      {label:'Fotos',action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
-      {label:'Texto',action:()=>addText('paragraph')},
-      {label:'Elementos',action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
-       {label:'Stickers',action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
-      {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
-      {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
+      {label:'Fotos',icon:<ImagePlus size={19}/>,action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
+      {label:'Texto',icon:<Type size={19}/>,action:()=>addText('paragraph')},
+      {label:'Stickers',icon:<Sticker size={19}/>,action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
+      {label:'Elementos',icon:<Shapes size={19}/>,action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
+      {label:'Fondo',icon:<Palette size={19}/>,action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')},
+      {label:'Capas',icon:<Layers3 size={19}/>,action:()=>setQuickPanel(p=>p==='capas'?null:'capas')}
     ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
       aria-pressed={i>1?quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase()):undefined}
       style={{border:0,background:i>1&&quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
-        touchAction:'manipulation'}}>{tool.label}</button>)}
+        touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>
   {quickPanel&&<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+quickPanel}
     style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
