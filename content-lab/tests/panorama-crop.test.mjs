@@ -231,8 +231,8 @@ test('a named personal asset can be opened and dragged from the compact library 
   const factory=readFileSync(new URL('../src/CarouselFactory.tsx',import.meta.url),'utf8');
   const app=readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');
   assert.ok(editor.includes('const [libraryOpen,setLibraryOpen]=useState(false)'),'the canvas starts unobstructed');
-  assert.ok(editor.includes("setLibraryKind('photo')"),'photo drawer opens on demand');
-  assert.ok(editor.includes("setLibraryKind('sticker')"),'sticker drawer opens on demand');
+  assert.ok(editor.includes("openTool('photo')"),'photo drawer opens on demand');
+  assert.ok(editor.includes("openTool('sticker')"),'sticker drawer opens on demand');
   assert.ok(editor.includes('panorama-mobile-layer-panel'),'layers remain accessible');
   assert.ok(editor.includes('new File([file],safe+extension'),'users choose an image name before saving');
   assert.ok(editor.includes('onUploadToLibrary(files,uploadKind)'),'upload and insertion are separate actions');
