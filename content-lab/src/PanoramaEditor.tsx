@@ -59,11 +59,13 @@ export default function PanoramaEditor({
   const [backgroundOpen,setBackgroundOpen]=useState(false);
   const revealCanvas=()=>requestAnimationFrame(()=>containerRef.current?.querySelector('.panorama-workspace')?.scrollIntoView({block:'nearest',behavior:'smooth'}));
   const openTool=(tool:'photo'|'sticker'|'background'|'layers'|'elements')=>{
-    setLibraryOpen(tool==='photo'||tool==='sticker');
-    if(tool==='photo'||tool==='sticker')setLibraryKind(tool==='photo'?'photo':'sticker');
-    setLayersOpen(tool==='layers');
-    setBackgroundOpen(tool==='background');
-    setMoreTools(tool==='elements');
+    const openingPhoto=tool==='photo'&&!(libraryOpen&&libraryKind==='photo');
+    const openingSticker=tool==='sticker'&&!(libraryOpen&&libraryKind==='sticker');
+    setLibraryOpen(openingPhoto||openingSticker);
+    if(openingPhoto||openingSticker)setLibraryKind(openingPhoto?'photo':'sticker');
+    setLayersOpen(tool==='layers'&&!layersOpen);
+    setBackgroundOpen(tool==='background'&&!backgroundOpen);
+    setMoreTools(tool==='elements'&&!moreTools);
   };
   useEffect(()=>{
     const onKey=(event:KeyboardEvent)=>{
@@ -273,7 +275,8 @@ export default function PanoramaEditor({
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Mis elementos</strong>
-        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small></div>
+        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small>
+        <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
       <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
         {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
           aria-pressed={libraryKind===kind} onClick={()=>setLibraryKind(kind)}>
