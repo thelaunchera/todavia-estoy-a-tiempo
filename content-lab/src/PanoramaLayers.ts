@@ -119,7 +119,7 @@ export function panoramaTextWeight(value:unknown):number{
  return [400,500,600,700,800,900].includes(n)?n:700;
 }
 /** Same text painter for the editable preview and exported seamless PNGs. */
-export function paintPanoramaTextLayer(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:number,h:number){
+export function paintPanoramaTextLayer(ctx:CanvasRenderingContext2D,layer:Pick<PanoramaLayer,'text'|'font'|'fontSize'|'fontWeight'|'lineHeight'|'spacing'|'curve'|'color'|'outline'|'shadow'>,w:number,h:number){
  const size=Math.max(20,Math.min(240,layer.fontSize||76));
  const leading=Math.max(.7,Math.min(2,layer.lineHeight||1.12));
  const text=layer.text||'';
