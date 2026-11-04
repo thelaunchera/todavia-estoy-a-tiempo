@@ -4,13 +4,13 @@ import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2, LockKeyhole, LockKeyholeOpen, Copy } from 'lucide-react';
-import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
+import { panoramaFont,panoramaTextWeight,paintPanoramaTextLayer,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;
   frameStyle?: string; paper?: string; accent?: string;
@@ -39,6 +39,34 @@ type Gesture = {
   scrollLeft: number;
   pinchDistance?: number; pinchCenter?: [number, number];
 };
+
+/** Curved lettering uses the exact canvas painter that produces the exported PNG. */
+function CurvedTextPreview({layer,width,height}:{layer:TouchLayer;width:number;height:number}){
+  const canvasRef=useRef<HTMLCanvasElement>(null);
+  useEffect(()=>{
+    const canvas=canvasRef.current;if(!canvas)return;
+    let active=true;
+    const paint=async()=>{
+      const w=Math.max(1,width),h=Math.max(1,height);
+      // Keep small iPhone previews sharp without allocating a huge multi-slide canvas.
+      const scale=Math.min(1,Math.sqrt(1_800_000/(w*h)));
+      canvas.width=Math.max(1,Math.round(w*scale));
+      canvas.height=Math.max(1,Math.round(h*scale));
+      const ctx=canvas.getContext('2d');if(!ctx)return;
+      try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font))}
+      catch{/* Browser font fallback is shared with PNG export. */}
+      if(!active)return;
+      ctx.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
+      ctx.translate(w/2,h/2);
+      paintPanoramaTextLayer(ctx,layer,w,h);
+    };
+    void paint();
+    return()=>{active=false};
+  },[width,height,layer.text,layer.font,layer.fontSize,layer.fontWeight,
+    layer.lineHeight,layer.spacing,layer.curve,layer.color,layer.outline,layer.shadow]);
+  return <canvas ref={canvasRef} className="touch-editor-curved-text" aria-hidden="true"/>;
+}
+
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
   onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,fullscreen=false,
@@ -561,6 +589,7 @@ export default function TouchLayerCanvas({
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
                 }}/>
+              :layer.kind==='text'&&(layer.curve||0)!==0?<CurvedTextPreview layer={layer} width={fw} height={fh}/>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               fontWeight:panoramaTextWeight(layer.fontWeight),
@@ -728,6 +757,15 @@ export default function TouchLayerCanvas({
           onChange={e=>onUpdate(chosen.id,{lineHeight:Number(e.target.value)})}/></label>
         <label>Espaciado <input type="range" min="-6" max="35" step="1" value={chosen.spacing||0}
           onChange={e=>onUpdate(chosen.id,{spacing:Number(e.target.value)})}/></label>
+        <label>Curva de texto <input type="range" min="-100" max="100" step="2" value={chosen.curve||0}
+          onChange={e=>onUpdate(chosen.id,{curve:Number(e.target.value)})}/>
+          <span>{chosen.curve||0} · 0 = recto</span>
+        </label>
+        <div className="touch-editor-curved-presets" role="group" aria-label="Forma del texto">
+          <button type="button" aria-pressed={!(chosen.curve||0)} onClick={()=>onUpdate(chosen.id,{curve:0})}>Recto</button>
+          <button type="button" aria-pressed={(chosen.curve||0)>0} onClick={()=>onUpdate(chosen.id,{curve:50})}>∩ Arco</button>
+          <button type="button" aria-pressed={(chosen.curve||0)<0} onClick={()=>onUpdate(chosen.id,{curve:-50})}>∪ Sonrisa</button>
+        </div>
         <label>Color <input type="color" aria-label="Color de texto libre"
           value={chosen.color||'#191919'} onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
         <div className="touch-editor-text-palette" role="group" aria-label="Colores rápidos de texto">
