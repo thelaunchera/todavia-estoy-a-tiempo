@@ -577,3 +577,12 @@
  .factory-canvas-active .factory-photo-extra{margin-top:12px}
  .factory-canvas-active .factory-step-footer{margin-bottom:calc(25px + env(safe-area-inset-bottom))}
 }
+
+.factory-app-header-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.factory-app-header-actions .btn{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;padding:8px 11px;border-radius:11px;white-space:nowrap}
+@media(max-width:920px){
+ .factory-canvas-active .factory-app-header-actions{gap:4px}
+ .factory-canvas-active .factory-app-header-actions .btn{min-height:39px;font-size:10px;padding:7px 8px;gap:4px}
+ .factory-canvas-active .factory-app-header-actions .btn svg{width:14px;height:14px}
+}
+@media(max-width:365px){.factory-canvas-active .factory-app-header-actions .btn svg{display:none}}
