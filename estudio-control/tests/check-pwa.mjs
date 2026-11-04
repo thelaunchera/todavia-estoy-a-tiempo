@@ -29,6 +29,10 @@ assert.ok(studio.includes("navigator.serviceWorker?.addEventListener('controller
 assert.ok(studio.includes("setStudioUpdateAvailable(true)"));
 assert.ok(studio.includes("studio-update-notice"),'new build notice is rendered before content');
 assert.ok(studioCss.includes('.studio-update-notice'));
+const studioAuth=readFileSync(new URL('src/supabase-client.ts',root),'utf8');
+assert.ok(studioAuth.includes("if(error)throw new Error('La conexión no permite verificar la sesión."),'transient auth failures are not sign-out events');
+assert.ok(studioAuth.includes("if(!user)return null;"),'only missing auth user returns a logged-out state');
+assert.ok(studioAuth.includes("if(roleError)throw new Error('No se pudo verificar el permiso"),'temporary role lookup errors do not revoke permissions');
 assert.ok(studio.includes("if(unauthorized)setDenied(true)"),'only confirmed access denial hides the private studio');
 assert.ok(!studio.includes("} catch {\\n      setDenied(true);"),'network failures must not look like access removal');
 assert.ok(worker.includes("request.mode === 'navigate'"),'navigation keeps using online HTML to avoid stale menus');
