@@ -398,7 +398,219 @@ pairs.push(
  ["Recover changes","Recuperar cambios"],
  ["Keep saved version","Continuar con lo guardado"]
 );
-const enToEs=new Map(pairs),esToEn=new Map(pairs.map(([en,es])=>[es,en]));
+/** Text editing controls are translated without touching the user's design copy. */
+const editorPairs:[string,string][]=[
+ [
+  "Text curve",
+  "Curva de texto"
+ ],
+ [
+  "Text shape",
+  "Forma del texto"
+ ],
+ [
+  "Straight",
+  "Recto"
+ ],
+ [
+  "Arch",
+  "Arco"
+ ],
+ [
+  "Smile",
+  "Sonrisa"
+ ],
+ [
+  "Text",
+  "Texto"
+ ],
+ [
+  "Font",
+  "Fuente"
+ ],
+ [
+  "Weight",
+  "Grosor"
+ ],
+ [
+  "Size",
+  "Tamaño"
+ ],
+ [
+  "Line spacing",
+  "Interlineado"
+ ],
+ [
+  "Letter spacing",
+  "Espaciado"
+ ],
+ [
+  "Color",
+  "Color"
+ ],
+ [
+  "Shadow",
+  "Sombra"
+ ],
+ [
+  "Outline",
+  "Contorno"
+ ],
+ [
+  "Quick position",
+  "Posición rápida"
+ ],
+ [
+  "Top",
+  "Arriba"
+ ],
+ [
+  "Center",
+  "Centro"
+ ],
+ [
+  "Bottom",
+  "Abajo"
+ ],
+ [
+  "Edit text here",
+  "Editar texto aquí"
+ ],
+ [
+  "Fit",
+  "Ajustar"
+ ],
+ [
+  "Duplicate text",
+  "Duplicar texto"
+ ],
+ [
+  "Photo framing",
+  "Encuadre de la fotografía"
+ ],
+ [
+  "Background",
+  "Fondo"
+ ],
+ [
+  "Straight text",
+  "Texto recto"
+ ],
+ [
+  "Remove element",
+  "Quitar elemento"
+ ],
+ [
+  "Text must fit inside its box",
+  "El texto debe caber dentro de su cuadro"
+ ],
+ [
+  "Select a font",
+  "Selecciona una fuente"
+ ],
+ [
+  "Extra Bold",
+  "Extra bold"
+ ],
+ [
+  "Classic",
+  "Clásica"
+ ],
+ [
+  "Drag text to move it.",
+  "Arrastra el texto para moverlo."
+ ],
+ [
+  "Tap text to select it; then drag it anywhere.",
+  "Toca el texto para seleccionarlo; después arrástralo donde quieras."
+ ],
+ [
+  "Text for carousel",
+  "Textos del carrusel"
+ ],
+ [
+  "Delete",
+  "Borrar"
+ ],
+ [
+  "No results. Upload your first image to get started.",
+  "No hay resultados. Sube tu primera imagen para empezar."
+ ],
+ [
+  "Choose your carousel's visual direction",
+  "Dirección visual del carrusel"
+ ],
+ [
+  "Main typography",
+  "Tipografía principal"
+ ],
+ [
+  "Headline",
+  "Título principal"
+ ],
+ [
+  "Supporting text",
+  "Texto de apoyo"
+ ],
+ [
+  "No photo · graphics only",
+  "Sin foto · solo gráfico"
+ ],
+ [
+  "New carousel",
+  "Nuevo carrusel"
+ ],
+ [
+  "Prepare my PNGs",
+  "Preparar mis PNG"
+ ],
+ [
+  "Download each file individually, no ZIP.",
+  "Descárgalos individualmente, sin ZIP."
+ ],
+ [
+  "Download",
+  "Descargar"
+ ],
+ [
+  "Preview",
+  "Vista previa"
+ ],
+ [
+  "Save",
+  "Guardar"
+ ],
+ [
+  "Edit",
+  "Editar"
+ ],
+ [
+  "Crop",
+  "Recortar"
+ ],
+ [
+  "Frames",
+  "Marcos"
+ ],
+ [
+  "Photo",
+  "Foto"
+ ],
+ [
+  "Layers",
+  "Capas"
+ ],
+ [
+  "Undo",
+  "Deshacer"
+ ],
+ [
+  "Redo",
+  "Rehacer"
+ ]
+];
+const allPairs=[...pairs,...editorPairs];
+const enToEs=new Map(allPairs),esToEn=new Map(allPairs.map(([en,es])=>[es,en]));
 /**
  * Render-time UI strings. React owns the DOM; don't rely on a MutationObserver
  * to translate React-owned nodes (React may replace them during hydration/updates).

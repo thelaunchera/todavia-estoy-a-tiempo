@@ -905,7 +905,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       name:item.name+' · slide '+(n+1),src:'',text:item.value,
        locked:(style.lockedLayerIds||[]).includes('page-text-'+part.key+'-'+item.field),
       font:item.field==='title'?(part.titleFont||style.font)==='brand'?(brand.headingFont||'serif').toLowerCase():(part.titleFont||style.font):'sans',
-      fontSize:geometry.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,
+      fontSize:geometry.fontSize,color:readableColor(part.backgroundColor||style.canvasColor||'#FFFFFF'),lineHeight:1.12,spacing:0,curve:0,
       rect:{...geometry.rect,x:(n+geometry.rect.x)/slides.length,w:geometry.rect.w/slides.length},
       page:n,sourceField:item.field,placement:'front' as const,
     });})):[]),
@@ -937,7 +937,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     id:source.id,assetId:source.assetId||'',name:source.name,kind:source.kind,
     rect:clampPanoramaRect(rect),placement:'front',
     ...(source.kind==='text'?{text:source.text,font:source.font,fontSize:source.fontSize,
-      lineHeight:source.lineHeight,spacing:source.spacing,color:source.color}:{}),
+      lineHeight:source.lineHeight,spacing:source.spacing,curve:source.curve,color:source.color}:{}),
   });
   const togglePanoramaLock=(id:string,locked:boolean)=>{
     if(pageLayers.some(layer=>layer.id===id)){
@@ -1034,7 +1034,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const n=Math.min(i,slides.length-1),count=slides.length;
     const newLayer:PanoramaLayer=kind==='text'
       ?{id:currentId,kind,assetId:'',name:'Texto libre',placement:'front',
-         text:'Escribe tu título',font:style.font==='brand'?(brand.headingFont||'serif').toLowerCase():style.font,fontSize:86,lineHeight:1.12,spacing:0,color:readableColor(style.canvasColor||'#FFFFFF'),
+         text:'Escribe tu título',font:style.font==='brand'?(brand.headingFont||'serif').toLowerCase():style.font,fontSize:86,lineHeight:1.12,spacing:0,curve:0,color:readableColor(style.canvasColor||'#FFFFFF'),
          rect:{x:(n+.12)/count,y:.35,w:.76/count,h:.24}}
       :{id:currentId,kind,assetId:'',name:'Collage · '+(shape||'paper'),shape:shape||'paper',
          placement:'front',color:shape==='tape'?'#E5C9AA':'#F1E5D2',

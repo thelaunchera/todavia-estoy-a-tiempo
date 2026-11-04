@@ -1,5 +1,6 @@
 import { clampPanoramaRect, layerCornerPixels, type TouchRect } from './TouchGeometry';
 import { coverPlacement } from './PhotoCrop';
+import { clampTextCurve, drawCurvedTextLine } from './CurvedText';
 export type LayerMove = 'backward' | 'forward' | 'back' | 'front';
 export type LayerPlacement = 'behind-text' | 'front';
 
@@ -32,7 +33,7 @@ export type PanoramaLayer = {
   assetId: string;
   name: string;
   kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
   color?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   placement?: LayerPlacement;
@@ -62,6 +63,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         fontWeight:[400,500,600,700,800,900].includes(Number(item.fontWeight))?Number(item.fontWeight):700,
         lineHeight:Math.max(.7,Math.min(2,Number(item.lineHeight)||1.12)),
         spacing:Math.max(-6,Math.min(35,Number(item.spacing)||0)),
+        curve:clampTextCurve(Number(item.curve)||0),
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#191919',
         outline:item.outline===true,shadow:item.shadow===true,
       }:{}),
@@ -116,7 +118,8 @@ export function panoramaTextWeight(value:unknown):number{
  const n=Number(value);
  return [400,500,600,700,800,900].includes(n)?n:700;
 }
-function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:number,h:number){
+/** Same text painter for the editable preview and exported seamless PNGs. */
+export function paintPanoramaTextLayer(ctx:CanvasRenderingContext2D,layer:Pick<PanoramaLayer,'text'|'font'|'fontSize'|'fontWeight'|'lineHeight'|'spacing'|'curve'|'color'|'outline'|'shadow'>,w:number,h:number){
  const size=Math.max(20,Math.min(240,layer.fontSize||76));
  const leading=Math.max(.7,Math.min(2,layer.lineHeight||1.12));
  const text=layer.text||'';
@@ -124,7 +127,9 @@ function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:number,h:n
  ctx.save();ctx.fillStyle=layer.color||'#191919';
  ctx.font=panoramaTextWeight(layer.fontWeight)+' '+size+'px '+panoramaFont(layer.font);
  ctx.textBaseline='top';
- ctx.letterSpacing=(layer.spacing||0)+'px';
+ const curve=clampTextCurve(layer.curve||0);
+ // Straight text uses browser letter spacing; curved glyphs handle tracking explicitly.
+ ctx.letterSpacing=curve?'0px':(layer.spacing||0)+'px';
  if(layer.shadow){ctx.shadowColor='#1A1A1A66';ctx.shadowBlur=size*.13;ctx.shadowOffsetY=size*.05}
  if(layer.outline){ctx.lineWidth=Math.max(1,size*.045);ctx.strokeStyle='#FFFFFF';ctx.lineJoin='round'}
  const lines:string[]=[];
@@ -139,8 +144,11 @@ function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:number,h:n
  ctx.beginPath();ctx.rect(-w/2,-h/2,w,h);ctx.clip();
  lines.slice(0,Math.max(1,Math.floor(h/(size*leading)))).forEach((line,i)=>{
   const x=-w/2+6,y=-h/2+size*leading*i;
-  if(layer.outline)ctx.strokeText(line,x,y,maxWidth);
-  ctx.fillText(line,x,y,maxWidth);
+  if(curve)drawCurvedTextLine(ctx,line,x,y,size,curve,maxWidth,layer.spacing||0,!!layer.outline);
+  else{
+   if(layer.outline)ctx.strokeText(line,x,y,maxWidth);
+   ctx.fillText(line,x,y,maxWidth);
+  }
  });
  ctx.restore();
 }
@@ -155,7 +163,7 @@ export async function paintPanoramaLayers(
   if(layer.kind==='text'){
     try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
     catch{/* Offline fallback retains exported text. */}
-    textPaint(ctx,layer,w,h);
+    paintPanoramaTextLayer(ctx,layer,w,h);
    }
   else if(layer.kind==='shape')shapePaint(ctx,layer,w,h);
   else{
