@@ -515,6 +515,7 @@ export default function SeamlessEditor(){
    </label>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} onClick={()=>void saveProject()}>Guardar</button>
    <button type="button" style={{...control,fontWeight:750}} onClick={startNewProject}>+ Nuevo proyecto</button>
+   <small role="status" aria-live="polite" style={{flex:'1 1 100%',color:saveStatus.startsWith('No se')?'#B42318':'#496259',fontWeight:600}}>{saveStatus}</small>
   </div>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
    <summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Carruseles pendientes ({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</summary>
