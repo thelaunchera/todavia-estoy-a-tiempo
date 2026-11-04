@@ -270,7 +270,7 @@ export default function SeamlessEditor(){
     const size=Math.max(isImage?80:24,Math.min(isImage?2400:800,Math.round(start.size*ratio)));
     const scale=size/start.size;
     // Scale around the fingers' midpoint; leave rotation to the precise slider.
-    const w=isImage?start.w*scale:start.w,h=start.h*scale;
+    const w=(isImage||it.kind==='sticker')?start.w*scale:start.w,h=start.h*scale;
     const cx=(points[0].x+points[1].x)/2,cy=(points[0].y+points[1].y)/2;
     queueTransform(it.id,{...(isImage?{width:size}:{fontSize:size}),
      x:Math.round(start.x+(start.w-w)/2+cx-start.cx),
