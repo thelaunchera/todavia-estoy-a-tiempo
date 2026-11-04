@@ -1,4 +1,5 @@
 import BrandAssetLibrary from './BrandAssetLibrary';
+import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
 import {SOVA_CAROUSEL_ASSETS,SOVA_CAROUSEL_DRIVE,type SovaCarouselAsset} from './sova-carousel-assets';
 import {GOLDEN_GRID_CAROUSEL_ASSETS,GOLDEN_GRID_CAROUSEL_DRIVE,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
@@ -150,6 +151,15 @@ export default function SeamlessEditor(){
    setSelected(id);setQuickPanel(null);
    setMessage(asset.name+' añadido al lienzo. Puedes mover, girar y cambiar su tamaño. El texto se agrega como una capa independiente.');
   }catch{setMessage('No se pudo abrir el elemento SOVA. Inténtalo de nuevo.');}
+ };
+ const addEditorialAsset=async(asset:typeof EDITORIAL_STICKER_ASSETS[number])=>{
+  try{
+   const src=new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href;
+   await loadImage(src);
+   const id=++nextId.current;
+   setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src,x:slide*W+80,y:220,width:asset.width,fontSize:80,color:'#191919'}]}));
+   setSelected(id);setQuickPanel(null);setMessage(asset.name+' añadido al lienzo. Puedes escalarlo con dos dedos.');
+  }catch{setMessage('No se pudo cargar el sticker. Inténtalo nuevamente.')}
  };
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
  const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
@@ -433,9 +443,9 @@ export default function SeamlessEditor(){
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
   <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
   <section aria-label="Biblioteca de elementos de marcas" style={{margin:'14px 0',padding:13,border:'1px solid #D6D8DD',borderRadius:15,background:'#FAF8F3'}}>
-   <strong style={{fontSize:17}}>Biblioteca visual · {GOLDEN_GRID_CAROUSEL_ASSETS.length+SOVA_CAROUSEL_ASSETS.length} elementos</strong>
+   <strong style={{fontSize:17}}>Biblioteca visual · {GOLDEN_GRID_CAROUSEL_ASSETS.length+SOVA_CAROUSEL_ASSETS.length+EDITORIAL_STICKER_ASSETS.length} elementos</strong>
    <p style={{fontSize:12,color:'#66717A'}}>Todas las marcas en una sola galería. Toca una cinta, banner o detalle para colocarlo individualmente sobre el lienzo.</p>
-   <BrandAssetLibrary onGolden={addGoldenGridAsset} onSova={addSovaAsset}/>
+   <BrandAssetLibrary onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>
   </section>
   <div role="group" aria-label="Proyecto actual" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,padding:10,margin:'10px 0 14px',border:'1px solid #D7DFE2',borderRadius:14,background:'#FAF8F3'}}>
    <label style={{display:'flex',alignItems:'center',flex:'1 1 210px',gap:8,fontWeight:650,fontSize:13}}>Proyecto
@@ -609,7 +619,7 @@ export default function SeamlessEditor(){
       <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
         style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
     </div>
-    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset}/>}
+    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>}
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
