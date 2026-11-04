@@ -662,7 +662,7 @@ export default function SeamlessEditor(){
         onClick={()=>{setQuickPanel(null);replacePhotoId.current=null;photoInput.current?.click()}}>＋ Elegir foto del iPhone o archivos</button>
       <strong>Fotos y recortes de este proyecto</strong>
       <div className="studio-app-photo-grid">
-       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map(src=><button key={src.slice(0,120)} type="button" aria-label="Añadir otra copia de esta foto"
+       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map((src,index)=><button key={index} type="button" aria-label="Añadir otra copia de esta foto"
          onClick={()=>{addPrivateSticker(src);setQuickPanel(null)}}>
           <img src={src} alt="" loading="lazy"/>
          </button>)}
