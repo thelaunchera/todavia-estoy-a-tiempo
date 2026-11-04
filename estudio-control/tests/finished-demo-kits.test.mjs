@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -98,4 +98,19 @@ test('Marea conserva catorce PNG originales, sus prompts y una sola ficha comple
  assert.match(resourcesSource,/export \{mareaPhotos, mareaRebuildPrompts\} from '.\/marea-kit'/);
  assert.match(kit,/18fNKBKlyXDVZd4VSsc4hmgGV5Br1OSdM/);
  assert.match(kit,/No añadido al aula/);
+});
+
+test('Havana 19 has 13 individual image references, photo prompts and seven GitHub rebuild steps',()=>{
+ const kit=read('src/havana19-kit.ts');
+ const photos=JSON.parse(kit.match(/havana19Photos: FinishedDemoPhoto\[\] = (\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/havana19RebuildPrompts: DemoRebuildPrompt\[\] = (\[[\s\S]*?\]);/)[1]);
+ assert.equal(photos.length,13);
+ assert.equal(new Set(photos.map(photo=>photo.url)).size,13);
+ assert.equal(steps.length,7);
+ for(const photo of photos)assert.ok(photo.title&&photo.placement&&photo.prompt.length>120);
+ for(const step of steps)assert.ok(step.title&&step.prompt&&step.show&&step.say);
+ assert.equal(cards.filter(card=>card.id==='havana-19').length,1);
+ assert.match(demosSource,/photos:havana19Photos/);
+ assert.match(demosSource,/'havana-19': havana19RebuildPrompts/);
+ assert.match(kit,/drive\.google\.com\/drive\/folders\/1Qer6jt7_vn-om5Sm_r2bfgRlwS1L4Jw4/);
 });
