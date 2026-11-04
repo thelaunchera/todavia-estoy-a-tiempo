@@ -473,21 +473,21 @@ main{padding-top:8px}
     <div class="hero-featured-wrap">
       <div class="hero-leaf hero-leaf-left" aria-hidden="true"></div>
       <div class="hero-featured-photo">
-        <img id="hero-featured" src="./matcha-05.jpg?v=hd-20261031" alt="Editorial matcha example, composition 5 of 8" fetchpriority="high" decoding="async">
+        <img id="hero-featured" src="../matcha-05.jpg?v=hd-20261031" alt="Editorial matcha example, composition 5 of 8" fetchpriority="high" decoding="async">
       </div>
       <span class="hero-photo-marker">EXAMPLE · MATCHA</span>
     </div>
     <div class="hero-slider-controls">
       <button class="hero-arrow" id="hero-prev" type="button" aria-label="Previous composition">‹</button>
       <div class="hero-thumbnails" aria-label="Choose a visual composition">
-        <button type="button" class="hero-thumb" data-hero-index="0" aria-label="View composition 1 de 8" aria-pressed="false"><img src="./matcha-01.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="1" aria-label="View composition 2 de 8" aria-pressed="false"><img src="./matcha-02.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="2" aria-label="View composition 3 de 8" aria-pressed="false"><img src="./matcha-03.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="3" aria-label="View composition 4 de 8" aria-pressed="false"><img src="./matcha-04.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb is-active" data-hero-index="4" aria-label="View composition 5 de 8" aria-pressed="true"><img src="./matcha-05.jpg?v=hd-20261031" alt="" loading="eager" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="5" aria-label="View composition 6 de 8" aria-pressed="false"><img src="./matcha-06.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="6" aria-label="View composition 7 de 8" aria-pressed="false"><img src="./matcha-07.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
-        <button type="button" class="hero-thumb" data-hero-index="7" aria-label="View composition 8 de 8" aria-pressed="false"><img src="./matcha-08.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="0" aria-label="View composition 1 de 8" aria-pressed="false"><img src="../matcha-01.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="1" aria-label="View composition 2 de 8" aria-pressed="false"><img src="../matcha-02.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="2" aria-label="View composition 3 de 8" aria-pressed="false"><img src="../matcha-03.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="3" aria-label="View composition 4 de 8" aria-pressed="false"><img src="../matcha-04.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb is-active" data-hero-index="4" aria-label="View composition 5 de 8" aria-pressed="true"><img src="../matcha-05.jpg?v=hd-20261031" alt="" loading="eager" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="5" aria-label="View composition 6 de 8" aria-pressed="false"><img src="../matcha-06.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="6" aria-label="View composition 7 de 8" aria-pressed="false"><img src="../matcha-07.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
+        <button type="button" class="hero-thumb" data-hero-index="7" aria-label="View composition 8 de 8" aria-pressed="false"><img src="../matcha-08.jpg?v=hd-20261031" alt="" loading="lazy" decoding="async"></button>
       </div>
       <button class="hero-arrow" id="hero-next" type="button" aria-label="Next composition">›</button>
     </div>
@@ -505,7 +505,7 @@ main{padding-top:8px}
     <p>Choose your product, explore the ideas and copy the prompt you want to try.</p>
     <ol class="process-steps"><li><span>1</span> Tell us about your product</li><li><span>2</span> Explore eight compositions</li><li><span>3</span> Copy your favorite and create your post</li></ol>
   </div>
-  <div class="process-art" aria-label="Three matcha visual examples"><img src="./matcha-02.jpg?v=hd-20261031" alt="Matcha example with an abstract typographic layout" loading="lazy"><img src="./matcha-05.jpg?v=hd-20261031" alt="Matcha example in an editorial layout" loading="lazy"><img src="./matcha-04.jpg?v=hd-20261031" alt="Close-up matcha visual example" loading="lazy"></div>
+  <div class="process-art" aria-label="Three matcha visual examples"><img src="../matcha-02.jpg?v=hd-20261031" alt="Matcha example with an abstract typographic layout" loading="lazy"><img src="../matcha-05.jpg?v=hd-20261031" alt="Matcha example in an editorial layout" loading="lazy"><img src="../matcha-04.jpg?v=hd-20261031" alt="Close-up matcha visual example" loading="lazy"></div>
 </section>
 <div class="all-products">Use it with any product, not only matcha.</div>
 
@@ -587,7 +587,7 @@ function render(){const root=$('output');root.replaceChildren();
   const n=document.createElement('b');n.className='number';n.textContent=String(i+1).padStart(2,'0');
   const heading=document.createElement('span');heading.className='heading';
   const strong=document.createElement('strong');strong.textContent=v.title;const desc=document.createElement('small');desc.textContent=v.desc;heading.append(strong,desc);
-  const photo=document.createElement('img');photo.className='sample-thumb';photo.src='./matcha-'+String(i+1).padStart(2,'0')+'.jpg?v=hd-20261031';photo.alt='Example of composition '+String(i+1)+' with matcha';photo.loading='lazy';photo.onerror=()=>photo.remove();
+  const photo=document.createElement('img');photo.className='sample-thumb';photo.src='../matcha-'+String(i+1).padStart(2,'0')+'.jpg?v=hd-20261031';photo.alt='Example of composition '+String(i+1)+' with matcha';photo.loading='lazy';photo.onerror=()=>photo.remove();
   const toggle=document.createElement('span');toggle.textContent=selected===i?'−':'+';btn.append(n,photo,heading,toggle);
   btn.onclick=()=>{selected=selected===i?-1:i;render()};article.append(btn);
   if(selected===i){const body=document.createElement('div');body.className='body';const textarea=document.createElement('textarea');textarea.readOnly=true;textarea.rows=17;textarea.value=build(i);
