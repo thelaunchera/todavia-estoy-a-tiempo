@@ -1,8 +1,4 @@
-/**
- * On-device background removal for original user uploads and library photos.
- * BG0 produces an alpha mask at its inference size. Composite that alpha over
- * the ORIGINAL pixels so the exported PNG keeps the source photograph's detail.
- */
+/** Local photo background removal, with original photos preserved for undo. */
 type ProgressCallback=(label:string)=>void;
 const ORIGINAL_DB='studio-photo-originals-v1';
 const STORE='photos';
@@ -74,51 +70,68 @@ export async function originalBlobFromSource(src:string):Promise<Blob>{
 }
 
 const asBitmap=async(blob:Blob):Promise<ImageBitmap>=>{
- if(typeof createImageBitmap==='function')return createImageBitmap(blob);
- throw Error('El navegador no puede preparar la imagen. Actualiza Safari para usar esta opción.');
+  if(typeof createImageBitmap==='function')return createImageBitmap(blob);
+  throw Error('El navegador no puede preparar la imagen. Actualiza Safari para usar esta opción.');
 };
 
-export async function cutoutOriginalPhoto(
- original:Blob,onProgress?:ProgressCallback
-):Promise<string>{
- // Lazy-load AI only when the user explicitly chooses "Quitar fondo".
- const {removeBackground}=await import('@bg0/browser');
- const result=await removeBackground(original,{
-  quality:'quality',
-  onProgress:({stage,message}:{stage:string;message:string})=>{
-   const labels:Record<string,string>={
-    preparing:'Preparando la foto…',
-    downloading:'Descargando el modelo IA (solo la primera vez)…',
-    processing:'Quitando el fondo…',
-    finishing:'Preparando PNG transparente…',
-   };
-   onProgress?.(labels[stage]||message||'Procesando foto…');
+/**
+ * Safari can terminate an entire tab when a full-resolution photo, an AI model
+ * and multiple 20MP canvases are held in memory at the same time. Decode and
+ * reduce large photos BEFORE loading the AI model; the untouched original is
+ * separately saved for restoration by SeamlessEditor.
+ *
+ * 2.4 MP still exceeds the 1080×1350 slide export resolution.
+ */
+async function prepareRemovalPhoto(original:Blob):Promise<Blob>{
+  const mobile=/iPhone|iPad|iPod/i.test(navigator.userAgent)
+    ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const maxPixels=mobile?2_400_000:8_000_000;
+  const maxSide=mobile?2048:4096;
+  const bitmap=await asBitmap(original);
+  try{
+    const factor=Math.min(1,Math.sqrt(maxPixels/(bitmap.width*bitmap.height)),
+      maxSide/Math.max(bitmap.width,bitmap.height));
+    if(factor>=1)return original;
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(bitmap.width*factor));
+    canvas.height=Math.max(1,Math.round(bitmap.height*factor));
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw Error('No se pudo preparar la foto en este dispositivo.');
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    try{
+      return await new Promise<Blob>((resolve,reject)=>
+        canvas.toBlob(blob=>blob?resolve(blob):reject(Error('No se pudo preparar la foto.')),'image/png')
+      );
+    }finally{
+      // Release the large intermediate pixel buffer before AI inference.
+      canvas.width=1;canvas.height=1;
+    }
+  }finally{
+    bitmap.close();
   }
- });
- const source=await asBitmap(original);
- const mask=await asBitmap(result.blob);
- try{
-  // Keep high-resolution source pixels, even on iPhone where the model
-  // computes its alpha at a reduced input size.
-  const maxArea=20_000_000,maxSide=6144;
-  const factor=Math.min(1,Math.sqrt(maxArea/(source.width*source.height)),
-   maxSide/Math.max(source.width,source.height));
-  const out=document.createElement('canvas');
-  out.width=Math.max(1,Math.round(source.width*factor));
-  out.height=Math.max(1,Math.round(source.height*factor));
-  const ctx=out.getContext('2d');
-  if(!ctx)throw Error('No se pudo preparar el recorte en este dispositivo.');
-  ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality='high';
-  ctx.drawImage(source,0,0,out.width,out.height);
-  ctx.globalCompositeOperation='destination-in';
-  ctx.drawImage(mask,0,0,out.width,out.height);
-  ctx.globalCompositeOperation='source-over';
-  const transparent=await new Promise<Blob>((resolve,reject)=>
-   out.toBlob(blob=>blob?resolve(blob):reject(Error('No se pudo generar el PNG transparente.')),'image/png')
-  );
-  return await fileToDataUrl(transparent);
- }finally{
-  source.close();mask.close();
- }
+}
+
+export async function cutoutOriginalPhoto(
+  original:Blob,onProgress?:ProgressCallback
+):Promise<string>{
+  onProgress?.('Preparando una versión segura para este dispositivo…');
+  const prepared=await prepareRemovalPhoto(original);
+  // BG0 already returns a fully composited transparent PNG. Do not duplicate
+  // the full-resolution image and mask in additional canvases.
+  const {removeBackground}=await import('@bg0/browser');
+  const result=await removeBackground(prepared,{
+    quality:'quality',
+    onProgress:({stage,message}:{stage:string;message:string})=>{
+      const labels:Record<string,string>={
+        preparing:'Preparando la foto…',
+        downloading:'Descargando el modelo IA (solo la primera vez)…',
+        processing:'Quitando el fondo…',
+        finishing:'Preparando PNG transparente…',
+      };
+      onProgress?.(labels[stage]||message||'Procesando foto…');
+    }
+  });
+  return fileToDataUrl(result.blob);
 }
