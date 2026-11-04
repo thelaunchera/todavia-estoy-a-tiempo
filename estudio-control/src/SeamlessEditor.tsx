@@ -1,3 +1,4 @@
+import BrandAssetLibrary from './BrandAssetLibrary';
 import {SOVA_CAROUSEL_ASSETS,SOVA_CAROUSEL_DRIVE,type SovaCarouselAsset} from './sova-carousel-assets';
 import {GOLDEN_GRID_CAROUSEL_ASSETS,GOLDEN_GRID_CAROUSEL_DRIVE,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
@@ -44,7 +45,7 @@ export default function SeamlessEditor(){
  const [brandFilter,setBrandFilter]=useState('todos');
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
- const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|null>(null);
+ const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
@@ -383,32 +384,11 @@ export default function SeamlessEditor(){
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
   <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
-  <details open style={{margin:'16px 0',border:'1px solid #BCE8EE',borderRadius:14,padding:14,background:'#FFF8E8'}}>
-   <summary style={{cursor:'pointer',fontWeight:750}}>Golden Grid · Cintas y banners ({GOLDEN_GRID_CAROUSEL_ASSETS.length})</summary>
-   <p style={{fontSize:12,lineHeight:1.6}}>Toca un elemento para ponerlo en el lienzo. Tiene fondo transparente: puedes moverlo, girarlo, cambiar su tamaño y cruzarlo entre slides. Añade el texto por separado para mantenerlo editable.</p>
-   <div aria-label="Elementos de Golden Grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(125px,1fr))',gap:10,maxHeight:330,overflowY:'auto',padding:3}}>
-    {GOLDEN_GRID_CAROUSEL_ASSETS.map(asset=><button type="button" key={asset.id} aria-label={'Añadir '+asset.name+' al lienzo'} onClick={()=>void addGoldenGridAsset(asset)} style={{...control,minWidth:0,padding:9,textAlign:'center',background:'#fff',color:'#191919'}}>
-     <img src={goldenGridAssetUrl(asset.file)} loading="lazy" alt={asset.name} style={{width:'100%',height:78,objectFit:'contain',display:'block',marginBottom:8}}/>
-     <strong style={{display:'block',fontSize:11}}>{asset.name}</strong><span style={{display:'block',fontSize:10,marginTop:5}}>+ Añadir al lienzo</span>
-    </button>)}
-   </div>
-   <p style={{fontSize:12,lineHeight:1.6}}><b>Fotos recomendadas:</b> 1 para portada, 7 para mostrar el producto en la mano, 3 para packaging, 5 para detalle y 9 para el cierre. Usa las cintas para unir visualmente dos slides.</p>
-   <a href={GOLDEN_GRID_CAROUSEL_DRIVE} target="_blank" rel="noopener noreferrer" style={{fontSize:12,textDecoration:'underline'}}>Abrir todos los elementos en Drive</a>
-  </details>
-
-  <details style={{margin:'16px 0',border:'1px solid #A8C7F4',borderRadius:14,padding:14,background:'#F2F6FE'}}>
-   <summary style={{cursor:'pointer',fontWeight:750}}>SOVA · Headphones · Cintas, banners y sonido ({SOVA_CAROUSEL_ASSETS.length})</summary>
-   <p style={{fontSize:12,lineHeight:1.6}}>Elementos transparentes para tu carrusel de marca. Pulsa «Añadir al lienzo», mueve con el dedo, rota o cambia el tamaño. Escribe los titulares como texto editable en otra capa.</p>
-   <div aria-label="Elementos de SOVA" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(125px,1fr))',gap:10,maxHeight:330,overflowY:'auto',padding:3}}>
-    {SOVA_CAROUSEL_ASSETS.map(asset=><button type="button" key={asset.id} aria-label={'Añadir '+asset.name+' al lienzo'} onClick={()=>void addSovaAsset(asset)} style={{...control,minWidth:0,padding:9,textAlign:'center',background:'#fff',color:'#191919'}}>
-     <img src={sovaAssetUrl(asset.file)} loading="lazy" alt={asset.name} style={{width:'100%',height:78,objectFit:'contain',display:'block',marginBottom:8}}/>
-     <strong style={{display:'block',fontSize:11}}>{asset.name}</strong><span style={{display:'block',fontSize:10,marginTop:5}}>+ Añadir al lienzo</span>
-    </button>)}
-   </div>
-   <p style={{fontSize:12,lineHeight:1.6}}><b>Fotos recomendadas:</b> 07 (espacio negativo) para portada y hook, 02 (producto aislado) para presentación, 06 (close-up) para detalles, 04 (producto monumental) para contraste y 10 (composición revista) para cierre. 01 es el hero con retrato: úsala en el kit privado, no como recurso genérico.</p>
-   <a href={SOVA_CAROUSEL_DRIVE} target="_blank" rel="noopener noreferrer" style={{fontSize:12,textDecoration:'underline'}}>Abrir fotos y prompts SOVA en Drive</a>
-  </details>
-
+  <section aria-label="Biblioteca de elementos de marcas" style={{margin:'14px 0',padding:13,border:'1px solid #D6D8DD',borderRadius:15,background:'#FAF8F3'}}>
+   <strong style={{fontSize:17}}>Biblioteca visual · {GOLDEN_GRID_CAROUSEL_ASSETS.length+SOVA_CAROUSEL_ASSETS.length} elementos</strong>
+   <p style={{fontSize:12,color:'#66717A'}}>Todas las marcas en una sola galería. Toca una cinta, banner o detalle para colocarlo individualmente sobre el lienzo.</p>
+   <BrandAssetLibrary onGolden={addGoldenGridAsset} onSova={addSovaAsset}/>
+  </section>
   <div role="group" aria-label="Proyecto actual" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,padding:10,margin:'10px 0 14px',border:'1px solid #D7DFE2',borderRadius:14,background:'#FAF8F3'}}>
    <label style={{display:'flex',alignItems:'center',flex:'1 1 210px',gap:8,fontWeight:650,fontSize:13}}>Proyecto
     <input aria-label="Nombre del proyecto actual" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,minWidth:0,width:'100%',boxSizing:'border-box'}}/>
@@ -547,7 +527,7 @@ export default function SeamlessEditor(){
     {([
       {label:'Fotos',action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
       {label:'Texto',action:()=>addText('paragraph')},
-      {label:'Stickers',action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
+      {label:'Elementos',action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
       {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
       {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
     ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
@@ -561,10 +541,11 @@ export default function SeamlessEditor(){
       zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
       background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
-      <strong style={{fontSize:13}}>{quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':'Seleccionar capa'}</strong>
+      <strong style={{fontSize:13}}>{quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
       <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
         style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
     </div>
+    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset}/>}
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
