@@ -270,3 +270,8 @@
  .panorama-editor.expanded .panorama-background-sheet,
  .panorama-editor.expanded .panorama-quicktools{bottom:calc(84px + env(safe-area-inset-bottom))!important}
 }
+
+.panorama-library-heading{position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;padding-right:40px}
+.panorama-library-heading strong{flex:1 1 100%;font-size:13px}
+.panorama-library-heading small{font-size:10px;line-height:1.35}
+.panorama-library-close{position:absolute;right:0;top:0;display:grid;place-items:center;min-width:36px;min-height:36px;border:1px solid #d5e1e2;border-radius:9px;background:#fff;color:#191919;font-size:21px}
