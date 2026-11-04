@@ -2362,3 +2362,20 @@ a:focus-visible {
     border-radius:10px!important;font-size:11px!important;
   }
 }
+
+/* Keep an old iPhone PWA from silently looking like missing Studio features. */
+.studio-update-notice{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  padding:13px 16px;margin-bottom:16px;border:1px solid #d8d1ab;
+  background:#fffaf0;border-radius:12px;color:#191919;
+}
+.studio-update-notice>div{display:grid;gap:4px;flex:1 1 250px}
+.studio-update-notice strong{font-size:14px}
+.studio-update-notice span{font-size:12px;line-height:1.5;color:#53636b}
+.studio-update-notice button{
+  border:0;border-radius:9px;padding:11px 14px;min-height:44px;
+  background:#191919;color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;
+}
+@media(max-width:600px){
+  .studio-update-notice button{width:100%}
+}
