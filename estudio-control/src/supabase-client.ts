@@ -93,7 +93,9 @@ async function owner():Promise<{id:string;email:string}> {
   if(error||!user)throw new Error('Inicia sesión para continuar.');
   const {data:admin,error:roleError}=await client.from('podcast_studio_admins')
     .select('user_id').eq('user_id',user.id).maybeSingle();
-  if(roleError || !admin){ throw Object.assign(new Error('La sesión existe, pero el acceso de administradora todavía no está autorizado.'),{code:'unauthorized'}); }
+  // A network/RLS query error is not proof that an owner's access was revoked.
+  if(roleError)throw new Error('No se pudo verificar el permiso del Studio. Reintenta cuando vuelva la conexión.');
+  if(!admin){ throw Object.assign(new Error('La sesión existe, pero el acceso de administradora todavía no está autorizado.'),{code:'unauthorized'}); }
   return {id:user.id,email:user.email||''};
 }
 // Uso exclusivo de la vista previa del aula dentro del Studio autenticado.
@@ -125,9 +127,14 @@ export const auth={
     if(!client) return localAuth.getUser();
     if(recoveringPassword) return null;
     try { await enforcePasswordSession(); }
-    catch { return null; }
+    catch(e) {
+      if((e as {code?:string})?.code==='session_expired')return null;
+      // Do not log the owner out on an offline iPhone or a failed auth request.
+      throw e;
+    }
     const {data:{user},error}=await client.auth.getUser();
-    if(error||!user)return null;
+    if(error)throw new Error('La conexión no permite verificar la sesión. Vuelve a intentarlo.');
+    if(!user)return null;
     const admin=await owner();
     return {email:admin.email,name:'Administración del podcast'};
   },
