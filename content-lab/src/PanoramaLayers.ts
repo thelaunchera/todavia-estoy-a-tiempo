@@ -39,6 +39,7 @@ export type PanoramaLayer = {
   /** Continuous draggable wallpaper, painted behind independent content. */
   role?:'background';
   locked?:boolean;
+  opacity?:number;
   rect: TouchRect;
 };
 
@@ -69,6 +70,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         shape:['paper','tape','circle','frame'].includes(String(item.shape))?item.shape as PanoramaLayer['shape']:'paper',
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
+      opacity:Number.isFinite(Number(item.opacity))?Math.max(0,Math.min(1,Number(item.opacity))):1,
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
       ...(item.locked===true?{locked:true}:{}),
@@ -150,7 +152,7 @@ export async function paintPanoramaLayers(
 ) {
  for(const layer of layers){
   const r=clampPanoramaRect(layer.rect),w=r.w*width,h=r.h*height;
-  ctx.save();ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
+  ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,layer.opacity??1));ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
   ctx.rotate((r.angle||0)*Math.PI/180);
   if(layer.kind==='text'){
     try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
