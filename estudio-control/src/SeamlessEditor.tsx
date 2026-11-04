@@ -43,6 +43,8 @@ export default function SeamlessEditor(){
  const [backgroundProgress,setBackgroundProgress]=useState('');
  const backgroundGeneration=useRef(0);
  const [brandFilter,setBrandFilter]=useState('todos');
+ const [hiddenDraftIds,setHiddenDraftIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem('studio-hidden-carousel-drafts-v1')||'[]')}catch{return []}});
+ useEffect(()=>{try{localStorage.setItem('studio-hidden-carousel-drafts-v1',JSON.stringify(hiddenDraftIds))}catch{}},[hiddenDraftIds]);
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
  const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|'elementos'|null>(null);
@@ -57,6 +59,7 @@ export default function SeamlessEditor(){
  const swipeStart=useRef<{x:number;y:number;slide:number}|null>(null);
  const layerGesture=useRef(false);
  const [slide,setSlide]=useState(0);
+ const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
@@ -380,7 +383,9 @@ export default function SeamlessEditor(){
   const removeSolidBackground=async()=>{const item=doc.items.find(it=>it.id===selected);if(!item||item.kind!=='image'||!item.src)return;setBusy(true);setMessage('Procesando fondo de color uniforme…');try{const im=await loadImage(item.src);const cv=document.createElement('canvas');const factor=Math.min(1,1600/Math.max(im.width,im.height));cv.width=Math.round(im.width*factor);cv.height=Math.round(im.height*factor);const ctx=cv.getContext('2d',{willReadFrequently:true});if(!ctx)throw Error('canvas');ctx.drawImage(im,0,0,cv.width,cv.height);const data=ctx.getImageData(0,0,cv.width,cv.height);const {width:w,height:h}=cv;const px=data.data;const corners=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];const rgb=[0,1,2].map(channel=>Math.round(corners.reduce((sum,i)=>sum+px[i+channel],0)/4));const visited=new Uint8Array(w*h);const queue=new Int32Array(w*h);let head=0,tail=0;const add=(i:number)=>{if(i<0||i>=w*h||visited[i])return;const p=i*4;const dist=Math.sqrt((px[p]-rgb[0])**2+(px[p+1]-rgb[1])**2+(px[p+2]-rgb[2])**2);if(dist>48)return;visited[i]=1;queue[tail++]=i};for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);px[i*4+3]=0;if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w)}ctx.putImageData(data,0,0);const result=cv.toDataURL('image/png');update(item.id,{src:result});setMessage('Fondo uniforme eliminado. Revisa los bordes; las fotos con fondos complejos necesitan recorte avanzado.')}catch{setMessage('No se pudo quitar el fondo. Prueba con una foto de fondo liso.')}finally{setBusy(false)}};
  const current=doc.items.find(it=>it.id===selected);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
- const viewportScale=300/W;
+ const slideWidthPx=300*canvasZoom/100;
+ const viewportScale=slideWidthPx/W;
+ useEffect(()=>{viewport.current?.scrollTo({left:slide*slideWidthPx});},[canvasZoom]);
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
   <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
@@ -396,10 +401,26 @@ export default function SeamlessEditor(){
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} onClick={saveProject}>Guardar</button>
    <button type="button" style={{...control,fontWeight:750}} onClick={startNewProject}>+ Nuevo proyecto</button>
   </div>
-  <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>🗂️ Carruseles pendientes · guiones nuevos de Notion ({EDITORIAL_DRAFTS.length})</summary>
-  <p style={{fontSize:13}}>Plan Maestro actualizado el 2 de noviembre. Solo borradores: no publica ni cambia el calendario. Guarda el diseño abierto antes de cargar otro.</p>
-  <label style={{fontSize:13}}>Marca <select value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} style={{...control,marginLeft:8}}><option value="todos">Todas</option><option value="tle">The Launch Era</option><option value="podcast">Podcast</option><option value="clase">Clase</option><option value="lab">Content Lab</option></select></label>
-  <div style={{display:'grid',gap:8,marginTop:12,maxHeight:370,overflowY:'auto'}}>{EDITORIAL_DRAFTS.filter(d=>brandFilter==='todos'||d.brand===brandFilter).map(d=><div key={d.id} style={{border:'1px solid #ddd',borderRadius:12,padding:12,background:'white'}}><strong style={{display:'block',fontSize:14}}>{d.title}</strong><span style={{fontSize:12,color:'#555'}}>{d.brand==='tle'?'The Launch Era':d.brand==='lab'?'Content Lab':d.brand==='clase'?'Clase':'Podcast'} · {d.date} · 4 slides</span><div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:9}}><button style={{...control,background:'#F2D85B'}} onClick={()=>prepareEditorial(d)}>Preparar en editor</button><a href={d.url} target="_blank" rel="noopener noreferrer" style={{fontSize:13,alignSelf:'center'}}>Ver Notion</a></div></div>)}</div>
+  <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
+   <summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Carruseles pendientes ({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</summary>
+   <p style={{fontSize:13}}>Ocultar un borrador de esta lista no lo borra de Notion ni elimina proyectos guardados.</p>
+   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+    <label style={{fontSize:13}}>Marca <select value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} style={{...control,marginLeft:8}}><option value="todos">Todas</option><option value="tle">The Launch Era</option><option value="podcast">Podcast</option><option value="clase">Clase</option><option value="lab">Content Lab</option></select></label>
+    {EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<button type="button" style={control} onClick={()=>{if(window.confirm('¿Quitar todos los borradores de pendientes? No se borrarán de Notion.'))setHiddenDraftIds(EDITORIAL_DRAFTS.map(d=>d.id))}}>Quitar todos de la lista</button>}
+    {hiddenDraftIds.length>0&&<button type="button" style={control} onClick={()=>setHiddenDraftIds([])}>Restaurar ocultos ({hiddenDraftIds.length})</button>}
+   </div>
+   <div style={{display:'grid',gap:8,marginTop:12,maxHeight:340,overflowY:'auto'}}>
+    {EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)&&(brandFilter==='todos'||d.brand===brandFilter)).map(d=><div key={d.id} style={{border:'1px solid #ddd',borderRadius:12,padding:12,background:'white'}}>
+     <strong style={{display:'block',fontSize:14}}>{d.title}</strong>
+     <span style={{fontSize:12,color:'#555'}}>{d.brand==='tle'?'The Launch Era':d.brand==='lab'?'Content Lab':d.brand==='clase'?'Clase':'Podcast'} · {d.date} · 4 slides</span>
+     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:9}}>
+      <button type="button" style={{...control,background:'#F2D85B'}} onClick={()=>prepareEditorial(d)}>Preparar en editor</button>
+      <button type="button" style={control} onClick={()=>setHiddenDraftIds(ids=>[...new Set([...ids,d.id])])}>Quitar de pendientes</button>
+      <a href={d.url} target="_blank" rel="noopener noreferrer" style={{fontSize:13,alignSelf:'center'}}>Ver Notion</a>
+     </div>
+    </div>)}
+    {!EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<p style={{fontSize:13}}>No quedan borradores visibles. Puedes restaurarlos cuando quieras.</p>}
+   </div>
   </details>
   {activeBrief&&<details open style={{border:'1px solid #D6D8DD',borderRadius:12,padding:12,marginBottom:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Guion activo · {activeBrief.title}</summary><p style={{fontSize:13}}><b>Dirección visual:</b> {activeBrief.direction}</p><p style={{fontSize:13}}><b>CTA:</b> {activeBrief.cta}</p><p style={{fontSize:12}}>Los textos están en las cuatro láminas y se pueden mover o editar. La portada requiere fotografía real.</p></details>}
   <details style={{marginBottom:12,border:'1px solid #ddd',borderRadius:14,padding:'10px 12px',background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Herramientas y botones · tocar para abrir o recoger</summary><div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:12,marginBottom:8,alignItems:'center'}}>
@@ -457,7 +478,7 @@ export default function SeamlessEditor(){
   {panel==='capas'&&<div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:18}}>{doc.items.map(it=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white'}} onClick={()=>setSelected(it.id)}>{it.locked?'🔒 ':''}{it.kind==='image'?'📷 Foto':(it.text||'Texto sin escribir').slice(0,42)}</button>)}</div>}
   </details>
   <section aria-label="Navegador de slides" style={{margin:'12px 0',padding:'12px',border:'1px solid #D7DFE2',borderRadius:16,background:'#FAF8F3'}}>
-   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}><div><strong style={{fontSize:16}}>Slide {slide+1} de {doc.count}</strong><div style={{fontSize:12,color:'#53636B'}}>Selecciona una lámina para editarla</div></div><div style={{display:'flex',gap:6}}><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide-1)} disabled={slide===0} aria-label="Slide anterior">‹</button><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide+1)} disabled={slide>=doc.count-1} aria-label="Slide siguiente">›</button></div></div>
+   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}><div><strong style={{fontSize:16}}>Slide {slide+1} de {doc.count}</strong><div style={{fontSize:12,color:'#53636B'}}>Selecciona, mueve o ajusta con dos dedos</div></div><div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}><label style={{fontSize:12}}>Zoom <select aria-label="Zoom del lienzo" value={canvasZoom} onChange={e=>setCanvasZoom(Number(e.target.value) as 75|100|125|150)} style={{...control,padding:'7px 4px',fontSize:12}}><option value={75}>75%</option><option value={100}>100%</option><option value={125}>125%</option><option value={150}>150%</option></select></label><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide-1)} disabled={slide===0} aria-label="Slide anterior">‹</button><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide+1)} disabled={slide>=doc.count-1} aria-label="Slide siguiente">›</button></div></div>
    <div style={{display:'grid',gridTemplateColumns:'repeat('+Math.min(doc.count,5)+',minmax(0,1fr))',gap:7}}>{Array.from({length:doc.count},(_,i)=>{const texts=doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===i);const photos=doc.items.filter(it=>it.kind==='image'&&Math.floor(it.x/W)===i);return <button key={i} type="button" aria-current={slide===i?'step':undefined} aria-label={'Ir al slide '+(i+1)} onClick={()=>goSlide(i)} style={{border:slide===i?'2px solid #244B5B':'1px solid #D7DFE2',background:slide===i?'#E6F0F4':'#fff',color:'#191919',borderRadius:10,padding:'10px 3px',minWidth:0,textAlign:'center'}}><strong style={{display:'block',fontSize:14}}>{i+1}</strong><span style={{display:'block',fontSize:10,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{texts[0]?.text?.trim().slice(0,14)|| (photos.length?'Foto':'Vacío')}</span></button>})}</div>
   </section>
   {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
@@ -496,7 +517,7 @@ export default function SeamlessEditor(){
    {recentlyDeleted&&<button type="button" style={control} onClick={undoDelete}>Deshacer eliminación</button>}
    </div>}
   <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'x proximity',overscrollBehaviorX:'contain'}}>
-   <div style={{position:'relative',width:doc.count*300,maxWidth:'none'}}>
+   <div style={{position:'relative',width:doc.count*slideWidthPx,maxWidth:'none'}}>
    <canvas ref={canvas} data-carousel-canvas="true" onPointerDown={down} onPointerMove={move}
     onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
     style={{display:'block',width:'100%',height:'auto',maxWidth:'none',touchAction:'none',cursor:'grab'}}
@@ -504,7 +525,7 @@ export default function SeamlessEditor(){
    {current&&deleteArmedId===current.id&&<button type="button" data-carousel-delete="true"
     aria-label={'Eliminar '+(current.kind==='text'?'texto':current.kind==='image'?'foto':'sticker')+' seleccionado'}
     title="Eliminar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteElement(current.id)}}
-    style={{position:'absolute',left:Math.max(0,Math.min(doc.count*300-42,(current.x+itemBounds(current).w)*viewportScale-21)),
+    style={{position:'absolute',left:Math.max(0,Math.min(doc.count*slideWidthPx-42,(current.x+itemBounds(current).w)*viewportScale-21)),
      top:Math.max(0,current.y*viewportScale-21),width:42,height:42,borderRadius:'50%',
      border:'2px solid #fff',background:'#191919',color:'#fff',fontSize:26,fontWeight:650,
      display:'grid',placeItems:'center',cursor:'pointer',zIndex:7,boxShadow:'0 2px 10px #0005',
@@ -585,7 +606,7 @@ export default function SeamlessEditor(){
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
   </div>}
   <p style={{fontSize:12,fontWeight:600}}>Un toque: selecciona y mueve. Dos toques rápidos sobre el mismo elemento: aparece la × para borrarlo. Toca fuera y la × desaparece. Selecciona un texto para curvarlo como un círculo y ajustar la separación entre letras.</p>
-  <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para pasar de slide; usa dos dedos para cambiar el tamaño de un elemento seleccionado. Los botones Anterior y Siguiente son opcionales.</p>
+  <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para cambiar de slide. Usa dos dedos sobre el elemento para cambiar su tamaño; para girarlo utiliza «Más ajustes». Los botones Anterior y Siguiente son opcionales.</p>
   <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={saveProject}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El proyecto se guarda localmente en este navegador; no se sincroniza aún con otros dispositivos.</p>
  </section>;
