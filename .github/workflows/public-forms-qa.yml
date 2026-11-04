@@ -1,0 +1,23 @@
+name: Public English forms - isolated browser QA
+on:
+  push:
+    branches: [main]
+    paths: ['baja-en.html', 'content-lab/public/prompts/en/**', 'scripts/qa-public-forms-browser.mjs', '.github/workflows/public-forms-qa.yml']
+  pull_request:
+    paths: ['baja-en.html', 'content-lab/public/prompts/en/**', 'scripts/qa-public-forms-browser.mjs', '.github/workflows/public-forms-qa.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/tle-public-browser --no-audit --no-fund playwright@1.58.2
+      - run: node /tmp/tle-public-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node scripts/qa-public-forms-browser.mjs
+        env:
+          PLAYWRIGHT_MODULE_PATH: /tmp/tle-public-browser/node_modules/playwright/index.mjs

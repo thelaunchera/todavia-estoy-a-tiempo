@@ -73,6 +73,8 @@ jobs:
           node-version: '22'
       - name: Validar esquema y permisos del podcast
         run: node estudio-control/tests/check-schema.mjs
+      - name: Validar JavaScript integrado en páginas públicas
+        run: node scripts/check-inline-scripts.mjs
       - name: Validar instalación de la web app
         run: node estudio-control/tests/check-pwa.mjs
       - name: Validar privacidad compacta y portada de episodio sin destellos

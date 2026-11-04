@@ -61,11 +61,11 @@
           btn.disabled=true;input.disabled=true;btn.textContent='Saving your preference…';
           const response=await fetch(url,{method:'POST',mode:'cors',headers:{Accept:'application/json'},body:new URLSearchParams({email,resource:'podcast_unsubscribe',action:'unsubscribe',source:'unsubscribe_page',website:''})});
           if(!response.ok||(await response.json())?.ok!==true)throw new Error('No confirmada');
-          status.textContent='You're all set. You won't receive new episode updates. Thank you for being here.';
+          status.textContent="You're all set. You won't receive new episode updates. Thank you for being here.";
           form.reset();input.setAttribute('aria-invalid','false');btn.textContent='Unsubscribed';
         }catch(e){
           input.disabled=false;btn.disabled=false;btn.textContent='Unsubscribe from updates';
-          status.textContent='We couldn't confirm your request. Please try again.';
+          status.textContent="We couldn't confirm your request. Please try again.";
         }
       });
     })();

@@ -516,9 +516,9 @@ main{padding-top:8px}
 <label for="matcha-email">Where should we send your ideas?</label><input id="matcha-email" type="email" name="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
 <label class="matcha-marketing-consent"><input type="checkbox" id="matcha-marketing" name="marketing_opt_in"><span>I'd also like ideas and updates from The Launch Era. I can unsubscribe whenever I want.</span></label>
 <div class="matcha-honeypot" aria-hidden="true"><label for="matcha-website">Leave this field blank</label><input tabindex="-1" autocomplete="off" type="text" name="website" id="matcha-website"></div>
-<button class="matcha-send-button" id="matcha-send" type="submit">Enviarme mis 8 ideas gratis <span aria-hidden="true">→</span></button>
+<button class="matcha-send-button" id="matcha-send" type="submit">Send me my 8 free ideas</button>
 <p role="status" aria-live="polite" id="matcha-lead-feedback" class="matcha-lead-feedback"></p>
-<small>Newsletter opcional · <a href="https://thelaunchera.com/privacidad.html" target="_blank" rel="noopener noreferrer">Privacy</a></small>
+<small>Optional newsletter · <a href="https://thelaunchera.com/privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a></small>
 </form></section>
 <section id="access-placeholder" class="matcha-locked-prompt" aria-labelledby="access-title" hidden>
 <h2 id="access-title">Getting your ideas ready.</h2>
@@ -668,12 +668,12 @@ render();
     })
    });
    const result=await response.json().catch(()=>({}));
-   if(!response.ok||!result.ok)throw Error(result.error||'We couldn't send the link.');
+   if(!response.ok||!result.ok)throw Error(result.error||"We couldn't send the link.");
    feedback.textContent='Done! We emailed your eight ideas. Check your inbox. 💛';
    form.querySelector('#matcha-email').readOnly=true;
    button.textContent='Request received ✓';
   }catch(err){
-   feedback.textContent=err&&err.message?err.message:'We couldn't save your email. Please try again.';
+   feedback.textContent=err&&err.message?err.message:"We couldn't save your email. Please try again.";
    button.disabled=false;button.textContent='Try again';
   }
  });
@@ -699,14 +699,14 @@ render();
    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
   });
   const data=await response.json().catch(()=>({}));
-  if(!response.ok||!data.ok)throw new Error(data.error||'We couldn't complete the request.');
+  if(!response.ok||!data.ok)throw new Error(data.error||"We couldn't complete the request.");
   return data;
  }
  if(action==='unsubscribe'){
   placeholder.hidden=false;
   placeholder.scrollIntoView({block:'start'});
   title.textContent='Your email preferences';
-  note.textContent='Want to unsubscribe from creative updates? You'll still have access to the free prompts.';
+  note.textContent="Want to unsubscribe from creative updates? You'll still have access to the free prompts.";
   requestLink.hidden=true;
   const cancel=document.createElement('button');
   cancel.className='matcha-send-button';cancel.type='button';
@@ -717,7 +717,7 @@ render();
    try{
     await sendAction('unsubscribe',{unsubscribe_token:magicToken});
     title.textContent='Unsubscribed ✓';
-    note.textContent='You won't receive marketing messages from this freebie.';
+    note.textContent="You won't receive marketing messages from this freebie.";
     cancel.remove();requestLink.hidden=false;requestLink.textContent='Back to the free prompts';requestLink.href='#recibir';
    }catch(error){cancel.disabled=false;cancel.textContent='Try again';note.textContent=error.message}
   };
@@ -727,13 +727,13 @@ render();
  if(action==='confirm'){
   placeholder.classList.add('is-loading');
   title.textContent='Unlocking your eight prompts…';
-  note.textContent='We're confirming your email and preparing your creative space.';
+  note.textContent="We're confirming your email and preparing your creative space.";
   requestLink.hidden=true;
   try{
    const data=await sendAction('confirm',{confirm_token:magicToken});
    token=data.access_token;
   }catch(error){
-   feedback('We couldn't open your free prompts',error.message+' Request a new link using the form.');
+   feedback("We couldn't open your free prompts",error.message+' Request a new link using the form.');
    placeholder.scrollIntoView({block:'start'});return;
   }
  }
@@ -749,7 +749,7 @@ render();
  if(!action){title.textContent='Restoring your prompts…';requestLink.hidden=true}
  try{
   const data=await sendAction('library',{access_token:token});
-  if(!Array.isArray(data.layouts)||data.layouts.length!==8||!data.rules)throw new Error('Your prompt library isn't available right now.');
+  if(!Array.isArray(data.layouts)||data.layouts.length!==8||!data.rules)throw new Error("Your prompt library isn't available right now.");
   const englishTitles=[
     ["Asymmetric Editorial","A large product photo on the right"],
     ["Monumental Center","A bold headline with your product below"],
@@ -777,7 +777,7 @@ render();
  }catch(error){
   sessionStorage.removeItem('matcha_private_access_v1');
   try{localStorage.removeItem('matcha_private_access_v2')}catch{}
-  feedback('Your access needs to be renewed','We couldn't verify the link. Request a fresh email from the form.');
+  feedback('Your access needs to be renewed',"We couldn't verify the link. Request a fresh email from the form.");
   placeholder.scrollIntoView({block:'start'});
  }
 })();
