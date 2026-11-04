@@ -79,7 +79,7 @@ export function useClassroomDemoPublishing(){
   try{
    const rows=await setClassroomDemoVisibility(entry,visible);
    setCatalog(rows);
-   setNotice(visible?entry.title+' ya aparece en la clase, con sus recursos disponibles.':entry.title+' quedó oculto para alumnos; permanece en Studio.');
+   setNotice(visible?entry.title+' ya está disponible en el Aula, con sus recursos.':entry.title+' ya no está visible en el Aula; permanece en Studio.');
   }catch(e){setError(e instanceof Error?e.message:'No se pudo guardar la selección.');}
   finally{setSaving('');}
  }
@@ -101,7 +101,7 @@ export function ClassroomDemoPublication({demo,control}:{demo:PublishableDemo;co
    :<div className="finished-demo-classroom-buttons">
       <button type="button" disabled={busy} onClick={()=>void control.setVisible(demo,!visible)}>
        {visible?<EyeOff size={15}/>:<Eye size={15}/>}
-       {control.saving===entry.id?'Guardando…':visible?'Quitar de la clase':'Poner en la clase'}
+       {control.saving===entry.id?'Guardando…':visible?'Quitar del Aula':'Agregar al Aula'}
       </button>
       {syncNeeded&&<button type="button" className="finished-demo-sync" disabled={busy}
        onClick={()=>void control.setVisible(demo,true)}><RefreshCw size={14}/> Actualizar fotos y prompts</button>}
@@ -112,7 +112,7 @@ export function ClassroomDemoPublication({demo,control}:{demo:PublishableDemo;co
 export function ClassroomDemoPublishingSummary({control}:{control:Controller}){
  return <>
   <div className="finished-demo-classroom-summary">
-   <div><strong>Demos disponibles en el aula</strong><span>Elige qué proyectos enseñar. Los demás se quedan en Studio.</span></div>
+   <div><strong>Demos disponibles en el Aula</strong><span>Cada demo terminado incluye la opción «Agregar al Aula». Por defecto permanece en Studio; tú decides si mostrarlo a los alumnos.</span></div>
    <span>{control.loading?'Consultando…':control.catalog?control.catalog.filter(d=>d.published!==false).length+' visibles':'No disponible'}</span>
    <button type="button" disabled={control.loading||!!control.saving} onClick={control.refresh}><RefreshCw size={15}/> Actualizar</button>
   </div>
