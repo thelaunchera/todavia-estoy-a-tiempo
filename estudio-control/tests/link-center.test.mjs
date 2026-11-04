@@ -32,8 +32,8 @@ test('Recording mode hides all private and review-only links',()=>{
   assert.match(source,/!readOnly \|\| shareable\(x\.visibility\)/);
   assert.match(source,/readOnly \? 'Modo grabación: solo se muestran enlaces públicos y demos/);
 });
-test('Studio links keep published sources and La Vie in Pink has its approved AppDeploy URL',()=>{
-  assert.deepEqual(records.filter(x=>x.url.includes('appdeploy.ai')).map(x=>x.key),['school-la-vie-in-pink']);
+test('Studio links keep published sources and approved AppDeploy demos have their published URLs',()=>{
+  assert.deepEqual(records.filter(x=>x.url.includes('appdeploy.ai')).map(x=>x.key),['school-golden-grid','school-la-vie-in-pink']);
   assert.match(records.find(x=>x.key==='lab-editor')?.url||'',/podcast\.thelaunchera\.com\/content-lab\//);
   assert.match(records.find(x=>x.key==='lab-prompts')?.url||'',/\/content-lab\/prompts\//);
 });
@@ -52,13 +52,13 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  const featured=source.match(/RECENT_DEMO_KEYS = \[([^\]]+)\] as const/);
  assert.ok(featured,'Recent demos must reuse canonical keys');
  const keys=[...featured[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
- assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','tle-experience']);
+ assert.deepEqual(keys,['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','tle-experience']);
  const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
  for(const key of keys){
   const item=byKey[key];
   assert.ok(item,'Missing demo record '+key);
   assert.equal(item.visibility,'demo',key);
-  assert.ok(item.url.startsWith('https://thelaunchera.com/')||item.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/')||(key==='school-la-vie-in-pink'&&item.url==='https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/'),key);
+  assert.ok(item.url.startsWith('https://thelaunchera.com/')||item.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/')||(key==='school-la-vie-in-pink'&&item.url==='https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/')||(key==='school-golden-grid'&&item.url==='https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/'),key);
  }
  assert.ok(!keys.includes('tle-cb-depot'),'Real customer projects must not appear as fictional demos');
  assert.ok(!keys.includes('pod-studio'),'Private Studio must not be shared');
