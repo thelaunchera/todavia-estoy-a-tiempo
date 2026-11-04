@@ -1,3 +1,4 @@
+import {SOVA_CAROUSEL_ASSETS,SOVA_CAROUSEL_DRIVE,type SovaCarouselAsset} from './sova-carousel-assets';
 import {GOLDEN_GRID_CAROUSEL_ASSETS,GOLDEN_GRID_CAROUSEL_DRIVE,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
@@ -122,6 +123,17 @@ export default function SeamlessEditor(){
    setSelected(id);setQuickPanel(null);
    setMessage(asset.name+' añadido al lienzo. Muévelo, gíralo o agrándalo. Añade tu texto como otra capa.');
   }catch{setMessage('No se pudo abrir este elemento. Vuelve a intentarlo.');}
+ };
+ const sovaAssetUrl=(file:string)=>new URL('brand-kits/sova/'+file,document.baseURI).href;
+ const addSovaAsset=async(asset:SovaCarouselAsset)=>{
+  try{
+   const src=sovaAssetUrl(asset.file);
+   await loadImage(src);
+   const id=++nextId.current;
+   setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src,x:slide*W+60,y:220,width:asset.width,fontSize:80,color:'#191919'}]}));
+   setSelected(id);setQuickPanel(null);
+   setMessage(asset.name+' añadido al lienzo. Puedes mover, girar y cambiar su tamaño. El texto se agrega como una capa independiente.');
+  }catch{setMessage('No se pudo abrir el elemento SOVA. Inténtalo de nuevo.');}
  };
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
  const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
@@ -382,6 +394,19 @@ export default function SeamlessEditor(){
    </div>
    <p style={{fontSize:12,lineHeight:1.6}}><b>Fotos recomendadas:</b> 1 para portada, 7 para mostrar el producto en la mano, 3 para packaging, 5 para detalle y 9 para el cierre. Usa las cintas para unir visualmente dos slides.</p>
    <a href={GOLDEN_GRID_CAROUSEL_DRIVE} target="_blank" rel="noopener noreferrer" style={{fontSize:12,textDecoration:'underline'}}>Abrir todos los elementos en Drive</a>
+  </details>
+
+  <details style={{margin:'16px 0',border:'1px solid #A8C7F4',borderRadius:14,padding:14,background:'#F2F6FE'}}>
+   <summary style={{cursor:'pointer',fontWeight:750}}>SOVA · Headphones · Cintas, banners y sonido ({SOVA_CAROUSEL_ASSETS.length})</summary>
+   <p style={{fontSize:12,lineHeight:1.6}}>Elementos transparentes para tu carrusel de marca. Pulsa «Añadir al lienzo», mueve con el dedo, rota o cambia el tamaño. Escribe los titulares como texto editable en otra capa.</p>
+   <div aria-label="Elementos de SOVA" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(125px,1fr))',gap:10,maxHeight:330,overflowY:'auto',padding:3}}>
+    {SOVA_CAROUSEL_ASSETS.map(asset=><button type="button" key={asset.id} aria-label={'Añadir '+asset.name+' al lienzo'} onClick={()=>void addSovaAsset(asset)} style={{...control,minWidth:0,padding:9,textAlign:'center',background:'#fff',color:'#191919'}}>
+     <img src={sovaAssetUrl(asset.file)} loading="lazy" alt={asset.name} style={{width:'100%',height:78,objectFit:'contain',display:'block',marginBottom:8}}/>
+     <strong style={{display:'block',fontSize:11}}>{asset.name}</strong><span style={{display:'block',fontSize:10,marginTop:5}}>+ Añadir al lienzo</span>
+    </button>)}
+   </div>
+   <p style={{fontSize:12,lineHeight:1.6}}><b>Fotos recomendadas:</b> 07 (espacio negativo) para portada y hook, 02 (producto aislado) para presentación, 06 (close-up) para detalles, 04 (producto monumental) para contraste y 10 (composición revista) para cierre. 01 es el hero con retrato: úsala en el kit privado, no como recurso genérico.</p>
+   <a href={SOVA_CAROUSEL_DRIVE} target="_blank" rel="noopener noreferrer" style={{fontSize:12,textDecoration:'underline'}}>Abrir fotos y prompts SOVA en Drive</a>
   </details>
 
   <div role="group" aria-label="Proyecto actual" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,padding:10,margin:'10px 0 14px',border:'1px solid #D7DFE2',borderRadius:14,background:'#FAF8F3'}}>
