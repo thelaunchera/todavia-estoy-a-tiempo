@@ -25,9 +25,9 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=f
  const [kind,setKind]=useState<(typeof categories)[number]>('Todos');
  const [search,setSearch]=useState('');
  const assets=[
-  ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/golden-grid/'+asset.file,document.baseURI).href,asset})),
-  ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/sova/'+asset.file,document.baseURI).href,asset})),
-  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href,asset}))
+  ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:'/estudio/brand-kits/golden-grid/'+asset.file,asset})),
+  ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:'/estudio/brand-kits/sova/'+asset.file,asset})),
+  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:'/estudio/brand-kits/editorial-stickers/'+asset.file,asset}))
  ];
  const filtered=assets.filter(a=>(kind==='Todos'||a.category===kind)&&a.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')));
  return <div style={{display:'grid',gap:9}}>
@@ -37,8 +37,8 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=f
   </div>
   <div aria-label="Galería de stickers individuales para colocar en el lienzo" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax('+(compact?'95px':'125px')+',1fr))',gap:9,maxHeight:compact?230:300,overflowY:'auto',padding:3}}>
    {filtered.map(a=><button type="button" key={a.key} aria-label={'Añadir '+a.name+' al lienzo'} onClick={()=>{if(a.brand==='golden')void onGolden(a.asset);else if(a.brand==='sova')void onSova(a.asset);else void onEditorial(a.asset)}} style={{...control,padding:6,minWidth:0,textAlign:'center',overflow:'hidden'}}>
-     <span style={{display:'grid',placeItems:'center',height:compact?60:82,borderRadius:8,backgroundColor:'#F0F1F2',backgroundImage:'linear-gradient(45deg,#e2e5e6 25%,transparent 25%),linear-gradient(-45deg,#e2e5e6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e5e6 75%),linear-gradient(-45deg,transparent 75%,#e2e5e6 75%)',backgroundSize:'18px 18px',backgroundPosition:'0 0,0 9px,9px -9px,-9px 0'}}>
-      <img loading="lazy" src={a.src} alt="" style={{width:'100%',height:'95%',objectFit:'contain'}}/>
+     <span style={{display:'grid',placeItems:'center',height:compact?88:100,borderRadius:8,backgroundColor:'#F0F1F2',backgroundImage:'linear-gradient(45deg,#e2e5e6 25%,transparent 25%),linear-gradient(-45deg,#e2e5e6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e5e6 75%),linear-gradient(-45deg,transparent 75%,#e2e5e6 75%)',backgroundSize:'18px 18px',backgroundPosition:'0 0,0 9px,9px -9px,-9px 0'}}>
+      <img loading="lazy" src={a.src} alt="" style={{width:'100%',height:'100%',objectFit:'contain',display:'block'}}/>
      </span>
      <strong style={{display:'block',fontSize:11,marginTop:6,lineHeight:1.2}}>{a.name}</strong>
     </button>)}
