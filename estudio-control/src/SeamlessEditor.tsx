@@ -205,8 +205,9 @@ export default function SeamlessEditor(){
   if(touches.current.size===2){
    lastTap.current=null;setDeleteArmedId(null);
    // Do not resize a previously selected layer if the first finger touched empty canvas.
-   const id=drag.current?.id??pointerStart.current?.id;
-   const it=doc.items.find(item=>item.id===id&&!item.locked);
+   const id=drag.current?.id??selected;
+   const firstTouchId=drag.current?.id??pointerStart.current?.id;
+   const it=doc.items.find(item=>item.id===id&&item.id===firstTouchId&&!item.locked);
    if(it){
     const points=[...touches.current.values()],bounds=itemBounds(it);
     const pending=pendingTransform.current?.id===it.id?pendingTransform.current.patch:null;
