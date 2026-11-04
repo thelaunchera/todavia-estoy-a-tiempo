@@ -4,6 +4,7 @@ import SeamlessEditor from './SeamlessEditor';
 import SupportInbox from './SupportInbox';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
+import {PRIVATE_DEMO_KIT_SECTION} from './PrivateDemoKits';
 import ReelsProduction from './ReelsProduction';
 import BrandReelsProduction from './BrandReelsProduction';
 import BonusLibrary from './BonusLibrary';
@@ -623,7 +624,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1' && x.section !== 'youtube-unassigned-moodboard-v1' && x.section !== MICRO_SCENE_SECTION);
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1' && x.section !== 'youtube-unassigned-moodboard-v1' && x.section !== MICRO_SCENE_SECTION && x.section !== PRIVATE_DEMO_KIT_SECTION);
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -1474,7 +1475,7 @@ function App() {
           )}
           {page === 'bonos' && <BonusLibrary />}
           {page === 'links' && <LinkCenter entries={items.ideas} onChanged={refresh} readOnly={recording} />}
-          {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} />}
+          {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} entries={items.ideas} />}
           {page === 'clases' && (
             <ClassProduction entries={items.ideas} tasks={items.tareas} launchStats={classStats} onTaskToggle={async (task,next) => {
               await api.put('/api/items/tareas/'+task.id, { ...task, status:next });

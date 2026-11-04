@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import PrivateDemoKits from './PrivateDemoKits';
 import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
@@ -188,7 +189,7 @@ const finishedDemos:Demo[]=[
   promptsFor:'experience-cleaning',
  },
 ];
-export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
+export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>void;entries?:{id:string;title:string;section?:string;notes?:string}[]}){
  const [copied,setCopied]=useState('');
  const [notice,setNotice]=useState('');
  const classroom=useClassroomDemoPublishing();
@@ -203,6 +204,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
      <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
+   <PrivateDemoKits entries={entries}/>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
      <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:null} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
