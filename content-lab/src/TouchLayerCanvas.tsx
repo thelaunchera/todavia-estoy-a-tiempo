@@ -447,6 +447,11 @@ export default function TouchLayerCanvas({
         <Trash2 size={15}/> Borrar
       </button>
     </div>}
+    {chosen && onUpdate && <div role="group" aria-label="Transparencia del elemento seleccionado" style={{display:'flex',alignItems:'center',gap:9,padding:'8px 12px',background:'#FAF8F3',border:'1px solid #D6D8DD',borderRadius:12,margin:'8px 0',fontSize:13,fontWeight:700}}>
+      <label htmlFor="touch-layer-opacity">Opacidad</label>
+      <input id="touch-layer-opacity" type="range" min="0" max="100" step="1" aria-label="Opacidad de foto, sticker o elemento" value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})} style={{flex:1,minWidth:60,accentColor:'#191919'}}/>
+      <output>{Math.round((chosen.opacity??1)*100)}%</output>
+    </div>}
     {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 && !inlineTextTools &&
       <div className="touch-editor-size-toolbar" role="group" aria-label="Tamaño de la fotografía seleccionada">
         <span className="touch-editor-size-label">Tamaño de foto</span>
