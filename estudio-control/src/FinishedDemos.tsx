@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -10,7 +11,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -19,6 +20,20 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+ {
+  id:'golden-grid',
+  title:'Golden Grid · Waffle Co.',
+  category:'Marca de waffles · branding y website bilingüe',
+  description:'Demo editorial con nueve imágenes originales, waffles, mezcla y empaques. Incluye colección con detalles, historia, galería ampliable, selector español/inglés y contacto de demostración.',
+  image:goldenGridPhotos[0].url,
+  url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',
+  source:'https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/demo-source/golden-grid',
+  note:'Marca conceptual. No acepta pedidos ni pagos y el contacto no envía ni guarda datos. Kit con nueve fotos originales, prompts de recreación y cuatro pasos de reconstrucción.',
+  kind:'other',
+  photos:goldenGridPhotos,
+  promptsFor:'golden-grid',
+ },
+
  {
   id:'casa-brownie-static',
   title:'Casa Brownie · Foto estática',
@@ -185,7 +200,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <div className="finished-demos-grid">
@@ -204,6 +219,7 @@ export default function FinishedDemos({onOpenClass}:{onOpenClass:()=>void}){
          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">{d.id==='la-vie-in-pink'?'Ver en AppDeploy':'Ver en repositorio'}</a>
        </div>
+       {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
          <summary><span>Ver kit completo: fotos + prompts + pasos</span><span>{d.photos.length} fotos · {studioDemoPrompts[d.promptsFor].length} pasos</span></summary>
