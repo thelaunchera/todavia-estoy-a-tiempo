@@ -25,9 +25,9 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=f
  const [kind,setKind]=useState<(typeof categories)[number]>('Todos');
  const [search,setSearch]=useState('');
  const assets=[
-  ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:'/estudio/brand-kits/golden-grid/'+asset.file,asset})),
-  ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:'/estudio/brand-kits/sova/'+asset.file,asset})),
-  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:'/estudio/brand-kits/editorial-stickers/'+asset.file,asset}))
+  ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/golden-grid/'+asset.file,document.baseURI).href,asset})),
+  ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/sova/'+asset.file,document.baseURI).href,asset})),
+  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href,asset}))
  ];
  const filtered=assets.filter(a=>(kind==='Todos'||a.category===kind)&&a.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')));
  return <div style={{display:'grid',gap:9}}>
