@@ -1,6 +1,76 @@
 /** Stickers originales reutilizables del Studio; no se publican en Content Lab. */
 export const EDITORIAL_STICKER_ASSETS = [
   {
+    "id": "asterisco-negro-organico",
+    "name": "Asterisco negro orgánico",
+    "category": "Asteriscos",
+    "width": 370,
+    "file": "asterisco-negro-organico.svg"
+  },
+  {
+    "id": "banner-negro-ondulado",
+    "name": "Banner negro ondulado",
+    "category": "Banners y cintas",
+    "width": 850,
+    "file": "banner-negro-ondulado.svg"
+  },
+  {
+    "id": "sello-circular-tinta",
+    "name": "Sello circular de tinta",
+    "category": "Etiquetas",
+    "width": 540,
+    "file": "sello-circular-tinta.svg"
+  },
+  {
+    "id": "cinta-negra-rasgada",
+    "name": "Cinta negra rasgada",
+    "category": "Papeles y washi",
+    "width": 840,
+    "file": "cinta-negra-rasgada.svg"
+  },
+  {
+    "id": "destellos-trio-negro",
+    "name": "Destellos negros editoriales",
+    "category": "Asteriscos",
+    "width": 520,
+    "file": "destellos-trio-negro.svg"
+  },
+  {
+    "id": "sello-flor-festoneada",
+    "name": "Sello floral festoneado",
+    "category": "Etiquetas",
+    "width": 530,
+    "file": "sello-flor-festoneada.svg"
+  },
+  {
+    "id": "marco-negro-expresivo",
+    "name": "Marco negro de tinta",
+    "category": "Etiquetas",
+    "width": 720,
+    "file": "marco-negro-expresivo.svg"
+  },
+  {
+    "id": "subrayado-loop-negro",
+    "name": "Subrayado negro con lazo",
+    "category": "Acentos",
+    "width": 820,
+    "file": "subrayado-loop-negro.svg"
+  },
+  {
+    "id": "etiqueta-negra-perforada",
+    "name": "Etiqueta negra perforada",
+    "category": "Etiquetas",
+    "width": 700,
+    "file": "etiqueta-negra-perforada.svg"
+  },
+  {
+    "id": "rayos-minimalistas-negros",
+    "name": "Rayos negros minimalistas",
+    "category": "Asteriscos",
+    "width": 520,
+    "file": "rayos-minimalistas-negros.svg"
+  },
+  {
     "id": "asterisco-amarillo",
     "name": "Asterisco amarillo suave",
     "category": "Asteriscos",

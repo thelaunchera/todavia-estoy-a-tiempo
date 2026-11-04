@@ -738,6 +738,9 @@ export default function SeamlessEditor(){
       </button>)}
     </div>}
     {quickPanel==='stickers'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(68px,1fr))',gap:8}}>
+      <div style={{gridColumn:'1 / -1'}}>
+        <BrandAssetLibrary compact onlyEditorial onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>
+      </div>
       {LAB_STICKERS.map((emoji,i)=><button type="button" key={i} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}
         style={{...control,minHeight:60,fontSize:27,padding:5}}>{emoji}</button>)}
       {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
