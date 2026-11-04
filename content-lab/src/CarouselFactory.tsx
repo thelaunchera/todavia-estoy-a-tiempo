@@ -1404,7 +1404,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
       </aside>
   );
-  return <div className="factory">
+  return <div className={'factory'+(studioTab==='canvas'?' factory-canvas-active':'')}>
     <div className="factory-header">
       <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
       <button className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
