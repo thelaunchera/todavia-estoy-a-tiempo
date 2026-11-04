@@ -2,18 +2,19 @@ import {useState} from 'react';
 import PrivateDemoKits from './PrivateDemoKits';
 import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
 import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
+import {mareaDrive} from './marea-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
 import {ivoryBloomPhotos} from './ivory-bloom-photos';
 import {ivoryBloomRebuildPrompts} from './ivory-bloom-rebuild-prompts';
-import {additionalDemoPhotos, additionalDemoPrompts, type FinishedDemoPhoto} from './finished-demo-resources';
+import {additionalDemoPhotos, additionalDemoPrompts, mareaPhotos, mareaRebuildPrompts, type FinishedDemoPhoto} from './finished-demo-resources';
 import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemoPublishing} from './ClassroomDemoPublishing';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -22,6 +23,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+ {
+  id:'marea-wigs-miami',
+  title:'Marea Wigs · Miami',
+  category:'Pelucas · marca editorial y website bilingüe',
+  description:'Catorce fotografías originales, colección de cuatro looks, filtros, favoritos, buscador de estilo, moodboard ampliable y consulta local de demostración.',
+  image:mareaPhotos[12].url,
+  url:'https://thelaunchera.com/demos/marea-wigs-miami/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/demo-source/marea-wigs-miami',
+  note:'Marca conceptual creada con AppDeploy y publicada en GitHub. Conserva los 14 PNG y sus prompts originales, la carpeta Drive y seis pasos de reconstrucción. No procesa compras, citas ni envía consultas.',
+  kind:'other',
+  photos:mareaPhotos,
+  promptsFor:'marea',
+ },
  {
   id:'sova',
   title:'SOVA Headphones',
@@ -215,7 +229,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -237,6 +251,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        </div>
        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
+       {d.id==='marea-wigs-miami'&&<p><a href={mareaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
          <summary><span>Ver kit completo: fotos + prompts + pasos</span><span>{d.photos.length} fotos · {studioDemoPrompts[d.promptsFor].length} pasos</span></summary>

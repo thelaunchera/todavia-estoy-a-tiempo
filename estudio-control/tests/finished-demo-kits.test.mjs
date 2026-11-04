@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -76,4 +76,26 @@ test('SOVA keeps ten original photo prompts, six steps and one published card',(
  assert.equal(cards.filter(card=>card.id==='sova').length,1);
  assert.match(demosSource,/publishedBrands=\{\['sova'\]\}/);
  assert.match(kit,/1dcvRv6uM4t6qz7PIkhALKJLwjGnvkJ0p/);
+});
+
+test('Marea conserva catorce PNG originales, sus prompts y una sola ficha completa',()=>{
+ const kit=read('src/marea-kit.ts');
+ const photos=JSON.parse(kit.match(/mareaPhotos: FinishedDemoPhoto\[\] = (\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/mareaRebuildPrompts: DemoRebuildPrompt\[\] = (\[[\s\S]*?\]);/)[1]);
+ assert.equal(photos.length,14);
+ assert.equal(new Set(photos.map(photo=>photo.url)).size,14);
+ for(const [index,photo] of photos.entries()){
+  assert.ok(photo.title&&photo.placement&&photo.prompt.length>1000);
+  assert.ok(photo.url.startsWith('https://thelaunchera.com/demos/marea-wigs-miami/resources/'));
+  assert.ok(photo.url.endsWith('.png'));
+  assert.ok(photo.prompt.includes('IMAGE '+(index+1)+' OF 14:'));
+ }
+ assert.equal(steps.length,6);
+ for(const step of steps)assert.ok(step.title&&step.prompt&&step.show&&step.say);
+ assert.equal(cards.filter(card=>card.id==='marea-wigs-miami').length,1);
+ assert.match(demosSource,/photos:mareaPhotos/);
+ assert.match(demosSource,/marea: mareaRebuildPrompts/);
+ assert.match(resourcesSource,/export \{mareaPhotos, mareaRebuildPrompts\} from '.\/marea-kit'/);
+ assert.match(kit,/18fNKBKlyXDVZd4VSsc4hmgGV5Br1OSdM/);
+ assert.match(kit,/No añadido al aula/);
 });
