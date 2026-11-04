@@ -297,6 +297,44 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
+  // GitHub Pages can finish a deployment while an iPhone PWA keeps the old
+  // JavaScript in memory. Never silently reload: the user may be editing a
+  // carousel that has not yet completed its local autosave.
+  const [studioUpdateAvailable,setStudioUpdateAvailable] = useState(false);
+  useEffect(() => {
+    const loadedEntry=document.querySelector<HTMLScriptElement>('script[type="module"][src]')?.src;
+    if (!loadedEntry || !import.meta.env.PROD) return;
+    let mounted=true,checkingUpdate=false;
+    const checkStudioUpdate=async()=>{
+      if(!mounted||checkingUpdate||document.visibilityState==='hidden')return;
+      checkingUpdate=true;
+      try{
+        const baseUrl=new URL(import.meta.env.BASE_URL,window.location.href);
+        const response=await fetch(baseUrl.href,{cache:'no-store',credentials:'same-origin'});
+        if(!response.ok)return;
+        const html=new DOMParser().parseFromString(await response.text(),'text/html');
+        const nextEntry=html.querySelector<HTMLScriptElement>('script[type="module"][src]')?.getAttribute('src');
+        if(nextEntry&&new URL(nextEntry,response.url).href!==loadedEntry&&mounted)
+          setStudioUpdateAvailable(true);
+      }catch{/* An offline iPhone keeps the existing Studio usable. */}
+      finally{checkingUpdate=false;}
+    };
+    const onResume=()=>{void checkStudioUpdate();};
+    document.addEventListener('visibilitychange',onResume);
+    window.addEventListener('pageshow',onResume);
+    window.addEventListener('focus',onResume);
+    window.addEventListener('online',onResume);
+    navigator.serviceWorker?.addEventListener('controllerchange',onResume);
+    void checkStudioUpdate();
+    return()=>{
+      mounted=false;
+      document.removeEventListener('visibilitychange',onResume);
+      window.removeEventListener('pageshow',onResume);
+      window.removeEventListener('focus',onResume);
+      window.removeEventListener('online',onResume);
+      navigator.serviceWorker?.removeEventListener('controllerchange',onResume);
+    };
+  },[]);
   const [aulaPreviewOpen,setAulaPreviewOpen] = useState(false);
   const [aulaPreviewError,setAulaPreviewError] = useState('');
   const aulaFrameRef=useRef<HTMLIFrameElement>(null);
@@ -435,11 +473,14 @@ function App() {
       setData({ ...incoming, records: { ...incoming.records, episodios: (incoming.records.episodios || []).map(item => ({ ...item, script: dialogueForAudience(item.script || '', item.number) })) } });
       setDenied(false);
       setError('');
-    } catch {
-      setDenied(true);
-      setError(
-        'No se pudieron cargar tus datos. Reintenta o comprueba tu cuenta.'
-      );
+    } catch (e) {
+      // Temporary mobile networking or a deployment in progress must not
+      // invalidate a signed-in owner or hide the Studio navigation.
+      const unauthorized=(e as {code?:string})?.code==='unauthorized';
+      if(unauthorized)setDenied(true);
+      setError(unauthorized
+        ? 'Tu cuenta no tiene acceso al Studio. Comprueba los permisos de administración.'
+        : 'No se pudo actualizar la información. Tu menú y el trabajo guardado siguen disponibles; revisa la conexión y vuelve a intentar.');
     } finally {
       setLoading(false);
     }
@@ -1110,6 +1151,10 @@ function App() {
           </div>
         </header>
         <main className="main">
+          {studioUpdateAvailable&&<div className="studio-update-notice" role="status">
+            <div><strong>Hay una versión nueva del Studio.</strong><span>Tu menú y herramientas pueden verse anteriores hasta actualizar. Guarda primero el carrusel que estés editando.</span></div>
+            <button type="button" onClick={()=>{if(window.confirm('¿Guardaste tu carrusel? Se recargará el Studio para mostrar la versión más reciente.'))window.location.reload();}}>Actualizar Studio</button>
+          </div>}
           <div className="page-head">
             <div>
               <span className="eyebrow">
