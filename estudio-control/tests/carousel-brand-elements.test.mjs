@@ -59,7 +59,7 @@ test('Studio safeguards existing carousel on interrupted IndexedDB restore and S
 test('Studio displays a canvas-first app workspace with the shared six-tool dock',()=>{
  const css=read('src/seamless-app.css');
  assert.ok(editor.indexOf('className="studio-app-canvas"')>=0);
- assert.ok(editor.indexOf('className="studio-app-canvas"')<editor.indexOf('aria-label="Biblioteca de elementos de marcas"'));
+ assert.ok(!editor.includes('aria-label="Biblioteca de elementos de marcas"'),'legacy stacked library must not precede canvas');
  assert.match(editor,/className="studio-app-admin"/);
  assert.match(editor,/ref=\{workspaceRef\}/);
  assert.match(editor,/workspaceRef\.current\?\.scrollIntoView/);
