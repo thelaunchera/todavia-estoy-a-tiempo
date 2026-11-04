@@ -15,7 +15,7 @@ const copy={
    ['Guarda y descarga','Revisa el diseño y descarga tu PNG.']
   ],
   editor:'En el teléfono usa «Ver diseño» para revisar la publicación sin tapar el área de edición.',
-  start:'Crear mi primera publicación',done:'Entendido',hide:'Ocultar guía',closed:'Puedes abrir esta guía cuando la necesites.'
+  start:'Crear mi primer carrusel',done:'Entendido',hide:'Ocultar guía',closed:'Puedes abrir esta guía cuando la necesites.'
  },
  en:{
   label:'Content Lab quick guide',heading:'Your first design, made simple.',
@@ -27,7 +27,7 @@ const copy={
    ['Save and download','Review your design and download the PNG.']
   ],
   editor:'On your phone, tap “View design” to preview the post without covering your editing tools.',
-  start:'Create my first post',done:'Got it',hide:'Hide guide',closed:'You can reopen this guide whenever you need it.'
+  start:'Create my first carousel',done:'Got it',hide:'Hide guide',closed:'You can reopen this guide whenever you need it.'
  }
 } as const;
 export default function QuickStartGuide({scope,onCreate,locale='es',mode='editor'}:{

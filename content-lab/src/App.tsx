@@ -1357,23 +1357,23 @@ function App() {
                 <div className="lab-greeting-main">
                   <div className="lab-greeting-copy">
                     <span className="lab-greeting-kicker"><Sparkles size={15} aria-hidden="true"/>
-                      {loginLanguage==='es'?'TU ESPACIO CREATIVO':'YOUR CREATIVE SPACE'}
+                      {loginLanguage==='es'?'TU APP PARA CREAR CONTENIDO':'YOUR CONTENT CREATION APP'}
                     </span>
-                    <h1>{loginLanguage==='es'?'¡Qué gusto verte de nuevo! 👋':'Welcome back! 👋'}</h1>
+                    <h1>{loginLanguage==='es'?'¿Qué carrusel creamos hoy?':'What carousel will you create today?'}</h1>
                     <p>{loginLanguage==='es'
-                      ?'Tu estudio está listo. ¿Qué vamos a crear hoy?'
-                      :'Your studio is ready. What shall we create today?'}</p>
+                      ?'Tus fotos, tus textos y tu estilo. Crea un carrusel o empieza con otro formato.'
+                      :'Your photos, your type, your style. Start a carousel or choose another format.'}</p>
                     {brand.name&&brand.name!=='My Brand'&&<span className="lab-greeting-brand">
                       {loginLanguage==='es'?'Trabajando en':'Working on'} <strong>{brand.name}</strong>
                     </span>}
                   </div>
                   <div className="lab-greeting-actions">
-                    <button type="button" className="btn dark" onClick={()=>start()}>
+                    <button type="button" className="btn dark" onClick={startFactory}>
                       <Plus size={17} aria-hidden="true"/>
-                      {loginLanguage==='es'?'Crear publicación':'Create post'}
+                      {loginLanguage==='es'?'Crear carrusel':'Create carousel'}
                     </button>
-                    <button type="button" className="lab-greeting-secondary" onClick={startFactory}>
-                      {loginLanguage==='es'?'Carruseles':'Carousels'}
+                    <button type="button" className="lab-greeting-secondary" onClick={()=>start()}>
+                      {loginLanguage==='es'?'Crear post':'Create post'}
                     </button>
                     <button type="button" className="lab-greeting-secondary" onClick={()=>navigate('calendar')}>
                       <CalendarDays size={16}/>{loginLanguage==='es'?'Organizar contenido':'Plan content'}
@@ -1397,7 +1397,12 @@ function App() {
                   </div>
                 </details>}
               </section>
-              {account?.email&&<QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="home"/>}
+              <section className="lab-format-launcher" aria-label={loginLanguage==='es'?'Elige un formato':'Choose a format'}>
+                <button type="button" className="lab-format-featured" onClick={startFactory}><span className="lab-format-art" aria-hidden="true"><i/><i/><i/></span><strong>{loginLanguage==='es'?'Carrusel':'Carousel'}</strong><small>{loginLanguage==='es'?'Un diseño que continúa entre slides':'One design that flows across slides'}</small><span>4:5 · PNG</span></button>
+                <button type="button" onClick={()=>start()}><span className="lab-format-art single" aria-hidden="true"><i/></span><strong>Post</strong><small>{loginLanguage==='es'?'Una foto, una idea, tu composición':'One photo, one idea, your composition'}</small><span>4:5 · PNG</span></button>
+                <button type="button" onClick={()=>startVertical('Story')}><span className="lab-format-art vertical" aria-hidden="true"><i/></span><strong>{loginLanguage==='es'?'Historia':'Story'}</strong><small>{loginLanguage==='es'?'Lleva tu idea al formato vertical':'Take your idea into a vertical format'}</small><span>9:16 · PNG</span></button>
+              </section>
+              {account?.email&&<QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory} locale={loginLanguage} mode="home"/>}
               {mine.length>0&&<section className="stats">
                 {[
                   {
