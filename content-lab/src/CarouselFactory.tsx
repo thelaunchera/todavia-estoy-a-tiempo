@@ -1528,6 +1528,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       </div>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+        backgroundColor={slide.backgroundColor||style.canvasColor}
+        onBackgroundColor={color=>{
+          if(style.seamlessEnabled){
+            setAll(slides.map(part=>({...part,backgroundId:'brand',backgroundImageId:'',backgroundGradient:undefined})),
+              normalizeCarouselStyle({...style,canvasColor:color,canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''}));
+          }else replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:color,backgroundGradient:undefined});
+        }}
         onExtendBackground={extendCurrentBackground}
         canExtendBackground={!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background')}
         focusLayerId={focusWallpaperId}
