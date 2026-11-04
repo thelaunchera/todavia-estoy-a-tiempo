@@ -1,0 +1,26 @@
+name: Studio carousel safety QA
+on:
+  pull_request:
+    paths:
+      - 'estudio-control/**'
+      - '.github/workflows/studio-carousel-qa.yml'
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Studio dependencies
+        working-directory: estudio-control
+        run: npm install --no-audit --no-fund
+      - name: Test brand carousels, restore guards and editorial plan
+        working-directory: estudio-control
+        run: npm run test:editorial-plan
+      - name: Type-check private Studio
+        working-directory: estudio-control
+        run: npx tsc --noEmit --pretty false
+      - name: Build private Studio
+        working-directory: estudio-control
+        run: npm run build

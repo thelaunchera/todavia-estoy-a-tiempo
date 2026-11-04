@@ -92,15 +92,22 @@ export default function SeamlessEditor(){
  };
  useEffect(()=>{
   let live=true;
-  void Promise.all([readEditorRecord<typeof defaults>(KEY),readEditorRecord<typeof projects>(PROJECTS_KEY)])
-   .then(([savedDoc,savedProjects])=>{
+  void Promise.allSettled([readEditorRecord<typeof defaults>(KEY),readEditorRecord<typeof projects>(PROJECTS_KEY)])
+   .then(([docResult,projectsResult])=>{
     if(!live)return;
-    if(savedDoc)setDoc(savedDoc);
-    if(savedProjects)setProjects(savedProjects);
-    setSaveStatus('Guardado automático activado');
+    if(projectsResult.status==='fulfilled'&&projectsResult.value)setProjects(projectsResult.value);
+    // A failed read must not turn the empty initial canvas into the saved document.
+    if(docResult.status==='rejected'){
+     setSaveStatus('No se pudo leer el diseño anterior. Guardado detenido para no sobrescribirlo.');
+     return;
+    }
+    if(docResult.value)setDoc(docResult.value);
+    setStorageReady(true);
+    setSaveStatus(projectsResult.status==='rejected'
+     ?'Diseño recuperado, pero no se pudo cargar la lista de proyectos.'
+     :'Guardado automático activado');
    })
-   .catch(()=>{if(live)setSaveStatus('No se pudo abrir el guardado automático. No cierres el editor sin exportar tu trabajo.');})
-   .finally(()=>{if(live)setStorageReady(true)});
+   .catch(()=>{if(live)setSaveStatus('No se pudo recuperar el carrusel. Guardado detenido para protegerlo.');});
   return()=>{live=false};
  },[]);
  useEffect(()=>{
@@ -111,6 +118,18 @@ export default function SeamlessEditor(){
     .catch(()=>setSaveStatus('No se guardaron los cambios. Libera espacio antes de salir.'));
   },350);
   return()=>window.clearTimeout(timer);
+ },[doc,storageReady]);
+ useEffect(()=>{
+  if(!storageReady)return;
+  // iOS may suspend the tab before the 350ms debounce finishes.
+  const flush=()=>{void persistDraft(doc).catch(()=>setSaveStatus('No se guardaron los últimos cambios. Libera espacio y vuelve a guardar.'));};
+  const onHidden=()=>{if(document.visibilityState==='hidden')flush();};
+  document.addEventListener('visibilitychange',onHidden);
+  window.addEventListener('pagehide',flush);
+  return()=>{
+   document.removeEventListener('visibilitychange',onHidden);
+   window.removeEventListener('pagehide',flush);
+  };
  },[doc,storageReady]);
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
@@ -387,6 +406,10 @@ export default function SeamlessEditor(){
  const items:Item[]=draft.slides.map((txt,i)=>({id:++nextId.current,kind:'text',text:txt,textStyle:i===0?'hook':'title',x:i*W+90,y:i===0?310:360,width:900,fontSize:i===0?76:66,color}));
  setDoc({count:4,background:base,backgroundImages:{},items});setSlide(0);setSelected(null);setActiveProjectId(null);setRecentlyDeleted(null);setProjectName(draft.title);setActiveBrief(draft);setMessage('Guion cargado: 4 slides editables. Añade fotografías auténticas antes de exportar.');};
  const saveProject=async(silent=false):Promise<boolean>=>{
+  if(!storageReady){
+   setMessage('El guardado anterior todavía no se pudo recuperar. Reabre el editor antes de guardar para no sobrescribir tu proyecto.');
+   return false;
+  }
   const name=projectName.trim()||'Mi carrusel';
   const id=activeProjectId&&projects.some(p=>p.id===activeProjectId)?activeProjectId:String(Date.now());
   const next=[{id,name,updated:new Date().toLocaleDateString('es-US'),doc:JSON.parse(JSON.stringify(doc))},...projects.filter(p=>p.id!==id)];
@@ -502,6 +525,11 @@ export default function SeamlessEditor(){
  const viewportScale=slideWidthPx/W;
  useEffect(()=>{viewport.current?.scrollTo({left:slide*slideWidthPx});},[canvasZoom]);
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
+ if(!storageReady)return <section style={{maxWidth:620,margin:'40px auto',padding:24,background:'#FAF8F3',borderRadius:16,color:'#191919'}}>
+  <h2>Recuperando tu carrusel</h2>
+  <p role="alert">{saveStatus}</p>
+  {saveStatus.startsWith('No se')&&<button type="button" onClick={()=>window.location.reload()} style={{padding:'12px 18px',background:'#F2D85B',border:0,borderRadius:12,fontWeight:700}}>Reintentar sin borrar mis proyectos</button>}
+ </section>;
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
   <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
   <section aria-label="Biblioteca de elementos de marcas" style={{margin:'14px 0',padding:13,border:'1px solid #D6D8DD',borderRadius:15,background:'#FAF8F3'}}>

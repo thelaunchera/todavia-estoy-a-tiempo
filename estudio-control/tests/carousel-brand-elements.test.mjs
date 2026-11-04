@@ -40,3 +40,12 @@ test('Studio preserves source image quality and can hide pending carousel briefs
  assert.match(editor,/Quitar de pendientes/);
  assert.match(editor,/renderExportSlide/);
 });
+
+test('Studio safeguards existing carousel on interrupted IndexedDB restore and Safari suspend',()=>{
+ assert.match(editor,/Promise\.allSettled\(\[readEditorRecord/);
+ assert.match(editor,/if\(docResult\.status==='rejected'\)/);
+ assert.match(editor,/if\(!storageReady\)return <section/);
+ assert.match(editor,/if\(!storageReady\)\{\s*setMessage\(/);
+ assert.match(editor,/document\.addEventListener\('visibilitychange',onHidden\)/);
+ assert.match(editor,/window\.addEventListener\('pagehide',flush\)/);
+});
