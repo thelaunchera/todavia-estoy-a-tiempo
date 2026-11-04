@@ -27,8 +27,18 @@ test('course stays blocked while Content Lab checkout is live with QA caveat',()
  assert.match(catalog,/Checkout y acceso de compradores cerrados/);
  assert.match(catalog,/Falta verificar compra y entrega completas/);
 });
-test('all links use GitHub, GitHub Pages, company domains, or known public services, not AppDeploy',()=>{
- assert.doesNotMatch(links,/https:\/\/[^\s'"]*appdeploy\.ai/i);
+test('only approved public AppDeploy demos are listed and remain demo-only',()=>{
+ const approved = new Set([
+  'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/',
+  'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/'
+ ]);
+ const appdeployEntries = links.split('\n').filter(line=>/url:'https:\/\/[^']*appdeploy\.ai\//.test(line));
+ assert.ok(appdeployEntries.length >= 2, 'Approved AppDeploy demos must be discoverable');
+ for (const entry of appdeployEntries) {
+  const url = entry.match(/url:'([^']+)'/)?.[1];
+  assert.ok(approved.has(url), 'Unapproved AppDeploy destination: '+url);
+  assert.match(entry,/visibility:'demo'/, 'AppDeploy concepts must not be marked as real sales');
+ }
  assert.match(links,/thelaunchera\.github\.io\/demo-booking-landing-\/brand-board-studio/);
  assert.match(catalog,/resolveStudioLinks\(entries\)/);
  assert.match(catalog,/!readOnly\|\|x\.shareable/);

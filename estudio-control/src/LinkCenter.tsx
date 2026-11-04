@@ -5,7 +5,7 @@ import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','tle-experience'] as const;
+export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','tle-experience'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -18,6 +18,7 @@ const GROUPS: {id:Category; title:string; intro:string}[] = [
   {id:'lab',title:'Content Lab',intro:'Editor creativo, prompts, herramientas y archivos'}
 ];
 export const STUDIO_LINKS:BaseLink[] = [
+  {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
