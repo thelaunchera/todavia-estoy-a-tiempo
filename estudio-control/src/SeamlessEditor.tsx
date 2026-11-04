@@ -11,6 +11,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
+import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
