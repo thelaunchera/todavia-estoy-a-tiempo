@@ -55,3 +55,19 @@ test('Studio safeguards existing carousel on interrupted IndexedDB restore and S
  assert.match(editor,/document\.addEventListener\('visibilitychange',onHidden\)/);
  assert.match(editor,/window\.addEventListener\('pagehide',flush\)/);
 });
+
+test('Studio displays a canvas-first app workspace with the shared six-tool dock',()=>{
+ const css=read('src/seamless-app.css');
+ assert.ok(editor.indexOf('className="studio-app-canvas"')>=0);
+ assert.ok(!editor.includes('aria-label="Biblioteca de elementos de marcas"'),'legacy stacked library must not precede canvas');
+ assert.match(editor,/className="studio-app-admin"/);
+ assert.match(editor,/ref=\{workspaceRef\}/);
+ assert.match(editor,/workspaceRef\.current\?\.scrollIntoView/);
+ assert.match(editor,/className="studio-app-slide-tray"/);
+ assert.match(editor,/className="studio-app-toolbar"/);
+ for(const label of ['Fotos','Texto','Stickers','Elementos','Fondo','Capas'])assert.ok(editor.includes("label:'"+label+"'"),label);
+ assert.match(css,/\.studio-app-toolbar\{position:fixed!important/);
+ assert.match(css,/\.studio-app-sheet\{/);
+ assert.match(editor,/onClick=\{\(\)=>void downloadSlide\(slide\)\}/);
+ assert.equal((editor.match(/ref=\{photoInput\}/g)||[]).length,1);
+});

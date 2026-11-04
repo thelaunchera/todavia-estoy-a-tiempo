@@ -548,3 +548,41 @@
 }
 
 .factory-mode-hint{margin:10px 0;padding:10px 13px;background:#e9f1f1;border:1px solid #cadae0;border-radius:10px;color:#2a4c58;font-size:12px;line-height:1.5}
+
+/* Content Lab canvas app: keep its brand data private, but match the Studio editing controls. */
+@media(max-width:920px){
+ .factory-canvas-active{min-width:0;padding-bottom:calc(95px + env(safe-area-inset-bottom))}
+ .factory-canvas-active .factory-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;margin:0 0 5px;border:1px solid #e3e7e5;border-radius:15px;background:#FAF8F3}
+ .factory-canvas-active .factory-header>div{min-width:0;flex:1}
+ .factory-canvas-active .factory-header .eyebrow,.factory-canvas-active .factory-header p{display:none}
+ .factory-canvas-active .factory-header h1{font-size:clamp(18px,4vw,23px)!important;line-height:1.2!important;margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .factory-canvas-active .factory-header>button{flex:0 0 auto;padding:8px 10px;min-height:41px;font-size:11px;border-radius:11px}
+ .factory-canvas-active .factory-format-switch{display:flex;gap:6px;margin:4px 0;padding:3px}
+ .factory-canvas-active .factory-format-switch button{min-width:0;flex:1;min-height:39px;padding:7px 8px;gap:4px;border-radius:10px}
+ .factory-canvas-active .factory-format-switch .factory-mode-icon,.factory-canvas-active .factory-format-switch small{display:none}
+ .factory-canvas-active .factory-format-switch strong{font-size:11px}
+ .factory-canvas-active .factory-design-flow,.factory-canvas-active .factory-mode-hint{display:none}
+ .factory-canvas-active .factory-studio-tabs.factory-cata-nav{margin:4px 0 5px;padding:0;gap:5px;border:0;background:transparent}
+ .factory-canvas-active .factory-studio-tabs .factory-step-rail>button{min-height:37px;padding:6px 9px;font-size:10px}
+ .factory-canvas-active .factory-studio-tabs .factory-step-number{display:none}
+ .factory-canvas-active .factory-ia-entry{min-height:37px;font-size:10px}
+ .factory-canvas-active .factory-slide-actions{margin:3px 0 4px;padding:3px 7px;border-radius:10px}
+ .factory-canvas-active .factory-slide-actions label,.factory-canvas-active .factory-slide-actions button{font-size:11px}
+ .factory-canvas-active .factory-slide-actions select{min-height:35px;padding:4px 7px}
+ .factory-canvas-active .factory-slide-actions button{min-height:35px;padding:5px 9px}
+ .factory-canvas-active .factory-mobile-preview-trigger{min-height:33px;margin:2px 0 3px auto;padding:4px 9px;font-size:11px}
+ .factory-canvas-active .factory-persistent-layout,.factory-canvas-active .factory-persistent-content{min-width:0;margin:0;padding:0}
+ .factory-canvas-active .factory-step-intro{display:none}
+ .factory-canvas-active .panorama-editor{margin-top:0}
+ .factory-canvas-active .factory-photo-extra{margin-top:12px}
+ .factory-canvas-active .factory-step-footer{margin-bottom:calc(25px + env(safe-area-inset-bottom))}
+}
+
+.factory-app-header-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.factory-app-header-actions .btn{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;padding:8px 11px;border-radius:11px;white-space:nowrap}
+@media(max-width:920px){
+ .factory-canvas-active .factory-app-header-actions{gap:4px}
+ .factory-canvas-active .factory-app-header-actions .btn{min-height:39px;font-size:10px;padding:7px 8px;gap:4px}
+ .factory-canvas-active .factory-app-header-actions .btn svg{width:14px;height:14px}
+}
+@media(max-width:365px){.factory-canvas-active .factory-app-header-actions .btn svg{display:none}}

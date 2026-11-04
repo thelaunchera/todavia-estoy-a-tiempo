@@ -1,0 +1,68 @@
+/* One-canvas, one-dock editing contract. Studio projects stay private and local. */
+.studio-seamless-app{--editor-ink:#191919;--editor-paper:#faf8f3;--editor-accent:#f2d85b;display:grid;gap:10px;min-width:0;padding-bottom:calc(96px + env(safe-area-inset-bottom));color:var(--editor-ink)}
+.studio-app-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 12px;border:1px solid #e4e4df;background:var(--editor-paper);border-radius:17px}
+.studio-app-name{display:flex;flex:1 1 170px;min-width:0;flex-direction:column;gap:4px}
+.studio-app-name>span{font-size:10px;font-weight:800;color:#6d7375;letter-spacing:.11em}
+.studio-app-name input{width:100%;min-width:0;max-width:310px;background:transparent;border:0;border-bottom:1px solid transparent;border-radius:0;outline-offset:3px;padding:3px 0;font-weight:750;font-size:clamp(15px,3.5vw,21px);line-height:1.25;font-family:inherit;color:#191919;text-overflow:ellipsis}
+.studio-app-name input:focus{border-color:#acbec5}
+.studio-app-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.studio-app-save-state{font-size:10px;color:#54736a;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.studio-app-actions button{min-height:42px;border:1px solid #cdd9d8;border-radius:12px;padding:8px 12px;background:white;color:#191919;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer}
+.studio-app-actions button.primary{background:#191919;color:#fff;border-color:#191919}
+.studio-app-actions button:disabled{opacity:.5;cursor:wait}
+.studio-app-canvas{padding:8px;background:#f4f5f4;border:1px solid #e1e5e5;border-radius:18px;min-width:0;scroll-margin-top:90px}
+.studio-app-canvas [data-carousel-canvas]{touch-action:none}
+.studio-app-slide-tray{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;border:1px solid #e5e8e6;padding:8px;border-radius:14px;background:#fff;min-width:0}
+.studio-app-slide-tabs{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:1 1 150px;scrollbar-width:none}
+.studio-app-slide-tabs>button{flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid #d9e1e3;background:#fafafa;color:#191919;font-weight:750;font-size:13px;font-family:inherit}
+.studio-app-slide-tabs>button.is-active{background:#f2d85b;border-color:#cfb948}
+.studio-app-zoom{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex:0 0 auto}
+.studio-app-zoom>span{font-size:11px;color:#526670;font-weight:700;white-space:nowrap}
+.studio-app-zoom>button{min-width:33px;min-height:37px;border:1px solid #d5dfe2;border-radius:10px;background:white;font-size:18px}
+.studio-app-zoom>button:disabled{opacity:.35}
+.studio-app-zoom label{display:flex;align-items:center;gap:3px;font-size:10px}
+.studio-app-zoom select{max-width:70px;border:1px solid #d5dfe2;border-radius:10px;background:white;min-height:37px;padding:4px;font-size:11px}
+.studio-app-selection{min-width:0}
+.studio-app-selection>[role=toolbar]{overflow-x:auto;overscroll-behavior-x:contain;max-width:100%;scrollbar-width:thin}
+.studio-app-toolbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:6px;border:1px solid #dce5e5;border-radius:18px;background:#fff;box-shadow:0 5px 22px #152c3a23;z-index:1801}
+.studio-app-toolbar button{display:grid!important;align-content:center;justify-items:center;gap:4px;min-width:0!important;min-height:55px!important;white-space:nowrap;font-size:11px!important}
+.studio-app-toolbar button>span{display:grid;place-items:center;min-width:0}
+.studio-app-toolbar button[aria-pressed=true]{background:#f5e7a3!important;color:#191919!important}
+.studio-app-sheet{z-index:1802!important;box-sizing:border-box;overscroll-behavior:contain}
+.studio-app-admin{border:1px solid #dde4e4;border-radius:15px;background:#faf8f3;padding:10px;min-width:0}
+.studio-app-admin>summary{cursor:pointer;font-weight:740;font-size:13px;padding:8px;list-style-position:inside}
+.studio-app-admin[open]>summary{margin-bottom:12px;border-bottom:1px solid #dfe4e4}
+.studio-app-admin>section,.studio-app-admin>details,.studio-app-admin>div{max-width:100%;min-width:0}
+.studio-seamless-app button{touch-action:manipulation}
+@media(max-width:799px){
+ .studio-seamless-app{gap:7px;padding-bottom:calc(116px + env(safe-area-inset-bottom))}
+ .studio-app-topbar{padding:8px;gap:7px}
+ .studio-app-name{flex:1 1 125px}
+ .studio-app-name input{font-size:16px!important}
+ .studio-app-actions{flex:0 0 auto;gap:5px}
+ .studio-app-save-state{display:none}
+ .studio-app-actions button{min-height:40px;padding:7px 9px;font-size:11px}
+ .studio-app-canvas{padding:4px;border-radius:12px}
+ .studio-app-canvas>div{border-radius:10px!important;padding:3px!important}
+ .studio-app-slide-tray{padding:6px;gap:6px}
+ .studio-app-slide-tabs{flex-basis:100%;gap:5px;order:2}
+ .studio-app-zoom{width:100%;justify-content:space-between;order:1}
+ .studio-app-toolbar{position:fixed!important;left:50%;bottom:calc(9px + env(safe-area-inset-bottom))!important;transform:translateX(-50%);width:calc(100vw - 16px);max-width:650px;box-sizing:border-box;margin:0!important;box-shadow:0 7px 26px #14273330}
+ .studio-app-toolbar button{font-size:10px!important;min-height:54px!important;padding:3px 0!important}
+ .studio-app-toolbar button>span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+ .studio-app-sheet{left:8px!important;right:8px!important;bottom:calc(84px + env(safe-area-inset-bottom))!important;transform:none!important;width:auto!important;max-width:none!important;max-height:min(45dvh,440px)!important;z-index:1802!important;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+ .studio-app-selection>[role=toolbar]{flex-wrap:nowrap!important;gap:5px!important;padding:4px!important;margin:2px 0!important}
+ .studio-app-selection>[role=toolbar]>button{flex:0 0 auto!important;white-space:nowrap;min-height:40px}
+ .studio-app-admin>summary{font-size:12px}
+}
+@media(max-width:365px){
+ .studio-app-actions button{padding:6px 7px}
+ .studio-app-zoom>span{display:none}
+ .studio-app-toolbar button>span:last-child{font-size:9px}
+}
+
+.studio-app-photos{display:grid;gap:10px}
+.studio-app-photos>strong{font-size:12px;color:#324955}
+.studio-app-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:7px;max-height:180px;overflow-y:auto}
+.studio-app-photo-grid>button{background:#fff;border:1px solid #dde4e5;border-radius:10px;padding:4px;min-height:77px}
+.studio-app-photo-grid img{width:100%;height:70px;display:block;object-fit:contain}

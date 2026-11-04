@@ -1,7 +1,7 @@
 import BrandAssetLibrary from './BrandAssetLibrary';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
-import {SOVA_CAROUSEL_ASSETS,type SovaCarouselAsset} from './sova-carousel-assets';
-import {GOLDEN_GRID_CAROUSEL_ASSETS,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
+import {type SovaCarouselAsset} from './sova-carousel-assets';
+import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
@@ -11,6 +11,8 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
+import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
+import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
@@ -49,12 +51,13 @@ export default function SeamlessEditor(){
  const [hiddenDraftIds,setHiddenDraftIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem('studio-hidden-carousel-drafts-v1')||'[]')}catch{return []}});
  useEffect(()=>{try{localStorage.setItem('studio-hidden-carousel-drafts-v1',JSON.stringify(hiddenDraftIds))}catch{}},[hiddenDraftIds]);
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
- const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
- const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|'elementos'|null>(null);
+ const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
  const canvas=useRef<HTMLCanvasElement>(null);
+ const workspaceRef=useRef<HTMLDivElement>(null);
+ const previousLayerCount=useRef<number|null>(null);
  const viewport=useRef<HTMLDivElement>(null);
  const photoInput=useRef<HTMLInputElement>(null);
  const replacePhotoId=useRef<number|null>(null);
@@ -131,6 +134,13 @@ export default function SeamlessEditor(){
    window.removeEventListener('pagehide',flush);
   };
  },[doc,storageReady]);
+ useEffect(()=>{
+  // Moving a new sticker/photo/text into the design must reveal the canvas, not another settings block.
+  const previous=previousLayerCount.current;
+  previousLayerCount.current=doc.items.length;
+  if(!storageReady||previous===null||doc.items.length<=previous)return;
+  requestAnimationFrame(()=>workspaceRef.current?.scrollIntoView({block:'nearest',behavior:'smooth'}));
+ },[doc.items.length,storageReady]);
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
@@ -530,102 +540,61 @@ export default function SeamlessEditor(){
   <p role="alert">{saveStatus}</p>
   {saveStatus.startsWith('No se')&&<button type="button" onClick={()=>window.location.reload()} style={{padding:'12px 18px',background:'#F2D85B',border:0,borderRadius:12,fontWeight:700}}>Reintentar sin borrar mis proyectos</button>}
  </section>;
- return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
-  <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
-  <section aria-label="Biblioteca de elementos de marcas" style={{margin:'14px 0',padding:13,border:'1px solid #D6D8DD',borderRadius:15,background:'#FAF8F3'}}>
-   <strong style={{fontSize:17}}>Biblioteca visual · {GOLDEN_GRID_CAROUSEL_ASSETS.length+SOVA_CAROUSEL_ASSETS.length+EDITORIAL_STICKER_ASSETS.length} elementos</strong>
-   <p style={{fontSize:12,color:'#66717A'}}>Todas las marcas en una sola galería. Toca una cinta, banner o detalle para colocarlo individualmente sobre el lienzo.</p>
-   <BrandAssetLibrary onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>
-  </section>
-  <div role="group" aria-label="Proyecto actual" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,padding:10,margin:'10px 0 14px',border:'1px solid #D7DFE2',borderRadius:14,background:'#FAF8F3'}}>
-   <label style={{display:'flex',alignItems:'center',flex:'1 1 210px',gap:8,fontWeight:650,fontSize:13}}>Proyecto
-    <input aria-label="Nombre del proyecto actual" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,minWidth:0,width:'100%',boxSizing:'border-box'}}/>
-   </label>
-   <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} onClick={()=>void saveProject()}>Guardar</button>
-   <button type="button" style={{...control,fontWeight:750}} onClick={startNewProject}>+ Nuevo proyecto</button>
-   <small role="status" aria-live="polite" style={{flex:'1 1 100%',color:saveStatus.startsWith('No se')?'#B42318':'#496259',fontWeight:600}}>{saveStatus}</small>
+ return <section className="studio-seamless-app" style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
+  <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
+   <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
+   <div className="studio-app-actions">
+    <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
+    <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
+    <button type="button" className="primary" onClick={()=>void downloadSlide(slide)} disabled={busy}>{busy?'Preparando…':'Exportar PNG'}</button>
+   </div>
+  </header>
+  <input ref={photoInput} type="file" accept="image/*" onChange={onFile}
+    style={{position:'absolute',width:1,height:1,opacity:0,pointerEvents:'none'}} aria-label="Elegir foto del dispositivo"/>
+
+  <div className="studio-app-canvas" ref={workspaceRef} aria-label="Área de edición: lienzo visible">
+  <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'x proximity',overscrollBehaviorX:'contain'}}>
+   <div style={{position:'relative',width:doc.count*slideWidthPx,maxWidth:'none'}}>
+   <canvas ref={canvas} data-carousel-canvas="true" onPointerDown={down} onPointerMove={move}
+    onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
+    style={{display:'block',width:'100%',height:'auto',maxWidth:'none',touchAction:'none',cursor:'grab'}}
+    aria-label="Lienzo continuo del carrusel: toca para seleccionar y mover; toca dos veces para mostrar la cruz de eliminar"/>
+   {current&&deleteArmedId===current.id&&<button type="button" data-carousel-delete="true"
+    aria-label={'Eliminar '+(current.kind==='text'?'texto':current.kind==='image'?'foto':'sticker')+' seleccionado'}
+    title="Eliminar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteElement(current.id)}}
+    style={{position:'absolute',left:Math.max(0,Math.min(doc.count*slideWidthPx-42,(current.x+itemBounds(current).w)*viewportScale-21)),
+     top:Math.max(0,current.y*viewportScale-21),width:42,height:42,borderRadius:'50%',
+     border:'2px solid #fff',background:'#191919',color:'#fff',fontSize:26,fontWeight:650,
+     display:'grid',placeItems:'center',cursor:'pointer',zIndex:7,boxShadow:'0 2px 10px #0005',
+     touchAction:'manipulation'}}>×</button>}
+   {editingText!==null&&current?.id===editingText&&current.kind==='text'&&<textarea ref={canvasTextRef}
+    aria-label="Escribir directamente sobre el carrusel" rows={3} value={current.text||''}
+    onChange={e=>update(current.id,{text:e.target.value})} onBlur={()=>setEditingText(null)}
+    onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
+    style={{position:'absolute',left:current.x*viewportScale,top:current.y*viewportScale,
+     width:Math.max(100,current.width*viewportScale),height:Math.max(52,itemBounds(current).h*viewportScale+14),
+     maxWidth:'none',font:'700 '+current.fontSize*viewportScale+'px/1.3 Arial,sans-serif',
+     color:current.color,background:'rgba(250,248,243,.95)',border:'2px solid #447B94',borderRadius:6,
+     padding:3,resize:'none',zIndex:5,boxShadow:'0 2px 12px #0002'}}/>}
+   </div>
   </div>
-  <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
-   <summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Carruseles pendientes ({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</summary>
-   <p style={{fontSize:13}}>Ocultar un borrador de esta lista no lo borra de Notion ni elimina proyectos guardados.</p>
-   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-    <label style={{fontSize:13}}>Marca <select value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} style={{...control,marginLeft:8}}><option value="todos">Todas</option><option value="tle">The Launch Era</option><option value="podcast">Podcast</option><option value="clase">Clase</option><option value="lab">Content Lab</option></select></label>
-    {EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<button type="button" style={control} onClick={()=>{if(window.confirm('¿Quitar todos los borradores de pendientes? No se borrarán de Notion.'))setHiddenDraftIds(EDITORIAL_DRAFTS.map(d=>d.id))}}>Quitar todos de la lista</button>}
-    {hiddenDraftIds.length>0&&<button type="button" style={control} onClick={()=>setHiddenDraftIds([])}>Restaurar ocultos ({hiddenDraftIds.length})</button>}
+
+  </div>
+  <nav className="studio-app-slide-tray" aria-label="Elegir slide y zoom del lienzo">
+   <div className="studio-app-slide-tabs">
+    {Array.from({length:doc.count},(_,index)=><button key={index} type="button"
+      aria-label={'Ir al slide '+(index+1)} aria-current={slide===index?'step':undefined}
+      className={slide===index?'is-active':''} onClick={()=>goSlide(index)}>{index+1}</button>)}
    </div>
-   <div style={{display:'grid',gap:8,marginTop:12,maxHeight:340,overflowY:'auto'}}>
-    {EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)&&(brandFilter==='todos'||d.brand===brandFilter)).map(d=><div key={d.id} style={{border:'1px solid #ddd',borderRadius:12,padding:12,background:'white'}}>
-     <strong style={{display:'block',fontSize:14}}>{d.title}</strong>
-     <span style={{fontSize:12,color:'#555'}}>{d.brand==='tle'?'The Launch Era':d.brand==='lab'?'Content Lab':d.brand==='clase'?'Clase':'Podcast'} · {d.date} · 4 slides</span>
-     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:9}}>
-      <button type="button" style={{...control,background:'#F2D85B'}} onClick={()=>prepareEditorial(d)}>Preparar en editor</button>
-      <button type="button" style={control} onClick={()=>setHiddenDraftIds(ids=>[...new Set([...ids,d.id])])}>Quitar de pendientes</button>
-      <a href={d.url} target="_blank" rel="noopener noreferrer" style={{fontSize:13,alignSelf:'center'}}>Ver Notion</a>
-     </div>
-    </div>)}
-    {!EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<p style={{fontSize:13}}>No quedan borradores visibles. Puedes restaurarlos cuando quieras.</p>}
+   <div className="studio-app-zoom"><span>Slide {slide+1}/{doc.count}</span>
+    <button type="button" onClick={()=>goSlide(Math.max(0,slide-1))} disabled={slide===0} aria-label="Slide anterior">‹</button>
+    <button type="button" onClick={()=>goSlide(Math.min(doc.count-1,slide+1))} disabled={slide===doc.count-1} aria-label="Slide siguiente">›</button>
+    <label>Zoom <select aria-label="Zoom del lienzo" value={canvasZoom} onChange={e=>setCanvasZoom(Number(e.target.value) as 75|100|125|150)}>
+      {[75,100,125,150].map(n=><option key={n} value={n}>{n}%</option>)}</select></label>
    </div>
-  </details>
-  {activeBrief&&<details open style={{border:'1px solid #D6D8DD',borderRadius:12,padding:12,marginBottom:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Guion activo · {activeBrief.title}</summary><p style={{fontSize:13}}><b>Dirección visual:</b> {activeBrief.direction}</p><p style={{fontSize:13}}><b>CTA:</b> {activeBrief.cta}</p><p style={{fontSize:12}}>Los textos están en las cuatro láminas y se pueden mover o editar. La portada requiere fotografía real.</p></details>}
-  <details style={{marginBottom:12,border:'1px solid #ddd',borderRadius:14,padding:'10px 12px',background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Herramientas y botones · tocar para abrir o recoger</summary><div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:12,marginBottom:8,alignItems:'center'}}>
-   <label>Slides <select aria-label="Cantidad de slides" style={control} value={doc.count} onChange={e=>setDoc(d=>({...d,count:Number(e.target.value)}))}>{[2,3,4,5,6,7,8,9,10].map(n=><option key={n}>{n}</option>)}</select></label>
-   <label>Fondo <input aria-label="Color de fondo" type="color" value={doc.background} onChange={e=>setDoc(d=>({...d,background:e.target.value}))}/></label>
-   <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}><button style={{...control,background:'#F2D85B',fontWeight:700}} onClick={()=>addText('paragraph')}>+ Texto libre</button><button style={control} onClick={()=>addText('hook')}>+ Hook</button><button style={control} onClick={()=>addText('title')}>+ Título</button><button style={control} onClick={()=>addText('caption')}>+ Texto pequeño</button></div>
-   <input ref={photoInput} type="file" accept="image/*" onChange={onFile}  style={{position:'absolute',width:1,height:1,opacity:0}} aria-label="Elegir foto del dispositivo"/><button style={control} type="button" onClick={()=>{replacePhotoId.current=null;photoInput.current?.click()}}>+ Abrir fotos</button>
-   <button style={{...control,background:'#F2D85B',fontWeight:700}} disabled={busy} onClick={()=>void downloadSlide(slide)}>{busy?'Preparando…':'Guardar slide '+(slide+1)+' en mi teléfono'}</button>
-   <button style={control} disabled={busy} onClick={()=>void exportSlides()}>Descargar carrusel completo (ZIP)</button>
-  </div></details>
-  {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
-    {current&&<label style={{display:'flex',alignItems:'center',gap:6}}>Girar <input aria-label="Girar elemento" type="range" min="-180" max="180" step="1" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/><output>{current.rotation||0}°</output></label>}{current.kind==='text'&&<><div style={{flex:'1 1 100%',padding:12,background:'#FAF8F3',borderRadius:12}}><label htmlFor="seamless-text-editor" style={{display:'block',fontWeight:700,marginBottom:6}}>Escribe o edita este texto</label><textarea ref={textEditor} id="seamless-text-editor" aria-label="Escribir texto de la diapositiva" rows={6} placeholder="Escribe aquí todo lo que quieras explicar. Puedes añadir párrafos y saltos de línea…" style={{...control,width:'100%',boxSizing:'border-box',resize:'vertical',fontFamily:'inherit'}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><div style={{fontSize:12,marginTop:5}}>Cada texto es independiente. El párrafo se ajusta automáticamente al ancho del bloque.</div><label style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>Ancho del texto <input aria-label="Ancho del párrafo" type="range" min="200" max="1000" step="20" value={current.width||900} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label></div><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
-    {current.kind==='text'&&<div role="group" aria-label="Curvar texto" style={{flex:'1 1 100%',display:'grid',gap:9,padding:'10px 12px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
-      <strong style={{fontSize:14}}>Efecto de texto · Curva circular</strong>
-      <label style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',fontSize:13}}>Curvatura
-        <input type="range" min="-100" max="100" step="1" aria-label="Curvatura del texto"
-          value={clampTextCurve(current.curve||0)} onChange={e=>update(current.id,{curve:Number(e.target.value)})}
-          style={{flex:'1 1 160px',minWidth:120,accentColor:'#191919'}}/>
-        <output aria-live="off">{clampTextCurve(current.curve||0)}%</output>
-      </label>
-      <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
-        {([['Recto',0],['Arco suave',30],['Semicírculo',55],['Casi círculo',100],['Arco abajo',-55]] as const)
-         .map(([name,value])=><button key={name} type="button"
-           aria-pressed={clampTextCurve(current.curve||0)===value}
-           style={{...control,padding:'9px 10px',background:clampTextCurve(current.curve||0)===value?'#F2D85B':'white'}}
-           onClick={()=>update(current.id,{curve:value})}>{name}</button>)}
-      </div>
-      <label style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',fontSize:13}}>
-       Espacio entre letras
-       <input type="range" min="-8" max="30" step="1" aria-label="Espaciado de las letras"
-        value={clampLetterSpacing(current.letterSpacing||0)}
-        onChange={e=>update(current.id,{letterSpacing:Number(e.target.value)})}
-        style={{flex:'1 1 150px',accentColor:'#191919'}}/>
-       <output>{clampLetterSpacing(current.letterSpacing||0)}</output>
-      </label>
-      <small style={{color:'#647075'}}>Las letras siguen un círculo real. Ajusta la curva y la separación; los cambios también aparecen en los PNG.</small>
-    </div>}
-    {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
-    {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
-    <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
-    <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button><button type="button" style={{...control,background:current.locked?'#DCECF4':'#F2D85B'}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear':'🔒 Bloquear'}</button></div>
-    {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-     <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy} onClick={()=>void removePhotoBackground()}>Quitar fondo con IA</button>
-     {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar foto original</button>}
-     <button type="button" style={control} disabled={busy} onClick={()=>void removeSolidBackground()}>Quitar fondo liso</button>
-    </div>}
-    <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>deleteElement(current.id)}>Eliminar elemento</button>
-   </div></details>}
-  <details style={{margin:'10px 0'}}><summary style={{cursor:'pointer',fontWeight:700,fontSize:12}}>Textos de este slide · abrir para seleccionar</summary><div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',margin:'12px 0'}}><strong>Textos del slide {slide+1}:</strong>{doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===slide).map((it,i)=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white',maxWidth:190,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} onClick={()=>{setSelected(it.id);setTimeout(()=>textEditor.current?.focus(),30)}}>{it.text?.trim()||'Texto nuevo '+(i+1)}</button>)}<button style={control} onClick={()=>addText('paragraph')}>+ Nuevo texto</button></div></details>
-  <details style={{margin:'12px 0',border:'1px solid #ddd',borderRadius:14,padding:'10px 12px'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Fondos, stickers y capas · abrir / recoger</summary><div style={{display:'flex',gap:8,margin:'12px 0',flexWrap:'wrap'}}>{(['fondos','stickers','capas'] as const).map(tab=><button key={tab} style={{...control,background:panel===tab?'#F2D85B':'white'}} onClick={()=>setPanel(tab)}>{tab==='fondos'?'Fondos':tab==='stickers'?'Stickers':'Capas'}</button>)}</div>
-  {panel==='fondos'&&doc.backgroundImages?.[slide]&&<button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={removeSlideBackground}>Quitar foto de fondo del slide {slide+1}</button>}
-  {panel==='fondos'&&<div style={{display:'flex',gap:8,overflowX:'auto',padding:'8px 0 18px'}}>{LAB_BACKGROUNDS.map(([name,color])=><button key={name} title={name} onClick={()=>setDoc(d=>({...d,background:color}))} style={{minWidth:96,border:'1px solid #ddd',borderRadius:12,padding:8,background:'white',color:'#191919'}}><span style={{display:'block',height:62,borderRadius:8,background:color,border:'1px solid #ddd'}}/>{name}</button>)}</div>}
-  {panel==='stickers'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:18}}>{LAB_STICKERS.map((emoji,i)=><button key={i} aria-label={'Añadir sticker '+emoji} onClick={()=>addSticker(emoji)} style={{...control,fontSize:28}}>{emoji}</button>)}</div>}
-  {(panel==='fondos'||panel==='stickers')&&<div style={{margin:'0 0 14px'}}><strong style={{display:'block',marginBottom:8}}>Biblioteca original del Content Lab · {panel==='fondos'?'Fondos':'Stickers'}</strong>{libraryStatus&&<p role="status" style={{fontSize:13}}>{libraryStatus}</p>}<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:10,maxHeight:350,overflowY:'auto',padding:4}}>{privateAssets.filter(asset=>asset.category===(panel==='fondos'?'background':'sticker')).map(asset=><button key={asset.id} type="button" onClick={()=>{setLibraryStatus('Añadiendo imagen…');void keepStudioLabImage(asset.url).then(src=>{panel==='fondos'?setPrivateBackground(src):addPrivateSticker(src);setLibraryStatus('')}).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir la imagen.'))}} style={{border:'1px solid #ddd',background:'white',borderRadius:12,padding:6,color:'#191919',textAlign:'center',cursor:'pointer'}}><img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:86,objectFit:'contain',borderRadius:8}}/><span style={{fontSize:11,display:'block',marginTop:4}}>{asset.name}</span></button>)}{LAB_ASSETS.filter(asset=>asset.category===(panel==='fondos'?'background':'sticker')).map(asset=><button key={asset.id} type="button" onClick={()=>panel==='fondos'?setLabBackground(asset.file):addLabSticker(asset.file)} style={{border:'1px solid #ddd',background:'white',borderRadius:12,padding:6,color:'#191919',textAlign:'center',cursor:'pointer'}}><img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:86,objectFit:'contain',borderRadius:8}}/><span style={{fontSize:11,display:'block',marginTop:4}}>{asset.name}</span></button>)}</div></div>}
-  {panel==='capas'&&<div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:18}}>{doc.items.map(it=><button key={it.id} style={{...control,background:selected===it.id?'#F2D85B':'white'}} onClick={()=>setSelected(it.id)}>{it.locked?'🔒 ':''}{it.kind==='image'?'📷 Foto':(it.text||'Texto sin escribir').slice(0,42)}</button>)}</div>}
-  </details>
-  <section aria-label="Navegador de slides" style={{margin:'12px 0',padding:'12px',border:'1px solid #D7DFE2',borderRadius:16,background:'#FAF8F3'}}>
-   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}><div><strong style={{fontSize:16}}>Slide {slide+1} de {doc.count}</strong><div style={{fontSize:12,color:'#53636B'}}>Selecciona, mueve o ajusta con dos dedos</div></div><div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}><label style={{fontSize:12}}>Zoom <select aria-label="Zoom del lienzo" value={canvasZoom} onChange={e=>setCanvasZoom(Number(e.target.value) as 75|100|125|150)} style={{...control,padding:'7px 4px',fontSize:12}}><option value={75}>75%</option><option value={100}>100%</option><option value={125}>125%</option><option value={150}>150%</option></select></label><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide-1)} disabled={slide===0} aria-label="Slide anterior">‹</button><button style={{...control,padding:'8px 12px'}} onClick={()=>goSlide(slide+1)} disabled={slide>=doc.count-1} aria-label="Slide siguiente">›</button></div></div>
-   <div style={{display:'grid',gridTemplateColumns:'repeat('+Math.min(doc.count,5)+',minmax(0,1fr))',gap:7}}>{Array.from({length:doc.count},(_,i)=>{const texts=doc.items.filter(it=>it.kind==='text'&&Math.floor(it.x/W)===i);const photos=doc.items.filter(it=>it.kind==='image'&&Math.floor(it.x/W)===i);return <button key={i} type="button" aria-current={slide===i?'step':undefined} aria-label={'Ir al slide '+(i+1)} onClick={()=>goSlide(i)} style={{border:slide===i?'2px solid #244B5B':'1px solid #D7DFE2',background:slide===i?'#E6F0F4':'#fff',color:'#191919',borderRadius:10,padding:'10px 3px',minWidth:0,textAlign:'center'}}><strong style={{display:'block',fontSize:14}}>{i+1}</strong><span style={{display:'block',fontSize:10,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{texts[0]?.text?.trim().slice(0,14)|| (photos.length?'Foto':'Vacío')}</span></button>})}</div>
-  </section>
-  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
+  </nav>
+
+  <div className="studio-app-selection">  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
     onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo'}</button>
    {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar original</button>}
@@ -660,57 +629,44 @@ export default function SeamlessEditor(){
    </>}
    {recentlyDeleted&&<button type="button" style={control} onClick={undoDelete}>Deshacer eliminación</button>}
    </div>}
-  <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'x proximity',overscrollBehaviorX:'contain'}}>
-   <div style={{position:'relative',width:doc.count*slideWidthPx,maxWidth:'none'}}>
-   <canvas ref={canvas} data-carousel-canvas="true" onPointerDown={down} onPointerMove={move}
-    onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
-    style={{display:'block',width:'100%',height:'auto',maxWidth:'none',touchAction:'none',cursor:'grab'}}
-    aria-label="Lienzo continuo del carrusel: toca para seleccionar y mover; toca dos veces para mostrar la cruz de eliminar"/>
-   {current&&deleteArmedId===current.id&&<button type="button" data-carousel-delete="true"
-    aria-label={'Eliminar '+(current.kind==='text'?'texto':current.kind==='image'?'foto':'sticker')+' seleccionado'}
-    title="Eliminar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteElement(current.id)}}
-    style={{position:'absolute',left:Math.max(0,Math.min(doc.count*slideWidthPx-42,(current.x+itemBounds(current).w)*viewportScale-21)),
-     top:Math.max(0,current.y*viewportScale-21),width:42,height:42,borderRadius:'50%',
-     border:'2px solid #fff',background:'#191919',color:'#fff',fontSize:26,fontWeight:650,
-     display:'grid',placeItems:'center',cursor:'pointer',zIndex:7,boxShadow:'0 2px 10px #0005',
-     touchAction:'manipulation'}}>×</button>}
-   {editingText!==null&&current?.id===editingText&&current.kind==='text'&&<textarea ref={canvasTextRef}
-    aria-label="Escribir directamente sobre el carrusel" rows={3} value={current.text||''}
-    onChange={e=>update(current.id,{text:e.target.value})} onBlur={()=>setEditingText(null)}
-    onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
-    style={{position:'absolute',left:current.x*viewportScale,top:current.y*viewportScale,
-     width:Math.max(100,current.width*viewportScale),height:Math.max(52,itemBounds(current).h*viewportScale+14),
-     maxWidth:'none',font:'700 '+current.fontSize*viewportScale+'px/1.3 Arial,sans-serif',
-     color:current.color,background:'rgba(250,248,243,.95)',border:'2px solid #447B94',borderRadius:6,
-     padding:3,resize:'none',zIndex:5,boxShadow:'0 2px 12px #0002'}}/>}
-   </div>
-  </div>
-  <div role="toolbar" aria-label="Herramientas táctiles del carrusel seamless"
+</div>
+  <div className="studio-app-toolbar" role="toolbar" aria-label="Herramientas táctiles del carrusel seamless"
     style={{display:'grid',gridTemplateColumns:'repeat(6,minmax(0,1fr))',gap:4,padding:5,position:'sticky',
       bottom:'auto',zIndex:10,border:'1px solid #dce5e5',
       borderRadius:15,background:'#fff',boxShadow:'0 -4px 16px #142c3c20'}}>
     {([
-      {label:'Fotos',action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
-      {label:'Texto',action:()=>addText('paragraph')},
-      {label:'Elementos',action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
-       {label:'Stickers',action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
-      {label:'Capas',action:()=>setQuickPanel(p=>p==='capas'?null:'capas')},
-      {label:'Fondo',action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')}
-    ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
-      aria-pressed={i>1?quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase()):undefined}
-      style={{border:0,background:i>1&&quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
+      {label:'Fotos',icon:<ImagePlus size={19}/>,action:()=>setQuickPanel(p=>p==='fotos'?null:'fotos')},
+      {label:'Texto',icon:<Type size={19}/>,action:()=>addText('paragraph')},
+      {label:'Stickers',icon:<Sticker size={19}/>,action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
+      {label:'Elementos',icon:<Shapes size={19}/>,action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
+      {label:'Fondo',icon:<Palette size={19}/>,action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')},
+      {label:'Capas',icon:<Layers3 size={19}/>,action:()=>setQuickPanel(p=>p==='capas'?null:'capas')}
+    ]).map(tool=><button type="button" key={tool.label} onClick={tool.action}
+      aria-pressed={tool.label==='Texto'?undefined:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())}
+      style={{border:0,background:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
-        touchAction:'manipulation'}}>{tool.label}</button>)}
+        touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>
-  {quickPanel&&<div role="region" aria-label={'Opciones de '+quickPanel}
+  {quickPanel&&<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+quickPanel}
     style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
       zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
       background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
-      <strong style={{fontSize:13}}>{quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
+      <strong style={{fontSize:13}}>{quickPanel==='fotos'?'Añadir una foto':quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
       <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
         style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
     </div>
+    {quickPanel==='fotos'&&<div className="studio-app-photos">
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,width:'100%'}}
+        onClick={()=>{setQuickPanel(null);replacePhotoId.current=null;photoInput.current?.click()}}>＋ Elegir foto del iPhone o archivos</button>
+      <strong>Fotos y recortes de este proyecto</strong>
+      <div className="studio-app-photo-grid">
+       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map((src,index)=><button key={index} type="button" aria-label="Añadir otra copia de esta foto"
+         onClick={()=>{addPrivateSticker(src);setQuickPanel(null)}}>
+          <img src={src} alt="" loading="lazy"/>
+         </button>)}
+      </div>
+     </div>}
     {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>}
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
@@ -753,9 +709,82 @@ export default function SeamlessEditor(){
     </div>}
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
   </div>}
+
+  <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
+  <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
+   <summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Carruseles pendientes ({EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)).length})</summary>
+   <p style={{fontSize:13}}>Ocultar un borrador de esta lista no lo borra de Notion ni elimina proyectos guardados.</p>
+   <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+    <label style={{fontSize:13}}>Marca <select value={brandFilter} onChange={e=>setBrandFilter(e.target.value)} style={{...control,marginLeft:8}}><option value="todos">Todas</option><option value="tle">The Launch Era</option><option value="podcast">Podcast</option><option value="clase">Clase</option><option value="lab">Content Lab</option></select></label>
+    {EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<button type="button" style={control} onClick={()=>{if(window.confirm('¿Quitar todos los borradores de pendientes? No se borrarán de Notion.'))setHiddenDraftIds(EDITORIAL_DRAFTS.map(d=>d.id))}}>Quitar todos de la lista</button>}
+    {hiddenDraftIds.length>0&&<button type="button" style={control} onClick={()=>setHiddenDraftIds([])}>Restaurar ocultos ({hiddenDraftIds.length})</button>}
+   </div>
+   <div style={{display:'grid',gap:8,marginTop:12,maxHeight:340,overflowY:'auto'}}>
+    {EDITORIAL_DRAFTS.filter(d=>!hiddenDraftIds.includes(d.id)&&(brandFilter==='todos'||d.brand===brandFilter)).map(d=><div key={d.id} style={{border:'1px solid #ddd',borderRadius:12,padding:12,background:'white'}}>
+     <strong style={{display:'block',fontSize:14}}>{d.title}</strong>
+     <span style={{fontSize:12,color:'#555'}}>{d.brand==='tle'?'The Launch Era':d.brand==='lab'?'Content Lab':d.brand==='clase'?'Clase':'Podcast'} · {d.date} · 4 slides</span>
+     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:9}}>
+      <button type="button" style={{...control,background:'#F2D85B'}} onClick={()=>prepareEditorial(d)}>Preparar en editor</button>
+      <button type="button" style={control} onClick={()=>setHiddenDraftIds(ids=>[...new Set([...ids,d.id])])}>Quitar de pendientes</button>
+      <a href={d.url} target="_blank" rel="noopener noreferrer" style={{fontSize:13,alignSelf:'center'}}>Ver Notion</a>
+     </div>
+    </div>)}
+    {!EDITORIAL_DRAFTS.some(d=>!hiddenDraftIds.includes(d.id))&&<p style={{fontSize:13}}>No quedan borradores visibles. Puedes restaurarlos cuando quieras.</p>}
+   </div>
+  </details>
+  {activeBrief&&<details open style={{border:'1px solid #D6D8DD',borderRadius:12,padding:12,marginBottom:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Guion activo · {activeBrief.title}</summary><p style={{fontSize:13}}><b>Dirección visual:</b> {activeBrief.direction}</p><p style={{fontSize:13}}><b>CTA:</b> {activeBrief.cta}</p><p style={{fontSize:12}}>Los textos están en las cuatro láminas y se pueden mover o editar. La portada requiere fotografía real.</p></details>}
+  <details style={{marginBottom:12,border:'1px solid #ddd',borderRadius:14,padding:'10px 12px',background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Herramientas y botones · tocar para abrir o recoger</summary><div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:12,marginBottom:8,alignItems:'center'}}>
+   <label>Slides <select aria-label="Cantidad de slides" style={control} value={doc.count} onChange={e=>setDoc(d=>({...d,count:Number(e.target.value)}))}>{[2,3,4,5,6,7,8,9,10].map(n=><option key={n}>{n}</option>)}</select></label>
+   <label>Fondo <input aria-label="Color de fondo" type="color" value={doc.background} onChange={e=>setDoc(d=>({...d,background:e.target.value}))}/></label>
+   <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}><button style={{...control,background:'#F2D85B',fontWeight:700}} onClick={()=>addText('paragraph')}>+ Texto libre</button><button style={control} onClick={()=>addText('hook')}>+ Hook</button><button style={control} onClick={()=>addText('title')}>+ Título</button><button style={control} onClick={()=>addText('caption')}>+ Texto pequeño</button></div>
+   <button style={control} type="button" onClick={()=>{replacePhotoId.current=null;photoInput.current?.click()}}>+ Abrir fotos</button>
+   <button style={{...control,background:'#F2D85B',fontWeight:700}} disabled={busy} onClick={()=>void downloadSlide(slide)}>{busy?'Preparando…':'Guardar slide '+(slide+1)+' en mi teléfono'}</button>
+   <button style={control} disabled={busy} onClick={()=>void exportSlides()}>Descargar carrusel completo (ZIP)</button>
+  </div></details>
+  {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
+    {current&&<label style={{display:'flex',alignItems:'center',gap:6}}>Girar <input aria-label="Girar elemento" type="range" min="-180" max="180" step="1" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/><output>{current.rotation||0}°</output></label>}{current.kind==='text'&&<><div style={{flex:'1 1 100%',padding:12,background:'#FAF8F3',borderRadius:12}}><label htmlFor="seamless-text-editor" style={{display:'block',fontWeight:700,marginBottom:6}}>Escribe o edita este texto</label><textarea ref={textEditor} id="seamless-text-editor" aria-label="Escribir texto de la diapositiva" rows={6} placeholder="Escribe aquí todo lo que quieras explicar. Puedes añadir párrafos y saltos de línea…" style={{...control,width:'100%',boxSizing:'border-box',resize:'vertical',fontFamily:'inherit'}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><div style={{fontSize:12,marginTop:5}}>Cada texto es independiente. El párrafo se ajusta automáticamente al ancho del bloque.</div><label style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>Ancho del texto <input aria-label="Ancho del párrafo" type="range" min="200" max="1000" step="20" value={current.width||900} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label></div><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
+    {current.kind==='text'&&<div role="group" aria-label="Curvar texto" style={{flex:'1 1 100%',display:'grid',gap:9,padding:'10px 12px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
+      <strong style={{fontSize:14}}>Efecto de texto · Curva circular</strong>
+      <label style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',fontSize:13}}>Curvatura
+        <input type="range" min="-100" max="100" step="1" aria-label="Curvatura del texto"
+          value={clampTextCurve(current.curve||0)} onChange={e=>update(current.id,{curve:Number(e.target.value)})}
+          style={{flex:'1 1 160px',minWidth:120,accentColor:'#191919'}}/>
+        <output aria-live="off">{clampTextCurve(current.curve||0)}%</output>
+      </label>
+      <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>
+        {([['Recto',0],['Arco suave',30],['Semicírculo',55],['Casi círculo',100],['Arco abajo',-55]] as const)
+         .map(([name,value])=><button key={name} type="button"
+           aria-pressed={clampTextCurve(current.curve||0)===value}
+           style={{...control,padding:'9px 10px',background:clampTextCurve(current.curve||0)===value?'#F2D85B':'white'}}
+           onClick={()=>update(current.id,{curve:value})}>{name}</button>)}
+      </div>
+      <label style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',fontSize:13}}>
+       Espacio entre letras
+       <input type="range" min="-8" max="30" step="1" aria-label="Espaciado de las letras"
+        value={clampLetterSpacing(current.letterSpacing||0)}
+        onChange={e=>update(current.id,{letterSpacing:Number(e.target.value)})}
+        style={{flex:'1 1 150px',accentColor:'#191919'}}/>
+       <output>{clampLetterSpacing(current.letterSpacing||0)}</output>
+      </label>
+      <small style={{color:'#647075'}}>Las letras siguen un círculo real. Ajusta la curva y la separación; los cambios también aparecen en los PNG.</small>
+    </div>}
+    {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
+    {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
+    <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
+    <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button><button type="button" style={{...control,background:current.locked?'#DCECF4':'#F2D85B'}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear':'🔒 Bloquear'}</button></div>
+    {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+     <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy} onClick={()=>void removePhotoBackground()}>Quitar fondo con IA</button>
+     {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar foto original</button>}
+     <button type="button" style={control} disabled={busy} onClick={()=>void removeSolidBackground()}>Quitar fondo liso</button>
+    </div>}
+    <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>deleteElement(current.id)}>Eliminar elemento</button>
+   </div></details>}
+  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={()=>void saveProject()}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>void removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
+
+  </details>
   <p style={{fontSize:12,fontWeight:600}}>Un toque: selecciona y mueve. Dos toques rápidos sobre el mismo elemento: aparece la × para borrarlo. Toca fuera y la × desaparece. Selecciona un texto para curvarlo como un círculo y ajustar la separación entre letras.</p>
   <p style={{fontSize:13}}>Arrastra los elementos con el dedo o el mouse. Desliza sobre un espacio vacío para cambiar de slide. Usa dos dedos sobre el elemento para cambiar su tamaño; para girarlo utiliza «Más ajustes». Los botones Anterior y Siguiente son opcionales.</p>
-  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={()=>void saveProject()}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>void removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
+
   <p role="status" aria-live="polite">{message}</p><p style={{fontSize:13,opacity:.7}}>Los PNG se exportan desde las fotos originales, hasta 4× la resolución base. La vista previa no se utiliza para descargar. El carrusel se guarda automáticamente en este dispositivo. El ZIP contiene las imágenes individuales; todavía no se sincroniza entre dispositivos.</p>
  </section>;
 }

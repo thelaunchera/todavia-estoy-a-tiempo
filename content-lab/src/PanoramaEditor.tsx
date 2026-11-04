@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X, Sticker, Palette } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
@@ -29,11 +29,12 @@ type Props = {
   onRemoveText: (id: string) => void;
   onUpload: (files: File[], point: Point) => Promise<void>;
   error: string; onRetry: () => void;
+  backgroundColor:string;onBackgroundColor:(color:string)=>void;
 };
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,
-  canExtendBackground,onExtendBackground,focusLayerId,
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [libraryOpen,setLibraryOpen]=useState(false);
@@ -55,6 +56,17 @@ export default function PanoramaEditor({
   const [uploading, setUploading] = useState(false);
   const [uploadError,setUploadError]=useState('');
   const [moreTools,setMoreTools]=useState(false);
+  const [backgroundOpen,setBackgroundOpen]=useState(false);
+  const revealCanvas=()=>requestAnimationFrame(()=>containerRef.current?.querySelector('.panorama-workspace')?.scrollIntoView({block:'nearest',behavior:'smooth'}));
+  const openTool=(tool:'photo'|'sticker'|'background'|'layers'|'elements')=>{
+    const openingPhoto=tool==='photo'&&!(libraryOpen&&libraryKind==='photo');
+    const openingSticker=tool==='sticker'&&!(libraryOpen&&libraryKind==='sticker');
+    setLibraryOpen(openingPhoto||openingSticker);
+    if(openingPhoto||openingSticker)setLibraryKind(openingPhoto?'photo':'sticker');
+    setLayersOpen(tool==='layers'&&!layersOpen);
+    setBackgroundOpen(tool==='background'&&!backgroundOpen);
+    setMoreTools(tool==='elements'&&!moreTools);
+  };
   useEffect(()=>{
     const onKey=(event:KeyboardEvent)=>{
       if(!(event.metaKey||event.ctrlKey)||event.key.toLowerCase()!=='z')return;
@@ -164,7 +176,7 @@ export default function PanoramaEditor({
     if(viewport&&e.clientX>=viewport.left&&e.clientX<=viewport.right&&
       e.clientY>=viewport.top&&e.clientY<=viewport.bottom&&
       x>=0&&x<=1&&y>=0&&y<=1){
-      onAdd(drag.id,{x,y});setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
+      onAdd(drag.id,{x,y});setLibraryOpen(false);revealCanvas();setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
     }else setLibraryFeedback('Suelta la imagen sobre el lienzo para colocarla.');
   };
   const upload = async (files: File[], point: Point) => {
@@ -173,6 +185,9 @@ export default function PanoramaEditor({
     try { await onUpload(files, point); }
     catch(e){setUploadError(e instanceof Error?e.message:'No se pudo subir la foto.');}
     finally { setUploading(false); }
+  };
+  const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
+    onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
   const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
@@ -185,24 +200,36 @@ export default function PanoramaEditor({
     {expanded&&<button type="button" className="panorama-exit-fixed" onClick={()=>setExpanded(false)}>
       <Minimize2 size={17}/> Cerrar vista amplia
     </button>}
-    <div className="panorama-primary-actions" role="toolbar" aria-label="Herramientas del carrusel">
-      <button type="button" className="panorama-toggle-library" aria-pressed={libraryOpen&&libraryKind==='photo'}
-        onClick={()=>{const open=libraryOpen&&libraryKind==='photo';setLibraryKind('photo');setLibraryOpen(!open);setLayersOpen(false)}}>
-        <ImagePlus size={20}/><span>Fotos</span></button>
-      <button type="button" onClick={()=>onAddLayer('text')}><Type size={20}/><span>Texto</span></button>
-      <button type="button" className="panorama-toggle-library" aria-pressed={libraryOpen&&libraryKind==='sticker'}
-        onClick={()=>{const open=libraryOpen&&libraryKind==='sticker';setLibraryKind('sticker');setLibraryOpen(!open);setLayersOpen(false)}}>
-        <Shapes size={20}/><span>Stickers</span></button>
-      <button type="button" aria-pressed={layersOpen}
-        onClick={()=>{setLayersOpen(v=>!v);setLibraryOpen(false)}}><Layers3 size={20}/><span>Capas</span></button>
-      <button type="button" className="panorama-more-toggle" aria-pressed={moreTools}
-        onClick={()=>setMoreTools(open=>!open)}><Pencil size={20}/><span>Más</span></button>
+    <div className="panorama-primary-actions" role="toolbar" aria-label="Herramientas táctiles del carrusel">
+      <button type="button" aria-pressed={libraryOpen&&libraryKind==='photo'} onClick={()=>openTool('photo')}>
+        <ImagePlus size={19}/><span>Fotos</span></button>
+      <button type="button" onClick={()=>{openTool('elements');setMoreTools(false);onAddLayer('text');revealCanvas()}}>
+        <Type size={19}/><span>Texto</span></button>
+      <button type="button" aria-pressed={libraryOpen&&libraryKind==='sticker'} onClick={()=>openTool('sticker')}>
+        <Sticker size={19}/><span>Stickers</span></button>
+      <button type="button" aria-pressed={moreTools} onClick={()=>openTool('elements')}>
+        <Shapes size={19}/><span>Elementos</span></button>
+      <button type="button" aria-pressed={backgroundOpen} onClick={()=>openTool('background')}>
+        <Palette size={19}/><span>Fondo</span></button>
+      <button type="button" aria-pressed={layersOpen} onClick={()=>openTool('layers')}>
+        <Layers3 size={19}/><span>Capas</span></button>
     </div>
+    {backgroundOpen&&<div className="panorama-background-sheet" role="region" aria-label="Elegir fondo del carrusel">
+      <div className="panorama-sheet-heading"><strong>Color del lienzo</strong><button type="button" onClick={()=>setBackgroundOpen(false)} aria-label="Cerrar colores">×</button></div>
+      <div className="panorama-background-colors">
+        {(['#FAF8F3','#FFFFFF','#F2D85B','#DCECF4','#EADDE5','#F6E7CE','#E4EDE1','#191919'] as const).map(color=><button key={color}
+          type="button" aria-label={'Fondo '+color} aria-pressed={backgroundColor.toLowerCase()===color.toLowerCase()}
+          onClick={()=>{onBackgroundColor(color);setBackgroundOpen(false);revealCanvas()}}
+          style={{background:color}}/>)}
+        <label>Personalizado <input type="color" value={backgroundColor} onChange={e=>onBackgroundColor(e.target.value)} aria-label="Color personalizado del fondo"/></label>
+      </div>
+      <small>Los cambios se aplican al lienzo de este carrusel sin modificar la biblioteca de tu marca.</small>
+    </div>}
     <div className="panorama-editor-utilities">
       <button type="button" disabled={!canUndo} onClick={onUndo} aria-label="Deshacer"><Undo2 size={17}/></button>
       <button type="button" disabled={!canRedo} onClick={onRedo} aria-label="Rehacer"><Redo2 size={17}/></button>
       <button type="button" className="panorama-add-photo" disabled={uploading}
-        onClick={()=>{setLibraryOpen(true);input.current?.click()}}>
+        onClick={()=>{openTool('photo');input.current?.click()}}>
         <Upload size={16}/> Subir imagen
       </button>
     </div>
@@ -240,18 +267,19 @@ export default function PanoramaEditor({
     </div>}
     {(uploadError||libraryFeedback)&&<p className="panorama-library-status" role="status">{uploadError||libraryFeedback}</p>}
     {moreTools&&<div className="panorama-quicktools" aria-label="Herramientas adicionales">
-      <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Texto libre</button>
-      <button type="button" onClick={()=>onAddLayer('shape','paper')}><Shapes size={16}/> Papel</button>
-      <button type="button" onClick={()=>onAddLayer('shape','tape')}>Cinta washi</button>
-      <button type="button" onClick={()=>onAddLayer('shape','frame')}>Marco</button>
-      <button type="button" onClick={()=>onAddLayer('shape','circle')}>Círculo</button>
+      <button type="button" onClick={()=>addFromElements('text')}><Type size={16}/> Texto libre</button>
+      <button type="button" onClick={()=>addFromElements('shape','paper')}><Shapes size={16}/> Papel</button>
+      <button type="button" onClick={()=>addFromElements('shape','tape')}>Cinta washi</button>
+      <button type="button" onClick={()=>addFromElements('shape','frame')}>Marco</button>
+      <button type="button" onClick={()=>addFromElements('shape','circle')}>Círculo</button>
       <button type="button" disabled={!canUndo} onClick={onUndo}><Undo2 size={16}/> Deshacer</button>
       <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
     </div>}
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Mis elementos</strong>
-        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small></div>
+        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small>
+        <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
       <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
         {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
           aria-pressed={libraryKind===kind} onClick={()=>setLibraryKind(kind)}>
@@ -287,6 +315,7 @@ export default function PanoramaEditor({
               const view=containerRef.current?.querySelector('.touch-editor-scroll');
               const center=stage&&view?(view.scrollLeft+view.clientWidth/2)/stage.getBoundingClientRect().width:(.5/count);
               onAdd(asset.id,{x:Math.min(.99,Math.max(.01,center)),y:.5});
+              setLibraryOpen(false);revealCanvas();
               setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
             }}>
             {images[asset.id]
