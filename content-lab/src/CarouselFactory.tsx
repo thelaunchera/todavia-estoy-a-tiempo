@@ -1407,7 +1407,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   return <div className={'factory'+(studioTab==='canvas'?' factory-canvas-active':'')}>
     <div className="factory-header">
       <div><div className="eyebrow">YOUR VISUAL PRODUCTION SPACE</div><h1>Carousel <em>Factory.</em></h1><p>De una idea a todos los slides. Cada diseño individual y listo para Instagram.</p></div>
-      <button className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+      <div className="factory-app-header-actions">
+        <button className="btn ghost" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar'}</button>
+        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy}><ImagePlus size={16}/> {busy?'Preparando…':'Exportar PNG'}</button>
+      </div>
     </div>
 
     <div className="factory-format-switch" role="group" aria-label="Tipo de carrusel">
