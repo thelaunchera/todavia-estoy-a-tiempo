@@ -186,6 +186,9 @@ export default function PanoramaEditor({
     catch(e){setUploadError(e instanceof Error?e.message:'No se pudo subir la foto.');}
     finally { setUploading(false); }
   };
+  const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
+    onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
+  };
   const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
@@ -264,11 +267,11 @@ export default function PanoramaEditor({
     </div>}
     {(uploadError||libraryFeedback)&&<p className="panorama-library-status" role="status">{uploadError||libraryFeedback}</p>}
     {moreTools&&<div className="panorama-quicktools" aria-label="Herramientas adicionales">
-      <button type="button" onClick={()=>onAddLayer('text')}><Type size={16}/> Texto libre</button>
-      <button type="button" onClick={()=>onAddLayer('shape','paper')}><Shapes size={16}/> Papel</button>
-      <button type="button" onClick={()=>onAddLayer('shape','tape')}>Cinta washi</button>
-      <button type="button" onClick={()=>onAddLayer('shape','frame')}>Marco</button>
-      <button type="button" onClick={()=>onAddLayer('shape','circle')}>Círculo</button>
+      <button type="button" onClick={()=>addFromElements('text')}><Type size={16}/> Texto libre</button>
+      <button type="button" onClick={()=>addFromElements('shape','paper')}><Shapes size={16}/> Papel</button>
+      <button type="button" onClick={()=>addFromElements('shape','tape')}>Cinta washi</button>
+      <button type="button" onClick={()=>addFromElements('shape','frame')}>Marco</button>
+      <button type="button" onClick={()=>addFromElements('shape','circle')}>Círculo</button>
       <button type="button" disabled={!canUndo} onClick={onUndo}><Undo2 size={16}/> Deshacer</button>
       <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
     </div>}
