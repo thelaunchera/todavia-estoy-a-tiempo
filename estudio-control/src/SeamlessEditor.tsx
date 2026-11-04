@@ -1,3 +1,4 @@
+import {GOLDEN_GRID_CAROUSEL_ASSETS,GOLDEN_GRID_CAROUSEL_DRIVE,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
@@ -111,6 +112,17 @@ export default function SeamlessEditor(){
  const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
  const addPrivateSticker=(url:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id)};
+ const goldenGridAssetUrl=(file:string)=>new URL('brand-kits/golden-grid/'+file,document.baseURI).href;
+ const addGoldenGridAsset=async(asset:GoldenGridCarouselAsset)=>{
+  try{
+   const src=goldenGridAssetUrl(asset.file);
+   await loadImage(src);
+   const id=++nextId.current;
+   setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src,x:slide*W+60,y:220,width:asset.width,fontSize:80,color:'#191919'}]}));
+   setSelected(id);setQuickPanel(null);
+   setMessage(asset.name+' añadido al lienzo. Muévelo, gíralo o agrándalo. Añade tu texto como otra capa.');
+  }catch{setMessage('No se pudo abrir este elemento. Vuelve a intentarlo.');}
+ };
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
  const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
  const setLabBackground=(file:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:labUrl(file)}}));
@@ -359,6 +371,19 @@ export default function SeamlessEditor(){
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
  return <section style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
   <h2>Carrusel seamless</h2><p style={{fontSize:13}}>Añade, mueve con el dedo y desliza entre slides. Abre solo las herramientas que necesites.</p>
+  <details open style={{margin:'16px 0',border:'1px solid #BCE8EE',borderRadius:14,padding:14,background:'#FFF8E8'}}>
+   <summary style={{cursor:'pointer',fontWeight:750}}>Golden Grid · Cintas y banners ({GOLDEN_GRID_CAROUSEL_ASSETS.length})</summary>
+   <p style={{fontSize:12,lineHeight:1.6}}>Toca un elemento para ponerlo en el lienzo. Tiene fondo transparente: puedes moverlo, girarlo, cambiar su tamaño y cruzarlo entre slides. Añade el texto por separado para mantenerlo editable.</p>
+   <div aria-label="Elementos de Golden Grid" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(125px,1fr))',gap:10,maxHeight:330,overflowY:'auto',padding:3}}>
+    {GOLDEN_GRID_CAROUSEL_ASSETS.map(asset=><button type="button" key={asset.id} aria-label={'Añadir '+asset.name+' al lienzo'} onClick={()=>void addGoldenGridAsset(asset)} style={{...control,minWidth:0,padding:9,textAlign:'center',background:'#fff',color:'#191919'}}>
+     <img src={goldenGridAssetUrl(asset.file)} loading="lazy" alt={asset.name} style={{width:'100%',height:78,objectFit:'contain',display:'block',marginBottom:8}}/>
+     <strong style={{display:'block',fontSize:11}}>{asset.name}</strong><span style={{display:'block',fontSize:10,marginTop:5}}>+ Añadir al lienzo</span>
+    </button>)}
+   </div>
+   <p style={{fontSize:12,lineHeight:1.6}}><b>Fotos recomendadas:</b> 1 para portada, 7 para mostrar el producto en la mano, 3 para packaging, 5 para detalle y 9 para el cierre. Usa las cintas para unir visualmente dos slides.</p>
+   <a href={GOLDEN_GRID_CAROUSEL_DRIVE} target="_blank" rel="noopener noreferrer" style={{fontSize:12,textDecoration:'underline'}}>Abrir todos los elementos en Drive</a>
+  </details>
+
   <div role="group" aria-label="Proyecto actual" style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:8,padding:10,margin:'10px 0 14px',border:'1px solid #D7DFE2',borderRadius:14,background:'#FAF8F3'}}>
    <label style={{display:'flex',alignItems:'center',flex:'1 1 210px',gap:8,fontWeight:650,fontSize:13}}>Proyecto
     <input aria-label="Nombre del proyecto actual" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,minWidth:0,width:'100%',boxSizing:'border-box'}}/>
