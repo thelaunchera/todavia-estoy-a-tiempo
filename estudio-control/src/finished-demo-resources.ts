@@ -507,7 +507,7 @@ const photoData={
     ]
   },
   "la-vie-in-pink": {
-    "base": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/",
+    "base": "https://thelaunchera.com/demos/la-vie-in-pink/resources/",
     "brand": "La Vie in Pink",
     "style": "fotografía editorial de pastelería europea premium, croissants gourmet, panadería artesanal, porcelana cálida, marrón oscuro, rojo vino, blanco marfil y olivo; luz natural auténtica, personas reales y escenas diferentes",
     "items": [
@@ -798,7 +798,7 @@ export const additionalDemoPrompts:Record<'jaramillo-boutique'|'yummm'|'experien
       "title": "04 · QA y entrega",
       "step": "04 · Publicación",
       "say": "Cierro tocando cada enlace y comparando la versión publicada con las fotografías de referencia. Solo después comparto la URL.",
-      "show": "Probar menú, galería, responsive y URL https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/.",
+      "show": "Probar menú, galería, responsive y URL https://thelaunchera.com/demos/la-vie-in-pink/.",
       "prompt": "Haz QA de LA VIE IN PINK: enlaces, contacto, navegación por teclado, contraste, tamaño de botones, ausencia de scroll horizontal, carga de las diez imágenes y traducción bilingüe. Comprueba que en 375px no se recorte el croissant ni se superpongan títulos. Mantén footer 'Powered by The Launch Era'. Corrige únicamente errores encontrados y entrégame la URL final. No habilites cobros ni mensajes reales."
     }
   ]
