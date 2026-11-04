@@ -52,7 +52,7 @@ export default function SeamlessEditor(){
  useEffect(()=>{try{localStorage.setItem('studio-hidden-carousel-drafts-v1',JSON.stringify(hiddenDraftIds))}catch{}},[hiddenDraftIds]);
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [panel,setPanel]=useState<'fondos'|'stickers'|'capas'>('fondos');
- const [quickPanel,setQuickPanel]=useState<'fondos'|'stickers'|'capas'|'elementos'|null>(null);
+ const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
@@ -636,15 +636,15 @@ export default function SeamlessEditor(){
       bottom:'auto',zIndex:10,border:'1px solid #dce5e5',
       borderRadius:15,background:'#fff',boxShadow:'0 -4px 16px #142c3c20'}}>
     {([
-      {label:'Fotos',icon:<ImagePlus size={19}/>,action:()=>{replacePhotoId.current=null;photoInput.current?.click()}},
+      {label:'Fotos',icon:<ImagePlus size={19}/>,action:()=>setQuickPanel(p=>p==='fotos'?null:'fotos')},
       {label:'Texto',icon:<Type size={19}/>,action:()=>addText('paragraph')},
       {label:'Stickers',icon:<Sticker size={19}/>,action:()=>setQuickPanel(p=>p==='stickers'?null:'stickers')},
       {label:'Elementos',icon:<Shapes size={19}/>,action:()=>setQuickPanel(p=>p==='elementos'?null:'elementos')},
       {label:'Fondo',icon:<Palette size={19}/>,action:()=>setQuickPanel(p=>p==='fondos'?null:'fondos')},
       {label:'Capas',icon:<Layers3 size={19}/>,action:()=>setQuickPanel(p=>p==='capas'?null:'capas')}
     ]).map((tool,i)=><button type="button" key={tool.label} onClick={tool.action}
-      aria-pressed={i>1?quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase()):undefined}
-      style={{border:0,background:i>1&&quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
+      aria-pressed={tool.label==='Texto'?undefined:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())}
+      style={{border:0,background:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>
@@ -653,10 +653,21 @@ export default function SeamlessEditor(){
       zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
       background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
-      <strong style={{fontSize:13}}>{quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
+      <strong style={{fontSize:13}}>{quickPanel==='fotos'?'Añadir una foto':quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
       <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
         style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
     </div>
+    {quickPanel==='fotos'&&<div className="studio-app-photos">
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,width:'100%'}}
+        onClick={()=>{setQuickPanel(null);replacePhotoId.current=null;photoInput.current?.click()}}>＋ Elegir foto del iPhone o archivos</button>
+      <strong>Fotos y recortes de este proyecto</strong>
+      <div className="studio-app-photo-grid">
+       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map(src=><button key={src.slice(0,120)} type="button" aria-label="Añadir otra copia de esta foto"
+         onClick={()=>{addPrivateSticker(src);setQuickPanel(null)}}>
+          <img src={src} alt="" loading="lazy"/>
+         </button>)}
+      </div>
+     </div>}
     {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>}
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
