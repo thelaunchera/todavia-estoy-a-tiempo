@@ -8,6 +8,7 @@ type Props={
   onSova:(asset:SovaCarouselAsset)=>void|Promise<void>;
   onEditorial:(asset:typeof EDITORIAL_STICKER_ASSETS[number])=>void|Promise<void>;
   compact?:boolean;
+  onlyEditorial?:boolean;
 };
 const control:React.CSSProperties={border:'1px solid #D5DCE1',borderRadius:11,padding:'9px 10px',background:'#fff',color:'#191919',fontSize:12};
 const category=(name:string):Category=>{
@@ -20,12 +21,12 @@ const category=(name:string):Category=>{
  return 'Acentos';
 };
 const categories=['Todos','Asteriscos','Banners y cintas','Etiquetas','Papeles y washi','Acentos','Audio'] as const;
-export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=false}:Props){
+export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=false,onlyEditorial=false}:Props){
  const [kind,setKind]=useState<(typeof categories)[number]>('Todos');
  const [search,setSearch]=useState('');
  const assets=[
-  ...GOLDEN_GRID_CAROUSEL_ASSETS.map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/golden-grid/'+asset.file,document.baseURI).href,asset})),
-  ...SOVA_CAROUSEL_ASSETS.map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/sova/'+asset.file,document.baseURI).href,asset})),
+  ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/golden-grid/'+asset.file,document.baseURI).href,asset})),
+  ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/sova/'+asset.file,document.baseURI).href,asset})),
   ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href,asset}))
  ];
  const filtered=assets.filter(a=>(kind==='Todos'||a.category===kind)&&a.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')));
