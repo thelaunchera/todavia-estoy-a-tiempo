@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import PrivateDemoKits from './PrivateDemoKits';
 import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
+import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -12,7 +13,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -22,13 +23,26 @@ type Demo = {
 };
 const finishedDemos:Demo[]=[
  {
+  id:'sova',
+  title:'SOVA Headphones',
+  category:'Audífonos · marca y website bilingüe',
+  description:'Demo editorial con tu fotografía original, diez imágenes individuales, colección por colores, bolsa de demostración y galería con descarga PNG.',
+  image:sovaPhotos[0].url,
+  url:'https://thelaunchera.com/demos/sova/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/demo-source/sova',
+  note:'Diez PNG originales publicados con autorización de la propietaria. Incluye los prompts originales de las fotografías y seis pasos de reconstrucción. No recibe pedidos ni pagos.',
+  kind:'other',
+  photos:sovaPhotos,
+  promptsFor:'sova',
+ },
+ {
   id:'golden-grid',
   title:'Golden Grid · Waffle Co.',
   category:'Marca de waffles · branding y website bilingüe',
   description:'Demo editorial con nueve imágenes originales, waffles, mezcla y empaques. Incluye colección con detalles, historia, galería ampliable, selector español/inglés y contacto de demostración.',
   image:goldenGridPhotos[0].url,
-  url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',
-  source:'https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/demo-source/golden-grid',
+  url:'https://thelaunchera.com/demos/golden-grid/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/demo-source/golden-grid',
   note:'Marca conceptual. No acepta pedidos ni pagos y el contacto no envía ni guarda datos. Kit con nueve fotos originales, prompts de recreación y cuatro pasos de reconstrucción.',
   kind:'other',
   photos:goldenGridPhotos,
@@ -125,9 +139,9 @@ const finishedDemos:Demo[]=[
   category:'Croissants gourmet, desayunos europeos y pastries · demo bilingüe',
   description:'Website de pâtisserie europea en español e inglés: fachada editorial, croissants, desayunos, regalos, galería, historia y personas, membresía de muestra y contacto. Construido con AppDeploy.',
   image:additionalDemoPhotos['la-vie-in-pink'][0].url,
-  url:'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/',
-  source:'https://dashboard.appdeploy.ai/',
-  note:'Demo publicado en AppDeploy, con 10 fotografías originales del proyecto y 4 pasos educativos de reconstrucción. No procesa pedidos ni pagos reales; las funciones de membresía son de demostración.',
+  url:'https://thelaunchera.com/demos/la-vie-in-pink/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/demo-source/la-vie-in-pink',
+  note:'Demo publicado en GitHub, con 10 fotografías originales del proyecto y 4 pasos educativos de reconstrucción. No procesa pedidos ni pagos reales; las funciones de membresía son de demostración.',
   kind:'other',
   photos:additionalDemoPhotos['la-vie-in-pink'],
   promptsFor:'la-vie-in-pink',
@@ -201,10 +215,10 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
-   <PrivateDemoKits entries={entries}/>
+   <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
      <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:null} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
@@ -219,9 +233,10 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        }}/>
        <div className="finished-demo-actions">
          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
-         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">{d.id==='la-vie-in-pink'?'Ver en AppDeploy':'Ver en repositorio'}</a>
+         <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
+       {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
          <summary><span>Ver kit completo: fotos + prompts + pasos</span><span>{d.photos.length} fotos · {studioDemoPrompts[d.promptsFor].length} pasos</span></summary>

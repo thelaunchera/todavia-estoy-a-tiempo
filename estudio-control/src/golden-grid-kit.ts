@@ -7,63 +7,63 @@ export const goldenGridPhotos: FinishedDemoPhoto[] = [
     "key": "golden-1",
     "title": "Morning, but golden.",
     "placement": "Hero + Campaña · 1 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-1.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-1.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Hero sensorial: tres waffles cuadrados sobre plato marfil entre nubes, sirope cayendo y empaque azul detrás. Titular exacto en inglés: \"Morning, but golden.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-2",
     "title": "Crisp edges. Soft mornings.",
     "placement": "Campaña · 2 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-2.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-2.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Asymmetric Editorial: desayuno en mantel vichy azul, producto protagonista a derecha y titular a izquierda. Titular exacto en inglés: \"Crisp edges. Soft mornings.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-3",
     "title": "Meet your golden hour.",
     "placement": "Campaña · 3 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-3.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-3.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Monumental Center: empaque azul centrado en pedestal, círculo amarillo sobre fondo marfil y waffle delante. Titular exacto en inglés: \"Meet your golden hour.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-4",
     "title": "Stay golden.",
     "placement": "Campaña · 4 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-4.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-4.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Type Behind Product: waffle grande sobre acero, fondo rojo y titular marfil detrás. Titular exacto en inglés: \"Stay golden.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-5",
     "title": "Worth every crumb.",
     "placement": "Campaña · 5 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-5.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-5.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Side-Cropped Close-Up: macro del waffle entrando por derecha e inferior y tenedor con un bocado. Titular exacto en inglés: \"Worth every crumb.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-6",
     "title": "Good things. To go.",
     "placement": "Campaña · 6 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-6.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-6.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Offset Negative Space: caja amarilla abierta con waffle abajo a derecha, fondo azul y espacio negativo. Titular exacto en inglés: \"Good things. To go.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-7",
     "title": "A square worth sharing.",
     "placement": "Campaña · 7 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-7.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-7.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Diagonal Visual Flow: mano real sosteniendo waffle en sleeve marfil con cuadrículas rojas arriba a derecha, texto abajo a izquierda. Titular exacto en inglés: \"A square worth sharing.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-8",
     "title": "Slow down. Syrup up.",
     "placement": "Campaña · 8 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-8.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-8.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Vertical Editorial Stack: titular arriba, apoyo al centro y desayuno cenital sobre mesa amarilla abajo. Titular exacto en inglés: \"Slow down. Syrup up.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   },
   {
     "key": "golden-9",
     "title": "The art of a better morning.",
     "placement": "Campaña · 9 de 9",
-    "url": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-9.png",
+    "url": "https://thelaunchera.com/demos/golden-grid/resources/golden-9.png",
     "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Magazine Column Split: columna marfil de texto a izquierda 33% y fotografía de empaque azul, caja y waffle a derecha 67%. Titular exacto en inglés: \"The art of a better morning.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen."
   }
 ];
@@ -85,47 +85,47 @@ export const goldenGridRebuildPrompts: DemoRebuildPrompt[] = [
       {
         "title": "Morning, but golden.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Hero sensorial: tres waffles cuadrados sobre plato marfil entre nubes, sirope cayendo y empaque azul detrás. Titular exacto en inglés: \"Morning, but golden.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-1.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-1.png"
       },
       {
         "title": "Crisp edges. Soft mornings.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Asymmetric Editorial: desayuno en mantel vichy azul, producto protagonista a derecha y titular a izquierda. Titular exacto en inglés: \"Crisp edges. Soft mornings.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-2.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-2.png"
       },
       {
         "title": "Meet your golden hour.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Monumental Center: empaque azul centrado en pedestal, círculo amarillo sobre fondo marfil y waffle delante. Titular exacto en inglés: \"Meet your golden hour.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-3.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-3.png"
       },
       {
         "title": "Stay golden.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Type Behind Product: waffle grande sobre acero, fondo rojo y titular marfil detrás. Titular exacto en inglés: \"Stay golden.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-4.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-4.png"
       },
       {
         "title": "Worth every crumb.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Side-Cropped Close-Up: macro del waffle entrando por derecha e inferior y tenedor con un bocado. Titular exacto en inglés: \"Worth every crumb.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-5.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-5.png"
       },
       {
         "title": "Good things. To go.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Offset Negative Space: caja amarilla abierta con waffle abajo a derecha, fondo azul y espacio negativo. Titular exacto en inglés: \"Good things. To go.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-6.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-6.png"
       },
       {
         "title": "A square worth sharing.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Diagonal Visual Flow: mano real sosteniendo waffle en sleeve marfil con cuadrículas rojas arriba a derecha, texto abajo a izquierda. Titular exacto en inglés: \"A square worth sharing.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-7.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-7.png"
       },
       {
         "title": "Slow down. Syrup up.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Vertical Editorial Stack: titular arriba, apoyo al centro y desayuno cenital sobre mesa amarilla abajo. Titular exacto en inglés: \"Slow down. Syrup up.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-8.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-8.png"
       },
       {
         "title": "The art of a better morning.",
         "prompt": "Prompt de recreación, no transcripción del original. Crea UNA imagen individual vertical 4:5 para GOLDEN GRID · WAFFLE CO. Adjunta la foto original aprobada como referencia de identidad. Preserva waffles belgas cuadrados con rejilla profunda, marca tipográfica sans pesada ligeramente inclinada GOLDEN GRID, símbolo de nueve cuadrados, empaque azul con franja amarilla y roja. Paleta azul cielo #BCE8EE, rojo tomate #D93624, amarillo mantequilla #F4D776 y marfil #FFF8E8. Fotografía editorial realista de alimentos, luz natural y textura auténtica. Titulares DM Serif Display regular e italic y apoyo DM Sans. Composición: Magazine Column Split: columna marfil de texto a izquierda 33% y fotografía de empaque azul, caja y waffle a derecha 67%. Titular exacto en inglés: \"The art of a better morning.\". Crédito discreto \"A concept by The Launch Era\". No collage, no mosaico, no interfaz de Instagram. Devuelve una imagen completa, no recortes de otra imagen.",
-        "imageUrl": "https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/golden-9.png"
+        "imageUrl": "https://thelaunchera.com/demos/golden-grid/resources/golden-9.png"
       }
     ]
   },

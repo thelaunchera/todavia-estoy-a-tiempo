@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -51,7 +51,7 @@ test('Golden Grid conserva sus nueve originales, pasos y carpeta Drive',()=>{
  assert.equal(new Set(photos.map(p=>p.url)).size,9);
  for(const photo of photos){
   assert.ok(photo.title&&photo.placement&&photo.prompt);
-  assert.ok(photo.url.startsWith('https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/resources/'));
+  assert.ok(photo.url.startsWith('https://thelaunchera.com/demos/golden-grid/resources/'));
   assert.match(photo.prompt,/recreación/);
  }
  assert.equal(steps.length,4);
@@ -59,4 +59,21 @@ test('Golden Grid conserva sus nueve originales, pasos y carpeta Drive',()=>{
  assert.match(kit,/https:\/\/drive.google.com\/drive\/folders\/11QkpVn07VOpfZtwrF4zLnIiS8TJd47kK/);
  assert.match(demosSource,/photos:goldenGridPhotos/);
  assert.match(demosSource,/'golden-grid': goldenGridRebuildPrompts/);
+});
+
+test('SOVA keeps ten original photo prompts, six steps and one published card',()=>{
+ const kit=read('src/sova-kit.ts');
+ const photos=JSON.parse(kit.match(/sovaPhotos: FinishedDemoPhoto\[\] = (\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/sovaRebuildPrompts: DemoRebuildPrompt\[\] = (\[[\s\S]*?\]);/)[1]);
+ assert.equal(photos.length,10);
+ assert.equal(new Set(photos.map(photo=>photo.url)).size,10);
+ for(const photo of photos){
+  assert.ok(photo.prompt.length>100);
+  assert.ok(photo.url.startsWith('https://thelaunchera.com/demos/sova/resources/'));
+ }
+ assert.equal(steps.length,6);
+ for(const step of steps)assert.ok(step.title&&step.prompt&&step.show&&step.say);
+ assert.equal(cards.filter(card=>card.id==='sova').length,1);
+ assert.match(demosSource,/publishedBrands=\{\['sova'\]\}/);
+ assert.match(kit,/1dcvRv6uM4t6qz7PIkhALKJLwjGnvkJ0p/);
 });

@@ -19,9 +19,9 @@ function parse(entry:Entry):Kit|null {
     return kit;
   }catch{return null;}
 }
-export default function PrivateDemoKits({entries}:{entries:Entry[]}){
+export default function PrivateDemoKits({entries,publishedBrands=[]}:{entries:Entry[];publishedBrands?:string[]}){
   const [notice,setNotice]=useState('');
-  const kits=entries.map(entry=>({entry,kit:parse(entry)})).filter(row=>row.kit!==null);
+  const kits=entries.map(entry=>({entry,kit:parse(entry)})).filter(row=>row.kit!==null&&!publishedBrands.some(brand=>row.kit!.brand.toLowerCase().includes(brand.toLowerCase())));
   if(!kits.length)return null;
   async function copy(value:string){try{await navigator.clipboard.writeText(value);setNotice('Copiado.');}catch{setNotice('Selecciona el texto para copiarlo.');}}
   return <section aria-label="Kits privados pendientes de publicación" style={{marginBottom:26}}>
