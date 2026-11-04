@@ -5,7 +5,7 @@ import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','tle-experience'] as const;
+export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','tle-experience'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -18,6 +18,7 @@ const GROUPS: {id:Category; title:string; intro:string}[] = [
   {id:'lab',title:'Content Lab',intro:'Editor creativo, prompts, herramientas y archivos'}
 ];
 export const STUDIO_LINKS:BaseLink[] = [
+  {key:'school-havana-19',title:'Havana 19 · Cuban Cuisine',url:'https://thelaunchera.com/demos/havana-19/',category:'escuela',visibility:'demo',description:'Restaurante cubano en Boston, hecho directo en GitHub con fotos individuales, historia y reserva de demostración'},
   {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
@@ -88,7 +89,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'pod-home':'publicado','pod-spotify':'publicado','pod-ep1':'publicado','pod-ep2':'publicado',
   'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
   'school-class':'produccion','school-wait':'publicado',
-  'school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo','school-la-vie-in-pink':'demo',
+  'school-havana-19':'demo','school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo','school-la-vie-in-pink':'demo',
   'school-aula':'produccion','school-club':'produccion','school-pdf':'produccion',
   'lab-editor':'produccion','lab-prompts':'publicado','lab-brand-board':'publicado'
 };

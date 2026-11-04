@@ -3,6 +3,7 @@ import PrivateDemoKits from './PrivateDemoKits';
 import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
 import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
 import {mareaDrive} from './marea-kit';
+import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -14,7 +15,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -23,6 +24,20 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+ {
+  id:'havana-19',
+  title:'Havana 19 · Cuban Cuisine · Boston',
+  category:'Restaurante cubano de lujo · website bilingüe',
+  description:'Web editorial directamente en GitHub: portada luminosa, historia, platos cubanos, servicio, galería y formulario de reservas ilustrativo. Doce fotografías distintas en la página.',
+  image:havana19Photos[0].url,
+  url:'https://thelaunchera.com/demos/havana-19/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/havana-19',
+  note:'Concepto ficticio. Reservas solo de muestra, sin envíos ni disponibilidad real. Kit privado con 13 fotos individuales de archivo (una fachada anterior no se publica), prompts de recreación y 7 pasos de construcción directa en GitHub.',
+  kind:'other',
+  photos:havana19Photos,
+  promptsFor:'havana-19',
+ },
+
  {
   id:'marea-wigs-miami',
   title:'Marea Wigs · Miami',
@@ -229,7 +244,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -251,6 +266,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        </div>
        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
+       {d.id==='havana-19'&&<p><a href={havana19Drive} target="_blank" rel="noopener noreferrer">Abrir carpeta Havana 19 en Drive</a></p>}
        {d.id==='marea-wigs-miami'&&<p><a href={mareaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
