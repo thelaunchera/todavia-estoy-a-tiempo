@@ -63,11 +63,23 @@ export default function SeamlessEditor(){
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
- const pinch=useRef<{id:number;distance:number;size:number;angle:number;rotation:number}|null>(null);
+ const pinch=useRef<{id:number;distance:number;size:number;x:number;y:number;w:number;h:number;cx:number;cy:number}|null>(null);
  const drag=useRef<{pointer:number;id:number;x:number;y:number;ox:number;oy:number;mode:'move'|'resize';startSize:number}|null>(null);
+ const transformFrame=useRef<number|null>(null);
+ const pendingTransform=useRef<{id:number;patch:Partial<Item>}|null>(null);
+ const queueTransform=(id:number,patch:Partial<Item>)=>{
+  pendingTransform.current={id,patch};
+  if(transformFrame.current!==null)return;
+  transformFrame.current=requestAnimationFrame(()=>{
+   transformFrame.current=null;
+   const next=pendingTransform.current;pendingTransform.current=null;
+   if(next)setDoc(d=>({...d,items:d.items.map(item=>item.id===next.id?{...item,...next.patch}:item)}));
+  });
+ };
+ useEffect(()=>()=>{if(transformFrame.current!==null)cancelAnimationFrame(transformFrame.current)},[]);
  const images=useRef(new Map<string,HTMLImageElement>());
  const width=doc.count*W;
- useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(doc))}catch{setMessage('El navegador no tiene espacio para guardar. Exporta tus imágenes.')}},[doc]);
+ useEffect(()=>{const timer=window.setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(doc))}catch{setMessage('El navegador no tiene espacio para guardar. Exporta tus imágenes.')}},450);return()=>window.clearTimeout(timer)},[doc]);
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
@@ -87,7 +99,7 @@ export default function SeamlessEditor(){
      // Paint in an isolated, display-sized buffer. An older asynchronous image
      // decode must never overwrite newer edits or make a layer disappear.
      // The export path still paints at the full 1080 × 1350 per slide.
-     const previewScale=600/W;
+     const previewScale=480/W;
      const buffer=document.createElement('canvas');
      buffer.width=Math.round(width*previewScale);
      buffer.height=Math.round(H*previewScale);
@@ -178,39 +190,39 @@ export default function SeamlessEditor(){
    return lx>=-tolerance&&lx<=w+tolerance&&ly>=-tolerance&&ly<=h+tolerance;
  });
  const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{
-   const p=locate(e);
-   touches.current.set(e.pointerId,p);
-   if(touches.current.size===2){
-     pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null);
-     // Use the element from the first finger, not a possibly stale React
-     // selected state. This also works when the other finger lands on blank canvas.
-     const id=drag.current?.id??selected;
-     const it=doc.items.find(item=>item.id===id&&!item.locked);
-     if(it){
-       const points=[...touches.current.values()];
-       pinch.current={id:it.id,distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),
-         size:it.kind==='image'?it.width:it.fontSize,
-         angle:Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x),rotation:it.rotation||0};
-       drag.current=null;layerGesture.current=true;swipeStart.current=null;
-       e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);return;
-     }
-   }
-   if(touches.current.size>2)return;
-   const it=hit(p.x,p.y);
-   pointerStart.current={pointer:e.pointerId,id:it?.id??null,x:e.clientX,y:e.clientY};
-   if(!it||deleteArmedId!==it.id)setDeleteArmedId(null);
-   if(!it)lastTap.current=null;
-   setSelected(it?.id??null);setEditingText(null);
+  const p=locate(e);
+  touches.current.set(e.pointerId,p);
+  if(touches.current.size===2){
+   lastTap.current=null;setDeleteArmedId(null);
+   // Do not resize a previously selected layer if the first finger touched empty canvas.
+   const id=drag.current?.id??pointerStart.current?.id;
+   const it=doc.items.find(item=>item.id===id&&!item.locked);
    if(it){
-     layerGesture.current=true;swipeStart.current=null;
-     drag.current={pointer:e.pointerId,id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:'move',
-       startSize:it.kind==='image'?it.width:it.fontSize};
-     e.preventDefault();
-   }else{
-     layerGesture.current=false;
-     swipe.current={pointer:e.pointerId,x:p.x,y:p.y};
+    const points=[...touches.current.values()],bounds=itemBounds(it);
+    const pending=pendingTransform.current?.id===it.id?pendingTransform.current.patch:null;
+    pinch.current={id:it.id,distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),
+     size:it.kind==='image'?it.width:it.fontSize,x:pending?.x??it.x,y:pending?.y??it.y,
+     w:bounds.w,h:bounds.h,cx:(points[0].x+points[1].x)/2,cy:(points[0].y+points[1].y)/2};
+    drag.current=null;swipe.current=null;layerGesture.current=true;swipeStart.current=null;
    }
-   e.currentTarget.setPointerCapture(e.pointerId);
+   pointerStart.current=null;
+   e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);return;
+  }
+  if(touches.current.size>2)return;
+  const it=hit(p.x,p.y);
+  pointerStart.current={pointer:e.pointerId,id:it?.id??null,x:e.clientX,y:e.clientY};
+  if(!it||deleteArmedId!==it.id)setDeleteArmedId(null);
+  if(!it)lastTap.current=null;
+  setSelected(it?.id??null);setEditingText(null);
+  if(it){
+   layerGesture.current=true;swipeStart.current=null;
+   drag.current={pointer:e.pointerId,id:it.id,x:p.x,y:p.y,ox:it.x,oy:it.y,mode:'move',startSize:it.kind==='image'?it.width:it.fontSize};
+   e.preventDefault();
+  }else{
+   layerGesture.current=false;
+   swipe.current={pointer:e.pointerId,x:p.x,y:p.y};
+  }
+  e.currentTarget.setPointerCapture(e.pointerId);
  };
  const goSlide=(n:number,keepSelection=false)=>{
    const next=Math.max(0,Math.min(doc.count-1,n));setSlide(next);
@@ -232,7 +244,38 @@ export default function SeamlessEditor(){
    const touch=e.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
    if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
  };
- const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{const p=locate(e);if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);if(swipe.current?.pointer===e.pointerId)return;if(pinch.current&&touches.current.size===2){const points=[...touches.current.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);const start=pinch.current;const it=doc.items.find(item=>item.id===start.id);if(it&&!it.locked&&start.distance>0){const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(start.size*distance/start.distance)));const angle=Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x);const rotation=Math.round(start.rotation+(angle-start.angle)*180/Math.PI);update(it.id,{...(it.kind==='image'?{width:size}:{fontSize:size}),rotation})}return}if(!drag.current||drag.current.pointer!==e.pointerId)return;const d=drag.current;if(doc.items.find(item=>item.id===d.id)?.locked)return;if(d.mode==='resize'){const it=doc.items.find(item=>item.id===d.id);if(!it)return;const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));update(d.id,it.kind==='image'?{width:size}:{fontSize:size})}else update(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)})};
+ const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{
+  const p=locate(e);
+  if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);
+  if(swipe.current?.pointer===e.pointerId)return;
+  if(pinch.current&&touches.current.size===2){
+   e.preventDefault();
+   const points=[...touches.current.values()],start=pinch.current;
+   const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);
+   const ratio=Math.max(.1,Math.min(8,distance/start.distance));
+   const it=doc.items.find(item=>item.id===start.id);
+   if(it&&!it.locked){
+    const isImage=it.kind==='image';
+    const size=Math.max(isImage?80:24,Math.min(isImage?2400:800,Math.round(start.size*ratio)));
+    const scale=size/start.size;
+    // Scale around the fingers' midpoint; leave rotation to the precise slider.
+    const w=isImage?start.w*scale:start.w,h=start.h*scale;
+    const cx=(points[0].x+points[1].x)/2,cy=(points[0].y+points[1].y)/2;
+    queueTransform(it.id,{...(isImage?{width:size}:{fontSize:size}),
+     x:Math.round(start.x+(start.w-w)/2+cx-start.cx),
+     y:Math.round(start.y+(start.h-h)/2+cy-start.cy)});
+   }
+   return;
+  }
+  if(!drag.current||drag.current.pointer!==e.pointerId)return;
+  const d=drag.current;
+  if(doc.items.find(item=>item.id===d.id)?.locked)return;
+  if(d.mode==='resize'){
+   const it=doc.items.find(item=>item.id===d.id);if(!it)return;
+   const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));
+   queueTransform(d.id,it.kind==='image'?{width:size}:{fontSize:size});
+  }else queueTransform(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)});
+ };
  const up=(e:React.PointerEvent<HTMLCanvasElement>)=>{
   const start=pointerStart.current;
   if(start?.pointer===e.pointerId&&start.id!==null&&touches.current.size===1&&!pinch.current&&
