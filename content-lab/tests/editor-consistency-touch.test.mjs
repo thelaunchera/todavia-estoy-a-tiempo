@@ -28,7 +28,8 @@ test('Both touch editors keep text selectable and do not reset layers on blur',(
  assert.ok(touch.includes('onBlur={()=>setEditingText(\'\')}'));
  assert.ok(studio.includes('const {w,h}=itemBounds(it)'));
  // Pinch targets the layer touched by the first finger, not a stale selection.
- assert.ok(studio.includes('const id=drag.current?.id??pointerStart.current?.id'));
+ assert.ok(studio.includes('const firstTouchId=drag.current?.id??pointerStart.current?.id'));
+ assert.ok(studio.includes('item.id===firstTouchId'));
  assert.ok(studio.includes('queueTransform(it.id'));;
  assert.ok(studio.includes('if(starter){setSelected(starter.id);setEditingText(starter.id)'));
  assert.ok(studio.includes('goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true)'));
