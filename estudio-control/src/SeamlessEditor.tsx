@@ -1,7 +1,7 @@
 import BrandAssetLibrary from './BrandAssetLibrary';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
-import {SOVA_CAROUSEL_ASSETS,type SovaCarouselAsset} from './sova-carousel-assets';
-import {GOLDEN_GRID_CAROUSEL_ASSETS,type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
+import {type SovaCarouselAsset} from './sova-carousel-assets';
+import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
