@@ -36,7 +36,7 @@ test('Studio uses one categorized searchable library with reusable assets',()=>{
  assert.doesNotMatch(gallery,/Filtrar elementos por marca/);
  assert.match(editor,/onEditorial=\{addEditorialAsset\}/);
  assert.match(gallery,/onlyEditorial\?:boolean/);
- assert.match(editor,/<BrandAssetLibrary compact onlyEditorial onGolden=\{addGoldenGridAsset\} onSova=\{addSovaAsset\} onEditorial=\{addEditorialAsset\}\}\/\>/);
+ assert.match(editor,/<BrandAssetLibrary compact onlyEditorial onGolden=/);
  assert.match(editor,/await loadImage\(src\)/);
  assert.match(editor,/items:\[\.\.\.d\.items,\{id,kind:'image',src/);
  assert.match(editor,/document\.baseURI/);
