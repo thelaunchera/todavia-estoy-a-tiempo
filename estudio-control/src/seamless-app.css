@@ -213,3 +213,60 @@
 @media(max-width:799px){
  .studio-app-inspector{max-height:min(35dvh,275px);overflow-y:auto;overscroll-behavior:contain}
 }
+
+/* iOS editing fix: Safari zooms the entire page when a focused editable
+   textarea/select uses a font below 16px. The canvas remains zoomable via its
+   own controls, but focusing a text field must not enlarge the browser. */
+.studio-seamless-app{
+  width:100%;max-width:100%;min-width:0;
+  box-sizing:border-box;overflow-x:clip;
+}
+.studio-seamless-app textarea,
+.studio-seamless-app input[type=text],
+.studio-seamless-app input[type=search],
+.studio-seamless-app input:not([type]),
+.studio-seamless-app select{font-size:16px!important}
+.studio-app-canvas{max-width:100%;box-sizing:border-box}
+.studio-app-canvas>div{min-width:0;max-width:100%;box-sizing:border-box}
+.studio-app-range-row,
+.studio-app-font-inspector,
+.studio-app-curve-inspector,
+.studio-app-font-inspector>label{min-width:0;max-width:100%;box-sizing:border-box}
+.studio-app-range-row input[type=range]{
+  width:0;min-width:0;flex:1 1 0%;max-width:100%;
+}
+.studio-app-range-row output{flex:0 0 46px;width:46px;white-space:nowrap}
+.studio-app-font-inspector>label select{
+  min-width:0;max-width:64%;width:60%;box-sizing:border-box;
+}
+.studio-app-position-row{
+  min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;scrollbar-width:none;
+}
+.studio-app-position-row>button{
+  min-width:0;flex:0 0 auto;white-space:nowrap;
+  max-width:100%;font-size:13px;box-sizing:border-box
+}
+@media(max-width:799px){
+  .studio-seamless-app{overflow-x:clip}
+  .studio-app-inspector{
+    position:fixed;
+    left:50%;right:auto;
+    transform:translateX(-50%);
+    width:calc(100vw - 16px);
+    max-width:min(650px,calc(100vw - 16px));
+    min-width:0;box-sizing:border-box;
+    max-height:min(34dvh,270px);
+    overflow-x:hidden;overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:10px 12px;
+  }
+  .studio-app-font-inspector .studio-app-position-row{gap:7px}
+  .studio-app-font-inspector .studio-app-position-row button{
+    font-size:12px;min-height:40px;padding:8px 11px;
+  }
+  .studio-app-font-inspector select{
+    font-size:16px!important;
+    min-height:44px;
+  }
+}
