@@ -53,7 +53,7 @@ type Props = {
   locale: 'es' | 'en'; onStartNewCarousel: () => Promise<boolean>;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
-  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
+  notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean; saveState?:'saved'|'saving'|'unsaved'|'offline'; onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
   onUploadSticker:(file:File)=>Promise<Asset|null>;
   onRenameAsset:(asset:Asset,name:string)=>Promise<void>;
@@ -452,7 +452,7 @@ const filename=(post:Post,i:number,width=1080,height=1350)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-'+width+'x'+height+'.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
@@ -1480,7 +1480,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     <div className="factory-header">
       <div className="factory-header-identity"><div className="eyebrow">THE CONTENT LAB · CREATIVE WORKSPACE</div><h1>Carousel <em>Factory.</em></h1><p>Un lienzo para diseñar a tu manera.</p></div>
       <div className="factory-app-header-actions">
-        <button className="btn ghost" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar'}</button>
+        <button type="button" className="btn ghost" onClick={saveLatest} disabled={saving}
+          aria-label={saveState==='offline'?'Guardar carrusel · sin conexión':saveState==='saved'?'Carrusel guardado':'Guardar carrusel'}>
+          <Save size={16}/> {saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</button>
         <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy}><ImagePlus size={16}/> {busy?'Preparando…':'Exportar PNG'}</button>
       </div>
     </div>
