@@ -10,6 +10,8 @@ window.PODCAST_CONFIG = {
   unsubscribeEndpoint: 'https://hook.us2.make.com/5sgoykwaxvn52xmv817h8dgro7yxtm2h',
   helpEndpoint: 'https://hook.us2.make.com/l2yj2ral7cmqgpbgv342zlcm74wlhrjt',
   podcastUrl: 'https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh',
+  // Solo capítulos públicos: tabla segura con RLS, sin guiones ni datos de seguidores.
+  publishedEpisodesEndpoint: 'https://fhrvuhikrybobidxpvnh.supabase.co/rest/v1/podcast_published_episodes?select=number,date,title,title_en,summary,summary_en,url,art,popup_image,popup_headline,popup_headline_en,popup_message,popup_message_en&order=date.desc,number.desc',
   // Canción oficial del podcast: MP3 alojado en CDN para reproducción web; sin inicio automático.
   themeSongUrl: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3FC9GcVebQE6WAxiCP5Hh9w95GF/6245b40c-583e-42f0-bc44-e1ebfd096c2c.mp3',
   themeSongStartSeconds: 5,
