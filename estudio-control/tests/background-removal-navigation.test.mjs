@@ -37,3 +37,21 @@ test('Carousel editor remains reachable and selected after a Studio page reload'
  assert.match(studio,/if \(p==='seamless' \|\| p==='ventas'/);
  assert.match(studio,/<SeamlessEditor \/>/);
 });
+
+test('Complex-background photos have a manual, reversible, touch-first editor',()=>{
+ const eraser=read('src/ManualBackgroundEraser.tsx');
+ assert.match(editor,/import ManualBackgroundEraser from '\.\/ManualBackgroundEraser'/);
+ assert.match(editor,/onClick=\{\(\)=>void openManualEraser\(\)\}/);
+ assert.match(editor,/onApply=\{applyManualCutout\}/);
+ assert.match(editor,/originalBackupId:backupId/);
+ assert.match(eraser,/onPointerDown=\{down\}/);
+ assert.match(eraser,/onPointerMove=\{move\}/);
+ assert.match(eraser,/onPointerCancel=\{up\}/);
+ assert.match(eraser,/tool==='erase'\?'destination-out':'source-over'/);
+ assert.match(eraser,/ctx\.globalCompositeOperation='destination-in'/);
+ assert.match(eraser,/canvas\.toBlob\(/);
+ assert.match(eraser,/image\/png/);
+ for(const label of ['Borrar','Recuperar','Mover vista','Deshacer','Rehacer','Aplicar recorte'])
+  assert.ok(eraser.includes(label),label);
+ assert.doesNotMatch(eraser,/@bg0\/browser|removeBackground\(/);
+});
