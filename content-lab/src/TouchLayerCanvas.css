@@ -532,3 +532,42 @@
   bottom:calc(82px + env(safe-area-inset-bottom))
  }
 }
+
+/* Selection behaves like an in-canvas graphic editor: a tiny floating object
+   menu and a compact horizontally scrollable context dock. */
+.touch-editor-mini-actions{position:absolute;z-index:40;left:50%;top:-49px;transform:translateX(-50%);
+ display:flex;align-items:center;gap:3px;padding:4px;border:1px solid #e1e5e7;border-radius:999px;
+ background:#fff;box-shadow:0 5px 17px #1d304040;white-space:nowrap;pointer-events:auto}
+.touch-editor-mini-actions button{display:grid;place-items:center;width:36px;height:35px;padding:0;
+ border:0;border-radius:50%;background:transparent;font-size:21px;color:#191919;cursor:pointer;touch-action:manipulation}
+.touch-editor-mini-actions button:active{background:#f2d85b}
+.touch-editor-context-dock{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;
+ background:#fff;border:1px solid #d8e1e5;border-radius:17px;padding:6px;box-shadow:0 5px 22px #152c3a2a}
+.touch-editor-context-dock button{flex:0 0 82px;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;gap:4px;min-height:51px;padding:5px 4px;background:transparent;
+ border:0;border-radius:11px;color:#191919;font-family:inherit;font-size:21px;cursor:pointer;touch-action:manipulation}
+.touch-editor-context-dock button small{font-size:10px;font-weight:750;white-space:nowrap}
+.touch-editor-context-dock button[aria-pressed=true]{background:#f5e7a3}
+.touch-editor-context-dock button.touch-editor-context-done{position:sticky;right:0;flex-basis:57px;border:1px solid #e0e4e6;
+ border-radius:50%;background:#faf8f3;box-shadow:-4px 0 13px #fff}
+.touch-editor-context-inspector{display:grid;gap:8px;padding:10px 12px;border:1px solid #d6e2e4;
+ border-radius:15px;background:#faf8f3;box-shadow:0 5px 18px #152b3b25}
+.touch-editor-context-inspector-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800}
+.touch-editor-context-inspector-head button{width:32px;height:32px;display:grid;place-items:center;
+ border:0;border-radius:10px;background:#fff;font-size:22px;color:#191919}
+.touch-editor-context-range{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700}
+.touch-editor-context-range input[type=range]{min-width:45px;flex:1;accent-color:#191919;touch-action:manipulation}
+.touch-editor-context-range output{min-width:40px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+.touch-editor-context-position{display:flex;gap:7px;overflow-x:auto}
+.touch-editor-context-position button{flex:1 0 auto;min-height:39px;padding:7px 9px;
+ border:1px solid #d5e1e4;border-radius:9px;background:#fff;color:#191919;font-weight:700}
+@media(max-width:799px){
+ .touch-editor-context-dock{position:fixed!important;z-index:6018;left:8px;right:8px;
+   bottom:calc(81px + env(safe-area-inset-bottom));max-width:650px;margin:0 auto;box-sizing:border-box;
+   padding:6px;overflow-x:auto;box-shadow:0 7px 24px #122a3b37}
+ .touch-editor-context-inspector{position:fixed!important;z-index:6019;left:8px;right:8px;
+   bottom:calc(155px + env(safe-area-inset-bottom));max-width:650px;margin:0 auto;box-sizing:border-box}
+ .touch-editor-opacity-control{display:none!important}
+ .touch-editor-mini-actions{top:-40px;padding:2px;gap:1px}
+ .touch-editor-mini-actions button{width:33px;height:33px;font-size:18px}
+}
