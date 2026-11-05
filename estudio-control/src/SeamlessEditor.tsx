@@ -515,7 +515,7 @@ export default function SeamlessEditor(){
    const dx=x-cx,dy=y-cy;
    const lx=dx*Math.cos(a)-dy*Math.sin(a)+w/2;
    const ly=dx*Math.sin(a)+dy*Math.cos(a)+h/2;
-   const tolerance=24; // approximately seven displayed pixels on a phone
+   const tolerance=typeof window!=='undefined'&&window.matchMedia('(max-width:799px)').matches?52:24; // larger finger-friendly target on phones
    return lx>=-tolerance&&lx<=w+tolerance&&ly>=-tolerance&&ly<=h+tolerance;
  });
  const down=(e:React.PointerEvent<HTMLCanvasElement>)=>{
@@ -572,12 +572,13 @@ export default function SeamlessEditor(){
    if(e.touches.length===0)layerGesture.current=false;
    if(interacted||!start||e.changedTouches.length!==1||e.touches.length!==0||pinch.current||drag.current)return;
    const touch=e.changedTouches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
-   if(Math.abs(dx)>=55&&Math.abs(dx)>Math.abs(dy)*1.25)goSlide(start.slide+(dx<0?1:-1));
+   if(Math.abs(dx)>=75&&Math.abs(dx)>Math.abs(dy)*1.6)goSlide(start.slide+(dx<0?1:-1));
  };
  const move=(e:React.PointerEvent<HTMLCanvasElement>)=>{
   const p=locate(e);
   if(touches.current.has(e.pointerId))touches.current.set(e.pointerId,p);
   if(swipe.current?.pointer===e.pointerId)return;
+  if(e.pointerType==='touch'&&(drag.current?.pointer===e.pointerId||pinch.current))e.preventDefault();
   if(pinch.current&&touches.current.size===2){
    e.preventDefault();
    const points=[...touches.current.values()],start=pinch.current;
@@ -598,6 +599,7 @@ export default function SeamlessEditor(){
    return;
   }
   if(!drag.current||drag.current.pointer!==e.pointerId)return;
+  if(e.pointerType==='touch'&&touches.current.size>1)return;
   const d=drag.current;
   if(doc.items.find(item=>item.id===d.id)?.locked)return;
   if(d.mode==='resize'){
@@ -912,7 +914,7 @@ export default function SeamlessEditor(){
     style={{position:'absolute',width:1,height:1,opacity:0,pointerEvents:'none'}} aria-label="Elegir foto del dispositivo"/>
 
   <div className="studio-app-canvas" ref={workspaceRef} aria-label="Área de edición: lienzo visible">
-  <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'x proximity',overscrollBehaviorX:'contain'}}>
+  <div ref={viewport} onTouchStartCapture={onViewportTouchStart} onTouchEndCapture={onViewportTouchEnd} style={{overflowX:'auto',borderRadius:16,border:'1px solid #ddd',background:'#eaeaea',padding:8,scrollSnapType:'none',overscrollBehaviorX:'contain',touchAction:'pan-y'}}>
    <div style={{position:'relative',width:doc.count*slideWidthPx,maxWidth:'none'}}>
    <canvas ref={canvas} data-carousel-canvas="true" onPointerDown={down} onPointerMove={move}
     onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
