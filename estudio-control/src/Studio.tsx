@@ -151,7 +151,10 @@ function validPodcastArchiveArtUrl(value?:string){
   try {
     const url = new URL((value||'').trim());
     return url.protocol==='https:' &&
-      ['podcast.thelaunchera.com','d2ol7oe51mr4n9.cloudfront.net'].includes(url.hostname) &&
+      (
+        ['podcast.thelaunchera.com','d2ol7oe51mr4n9.cloudfront.net'].includes(url.hostname) ||
+        (url.hostname==='raw.githubusercontent.com' && url.pathname.startsWith('/thelaunchera/todavia-estoy-a-tiempo/main/assets/'))
+      ) &&
       /\.(?:png|jpe?g|webp)$/i.test(url.pathname) && !url.username && !url.password;
   } catch { return false; }
 }
@@ -160,8 +163,8 @@ function popupImageFor(row:Partial<Row>):string{
 }
 function episodeReadyForPublicArchive(row:Partial<Row>,all:Row[]):string{
   if(!row.date || !/^\d{4}-\d{2}-\d{2}$/.test(row.date))return 'Selecciona la fecha real de publicación del capítulo.';
-  if(!validPodcastArchiveArtUrl(row.email_art_url))return 'La portada debe estar en podcast.thelaunchera.com o nuestro CDN oficial, con enlace público directo a PNG, JPG o WebP.';
-  if(!validPodcastArchiveArtUrl(popupImageFor(row)))return 'El pop-up necesita una foto pública directa del podcast o del CDN oficial.';
+  if(!validPodcastArchiveArtUrl(row.email_art_url))return 'La portada debe ser pública y directa desde el podcast, nuestro CDN o assets oficiales de GitHub (PNG, JPG o WebP).';
+  if(!validPodcastArchiveArtUrl(popupImageFor(row)))return 'El pop-up necesita una foto pública directa desde el podcast, el CDN o assets oficiales de GitHub.';
   if(!String(row.popup_headline||'').trim() || !String(row.popup_message||'').trim())return 'Escribe un titular y un mensaje propios del capítulo para el pop-up.';
   const image=popupImageFor(row);
   if(all.some(item=>item.id!==row.id&&item.status==='publicado'&&popupImageFor(item)===image))
@@ -2262,7 +2265,7 @@ function App() {
                         })
                       }
                     />
-                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). Para el archivo del podcast, usa podcast.thelaunchera.com o el CDN oficial. Una foto privada de Biblioteca no sirve para publicar.</small>
+                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). Para el archivo del podcast, usa el dominio, el CDN o los assets oficiales de GitHub. Una foto privada de Biblioteca no sirve para publicar.</small>
                   </label>
                   <details className="episode-website-fields">
                     <summary>Banner semanal y pop-up del capítulo</summary>
