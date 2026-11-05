@@ -47,9 +47,10 @@ test('Factory uses the five mobile-first creation steps and keeps ideas with IA 
  assert.ok(studio.includes('PASO 4 DE 5 · VISTA PREVIA'));
  assert.ok(studio.includes('PASO 5 DE 5 · DESCARGAR'));
  assert.ok(!studio.includes('IA opcional'));
- assert.ok(studio.includes('>Ideas con IA</button>'));
- assert.ok(studio.indexOf("{id:'style',name:'Fondos y stickers'}")<studio.indexOf("{id:'canvas',name:'Fotos y diseño'}"));
- assert.ok(studio.indexOf("{id:'canvas',name:'Fotos y diseño'}")<studio.indexOf("{id:'slides',name:'Tipografía'}"));
+ assert.ok(studio.includes('aria-label="Ideas con IA"'));
+ assert.ok(studio.includes('factory-step-short'));
+ assert.ok(studio.indexOf("{id:'style',name:'Fondos y stickers',short:'Fondos'}")<studio.indexOf("{id:'canvas',name:'Fotos y diseño',short:'Diseño'}"));
+ assert.ok(studio.indexOf("{id:'canvas',name:'Fotos y diseño',short:'Diseño'}")<studio.indexOf("{id:'slides',name:'Tipografía',short:'Texto'}"));
  assert.ok(studio.includes("studioTab==='canvas'"));
  assert.ok(studio.includes("studioTab==='slides'"));
  assert.ok(studio.includes("studioTab==='style'"));
@@ -78,4 +79,24 @@ test('Public wallpapers have clear exclusive categories and retired bows remain 
  assert.ok(gallery.includes("label:'Mis fondos'"));
  assert.ok(gallery.includes('ownVisible.map'));
  assert.ok(gallery.includes('backgrounds.filter(item=>belongsToBackgroundCategory'));
+});
+
+
+test('B+C Carousel Factory makes the first viewport a compact touch workspace',()=>{
+ const studio=read('src/CarouselFactory.tsx');
+ const css=read('src/CarouselFactory.css');
+ const panorama=read('src/PanoramaEditor.tsx');
+ const panoCss=read('src/PanoramaEditor.css');
+ const app=read('src/App.tsx');
+ for(const step of ["short:'Fondos'","short:'Diseño'","short:'Texto'","short:'Vista'","short:'PNG'"])
+   assert.ok(studio.includes(step),step);
+ assert.ok(studio.includes('factory-edit-rail'));
+ assert.ok(studio.includes('factory-preview-text'));
+ assert.ok(studio.includes('saveState'));
+ assert.ok(css.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
+ assert.ok(css.includes('.factory-bc-workspace .factory-mobile-preview-trigger'));
+ assert.ok(panorama.includes('panorama-expand-short'));
+ assert.ok(panoCss.includes('B+C Carousel Factory artboard'));
+ assert.ok(app.includes('className="lab-factory-help"'));
+ assert.ok(app.includes('saveState={draftStatus}'));
 });
