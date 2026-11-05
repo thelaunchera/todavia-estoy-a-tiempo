@@ -15,7 +15,7 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
 import './seamless-app.css';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // Studio copies its own shared resources on deployment.
@@ -73,7 +73,7 @@ export default function SeamlessEditor(){
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [stickerSearch,setStickerSearch]=useState('');
- const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|null>(null);
+ const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
@@ -98,6 +98,23 @@ export default function SeamlessEditor(){
  const layerGesture=useRef(false);
  const [slide,setSlide]=useState(0);
  const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
+ const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:1100px)').matches);
+ const [artboardSpace,setArtboardSpace]=useState(740);
+ useEffect(()=>{
+   const mq=window.matchMedia('(min-width:1100px)');
+   const change=()=>setWideScreen(mq.matches);
+   change();mq.addEventListener('change',change);
+   return()=>mq.removeEventListener('change',change);
+ },[]);
+ useEffect(()=>{
+   if(!wideScreen)return;
+   const node=viewport.current;
+   if(!node)return;
+   const measure=()=>setArtboardSpace(Math.max(350,Math.min(900,node.clientWidth-24)));
+   const observer=new ResizeObserver(measure);
+   observer.observe(node);measure();
+   return()=>observer.disconnect();
+ },[wideScreen]);
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
@@ -185,14 +202,77 @@ export default function SeamlessEditor(){
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
   for(let slideIndex=0;slideIndex<doc.count;slideIndex++){const src=doc.backgroundImages?.[slideIndex];if(src){try{const bg=await loadImage(src);const left=slideIndex*W-clipStart;ctx.save();ctx.beginPath();ctx.rect(left,0,W,H);ctx.clip();const factor=Math.max(W/bg.width,H/bg.height);const dw=bg.width*factor,dh=bg.height*factor;ctx.drawImage(bg,left+(W-dw)/2,(H-dh)/2,dw,dh);ctx.restore()}catch{}}}
-  for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,it.opacity??1));if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){
-    ctx.fillStyle=it.color;ctx.font=(it.fontWeight||700)+' '+it.fontSize+'px '+studioTextFont(it.fontFamily);ctx.textBaseline='top';
-    if(it.textShadow){ctx.shadowColor='#19191966';ctx.shadowBlur=it.fontSize*.12;ctx.shadowOffsetY=it.fontSize*.05}
-    if(it.textOutline){ctx.strokeStyle='#FFFFFF';ctx.lineWidth=Math.max(1,it.fontSize*.045);ctx.lineJoin='round'}
-    const lines=textLines(it),curve=clampTextCurve(it.curve||0);
-    const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines,it.letterSpacing||0);
-    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0,!!it.textOutline));
-   }else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
+  for(const it of doc.items){
+   if(it.kind==='text'&&it.id===omitTextId)continue;
+   const x=it.x-clipStart;
+   const bounds=itemBounds(it);
+   ctx.save();
+   ctx.globalAlpha=Math.max(0,Math.min(1,it.opacity??1));
+   const cx=x+bounds.w/2,cy=it.y+bounds.h/2;
+   if(it.rotation||it.flipX||it.flipY){
+     ctx.translate(cx,cy);
+     if(it.rotation)ctx.rotate(it.rotation*Math.PI/180);
+     ctx.scale(it.flipX?-1:1,it.flipY?-1:1);
+     ctx.translate(-cx,-cy);
+   }
+   if(it.shadowEnabled){
+     ctx.shadowColor=it.shadowColor||'#191919';
+     ctx.shadowBlur=Math.max(0,Math.min(120,it.shadowBlur??20));
+     ctx.shadowOffsetX=it.shadowOffsetX??8;
+     ctx.shadowOffsetY=it.shadowOffsetY??12;
+   }
+   if(it.kind==='sticker'){
+     ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';
+     ctx.textBaseline='top';
+     ctx.fillText(it.text||'✨',x,it.y);
+   }else if(it.kind==='text'){
+     ctx.fillStyle=it.color;
+     ctx.font=(it.fontWeight||700)+' '+it.fontSize+'px '+studioTextFont(it.fontFamily);
+     ctx.textBaseline='top';
+     if(it.textShadow){
+       ctx.shadowColor=it.shadowColor||'#19191966';
+       ctx.shadowBlur=it.shadowBlur??it.fontSize*.12;
+       ctx.shadowOffsetY=it.shadowOffsetY??it.fontSize*.05;
+       ctx.shadowOffsetX=it.shadowOffsetX??0;
+     }
+     if(it.textOutline){
+       ctx.strokeStyle='#FFFFFF';
+       ctx.lineWidth=Math.max(1,it.fontSize*.045);
+       ctx.lineJoin='round';
+     }
+     const lines=textLines(it),curve=clampTextCurve(it.curve||0);
+     const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines,it.letterSpacing||0);
+     lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0,!!it.textOutline));
+   }else if(it.src){
+     try{
+       const im=await loadImage(it.src);
+       const h=it.width*im.height/im.width;
+       const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));
+       const strength=Math.max(0,Math.min(1,it.tintStrength??0.38));
+       // Use an alpha-preserving offscreen layer for recoloring and rounded corners.
+       // Export and preview share this exact paint path at native source resolution.
+       if(radius>0||(it.tintColor&&strength>0)){
+         const buffer=document.createElement('canvas');
+         buffer.width=im.naturalWidth;buffer.height=im.naturalHeight;
+         const b=buffer.getContext('2d');
+         if(!b)throw new Error('No se pudo preparar la capa');
+         const scaledRadius=radius*im.naturalWidth/it.width;
+         b.beginPath();b.roundRect(0,0,buffer.width,buffer.height,scaledRadius);b.clip();
+         b.drawImage(im,0,0);
+         if(it.tintColor&&strength>0){
+           b.globalCompositeOperation='source-atop';
+           b.globalAlpha=strength;b.fillStyle=it.tintColor;
+           b.fillRect(0,0,buffer.width,buffer.height);
+         }
+         ctx.drawImage(buffer,x,it.y,it.width,h);
+         buffer.width=1;buffer.height=1;
+       }else ctx.drawImage(im,x,it.y,it.width,h);
+     }catch{
+       // A damaged image never overwrites or clears the rest of the document.
+     }
+   }
+   ctx.restore();
+  }
   ctx.restore();
  };
  useEffect(()=>{
@@ -202,7 +282,7 @@ export default function SeamlessEditor(){
      // Paint in an isolated, display-sized buffer. An older asynchronous image
      // decode must never overwrite newer edits or make a layer disappear.
      // The export path still paints at the full 1080 × 1350 per slide.
-     const previewScale=480/W;
+     const previewScale=wideScreen?Math.min(1.25,Math.max(480,slideWidthPx*Math.min(window.devicePixelRatio||1,2))/W):480/W;
      const buffer=document.createElement('canvas');
      buffer.width=Math.round(width*previewScale);
      buffer.height=Math.round(H*previewScale);
@@ -228,7 +308,7 @@ export default function SeamlessEditor(){
      ctx.restore();
    };
    void render();return()=>{active=false};
- },[doc,selected,editingText]);
+ },[doc,selected,editingText,wideScreen,slideWidthPx]);
  const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
  const addPrivateSticker=async(url:string)=>{
@@ -326,7 +406,7 @@ export default function SeamlessEditor(){
  const locate=(e:React.PointerEvent<HTMLCanvasElement>|React.MouseEvent<HTMLCanvasElement>)=>{const r=e.currentTarget.getBoundingClientRect();return {x:(e.clientX-r.left)*width/r.width,y:(e.clientY-r.top)*H/r.height}};
  const textLines=(it:Item)=>{const lines:string[]=[];const maxWidth=it.width||900;const font=it.fontSize;for(const para of (it.text||'').split('\n')){if(!para.trim()){lines.push('');continue}let line='';for(const word of para.split(/\s+/)){const candidate=line?line+' '+word:word;if(candidate.length*font*.53>maxWidth&&line){lines.push(line);line=word}else line=candidate}lines.push(line)}return lines.length?lines:['']};
  const itemBounds=(it:Item)=>{
-  const im=it.src?images.current.get(it.src):undefined;
+  const im=it.src?images.current.get(resolveImageSource(it.src)):undefined;
   const lines=it.kind==='text'?textLines(it):[];
   const lineHeight=it.fontSize*1.3+(it.kind==='text'?curvedTextExtraHeight(it.fontSize,it.width||900,it.curve||0,lines,it.letterSpacing||0):0);
   return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,
@@ -617,7 +697,7 @@ export default function SeamlessEditor(){
  const current=doc.items.find(it=>it.id===selected);
  useEffect(()=>{setActiveInspector(null)},[selected]);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
- const slideWidthPx=300*canvasZoom/100;
+ const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
  const viewportScale=slideWidthPx/W;
  useEffect(()=>{viewport.current?.scrollTo({left:slide*slideWidthPx});},[canvasZoom]);
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
