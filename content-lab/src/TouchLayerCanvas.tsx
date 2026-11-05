@@ -544,7 +544,7 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&layer.role!=='background'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
-            {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={photoWindow}>
+            {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:Math.max(0,Math.min(1,layer.opacity??1))}}>
               <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
@@ -562,12 +562,14 @@ export default function TouchLayerCanvas({
                 onKeyDown={e=>e.stopPropagation()}
                 style={{
                   fontFamily:panoramaFont(layer.font),fontWeight:panoramaTextWeight(layer.fontWeight),
+                  opacity:Math.max(0,Math.min(1,layer.opacity??1)),
                   fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
                 }}/>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
+              opacity:Math.max(0,Math.min(1,layer.opacity??1)),
               fontWeight:panoramaTextWeight(layer.fontWeight),
               fontSize:(layer.fontSize||76)*(gesture.current?.id===layer.id
                 ?rect.w/Math.max(.001,layer.rect.w):1)*stageHeight/canvasHeight+'px',
@@ -578,7 +580,7 @@ export default function TouchLayerCanvas({
               WebkitTextStroke:layer.outline?'1px #FFFFFF':undefined,
             }}>{layer.text||''}</div>}
             {layer.kind==='shape'&&<div className={'touch-editor-collage-shape shape-'+(layer.shape||'paper')}
-              style={{background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
+              style={{opacity:Math.max(0,Math.min(1,layer.opacity??1)),background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
                 borderColor:layer.color||'#F1E5D2',
                 borderRadius:layer.shape==='circle'?'50%':radius(layerCornerPixels(rect,fw,fh),fw,fh)}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
