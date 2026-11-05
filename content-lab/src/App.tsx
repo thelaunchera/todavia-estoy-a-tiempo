@@ -989,12 +989,11 @@ function App() {
     }catch(e){err(e);return null}
     finally{setBusy('')}
   };
-  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true, targetBrandId=brand.id, forcePrivate=false): Promise<Asset | null> => {
+  const upload = async (file?: File, category:MediaCategory='original', autoSelect=true, targetBrandId=brand.id, _forcePrivate=true): Promise<Asset | null> => {
     if (!file) return null;
-    // The administrator's background/sticker uploads are intentionally shared.
-    // Every buyer upload still goes to owner-only RLS tables and private Storage.
-    if(aiWallet?.admin&&category==='background'&&!forcePrivate)return publishSharedBackground(file);
-    if(aiWallet?.admin&&category==='sticker'&&!forcePrivate)return publishSharedSticker(file,'Aesthetic');
+    // SAFE DEFAULT: every personal upload, even by an administrator, stays in
+    // owner-scoped RLS + private Storage. Publishing requires a separate,
+    // confirmed catalog action (publishSharedBackground / publishSharedSticker).
     if (file.size > 25000000) {
       toast('Foto demasiado grande. Elige una imagen de menos de 25 MB.');
       return null;
@@ -1628,7 +1627,7 @@ function App() {
             <CarouselFactory
               onUploadPhoto={async file=>upload(file,'original',false)}
               onUploadSticker={async file=>upload(file,'sticker',false,brand.id,true)}
-              onUploadBackground={async file=>upload(file,'background',false)}
+              onUploadBackground={async file=>upload(file,'background',false,brand.id,true)}
               onRenameAsset={async(asset,name)=>{
                 if(asset.shared||asset.brandId!==brand.id)throw Error('Solo puedes cambiar el nombre de tus archivos propios.');
                 const {data}=await api.put('/api/assets/'+asset.id,{displayName:name});
@@ -1660,7 +1659,7 @@ function App() {
               locale={loginLanguage} saving={busy==='save'} onSave={saveAndReturnToCalendar}
               onChange={patch=>setEditor(old=>({...old,...patch}))}
               onUploadPhoto={async file=>upload(file,'original',false)}
-              onUploadBackground={async file=>upload(file,'background',false)}
+              onUploadBackground={async file=>upload(file,'background',false,brand.id,true)}
               loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
               notify={toast}/>
           )}
@@ -1855,7 +1854,7 @@ function App() {
                     onTitle={value=>change('hook',value)}
                     onUpload={async file=>upload(file,'original',false)}
                     loadImage={imageLoad} onOpenStickers={()=>navigate('stickers')}
-                    onUploadBackground={async file=>upload(file,'background',false)}
+                    onUploadBackground={async file=>upload(file,'background',false,brand.id,true)}
                     notify={toast} saving={busy==='save'} saveState={draftStatus} onSave={()=>{void saveAndReturnToCalendar()}}/>
 
                 </aside>
@@ -1937,7 +1936,7 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker')} onDelete={deleteLibraryAsset} loadImage={imageLoad} onUse={(id,destination)=>{
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker',false,brand.id,true)} onDelete={deleteLibraryAsset} loadImage={imageLoad} onUse={(id,destination)=>{
                     if(destination==='cover'){
                       setEditor(old=>{
                         const decor=readCoverDecor(old.designData);
@@ -1955,7 +1954,8 @@ function App() {
           {brand && tab === 'backgrounds' && <BackgroundLibrary
   isAdmin={Boolean(aiWallet?.admin)}
   assets={library} images={images} loadImage={imageLoad}
-  onUpload={async(file,category)=>aiWallet?.admin?publishSharedBackground(file,category):upload(file,'background')}
+  onUpload={async file=>upload(file,'background',false,brand.id,true)}
+   onPublish={publishSharedBackground}
   onDelete={deleteLibraryAsset}
   onDeletePreset={deleteIncludedBackground}
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
