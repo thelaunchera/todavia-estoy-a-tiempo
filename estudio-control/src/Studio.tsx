@@ -13,7 +13,7 @@ import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
 import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import ProductCenter from './ProductCenter';
-import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
+import { classLessons, CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
 import { REELS_SECTION } from './reels-plan';
 import { BRAND_REELS_SECTIONS } from './brand-reels-plan';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -294,6 +294,7 @@ function App() {
   const [data, setData] = useState<Data | null>(null),
     [denied, setDenied] = useState(false),
     [error, setError] = useState('');
+  const [classPendingTarget, setClassPendingTarget] = useState<{kind:'lesson'|'weekly';id:string}|null>(null);
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
     return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' ? section : 'inicio';
@@ -681,8 +682,19 @@ function App() {
   );
   const tasks = items.tareas,
     products = items.productos;
-  // Una sola lista de la clase en Clases · grabación; no repetir en Tareas.
-  const generalTasks=tasks.filter(x=>x.section!==CLASS_TASK_SECTION);
+  // A single underlying task for each class item, surfaced in both views.
+  const generalTasks = tasks.filter(x => x.section !== CLASS_TASK_SECTION);
+  const classWeeklyTasks = tasks.filter((x,index,all) =>
+    x.section === CLASS_TASK_SECTION &&
+    all.findIndex(t => t.section === CLASS_TASK_SECTION && t.title.toLocaleLowerCase('es').trim().replace(/\\s+/g,' ') === x.title.toLocaleLowerCase('es').trim().replace(/\\s+/g,' ')) === index
+  );
+  // Recording modules are already persisted as class production records in ideas;
+  // do not create task copies or treat "grabado" as "aprobado".
+  const classRecordingItems = classLessons.map(lesson => ({
+    lesson,
+    record: items.ideas.find(x => x.section === CLASS_SECTION && x.subtitle === lesson.id)
+  }));
+  const classOpenRecordings = classRecordingItems.filter(x => x.record?.status !== 'aprobado');
   const paidPdfSales=verifiedSales?.filter(s=>s.status?.toLowerCase()==='paid')||[];
   const paidUsdSales=paidPdfSales.filter(s=>s.currency?.toLowerCase()==='usd' && typeof s.amount_cents==='number');
   const pdfRevenueUsdCents=paidUsdSales.reduce((sum,s)=>sum+(s.amount_cents||0),0);
@@ -697,7 +709,7 @@ function App() {
   const libraryEpisodes = episodeScope === 'month' ? plan.month : episodeScope === 'published' ? plan.published : plan.active;
   const allSeries = groupEpisodes(libraryEpisodes);
   const published = plan.published.length;
-  const pending = generalTasks.filter(x => x.status !== 'completado').length + nextProductionEpisodes.length;
+  const pending = generalTasks.filter(x => x.status !== 'completado').length + nextProductionEpisodes.length + classWeeklyTasks.filter(x => x.status !== 'completado').length + classOpenRecordings.length;
   const next = plan.planned[0];
   const visible = (xs: Row[]) =>
     xs.filter(x =>
@@ -705,7 +717,7 @@ function App() {
         .toLowerCase()
         .includes(search.toLowerCase())
     );
-  const change = (p: Page) => {
+  const change = (p: Page, directPending = false) => {
     setPage(p);
     setSearch('');
     setMobileNav(false);
@@ -715,7 +727,11 @@ function App() {
     if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!directPending) window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const openClassPending = (kind: 'lesson'|'weekly', id: string) => {
+    setClassPendingTarget({kind,id});
+    change('clases',true);
   };
   const newRow = (kind: Kind) => {
     if (recording) return;
@@ -963,8 +979,54 @@ function App() {
   const openEditorialTasks = visible(generalTasks.filter(x => x.status !== 'completado'));
   const finishedEditorialTasks = visible(generalTasks.filter(x => x.status === 'completado'));
   const calendarActionRows = visible(nextProductionEpisodes);
+  const recordingActionRows = classOpenRecordings.filter(x =>
+    ('módulo ' + x.lesson.id + ' ' + x.lesson.title + ' ' + (x.record?.status || 'pendiente'))
+      .toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))
+  );
+  const classWeeklyOpen = visible(classWeeklyTasks.filter(x => x.status !== 'completado'))
+    .sort((a,b) => (a.date || '9999').localeCompare(b.date || '9999'));
   const taskRows = (
     <div className="task-feed">
+      {recordingActionRows.length > 0 && (
+        <section className="task-calendar-feed" aria-label="Grabaciones pendientes de la clase">
+          <div className="task-calendar-heading">
+            <strong>Grabación · Módulos de la clase ({recordingActionRows.length})</strong>
+            <small>Toca el módulo para abrir su ficha exacta, guion y progreso. Sin duplicar tareas.</small>
+          </div>
+          <div className="task-list task-destination-list">
+            {recordingActionRows.map(({lesson,record}) => (
+              <button type="button" key={lesson.id} className="task-destination" onClick={() => openClassPending('lesson',lesson.id)}>
+                <span className="task-episode-number">{lesson.id}</span>
+                <span className="task-destination-copy">
+                  <b>{lesson.title}</b>
+                  <small>Grabar clase · {record?.status || 'pendiente'} · Abrir ficha y guion</small>
+                </span>
+                <span className="task-destination-action">Abrir</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+      {classWeeklyOpen.length > 0 && (
+        <section className="task-calendar-feed" aria-label="Pendientes del plan de la clase">
+          <div className="task-calendar-heading">
+            <strong>Producción y lanzamiento · Clase ({classWeeklyOpen.length})</strong>
+            <small>Estas mismas tareas siguen guardadas en el plan semanal.</small>
+          </div>
+          <div className="task-list task-destination-list">
+            {classWeeklyOpen.map(x => (
+              <button type="button" key={x.id} className="task-destination" onClick={() => openClassPending('weekly',x.id)}>
+                <span className="task-episode-number"><BookOpen size={17}/></span>
+                <span className="task-destination-copy">
+                  <b>{x.title.replace(/^CLASE 01 · /,'')}</b>
+                  <small>{formatDate(x.date)} · {x.status || 'pendiente'} · Abrir pendiente del plan</small>
+                </span>
+                <span className="task-destination-action">Abrir</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       {calendarActionRows.length > 0 && (
         <section className="task-calendar-feed" aria-label="Próximos capítulos del podcast">
           <div className="task-calendar-heading">
@@ -992,7 +1054,7 @@ function App() {
           {openEditorialTasks.map(taskCard)}
         </section>
       )}
-      {calendarActionRows.length === 0 && openEditorialTasks.length === 0 && (
+      {recordingActionRows.length === 0 && classWeeklyOpen.length === 0 && calendarActionRows.length === 0 && openEditorialTasks.length === 0 && (
         <p className="task-feed-empty">No hay tareas editoriales abiertas. Puedes añadir una nueva cuando la necesites.</p>
       )}
       {finishedEditorialTasks.length > 0 && (
@@ -1474,13 +1536,13 @@ function App() {
                 />
               </div>
               <div className="task-page-refresh">
-                <span>Los capítulos se consultan en tu calendario. Las tareas externas de Notion no se importan automáticamente.</span>
+                <span>Los módulos, el plan semanal y el calendario del podcast aparecen aquí desde sus registros originales. Las tareas externas de Notion no se importan automáticamente.</span>
                 <button type="button" disabled={loading} onClick={() => void refresh()}>
                   <RotateCcw size={15}/> {loading ? 'Actualizando…' : 'Actualizar lista'}
                 </button>
               </div>
               {taskRows}
-              <p className="hint task-class-hint"><BookOpen size={16}/><span>Las tareas semanales de la clase se gestionan en <button type="button" onClick={()=>change('clases')} className="class-plan-inline-link">Clases · grabación</button>, sin duplicarlas aquí.</span></p>
+              <p className="hint task-class-hint"><BookOpen size={16}/><span>Al tocar un pendiente de la clase se abre directamente su ficha de grabación o su semana en <button type="button" onClick={()=>change('clases')} className="class-plan-inline-link">Grabar módulos</button>. Los cambios se guardan en un solo lugar.</span></p>
             </>
           )}
           {page === 'productos' && (
@@ -1570,7 +1632,7 @@ function App() {
           {page === 'links' && <LinkCenter entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} entries={items.ideas} />}
           {page === 'clases' && (
-            <ClassProduction entries={items.ideas} tasks={items.tareas} launchStats={classStats} onTaskToggle={async (task,next) => {
+            <ClassProduction entries={items.ideas} tasks={items.tareas} focusPending={classPendingTarget} launchStats={classStats} onTaskToggle={async (task,next) => {
               await api.put('/api/items/tareas/'+task.id, { ...task, status:next });
               await refresh();
             }} onSave={async (entry, changes) => {
