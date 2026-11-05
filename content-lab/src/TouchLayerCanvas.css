@@ -516,7 +516,8 @@
 }
 .touch-editor-opacity-control label{flex:0 0 auto;white-space:nowrap}
 .touch-editor-opacity-control input[type=range]{
- min-width:45px;width:100%;flex:1;accent-color:#191919;touch-action:manipulation
+ min-width:45px;width:100%;flex:1;accent-color:#191919;
+ min-height:44px;touch-action:none;cursor:ew-resize
 }
 .touch-editor-opacity-control output{
  min-width:40px;font-size:12px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums
@@ -556,7 +557,7 @@
 .touch-editor-context-inspector-head button{width:32px;height:32px;display:grid;place-items:center;
  border:0;border-radius:10px;background:#fff;font-size:22px;color:#191919}
 .touch-editor-context-range{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700}
-.touch-editor-context-range input[type=range]{min-width:45px;flex:1;accent-color:#191919;touch-action:manipulation}
+.touch-editor-context-range input[type=range]{min-width:45px;flex:1;accent-color:#191919;min-height:44px;touch-action:none;cursor:ew-resize}
 .touch-editor-context-range output{min-width:40px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
 .touch-editor-context-position{display:flex;gap:7px;overflow-x:auto}
 .touch-editor-context-position button{flex:1 0 auto;min-height:39px;padding:7px 9px;
