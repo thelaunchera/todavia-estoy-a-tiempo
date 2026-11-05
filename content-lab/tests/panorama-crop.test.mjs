@@ -82,8 +82,9 @@ function editorAction(name,context){
   return vm.runInNewContext('(()=>{'+code+';return invoke;})()',context);
 }
 
-test('normal mode moves photos to another slide without crossing its boundaries',()=>{
-  const rect={x:.65,y:.2,w:.25,h:.5};
+test('normal mode keeps the source slide and never auto-enables Seamless for photo overflow',()=>{
+  // This rectangle deliberately crosses the 50% boundary between two slides.
+  const rect={x:.42,y:.2,w:.30,h:.5};
   const slides=[{key:'one',title:'One',assetId:'photo',layout:'cover'},
     {key:'two',title:'Two',assetId:'',layout:'statement'}];
   let saved;
@@ -93,12 +94,13 @@ test('normal mode moves photos to another slide without crossing its boundaries'
     notify:message=>{throw Error(message)},setAll:(pages,style)=>{saved={pages,style}},
     stripSource:editorAction('stripSource',{slides,photoDefault}),
     promoteSource:editorAction('promoteSource',{clampPanoramaRect}),
-    constrainNormalLayer:editorAction('constrainNormalLayer',{clampPanoramaRect}),
   });
   move('photo','page-photo-one',rect);
   assert.equal(saved.pages[0].assetId,'');
   assert.equal(saved.style.seamlessEnabled,false);
-  assert.equal(saved.style.panoramaLayers[0].rect.x,.65);
+  assert.equal(saved.style.panoramaLayers[0].rect.x,.42);
+  assert.equal(saved.style.panoramaLayers[0].rect.w,.30);
+  assert.equal(saved.style.panoramaLayers[0].page,0);
   assert.equal(saved.style.panoramaLayers[0].assetId,'photo');
 });
 
@@ -213,17 +215,24 @@ test('continuous wallpaper keeps cross-slide width, flat edges and role after au
   assert.equal(decoded.style.panoramaLayers[0].rect.w*count,2);
 });
 
-test('normal confines free layers to a single slide while seamless saves the full cross-slide geometry',()=>{
- const pin=editorAction('constrainNormalLayer',{clampPanoramaRect});
- const layer={id:'photo',kind:'photo',assetId:'real',rect:{x:.38,y:.1,w:.35,h:.8}};
- const normal=pin(layer,4);
- const page=Math.floor((normal.rect.x+normal.rect.w/2)*4);
- assert.ok(normal.rect.x>=page/4-.000001);
- assert.ok(normal.rect.x+normal.rect.w<=(page+1)/4+.000001);
- assert.equal(normal.rect.h,.8);
- // The original image geometry is preserved for seamless mode.
- assert.equal(layer.rect.x,.38);
- assert.equal(layer.rect.w,.35);
+test('normal persists overflow and slide ownership; only renderer clips adjacent slides',()=>{
+ const layer={id:'photo',kind:'photo',assetId:'real',page:1,
+   rect:{x:.38,y:.1,w:.35,h:.8}};
+ const normal=readCarouselDesign(encodeCarouselDesign(
+   [{title:'One'},{title:'Two'},{title:'Three'},{title:'Four'}],
+   {seamlessEnabled:false,panoramaLayers:[layer]}));
+ assert.equal(normal.style.seamlessEnabled,false);
+ assert.equal(normal.style.panoramaLayers[0].page,1);
+ assert.equal(normal.style.panoramaLayers[0].rect.x,.38);
+ assert.equal(normal.style.panoramaLayers[0].rect.w,.35);
+ assert.equal(normal.style.panoramaLayers[0].rect.h,.8);
+ assert.ok(layer.rect.x < .5 && layer.rect.x+layer.rect.w>.5);
+ // The same full geometry also remains available when Seamless is chosen.
+ const seamless=readCarouselDesign(encodeCarouselDesign(
+   [{title:'One'},{title:'Two'},{title:'Three'},{title:'Four'}],
+   {seamlessEnabled:true,panoramaLayers:[layer]}));
+ assert.equal(seamless.style.seamlessEnabled,true);
+ assert.deepEqual(seamless.style.panoramaLayers[0].rect,normal.style.panoramaLayers[0].rect);
 });
 
 test('a named personal asset can be opened and dragged from the compact library into a seamless canvas',()=>{
