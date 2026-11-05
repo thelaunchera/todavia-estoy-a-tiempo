@@ -36,7 +36,7 @@ try {
   // Close it as a visitor would before testing hero controls.
   const chapterAnnouncement=page.locator('#podcast-ep03-dialog');
   if(await chapterAnnouncement.isVisible()){
-   await chapterAnnouncement.locator('[data-ep03-close]').click();
+   await chapterAnnouncement.locator('button.ep03-close[data-ep03-close]').click();
    assert(!(await chapterAnnouncement.isVisible()),width+': close should restore navigation');
   }
   await page.locator('.podcast-film-captions').waitFor({state:'visible',timeout:10000});
