@@ -1,0 +1,30 @@
+{
+  "timezone": "America/New_York",
+  "policy": "Same as Matcha: fully prepared freebie and email-verified access; hidden from the public landing until the user-approved release date.",
+  "releases": [
+    {
+      "resource": "november_web_one_prompt_2026",
+      "name": "Tu web con un solo prompt",
+      "date": "2026-11-19",
+      "signup": "/freebies/november-website/",
+      "access": "/freebies/november-website/access/",
+      "status": "scheduled"
+    },
+    {
+      "resource": "december_lavender_2026",
+      "name": "The Lavender Edit",
+      "date": "2026-12-01",
+      "signup": "/freebies/december-lavender/signup/",
+      "access": "/freebies/december-lavender/",
+      "status": "scheduled"
+    },
+    {
+      "resource": "salt_line_january_2027",
+      "name": "SALT LINE",
+      "date": "2027-01-02",
+      "signup": "/freebies/january-salt-line/",
+      "access": "/freebies/january-salt-line/access/",
+      "status": "scheduled"
+    }
+  ]
+}
