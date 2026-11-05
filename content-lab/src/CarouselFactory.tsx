@@ -26,7 +26,7 @@ import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositi
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import {copyStickerToSlide,type StickerCopyResult} from './CarouselStickerCopy';
 
-type Brand = {
+export type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
   rules: string; language: 'English' | 'Español'; color: string; background: string;
   headingFont?:string;bodyFont?:string;referenceAssetId?:string;secondaryColor?:string;additionalColors?:string[];socialAccounts?:SocialAccounts;primaryPlatform?:SocialPlatform;
@@ -452,6 +452,75 @@ const filename=(post:Post,i:number,width=1080,height=1350)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-'+width+'x'+height+'.png';
 };
+/** Render the ACTUAL first saved slide for project cards, using the same
+ * image/compositing pipeline as the carousel's final PNG export. Read-only:
+ * never writes back to a post, modifies a saved draft or generates fake art. */
+export async function renderSavedCarouselCover(
+  draft:{id?:string;assetId:string;hook?:string;slides?:string;cta?:string;designData?:string},
+  brand:Brand, images:Record<string,string>,
+):Promise<HTMLCanvasElement>{
+  const post={id:draft.id,assetId:draft.assetId,hook:draft.hook||'',
+    slides:draft.slides||'',cta:draft.cta||'',designData:draft.designData||''} as Post;
+  const slides=parseSlides(post,brand);
+  const style=readCarouselDesign(post.designData||'').style;
+  const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...(part.stickerIds||[])]);
+  required.push(...(style.panoramaLayers||[])
+    .filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
+  if(style.seamlessEnabled&&style.seamlessAssetId)required.push(style.seamlessAssetId);
+  if(required.some(id=>id&&!images[id]))throw Error('Cover assets are still loading.');
+  if(style.seamlessEnabled){
+    const pages=await drawSeamlessPages(slides,brand,images,{
+      backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
+      accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
+      layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,
+      editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,
+      canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds,
+    });
+    for(const page of pages.slice(1)){page.width=1;page.height=1;}
+    return pages[0];
+  }
+  if(!(style.panoramaLayers||[]).length){
+    return drawSlide(slides[0],0,slides.length,brand,images,style);
+  }
+  const hasBehind=(style.panoramaLayers||[])
+    .some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+  const pages=await Promise.all(slides.map((part,n)=>
+    drawSlide(part,n,slides.length,brand,images,style,hasBehind)));
+  const saved=(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length));
+  // When a customer sends a photo behind text, the native slide photos and
+  // stickers must be composed between the back layers and typography too.
+  const native:PanoramaLayer[]=hasBehind?slides.flatMap((part,n)=>{
+    const photo=part.assetId?[{
+      id:'page-photo-'+part.key,assetId:part.assetId,name:'Foto · slide '+(n+1),
+      kind:'photo' as const,placement:'behind-text' as const,
+      rect:{...clampRect(part.photoPosition||photoDefault(part.layout)),
+        x:(n+clampRect(part.photoPosition||photoDefault(part.layout)).x)/slides.length,
+        w:clampRect(part.photoPosition||photoDefault(part.layout)).w/slides.length,
+        crop:part.photoPosition?.crop||normalizeCrop({y:part.photoFocus==='top'?.12:part.photoFocus==='bottom'?.9:.5})},
+    }]:[];
+    const stickers=(part.stickerIds||[]).map((id,index)=>{
+      const rect=clampRect(part.stickerPositions?.[id]||stickerDefault(index));
+      return {id:'page-sticker-'+part.key+'-'+id,assetId:id,
+        name:'Sticker · slide '+(n+1),kind:'sticker' as const,
+        placement:'behind-text' as const,
+        rect:{...rect,x:(n+rect.x)/slides.length,w:rect.w/slides.length}};
+    });
+    return [...photo,...stickers];
+  }):[];
+  const ordered=hasBehind?[
+    ...saved.filter(layer=>layer.placement==='behind-text'),...native,
+    ...saved.filter(layer=>layer.placement!=='behind-text'),
+  ]:saved;
+  try{
+    const composed=await overlayPanoramaPages(pages,ordered,images,
+      ctx=>paintCarouselTypography(ctx,slides,brand,style));
+    for(const canvas of composed.slice(1)){canvas.width=1;canvas.height=1;}
+    return composed[0];
+  }finally{
+    for(const canvas of pages){canvas.width=1;canvas.height=1;}
+  }
+}
+
 export default function CarouselFactory({brand,post,assets,images,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);

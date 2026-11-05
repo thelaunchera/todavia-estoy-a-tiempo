@@ -18,7 +18,10 @@ test('Background picker offers slide-only and whole-carousel application without
 
 test('Seamless final PNG and live canvas use the exact same individual backgrounds',()=>{
  const src=read('CarouselFactory.tsx'),seamless=read('SeamlessCarousel.ts'),style=read('CarouselArtDirection.ts');
- assert.equal((src.match(/usePageBackgrounds:style\.perSlideBackgrounds/g)||[]).length,3);
+ // Includes the read-only first-slide project cover renderer as well as
+ // the live artboard, preview and individual PNG export.
+ assert.equal((src.match(/usePageBackgrounds:style\.perSlideBackgrounds/g)||[]).length,4);
+ assert.ok(src.includes('export async function renderSavedCarouselCover'));
  assert.ok(style.includes('perSlideBackgrounds:v.perSlideBackgrounds===true'));
  assert.ok(style.includes('perSlideBackgrounds:boolean'));
  assert.ok(seamless.includes('if(opts.usePageBackgrounds||sharedImageIsBackground){'));

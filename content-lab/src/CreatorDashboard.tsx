@@ -1,18 +1,14 @@
 import {useEffect, useMemo, useRef} from 'react';
 import {ArrowRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Layers3, Lightbulb, Plus, Sparkles} from 'lucide-react';
 import {readCarouselDesign} from './CarouselArtDirection';
+import ProjectCover,{type CoverPost} from './ProjectCover';
+import type {Brand as CarouselBrand} from './CarouselFactory';
 import {assetCategory,type LibraryAsset} from './MediaAsset';
 import {UniversalLabIcon} from './UniversalLabIcon';
 import './CreatorDashboard.css';
 
-export type CreatorDashboardPost = {
-  id?:string;brandId:string;title:string;format:string;angle:string;status:string;
-  assetId:string;designData?:string;updatedAt?:string;
-};
-type DashboardBrand = {
-  id:string;name:string;color:string;background:string;secondaryColor?:string;
-  handle?:string;language:string;audience:string;logoAssetId?:string;
-};
+export type CreatorDashboardPost = CoverPost & {angle:string;status:string};
+type DashboardBrand=CarouselBrand;
 type Props = {
   locale:'es'|'en';
   brand:DashboardBrand;
@@ -32,22 +28,6 @@ const safeDate=(date?:string)=>{
  const n=Date.parse(date||'');
  return Number.isFinite(n)?n:0;
 };
-function coverAssetId(post:CreatorDashboardPost):string{
- if(post.assetId)return post.assetId;
- if(!post.designData)return '';
- const {slides,style}=readCarouselDesign(post.designData);
- if(style.seamlessAssetId)return style.seamlessAssetId;
- if(Array.isArray(slides)){
-  for(const item of slides){
-   if(!item||typeof item!=='object')continue;
-   const slide=item as Record<string,unknown>;
-   for(const key of ['assetId','backgroundImageId']){
-    if(typeof slide[key]==='string'&&slide[key])return slide[key] as string;
-   }
-  }
- }
- return '';
-}
 function postKind(post:CreatorDashboardPost):'normal'|'seamless'|'post'|'story'{
  if(post.format==='Story'||post.format==='Reel')return 'story';
  if(post.format==='Carousel'){
@@ -61,7 +41,7 @@ export default function CreatorDashboard({
 }:Props){
  const es=locale==='es';
  const [recent,libraryPhotos]=useMemo(()=>{
-  const recent=posts.map((post,index)=>({post,index,assetId:coverAssetId(post)}))
+  const recent=posts.map((post,index)=>({post,index}))
    .sort((a,b)=>safeDate(b.post.updatedAt)-safeDate(a.post.updatedAt)||b.index-a.index)
    .slice(0,4);
   const libraryPhotos=library.filter(a=>['original','reference','generated','screenshot'].includes(assetCategory(a))&&!a.bundled).slice(0,5);
@@ -69,7 +49,7 @@ export default function CreatorDashboard({
  },[posts,library]);
  const attempted=useRef(new Set<string>());
  useEffect(()=>{
-  const ids=[...recent.map(item=>item.assetId),...libraryPhotos.map(asset=>asset.id)];
+  const ids=libraryPhotos.map(asset=>asset.id);
   ids.forEach(id=>{
    if(!id||images[id]||attempted.current.has(id))return;
    attempted.current.add(id);
@@ -129,12 +109,11 @@ export default function CreatorDashboard({
     <button type="button" className="cld-textlink" onClick={()=>onNavigate('posts')}>{es?'Ver proyectos':'View projects'}<ArrowRight size={16}/></button>
    </div>
    {recent.length>0?<div className="cld-project-grid">
-    {recent.map(({post,assetId},index)=>{
-     const src=assetId?images[assetId]:'';
+    {recent.map(({post},index)=>{
      const kind=postKind(post);
      return <button type="button" key={post.id||'recent-'+index} className="cld-project-card" onClick={()=>onEditPost(post)} aria-label={(es?'Continuar ':'Continue ')+(post.title||formatLabel(post))}>
       <span className={'cld-project-cover cld-project-'+kind}>
-       {src?<img src={src} alt="" loading="lazy"/>:<span className="cld-cover-fallback" aria-hidden="true"><span className="cld-cover-mark">the<br/>creative<br/>edit.</span></span>}
+       <ProjectCover post={post} brand={brand} images={images} loadImage={loadImage} locale={locale}/>
        <span className="cld-cover-action"><ArrowRight size={17}/></span>
       </span>
       <span className="cld-project-copy"><strong>{post.title||(es?'Sin título':'Untitled')}</strong><small>{formatLabel(post)} · {es?(post.status==='Ready'?'Listo':'En progreso'):(post.status==='Ready'?'Ready':'In progress')}</small></span>
