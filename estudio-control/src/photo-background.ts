@@ -69,69 +69,75 @@ export async function originalBlobFromSource(src:string):Promise<Blob>{
  return blob;
 }
 
-const asBitmap=async(blob:Blob):Promise<ImageBitmap>=>{
-  if(typeof createImageBitmap==='function')return createImageBitmap(blob);
-  throw Error('El navegador no puede preparar la imagen. Actualiza Safari para usar esta opción.');
-};
-
 /**
- * Safari can terminate an entire tab when a full-resolution photo, an AI model
- * and multiple 20MP canvases are held in memory at the same time. Decode and
- * reduce large photos BEFORE loading the AI model; the untouched original is
- * separately saved for restoration by SeamlessEditor.
- *
- * 2.4 MP still exceeds the 1080×1350 slide export resolution.
+ * Remove an edge-connected, uniform-color photo background without AI, model
+ * downloads or heavyweight canvases.  Never guess on a complex background:
+ * leaving the original untouched is safer than erasing the subject.
  */
-async function prepareRemovalPhoto(original:Blob):Promise<Blob>{
-  const mobile=/iPhone|iPad|iPod/i.test(navigator.userAgent)
-    ||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  const maxPixels=mobile?2_400_000:8_000_000;
-  const maxSide=mobile?2048:4096;
-  const bitmap=await asBitmap(original);
+export async function cutoutSolidBackground(original:Blob):Promise<string>{
+ if(typeof createImageBitmap!=='function')
+  throw Error('Este navegador no permite preparar el recorte. Actualiza Safari.');
+ const bitmap=await createImageBitmap(original);
+ try{
+  const scale=Math.min(1,2048/Math.max(bitmap.width,bitmap.height),
+   Math.sqrt(2_400_000/(bitmap.width*bitmap.height)));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+  canvas.height=Math.max(1,Math.round(bitmap.height*scale));
   try{
-    const factor=Math.min(1,Math.sqrt(maxPixels/(bitmap.width*bitmap.height)),
-      maxSide/Math.max(bitmap.width,bitmap.height));
-    if(factor>=1)return original;
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(1,Math.round(bitmap.width*factor));
-    canvas.height=Math.max(1,Math.round(bitmap.height*factor));
-    const ctx=canvas.getContext('2d');
-    if(!ctx)throw Error('No se pudo preparar la foto en este dispositivo.');
-    ctx.imageSmoothingEnabled=true;
-    ctx.imageSmoothingQuality='high';
-    ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-    try{
-      return await new Promise<Blob>((resolve,reject)=>
-        canvas.toBlob(blob=>blob?resolve(blob):reject(Error('No se pudo preparar la foto.')),'image/png')
-      );
-    }finally{
-      // Release the large intermediate pixel buffer before AI inference.
-      canvas.width=1;canvas.height=1;
-    }
-  }finally{
-    bitmap.close();
-  }
-}
-
-export async function cutoutOriginalPhoto(
-  original:Blob,onProgress?:ProgressCallback
-):Promise<string>{
-  onProgress?.('Preparando una versión segura para este dispositivo…');
-  const prepared=await prepareRemovalPhoto(original);
-  // BG0 already returns a fully composited transparent PNG. Do not duplicate
-  // the full-resolution image and mask in additional canvases.
-  const {removeBackground}=await import('@bg0/browser');
-  const result=await removeBackground(prepared,{
-    quality:'quality',
-    onProgress:({stage,message}:{stage:string;message:string})=>{
-      const labels:Record<string,string>={
-        preparing:'Preparando la foto…',
-        downloading:'Descargando el modelo IA (solo la primera vez)…',
-        processing:'Quitando el fondo…',
-        finishing:'Preparando PNG transparente…',
-      };
-      onProgress?.(labels[stage]||message||'Procesando foto…');
-    }
-  });
-  return fileToDataUrl(result.blob);
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   if(!ctx)throw Error('No se pudo abrir el editor de imágenes.');
+   ctx.imageSmoothingEnabled=true;
+   ctx.imageSmoothingQuality='high';
+   ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+   const {width:w,height:h}=canvas;
+   const image=ctx.getImageData(0,0,w,h),pixels=image.data;
+   const corners=[0,w-1,(h-1)*w,w*h-1];
+   const color=(i:number)=>[pixels[i*4],pixels[i*4+1],pixels[i*4+2]];
+   const colors=corners.map(color);
+   const distance=(a:number[],b:number[])=>(
+    (a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);
+   // At least two corners must agree on the background color.
+   let candidates:number[]=[];
+   for(const reference of colors){
+    const cluster=colors.filter(c=>distance(c,reference)<38**2);
+    if(cluster.length>candidates.length/3)candidates=cluster.flat();
+   }
+   if(candidates.length<6)
+    throw Error('El fondo tiene colores diferentes. Esta herramienta solo quita fondos lisos; la foto no se modificó.');
+   const count=candidates.length/3;
+   const bg=[0,1,2].map(ch=>Math.round(candidates.reduce(
+    (sum,n,i)=>sum+(i%3===ch?n:0),0)/count));
+   // Only connected pixels near the canvas border are eligible for removal.
+   const visited=new Uint8Array(w*h),queue=new Int32Array(w*h);
+   let head=0,tail=0;
+   const add=(i:number)=>{
+    if(i<0||i>=w*h||visited[i])return;
+    visited[i]=1;
+    const j=i*4;
+    if((pixels[j]-bg[0])**2+(pixels[j+1]-bg[1])**2+
+      (pixels[j+2]-bg[2])**2>50**2)return;
+    queue[tail++]=i;
+   };
+   for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}
+   for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}
+   if(tail<w+h)
+    throw Error('No detecté suficiente fondo uniforme. La foto original sigue intacta.');
+   let removed=0;
+   while(head<tail){
+    const i=queue[head++],x=i%w,y=Math.floor(i/w);
+    pixels[i*4+3]=0;removed++;
+    if(x>0)add(i-1);
+    if(x<w-1)add(i+1);
+    if(y>0)add(i-w);
+    if(y<h-1)add(i+w);
+   }
+   if(removed<w*h*.02)
+    throw Error('No detecté un fondo liso que pueda eliminar sin dañar la foto.');
+   ctx.putImageData(image,0,0);
+   const result=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(
+    blob=>blob?resolve(blob):reject(Error('No se pudo generar el PNG transparente.')),'image/png'));
+   return fileToDataUrl(result);
+  }finally{canvas.width=1;canvas.height=1;}
+ }finally{bitmap.close();}
 }
