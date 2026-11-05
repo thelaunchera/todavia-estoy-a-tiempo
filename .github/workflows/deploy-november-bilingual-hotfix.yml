@@ -46,7 +46,7 @@ jobs:
           test -s _podcast_pages/freebies/november-website/access/index.html
           grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/index.html
           grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/access/index.html
-          test -e _podcast_pages/.nojekyll
+          touch _podcast_pages/.nojekyll
       - name: Upload site without touching existing Lab or Studio builds
         uses: actions/upload-pages-artifact@v4
         with:
