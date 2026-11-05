@@ -85,7 +85,7 @@ test('public freebie copy contains no production notes or fixed launch notices',
  for(const {landing,access} of routes){
   for(const path of [landing,access]){
    const html=read(path);
-   assert.doesNotMatch(html,/No collage exports|Sin exportaciones en collage|Launch: January|Lanzamiento: 2 de enero|Programado para el|Scheduled for/);
+   assert.doesNotMatch(html,/No collage exports|Sin exportaciones en collage|Launch: January|Lanzamiento: 2 de enero|Programado para el|Scheduled for|Inside: 8 copy-ready prompts|JANUARY CREATIVE DROP|FREEBIE · NOVEMBER EDITION|EDICIÓN NOVIEMBRE/);
   }
  }
  assert.doesNotMatch(read('freebies/_shared/freebie-access.js'),/ENTREGA 19|NOVEMBER 19 RELEASE|DECEMBER 1, 2026|JANUARY 2, 2027/);
