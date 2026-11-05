@@ -74,7 +74,7 @@ export function composeCreativePrompt(c:PromptControls,language:LabLanguage='es'
   'Entrega UNA sola fotografía coherente, no un collage ni una cuadrícula. Cualquier título, precio o texto promocional se agregará después como una capa editable independiente.'
  ].join('\n').slice(0,1850);
  return [
-  instruction|| (language==='es'?'Crea una fotografía comercial auténtica.':'Create one believable commercial photograph.'),
+  instruction||'Create one believable commercial photograph.',
   'MAIN SUBJECT: '+knownSubject+'.'+(environment?' ENVIRONMENT: '+environment+'.':''),
   'STYLE: '+styleWords[c.style]+ ' CAMERA: '+shotWords[c.shot]+' LIGHT: '+lightWords[c.lighting],
   'REFERENCE RULE: '+(c.fidelity==='strict'
