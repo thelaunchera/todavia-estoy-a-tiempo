@@ -38,6 +38,9 @@ test('Studio uses one categorized searchable library with reusable assets',()=>{
  assert.match(gallery,/onlyEditorial\?:boolean/);
  assert.match(editor,/quickPanel==='elementos'&&<BrandAssetLibrary compact/);
  assert.match(editor,/studio-sticker-gallery/);
+ assert.match(gallery,/gridAutoRows:'max-content'/,'element tiles must not collapse to slivers under a max-height scroll container');
+ assert.match(gallery,/studio-sticker-gallery studio-element-gallery/,'Elementos must use the same visible tile gallery as Stickers');
+ assert.match(gallery,/className="studio-element-card"/);
  assert.doesNotMatch(editor,/<BrandAssetLibrary compact onlyEditorial onGolden=/,'Editorial and PNG stickers no longer repeat in both galleries');
  assert.match(editor,/await loadImage\(src\)/);
  assert.match(editor,/items:\[\.\.\.d\.items,\{id,kind:'image',src/);
