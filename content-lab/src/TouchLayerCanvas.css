@@ -388,18 +388,44 @@
  .panorama-canvas .touch-editor-fast-actions{margin:6px 0}
 }
 
-/* Separate page editor shows one full 4:5 tile without seamless cut marks. */
-.touch-editor-normal-pages .panorama-cut-guides>div{border:0!important;box-shadow:none!important;
- background:transparent!important}
-.touch-editor-normal-pages .panorama-cut-guides span{background:#244554e6;border-radius:6px}
-.touch-editor-normal-pages .touch-editor-scroll{scroll-snap-type:x proximity}
-.touch-editor-normal-pages .touch-editor-stage{border-radius:8px}
-.touch-editor-seamless-pages .panorama-cut-guides>div:not(:first-child){border-left:3px dashed #286e9c}
+/* Normal is a page-by-page 4:5 editor, never the seamless panorama.
+   The art remains in its existing coordinates; the viewport exposes exactly
+   one full slide. No gaps, guides or borders are burned into exported PNGs. */
+.touch-editor-normal-pages .panorama-guide-swatch{
+ width:17px;height:20px;border:1.5px solid #517381;border-radius:3px;background:#fff
+}
+.touch-editor-normal-pages .touch-editor-scroll{
+ width:100%;max-width:520px;box-sizing:border-box;margin:10px auto 13px;
+ padding:0!important;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+ scroll-padding-inline:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+ border:5px solid #fff;border-radius:16px;
+ background:#fff;box-shadow:0 0 0 1px #c8d7dc,0 10px 24px #132c3b21
+}
+.touch-editor-normal-pages .touch-editor-scroll::-webkit-scrollbar{display:none}
+.panorama-canvas.touch-editor-normal-pages .touch-editor-stage{
+ width:auto;max-width:none;border:0;border-radius:0!important;box-shadow:none
+}
+.touch-editor-normal-pages .panorama-cut-guides>div{
+ background:transparent!important;border:0!important;
+ box-shadow:inset 0 0 0 1px #9baeb14a!important;
+ scroll-snap-align:start;scroll-snap-stop:always
+}
+.touch-editor-normal-pages .panorama-cut-guides span{
+ top:9px;left:9px;background:#244554eb;border-radius:6px
+}
+.touch-editor-seamless-pages .panorama-cut-guides>div:not(:first-child){
+ border-left:3px dashed #286e9c
+}
 @media(max-width:760px){
  .touch-editor-normal-pages .panorama-guide-legend{color:#466574}
- .touch-editor-normal-pages .touch-editor-scroll{padding:0}
- .touch-editor-normal-pages .touch-editor-stage{border-radius:12px}
- .touch-editor-normal-pages .panorama-cut-guides>div{background:transparent!important}
+ .touch-editor-normal-pages .touch-editor-scroll{margin:7px auto 10px;border-width:4px;border-radius:14px}
+ .panorama-canvas.touch-editor-normal-pages .touch-editor-page-navigation{
+   width:100%;justify-content:space-between
+ }
+ .panorama-canvas.touch-editor-normal-pages .touch-editor-page-navigation button{
+   display:inline-flex;align-items:center;justify-content:center;
+   min-width:42px;min-height:42px;border-radius:10px
+ }
 }
 
 /* Easy touch mode: no blue corner target blocking or clipping the text. */
