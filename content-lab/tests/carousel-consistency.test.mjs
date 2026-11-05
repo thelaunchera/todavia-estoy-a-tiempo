@@ -18,7 +18,10 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(ui.includes('const canvas=pages?pages[n]:await drawSlide('));
  assert.ok(ui.includes('canvasToPngBlob(canvas)'));
  assert.ok(ui.includes('constrainNormalLayer(layer,slides.length)'));
- assert.ok(ui.includes('overlayPanoramaPages(all,style.seamlessEnabled?'));
+ assert.ok(ui.includes("const hasBehind=(style.panoramaLayers||[]).some"));
+ assert.ok(ui.includes("pageLayers.filter(layer=>layer.kind==='photo'||layer.kind==='sticker')"));
+ assert.ok(ui.includes('overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography'));
+ assert.ok(ui.includes("saved.filter(layer=>layer.placement==='behind-text')"));
 });
 test('Style references are sampled locally and never pasted into carousel slides',()=>{
  const helper=src('src/CarouselArtDirection.ts'),ui=src('src/CarouselFactory.tsx');
