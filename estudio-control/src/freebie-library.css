@@ -81,3 +81,8 @@
 .freebies-approved-cover img{display:block;max-width:100%;width:100%;max-height:660px;object-fit:contain;border-radius:9px;background:#f2e8f7;box-shadow:0 10px 24px #4a33541c}
 .freebies-approved-cover a span{display:flex;align-items:center;gap:6px}
 @media(max-width:760px){.freebies-matcha-art{min-height:365px}.freebies-matcha-art .freebies-art-small{margin-top:34px}.freebies-matcha-photos img{height:155px}.freebies-approved-cover{min-height:280px;padding:10px}.freebies-approved-cover img{max-height:none}}
+
+/* Original matcha gallery: all eight unaltered source images, swipeable on iPhone. */
+.freebies-matcha-photos{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:15px 5px 20px;gap:9px}
+.freebies-matcha-photos img{width:130px;min-width:130px;max-width:none;height:185px;transform:none!important;scroll-snap-align:start;z-index:auto!important;box-shadow:0 7px 18px #23371d24}
+@media(max-width:760px){.freebies-matcha-photos img{width:115px;min-width:115px;height:160px}}
