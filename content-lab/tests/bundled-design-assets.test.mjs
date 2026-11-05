@@ -29,8 +29,9 @@ test('Release preserves the original library and adds the seasonal and Pinterest
   assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|pinterest-aesthetic-stickers-2026-11\/[a-z0-9_]+|(?:branding-elements-2026-11|holiday-stickers-2026-11)\/[a-z0-9-]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
-  assert.equal(bytes.length,file.sizeBytes);
-  assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
+  assert.equal(bytes.length,file.sizeBytes,'Original PNG size differs for '+file.file+' — restore the approved original, do not change its manifest to match a damaged upload');
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256,'Original PNG hash differs for '+file.file+' — restore the source image');
+  assert.equal(bytes.subarray(-12).toString('hex'),'0000000049454e44ae426082','PNG is missing or has a damaged IEND chunk: '+file.file);
   const w=bytes.readUInt32BE(16),h=bytes.readUInt32BE(20);
   assert.equal(w,file.width);assert.equal(h,file.height);
   if(file.file.startsWith('resources/branding-elements-2026-11/')){
