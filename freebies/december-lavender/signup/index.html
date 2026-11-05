@@ -1,8 +1,24 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>The Lavender Edit · The Launch Era</title><style>
 *{box-sizing:border-box}body{margin:0;background:#faf8f3;color:#191919;font:15px/1.65 Arial,sans-serif}header{display:flex;justify-content:space-between;align-items:center;padding:20px 4%;border-bottom:1px solid #e5dfe9;letter-spacing:2px;font-size:11px}button,input{font:inherit}button{cursor:pointer}.switch{border:1px solid #c5bdd1;background:#fff;padding:8px 15px}.page{max-width:1210px;margin:auto;padding:50px 25px 80px}.hero{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center}.eyebrow{font-size:11px;letter-spacing:2.5px;font-weight:700;color:#866a9a}h1{font:normal clamp(58px,7vw,94px)/.95 Georgia,serif;letter-spacing:-3px;margin:20px 0}h2{font:normal 35px Georgia,serif;margin:0 0 15px}p{color:#5d5760}img.hero-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}.form{background:#fff;padding:28px;border:1px solid #e8dfe9;margin-top:25px}.form label{font-size:12px;font-weight:bold;display:block;margin:10px 0 7px}.form input[type=email]{width:100%;padding:14px;border:1px solid #ccc1d3;background:#fff;font-size:16px}.form button[type=submit]{width:100%;padding:16px;margin-top:14px;border:0;color:white;background:#191919;font-weight:bold}.form button:disabled{opacity:.55}.fine{font-size:12px;color:#67616d}.consent{display:flex!important;gap:9px;align-items:flex-start!important;font-weight:400!important}.consent input{width:17px;height:17px;flex:none;margin-top:4px}.photo-section{margin-top:60px}.gallery{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.gallery img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover}.gallery span{font-size:10px;letter-spacing:1.3px;display:block;padding:10px 0;border-bottom:1px solid #e7e1e7}.foot{border-top:1px solid #e3dfe2;text-align:center;padding:25px;font-size:11px;letter-spacing:2px;color:#686168}.hidden{position:absolute;left:-9999px}@media(max-width:760px){.page{padding:25px 17px 55px}.hero{grid-template-columns:1fr;gap:20px}h1{font-size:58px}.form{padding:21px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* The original photo is the first visual; show full frame before headline and email form. */
+.hero{display:flex;flex-direction:column;align-items:stretch;gap:0;min-width:0}
+.hero-media{width:100%;line-height:0;min-width:0}
+.hero img.hero-img{display:block;width:100%;max-width:100%;height:auto;max-height:670px;aspect-ratio:auto;object-fit:contain;object-position:center;background:#f3eefa}
+.hero-copy{width:100%;max-width:770px;min-width:0;padding:clamp(24px,4vw,44px) 0 0}
+.hero h1{font-size:clamp(50px,7vw,88px);line-height:1.05;letter-spacing:-.035em;white-space:normal;overflow-wrap:break-word;word-break:normal;overflow:visible}
+@media(max-width:760px){
+ .page{padding:14px 16px 55px}
+ .hero{gap:0}
+ .hero-copy{padding:21px 0 0}
+ .hero h1{font-size:clamp(42px,11vw,61px);line-height:1.07;letter-spacing:-.035em}
+ .hero img.hero-img{max-height:none}
+ .form{padding:19px}
+ .form h2{font-size:clamp(26px,7vw,33px);line-height:1.15}
+}
 </style></head><body>
 <header><strong>THE LAUNCH ERA</strong><button class="switch" id="language" type="button" aria-label="Change language">ES</button></header>
-<main class="page"><section class="hero"><div>
+<main class="page"><section class="hero"><div class="hero-media"><img class="hero-img" src="/assets/freebies/december-lavender/01-sculpted-gloss-hero.png" alt="The Lavender Edit original product photo"></div><div class="hero-copy">
 <div class="eyebrow">FREEBIE · DECEMBER 01, 2026</div><h1>The Lavender <i>Edit.</i></h1>
 <p data-en="Five editorial prompts, five original examples, one cohesive soft-purple product campaign. Get your prompts by email, then personalize each one." data-es="Cinco prompts editoriales, cinco ejemplos originales y una campaña visual coherente en lavanda suave. Recibe tus prompts por correo y personaliza cada uno.">Five editorial prompts, five original examples, one cohesive soft-purple product campaign. Get your prompts by email, then personalize each one.</p>
 <form class="form" method="POST" action="#" id="signup" data-release-date="2026-12-01">
@@ -14,7 +30,7 @@
 <button type="submit" disabled>Available December 1</button>
 <label class="consent"><input type="checkbox" name="marketing_opt_in"><span data-en="I want occasional creative emails (optional)." data-es="Quiero recibir ideas creativas por correo (opcional).">I want occasional creative emails (optional).</span></label>
 <p class="fine" data-en="Only the requested freebie will be sent. No automatic marketing subscription." data-es="Solo enviaremos el freebie solicitado. Sin suscripción automática a marketing.">Only the requested freebie will be sent. No automatic marketing subscription.</p>
-</form></div><img class="hero-img" src="/assets/freebies/december-lavender/01-sculpted-gloss-hero.png" alt="The Lavender Edit original product photo"></section>
+</form></div></section>
 <section class="photo-section"><div class="eyebrow" data-en="FIVE ORIGINAL EXAMPLES" data-es="CINCO EJEMPLOS ORIGINALES">FIVE ORIGINAL EXAMPLES</div><h2 data-en="See the quality. Make it yours." data-es="Mira la calidad. Hazlo tuyo.">See the quality. Make it yours.</h2>
 <div class="gallery"><div><img loading="lazy" src="/assets/freebies/december-lavender/01-sculpted-gloss-hero.png" alt="The Lavender Edit photo 1"><span>01 / 05</span></div><div><img loading="lazy" src="/assets/freebies/december-lavender/02-droplet-material-macro.png" alt="The Lavender Edit photo 2"><span>02 / 05</span></div><div><img loading="lazy" src="/assets/freebies/december-lavender/03-botanical-still-life.png" alt="The Lavender Edit photo 3"><span>03 / 05</span></div><div><img loading="lazy" src="/assets/freebies/december-lavender/04-cream-ritual-detail.png" alt="The Lavender Edit photo 4"><span>04 / 05</span></div><div><img loading="lazy" src="/assets/freebies/december-lavender/05-holiday-gift-campaign.png" alt="The Lavender Edit photo 5"><span>05 / 05</span></div></div></section></main>
 <footer class="foot">POWERED BY THE LAUNCH ERA</footer>
