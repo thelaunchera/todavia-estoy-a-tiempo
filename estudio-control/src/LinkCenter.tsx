@@ -18,6 +18,16 @@ const GROUPS: {id:Category; title:string; intro:string}[] = [
   {id:'lab',title:'Content Lab',intro:'Editor creativo, prompts, herramientas y archivos'}
 ];
 export const STUDIO_LINKS:BaseLink[] = [
+  {key:"school-freebies-main",title:"Freebie Library · Landing principal",url:"https://podcast.thelaunchera.com/freebies/",category:"escuela" as Category,visibility:"publico" as Visibility,description:"Nuevo landing EN/ES con recursos gratuitos, waitlist de la clase y Content Lab. Hero editorial azul, negro y amarillo"},
+  {key:"school-freebies-wait",title:"Freebie Library · Lista de espera",url:"https://podcast.thelaunchera.com/freebies/#class-waitlist",category:"escuela" as Category,visibility:"publico" as Visibility,description:"Acceso a la lista de espera de Tu primera web con IA desde el nuevo landing de freebies"},
+  {key:"lab-freebies-upsell",title:"Content Lab · Sección en Freebie Library",url:"https://podcast.thelaunchera.com/freebies/#content-lab",category:"lab" as Category,visibility:"publico" as Visibility,description:"Presentación visual del Content Lab y demostración de carruseles dentro del landing de freebies"},
+  {key:"school-freebie-nov-2026",title:"Freebie noviembre · Tu web con un solo prompt",url:"https://podcast.thelaunchera.com/freebies/november-website/",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Lanzamiento programado para el 19 nov 2026; enlace privado de revisión, no compartir antes de la fecha"},
+  {key:"school-freebie-dec-2026",title:"Freebie diciembre · The Lavender Edit",url:"https://podcast.thelaunchera.com/freebies/december-lavender/signup/",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Lanzamiento programado para el 1 dic 2026; acceso por correo pendiente de comprobación extremo a extremo"},
+  {key:"school-freebie-jan-2027",title:"Freebie enero · SALT LINE",url:"https://podcast.thelaunchera.com/freebies/january-salt-line/",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Lanzamiento programado para el 2 ene 2027; no anunciar ni compartir antes de la fecha"},
+  {key:"studio-freebies-management",title:"Mi Studio · Mis freebies y lanzamientos",url:"https://podcast.thelaunchera.com/estudio/?seccion=freebies",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Gestión privada de portadas, recursos y fechas de lanzamientos; requiere inicio de sesión"},
+  {key:"studio-links-direct",title:"Mi Studio · Centro de links",url:"https://podcast.thelaunchera.com/estudio/?seccion=links",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Acceso directo a esta biblioteca con enlaces y filtros por marca; solo administración"},
+  {key:"studio-registro-20261105",title:"Registro de trabajo · 5 noviembre 2026",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/blob/main/estudio-control/registro/2026-11-05-trabajo-y-enlaces.md",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Índice interno de lo trabajado hoy: nuevos enlaces, freebies, Studio, Content Lab, demos, fotos y QA pendiente"},
+  {key:"school-freebies-repo",title:"Freebie Library · Código y calendario",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/freebies",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Código fuente del catálogo y los tres freebies futuros; consulta técnica"},
   {key:'school-havana-19',title:'Havana 19 · Cuban Cuisine',url:'https://thelaunchera.com/demos/havana-19/',category:'escuela',visibility:'demo',description:'Restaurante cubano en Boston, hecho directo en GitHub con fotos individuales, historia y reserva de demostración'},
   {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
@@ -80,6 +90,16 @@ export const STUDIO_LINKS:BaseLink[] = [
 ];
 export type PublicationState = 'publicado' | 'demo' | 'produccion' | 'revision' | 'interno';
 export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
+  "school-freebies-main":"revision",
+  "school-freebies-wait":"revision",
+  "lab-freebies-upsell":"revision",
+  "school-freebie-nov-2026":"produccion",
+  "school-freebie-dec-2026":"produccion",
+  "school-freebie-jan-2027":"produccion",
+  "studio-freebies-management":"interno",
+  "studio-links-direct":"interno",
+  "studio-registro-20261105":"interno",
+  "school-freebies-repo":"interno",
   'lab-landing':'publicado','product-hub':'publicado',
   'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
   'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
