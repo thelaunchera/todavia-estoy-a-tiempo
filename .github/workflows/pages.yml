@@ -76,6 +76,12 @@ jobs:
         run: node estudio-control/tests/check-schema.mjs
       - name: Validar JavaScript integrado en páginas públicas
         run: node scripts/check-inline-scripts.mjs
+      - name: Validar archivo permanente y anuncio del nuevo episodio
+        run: |
+          node --check podcast-catalog.js
+          node --check podcast-archive.js
+          node --check podcast-episode-03-announcement-20261103.js
+          node scripts/check-podcast-catalog.mjs
       - name: Validar fechas, acceso y privacidad de los freebies
         run: node --test freebies/tests/*.test.mjs
       - name: Validar instalación de la web app
