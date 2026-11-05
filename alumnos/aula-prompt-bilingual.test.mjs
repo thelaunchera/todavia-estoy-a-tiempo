@@ -63,3 +63,18 @@ test('typography master and all 16 individual styles have bilingual guides and E
   assert.equal(localizedPrompt(code,original,'en'),'Use the ORIGINAL photo to change the lettering.');
  }
 });
+
+test('creative packs keep every step together instead of classifying hero and moodboard separately',async()=>{
+ const {promptPack}=await import('./prompt-guide.js');
+ const names=['Scuplted Gloss Hero','Droplet & Material Macro','Botanical Still Life','Cream & Ritual Detail','Holiday Gift Campaign'];
+ const packs=names.map((name,i)=>promptPack({prompt_code:'december_'+i,title:'December Creative Pack · '+name,category:i?'photos':'design'},'es'));
+ assert.deepEqual([...new Set(packs.map(x=>x.id))],['december-lavender']);
+ assert.match(packs[0].purpose,/campaña de producto/);
+ for(const lang of ['es','en']){
+  const typography=promptPack({prompt_code:'typography_01'},lang);
+  assert.equal(typography.id,promptPack({prompt_code:'typography_master_16'},lang).id);
+  assert.notEqual(typography.id,promptPack({prompt_code:'freebie_1photo8_01'},lang).id);
+  assert.equal(promptPack({prompt_code:'demo_casa-brownie_0',brand:'Casa Brownie'},lang).id,promptPack({prompt_code:'demo-photo_casa-brownie_0_1',brand:'Casa Brownie'},lang).id);
+  assert.notEqual(promptPack({prompt_code:'demo_crumb_0',brand:'Crumb'},lang).id,promptPack({prompt_code:'demo_casa-brownie_0',brand:'Casa Brownie'},lang).id);
+ }
+});
