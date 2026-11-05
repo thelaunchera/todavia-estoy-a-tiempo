@@ -10,7 +10,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: github-pages
+  group: verified-freebies-release
   cancel-in-progress: false
 jobs:
   overlay:
