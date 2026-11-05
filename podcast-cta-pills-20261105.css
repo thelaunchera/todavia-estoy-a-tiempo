@@ -1,0 +1,9 @@
+/* Podcast, class and product landings: rounded CTA pills, not rounded cards or inputs. */
+:is(a.button,button.button,a.nav-cta,a.episode-curated-button,a.episode-previous-cta,a.ep03-cta,
+ a.learning-lab-resource-button,a.creative-freebie-link,a.class-primary-button,
+ button.class-primary-button,a.class-launch-clock-cta,a.class-casa-open-button,
+ a.class-campaign-notify-link,button.class-contact-compact-button,
+ a.cover-action,a.product-learn,a.product-details-cta,button.product-details-cta,
+ a.help-strip-primary,a.help-strip-secondary,button.submit,button.form-submit){
+ border-radius:999px!important;
+}
