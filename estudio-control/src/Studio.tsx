@@ -2262,8 +2262,35 @@ function App() {
                         })
                       }
                     />
-                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). El enlace privado de Biblioteca no se mostrará en los correos. Guárdalo antes de publicar el episodio.</small>
+                    <small>Enlace público directo a la imagen (PNG, JPG o WebP). Para el archivo del podcast, usa podcast.thelaunchera.com o el CDN oficial. Una foto privada de Biblioteca no sirve para publicar.</small>
                   </label>
+                  <details className="episode-website-fields">
+                    <summary>Banner semanal y pop-up del capítulo</summary>
+                    <p>Al marcar «Publicado» con Spotify verificado, se añade el capítulo al archivo permanente. El aviso muestra su propia foto y mensaje durante la semana del estreno. Los anteriores nunca desaparecen.</p>
+                    <label>Frase que conecta con este capítulo · Español
+                      <input maxLength={180} value={edit.item.popup_headline||''} placeholder="Una pregunta que conecte con la historia real" onChange={e=>setEdit({...edit,item:{...edit.item,popup_headline:e.target.value}})}/>
+                    </label>
+                    <label>Mensaje del anuncio · Español
+                      <textarea rows={3} maxLength={520} value={edit.item.popup_message||''} placeholder="Por qué escuchar este capítulo; un mensaje humano y concreto" onChange={e=>setEdit({...edit,item:{...edit.item,popup_message:e.target.value}})}/>
+                    </label>
+                    <label>Foto distinta para el pop-up (opcional)
+                      <input type="url" inputMode="url" value={edit.item.popup_image_url||''} placeholder="https://podcast.thelaunchera.com/assets/episodio-04.webp" onChange={e=>setEdit({...edit,item:{...edit.item,popup_image_url:e.target.value}})}/>
+                      <small>Si no añades otra, usaremos la foto pública del capítulo. Debe ser diferente de la de otros episodios.</small>
+                    </label>
+                    <label>Episode title · English
+                      <input value={edit.item.title_en||''} maxLength={180} placeholder="English title for the episode archive" onChange={e=>setEdit({...edit,item:{...edit.item,title_en:e.target.value}})}/>
+                    </label>
+                    <label>Episode summary · English
+                      <textarea rows={2} maxLength={600} value={edit.item.summary_en||''} placeholder="English summary of the episode" onChange={e=>setEdit({...edit,item:{...edit.item,summary_en:e.target.value}})}/>
+                    </label>
+                    <label>Popup headline · English
+                      <input value={edit.item.popup_headline_en||''} maxLength={180} placeholder="A personal hook for this episode" onChange={e=>setEdit({...edit,item:{...edit.item,popup_headline_en:e.target.value}})}/>
+                    </label>
+                    <label>Popup message · English
+                      <textarea rows={3} maxLength={520} value={edit.item.popup_message_en||''} placeholder="A message that connects with the story" onChange={e=>setEdit({...edit,item:{...edit.item,popup_message_en:e.target.value}})}/>
+                      <small>Los textos en inglés son recomendados para la versión EN. El episodio publicado permanece en el archivo aunque termine su aviso semanal.</small>
+                    </label>
+                  </details>
                 </>
               )}
               {(edit.kind === 'productos' || edit.kind === 'episodios') && (
