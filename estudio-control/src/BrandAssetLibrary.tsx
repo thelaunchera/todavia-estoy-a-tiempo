@@ -42,13 +42,20 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=f
   <div role="group" aria-label="Filtrar tipo de elemento" style={{display:compact?'none':'flex',gap:6,overflowX:'auto',padding:'0 0 5px'}}>
    {categories.map(c=><button key={c} type="button" aria-pressed={kind===c} onClick={()=>setKind(c)} style={{...control,flexShrink:0,whiteSpace:'nowrap',minHeight:42,fontWeight:kind===c?800:500,background:kind===c?'#F2D85B':'#fff'}}>{c}</button>)}
   </div>
-  <div aria-label="Galería de stickers individuales para colocar en el lienzo" style={{display:'grid',gridTemplateColumns:compact?'repeat(2,minmax(0,1fr))':'repeat(auto-fill,minmax(125px,1fr))',gap:10,maxHeight:compact?255:370,overflowY:'auto',padding:3}}>
-   {filtered.map(a=><button type="button" key={a.key} aria-label={'Añadir '+a.name+' al lienzo'} onClick={()=>{if(a.brand==='golden')void onGolden(a.asset);else if(a.brand==='sova')void onSova(a.asset);else void onEditorial(a.asset)}} style={{...control,padding:8,minWidth:0,textAlign:'center',overflow:'hidden',gridColumn:compact&&(['Banners y cintas','Papeles y washi'].includes(a.category))?'span 2':undefined}}>
-     <span style={{display:'grid',placeItems:'center',height:compact?(['Banners y cintas','Papeles y washi'].includes(a.category)?110:132):140,
-        borderRadius:10,background:'#F7F7F4',overflow:'hidden',padding:10,boxSizing:'border-box'}}>
+  <div className={compact?'studio-sticker-gallery studio-element-gallery':'studio-element-gallery'} aria-label="Galería de elementos individuales para colocar en el lienzo"
+    style={{display:'grid',gridTemplateColumns:compact?'repeat(2,minmax(0,1fr))':'repeat(auto-fill,minmax(150px,1fr))',
+      gridAutoRows:'max-content',alignContent:'start',gap:10,overflowY:'auto',padding:3}}>
+   {filtered.map(a=><button type="button" key={a.key} aria-label={'Añadir '+a.name+' al lienzo'}
+     onClick={()=>{if(a.brand==='golden')void onGolden(a.asset);else if(a.brand==='sova')void onSova(a.asset);else void onEditorial(a.asset)}}
+     className="studio-element-card"
+     style={{...control,display:'grid',gridTemplateRows:'132px auto',alignContent:'start',
+       padding:8,minWidth:0,minHeight:174,textAlign:'center',overflow:'hidden',
+       gridColumn:compact&&(['Banners y cintas','Papeles y washi'].includes(a.category))?'span 2':undefined}}>
+     <span className="studio-sticker-thumb" style={{display:'grid',placeItems:'center',width:'100%',height:132,
+       borderRadius:10,background:'#F7F7F4',overflow:'hidden',padding:10,boxSizing:'border-box'}}>
        <img loading="lazy" src={a.src} alt={a.name} style={{width:'100%',height:'100%',maxHeight:'100%',maxWidth:'100%',objectFit:'contain',display:'block'}}/>
-      </span>
-     <strong style={{display:'block',fontSize:12,marginTop:7,lineHeight:1.3}}>{a.name}</strong>
+     </span>
+     <span className="studio-sticker-label" style={{display:'block',fontSize:12,fontWeight:700,marginTop:7,lineHeight:1.3,overflowWrap:'anywhere'}}>{a.name}</span>
     </button>)}
    {filtered.length===0&&<p style={{fontSize:13}}>Sin resultados en esta categoría.</p>}
   </div>
