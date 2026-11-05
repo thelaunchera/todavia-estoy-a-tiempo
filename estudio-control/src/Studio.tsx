@@ -691,10 +691,13 @@ function App() {
   const activeLabCount=activeProductAccess.filter(x=>x.product_code==='content-lab').length;
 
   const plan = editorialPlan(episodes);
+  // Derive upcoming podcast actions from the existing editorial calendar. Never
+  // create duplicate database tasks or mark an episode complete automatically.
+  const nextProductionEpisodes = plan.planned.filter(x => Boolean(x.date && x.number)).slice(0,4);
   const libraryEpisodes = episodeScope === 'month' ? plan.month : episodeScope === 'published' ? plan.published : plan.active;
   const allSeries = groupEpisodes(libraryEpisodes);
   const published = plan.published.length;
-  const pending = tasks.filter(x => x.status !== 'completado').length;
+  const pending = generalTasks.filter(x => x.status !== 'completado').length + nextProductionEpisodes.length;
   const next = plan.planned[0];
   const visible = (xs: Row[]) =>
     xs.filter(x =>
@@ -706,6 +709,7 @@ function App() {
     setPage(p);
     setSearch('');
     setMobileNav(false);
+    if (p === 'tareas') void refresh();
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
     if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies') nextUrl.searchParams.set('seccion',p);
@@ -938,32 +942,65 @@ function App() {
       {!groupEpisodes(visible(libraryEpisodes)).some(group=>seriesTab==='all'||seriesTab===group.id)&&empty}
     </div>
   );
+  const taskCard = (x: Row) => (
+    <div className={'task ' + (x.status === 'completado' ? 'done' : '')} key={x.id}>
+      <button
+        className="task-toggle"
+        aria-label={(x.status === 'completado' ? 'Reabrir ' : 'Completar ') + x.title}
+        disabled={recording}
+        onClick={() => void toggle(x)}
+      >
+        {x.status === 'completado' ? <Check size={17} /> : <span />}
+      </button>
+      <div>
+        <b>{x.title}</b>
+        <small>{x.section || 'Contenido'} · {formatDate(x.date)}</small>
+      </div>
+      <StatePill status={x.status} />
+      {buttons('tareas', x)}
+    </div>
+  );
+  const openEditorialTasks = visible(generalTasks.filter(x => x.status !== 'completado'));
+  const finishedEditorialTasks = visible(generalTasks.filter(x => x.status === 'completado'));
+  const calendarActionRows = visible(nextProductionEpisodes);
   const taskRows = (
-    <div className="task-list">
-      {visible(generalTasks).map(x => (
-        <div
-          className={'task ' + (x.status === 'completado' ? 'done' : '')}
-          key={x.id}
-        >
-          <button
-            className="task-toggle"
-            aria-label={'Completar ' + x.title}
-            disabled={recording}
-            onClick={() => toggle(x)}
-          >
-            {x.status === 'completado' ? <Check size={17} /> : <span />}
-          </button>
-          <div>
-            <b>{x.title}</b>
-            <small>
-              {x.section || 'Contenido'} · {formatDate(x.date)}
-            </small>
+    <div className="task-feed">
+      {calendarActionRows.length > 0 && (
+        <section className="task-calendar-feed" aria-label="Próximos capítulos del podcast">
+          <div className="task-calendar-heading">
+            <strong>Próximos capítulos por revisar</strong>
+            <small>Se actualizan con las fechas y estados del calendario del podcast.</small>
           </div>
-          <StatePill status={x.status} />
-          {buttons('tareas', x)}
-        </div>
-      ))}
-      {visible(generalTasks).length === 0 && empty}
+          <div className="task-list">
+            {calendarActionRows.map(x => (
+              <div className="task task-calendar-item" key={x.id}>
+                <span className="task-episode-number">EP {x.number}</span>
+                <div>
+                  <b>{x.title}</b>
+                  <small>{formatDate(x.date)} · {x.status || 'En preparación'}</small>
+                </div>
+                <button type="button" disabled={recording} className="task-episode-open" onClick={() => editRow('episodios', x)}>
+                  Revisar
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {openEditorialTasks.length > 0 && (
+        <section aria-label="Tareas editoriales pendientes" className="task-list">
+          {openEditorialTasks.map(taskCard)}
+        </section>
+      )}
+      {calendarActionRows.length === 0 && openEditorialTasks.length === 0 && (
+        <p className="task-feed-empty">No hay tareas editoriales abiertas. Puedes añadir una nueva cuando la necesites.</p>
+      )}
+      {finishedEditorialTasks.length > 0 && (
+        <details className="task-completed">
+          <summary>Ver tareas completadas ({finishedEditorialTasks.length})</summary>
+          <div className="task-list">{finishedEditorialTasks.map(taskCard)}</div>
+        </details>
+      )}
     </div>
   );
   const statusPanel = (title: string, desc: string) => (
@@ -1436,8 +1473,14 @@ function App() {
                   placeholder="Buscar tareas…"
                 />
               </div>
+              <div className="task-page-refresh">
+                <span>Los capítulos se consultan en tu calendario. Las tareas externas de Notion no se importan automáticamente.</span>
+                <button type="button" disabled={loading} onClick={() => void refresh()}>
+                  <RotateCcw size={15}/> {loading ? 'Actualizando…' : 'Actualizar lista'}
+                </button>
+              </div>
               {taskRows}
-              <p className="hint"><BookOpen size={16}/> Las tareas semanales de la clase se gestionan en <button type="button" onClick={()=>change('clases')} className="class-plan-inline-link">Clases · grabación</button>, sin duplicarlas aquí.</p>
+              <p className="hint task-class-hint"><BookOpen size={16}/><span>Las tareas semanales de la clase se gestionan en <button type="button" onClick={()=>change('clases')} className="class-plan-inline-link">Clases · grabación</button>, sin duplicarlas aquí.</span></p>
             </>
           )}
           {page === 'productos' && (
