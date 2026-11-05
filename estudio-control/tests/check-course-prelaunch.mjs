@@ -244,15 +244,22 @@ assert.match(read('index-en.html'),/id="podcast-ep03-dialog"/,'La landing en ing
 assert.match(read('index-en.html'),/A NEW EPISODE IS HERE · 03/,'El aviso inglés está traducido');
 assert.match(read('index-en.html'),/Listen to episode 03/,'El CTA del aviso inglés está traducido');
 assert.doesNotMatch(read('index-en.html'),/YA SALIÓ UN NUEVO EPISODIO/,'Sin copiar mensajes españoles al popup inglés');
-assert.match(popupEp03,/2026-11-03T00:00:00-05:00/);
-assert.match(popupEp03,/2026-11-06T00:00:00-05:00/);
-assert.doesNotMatch(popupEp03,/(?:localStorage|sessionStorage)\s*\./,'El popup reaparece en cada nueva visita, sin guardar cierres');
+assert.match(popupEp03,/PODCAST_PUBLISHED_EPISODES/,'El anuncio usa el último capítulo realmente publicado');
+assert.match(popupEp03,/popupImage/,'Cada capítulo puede mostrar su propia fotografía');
+assert.match(popupEp03,/popupHeadline/,'El anuncio tiene su propio titular');
+assert.match(popupEp03,/popupMessage/,'El anuncio tiene mensaje contextual');
+assert.match(popupEp03,/days >= 7/,'El aviso rota por estreno semanal sin borrar episodios');
+assert.match(popupEp03,/sessionStorage/,'El cierre se recuerda solo para este capítulo en la sesión');
+const permanentArchive=read('podcast-archive.js');
+assert.match(permanentArchive,/PODCAST_EPISODE_FEED_READY/,'El archivo consulta la lista pública y usa respaldo');
+assert.match(permanentArchive,/published\.slice\(1\)/,'Todos los anteriores se conservan, sin límite de tres');
+assert.match(read('index-en.html'),/podcast-archive\.js/,'El archivo también está en inglés');
 assert.match(classPage,/cinematic-hero-20261102[.]js/,'El video pausa al salir de pantalla');
 assert.match(newStyles,/object-fit:contain!important/);
 assert.match(newStyles,/mix-blend-mode:multiply/);
 assert.match(newStyles,/class-hero .class-notice strong\{/);
 assert.match(newStyles,/color:#193a56!important/);
-console.log('QA: capítulos 03, 02 y 01 visibles, título vigente de influencer y aviso ES/EN temporal correctos');
+console.log('QA: catálogo permanente y anuncio dinámico semanal ES/EN, sin quitar episodios');
 
 
 /* Copy público en español cotidiano: no exponer nomenclatura interna ni repetir fecha. */
