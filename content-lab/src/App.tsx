@@ -20,6 +20,7 @@ import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
+import CreatorDashboard from './CreatorDashboard';
 import QuickStartGuide from './QuickStartGuide';
 import FreeDecorControls from './FreeDecorControls';
 import {readCoverDecor,writeCoverDecor,type CoverDecor} from './CoverDecor';
@@ -586,16 +587,21 @@ function App() {
   ];
   const change = (key: keyof Post, val: string) =>
     setEditor(p => ({ ...p, [key]: val }));
-  const startFactory = () => {
+  const startFactoryWithMode = (seamless:boolean) => {
     if (!brand) return;
     setCalendarEditId('');
     // A new session must not inherit media selected for a previous carousel.
     setBackgroundPref({version:0});
     setStickerPref({version:0});
     editorSessionRef.current++;
-    setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel'}));
+    const initial = {...newPost(brand.id),format:'Carousel'};
+    setEditor(inspectRecovery(seamless
+      ? {...initial,designData:JSON.stringify({version:2,slides:[],style:{seamlessEnabled:true}})}
+      : initial));
     navigate('factory');
   };
+  const startFactory = () => startFactoryWithMode(false);
+  const startSeamless = () => startFactoryWithMode(true);
   const startVertical = (format:'Reel'|'Story'='Reel')=>{
     if(!brand)return;
     setCalendarEditId('');
@@ -1401,202 +1407,26 @@ function App() {
           )}
           {brand && tab === 'home' && (
             <>
-              <section className="lab-home-greeting" aria-label={loginLanguage==='es'?'Bienvenida a tu estudio':'Welcome to your studio'}>
-                <div className="lab-greeting-main">
-                  <div className="lab-greeting-copy">
-                    <span className="lab-greeting-kicker"><Sparkles size={15} aria-hidden="true"/>
-                      {loginLanguage==='es'?'TU APP PARA CREAR CONTENIDO':'YOUR CONTENT CREATION APP'}
-                    </span>
-                    <h1>{loginLanguage==='es'?'¿Qué carrusel creamos hoy?':'What carousel will you create today?'}</h1>
-                    <p>{loginLanguage==='es'
-                      ?'Tus fotos, tus textos y tu estilo. Crea un carrusel o empieza con otro formato.'
-                      :'Your photos, your type, your style. Start a carousel or choose another format.'}</p>
-                    {brand.name&&brand.name!=='My Brand'&&<span className="lab-greeting-brand">
-                      {loginLanguage==='es'?'Trabajando en':'Working on'} <strong>{brand.name}</strong>
-                    </span>}
-                  </div>
-                  <div className="lab-greeting-actions">
-                    <button type="button" className="btn dark" onClick={startFactory}>
-                      <Plus size={17} aria-hidden="true"/>
-                      {loginLanguage==='es'?'Crear carrusel':'Create carousel'}
-                    </button>
-                    <button type="button" className="lab-greeting-secondary" onClick={()=>start()}>
-                      {loginLanguage==='es'?'Crear post':'Create post'}
-                    </button>
-                    <button type="button" className="lab-greeting-secondary" onClick={()=>navigate('calendar')}>
-                      <CalendarDays size={16}/>{loginLanguage==='es'?'Organizar contenido':'Plan content'}
-                    </button>
-                  </div>
-                </div>
-                {setupStepsDone<3&&<details className="lab-greeting-progress">
-                  <summary>
-                    <Check size={15} aria-hidden="true"/>
-                    <span>{loginLanguage==='es'?'Mis primeros pasos':'My first steps'}</span>
-                    <strong>{setupStepsDone}/3</strong>
-                    <ChevronDown size={16} aria-hidden="true"/>
-                  </summary>
-                  <div className="lab-greeting-checklist">
-                    {setupSteps.map(step=><button key={step.title} type="button" className={step.ready?'complete':''}
-                      onClick={()=>{if(step.tab==='brands')setBrandForm(brand);if(step.tab==='create')start();else navigate(step.tab)}}>
-                      <span className="lab-greeting-checkicon">{step.ready?<Check size={15}/>:<ArrowRight size={15}/>}</span>
-                      <span>{t(step.title)}</span>
-                      <small>{step.ready?(loginLanguage==='es'?'Listo':'Done'):(loginLanguage==='es'?'Pendiente':'To do')}</small>
-                    </button>)}
-                  </div>
+              <CreatorDashboard
+                locale={loginLanguage}
+                brand={brand}
+                posts={mine}
+                library={library}
+                images={images}
+                loadImage={imageLoad}
+                onNewNormal={startFactory}
+                onNewSeamless={startSeamless}
+                onNewPost={start}
+                onNewStory={()=>startVertical('Story')}
+                onEditPost={(post)=>edit(post as Post)}
+                onNavigate={navigate}
+                onEditBrand={()=>{setBrandForm(brand);navigate('brands')}}
+              />
+              {account?.email&&setupStepsDone<3&&
+                <details className="cld-onboarding">
+                  <summary>{loginLanguage==='es'?'Mis primeros pasos':'My first steps'} · {setupStepsDone}/3</summary>
+                  <QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory} locale={loginLanguage} mode="home"/>
                 </details>}
-              </section>
-              <section className="lab-format-launcher" aria-label={loginLanguage==='es'?'Elige un formato':'Choose a format'}>
-                <button type="button" className="lab-format-featured" onClick={startFactory}><span className="lab-format-art" aria-hidden="true"><i/><i/><i/></span><strong>{loginLanguage==='es'?'Carrusel':'Carousel'}</strong><small>{loginLanguage==='es'?'Un diseño que continúa entre slides':'One design that flows across slides'}</small><span>4:5 · PNG</span></button>
-                <button type="button" onClick={()=>start()}><span className="lab-format-art single" aria-hidden="true"><i/></span><strong>Post</strong><small>{loginLanguage==='es'?'Una foto, una idea, tu composición':'One photo, one idea, your composition'}</small><span>4:5 · PNG</span></button>
-                <button type="button" onClick={()=>startVertical('Story')}><span className="lab-format-art vertical" aria-hidden="true"><i/></span><strong>{loginLanguage==='es'?'Historia':'Story'}</strong><small>{loginLanguage==='es'?'Lleva tu idea al formato vertical':'Take your idea into a vertical format'}</small><span>9:16 · PNG</span></button>
-              </section>
-              {account?.email&&<QuickStartGuide scope={account.email+':'+brand.id} onCreate={startFactory} locale={loginLanguage} mode="home"/>}
-              {mine.length>0&&<section className="stats">
-                {[
-                  {
-                    label: 'TOTAL PIECES',
-                    n: mine.length,
-                    detail: 'In this account',
-                  },
-                  {
-                    label: 'IN PROGRESS',
-                    n: mine.filter(x => ['Idea', 'Draft'].includes(x.status))
-                      .length,
-                    detail: 'Ideas in motion',
-                  },
-                  {
-                    label: 'READY TO POST',
-                    n: mine.filter(x => x.status === 'Ready').length,
-                    detail: 'Ready when you are',
-                  },
-                  {
-                    label: 'YOUR MEDIA',
-                    n: library.length,
-                    detail: 'Photos and screenshots',
-                  },
-                ].map(s => (
-                  <div key={s.label}>
-                    <span>{t(s.label)}</span>
-                    <strong>{s.n}</strong>
-                    <small>{t(s.detail)}</small>
-                  </div>
-                ))}
-              </section>}
-              <div className="homegrid">
-                <section className="homeideas">
-                  <div className="cardheading">
-                    <div>
-                      <div className="eyebrow">{t('THE CONTENT ENGINE')}</div>
-                      <h2>{t('What are we creating today?')}</h2>
-                    </div>
-                    <Sparkles size={25} />
-                  </div>
-                  <p>
-                    {t("Start with one problem, one photo or one idea worth sharing.")}
-                  </p>
-                  <div className="angles">
-                    {[
-                      {
-                        name: 'Teach something',
-                        sub: 'A useful little lesson',
-                        icon: Lightbulb,
-                        angle: 'Educational',
-                      },
-                      {
-                        name: 'Solve a pain point',
-                        sub: 'Make them feel seen',
-                        icon: Heart,
-                        angle: 'Pain point',
-                      },
-                      {
-                        name: 'Show the difference',
-                        sub: 'Before / after',
-                        icon: Layers3,
-                        angle: 'Before / after',
-                      },
-                      {
-                        name: 'Keep it relatable',
-                        sub: 'A real everyday moment',
-                        icon: Sparkles,
-                        angle: 'POV / Relatable',
-                      },
-                    ].map((a, i) => (
-                      <button
-                        className={'angle a' + i}
-                        key={a.name}
-                        onClick={() => start(a.angle)}
-                      >
-                        <a.icon size={23} />
-                        <strong>{t(a.name)}</strong>
-                        <small>{t(a.sub)}</small>
-                        <ArrowUpRight size={17} />
-                      </button>
-                    ))}
-                  </div>
-                </section>
-                <section className="homebrand">
-                  <div className="eyebrow">{t('ACTIVE BRAND')}</div>
-                  <h2>{brand.name}</h2>
-                  <p>{brand.audience || t('Define your audience in settings.')}</p>
-                  <div className="dots">
-                    <i style={{ background: brand.color }} />
-                    <i style={{ background: brand.background }} />
-                    <i style={{ background: '#191919' }} />
-                  </div>
-                  <div className="brand-detail">
-                    {t('LANGUAGE')} <strong>{brand.language}</strong>
-                  </div>
-                  <div className="brand-detail">
-                    {t('SAVED POSTS')} <strong>{mine.length}</strong>
-                  </div>
-                  <button
-                    className="textlink"
-                    onClick={() => {
-                      setBrandForm(brand);
-                      navigate('brands');
-                    }}
-                  >
-                    {t("Edit brand profile")} <ArrowRight size={16} />
-                  </button>
-                </section>
-              </div>
-              <div className="sectionheading">
-                <div>
-                  <div className="eyebrow">{t('PICK UP WHERE YOU LEFT OFF')}</div>
-                  <h2>{t('Recent creations')}</h2>
-                </div>
-                <button className="textlink" onClick={() => navigate('posts')}>
-                  {t("View all")} <ArrowRight size={16} />
-                </button>
-              </div>
-              {mine.length ? (
-                <div className="recent">
-                  {mine
-                    .slice()
-                    .reverse()
-                    .slice(0, 4)
-                    .map(p => (
-                      <button key={p.id} onClick={() => edit(p)}>
-                        <FolderOpen size={19} />
-                        <span>
-                          <strong>{p.title}</strong>
-                          <small>
-                            {p.format} · {p.angle}
-                          </small>
-                        </span>
-                        <b>{p.status}</b>
-                        <ArrowUpRight size={18} />
-                      </button>
-                    ))}
-                </div>
-              ) : (
-                <div className="empty">
-                  <Sparkles size={30} />
-                  <h3>{t("Your best ideas begin here.")}</h3>
-                  <p>{t("No content saved yet. Create your first piece.")}</p>
-                  <small className="lab-empty-hint">{loginLanguage==='es'?'Para empezar, toca «+ Crear» en la barra superior.':'To begin, tap “+ Create” in the top bar.'}</small>
-                </div>
-              )}
             </>
           )}
           {brand && tab === 'idea-bank' && (
