@@ -956,6 +956,23 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),cloned]});
     notify('Texto duplicado: conserva el color, la fuente y el tamaño.');
   };
+  const duplicatePanoramaLayer=(id:string)=>{
+    if((style.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');return}
+    const saved=(style.panoramaLayers||[]).find(layer=>layer.id===id);
+    const page=pageLayers.find(layer=>layer.id===id);
+    if(!saved&&!page)return;
+    if(saved?.role==='background'){notify('Los fondos continuos se gestionan desde Fondo.');return}
+    const source=saved||page!;
+    const base=saved||promoteSource(page!,page!.rect);
+    const next:PanoramaLayer={
+      ...base,id:'panorama-copy-'+crypto.randomUUID(),name:source.name+' · copia',
+      locked:false,placement:'front',
+      rect:clampPanoramaRect({...source.rect,x:source.rect.x+.025/slides.length,
+        y:Math.min(.95,source.rect.y+.02)}),
+    };
+    setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),next]});
+    notify('Elemento duplicado. Puedes moverlo sin cambiar el original.');
+  };
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
     const crossesSeam=(r:TouchRect,count:number)=>Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)/count)
       .some(cut=>r.x<cut-.0001&&r.x+r.w>cut+.0001);
@@ -1541,7 +1558,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         onExtendBackground={extendCurrentBackground}
         canExtendBackground={!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background')}
         focusLayerId={focusWallpaperId}
-       onCopySticker={copyPanoramaSticker} onToggleLock={togglePanoramaLock} onDuplicateText={duplicatePanoramaText}
+       onCopySticker={copyPanoramaSticker} onToggleLock={togglePanoramaLock} onDuplicateText={duplicatePanoramaText} onDuplicateLayer={duplicatePanoramaLayer}
       onUpdate={updatePanoramaLayer} onAddLayer={addCanvasLayer}
       onUndo={()=>restoreHistory('undo')} onRedo={()=>restoreHistory('redo')}
       canUndo={historyVersion>=0&&pastHistory.current.length>0}
