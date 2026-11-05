@@ -10,7 +10,7 @@ import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supa
 import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
-import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
+import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors} from 'lucide-react';
@@ -766,28 +766,23 @@ export default function SeamlessEditor(){
   const item=doc.items.find(it=>it.id===selected);
   if(!item||item.kind!=='image'||!item.src)return;
   const generation=backgroundGeneration.current;
-  setBusy(true);setBackgroundProgress('Preparando foto…');
-  setMessage('Quitando el fondo con IA en este dispositivo. La primera vez se descargará el modelo.');
+  setBusy(true);setBackgroundProgress('Preparando recorte sin IA…');
   try{
-   // Uploaded photos have a data URL, and library assets may have an HTTPS URL.
-   // If the user repeats removal, use the preserved ORIGINAL instead of a cutout.
    const source=item.originalBackupId
     ?await restoreOriginalPhoto(item.originalBackupId):item.src;
    const original=await originalBlobFromSource(source);
-   const transparent=await cutoutOriginalPhoto(original,label=>{
-    if(generation===backgroundGeneration.current)setBackgroundProgress(label);
-   });
+   // Do not load large AI models on iPad: a failed recorte must never reset Studio.
+   const transparent=await cutoutSolidBackground(original);
    if(generation!==backgroundGeneration.current)return;
    const backupId=item.originalBackupId||await storeOriginalPhoto(original);
    if(generation!==backgroundGeneration.current)return;
    setDoc(d=>({...d,items:d.items.map(photo=>
     photo.id===item.id&&photo.src===item.src
      ?{...photo,src:transparent,originalBackupId:backupId}:photo)}));
-   setMessage('Fondo eliminado. La foto tiene transparencia y conserva su posición. Puedes recuperar la original.');
+   setMessage('Fondo liso eliminado. Foto transparente y original guardado para restaurar.');
   }catch(err){
    if(generation===backgroundGeneration.current)
-    setMessage((err instanceof Error?err.message:'No se pudo quitar el fondo.')+
-     ' La foto original sigue intacta. Puedes probar «Quitar fondo liso» si tiene un color uniforme.');
+    setMessage(err instanceof Error?err.message:'No se pudo quitar el fondo liso. La foto original sigue intacta.');
   }finally{
    if(generation===backgroundGeneration.current){setBusy(false);setBackgroundProgress('');}
   }
@@ -812,7 +807,6 @@ export default function SeamlessEditor(){
    if(generation===backgroundGeneration.current){setBusy(false);setBackgroundProgress('');}
   }
  };
-  const removeSolidBackground=async()=>{const item=doc.items.find(it=>it.id===selected);if(!item||item.kind!=='image'||!item.src)return;setBusy(true);setMessage('Procesando fondo de color uniforme…');try{const im=await loadImage(item.src);const cv=document.createElement('canvas');const factor=Math.min(1,1600/Math.max(im.width,im.height));cv.width=Math.round(im.width*factor);cv.height=Math.round(im.height*factor);const ctx=cv.getContext('2d',{willReadFrequently:true});if(!ctx)throw Error('canvas');ctx.drawImage(im,0,0,cv.width,cv.height);const data=ctx.getImageData(0,0,cv.width,cv.height);const {width:w,height:h}=cv;const px=data.data;const corners=[0,(w-1)*4,(h-1)*w*4,((h-1)*w+w-1)*4];const rgb=[0,1,2].map(channel=>Math.round(corners.reduce((sum,i)=>sum+px[i+channel],0)/4));const visited=new Uint8Array(w*h);const queue=new Int32Array(w*h);let head=0,tail=0;const add=(i:number)=>{if(i<0||i>=w*h||visited[i])return;const p=i*4;const dist=Math.sqrt((px[p]-rgb[0])**2+(px[p+1]-rgb[1])**2+(px[p+2]-rgb[2])**2);if(dist>48)return;visited[i]=1;queue[tail++]=i};for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);px[i*4+3]=0;if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w)}ctx.putImageData(data,0,0);const result=cv.toDataURL('image/png');update(item.id,{src:result});setMessage('Fondo uniforme eliminado. Revisa los bordes; las fotos con fondos complejos necesitan recorte avanzado.')}catch{setMessage('No se pudo quitar el fondo. Prueba con una foto de fondo liso.')}finally{setBusy(false)}};
  const current=doc.items.find(it=>it.id===selected);
  useEffect(()=>{setActiveInspector(null)},[selected]);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
@@ -1086,7 +1080,7 @@ export default function SeamlessEditor(){
  </div>}
  <div className="studio-app-selection">  {current?.kind==='image'&&current.role!=='background'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
-    onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo'}</button>
+    onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo liso'}</button>
    {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar original</button>}
    {busy&&backgroundProgress&&<span role="status" style={{fontSize:12}}>{backgroundProgress}</span>}
   </div>}
@@ -1158,7 +1152,7 @@ export default function SeamlessEditor(){
      <button type="button" disabled={!current} aria-pressed={!!current?.flipX} onClick={()=>current&&update(current.id,{flipX:!current.flipX})}><FlipHorizontal size={20}/><small>Voltear H</small></button>
      <button type="button" disabled={!current} aria-pressed={!!current?.flipY} onClick={()=>current&&update(current.id,{flipY:!current.flipY})}><FlipVertical size={20}/><small>Voltear V</small></button>
      <button type="button" disabled={current?.kind!=='text'} aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector('curve')}><Type size={20}/><small>Curvar texto</small></button>
-     <button type="button" disabled={!current||current.kind!=='image'||current.role==='background'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo</small></button>
+     <button type="button" disabled={!current||current.kind!=='image'||current.role==='background'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo liso</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='color'} onClick={()=>setActiveInspector('color')}><Paintbrush size={20}/><small>Color</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='effects'} onClick={()=>setActiveInspector('effects')}><Sun size={20}/><small>Sombras</small></button>
      <button type="button" disabled={!current} onClick={duplicateSelected}><Copy size={20}/><small>Duplicar</small></button>
@@ -1233,9 +1227,7 @@ export default function SeamlessEditor(){
     <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
     <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button><button type="button" style={{...control,background:current.locked?'#DCECF4':'#F2D85B'}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear':'🔒 Bloquear'}</button></div>
     {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-     <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy} onClick={()=>void removePhotoBackground()}>Quitar fondo con IA</button>
      {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar foto original</button>}
-     <button type="button" style={control} disabled={busy} onClick={()=>void removeSolidBackground()}>Quitar fondo liso</button>
     </div>}
     <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>deleteElement(current.id)}>Eliminar elemento</button>
    </div></details>}
