@@ -41,6 +41,8 @@ export type PanoramaLayer = {
   role?:'background';
   locked?:boolean;
   opacity?:number;
+  /** Owning slide in Normal mode; overflowing pixels are clipped, not reflowed. */
+  page?:number;
   rect: TouchRect;
 };
 
@@ -76,6 +78,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
       ...(item.locked===true?{locked:true}:{}),
+      ...(Number.isInteger(item.page)&&item.page>=0&&item.page<20?{page:item.page}:{}),
       rect: clampPanoramaRect(item.rect),
     }];
   });
@@ -166,11 +169,19 @@ export function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:num
 }
 export async function paintPanoramaLayers(
   ctx: CanvasRenderingContext2D, width: number, height: number,
-  layers: PanoramaLayer[], images: Record<string, string>,
+  layers: PanoramaLayer[], images: Record<string, string>, clipToPages=0,
 ) {
  for(const layer of layers){
   const r=clampPanoramaRect(layer.rect),w=r.w*width,h=r.h*height;
-  ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,layer.opacity??1));ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
+  ctx.save();
+  // Normal keeps an element's original size and position, but never paints it
+  // onto a neighboring slide. Seamless deliberately skips this clip.
+  if(clipToPages>1){
+   const inferred=Math.floor((r.x+r.w/2)*clipToPages);
+   const owner=Math.max(0,Math.min(clipToPages-1,Number.isInteger(layer.page)?layer.page!:inferred));
+   ctx.beginPath();ctx.rect(owner*width/clipToPages,0,width/clipToPages,height);ctx.clip();
+  }
+  ctx.globalAlpha=Math.max(0,Math.min(1,layer.opacity??1));ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
   ctx.rotate((r.angle||0)*Math.PI/180);
   if(layer.kind==='text'){
     try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
@@ -207,7 +218,7 @@ export async function paintPanoramaLayers(
 /** Applies retained cross-slide layers even if the continuous background is turned off. */
 export async function overlayPanoramaPages(
   pages: HTMLCanvasElement[], layers: PanoramaLayer[], images: Record<string, string>,
-  paintTextOnTop?: (ctx:CanvasRenderingContext2D) => Promise<void>,
+  paintTextOnTop?: (ctx:CanvasRenderingContext2D) => Promise<void>,clipToSlides=false,
 ) {
   if (!layers.length) return pages;
   const scale=pages[0]?.width/1080||1,fullWidth=pages.length*1080;
@@ -218,9 +229,9 @@ export async function overlayPanoramaPages(
   ctx.save();ctx.scale(scale,scale);
   const behind=layers.filter(layer=>layer.placement==='behind-text');
   const front=layers.filter(layer=>layer.placement!=='behind-text');
-  await paintPanoramaLayers(ctx,fullWidth,1350,behind,images);
+  await paintPanoramaLayers(ctx,fullWidth,1350,behind,images,clipToSlides?pages.length:0);
   if(behind.length&&paintTextOnTop)await paintTextOnTop(ctx);
-  await paintPanoramaLayers(ctx,fullWidth,1350,front,images);
+  await paintPanoramaLayers(ctx,fullWidth,1350,front,images,clipToSlides?pages.length:0);
   ctx.restore();
   const result=pages.map((_,n)=>{
     const page=document.createElement('canvas');page.width=1080*scale;page.height=1350*scale;
