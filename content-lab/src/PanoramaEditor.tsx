@@ -30,12 +30,12 @@ type Props = {
   onRemoveText: (id: string) => void;
   onUpload: (files: File[], point: Point) => Promise<void>;
   error: string; onRetry: () => void;
-  backgroundColor:string;onBackgroundColor:(color:string)=>void;
+  backgroundColor:string;onBackgroundColor:(color:string)=>void;onClearBackground:()=>void;
 };
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
-  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [libraryOpen,setLibraryOpen]=useState(false);
@@ -91,7 +91,7 @@ export default function PanoramaEditor({
     (libraryKind==='all'||(libraryKind==='sticker'?assetCategory(a)==='sticker':assetCategory(a)!=='sticker'))&&
     displayAssetName(a).toLowerCase().includes(filter.toLowerCase()))
     .sort((a,b)=>Number(!(a.brandId===brandId&&!a.shared))-Number(!(b.brandId===brandId&&!b.shared)))
-    .slice(0,120);
+    ;
   const libraryIds=available.map(a=>a.id).join('|');
   useEffect(()=>{
     if(!libraryOpen)return;
@@ -195,7 +195,7 @@ export default function PanoramaEditor({
   const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
     onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
-  const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:799px)').matches;
+  const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:1360px)').matches;
   const libraryPanel=<aside className={'panorama-library'+(mobileGallery?' panorama-library-floating':'')+(expanded?' panorama-library-expanded':'')} aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Explorar elementos</strong>
         <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
@@ -213,6 +213,7 @@ export default function PanoramaEditor({
         <button type="button" aria-pressed={librarySection==='stickers'} onClick={()=>{setLibrarySection('stickers');setLibraryKind('sticker');setFilter('')}}><Sticker size={21}/><span>Stickers</span></button>
         <button type="button" aria-pressed={librarySection==='photos'} onClick={()=>{setLibrarySection('photos');setLibraryKind('photo');setFilter('')}}><ImagePlus size={21}/><span>Fotos</span></button>
       </div>
+      {librarySection!=='shapes'&&<p className="panorama-library-count" role="status">{available.length} elementos disponibles · {assets.filter(a=>a.shared&&assetCategory(a)==='sticker').length} stickers compartidos</p>}
       {librarySection==='shapes'&&<div className="panorama-shape-gallery" aria-label="Formas editables">
         {([['Papel','paper'],['Cinta','tape'],['Marco','frame'],['Círculo','circle']] as const).map(([name,shape])=><button type="button" key={shape} onClick={()=>{addFromElements('shape',shape);setLibraryOpen(false)}}>
           <span className={'panorama-shape-preview shape-'+shape} aria-hidden="true"/><small>{name}</small>
@@ -248,6 +249,7 @@ export default function PanoramaEditor({
               :<span className="panorama-library-loading">Cargando…</span>}
             <span className="panorama-asset-add" aria-hidden="true">＋</span>
           </button>
+          <span className={'panorama-asset-visibility'+(asset.shared?' is-shared':'')}>{asset.shared?'Compartido':assetCategory(asset)==='sticker'?'Mi sticker':'Mi imagen'}</span>
           {renameId===asset.id
             ?<div className="panorama-asset-rename">
               <input aria-label={'Nuevo nombre para '+displayAssetName(asset)} value={renameName}
@@ -303,7 +305,8 @@ export default function PanoramaEditor({
           style={{background:color}}/>)}
         <label>Personalizado <input type="color" value={backgroundColor} onChange={e=>onBackgroundColor(e.target.value)} aria-label="Color personalizado del fondo"/></label>
       </div>
-      <small>Los cambios se aplican al lienzo de este carrusel sin modificar la biblioteca de tu marca.</small>
+      <button type="button" className="panorama-clear-background" onClick={()=>{onClearBackground();setBackgroundOpen(false);revealCanvas()}}><Trash2 size={17}/> Quitar fondo del {seamless?'carrusel continuo':'slide actual'}</button>
+      <small>Quitar el fondo no borra las fotos, textos ni stickers. Los cambios de color no modifican tu biblioteca.</small>
     </div>}
     <div className="panorama-editor-utilities">
       <button type="button" disabled={!canUndo} onClick={onUndo} aria-label="Deshacer"><Undo2 size={17}/></button>
