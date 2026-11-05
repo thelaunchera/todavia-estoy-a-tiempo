@@ -116,7 +116,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <h3>Tu web con un solo prompt</h3>
         <p className="freebies-description">Crea tu primera web con ChatGPT y AppDeploy. Recursos ES / EN.</p>
         <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Acceso por correo · pendiente de QA</span></div>
-        <div className="freebies-actions">{external('https://app.notion.com/p/40da68f2ee6e81eb8308c07323903949?pvs=204','Ver freebie original',ExternalLink)}</div>
+        <div className="freebies-actions"><a className="freebies-link" href="/estudio/?seccion=links"><ExternalLink size={17}/> Abrir recursos de noviembre <ExternalLink size={14}/></a></div><p className="freebies-disclaimer">La carpeta original de noviembre aún no está identificada en Drive. No se muestra un enlace inventado.</p>
         {!november && <p className="freebies-alert">No se encontró la ficha original de noviembre en el Studio.</p>}
       </div>
     </div>
@@ -142,14 +142,15 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <div className="freebies-inline-gallery" aria-label="Cinco fotos originales del freebie de diciembre">
           {PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={"Abrir "+photo.name+" en Drive"}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
         </div>
+        <div className="freebies-actions">{external(PACK.images,'Abrir carpeta de fotos · Drive',ImageIcon)}{external(PACK.folder,'Abrir carpeta completa · Drive',ExternalLink)}</div>
         <details className="freebies-details"><summary>Gestionar freebie de diciembre</summary><div className="freebies-actions">
           {external(PACK.access,'Página de acceso · 5 prompts',ExternalLink)}
           {external(PACK.signup,'Formulario de registro · diciembre',Mail)}
           {external(PACK.make,'Automatización Make · QA pendiente',ExternalLink)}
-          {external(PACK.images,'Ver 5 imágenes',ImageIcon)}
+          {external(PACK.images,'Abrir carpeta de fotos en Drive',ImageIcon)}
           {external(PACK.prompts,'Prompts fuente · solo administración',ClipboardCopy)}
           {external(PACK.animation,'Ver GIF',Sparkles)}
-          {external(PACK.folder,'Carpeta completa',ExternalLink)}
+          {external(PACK.folder,'Abrir carpeta completa en Drive',ExternalLink)}
         </div>
         </details>
         <details className="freebies-details"><summary>Estado de lanzamiento y envío</summary><div className="freebies-publishing">
