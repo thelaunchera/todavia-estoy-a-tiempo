@@ -15,7 +15,7 @@ test('Idea Bank cards and copied prompts follow the selected UI language, not br
  const idea=src('src/IdeaBank.tsx'),app=src('src/App.tsx');
  assert.ok(idea.includes("ideas.map((idea,i)=>en?"));
  assert.ok(!idea.includes("language==='English'"));
- assert.ok(idea.includes("español latinoamericano natural"));
+ assert.ok(idea.includes("español natural para audiencias hispanohablantes de América"));
  assert.ok(app.includes('locale={loginLanguage} onUse={(idea:Idea)'));
 });
 
