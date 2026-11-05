@@ -76,6 +76,16 @@ export default function SeamlessEditor(){
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
+ const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
+ const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
+ useEffect(()=>{
+  let live=true;
+  fetch(new URL('assets-health.json',document.baseURI).href,{cache:'no-store'})
+   .then(response=>{if(!response.ok)throw new Error('No se pudo validar la biblioteca.');return response.json() as Promise<{valid:string[];unavailableCount:number}>;})
+   .then(data=>{if(!live)return;setValidBundledFiles(new Set(data.valid));setUnavailableBundledCount(data.unavailableCount||0);})
+   .catch(()=>{if(!live)return;setValidBundledFiles(new Set());setLibraryStatus('La biblioteca de stickers no se pudo verificar. Recarga el Studio.');});
+  return()=>{live=false;};
+ },[]);
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
  const canvas=useRef<HTMLCanvasElement>(null);
  const workspaceRef=useRef<HTMLDivElement>(null);
@@ -845,7 +855,7 @@ export default function SeamlessEditor(){
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
-      {LAB_ASSETS.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
+      {LAB_ASSETS.filter(asset=>asset.category==='background'&&validBundledFiles?.has(asset.file)).map(asset=><button type="button" key={asset.id}
         onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
@@ -853,9 +863,11 @@ export default function SeamlessEditor(){
     {quickPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
       <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
         onChange={e=>setStickerSearch(e.target.value)}/>
+      {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
+      {unavailableBundledCount>0&&<small role="status">{unavailableBundledCount} recursos con archivos dañados están ocultos hasta recuperar los originales.</small>}
       <div className="studio-sticker-gallery">
         {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
-          ...LAB_ASSETS.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
+          ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
            .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
