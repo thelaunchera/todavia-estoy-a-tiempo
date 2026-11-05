@@ -221,6 +221,38 @@ export async function getSupportMessages(): Promise<SupportMessage[]> {
   if (error) throw new Error('No se pudieron cargar los mensajes. Inténtalo de nuevo.');
   return (data || []) as SupportMessage[];
 }
+// All public website form submissions are stored in this private Studio project.
+// No reads or writes from here are sent to the unrelated Command Center CRM.
+export type WebsiteInquiryStatus = 'new' | 'contacted' | 'in_progress' | 'closed';
+export type WebsiteInquiry = {
+  id:string;submission_id:string;created_at:string;updated_at:string;
+  kind:'inquiry'|'intake';package_slug:'website-basic'|'website-ai-crm';
+  name:string;email:string;phone:string|null;business_name:string;industry:string;
+  existing_website:string|null;preferred_email:string;customer_action:string;
+  brand_notes:string|null;goals:string;automation_goals:string|null;
+  ai_brief:string|null;language:'en'|'es';source:string;
+  status:WebsiteInquiryStatus;payment_status:'unverified'|'verified';
+  checkout_reference:string|null;admin_notes:string|null;
+};
+export async function getWebsiteInquiries():Promise<WebsiteInquiry[]> {
+  if(!client)throw new Error('El Studio necesita conexión a Supabase para consultar los inquiries.');
+  await owner();
+  const {data,error}=await client.from('tle_studio_website_inquiries')
+    .select('id,submission_id,created_at,updated_at,kind,package_slug,name,email,phone,business_name,industry,existing_website,preferred_email,customer_action,brand_notes,goals,automation_goals,ai_brief,language,source,status,payment_status,checkout_reference,admin_notes')
+    .order('created_at',{ascending:false}).limit(200);
+  if(error)throw new Error('No pudimos cargar los intakes; comprueba la conexión y el permiso de Studio.');
+  return (data||[]) as WebsiteInquiry[];
+}
+export async function updateWebsiteInquiry(id:string,status:WebsiteInquiryStatus,notes:string):Promise<void>{
+  if(!client)throw new Error('Studio sin conexión a Supabase.');
+  await owner();
+  if(!/^[a-f0-9-]{36}$/i.test(id)||!['new','contacted','in_progress','closed'].includes(status))throw new Error('Estado inválido.');
+  const {data,error}=await client.from('tle_studio_website_inquiries')
+    .update({status,admin_notes:notes.slice(0,4000),updated_at:new Date().toISOString()})
+    .eq('id',id).select('id').single();
+  if(error||!data)throw new Error('No pudimos guardar el seguimiento. Inténtalo de nuevo.');
+}
+
 export const api={
   async get(path:string){
     if(!client)return localApi.get(path);

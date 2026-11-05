@@ -5,7 +5,7 @@ import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','tle-experience'] as const;
+export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -33,7 +33,12 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
-  {key:'tle-app-info',title:'Cleaning App · Información',url:'https://thelaunchera.com/cleaning-web-app/',category:'thelaunchera',visibility:'publico',description:'Página del producto principal'},
+  {key:'tle-website-basic-2026',title:'Website for Your Business · $15',url:'https://thelaunchera.com/website-for-your-business/#website-basic',category:'thelaunchera',visibility:'revision',description:'Nuevo paquete oficial: website para cualquier negocio + solicitudes notificadas al email elegido. Verificar publicación y checkout antes de compartir.'},
+  {key:'tle-website-ai-crm-2026',title:'Website + AI Assistant + Automated CRM · $25',url:'https://thelaunchera.com/website-for-your-business/#website-ai-crm',category:'thelaunchera',visibility:'revision',description:'Nuevo paquete: website + asistente IA en la página + CRM automatizado y seguimiento de leads. Verificar publicación y checkout antes de compartir.'},
+
+  {key:'tle-intake-website-2026',title:'Intake · Website $15',url:'https://thelaunchera.com/intake/website/?lang=en',category:'thelaunchera',visibility:'revision',description:'Formulario oficial de inquiries y requisitos para el paquete Website. Se guarda solo en Studio privado.'},
+  {key:'tle-intake-ai-crm-2026',title:'Intake · Website + IA + CRM $25',url:'https://thelaunchera.com/intake/website-ai-crm/?lang=en',category:'thelaunchera',visibility:'revision',description:'Formulario oficial para websites con IA y CRM; solicitudes almacenadas únicamente en Studio privado.'},
+  {key:'tle-studio-inquiries-2026',title:'Studio · Inquiries de websites',url:'https://podcast.thelaunchera.com/estudio/?seccion=inquiries',category:'thelaunchera',visibility:'interno',description:'Bandeja exclusiva de leads y solicitudes de los dos paquetes, con notas privadas y estado de seguimiento.'},  {key:'tle-app-info',title:'Cleaning App · Información',url:'https://thelaunchera.com/cleaning-web-app/',category:'thelaunchera',visibility:'publico',description:'Página del producto principal'},
   {key:'tle-app',title:'Cleaning App · Entrar',url:'https://app.thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Acceso a la aplicación para clientes'},
   {key:'tle-booking',title:'Booking Automation · Landing',url:'https://thelaunchera.com/booking-lead-automation/',category:'thelaunchera',visibility:'publico',description:'Página de presentación'},
   {key:'tle-booking-demo',title:'Booking · Demo pública',url:'https://thelaunchera.com/demo-booking/',category:'thelaunchera',visibility:'demo',description:'Ejemplo interactivo para mostrar el flujo'},
@@ -101,7 +106,8 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   "studio-registro-20261105":"interno",
   "school-freebies-repo":"interno",
   'lab-landing':'publicado','product-hub':'publicado',
-  'tle-site':'publicado','tle-cleaning-app-new':'publicado','tle-app':'publicado',
+  'tle-site':'publicado','tle-website-basic-2026':'revision','tle-website-ai-crm-2026':'revision',
+  'tle-intake-website-2026':'revision','tle-intake-ai-crm-2026':'revision','tle-studio-inquiries-2026':'interno',
   'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
   'tle-ai-booking':'revision','tle-bundle':'revision','tle-website-auto':'revision','tle-va':'revision',
   'pod-studio':'interno','lab-brand-board-code':'interno','lab-checkout':'publicado',
@@ -133,6 +139,15 @@ function decode(entry:StudioEntry) {
   } catch {return null;}
 }
 const blank:Omit<BaseLink,'key'>={title:'',url:'',category:'thelaunchera',visibility:'publico',description:''};
+// Historical TLE sales offers are archived, not deleted. Preserve source records for
+// existing customers while removing old public sales and private shortcuts from Studio.
+const RETIRED_TLE_SALES_LINK_KEYS=new Set([
+ 'tle-app-info','tle-app','tle-booking','tle-booking-demo','tle-experience','tle-free',
+ 'tle-checkout','tle-ai-booking','tle-bundle','tle-website-auto','tle-va',
+ 'tle-cleaning-app-new','tle-command','tle-command-code','tle-app-code'
+]);
+const RETIRED_TLE_SALES_URLS=/(?:thelaunchera\.com\/(?:booking-lead-automation|booking-bundle|service-checkout|virtual-assistant|ai-booking-assistant|website-automation|cleaning-web-app|cleaning-app|command-center|free-cleaning-lead-guide|experience-cleaning|demo-booking)(?:[\/?#]|$)|app\.thelaunchera\.com\/?$)/i;
+const isRetiredSalesLink=(x:DisplayLink)=>x.category==='thelaunchera'&&(RETIRED_TLE_SALES_LINK_KEYS.has(x.key)||RETIRED_TLE_SALES_URLS.test(x.url));
 export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
     const records=entries.filter(x=>x.section===LINK_CENTER_SECTION).map(row=>({row,config:decode(row)})).filter((x):x is {row:StudioEntry;config:NonNullable<ReturnType<typeof decode>>}=>!!x.config);
     const original=new Set(STUDIO_LINKS.map(x=>x.key));
@@ -144,7 +159,7 @@ export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
       key:x.config.key||x.row.id,title:x.row.title,url:x.config.url,category:x.config.category,
       visibility:x.config.visibility,description:x.config.description||'',rowId:x.row.id,hidden:x.config.hidden
     }));
-    return [...basics,...extras].filter(x=>!x.hidden);
+    return [...basics,...extras].filter(x=>!x.hidden&&!isRetiredSalesLink(x));
 }
 export default function LinkCenter({entries,onChanged,readOnly=false}:{entries:StudioEntry[];onChanged:()=>Promise<unknown>;readOnly?:boolean}) {
   const [category,setCategory]=useState<Category|'todos'>('todos');
