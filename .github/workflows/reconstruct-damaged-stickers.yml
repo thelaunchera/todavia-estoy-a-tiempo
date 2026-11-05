@@ -1,0 +1,68 @@
+name: Recover 33 damaged studio stickers
+on:
+  push:
+    branches: [main]
+    paths:
+      - "estudio-control/scripts/reconstruct_damaged_stickers.py"
+      - ".github/workflows/reconstruct-damaged-stickers.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Python and image libraries
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install raster and transparency validators
+        run: python -m pip install --quiet cairosvg Pillow
+      - name: Rebuild only corrupted editorial PNGs
+        run: python estudio-control/scripts/reconstruct_damaged_stickers.py
+      - name: Validate manifest-integrity and exact originals left untouched
+        run: |
+          node --test content-lab/tests/bundled-design-assets.test.mjs
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from PIL import Image
+          root=Path('content-lab/public')
+          total=0
+          for d in ['pinterest-aesthetic-stickers-2026-11','holiday-stickers-2026-11']:
+              a=json.loads((root/'resources'/d/'manifest.json').read_text())['assets']
+              for r in a:
+                  p=root/r['file']
+                  assert p.stat().st_size==r['sizeBytes'],p
+                  assert hashlib.sha256(p.read_bytes()).hexdigest()==r['sha256'],p
+                  with Image.open(p) as im:
+                      im.load()
+                      assert im.width==r['width'] and im.height==r['height']
+                      assert im.mode in ('RGBA','RGB','P')
+                  total+=1
+          assert total==36,total
+          print('36/36 Pinterest and holiday assets valid; 33 reconstructed, 3 untouched.')
+          PY
+      - name: Commit reconstructed individual originals without touching healthy files
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content-lab/public/resources/pinterest-aesthetic-stickers-2026-11 content-lab/public/resources/holiday-stickers-2026-11 content-lab/src/BundledDesignAssets.ts
+          git diff --cached --stat
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'; exit 0
+          fi
+          git commit -m "fix(stickers): restore 33 working full-res transparent PNG assets"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 3
+          done
+          echo "Failed to push reconstructed PNGs" >&2
+          exit 1
