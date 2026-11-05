@@ -36,8 +36,16 @@ test('Studio uses one categorized searchable library with reusable assets',()=>{
  assert.doesNotMatch(gallery,/Filtrar elementos por marca/);
  assert.match(editor,/onEditorial=\{addEditorialAsset\}/);
  assert.match(gallery,/onlyEditorial\?:boolean/);
- assert.match(editor,/quickPanel==='elementos'&&<BrandAssetLibrary compact/);
+ assert.match(editor,/openPanel==='elementos'&&<BrandAssetLibrary compact/);
  assert.match(editor,/studio-sticker-gallery/);
+ assert.match(editor,/studio-desktop-edit-toolbar/,'the real desktop toolbar must be present');
+ assert.match(editor,/studio-desktop-side-menu/,'large screens need the persistent library');
+ assert.match(editor,/aria-label="Cambiar color del sticker"/,'PNG stickers must support optional non-destructive recoloring');
+ assert.match(editor,/shadowEnabled/,'layer shadows must affect the actual PNG render');
+ assert.match(editor,/flipX\?-1:1/,'horizontal flip must be painted, not decorative');
+ assert.match(editor,/flipY\?-1:1/,'vertical flip must be painted');
+ assert.match(editor,/undoCanvas/);
+ assert.match(editor,/redoCanvas/);
  assert.match(gallery,/gridAutoRows:'max-content'/,'element tiles must not collapse to slivers under a max-height scroll container');
  assert.match(gallery,/studio-sticker-gallery studio-element-gallery/,'Elementos must use the same visible tile gallery as Stickers');
  assert.match(gallery,/className="studio-element-card"/);
