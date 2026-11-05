@@ -1068,7 +1068,25 @@ export default function SeamlessEditor(){
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
    </div>}
-  {openPanel&&(wideScreen?assetSheet:createPortal(assetSheet,document.body))}
+     <div className="studio-desktop-edit-toolbar" role="toolbar" aria-label="Herramientas avanzadas del editor de escritorio">
+     <button type="button" onClick={()=>{setSelected(null);setActiveInspector(null)}}><MousePointer2 size={20}/><small>Seleccionar</small></button>
+     <button type="button" disabled={!current} aria-pressed={activeInspector==='position'} onClick={()=>setActiveInspector('position')}><Move size={20}/><small>Mover</small></button>
+     <button type="button" disabled={!current} aria-pressed={activeInspector==='size'} onClick={()=>setActiveInspector('size')}><SlidersHorizontal size={20}/><small>Ajustar</small></button>
+     <button type="button" disabled={!current} aria-pressed={activeInspector==='rotate'} onClick={()=>setActiveInspector('rotate')}><RotateCw size={20}/><small>Rotar</small></button>
+     <button type="button" disabled={!current} aria-pressed={!!current?.flipX} onClick={()=>current&&update(current.id,{flipX:!current.flipX})}><FlipHorizontal size={20}/><small>Voltear H</small></button>
+     <button type="button" disabled={!current} aria-pressed={!!current?.flipY} onClick={()=>current&&update(current.id,{flipY:!current.flipY})}><FlipVertical size={20}/><small>Voltear V</small></button>
+     <button type="button" disabled={current?.kind!=='text'} aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector('curve')}><Type size={20}/><small>Curvar texto</small></button>
+     <button type="button" disabled={!current||current.kind!=='image'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo</small></button>
+     <button type="button" disabled={!current} aria-pressed={activeInspector==='color'} onClick={()=>setActiveInspector('color')}><Paintbrush size={20}/><small>Color</small></button>
+     <button type="button" disabled={!current} aria-pressed={activeInspector==='effects'} onClick={()=>setActiveInspector('effects')}><Sun size={20}/><small>Sombras</small></button>
+     <button type="button" disabled={!current} onClick={duplicateSelected}><Copy size={20}/><small>Duplicar</small></button>
+     <button type="button" disabled={!current} onClick={()=>current&&toggleLock(current.id)}><Lock size={20}/><small>{current?.locked?'Desbloquear':'Bloquear'}</small></button>
+     <button type="button" disabled={!current} onClick={()=>current&&deleteElement(current.id)}><Trash2 size={20}/><small>Borrar</small></button>
+     <span className="studio-desktop-tool-separator" aria-hidden="true"/>
+     <button type="button" disabled={!history.current.past.length} onClick={undoCanvas}><Undo2 size={20}/><small>Deshacer</small></button>
+     <button type="button" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={20}/><small>Rehacer</small></button>
+   </div>
+{openPanel&&(wideScreen?assetSheet:createPortal(assetSheet,document.body))}
 
   <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
