@@ -42,6 +42,8 @@ const studioTextFont=(font?:string)=>STUDIO_TEXT_FONTS[font||'']||STUDIO_TEXT_FO
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
+ const history=useRef<{past:typeof defaults[];future:typeof defaults[];current:string|null;lastChange:number;ignore:boolean}>({past:[],future:[],current:null,lastChange:0,ignore:false});
+ const [historyVersion,setHistoryVersion]=useState(0);
  const [deleteArmedId,setDeleteArmedId]=useState<number|null>(null);
  const lastTap=useRef<LayerTap|null>(null);
  const pointerStart=useRef<{pointer:number;id:number|null;x:number;y:number}|null>(null);
@@ -73,6 +75,8 @@ export default function SeamlessEditor(){
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [stickerSearch,setStickerSearch]=useState('');
+ const [stickerCategory,setStickerCategory]=useState('Todos');
+ const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
@@ -98,6 +102,7 @@ export default function SeamlessEditor(){
  const layerGesture=useRef(false);
  const [slide,setSlide]=useState(0);
  const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
+ const thumbnailsRef=useRef<(HTMLCanvasElement|null)[]>([]);
  const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:1100px)').matches);
  const [artboardSpace,setArtboardSpace]=useState(740);
  const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
@@ -191,6 +196,30 @@ export default function SeamlessEditor(){
   if(!storageReady||previous===null||doc.items.length<=previous)return;
   requestAnimationFrame(()=>workspaceRef.current?.scrollIntoView({block:'nearest',behavior:'smooth'}));
  },[doc.items.length,storageReady]);
+ // Undo/redo uses the same persisted schema; no customer document is replaced.
+ useEffect(()=>{
+   if(!storageReady)return;
+   const snapshot=JSON.stringify(doc),h=history.current;
+   if(h.current===null){h.current=snapshot;return;}
+   if(h.ignore){h.ignore=false;h.current=snapshot;return;}
+   if(h.current===snapshot)return;
+   const elapsed=Date.now()-h.lastChange;
+   if(elapsed>650||h.past.length===0){h.past.push(JSON.parse(h.current) as typeof defaults);if(h.past.length>36)h.past.shift();}
+   h.current=snapshot;h.lastChange=Date.now();h.future=[];
+   setHistoryVersion(n=>n+1);
+ },[doc,storageReady]);
+ const undoCanvas=()=>{
+   const h=history.current,previous=h.past.pop();if(!previous)return;
+   h.future.push(JSON.parse(JSON.stringify(doc)) as typeof defaults);
+   h.ignore=true;h.current=JSON.stringify(previous);h.lastChange=0;
+   setDoc(previous);setSelected(null);setHistoryVersion(n=>n+1);setMessage('Último cambio deshecho.');
+ };
+ const redoCanvas=()=>{
+   const h=history.current,next=h.future.pop();if(!next)return;
+   h.past.push(JSON.parse(JSON.stringify(doc)) as typeof defaults);
+   h.ignore=true;h.current=JSON.stringify(next);h.lastChange=0;
+   setDoc(next);setSelected(null);setHistoryVersion(n=>n+1);setMessage('Cambio restaurado.');
+ };
  const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
  const resolved=resolveImageSource(src);
  const existing=images.current.get(resolved);
@@ -276,6 +305,21 @@ export default function SeamlessEditor(){
   }
   ctx.restore();
  };
+ useEffect(()=>{
+   if(!wideScreen)return;
+   let active=true;
+   const draw=async()=>{
+     for(let i=0;i<doc.count;i++){
+       const tile=thumbnailsRef.current[i];if(!tile)continue;
+       tile.width=70;tile.height=88;
+       const ctx=tile.getContext('2d');if(!ctx)continue;
+       await paint(ctx,70/W,i*W,W);
+       if(!active)return;
+     }
+   };
+   void draw();
+   return()=>{active=false};
+ },[doc,wideScreen]);
  useEffect(()=>{
    let active=true;
    const render=async()=>{
