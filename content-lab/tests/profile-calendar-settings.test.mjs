@@ -4,12 +4,14 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 
 test('Settings keeps device install help short and profile photos private and persistent',()=>{
- const settings=read('AccountSettings.tsx'),app=read('App.tsx'),api=read('platform/client.ts');
+ const settings=read('AccountSettings.tsx'),app=read('App.tsx'),api=read('platform/client.ts'),installer=read('InstallContentLab.tsx');
  assert.ok(app.includes("id: 'settings', title: 'Ajustes'"));
  assert.ok(settings.includes('Mi foto de perfil'));
- assert.ok(settings.includes('iPhone / iPad'));
- assert.ok(settings.includes('Android / tablets'));
- assert.ok(settings.includes('<details>'));
+ assert.ok(settings.includes('<InstallContentLab locale={locale}/>'));
+ assert.ok(installer.includes('iPhone / iPad'));
+ assert.ok(installer.includes('Android / tablet'));
+ assert.ok(installer.includes('beforeinstallprompt'));
+ assert.ok(installer.includes('appinstalled'));
  assert.ok(settings.includes('onUpload(picture)'));
  assert.ok(app.includes("upload(file,'original',false)"));
  assert.ok(app.includes('auth.setProfilePhotoAssetId(picture.id)'));
