@@ -434,7 +434,7 @@ export default function TouchLayerCanvas({
         ?'Desliza para cambiar de slide. Nada se moverá.'
         :'Toca y arrastra cualquier elemento. Usa el tirador para cambiar su tamaño.'}</p>
     </div>}
-    {pageCount>1&&(fullscreen||floatingModeBar)&&typeof document!=='undefined'&&createPortal(
+    {pageCount>1&&!chosen&&(fullscreen||floatingModeBar)&&typeof document!=='undefined'&&createPortal(
       <div className={'touch-editor-floating-mode'+(fullscreen?' fullscreen':'')} role="toolbar" aria-label="Modo de carrusel siempre visible">
         <div className="touch-editor-floating-mode-switch" role="group" aria-label="Deslizar o editar">
           <button type="button" className={interactionMode==='navigate'?'active':''}
