@@ -2,11 +2,12 @@
 (()=>{"use strict";
 const form=document.getElementById("signup");if(!form)return;
 const resource=form.querySelector('[name="resource"]')?.value;
-const release=form.dataset.releaseDate||({
- november_web_one_prompt_2026:"2026-11-19",
+// The frontend must never promise an earlier release than the email backend.
+const release=({
+ november_web_one_prompt_2026:"2026-12-01",
  december_lavender_2026:"2026-12-01",
  salt_line_january_2027:"2027-01-02"
-})[resource];
+})[resource]||form.dataset.releaseDate;
 if(!resource||!release)return;
 const submit=form.querySelector('[type="submit"]');if(!submit)return;
 const mail=form.querySelector('[name="email"]');
