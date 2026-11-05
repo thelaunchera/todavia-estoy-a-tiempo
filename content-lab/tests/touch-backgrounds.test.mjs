@@ -5,11 +5,13 @@ const src=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('buyers upload their own background and preserve transparent files in private brand library',()=>{
  const lib=src('src/BackgroundLibrary.tsx'),app=src('src/App.tsx'),types=src('src/MediaAsset.ts'),decor=src('src/FreeDecorControls.tsx');
  assert.ok(lib.includes('Subir mi fondo privado') && lib.includes('Elegir archivo'));
- assert.ok(app.includes("upload(file,'background')"));
+ assert.ok(app.includes("upload(file,'background',false,brand.id,true)"));
  assert.ok(app.includes("category==='background'"));
- assert.ok(app.includes("aiWallet?.admin&&category==='background'"));
+ assert.ok(!app.includes("if(aiWallet?.admin&&category==='background'&&!forcePrivate"));
  assert.ok(app.includes('publishSharedBackground'));
- assert.ok(lib.includes("isAdmin?'Publicar fondo para todos':'Subir mi fondo privado'"));
+ assert.ok(lib.includes("<summary>Subir mi fondo privado</summary>"));
+ assert.ok(lib.includes('background-admin-publish'));
+ assert.ok(lib.includes('window.confirm('));
  assert.ok(types.includes("'background'"));
  assert.ok(decor.includes("backgroundImageId"));
  assert.ok(decor.includes('onUploadBackground'));
