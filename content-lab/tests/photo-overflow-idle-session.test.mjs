@@ -3,18 +3,26 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('Lab session uses 24h since last real activity, not 24h from initial OTP',()=>{
+test('Buyer must verify a new OTP after 24 hours, even with continued activity',()=>{
  const app=read('src/App.tsx'),client=read('src/platform/client.ts'),clock=read('src/SessionActivity.ts');
- assert.ok(clock.includes('24*60*60*1000'));
- assert.ok(clock.includes('tle-product-last-activity-v1:'));
- assert.ok(clock.includes('now-last>=IDLE_LIMIT_MS'));
- assert.ok(client.includes('persistSession:true'));
- assert.ok(client.includes('hasExpiredActivity(user.id)'));
- assert.ok(client.includes('recordActivity(activeUserId)'));
+ const migration=read('supabase/migrations/20261104_buyer_otp_24h.sql');
+ assert.ok(clock.includes('24*60*60*1000'),'existing inactivity protection can remain');
+ assert.ok(client.includes('persistSession:true'),'normal reload within 24h remains signed in');
+ assert.ok(client.includes("sb.rpc('content_lab_session_expires_at')"),'buyer expiry is server-derived');
+ assert.ok(client.includes('activeBuyerExpiresAt=deadline'));
+ assert.ok(client.includes('expiryReached(activeBuyerExpiresAt,now)'));
+ assert.ok(client.includes('await endExpiredSession(activeUserId)'));
+ assert.ok(client.includes("await endExpiredSession(user.id)"));
  assert.ok(client.includes('if(now-lastRecordedInteraction>=30000)'));
  assert.ok(app.includes("['pointerdown','touchstart','keydown','input','scroll']"));
  assert.ok(app.includes("document.visibilityState==='visible'"));
- assert.ok(app.includes('auth.checkIdle()'));
+ assert.ok(app.includes('window.setInterval(logoutWhenIdle,30_000)'),'open app checks expiry');
+ assert.ok(app.includes('window.clearInterval(expiryTimer)'));
+ assert.ok(app.includes('Tus fotos y proyectos se conservan.'));
+ assert.ok(migration.includes('auth.sessions'),'original OTP session, not JWT refresh time');
+ assert.ok(migration.includes("interval '24 hours'"));
+ assert.ok(migration.includes('alter policy "content lab buyer sees own purchase"'));
+ assert.ok(migration.includes("grant execute on function public.content_lab_session_expires_at() to authenticated"));
 });
 test('Product Center uses the same activity key and shares the verified Lab session',()=>{
  const center=read('../centro/centro.js');
