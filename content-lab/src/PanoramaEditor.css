@@ -382,3 +382,12 @@
    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important
  }
 }
+
+/* Mobile editing has one layers entry in the dock, not redundant panels
+   separating the working artboard from its tool strip. */
+@media(max-width:799px){
+ .panorama-editor .touch-editor-below-canvas-controls,
+ .panorama-editor .touch-editor-layer-list{display:none!important}
+ .panorama-editor .touch-editor-help{display:none!important}
+ .panorama-editor>.panorama-primary-actions{margin-top:4px!important}
+}
