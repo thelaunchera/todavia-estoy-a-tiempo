@@ -590,7 +590,11 @@ export default function TouchLayerCanvas({
           // Every new element stays above earlier ones. Selection must NEVER
           // change stacking order: tapping a photo should not bury its siblings.
           // Background is always the bottom-most layer, independent of locking.
-          const z = layer.role==='background'?1:layer.placement==='behind-text'?2+(layerIndex/Math.max(1,layers.length)):20+layerIndex;
+          // The single-post editor supplies one complete ordered stack, including
+          // the original photo/title and legacy stickers. Honor its exact order.
+          // Panoramas still reserve the below-page-content band for behind-text.
+          const z = layer.role==='background'?1:pageCount===1?20+layerIndex:
+            layer.placement==='behind-text'?2+(layerIndex/Math.max(1,layers.length)):20+layerIndex;
           const crop = normalizeCrop(rect.crop);
           const mode=layer.frameStyle||'panorama',fw=rect.w*1080*pageCount,fh=rect.h*canvasHeight;
           const metrics=photoFrameMetrics(fw,fh,mode);
@@ -651,7 +655,7 @@ export default function TouchLayerCanvas({
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
                 }}/>
-              :layer.kind==='text'&&(layer.curve||0)!==0?<CurvedTextPreview layer={{...layer,assetId:''}} width={fw} height={fh}/>
+              :layer.kind==='text'&&(layer.curve||0)!==0?<div style={{opacity:visibleOpacity(layer)}}><CurvedTextPreview layer={{...layer,assetId:''}} width={fw} height={fh}/></div>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               opacity:visibleOpacity(layer),
