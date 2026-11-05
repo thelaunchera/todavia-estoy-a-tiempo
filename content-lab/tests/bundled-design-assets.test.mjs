@@ -12,20 +12,21 @@ const moduleSource=read('src/BundledDesignAssets.ts').replace('import.meta.env.B
 const compiled=ts.transpileModule(moduleSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const bundle=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
 
-test('Release preserves 20 original stickers and 20 backgrounds while adding 19 premium, 16 branding elements and 8 creative stickers',()=>{
+test('Release preserves the original library and adds the seasonal and Pinterest collections',()=>{
  const files=bundle.BUNDLED_DESIGN_ASSETS;
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Inspiración').length,20);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/premium-stickers-2026-11/')).length,19);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/branding-marketing-stickers-2026-11/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/creative-stickers-2026-11-05/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/branding-elements-2026-11/')).length,8);
+ assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,20);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Branding y Marketing').length,16);
- assert.equal(files.filter(x=>x.category==='sticker').length,63);
+ assert.equal(files.filter(x=>x.category==='sticker').length,99);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,83);
- assert.equal(new Set(files.map(x=>x.sha256)).size,83);
+ assert.equal(new Set(files.map(x=>x.id)).size,119);
+ assert.equal(new Set(files.map(x=>x.sha256)).size,119);
  for(const file of files){
-  assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|branding-elements-2026-11\/[a-z0-9-]+)\.png$/);
+  assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|pinterest-aesthetic-stickers-2026-11\/[a-z0-9_]+|(?:branding-elements-2026-11|holiday-stickers-2026-11)\/[a-z0-9-]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
   assert.equal(bytes.length,file.sizeBytes);
@@ -53,6 +54,14 @@ test('Release preserves 20 original stickers and 20 backgrounds while adding 19 
    }else if(file.file.startsWith('resources/branding-elements-2026-11/')){
     assert.equal(bytes[25],6,'branding elements retain RGBA transparency');
     assert.ok(file.name.trim());
+   }else if(file.file.startsWith('resources/holiday-stickers-2026-11/')){
+    assert.equal(bytes[25],6);
+    assert.equal(file.stickerGroup,'Temporadas');
+    assert.ok(file.name.trim());
+   }else if(file.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')){
+    assert.equal(bytes[25],6,'Pinterest stickers retain RGBA transparency');
+    assert.equal(file.stickerGroup,'Pinterest aesthetic');
+    assert.ok(file.name.trim());
    }else{
     assert.equal(bytes[25],6,'original stickers must be RGBA PNGs');
     assert.ok(file.phrase&&file.name===file.phrase);
@@ -64,7 +73,7 @@ test('Release preserves 20 original stickers and 20 backgrounds while adding 19 
 
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,62);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,98);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);
