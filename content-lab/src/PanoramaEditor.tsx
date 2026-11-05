@@ -107,7 +107,7 @@ export default function PanoramaEditor({
         if(id&&!images[id])loadImage(id);
         observer.unobserve(item.target);
       }
-    },{root:pane,rootMargin:'160px'});
+    },{root:pane.closest('.panorama-library-floating')||pane,rootMargin:'160px'});
     pane.querySelectorAll('[data-library-asset]').forEach(node=>observer.observe(node));
     return()=>observer.disconnect();
   },[libraryIds,libraryOpen]);
