@@ -44,6 +44,12 @@ export default function SeamlessEditor(){
  const [selected,setSelected]=useState<number|null>(null);
  const history=useRef<{past:typeof defaults[];future:typeof defaults[];current:string|null;lastChange:number;ignore:boolean}>({past:[],future:[],current:null,lastChange:0,ignore:false});
  const [,setHistoryVersion]=useState(0);
+ // Opening another document starts a new undo timeline. Saving the current
+ // document (and assigning its project ID) must keep that timeline intact.
+ const replaceProjectDocument=(next:typeof defaults)=>{
+   history.current={past:[],future:[],current:JSON.stringify(next),lastChange:0,ignore:false};
+   setDoc(next);setHistoryVersion(n=>n+1);
+ };
  const [deleteArmedId,setDeleteArmedId]=useState<number|null>(null);
  const lastTap=useRef<LayerTap|null>(null);
  const pointerStart=useRef<{pointer:number;id:number|null;x:number;y:number}|null>(null);
@@ -112,15 +118,6 @@ export default function SeamlessEditor(){
    change();mq.addEventListener('change',change);
    return()=>mq.removeEventListener('change',change);
  },[]);
- useEffect(()=>{
-   if(!wideScreen)return;
-   const node=viewport.current;
-   if(!node)return;
-   const measure=()=>setArtboardSpace(Math.max(350,Math.min(900,node.clientWidth-24)));
-   const observer=new ResizeObserver(measure);
-   observer.observe(node);measure();
-   return()=>observer.disconnect();
- },[wideScreen]);
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
@@ -141,6 +138,15 @@ export default function SeamlessEditor(){
  const images=useRef(new Map<string,HTMLImageElement>());
  const width=doc.count*W;
  const [storageReady,setStorageReady]=useState(false);
+ useEffect(()=>{
+   if(!wideScreen||!storageReady)return;
+   const node=viewport.current;
+   if(!node)return;
+   const measure=()=>setArtboardSpace(Math.max(350,Math.min(900,node.clientWidth-24)));
+   const observer=new ResizeObserver(measure);
+   observer.observe(node);measure();
+   return()=>observer.disconnect();
+ },[wideScreen,storageReady]);
  const [saveStatus,setSaveStatus]=useState('Buscando tu último diseño guardado…');
  const saveQueue=useRef<Promise<void>>(Promise.resolve());
  const persistDraft=(snapshot:typeof defaults):Promise<void>=>{
@@ -624,7 +630,7 @@ export default function SeamlessEditor(){
  const base=draft.brand==='tle'?'#FAF8F3':draft.brand==='lab'?'#FFF8EC':'#F7F3EB';
  const color=draft.brand==='tle'?'#191919':'#243348';
  const items:Item[]=draft.slides.map((txt,i)=>({id:++nextId.current,kind:'text',text:txt,textStyle:i===0?'hook':'title',x:i*W+90,y:i===0?310:360,width:900,fontSize:i===0?76:66,color}));
- setDoc({count:4,background:base,backgroundImages:{},items});setSlide(0);setSelected(null);setActiveProjectId(null);setRecentlyDeleted(null);setProjectName(draft.title);setActiveBrief(draft);setMessage('Guion cargado: 4 slides editables. Añade fotografías auténticas antes de exportar.');};
+ replaceProjectDocument({count:4,background:base,backgroundImages:{},items});setSlide(0);setSelected(null);setActiveProjectId(null);setRecentlyDeleted(null);setProjectName(draft.title);setActiveBrief(draft);setMessage('Guion cargado: 4 slides editables. Añade fotografías auténticas antes de exportar.');};
  const saveProject=async(silent=false):Promise<boolean>=>{
   if(!storageReady){
    setMessage('El guardado anterior todavía no se pudo recuperar. Reabre el editor antes de guardar para no sobrescribir tu proyecto.');
@@ -651,7 +657,7 @@ export default function SeamlessEditor(){
    backgroundGeneration.current+=1;
    const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
    if(hasWork&&!(await saveProject()))return;
-   setDoc({...defaults,backgroundImages:{},items:[]});
+   replaceProjectDocument({...defaults,backgroundImages:{},items:[]});
    setProjectName('Mi carrusel nuevo');setActiveProjectId(null);setSlide(0);
    setSelected(null);setEditingText(null);setRecentlyDeleted(null);
    setActiveBrief(null);setQuickPanel(null);viewport.current?.scrollTo({left:0});
@@ -1157,7 +1163,7 @@ export default function SeamlessEditor(){
     </div>}
     <button type="button" style={{...control,borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>deleteElement(current.id)}>Eliminar elemento</button>
    </div></details>}
-  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={()=>void saveProject()}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;setDoc(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>void removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
+  <details style={{marginTop:22,padding:16,border:'1px solid #ddd',borderRadius:16,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700}}>Mis proyectos · abrir / recoger</summary><p style={{fontSize:13}}>Guarda distintas versiones y vuelve a editarlas cuando quieras en este dispositivo.</p><div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:12}}><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)} style={{...control,flex:'1 1 180px'}}/><button style={{...control,background:'#F2D85B'}} onClick={()=>void saveProject()}>Guardar proyecto</button><button style={control} onClick={startNewProject}>+ Nuevo proyecto</button></div>{projects.length===0?<p style={{fontSize:13}}>Todavía no hay proyectos guardados.</p>:<div style={{display:'grid',gap:8}}>{projects.map(p=><div key={p.id} style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',background:'white',padding:10,borderRadius:12}}><div><strong>{p.name}</strong><div style={{fontSize:12,opacity:.7}}>{p.doc.count} slides · {p.updated}</div></div><div style={{display:'flex',gap:6}}><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;replaceProjectDocument(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name);setActiveProjectId(p.id);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Proyecto «'+p.name+'» abierto para editar.')}}>Editar</button><button style={control} onClick={()=>{if(busy)return;backgroundGeneration.current+=1;replaceProjectDocument(JSON.parse(JSON.stringify(p.doc)));setProjectName(p.name+' copia');setActiveProjectId(null);setSlide(0);setSelected(null);setEditingText(null);setActiveBrief(null);setRecentlyDeleted(null);viewport.current?.scrollTo({left:0});setMessage('Copia abierta. Pulsa Guardar proyecto para conservarla.')}}>Duplicar</button><button style={control} onClick={()=>void removeProject(p.id)}>Eliminar proyecto</button></div></div>)}</div>}</details>
 
   </details>
   <p style={{fontSize:12,fontWeight:600}}>Un toque: selecciona y mueve. Dos toques rápidos sobre el mismo elemento: aparece la × para borrarlo. Toca fuera y la × desaparece. Selecciona un texto para curvarlo como un círculo y ajustar la separación entre letras.</p>

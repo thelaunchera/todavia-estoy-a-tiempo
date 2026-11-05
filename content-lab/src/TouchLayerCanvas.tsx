@@ -655,7 +655,7 @@ export default function TouchLayerCanvas({
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
                 }}/>
-              :layer.kind==='text'&&(layer.curve||0)!==0?<div style={{opacity:visibleOpacity(layer)}}><CurvedTextPreview layer={{...layer,assetId:''}} width={fw} height={fh}/></div>
+              :layer.kind==='text'&&(layer.curve||0)!==0?<CurvedTextPreview layer={{...layer,assetId:'',opacity:visibleOpacity(layer)}} width={fw} height={fh}/>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               opacity:visibleOpacity(layer),
