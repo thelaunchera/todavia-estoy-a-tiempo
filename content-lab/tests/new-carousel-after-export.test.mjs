@@ -42,3 +42,15 @@ test('Export links stay available while new project is protected from old media'
   assert.match(app,/setStickerPref\(\{version:0\}\)/);
   assert.match(app,/setEditor\(inspectRecovery\(\{\.\.\.newPost\(brand\.id\),format:'Carousel'\}\)\)/);
 });
+
+test('Receiving the first saved post ID must not clear prepared downloads or previews',()=>{
+  const factory=source('CarouselFactory.tsx');
+  const app=source('App.tsx');
+  assert.ok(app.includes("key={'carousel-session-'+editorSessionRef.current}"));
+  assert.ok(app.includes("editorSessionRef.current++"));
+  // A database-generated ID is metadata on the existing draft, not a new editing session.
+  assert.ok(factory.includes('resetting on post.id would erase freshly prepared PNG download links'));
+  assert.ok(!factory.includes('},[brand.id,post.id]);'));
+  assert.ok(factory.includes('clearDownloads();setOverview([])'));
+  assert.ok(factory.includes('},[brand.id]);'));
+});
