@@ -862,7 +862,7 @@ export default function SeamlessEditor(){
      {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}} onClick={()=>void addEditableBackground(doc.backgroundImages[slide])}>✎ Editar fondo de este slide</button>}
      {doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide)&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}}
        onClick={()=>{const layer=doc.items.find(it=>it.role==='background'&&it.backgroundSlide===slide);if(layer){setSelected(layer.id);setActiveInspector('size');setQuickPanel(null)}}}>✎ Seleccionar y agrandar fondo</button>}
-     {(doc.backgroundImages?.[slide]||doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide))&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>
+     {(doc.backgroundImages?.[slide]||doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide))&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>}
       {LAB_BACKGROUNDS.map(([name,color])=><button type="button" key={name} onClick={()=>{setDoc(d=>({...d,background:color}));setQuickPanel(null)}}
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
