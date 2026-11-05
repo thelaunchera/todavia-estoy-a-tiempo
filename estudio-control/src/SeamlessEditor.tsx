@@ -751,10 +751,104 @@ export default function SeamlessEditor(){
   <p role="alert">{saveStatus}</p>
   {saveStatus.startsWith('No se')&&<button type="button" onClick={()=>window.location.reload()} style={{padding:'12px 18px',background:'#F2D85B',border:0,borderRadius:12,fontWeight:700}}>Reintentar sin borrar mis proyectos</button>}
  </section>;
- return <section className="studio-seamless-app" style={{maxWidth:1100,margin:'auto',color:'#191919'}}>
+ const openPanel=quickPanel||(wideScreen&&!sidebarCollapsed?'stickers':null);
+ const assetSheet=openPanel&&(<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+openPanel}
+    style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
+      zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
+      background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
+      <strong style={{fontSize:13}}>{openPanel==='fotos'?'Añadir una foto':openPanel==='fondos'?'Elegir fondo':openPanel==='stickers'?'Elegir sticker':openPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
+      <button type="button" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(true)}} aria-label="Cerrar panel"
+        style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
+    </div>
+    {wideScreen&&<nav className="studio-desktop-side-menu" aria-label="Biblioteca de diseño">
+      {([{key:'stickers',label:'Stickers',icon:<Sticker size={18}/>},{key:'fotos',label:'Fotos',icon:<ImagePlus size={18}/>},
+         {key:'elementos',label:'Elementos',icon:<Shapes size={18}/>},{key:'fondos',label:'Fondo',icon:<Palette size={18}/>},
+         {key:'capas',label:'Capas',icon:<Layers3 size={18}/>} ] as const).map(tab=>
+        <button type="button" key={tab.key} aria-pressed={openPanel===tab.key} onClick={()=>{setSidebarCollapsed(false);setQuickPanel(tab.key)}}>
+         {tab.icon}<span>{tab.label}</span>
+        </button>)}
+    </nav>}
+    {openPanel==='fotos'&&<div className="studio-app-photos">
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,width:'100%'}}
+        onClick={()=>{setQuickPanel(null);replacePhotoId.current=null;photoInput.current?.click()}}>＋ Elegir foto del iPhone o archivos</button>
+      <strong>Fotos y recortes de este proyecto</strong>
+      <div className="studio-app-photo-grid">
+       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map((src,index)=><button key={index} type="button" aria-label="Añadir otra copia de esta foto"
+         onClick={()=>{addPrivateSticker(src);setQuickPanel(null)}}>
+          <img src={src} alt="" loading="lazy"/>
+         </button>)}
+      </div>
+     </div>}
+    {openPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape}/>}
+    {openPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
+      {[...doc.items].reverse().map(it=><button type="button" key={it.id}
+        style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
+        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true);setQuickPanel(null)}}>
+         {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
+           style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
+           (it.text||'Sticker').slice(0,40)}
+      </button>)}
+    </div>}
+    {openPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
+     {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>}
+      {LAB_BACKGROUNDS.map(([name,color])=><button type="button" key={name} onClick={()=>{setDoc(d=>({...d,background:color}));setQuickPanel(null)}}
+        style={{...control,fontSize:11,minHeight:80,padding:6}}>
+        <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
+      </button>)}
+      {privateAssets.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
+        onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'));setQuickPanel(null)}}
+        style={{...control,padding:5,fontSize:11}}>
+        <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
+      </button>)}
+      {LAB_ASSETS.filter(asset=>asset.category==='background'&&validBundledFiles?.has(asset.file)).map(asset=><button type="button" key={asset.id}
+        onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
+        <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
+      </button>)}
+    </div>}
+    {openPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
+      <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
+        onChange={e=>setStickerSearch(e.target.value)}/>
+      {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
+      {unavailableBundledCount>0&&<small role="status">{unavailableBundledCount} recursos con archivos dañados están ocultos hasta recuperar los originales.</small>}
+      <div className="studio-sticker-categories" role="group" aria-label="Filtrar stickers">
+       {['Todos','Lazos','Cintas','Estrellas','Branding','Decorativos','Temporada'].map(category=>
+         <button key={category} type="button" aria-pressed={stickerCategory===category}
+            onClick={()=>setStickerCategory(category)}>{category}</button>)}
+      </div>
+      <div className="studio-sticker-gallery">
+        {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+          ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
+           .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
+           .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
+          .filter(asset=>{
+            const name=asset.name.toLocaleLowerCase('es'),file=asset.file.toLocaleLowerCase('es');
+            if(stickerCategory==='Todos')return true;
+            if(stickerCategory==='Lazos')return /lazo|bow|ribbon/.test(name);
+            if(stickerCategory==='Cintas')return /cinta|tape|washi/.test(name);
+            if(stickerCategory==='Estrellas')return /estrella|star|destello|asterisco/.test(name);
+            if(stickerCategory==='Branding')return /brand|marketing|planner|sello|logo|creativ|etiqueta|business/.test(name);
+            if(stickerCategory==='Temporada')return /holiday|navidad|valentin|nieve|christmas|heart|coraz|amor/.test(file+' '+name);
+            return !/holiday-stickers/.test(file);
+          })
+           .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
+             onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
+               else if(asset.file)void addLabSticker(asset.file)}}>
+             <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
+             <span className="studio-sticker-label">{asset.name}</span>
+           </button>)}
+      </div>
+      <details className="studio-sticker-symbols"><summary>Stickers de símbolos</summary>
+        <div>{LAB_STICKERS.map((emoji,i)=><button type="button" key={i} aria-label={'Añadir símbolo '+emoji} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}>{emoji}</button>)}</div>
+      </details>
+    </div>}
+    {libraryStatus&&<small role="status">{libraryStatus}</small>}
+  </div>);
+ return <section className={'studio-seamless-app '+(openPanel&&wideScreen?'has-wide-sidebar':'')} style={{maxWidth:1600,margin:'auto',color:'#191919'}}>
   <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
+    {wideScreen&&<button type="button" className="studio-sidebar-toggle" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(v=>!v)}} aria-expanded={!!openPanel}>{sidebarCollapsed?'Abrir biblioteca':'Ocultar biblioteca'}</button>}
     <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
     <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
     <button type="button" className="primary" onClick={()=>void downloadSlide(slide)} disabled={busy}>{busy?'Preparando…':'Exportar PNG'}</button>
@@ -804,7 +898,9 @@ export default function SeamlessEditor(){
    <div className="studio-app-slide-tabs">
     {Array.from({length:doc.count},(_,index)=><button key={index} type="button"
       aria-label={'Ir al slide '+(index+1)} aria-current={slide===index?'step':undefined}
-      className={slide===index?'is-active':''} onClick={()=>goSlide(index)}>{index+1}</button>)}
+      className={slide===index?'is-active':''} onClick={()=>goSlide(index)}>
+       <canvas className="studio-slide-preview" ref={node=>{thumbnailsRef.current[index]=node}} width={70} height={88} aria-hidden="true"/>
+       <span>{index+1}</span></button>)}
    </div>
    <div className="studio-app-zoom"><span>Slide {slide+1}/{doc.count}</span>
     <button type="button" onClick={()=>goSlide(Math.max(0,slide-1))} disabled={slide===0} aria-label="Slide anterior">‹</button>
@@ -939,75 +1035,7 @@ export default function SeamlessEditor(){
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
    </div>}
-  {quickPanel&&typeof document!=='undefined'&&createPortal(<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+quickPanel}
-    style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
-      zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
-      background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,marginBottom:10}}>
-      <strong style={{fontSize:13}}>{quickPanel==='fotos'?'Añadir una foto':quickPanel==='fondos'?'Elegir fondo':quickPanel==='stickers'?'Elegir sticker':quickPanel==='elementos'?'Biblioteca de elementos':'Seleccionar capa'}</strong>
-      <button type="button" onClick={()=>setQuickPanel(null)} aria-label="Cerrar panel"
-        style={{...control,minWidth:42,minHeight:42,padding:5}}>×</button>
-    </div>
-    {quickPanel==='fotos'&&<div className="studio-app-photos">
-      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,width:'100%'}}
-        onClick={()=>{setQuickPanel(null);replacePhotoId.current=null;photoInput.current?.click()}}>＋ Elegir foto del iPhone o archivos</button>
-      <strong>Fotos y recortes de este proyecto</strong>
-      <div className="studio-app-photo-grid">
-       {[...new Set(doc.items.filter(item=>item.kind==='image'&&!!item.src).map(item=>item.src!))].slice(0,24).map((src,index)=><button key={index} type="button" aria-label="Añadir otra copia de esta foto"
-         onClick={()=>{addPrivateSticker(src);setQuickPanel(null)}}>
-          <img src={src} alt="" loading="lazy"/>
-         </button>)}
-      </div>
-     </div>}
-    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape}/>}
-    {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
-      {[...doc.items].reverse().map(it=><button type="button" key={it.id}
-        style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
-        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true);setQuickPanel(null)}}>
-         {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
-           style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
-           (it.text||'Sticker').slice(0,40)}
-      </button>)}
-    </div>}
-    {quickPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
-     {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>}
-      {LAB_BACKGROUNDS.map(([name,color])=><button type="button" key={name} onClick={()=>{setDoc(d=>({...d,background:color}));setQuickPanel(null)}}
-        style={{...control,fontSize:11,minHeight:80,padding:6}}>
-        <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
-      </button>)}
-      {privateAssets.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
-        onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'));setQuickPanel(null)}}
-        style={{...control,padding:5,fontSize:11}}>
-        <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
-      </button>)}
-      {LAB_ASSETS.filter(asset=>asset.category==='background'&&validBundledFiles?.has(asset.file)).map(asset=><button type="button" key={asset.id}
-        onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
-        <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
-      </button>)}
-    </div>}
-    {quickPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
-      <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
-        onChange={e=>setStickerSearch(e.target.value)}/>
-      {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
-      {unavailableBundledCount>0&&<small role="status">{unavailableBundledCount} recursos con archivos dañados están ocultos hasta recuperar los originales.</small>}
-      <div className="studio-sticker-gallery">
-        {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
-          ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
-           .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
-           .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
-           .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
-             onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
-               else if(asset.file)void addLabSticker(asset.file)}}>
-             <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
-             <span className="studio-sticker-label">{asset.name}</span>
-           </button>)}
-      </div>
-      <details className="studio-sticker-symbols"><summary>Stickers de símbolos</summary>
-        <div>{LAB_STICKERS.map((emoji,i)=><button type="button" key={i} aria-label={'Añadir símbolo '+emoji} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}>{emoji}</button>)}</div>
-      </details>
-    </div>}
-    {libraryStatus&&<small role="status">{libraryStatus}</small>}
-  </div>,document.body)}
+  {openPanel&&(wideScreen?assetSheet:createPortal(assetSheet,document.body))}
 
   <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
