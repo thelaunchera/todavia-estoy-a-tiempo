@@ -12,7 +12,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;
+  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
