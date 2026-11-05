@@ -87,3 +87,49 @@
   .studio-app-opacity-control label{font-size:12px}
   .studio-app-opacity-control input[type=range]{width:36px}
 }
+
+/* Mobile canvas-first editor: the artboard remains in view when browsing assets.
+   Context actions replace the standard creation toolbar after a layer is selected. */
+.studio-app-context-dock{display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:none;
+  padding:6px 8px;border:1px solid #dce5e5;border-radius:17px;background:#fff;
+  box-shadow:0 6px 23px #152c3a24}
+.studio-app-context-dock>button{flex:1 0 78px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;min-height:53px;padding:5px 7px;background:transparent;border:0;border-radius:12px;color:#191919;
+  font-family:inherit;font-size:21px;cursor:pointer;touch-action:manipulation}
+.studio-app-context-dock>button small{font-size:10px;font-weight:700;white-space:nowrap}
+.studio-app-context-dock>button[aria-pressed=true]{background:#f5e7a3}
+.studio-app-context-dock>button.studio-app-done{flex:0 0 56px;position:sticky;right:0;background:#faf8f3;border:1px solid #d8dfe2;border-radius:50%}
+.studio-app-inspector{padding:9px 12px;background:#FAF8F3;border:1px solid #d4dfe1;
+  border-radius:15px;box-shadow:0 6px 25px #122f3a24;display:grid;gap:7px}
+.studio-app-inspector-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
+.studio-app-inspector-heading button{width:32px;height:32px;border:0;background:#fff;border-radius:9px;font-size:21px}
+.studio-app-range-row{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.studio-app-range-row label{white-space:nowrap}.studio-app-range-row input[type=range]{min-width:40px;flex:1;accent-color:#191919;touch-action:manipulation}
+.studio-app-range-row output{width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.studio-app-position-row{display:flex;gap:7px;overflow:auto}
+.studio-app-position-row button{flex:1 0 auto;min-height:39px;padding:7px 10px;border:1px solid #d4dfe2;background:#fff;border-radius:10px;font-weight:700}
+.studio-canvas-mini-actions{position:absolute;z-index:9;display:flex;align-items:center;gap:3px;padding:4px;
+  border:1px solid #e2e4e5;border-radius:999px;background:#fff;box-shadow:0 5px 16px #19191933}
+.studio-canvas-mini-actions button{width:39px;height:37px;display:grid;place-items:center;border:0;
+  background:transparent;border-radius:50%;font-size:21px;color:#191919;touch-action:manipulation}
+.studio-canvas-mini-actions button:active{background:#f2d85b}
+@media(max-width:799px){
+ .studio-seamless-app{padding-bottom:calc(95px + env(safe-area-inset-bottom))}
+ .studio-app-canvas{position:sticky;top:clamp(58px,13dvh,115px);z-index:17;
+   background:#eff1f1;box-shadow:0 3px 13px #182a3b14}
+ .studio-app-canvas>div{max-height:min(61dvh,530px);overflow-x:auto;overflow-y:hidden}
+ .studio-app-toolbar{display:flex!important;justify-content:flex-start!important;overflow-x:auto!important;
+   overflow-y:hidden!important;scrollbar-width:none!important;gap:2px!important}
+ .studio-app-toolbar button{flex:0 0 77px!important;min-width:77px!important;max-width:none!important}
+ .studio-app-context-dock{position:fixed;left:8px;right:8px;bottom:calc(9px + env(safe-area-inset-bottom));
+   z-index:1801;max-width:650px;margin:0 auto;border-radius:18px;width:auto;box-sizing:border-box;
+   overflow-x:auto;box-shadow:0 7px 26px #14273330}
+ .studio-app-context-dock>button{flex:0 0 87px;min-height:51px}
+ .studio-app-context-dock>button.studio-app-done{flex-basis:55px;box-shadow:-5px 0 10px #fff}
+ .studio-app-sheet{max-height:min(30dvh,268px)!important;z-index:1802!important}
+ .studio-app-inspector{position:fixed;z-index:1804;left:8px;right:8px;bottom:calc(85px + env(safe-area-inset-bottom));
+   max-width:650px;margin:0 auto;box-sizing:border-box}
+ .studio-app-opacity-control{display:none!important}
+ .studio-canvas-mini-actions{padding:2px;gap:0}
+ .studio-canvas-mini-actions button{width:33px;height:33px;font-size:18px}
+}
