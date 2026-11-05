@@ -22,6 +22,7 @@ type Props = {
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
   onSelectionChange?: (id:string|null)=>void;
   ratio?: number; pageCount?: number; continuous?:boolean; canvasHeight?: number; onEmpty?: () => void;
+  pageIndex?:number;onPageIndexChange?:(index:number)=>void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onToggleLock?: (id:string,locked:boolean)=>void;
@@ -44,7 +45,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,
+  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,pageIndex,onPageIndexChange,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -59,7 +60,7 @@ export default function TouchLayerCanvas({
   const [copyFeedback,setCopyFeedback]=useState('');
   // Separate browsing the panorama from handling a selected object.
   const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
-  const [activePage,setActivePage]=useState(0);
+  const [activePage,setActivePage]=useState(pageIndex??0);
   const [floatingModeBar,setFloatingModeBar]=useState(false);
   const canvasRoot=useRef<HTMLDivElement>(null);
   const navigationBar=useRef<HTMLDivElement>(null);
@@ -71,6 +72,8 @@ export default function TouchLayerCanvas({
   const quickTextInput = useRef<HTMLTextAreaElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
+  // In Normal, each 4:5 page fills the editor viewport instead of sharing a panorama-sized viewport.
+  const [normalPageWidth,setNormalPageWidth]=useState(320);
   const autoPanFrame = useRef(0);
   const pointers = useRef(new Map<number, {x: number; y: number}>());
   const gesture = useRef<Gesture | null>(null);
@@ -102,6 +105,25 @@ export default function TouchLayerCanvas({
     resize();const observer=new ResizeObserver(resize);observer.observe(el);
     return()=>observer.disconnect();
   },[pageCount]);
+  useEffect(()=>{
+    if(pageCount<=1||continuous)return;
+    const viewport=scrollArea.current;
+    if(!viewport)return;
+    const measure=()=>{
+      const width=viewport.clientWidth;
+      if(width>0)setNormalPageWidth(previous=>Math.abs(previous-width)<1?previous:width);
+    };
+    measure();
+    const observer=new ResizeObserver(measure);
+    observer.observe(viewport);
+    return()=>observer.disconnect();
+  },[pageCount,continuous,fullscreen]);
+  useEffect(()=>{
+    if(pageCount<=1||continuous)return;
+    const viewport=scrollArea.current;
+    if(viewport)viewport.scrollLeft=Math.max(0,Math.min(pageCount-1,activePage))*normalPageWidth;
+    // Do not depend on activePage: swiping must not be pulled back during scroll.
+  },[normalPageWidth,pageCount,continuous]);
   // The fixed switch follows scrolling even inside a fullscreen iPad canvas.
   useEffect(()=>{
     // Fullscreen always uses its own fixed toolbar, including in iPhone in-app browsers.
@@ -146,6 +168,7 @@ export default function TouchLayerCanvas({
     const viewport=scrollArea.current,canvas=stage.current;
     const next=Math.max(0,Math.min(pageCount-1,index));
     setActivePage(next);
+    onPageIndexChange?.(next);
     if(!viewport||!canvas)return;
     const width=canvas.getBoundingClientRect().width/pageCount;
     viewport.scrollTo({left:Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,
@@ -156,9 +179,17 @@ export default function TouchLayerCanvas({
     const viewport=scrollArea.current,canvas=stage.current;
     if(!viewport||!canvas)return;
     const width=canvas.getBoundingClientRect().width/pageCount;
-    if(width>0)setActivePage(Math.max(0,Math.min(pageCount-1,
-      Math.floor((viewport.scrollLeft+viewport.clientWidth/2)/width))));
+    if(width>0){
+      const next=Math.max(0,Math.min(pageCount-1,
+        Math.floor((viewport.scrollLeft+viewport.clientWidth/2)/width)));
+      if(next!==activePage){setActivePage(next);onPageIndexChange?.(next)}
+    }
   };
+  useEffect(()=>{
+    if(pageIndex===undefined||pageCount<=1)return;
+    const next=Math.max(0,Math.min(pageCount-1,pageIndex));
+    if(next!==activePage)goToPage(next);
+  },[pageIndex,pageCount]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const selectFromList=(id:string)=>{
     setInteractionMode('edit');setSelected(id);setCropping(false);
@@ -552,7 +583,9 @@ export default function TouchLayerCanvas({
     <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
       style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
-        style={{aspectRatio: String(ratio), ...(pageCount > 1 ? {minWidth: pageCount * (continuous ? 230 : 320)} : {})}}
+        style={{aspectRatio: String(ratio), ...(pageCount > 1 ? continuous
+          ? {minWidth: pageCount * 230}
+          : {width: pageCount * normalPageWidth, minWidth: pageCount * normalPageWidth} : {})}}
         onClick={e => { if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('touch-editor-base')) {
           setSelected('');setEditingText('');setAdvancedOpen(false);onEmpty?.();
         } }}
