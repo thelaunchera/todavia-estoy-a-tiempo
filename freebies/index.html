@@ -32,29 +32,24 @@
     .btn:hover{background:#303d44;transform:translateY(-1px)}
     .btn-outline{background:transparent;color:var(--ink)}.btn-outline:hover{background:#e8eceb}
     /* Original blue / black / yellow typographic hero; photography can be added later. */
-    .hero-band{background:#b8d9ed;border-bottom:3px solid var(--ink);overflow:hidden}
-    .hero{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);gap:clamp(24px,4vw,65px);align-items:center;padding:clamp(50px,6vw,92px) 0;min-height:650px}
-    .hero-copy{min-width:0;position:relative;z-index:2}
-    .hero-title{font:900 clamp(58px,6.8vw,99px)/.94 Arial,Helvetica,sans-serif;letter-spacing:-.085em;max-width:700px;margin:23px 0 27px;text-transform:uppercase}
-    .hero-title em{display:inline;background:var(--yellow);font-weight:900;font-style:normal;box-decoration-break:clone;-webkit-box-decoration-break:clone;box-shadow:.1em 0 0 var(--yellow),-.035em 0 0 var(--yellow)}
-    .hero-sub{font-size:clamp(16px,1.7vw,19px);color:#27313a;max-width:495px;margin:0;line-height:1.6}
+
+    /* Full-bleed editorial photography: no inset image or framed card. */
+    .hero-band{position:relative;min-height:clamp(690px,82svh,830px);overflow:hidden;display:flex;align-items:flex-end;background:var(--ink);color:var(--paper)}
+    .hero-cover{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}
+    .hero-band:after{content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(10,18,26,.87) 0%,rgba(10,18,26,.64) 33%,rgba(10,18,26,.04) 80%),linear-gradient(0deg,rgba(10,18,26,.54),transparent 60%)}
+    .hero{position:relative;z-index:2;width:min(1220px,100% - 44px);min-height:inherit;display:flex;align-items:center;padding:82px 0}
+    .hero-copy{min-width:0;max-width:580px}
+    .hero .eyebrow{color:#e3eff4}
+    .hero-title{color:#faf8f3;font:900 clamp(54px,7vw,99px)/.94 Arial,Helvetica,sans-serif;letter-spacing:-.077em;max-width:700px;margin:22px 0 26px;text-transform:uppercase;text-wrap:balance}
+    .hero-title em{display:inline;background:var(--yellow);color:var(--ink);font-style:normal;font-weight:900;box-decoration-break:clone;-webkit-box-decoration-break:clone;box-shadow:.08em 0 0 var(--yellow),-.035em 0 0 var(--yellow)}
+    .hero-sub{font-size:clamp(16px,1.6vw,19px);color:#f0efeb;max-width:480px;margin:0;line-height:1.65}
     .hero-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:32px}
-    .hero-footnote{font-size:11px;color:#3d4e55;margin:18px 0 0}
-    .hero-feature{min-width:0;position:relative;min-height:495px;display:grid;place-items:center;padding:40px 26px}
-    .hero-feature:before{content:'';position:absolute;width:min(92%,480px);aspect-ratio:1;border-radius:50%;background:var(--yellow);top:1%;right:-4%}
-    .hero-feature:after{content:'';position:absolute;width:110px;height:110px;border:8px solid var(--ink);border-radius:50%;bottom:1%;left:0}
-    .hero-poster{position:relative;z-index:1;width:min(100%,370px);aspect-ratio:4/4.7;background:var(--ink);color:#fff;padding:clamp(24px,3vw,35px);display:flex;flex-direction:column;justify-content:space-between;transform:rotate(5deg);box-shadow:18px 18px 0 #f8f5eb;overflow:hidden}
-    .hero-backtype{position:absolute;z-index:0;top:15%;left:-9%;font:900 clamp(75px,9vw,138px)/.95 Arial,Helvetica,sans-serif;letter-spacing:-.1em;color:#19191925;transform:rotate(-10deg);pointer-events:none}
-    .hero-portrait-frame{position:relative;z-index:1;margin:0;width:min(86%,360px);aspect-ratio:4/5;transform:rotate(3deg);border:9px solid var(--paper);background:var(--ink);box-shadow:17px 17px 0 var(--ink);overflow:hidden}
-    .hero-portrait-image{display:block;width:100%;height:100%;object-fit:cover}
-    .poster-kicker{font:800 12px/1.3 Arial,sans-serif;letter-spacing:.16em}
-    .poster-type{position:relative;font:900 clamp(69px,8vw,116px)/.82 Arial,Helvetica,sans-serif;letter-spacing:-.115em;transform:translateX(-5px)}
-    .poster-type span{color:var(--yellow)}
-    .poster-bottom{border-top:1px solid #7e8b90;padding-top:13px;font:800 11px/1.5 Arial,sans-serif;letter-spacing:.14em}
-    .poster-seal{position:absolute;z-index:2;right:-5px;bottom:45px;width:108px;height:108px;border-radius:50%;background:var(--yellow);color:var(--ink);display:grid;place-items:center;text-align:center;transform:rotate(-17deg);font:900 13px/1.1 Arial,sans-serif;letter-spacing:-.03em;border:2px solid var(--ink)}
-    .hero-ribbon{position:absolute;z-index:3;bottom:5px;left:0;max-width:88%;transform:rotate(-7deg);background:#fff;border:2px solid var(--ink);padding:11px 16px;font:900 11px/1.3 Arial,sans-serif;letter-spacing:.11em}
-    
-    .section{padding:76px 0;border-top:1px solid var(--line)}
+    .hero .btn{border-color:var(--yellow);background:var(--yellow);color:var(--ink)}
+    .hero .btn:hover{background:#ffea85}
+    .hero .btn-outline{background:rgba(10,18,26,.48);color:#fff;border-color:#fff}
+    .hero .btn-outline:hover{background:rgba(10,18,26,.8)}
+    .hero-footnote{color:#d7e0e2;font-size:11px;margin:17px 0 0}
+        .section{padding:76px 0;border-top:1px solid var(--line)}
     .section-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:32px}
     h2{font:normal clamp(37px,5.5vw,68px)/1.03 Georgia,serif;letter-spacing:-.055em;margin:13px 0 0}
     .section-heading p:last-child{max-width:350px;color:var(--muted);font-size:14px;margin:0}
@@ -76,6 +71,8 @@
     .waitlist-section h2{font-size:clamp(43px,5.8vw,75px)}
     .waitlist-section h2 em{color:var(--yellow)}
     .waitlist-description{max-width:520px;color:#d6d9d8;line-height:1.75;margin:19px 0 0}
+    .class-photo{margin:30px 0 0;max-width:530px;border:1px solid #535c61;overflow:hidden;background:#373536}
+    .class-photo img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
     .clock-panel{margin-top:37px;background:#262626;border:1px solid #454545;padding:22px 21px 19px;max-width:525px}
     .clock-label{font-size:10px;font-weight:800;letter-spacing:.17em;color:#bfccd3;text-transform:uppercase;margin-bottom:17px}
     .clock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
@@ -132,20 +129,17 @@
       .top-nav a{font-size:11px}
       .top-nav .nav-lab{display:none}
       .language-toggle{padding:8px 9px}
-      .hero{display:flex;flex-direction:column;padding:48px 0 38px;gap:4px;align-items:stretch;min-height:0}
-      .hero-title{font-size:clamp(47px,11vw,76px);letter-spacing:-.08em;margin:15px 0 23px}
-      .hero-sub{font-size:15px}
-      .hero-feature{min-height:370px;padding:27px 35px 45px}
-      .hero-feature:before{width:280px;right:3%;top:12px}
-      .hero-feature:after{width:73px;height:73px;border-width:6px;left:8%;bottom:10px}
-      .hero-poster{width:245px;padding:23px;box-shadow:12px 12px 0 #f8f5eb}
-      .hero-backtype{font-size:77px;left:-3%;top:11%}
-      .hero-portrait-frame{width:min(76%,255px);border-width:6px;box-shadow:10px 10px 0 var(--ink)}
-      .poster-type{font-size:75px}
-      .poster-kicker,.poster-bottom{font-size:9px}
-      .poster-seal{width:82px;height:82px;right:2%;bottom:36px;font-size:11px}
-      .hero-ribbon{left:5%;bottom:0;font-size:9px}
-      
+      .hero-band{min-height:760px}
+      .hero-cover{object-position:43% 45%}
+      .hero-band:after{background:linear-gradient(0deg,rgba(10,18,26,.96) 0%,rgba(10,18,26,.89) 31%,rgba(10,18,26,.16) 71%,transparent 100%)}
+      .hero{min-height:760px;display:flex;align-items:flex-end;padding:35px 0 40px}
+      .hero-copy{max-width:100%}
+      .hero-title{font-size:clamp(45px,11vw,72px);letter-spacing:-.075em;margin:15px 0 20px}
+      .hero-sub{font-size:15px;line-height:1.5}
+      .hero-actions{gap:9px;margin-top:21px}
+      .hero .btn{min-height:47px;padding:11px 15px}
+      .hero-footnote{margin-top:13px}
+      .class-photo{margin-top:22px}
       .section{padding:55px 0}
       .section-heading{display:block;margin-bottom:24px}
       .section-heading p:last-child{margin-top:16px}
@@ -166,8 +160,8 @@
       .lab-preview img{height:122px}
       .footer-line{align-items:flex-start}
     }
-    @media(max-width:375px){.top-nav{gap:7px}.brand{font-size:16px}.top-nav a{font-size:10px}.hero-actions .btn{width:100%}.freebies-grid{grid-template-columns:minmax(0,250px)}.hero-title{font-size:clamp(43px,11vw,50px)}.poster-type{font-size:68px}.hero-feature{min-height:345px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+    @media(max-width:375px){.top-nav{gap:7px}.brand{font-size:16px}.top-nav a{font-size:10px}.hero-actions .btn{width:100%}.hero-title{font-size:clamp(42px,10.5vw,50px)}.hero-band,.hero{min-height:785px}}
+        @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>
@@ -183,7 +177,9 @@
     </div>
   </header>
   <main>
-    <section class="hero-band" aria-labelledby="main-title"><div class="shell hero">
+    <section class="hero-band" aria-labelledby="main-title">
+      <img class="hero-cover" src="/assets/freebies/freebie-library-fullbleed-hero.svg" width="1536" height="1024" alt="Creative founder working from a sofa on the Jaramillo Boutique website with photography and branding notes" fetchpriority="high" decoding="async">
+      <div class="shell hero">
       <div class="hero-copy">
         <p class="eyebrow" data-en="THE LAUNCH ERA / FREEBIE LIBRARY" data-es="THE LAUNCH ERA / BIBLIOTECA GRATUITA">THE LAUNCH ERA / FREEBIE LIBRARY</p>
         <h1 class="hero-title" id="main-title"><span data-en="A little free." data-es="Una idea gratis.">A little free.</span><br><em data-en="A lot of ideas." data-es="Mucho por crear.">A lot of ideas.</em></h1>
@@ -194,16 +190,9 @@
         </div>
         <p class="hero-footnote" data-en="Made for creators, small businesses and big ideas." data-es="Para creadores, emprendedores y grandes ideas.">Made for creators, small businesses and big ideas.</p>
       </div>
-      <div class="hero-feature" role="img" aria-label="Original blue, black and yellow editorial poster for The Launch Era Freebie Library">
-        <span class="hero-backtype" aria-hidden="true">CREATE</span>
-        <figure class="hero-portrait-frame">
-          <img class="hero-portrait-image" src="/assets/freebies/the-launch-era-personal-hero.svg" alt="The Launch Era founder at her creative workspace, wearing a black blazer with blue and yellow branding details" width="500" height="625" decoding="async" fetchpriority="high">
-        </figure>
-        <span class="poster-seal" aria-hidden="true">GO<br>CREATE.</span>
-        <span class="hero-ribbon" data-en="A NEW SPACE FOR CREATIVE IDEAS" data-es="UN NUEVO ESPACIO PARA IDEAS CREATIVAS">A NEW SPACE FOR CREATIVE IDEAS</span>
       </div>
-    </div></section>
-    <section class="section" id="freebies" aria-labelledby="freebies-title">
+    </section>
+        <section class="section" id="freebies" aria-labelledby="freebies-title">
       <div class="shell">
         <div class="section-heading">
           <div>
@@ -232,6 +221,9 @@
           <p class="eyebrow" data-en="NEXT UP / THE WEBSITE CLASS" data-es="PRÓXIMAMENTE / LA CLASE DE WEBS">NEXT UP / THE WEBSITE CLASS</p>
           <h2 id="waitlist-title"><span data-en="Your first website" data-es="Tu primera web">Your first website</span><br><em data-en="starts here." data-es="empieza aquí.">starts here.</em></h2>
           <p class="waitlist-description" data-en="Tu primera web con IA is a step-by-step class to help you build a real website with AI, from first idea to a polished mobile-ready page. The waitlist is free." data-es="Tu primera web con IA es una clase paso a paso para crear un website real con IA, desde la idea hasta una página lista para móvil. La lista de espera es gratis.">Tu primera web con IA is a step-by-step class to help you build a real website with AI, from first idea to a polished mobile-ready page. The waitlist is free.</p>
+          <figure class="class-photo">
+            <img src="/assets/freebies/web-class-jaramillo-work-scene.svg" width="1536" height="1024" loading="lazy" decoding="async" alt="Working on a real Jaramillo Boutique website on a laptop from a sofa">
+          </figure>
           <div class="clock-panel" role="group" aria-label="Countdown to the scheduled class launch, December 3 2026">
             <div class="clock-label" data-en="COUNTING DOWN TO THE CLASS · DEC 3, 2026" data-es="CUENTA REGRESIVA DE LA CLASE · 3 DIC 2026">COUNTING DOWN TO THE CLASS · DEC 3, 2026</div>
             <div class="clock" id="countdown-clock" role="timer">
