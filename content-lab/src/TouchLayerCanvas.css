@@ -618,3 +618,17 @@
  .touch-editor-context-inspector{max-height:min(32dvh,270px);overflow-y:auto;overscroll-behavior:contain}
  .touch-editor-curve-presets button{flex-basis:auto}
 }
+
+/* Destructive control belongs to the element itself, not a detached row.
+   It stays legible on iPhone, iPad and desktop without changing export art. */
+.touch-editor-layer .touch-editor-corner-delete{
+ position:absolute;top:3px;right:3px;z-index:70;display:grid;place-items:center;
+ width:35px;height:35px;min-width:35px;min-height:35px;padding:0;
+ border:2px solid #fff;border-radius:50%;background:#191919;color:#fff;
+ box-shadow:0 2px 9px #1427335c;font:700 25px/1 Arial,sans-serif;
+ cursor:pointer;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent
+}
+.touch-editor-layer .touch-editor-corner-delete:focus-visible{outline:3px solid #f2d85b;outline-offset:2px}
+@media(max-width:799px){.touch-editor-layer .touch-editor-corner-delete{
+ width:34px;height:34px;min-width:34px;min-height:34px;font-size:24px
+}}
