@@ -1,8 +1,397 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>The Launch Era — Freebies</title><style>
-*{box-sizing:border-box}body{margin:0;background:#faf8f3;color:#191919;font:16px/1.6 Arial,sans-serif}header{display:flex;align-items:center;justify-content:space-between;padding:24px 5%;border-bottom:1px solid #d6d2ca;font-size:11px;letter-spacing:2px;font-weight:800}main{max-width:1120px;margin:0 auto;padding:clamp(35px,7vw,90px) 5%}h1{font:normal clamp(52px,7vw,90px)/1 Georgia,serif;letter-spacing:-3px;margin:16px 0}p{color:#5a5b5b}.eyebrow{font-size:10px;letter-spacing:2px;color:#607780;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px;margin-top:45px}.item{background:white;border:1px solid #e6e3de;padding:25px}.item h2{font:normal 30px Georgia,serif}.item a{display:inline-block;text-decoration:none;color:white;background:#191919;padding:12px 17px;font-size:12px;font-weight:800}footer{text-align:center;font-size:10px;letter-spacing:2px;padding:35px;border-top:1px solid #dfdbd4}@media(max-width:600px){.grid{grid-template-columns:1fr}}
-</style></head><body><header>THE LAUNCH ERA <span>CREATIVE FREEBIES</span></header><main><div class="eyebrow">ORIGINAL FREE RESOURCES</div><h1>Make more with<br><i>one good idea.</i></h1><p>Every freebie includes original examples and copyable prompts sent after you confirm your email.</p><div class="grid" id="released"></div><p id="empty" hidden>More creative freebies are coming. The Matcha freebie is available now.</p><p><a href="/content-lab/prompts/">Explore the Matcha freebie</a></p></main><footer>POWERED BY THE LAUNCH ERA</footer><script>
-const releases=[{"title":"Tu web con un solo prompt","date":"2026-11-19","link":"/freebies/november-website/"},{"title":"The Lavender Edit","date":"2026-12-01","link":"/freebies/december-lavender/signup/"},{"title":"SALT LINE","date":"2027-01-02","link":"/freebies/january-salt-line/"}];
-const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
-const today=p.year+"-"+p.month+"-"+p.day;let n=0;
-for(const x of releases){if(today<x.date)continue;n++;const el=document.createElement("article");el.className="item";const meta=document.createElement("div");meta.className="eyebrow";meta.textContent="FREE CREATIVE PACK";const title=document.createElement("h2");title.textContent=x.title;const link=document.createElement("a");link.href=x.link;link.textContent="OPEN FREEBIE";el.append(meta,title,link);document.getElementById("released").append(el);}
-document.getElementById("empty").hidden=n!==0;</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF8F3">
+  <meta name="description" content="Original creative freebies by The Launch Era. Explore free photo prompts, join the website class waitlist, and create more with Content Lab.">
+  <meta property="og:title" content="Freebie Library — The Launch Era">
+  <meta property="og:description" content="Free creative prompts, visual ideas and resources for your next project.">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://podcast.thelaunchera.com/freebies/">
+  <title>Freebie Library | The Launch Era</title>
+  <style>
+    :root{--paper:#faf8f3;--ink:#191919;--blue:#c2d9e8;--soft:#ecf1f3;--line:#dcdad3;--muted:#5c6162;--yellow:#f2d85b}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit}img{display:block;max-width:100%}button,input{font:inherit}
+    button{cursor:pointer}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #356d96;outline-offset:4px}
+    [hidden]{display:none!important}
+    .shell{width:min(1220px,100% - 44px);margin:auto}
+    .eyebrow{margin:0;font-size:11px;font-weight:800;letter-spacing:.19em;text-transform:uppercase}
+    .muted{color:var(--muted)}
+    .site-header{position:relative;z-index:10;border-bottom:1px solid var(--line);background:var(--paper)}
+    .topline{display:flex;justify-content:space-between;align-items:center;gap:22px;min-height:81px}
+    .brand{font-weight:900;text-decoration:none;font-size:19px;letter-spacing:-.07em;white-space:nowrap}
+    .brand-dot{color:#77a7c2}
+    .top-nav{display:flex;align-items:center;gap:24px}
+    .top-nav a{text-decoration:none;font-size:12px;font-weight:700}
+    .language-toggle{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 12px;min-width:47px;font-size:11px;font-weight:800;letter-spacing:.08em}
+    .btn{min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:14px 25px;text-align:center;text-decoration:none;background:var(--ink);color:#fff;font-weight:800;font-size:13px;border:1px solid var(--ink);border-radius:2px;line-height:1.2;transition:background .2s ease,transform .2s ease}
+    .btn:hover{background:#303d44;transform:translateY(-1px)}
+    .btn-outline{background:transparent;color:var(--ink)}.btn-outline:hover{background:#e8eceb}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:clamp(36px,5vw,80px);align-items:center;padding:clamp(54px,7vw,104px) 0 84px}
+    .hero-copy{min-width:0}
+    .hero-title{font:normal clamp(58px,7.5vw,111px)/.96 Georgia,'Times New Roman',serif;letter-spacing:-.065em;max-width:710px;margin:20px 0 24px}
+    .hero-title em{font-weight:400;color:#658aa3}
+    .hero-sub{font-size:clamp(16px,1.8vw,19px);color:#475158;max-width:510px;margin:0;line-height:1.65}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:31px}
+    .hero-footnote{font-size:11px;color:#757c7d;margin:18px 0 0}
+    .hero-photo-wrap{position:relative;margin:0;min-width:0;padding:15px 24px 40px 0}
+    .hero-photo{width:100%;aspect-ratio:4/5;object-fit:cover;background:#ced6c0;border-radius:2px}
+    .hero-photo-wrap:before{content:'';position:absolute;z-index:-1;inset:48px 0 0 36px;background:#dce7eb}
+    .hero-photo-wrap figcaption{position:absolute;left:14px;bottom:10px;font-size:11px;font-weight:800;letter-spacing:.15em;background:var(--yellow);padding:10px 15px;transform:rotate(-3deg)}
+    .section{padding:76px 0;border-top:1px solid var(--line)}
+    .section-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:32px}
+    h2{font:normal clamp(37px,5.5vw,68px)/1.03 Georgia,serif;letter-spacing:-.055em;margin:13px 0 0}
+    .section-heading p:last-child{max-width:350px;color:var(--muted);font-size:14px;margin:0}
+    .freebies-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+    .freebie-card{min-width:0;background:#fff;border:1px solid var(--line);text-decoration:none;display:flex;flex-direction:column;overflow:hidden;transition:transform .2s ease,border-color .2s ease}
+    .freebie-card:hover{transform:translateY(-3px);border-color:#8ea4ac}
+    .freebie-media{overflow:hidden;background:#e5e9e4;aspect-ratio:4/4.3}
+    .freebie-media img{height:100%;width:100%;object-fit:cover;transition:transform .4s ease}
+    .freebie-card:hover img{transform:scale(1.025)}
+    .freebie-details{padding:22px 22px 26px;display:flex;flex:1;flex-direction:column}
+    .freebie-meta{font-size:10px;letter-spacing:.16em;font-weight:800;color:#587d91;text-transform:uppercase}
+    .freebie-card h3{font:normal 31px/1.1 Georgia,serif;letter-spacing:-.035em;margin:11px 0}
+    .freebie-card p{color:#636d70;font-size:13px;line-height:1.6;margin:0 0 22px}
+    .freebie-link{margin-top:auto;align-self:flex-start;border-bottom:1px solid var(--ink);padding-bottom:5px;font-size:12px;letter-spacing:.04em;font-weight:800}
+    .freebie-note{color:var(--muted);font-size:12px;margin:22px 0 0}
+    .waitlist-section{background:#191919;color:var(--paper);padding:clamp(64px,7vw,105px) 0}
+    .waitlist-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:clamp(34px,6vw,92px);align-items:start}
+    .waitlist-section .eyebrow{color:#bfd9e6}
+    .waitlist-section h2{font-size:clamp(43px,5.8vw,75px)}
+    .waitlist-section h2 em{color:var(--yellow)}
+    .waitlist-description{max-width:520px;color:#d6d9d8;line-height:1.75;margin:19px 0 0}
+    .clock-panel{margin-top:37px;background:#262626;border:1px solid #454545;padding:22px 21px 19px;max-width:525px}
+    .clock-label{font-size:10px;font-weight:800;letter-spacing:.17em;color:#bfccd3;text-transform:uppercase;margin-bottom:17px}
+    .clock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+    .clock-unit{min-width:0}
+    .clock-numbers{position:relative;display:block;background:#0d0d0d;color:#f6f5f0;border:1px solid #414141;box-shadow:inset 0 1px 0 #595959;min-width:0;padding:8px 0 11px;text-align:center;font:normal clamp(30px,4.5vw,51px)/1.05 'Courier New',monospace;letter-spacing:-.08em;font-variant-numeric:tabular-nums}
+    .clock-numbers:after{content:'';pointer-events:none;position:absolute;left:0;right:0;top:50%;border-top:1px solid #444}
+    .clock-unit small{display:block;text-align:center;font-size:10px;color:#b8c0c1;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
+    .clock-note{color:#b9bec0;font-size:11px;margin:17px 0 0;line-height:1.7}
+    .waitlist-form,.waitlist-success,.waitlist-pending{background:var(--paper);color:var(--ink);padding:clamp(24px,4vw,44px);border-radius:2px}
+    .waitlist-form h3{font:normal clamp(30px,3vw,42px)/1.1 Georgia,serif;letter-spacing:-.045em;margin:10px 0}
+    .waitlist-form .form-intro{font-size:13px;line-height:1.6;color:#657074;margin:0 0 25px}
+    .waitlist-form label:not(.check-label){display:block;font-size:12px;font-weight:800;margin-bottom:9px}
+    .waitlist-form input[type=email]{width:100%;min-height:51px;background:#fff;padding:14px 15px;border:1px solid #abb6bd;color:var(--ink);font-size:16px;border-radius:2px}
+    .check-label{display:flex;align-items:flex-start;gap:11px;font-size:12px;line-height:1.5;color:#4f5b5d;margin:18px 0}
+    .check-label input{margin:2px 0 0;flex:0 0 17px;width:17px;height:17px;accent-color:#191919}
+    .waitlist-form button[type=submit]{width:100%;border:1px solid var(--ink);background:var(--ink);color:#fff;min-height:52px;padding:13px;font-size:13px;font-weight:800}
+    .waitlist-form button:disabled{opacity:.6;cursor:not-allowed}
+    .form-feedback{font-size:12px;color:#5d696c;line-height:1.6;min-height:1.5em;margin:13px 0}
+    .waitlist-form small{display:block;font-size:11px;color:#636d6f;line-height:1.6}
+    .waitlist-form a{text-underline-offset:3px}
+    .waitlist-success h3,.waitlist-pending h3{font:normal 36px/1.14 Georgia,serif;letter-spacing:-.04em;margin:12px 0}
+    .waitlist-success p,.waitlist-pending p{font-size:14px;line-height:1.7;color:#4e5a5f}
+    .waitlist-success button,.waitlist-pending button,.class-waitlist-optout{background:#191919;color:white;border:0;padding:13px 17px;font-size:12px;font-weight:700;min-height:44px;margin-top:12px}
+    .waitlist-success a{display:inline-block;margin:10px 14px 10px 0}
+    .lab-section{padding:90px 0}
+    .lab-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(35px,6vw,85px)}
+    .lab-art{min-height:415px;background:#c1d9e7;padding:28px;position:relative;display:flex;align-items:center;justify-content:center}
+    .lab-editor{background:#fbfbf8;border:1px solid #a1b4bd;box-shadow:0 19px 40px #19191918;width:100%;max-width:440px;transform:rotate(-2deg);overflow:hidden}
+    .lab-top{display:flex;justify-content:space-between;border-bottom:1px solid #dce4e6;padding:14px;font-size:10px;font-weight:800;letter-spacing:.04em}
+    .lab-content{display:grid;grid-template-columns:54px 1fr;min-height:250px}
+    .lab-side{background:#e4ecee;display:flex;flex-direction:column;gap:13px;padding:20px 15px}
+    .lab-side i{width:24px;height:4px;border-radius:3px;background:#9aafbb}
+    .lab-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:0;align-self:center;margin:23px 14px;box-shadow:0 7px 19px #1b211b21}
+    .lab-preview img{width:100%;height:160px;object-fit:cover}
+    .lab-preview img:nth-child(1){object-position:25% center}
+    .lab-preview img:nth-child(2){object-position:center center}
+    .lab-preview img:nth-child(3){object-position:75% center}
+    .lab-sticker{position:absolute;right:4%;bottom:7%;background:var(--yellow);font-weight:900;letter-spacing:.04em;font-size:15px;padding:13px 22px;transform:rotate(5deg)}
+    .lab-copy h2{max-width:600px}
+    .lab-copy p:not(.eyebrow){color:#536066;line-height:1.7;max-width:510px}
+    .lab-price{display:inline-flex;align-items:baseline;gap:10px;margin:21px 0}
+    .lab-price strong{font-size:38px;letter-spacing:-.06em;line-height:1}
+    .lab-price span{font-size:12px;color:#667174}
+    .lab-copy .btn{display:flex;width:fit-content}
+    .site-footer{border-top:1px solid var(--line);padding:29px 0}
+    .footer-line{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+    .footer-line small{font-size:11px;color:#757978}
+    .footer-line nav{display:flex;gap:22px;flex-wrap:wrap;font-size:12px}
+    .footer-line nav a{text-decoration:none}
+    @media(max-width:940px){.hero{gap:34px}.freebies-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.waitlist-grid{gap:32px}.lab-inner{gap:35px}}
+    @media(max-width:700px){
+      .shell{width:min(100% - 32px,520px)}
+      .topline{min-height:66px;gap:9px}
+      .brand{font-size:17px}
+      .top-nav{gap:10px}
+      .top-nav a{font-size:11px}
+      .top-nav .nav-lab{display:none}
+      .language-toggle{padding:8px 9px}
+      .hero{display:flex;flex-direction:column;padding:36px 0 55px;gap:30px;align-items:stretch}
+      .hero-title{font-size:clamp(53px,12vw,80px);letter-spacing:-.064em}
+      .hero-sub{font-size:16px}
+      .hero-photo-wrap{padding:0 18px 30px 0;max-width:520px}
+      .hero-photo-wrap:before{inset:24px 0 0 23px}
+      .hero-photo-wrap figcaption{bottom:0;left:9px;font-size:10px}
+      .section{padding:55px 0}
+      .section-heading{display:block;margin-bottom:24px}
+      .section-heading p:last-child{margin-top:16px}
+      .freebies-grid{grid-template-columns:1fr;gap:15px}
+      .freebie-media{aspect-ratio:4/3.5}
+      .waitlist-section{padding:60px 0}
+      .waitlist-grid{grid-template-columns:1fr;gap:34px}
+      .waitlist-section h2{font-size:clamp(45px,11vw,65px)}
+      .clock-panel{padding:16px 12px}
+      .clock{gap:6px}
+      .clock-numbers{font-size:clamp(27px,9vw,43px);padding:9px 0}
+      .clock-unit small{font-size:9px;letter-spacing:0}
+      .waitlist-form,.waitlist-success,.waitlist-pending{padding:26px 20px}
+      .lab-section{padding:60px 0}
+      .lab-inner{grid-template-columns:1fr}
+      .lab-art{min-height:340px;padding:18px}
+      .lab-content{min-height:207px}
+      .lab-preview img{height:122px}
+      .footer-line{align-items:flex-start}
+    }
+    @media(max-width:375px){.top-nav{gap:7px}.brand{font-size:16px}.top-nav a{font-size:10px}.hero-actions .btn{width:100%}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell topline">
+      <a class="brand" href="/" aria-label="The Launch Era home">THE LAUNCH ERA<span class="brand-dot">.</span></a>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="#freebies" data-en="Freebies" data-es="Gratis">Freebies</a>
+        <a href="#class-waitlist" data-en="The class" data-es="La clase">The class</a>
+        <a href="#content-lab" class="nav-lab">Content Lab</a>
+        <button type="button" id="language-toggle" class="language-toggle" aria-label="Cambiar a español">ES</button>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="shell hero" aria-labelledby="main-title">
+      <div class="hero-copy">
+        <p class="eyebrow" data-en="THE LAUNCH ERA / FREEBIE LIBRARY" data-es="THE LAUNCH ERA / BIBLIOTECA GRATUITA">THE LAUNCH ERA / FREEBIE LIBRARY</p>
+        <h1 class="hero-title" id="main-title"><span data-en="A little free." data-es="Una idea gratis.">A little free.</span><br><em data-en="A lot of ideas." data-es="Mucho por crear.">A lot of ideas.</em></h1>
+        <p class="hero-sub" data-en="Original prompts, visual ideas and creative resources to turn one good idea into something you can actually make." data-es="Prompts originales, ideas visuales y recursos creativos para convertir una buena idea en algo que realmente puedas crear.">Original prompts, visual ideas and creative resources to turn one good idea into something you can actually make.</p>
+        <div class="hero-actions">
+          <a href="#freebies" class="btn" data-en="Explore free resources" data-es="Explorar recursos gratis">Explore free resources</a>
+          <a href="#class-waitlist" class="btn btn-outline" data-en="Join the class waitlist" data-es="Lista de espera de la clase">Join the class waitlist</a>
+        </div>
+        <p class="hero-footnote" data-en="Made for creators, small businesses and big ideas." data-es="Para creadores, emprendedores y grandes ideas.">Made for creators, small businesses and big ideas.</p>
+      </div>
+      <figure class="hero-photo-wrap">
+        <img class="hero-photo" src="/content-lab/prompts/matcha-01.jpg" alt="Editorial matcha product photo, part of the free creative prompts collection" width="650" height="800" fetchpriority="high">
+        <figcaption data-en="CREATE SOMETHING GOOD" data-es="CREA ALGO BUENO">CREATE SOMETHING GOOD</figcaption>
+      </figure>
+    </section>
+    <section class="section" id="freebies" aria-labelledby="freebies-title">
+      <div class="shell">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" data-en="THE FREE COLLECTION" data-es="LA COLECCIÓN GRATUITA">THE FREE COLLECTION</p>
+            <h2 id="freebies-title" data-en="Take an idea. Make it yours." data-es="Toma una idea. Hazla tuya.">Take an idea. Make it yours.</h2>
+          </div>
+          <p data-en="Every pack has its own creative direction, examples and prompts. New releases appear here when they're ready." data-es="Cada pack tiene su propia dirección creativa, ejemplos y prompts. Los nuevos recursos aparecen aquí cuando se publican.">Every pack has its own creative direction, examples and prompts. New releases appear here when they're ready.</p>
+        </div>
+        <div class="freebies-grid" id="released" aria-live="polite">
+          <a class="freebie-card" href="/content-lab/prompts/" data-freebie="matcha">
+            <div class="freebie-media"><img src="/content-lab/prompts/matcha-04.jpg" alt="Matcha photography inspiration, photographed as a single editorial image" loading="lazy"></div>
+            <div class="freebie-details">
+              <span class="freebie-meta" data-en="FREE · AVAILABLE NOW" data-es="GRATIS · DISPONIBLE">FREE · AVAILABLE NOW</span>
+              <h3>Matcha / 8 Master Prompts</h3>
+              <p data-en="One product. Eight fresh visual directions. Explore the examples and copy the prompts for your own brand." data-es="Un producto. Ocho direcciones visuales. Explora los ejemplos y copia los prompts para tu propia marca.">One product. Eight fresh visual directions. Explore the examples and copy the prompts for your own brand.</p>
+              <span class="freebie-link" data-en="Open the free prompts" data-es="Ver los prompts gratis">Open the free prompts</span>
+            </div>
+          </a>
+        </div>
+        <p class="freebie-note" data-en="No countdown or launch-date labels on the freebie cards. Each new pack is listed only after release." data-es="Los nuevos recursos aparecen automáticamente en la biblioteca cuando estén disponibles.">No countdown or launch-date labels on the freebie cards. Each new pack is listed only after release.</p>
+      </div>
+    </section>
+    <section class="waitlist-section" id="class-waitlist" aria-labelledby="waitlist-title">
+      <div class="shell waitlist-grid">
+        <div>
+          <p class="eyebrow" data-en="NEXT UP / THE WEBSITE CLASS" data-es="PRÓXIMAMENTE / LA CLASE DE WEBS">NEXT UP / THE WEBSITE CLASS</p>
+          <h2 id="waitlist-title"><span data-en="Your first website" data-es="Tu primera web">Your first website</span><br><em data-en="starts here." data-es="empieza aquí.">starts here.</em></h2>
+          <p class="waitlist-description" data-en="Tu primera web con IA is a step-by-step class to help you build a real website with AI, from first idea to a polished mobile-ready page. The waitlist is free." data-es="Tu primera web con IA es una clase paso a paso para crear un website real con IA, desde la idea hasta una página lista para móvil. La lista de espera es gratis.">Tu primera web con IA is a step-by-step class to help you build a real website with AI, from first idea to a polished mobile-ready page. The waitlist is free.</p>
+          <div class="clock-panel" role="group" aria-label="Countdown to the scheduled class launch, December 3 2026">
+            <div class="clock-label" data-en="COUNTING DOWN TO THE CLASS · DEC 3, 2026" data-es="CUENTA REGRESIVA DE LA CLASE · 3 DIC 2026">COUNTING DOWN TO THE CLASS · DEC 3, 2026</div>
+            <div class="clock" id="countdown-clock" role="timer">
+              <div class="clock-unit"><span class="clock-numbers" data-time="days">--</span><small data-en="Days" data-es="Días">Days</small></div>
+              <div class="clock-unit"><span class="clock-numbers" data-time="hours">--</span><small data-en="Hours" data-es="Horas">Hours</small></div>
+              <div class="clock-unit"><span class="clock-numbers" data-time="minutes">--</span><small data-en="Minutes" data-es="Minutos">Minutes</small></div>
+              <div class="clock-unit"><span class="clock-numbers" data-time="seconds">--</span><small data-en="Seconds" data-es="Segundos">Seconds</small></div>
+            </div>
+            <p class="clock-note" id="clock-note" data-en="Scheduled launch: December 3, 2026 · New York time. Join the waitlist for class announcements." data-es="Lanzamiento programado: 3 de diciembre de 2026 · hora de Nueva York. Apúntate para recibir novedades.">Scheduled launch: December 3, 2026 · New York time. Join the waitlist for class announcements.</p>
+          </div>
+          <p class="clock-note"><a id="class-details-link" href="/clases/primera-landing-en.html" data-en="See what's in the class" data-es="Conoce el contenido de la clase">See what's in the class</a></p>
+        </div>
+        <div>
+          <form id="course-waitlist-form" class="waitlist-form" aria-label="Join the class waitlist">
+            <p class="eyebrow" style="color:#65889e" data-en="EARLY ACCESS UPDATES" data-es="AVISOS DE LANZAMIENTO">EARLY ACCESS UPDATES</p>
+            <h3 data-en="Be first to know." data-es="Entérate primero.">Be first to know.</h3>
+            <p class="form-intro" data-en="Enter your email and confirm it using the link we send. We'll let you know when class registration opens." data-es="Escribe tu correo y confírmalo con el enlace que te enviamos. Te avisaremos cuando abran las inscripciones.">Enter your email and confirm it using the link we send. We'll let you know when class registration opens.</p>
+            <label for="course-waitlist-email" data-en="Your email address" data-es="Tu correo electrónico">Your email address</label>
+            <input id="course-waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
+            <label class="check-label" for="course-waitlist-consent">
+              <input id="course-waitlist-consent" type="checkbox" required>
+              <span data-en="I want updates about Tu primera web con IA, approximately once a week and when registration opens. I can unsubscribe at any time." data-es="Quiero recibir novedades de «Tu primera web con IA», aproximadamente una vez por semana y cuando abra. Puedo darme de baja cuando quiera.">I want updates about Tu primera web con IA, approximately once a week and when registration opens. I can unsubscribe at any time.</span>
+            </label>
+            <button type="submit" data-en="Join the free waitlist" data-es="Quiero estar en la lista">Join the free waitlist</button>
+            <p id="course-waitlist-feedback" class="form-feedback" aria-live="polite" data-en="We'll email you a link to confirm your signup." data-es="Te enviaremos un enlace para confirmar tu inscripción.">We'll email you a link to confirm your signup.</p>
+            <small><span data-en="Class updates only. No purchase or reserved seat." data-es="Solo avisos de la clase. No es una compra ni una reserva.">Class updates only. No purchase or reserved seat.</span> <a id="privacy-link" href="/privacidad-en.html" data-en="Privacy policy" data-es="Política de privacidad">Privacy policy</a></small>
+          </form>
+          <section id="course-waitlist-success" class="waitlist-success" tabindex="-1" role="status" aria-live="polite" hidden>
+            <p class="eyebrow" data-en="SIGNUP CONFIRMED" data-es="INSCRIPCIÓN CONFIRMADA">SIGNUP CONFIRMED</p>
+            <h3 data-en="You're on the list." data-es="Ya estás en la lista.">You're on the list.</h3>
+            <p data-en="Your email is verified and your class waitlist signup is saved. You'll hear from us with class updates and when registration opens." data-es="Tu correo está verificado y tu registro en la lista está guardado. Te escribiremos cuando haya novedades y se abra la inscripción.">Your email is verified and your class waitlist signup is saved. You'll hear from us with class updates and when registration opens.</p>
+            <p data-en="No purchase or seat reservation has been made." data-es="No has comprado ni reservado una plaza.">No purchase or seat reservation has been made.</p>
+            <a id="success-class-link" href="/clases/primera-landing-en.html" data-en="Explore the class" data-es="Conocer la clase">Explore the class</a>
+            <button type="button" id="course-waitlist-dismiss" data-en="Close confirmation" data-es="Cerrar confirmación">Close confirmation</button>
+            <div id="course-waitlist-success-optout"></div>
+          </section>
+          <section id="course-waitlist-pending" class="waitlist-pending" role="status" tabindex="-1" aria-live="polite" hidden>
+            <p class="eyebrow" data-en="ONE MORE STEP" data-es="UN PASO MÁS">ONE MORE STEP</p>
+            <h3 id="course-waitlist-pending-title" data-en="Check your email" data-es="Revisa tu correo">Check your email</h3>
+            <p id="course-waitlist-pending-description" data-en="We sent you a verification link. Open it to return here and confirm your signup." data-es="Te enviamos un enlace de verificación. Ábrelo para volver aquí y confirmar tu registro.">We sent you a verification link. Open it to return here and confirm your signup.</p>
+            <button id="course-waitlist-edit" type="button" data-en="Use a different email" data-es="Cambiar el correo">Use a different email</button>
+          </section>
+        </div>
+      </div>
+    </section>
+    <section class="lab-section" id="content-lab" aria-labelledby="lab-title">
+      <div class="shell lab-inner">
+        <div class="lab-art" aria-label="Illustration of a three-slide editorial carousel in the Content Lab interface">
+          <div class="lab-editor" aria-hidden="true">
+            <div class="lab-top"><strong>content lab.</strong><span>CAROUSEL STUDIO</span></div>
+            <div class="lab-content">
+              <div class="lab-side"><i></i><i></i><i></i><i></i></div>
+              <div class="lab-preview">
+                <img src="/content-lab/prompts/matcha-02.jpg" alt="">
+                <img src="/content-lab/prompts/matcha-03.jpg" alt="">
+                <img src="/content-lab/prompts/matcha-05.jpg" alt="">
+              </div>
+            </div>
+          </div>
+          <span class="lab-sticker" data-en="MAKE MORE" data-es="CREA MÁS">MAKE MORE</span>
+        </div>
+        <div class="lab-copy">
+          <p class="eyebrow" data-en="LOVE THE IDEAS? MEET CONTENT LAB." data-es="¿TE GUSTAN LAS IDEAS? CONOCE CONTENT LAB.">LOVE THE IDEAS? MEET CONTENT LAB.</p>
+          <h2 id="lab-title"><span data-en="From free prompts" data-es="De los prompts gratis">From free prompts</span><br><em data-en="to finished content." data-es="a contenido terminado.">to finished content.</em></h2>
+          <p data-en="The freebies get you started. Content Lab gives you a creative workspace to design seamless carousels, single posts, stories and reel covers with your own photos, text and brand elements." data-es="Los freebies te dan ideas. Content Lab te ofrece un espacio creativo para diseñar carruseles continuos, posts, historias y portadas de reels con tus fotos, textos y elementos de marca.">The freebies get you started. Content Lab gives you a creative workspace to design seamless carousels, single posts, stories and reel covers with your own photos, text and brand elements.</p>
+          <div class="lab-price"><strong>$10</strong><span data-en="USD · one-time payment" data-es="USD · pago único">USD · one-time payment</span></div>
+          <a id="lab-link" class="btn" href="/content-lab/descubre/en/" data-en="Explore Content Lab" data-es="Descubrir Content Lab">Explore Content Lab</a>
+          <p style="font-size:12px" data-en="A separate paid creative app. The free prompts remain free." data-es="Es una app creativa de pago independiente. Los prompts gratuitos siguen siendo gratis.">A separate paid creative app. The free prompts remain free.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="shell footer-line">
+      <small>© 2026 THE LAUNCH ERA · <span data-en="Made for real ideas." data-es="Hecho para ideas reales.">Made for real ideas.</span><br>Powered by The Launch Era</small>
+      <nav aria-label="Footer links">
+        <a href="/" data-en="Home" data-es="Inicio">Home</a>
+        <a id="footer-class-link" href="/clases/primera-landing-en.html" data-en="The class" data-es="La clase">The class</a>
+        <a id="footer-lab-link" href="/content-lab/descubre/en/">Content Lab</a>
+        <a id="footer-privacy-link" href="/privacidad-en.html" data-en="Privacy" data-es="Privacidad">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+  <script>
+    (() => {
+      "use strict";
+      const langButton=document.getElementById("language-toggle");
+      const labels={
+        en:{meta:"Original creative freebies by The Launch Era. Explore free photo prompts, join the website class waitlist, and create more with Content Lab.",
+          title:"Freebie Library | The Launch Era",
+          released:"FREE · NEW RESOURCE",action:"Explore the freebie",
+          descs:["One prompt to plan and create your own website with AI.","Five original lavender-toned visual ideas and copyable prompts.","Editorial beauty photos and macro-texture prompts."]},
+        es:{meta:"Freebies creativos de The Launch Era. Explora prompts gratuitos, inscríbete a la lista de espera de la clase y conoce Content Lab.",
+          title:"Biblioteca de freebies | The Launch Era",
+          released:"GRATIS · NUEVO RECURSO",action:"Abrir freebie",
+          descs:["Un prompt para planificar y crear tu propio website con IA.","Cinco ideas visuales originales en tonos lavanda y prompts para copiar.","Fotografía editorial de belleza y prompts de textura macro."]}
+      };
+      const releases=[
+        {title:"Tu web con un solo prompt",date:"2026-11-19",link:"/freebies/november-website/",img:"/assets/freebies/november-website/cover.svg"},
+        {title:"The Lavender Edit",date:"2026-12-01",link:"/freebies/december-lavender/signup/",img:"/assets/freebies/december-lavender/01-sculpted-gloss-hero.png"},
+        {title:"SALT LINE",date:"2027-01-02",link:"/freebies/january-salt-line/",img:"/assets/freebies/january-salt-line/hero.jpg"}
+      ];
+      const gallery=document.getElementById("released");
+      const classLinks=["class-details-link","success-class-link","footer-class-link"];
+      const labLinks=["lab-link","footer-lab-link"];
+      const privacyLinks=["privacy-link","footer-privacy-link"];
+      let lang=new URLSearchParams(location.search).get("lang")==="es"?"es":"en";
+      function getToday(){
+        const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+        return p.year+"-"+p.month+"-"+p.day;
+      }
+      function renderReleases(){
+        const today=getToday();
+        const existing=new Set(Array.from(gallery.querySelectorAll("[data-freebie]")).map(e=>e.dataset.freebie));
+        for(let i=0;i<releases.length;i++){
+          const x=releases[i];
+          if(today<x.date)continue;
+          if(existing.has(x.date))continue;
+          const card=document.createElement("a");
+          card.className="freebie-card";
+          card.dataset.freebie=x.date;
+          card.href=x.link;
+          const media=document.createElement("div");
+          media.className="freebie-media";
+          const photo=document.createElement("img");
+          photo.src=x.img;photo.alt=x.title+" freebie cover";photo.loading="lazy";
+          if(i===0)photo.style.objectFit="contain";
+          media.append(photo);
+          const detail=document.createElement("div");detail.className="freebie-details";
+          const tag=document.createElement("span");tag.className="freebie-meta";tag.textContent=labels[lang].released;
+          const heading=document.createElement("h3");heading.textContent=x.title;
+          const para=document.createElement("p");para.textContent=labels[lang].descs[i];
+          const action=document.createElement("span");action.className="freebie-link";action.textContent=labels[lang].action;
+          detail.append(tag,heading,para,action);card.append(media,detail);gallery.append(card);
+        }
+        gallery.querySelectorAll("[data-freebie]").forEach(card=>{
+          const i=releases.findIndex(x=>x.date===card.dataset.freebie);
+          if(i<0)return;
+          card.querySelector(".freebie-meta").textContent=labels[lang].released;
+          card.querySelector("p").textContent=labels[lang].descs[i];
+          card.querySelector(".freebie-link").textContent=labels[lang].action;
+        });
+      }
+      function setLanguage(next,writeUrl){
+        lang=next==="es"?"es":"en";
+        document.documentElement.lang=lang;
+        document.title=labels[lang].title;
+        document.querySelector('meta[name="description"]').content=labels[lang].meta;
+        document.querySelectorAll("[data-en][data-es]").forEach(node=>{node.textContent=node.dataset[lang]});
+        langButton.textContent=lang==="en"?"ES":"EN";
+        langButton.setAttribute("aria-label",lang==="en"?"Cambiar a español":"Switch to English");
+        document.getElementById("course-waitlist-email").placeholder=lang==="en"?"you@example.com":"tu@correo.com";
+        classLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/clases/primera-landing-en.html":"/clases/primera-landing.html"});
+        labLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/content-lab/descubre/en/":"/content-lab/descubre/"});
+        privacyLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/privacidad-en.html":"/privacidad.html"});
+        renderReleases();
+        if(writeUrl){
+          const u=new URL(location.href);
+          if(lang==="es")u.searchParams.set("lang","es");else u.searchParams.delete("lang");
+          history.replaceState(null,"",u.pathname+u.search+u.hash);
+        }
+      }
+      const launch=Date.parse("2026-12-03T00:00:00-05:00");
+      const units=["days","hours","minutes","seconds"];
+      function tick(){
+        const seconds=Math.max(0,Math.ceil((launch-Date.now())/1000));
+        const vals=[Math.floor(seconds/86400),Math.floor(seconds%86400/3600),Math.floor(seconds%3600/60),seconds%60];
+        units.forEach((unit,i)=>{const el=document.querySelector('[data-time="'+unit+'"]');const text=String(vals[i]).padStart(2,"0");if(el.textContent!==text)el.textContent=text;});
+        if(seconds===0){
+          const note=document.getElementById("clock-note");
+          note.textContent=lang==="en"?"The scheduled launch date has arrived. Check the class page for current registration details.":"Llegó la fecha programada. Consulta la página de la clase para conocer el estado de las inscripciones.";
+          document.getElementById("countdown-clock").setAttribute("aria-label",lang==="en"?"Launch date reached":"Fecha de lanzamiento alcanzada");
+        }
+      }
+      langButton.addEventListener("click",()=>{setLanguage(lang==="en"?"es":"en",true);tick()});
+      setLanguage(lang,false);
+      tick();
+      const interval=setInterval(()=>{tick();renderReleases()},1000);
+      window.addEventListener("pagehide",()=>clearInterval(interval),{once:true});
+      document.addEventListener("visibilitychange",()=>{if(!document.hidden){tick();renderReleases()}});
+    })();
+  </script>
+  <script type="module" src="/clases/waitlist.js?v=20261105-freebie-library"></script>
+</body>
+</html>
