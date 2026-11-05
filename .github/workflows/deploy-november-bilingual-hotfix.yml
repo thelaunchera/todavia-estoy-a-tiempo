@@ -1,0 +1,62 @@
+name: Publish bilingual November freebie safely
+on:
+  push:
+    paths:
+      - '.github/workflows/deploy-november-bilingual-hotfix.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  overlay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest bilingual freebie
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Recover last successful published website
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          run-id: 42010546206
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          path: _published_snapshot
+      - name: Overlay only November freebie assets and pages
+        run: |
+          mkdir -p _podcast_pages
+          test -s _published_snapshot/artifact.tar
+          tar -xf _published_snapshot/artifact.tar -C _podcast_pages
+          test -s _podcast_pages/content-lab/index.html
+          test -s _podcast_pages/estudio/index.html
+          mkdir -p _podcast_pages/freebies/november-website/access
+          mkdir -p _podcast_pages/assets/freebies/november-website
+          cp freebies/november-website/index.html _podcast_pages/freebies/november-website/index.html
+          cp freebies/november-website/access/index.html _podcast_pages/freebies/november-website/access/index.html
+          cp assets/freebies/november-website/cover-en.svg _podcast_pages/assets/freebies/november-website/cover-en.svg
+          test -s _podcast_pages/assets/freebies/november-website/cover.svg
+          test -s _podcast_pages/assets/freebies/november-website/cover-en.svg
+          test -s _podcast_pages/freebies/november-website/access/index.html
+          grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/index.html
+          grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/access/index.html
+          test -s _podcast_pages/.nojekyll
+      - name: Upload site without touching existing Lab or Studio builds
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _podcast_pages
+  deploy:
+    needs: overlay
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy bilingual freebie hotfix
+        id: deployment
+        uses: actions/deploy-pages@v4
