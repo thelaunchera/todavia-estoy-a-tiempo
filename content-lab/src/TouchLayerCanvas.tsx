@@ -5,12 +5,13 @@ import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } f
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
 import { Trash2, LockKeyhole, LockKeyholeOpen, Copy, Layers3 } from 'lucide-react';
 import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
+import CurvedTextPreview from './CurvedTextPreview';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;
   frameStyle?: string; paper?: string; accent?: string;
@@ -47,7 +48,7 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
-  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|null>(null);
+  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|null>(null);
   const [editingText,setEditingText]=useState('');
   const [advancedOpen,setAdvancedOpen]=useState(false);
   const [copyFeedback,setCopyFeedback]=useState('');
@@ -399,6 +400,7 @@ export default function TouchLayerCanvas({
     {chosen&&onUpdate&&<div className={'touch-editor-context-dock'+(fullscreen?' is-fullscreen':'')} role="toolbar" aria-label="Editar elemento seleccionado">
           <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
           <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
+          {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='curve'} onClick={()=>setContextInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
           <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
           <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
           <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
@@ -407,13 +409,30 @@ export default function TouchLayerCanvas({
           <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
         </div>}
         {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento">
-          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':'Posición'}</strong>
+          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':'Posición'}</strong>
             <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
           {contextInspector==='opacity'&&<label className="touch-editor-context-range">
             Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
             value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})}/>
             <output>{Math.round((chosen.opacity??1)*100)}%</output>
           </label>}
+          {contextInspector==='curve'&&chosen.kind==='text'&&<div className="touch-editor-curve-inspector" role="group" aria-label="Curvatura del texto">
+            <label className="touch-editor-context-range">Curvatura
+              <input type="range" min="-100" max="100" step="1" aria-label="Curvar texto"
+                value={chosen.curve||0} onChange={e=>onUpdate(chosen.id,{curve:Number(e.target.value)})}/>
+              <output>{chosen.curve||0}%</output>
+            </label>
+            <div className="touch-editor-curve-presets">
+              {([['Recto',0],['Arco',45],['Círculo',90],['Hacia abajo',-55]] as const).map(([name,value])=>
+                <button type="button" key={name} aria-pressed={(chosen.curve||0)===value}
+                  onClick={()=>onUpdate(chosen.id,{curve:value})}>{name}</button>)}
+            </div>
+            <label className="touch-editor-context-range">Espaciado
+              <input type="range" min="-6" max="30" step="1" aria-label="Separación entre letras"
+                value={chosen.spacing||0} onChange={e=>onUpdate(chosen.id,{spacing:Number(e.target.value)})}/>
+              <output>{chosen.spacing||0}</output>
+            </label>
+          </div>}
           {contextInspector==='rotation'&&<label className="touch-editor-context-range">
             Rotación <input type="range" min="-180" max="180" step="1" aria-label="Girar elemento"
             value={selectedRect.angle||0} onChange={e=>onCommit(chosen.kind,chosen.id,{...selectedRect,angle:Number(e.target.value)})}/>
@@ -601,6 +620,7 @@ export default function TouchLayerCanvas({
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
                 }}/>
+              :layer.kind==='text'&&(layer.curve||0)!==0?<CurvedTextPreview layer={{...layer,assetId:''}} width={fw} height={fh}/>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
               opacity:Math.max(0,Math.min(1,layer.opacity??1)),
@@ -777,6 +797,10 @@ export default function TouchLayerCanvas({
           onChange={e=>onUpdate(chosen.id,{fontSize:Number(e.target.value)})}/><span>{chosen.fontSize||76}px</span></label>
         <label>Interlineado <input type="range" min=".7" max="2" step=".05" value={chosen.lineHeight||1.12}
           onChange={e=>onUpdate(chosen.id,{lineHeight:Number(e.target.value)})}/></label>
+        <label>Curvatura <input type="range" min="-100" max="100" step="1"
+           aria-label="Curvar texto en arco circular" value={chosen.curve||0}
+           onChange={e=>onUpdate(chosen.id,{curve:Number(e.target.value)})}/>
+           <output>{chosen.curve||0}%</output></label>
         <label>Espaciado <input type="range" min="-6" max="35" step="1" value={chosen.spacing||0}
           onChange={e=>onUpdate(chosen.id,{spacing:Number(e.target.value)})}/></label>
         <label>Color <input type="color" aria-label="Color de texto libre"
