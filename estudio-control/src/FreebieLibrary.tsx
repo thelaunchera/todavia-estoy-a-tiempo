@@ -18,6 +18,7 @@ const NOVEMBER_FILES = {
   photos: 'https://drive.google.com/drive/folders/1_axcVjDNox1P0jevZay4OEuIOh1pHHgj',
   access: 'https://podcast.thelaunchera.com/freebies/november-website/access/',
   signup: 'https://podcast.thelaunchera.com/freebies/november-website/',
+  automation: 'https://us2.make.com/2964061/scenarios/6912483',
 };
 const NOVEMBER_PHOTOS = [
   {src:'/assets/freebies/november-website/01_laptop_workspace.svg',name:'01 · Website planning'},
@@ -119,17 +120,19 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <img src="/assets/freebies/november-website/cover.svg" alt="Portada aprobada: Tu web con un solo prompt" loading="lazy"/>
       </div>
       <div className="freebies-info">
-        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Noviembre 2026</span></div>
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status === 'listo_privado' ? 'Preparado · privado' : november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Lanzamiento diciembre</span></div>
         <h3>Tu web con un solo prompt</h3>
         <p className="freebies-description">Crea tu primera web con ChatGPT y AppDeploy. Incluye 3 fotografías sin texto y el prompt copiable en ES / EN.</p>
         <div className="freebies-november-photos" aria-label="Las tres fotos del freebie de noviembre">
           {NOVEMBER_PHOTOS.map(photo=><a key={photo.src} href={NOVEMBER_FILES.photos} target="_blank" rel="noopener noreferrer" aria-label={'Ver '+photo.name+' en Drive'}><img src={photo.src} alt={photo.name} loading="lazy"/></a>)}
         </div>
-        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Envío programado para diciembre</span></div>
+        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Make activo · verificación pendiente</span></div>
         <div className="freebies-actions">
-          {external(NOVEMBER_FILES.access,'Abrir freebie · ES / EN',ExternalLink)}
+          {external(NOVEMBER_FILES.access,'Ver contenido · ES / EN',ExternalLink)}
+          {external(NOVEMBER_FILES.signup,'Ver formulario de correo',Mail)}
           {external(NOVEMBER_FILES.photos,'Abrir fotos en Drive',ImageIcon)}
           {external(NOVEMBER_FILES.folder,'Carpeta completa',ExternalLink)}
+          {external(NOVEMBER_FILES.automation,'Automatización Make',ExternalLink)}
         </div>
         {!november && <p className="freebies-alert">No se encontró la ficha original de noviembre en el Studio.</p>}
       </div>
