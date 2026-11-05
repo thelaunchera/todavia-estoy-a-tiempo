@@ -367,3 +367,18 @@
  .panorama-editor .panorama-body:not(.panorama-library-collapsed)>.panorama-library{display:none!important}
  .panorama-library-floating{bottom:calc(177px + env(safe-area-inset-bottom))!important}
 }
+
+/* Keep the bottom drawer completely above the now-adjacent editing rail. */
+@media(max-width:799px){
+ .panorama-library-floating{
+   bottom:calc(208px + env(safe-area-inset-bottom))!important;
+   max-height:min(36dvh,370px)!important
+ }
+ .panorama-library-floating.panorama-library-expanded{
+   bottom:calc(169px + env(safe-area-inset-bottom))!important;
+   max-height:min(36dvh,370px)!important
+ }
+ .panorama-library-floating .panorama-assets{
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important
+ }
+}
