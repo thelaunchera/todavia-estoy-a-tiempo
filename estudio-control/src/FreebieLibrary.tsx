@@ -28,6 +28,8 @@ const NOVEMBER_PHOTOS = [
 const SALT_LINE = {
   folder: 'https://drive.google.com/drive/folders/1KcEkuwkLcmzUY9PWsh0cvUSsCOyAzDsA',
   pdf: 'https://drive.google.com/file/d/1kkRLliJaRtHKYes8X8FzPuSxP2vqZ5jc/view',
+  access: 'https://podcast.thelaunchera.com/freebies/january-salt-line/access/',
+  signup: 'https://podcast.thelaunchera.com/freebies/january-salt-line/',
   hero: '1cjtBtDSUEsMmh_v9zzpExZJYWgJLN7g0',
   signup: 'https://podcast.thelaunchera.com/freebies/january-salt-line/',
   access: 'https://podcast.thelaunchera.com/freebies/january-salt-line/access/',
