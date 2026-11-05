@@ -469,9 +469,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('canvas');
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
-  const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:920px)').matches);
+  const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:1360px)').matches);
   useEffect(()=>{
-    const query=window.matchMedia('(max-width:920px)');
+    const query=window.matchMedia('(max-width:1360px)');
     const update=()=>{setMobileViewport(query.matches);if(!query.matches)setMobilePreviewOpen(false)};
     update();query.addEventListener('change',update);
     return()=>query.removeEventListener('change',update);
@@ -856,6 +856,29 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     }));
     setFocusWallpaperId(id);setStudioTab('canvas');
     notify('Fondo continuo listo: usa el tirador azul o + Extender 1 slide.');
+  };
+  // The palette's explicit clear action removes only image/wallpaper backgrounds;
+  // it never destroys a buyer's photos, texts, stickers or private media.
+  const clearCanvasBackground=()=>{
+    const currentStart=i/slides.length,currentEnd=(i+1)/slides.length;
+    const wallpaperLayers=(style.panoramaLayers||[]).filter(layer=>layer.role==='background'&&
+      (style.seamlessEnabled||(layer.rect.x<currentEnd&&layer.rect.x+layer.rect.w>currentStart)));
+    const removedIds=new Set(wallpaperLayers.map(layer=>layer.id));
+    const nextStyle=normalizeCarouselStyle({
+      ...style,perSlideBackgrounds:true,
+      panoramaLayers:(style.panoramaLayers||[]).filter(layer=>!removedIds.has(layer.id)),
+      lockedLayerIds:(style.lockedLayerIds||[]).filter(id=>!removedIds.has(id)),
+      ...(style.seamlessEnabled?{canvasColor:'#FAF8F3',canvasGradient:'',
+        seamlessBackgroundId:'brand',seamlessAssetId:''}:{})
+    });
+    const nextSlides=slides.map((part,index)=>style.seamlessEnabled||index===i
+      ?{...part,backgroundId:'brand' as const,backgroundImageId:'',
+          backgroundColor:'#FAF8F3',backgroundGradient:undefined}
+      :part);
+    setAll(nextSlides,nextStyle);
+    setFocusWallpaperId('');
+    notify(style.seamlessEnabled?'Fondo del carrusel eliminado. Las otras capas se conservan.':
+      'Fondo del slide '+(i+1)+' eliminado. Las otras capas se conservan.');
   };
   const backgroundOfAll=()=>{
     const backgroundId=slide.backgroundId||'brand',backgroundImageId=slide.backgroundImageId||'';
@@ -1555,6 +1578,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
               normalizeCarouselStyle({...style,canvasColor:color,canvasGradient:'',seamlessBackgroundId:'brand',seamlessAssetId:''}));
           }else replace({backgroundId:'brand',backgroundImageId:'',backgroundColor:color,backgroundGradient:undefined});
         }}
+        onClearBackground={clearCanvasBackground}
         onExtendBackground={extendCurrentBackground}
         canExtendBackground={!!slide.backgroundImageId||!!(style.panoramaLayers||[]).find(layer=>layer.role==='background')}
         focusLayerId={focusWallpaperId}
