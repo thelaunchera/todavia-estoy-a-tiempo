@@ -490,7 +490,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     document.addEventListener('keydown',onEscape);
     return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener('keydown',onEscape)};
   },[mobilePreviewOpen]);
-  useEffect(()=>{setMobilePreviewOpen(false);},[brand.id,post.id]);
+  useEffect(()=>{setMobilePreviewOpen(false);},[brand.id]);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
@@ -532,7 +532,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
   const [creatingNewCarousel,setCreatingNewCarousel]=useState(false);
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
+  // The parent keys this editor by session. Assigning a first saved post.id is NOT a new project:
+  // resetting on post.id would erase freshly prepared PNG download links and previews.
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
   // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
