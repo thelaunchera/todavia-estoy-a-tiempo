@@ -72,6 +72,8 @@ export default function SeamlessEditor(){
  useEffect(()=>{try{if(activeProjectId)localStorage.setItem(ACTIVE_PROJECT_KEY,activeProjectId);else localStorage.removeItem(ACTIVE_PROJECT_KEY)}catch{}},[activeProjectId]);
  const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
  const [message,setMessage]=useState('');
+ // Keep feedback brief and non-blocking; new actions restart the two-second countdown.
+ useEffect(()=>{if(!message)return;const timeout=window.setTimeout(()=>setMessage(''),2000);return()=>window.clearTimeout(timeout)},[message]);
  const [busy,setBusy]=useState(false);
  const [backgroundProgress,setBackgroundProgress]=useState('');
  const backgroundGeneration=useRef(0);
