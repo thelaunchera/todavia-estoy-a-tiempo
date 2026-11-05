@@ -90,8 +90,8 @@ function shapePaint(ctx:CanvasRenderingContext2D,shape:PanoramaLayer,w:number,h:
   ctx.shadowColor='#12182035';ctx.shadowBlur=Math.max(5,w*.032);
   rounded();ctx.fill();
  } else if(kind==='tape'){
-  rounded();ctx.save();ctx.clip();ctx.globalAlpha=.72;ctx.fill();
-  ctx.globalAlpha=.25;ctx.fillStyle='#FFFFFF';ctx.fillRect(-w/2,-h/2,w,h*.13);ctx.restore();
+  rounded();ctx.save();ctx.clip();const layerAlpha=ctx.globalAlpha;ctx.globalAlpha=layerAlpha*.72;ctx.fill();
+  ctx.globalAlpha=layerAlpha*.25;ctx.fillStyle='#FFFFFF';ctx.fillRect(-w/2,-h/2,w,h*.13);ctx.restore();
  } else if(kind==='circle'){
   ctx.beginPath();ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);ctx.fill();
  } else {
