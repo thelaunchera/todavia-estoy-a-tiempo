@@ -66,3 +66,24 @@
 .studio-app-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:7px;max-height:180px;overflow-y:auto}
 .studio-app-photo-grid>button{background:#fff;border:1px solid #dde4e5;border-radius:10px;padding:4px;min-height:77px}
 .studio-app-photo-grid img{width:100%;height:70px;display:block;object-fit:contain}
+
+/* Selected-layer transparency stays visible near the canvas on mobile instead of
+   hiding below long editing toolbars. 100% = opaque; 0% = invisible. */
+.studio-app-opacity-control{
+  display:flex;align-items:center;gap:10px;min-width:0;padding:9px 12px;
+  border:1px solid #b9cbd0;border-radius:14px;background:#faf8f3;
+  box-shadow:0 5px 20px #142c3b22;color:#191919
+}
+.studio-app-opacity-control label{font-size:13px;font-weight:800;white-space:nowrap}
+.studio-app-opacity-control input[type=range]{min-width:48px;flex:1;accent-color:#191919;touch-action:manipulation}
+.studio-app-opacity-control output{min-width:41px;text-align:right;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.studio-app-opacity-control button{flex:0 0 auto;min-height:38px;padding:7px 10px;border:1px solid #d3d9db;border-radius:10px;background:#fff;color:#191919;font:700 12px inherit}
+@media(max-width:799px){
+  .studio-app-opacity-control{
+    position:fixed;left:8px;right:8px;width:auto;max-width:650px;
+    margin:0 auto;bottom:calc(83px + env(safe-area-inset-bottom));
+    z-index:1803;padding:8px 10px;gap:8px;box-sizing:border-box
+  }
+  .studio-app-opacity-control label{font-size:12px}
+  .studio-app-opacity-control input[type=range]{width:36px}
+}
