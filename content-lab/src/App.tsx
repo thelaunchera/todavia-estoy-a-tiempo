@@ -589,6 +589,9 @@ function App() {
   const startFactory = () => {
     if (!brand) return;
     setCalendarEditId('');
+    // A new session must not inherit media selected for a previous carousel.
+    setBackgroundPref({version:0});
+    setStickerPref({version:0});
     editorSessionRef.current++;
     setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel'}));
     navigate('factory');
@@ -697,6 +700,39 @@ function App() {
       setBusy('');
       setSavePulse(n=>n+1);
     }
+  };
+  const saveAndStartAnotherCarousel=async():Promise<boolean>=>{
+    if(!brand||editorLatestRef.current.brandId!==brand.id)return false;
+    if(saveInFlightRef.current){
+      toast(loginLanguage==='es'
+        ?'Todavía se está guardando el carrusel. Inténtalo otra vez cuando termine.'
+        :'Your carousel is still being saved. Try again when it finishes.');
+      return false;
+    }
+    const draft=editorLatestRef.current;
+    const fingerprint=draftFingerprint(draft);
+    const session=editorSessionRef.current;
+    // Wait for the server, not only a local auto-save or the PNG download.
+    const saved=await save(draft,true);
+    if(!saved){
+      toast(loginLanguage==='es'
+        ?'No se pudo guardar. Tu diseño sigue aquí; inténtalo de nuevo.'
+        :'Could not save. Your design is still here; please try again.');
+      return false;
+    }
+    // Editing or switching projects during the save must never lose newer work.
+    if(editorSessionRef.current!==session||
+       draftFingerprint(editorLatestRef.current)!==fingerprint){
+      toast(loginLanguage==='es'
+        ?'Hay cambios recientes sin guardar. Guárdalos antes de crear otro carrusel.'
+        :'There are newer unsaved changes. Save them before starting another carousel.');
+      return false;
+    }
+    startFactory();
+    toast(loginLanguage==='es'
+      ?'Carrusel guardado en Mis posts. Ya puedes crear otro.'
+      :'Carousel saved in My posts. You can create another now.');
+    return true;
   };
   const saveAndReturnToCalendar=async(candidate?:Post)=>{
     const draft=candidate||editorLatestRef.current;
@@ -1626,6 +1662,9 @@ function App() {
           )}
           {brand && tab === 'factory' && (
             <CarouselFactory
+              key={'carousel-session-'+editorSessionRef.current}
+              locale={loginLanguage}
+              onStartNewCarousel={saveAndStartAnotherCarousel}
               onUploadPhoto={async file=>upload(file,'original',false)}
               onUploadSticker={async file=>upload(file,'sticker',false,brand.id,true)}
               onUploadBackground={async file=>upload(file,'background',false,brand.id,true)}
