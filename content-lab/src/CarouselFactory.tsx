@@ -1603,6 +1603,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         </div>
       </div>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+        pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
           if(style.seamlessEnabled){
