@@ -152,11 +152,11 @@ export default function SeamlessEditor(){
  const [slide,setSlide]=useState(0);
  const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
  const thumbnailsRef=useRef<(HTMLCanvasElement|null)[]>([]);
- const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:1100px)').matches);
+ const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:900px)').matches);
  const [artboardSpace,setArtboardSpace]=useState(740);
  const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
  useEffect(()=>{
-   const mq=window.matchMedia('(min-width:1100px)');
+   const mq=window.matchMedia('(min-width:900px)');
    const change=()=>setWideScreen(mq.matches);
    change();mq.addEventListener('change',change);
    return()=>mq.removeEventListener('change',change);
