@@ -29,6 +29,9 @@ const SALT_LINE = {
   folder: 'https://drive.google.com/drive/folders/1KcEkuwkLcmzUY9PWsh0cvUSsCOyAzDsA',
   pdf: 'https://drive.google.com/file/d/1kkRLliJaRtHKYes8X8FzPuSxP2vqZ5jc/view',
   hero: '1cjtBtDSUEsMmh_v9zzpExZJYWgJLN7g0',
+  signup: 'https://podcast.thelaunchera.com/freebies/january-salt-line/',
+  access: 'https://podcast.thelaunchera.com/freebies/january-salt-line/access/',
+  make: 'https://us2.make.com/2964061/scenarios/6912745',
 } as const;
 const SALT_LINE_PHOTOS = [
   { id: '1wbN3yQEhlC6hAWg9h5oDQSXhhsfy7Pkx', name: '01 · The Woman' },
@@ -229,6 +232,9 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           <div className="freebies-actions">
             {external(SALT_LINE.folder,'Carpeta SALT LINE · Drive',ExternalLink)}
             {external(SALT_LINE.pdf,'PDF fuente · solo administración',ClipboardCopy)}
+            {external(SALT_LINE.signup,'Formulario de enero · desactivado hasta QA',Mail)}
+            {external(SALT_LINE.access,'Página de entrega web · PDF',ExternalLink)}
+            {external(SALT_LINE.make,'Escenario Make · inactivo',ExternalLink)}
           </div>
         </details>
         <p className="freebies-disclaimer">Preparado para enero. El botón abre el PDF en una vista privada de administración. No está publicado para solicitantes: falta probar el formulario, Resend y el acceso seguro.</p>
