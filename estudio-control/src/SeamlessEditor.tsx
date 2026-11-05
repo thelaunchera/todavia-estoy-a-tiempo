@@ -1,5 +1,6 @@
 import {createPortal} from 'react-dom';
 import BrandAssetLibrary from './BrandAssetLibrary';
+import ManualBackgroundEraser from './ManualBackgroundEraser';
 import {STUDIO_SHAPES,studioShapeData,type StudioShape} from './studio-shapes';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
 import {type SovaCarouselAsset} from './sova-carousel-assets';
@@ -76,6 +77,7 @@ export default function SeamlessEditor(){
  useEffect(()=>{if(!message)return;const timeout=window.setTimeout(()=>setMessage(''),2000);return()=>window.clearTimeout(timeout)},[message]);
  const [busy,setBusy]=useState(false);
  const [backgroundProgress,setBackgroundProgress]=useState('');
+ const [manualCutout,setManualCutout]=useState<{id:number;src:string;originalSrc:string;originalBackupId?:string}|null>(null);
  const backgroundGeneration=useRef(0);
  const [brandFilter,setBrandFilter]=useState('todos');
  const [hiddenDraftIds,setHiddenDraftIds]=useState<string[]>(()=>{try{return JSON.parse(localStorage.getItem('studio-hidden-carousel-drafts-v1')||'[]')}catch{return []}});
@@ -787,6 +789,32 @@ export default function SeamlessEditor(){
    if(generation===backgroundGeneration.current){setBusy(false);setBackgroundProgress('');}
   }
  };
+ const openManualEraser=async()=>{
+  if(busy)return;
+  const item=doc.items.find(it=>it.id===selected);
+  if(!item||item.kind!=='image'||!item.src||item.role==='background')return;
+  setBusy(true);
+  try{
+   const originalSrc=item.originalBackupId?await restoreOriginalPhoto(item.originalBackupId):item.src;
+   setManualCutout({id:item.id,src:item.src,originalSrc,originalBackupId:item.originalBackupId});
+   setQuickPanel(null);
+  }catch(err){
+   setMessage(err instanceof Error?err.message:'No se pudo recuperar la foto para editarla.');
+  }finally{setBusy(false);}
+ };
+ const applyManualCutout=async(transparentPng:string)=>{
+  const item=manualCutout;
+  if(!item)throw Error('El recorte ya no está abierto.');
+  if(!doc.items.some(photo=>photo.id===item.id&&photo.src===item.src))
+   throw Error('Esta foto cambió mientras editabas. El recorte no se aplicó.');
+  const backupId=item.originalBackupId||await storeOriginalPhoto(await originalBlobFromSource(item.originalSrc));
+  setDoc(d=>({...d,items:d.items.map(photo=>
+   photo.id===item.id&&photo.src===item.src
+    ?{...photo,src:transparentPng,originalBackupId:backupId}:photo)}));
+  setSelected(item.id);
+  setManualCutout(null);
+  setMessage('Recorte manual aplicado sin salir del carrusel. Puedes restaurar la foto original.');
+ };
  const restorePhotoBackground=async()=>{
   if(busy)return;
   const item=doc.items.find(it=>it.id===selected);
@@ -1081,6 +1109,7 @@ export default function SeamlessEditor(){
  <div className="studio-app-selection">  {current?.kind==='image'&&current.role!=='background'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
     onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo liso'}</button>
+   <button type="button" style={control} disabled={busy} onClick={()=>void openManualEraser()}>Recorte manual</button>
    {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar original</button>}
    {busy&&backgroundProgress&&<span role="status" style={{fontSize:12}}>{backgroundProgress}</span>}
   </div>}
@@ -1153,6 +1182,7 @@ export default function SeamlessEditor(){
      <button type="button" disabled={!current} aria-pressed={!!current?.flipY} onClick={()=>current&&update(current.id,{flipY:!current.flipY})}><FlipVertical size={20}/><small>Voltear V</small></button>
      <button type="button" disabled={current?.kind!=='text'} aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector('curve')}><Type size={20}/><small>Curvar texto</small></button>
      <button type="button" disabled={!current||current.kind!=='image'||current.role==='background'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo liso</small></button>
+     <button type="button" disabled={!current||current.kind!=='image'||current.role==='background'||busy} onClick={()=>void openManualEraser()}><Paintbrush size={20}/><small>Recorte manual</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='color'} onClick={()=>setActiveInspector('color')}><Paintbrush size={20}/><small>Color</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='effects'} onClick={()=>setActiveInspector('effects')}><Sun size={20}/><small>Sombras</small></button>
      <button type="button" disabled={!current} onClick={duplicateSelected}><Copy size={20}/><small>Duplicar</small></button>
@@ -1163,6 +1193,9 @@ export default function SeamlessEditor(){
      <button type="button" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={20}/><small>Rehacer</small></button>
    </div>
 {openPanel&&(wideScreen?assetSheet:createPortal(assetSheet,document.body))}
+  {manualCutout&&<ManualBackgroundEraser src={manualCutout.originalSrc}
+    onCancel={()=>setManualCutout(null)} onApply={applyManualCutout}/>}
+
 
   <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
