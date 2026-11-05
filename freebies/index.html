@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#FAF8F3">
-  <meta name="description" content="Original creative freebies by The Launch Era. Explore free photo prompts, join the website class waitlist, and create more with Content Lab.">
+  <meta name="description" content="Freebies creativos de The Launch Era, prompts originales y lista de espera para crear tu primera web con IA.">
   <meta property="og:title" content="Freebie Library — The Launch Era">
   <meta property="og:description" content="Free creative prompts, visual ideas and resources for your next project.">
   <meta property="og:type" content="website">
   <link rel="canonical" href="https://podcast.thelaunchera.com/freebies/">
-  <title>Freebie Library | The Launch Era</title>
+  <title>Biblioteca de freebies | The Launch Era</title>
   <style>
     :root{--paper:#faf8f3;--ink:#191919;--blue:#c2d9e8;--soft:#ecf1f3;--line:#dcdad3;--muted:#5c6162;--yellow:#f2d85b}
     *{box-sizing:border-box}
@@ -27,8 +27,8 @@
     .brand-dot{color:#77a7c2}
     .top-nav{display:flex;align-items:center;gap:24px}
     .top-nav a{text-decoration:none;font-size:12px;font-weight:700}
-    .language-toggle{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 12px;min-width:47px;font-size:11px;font-weight:800;letter-spacing:.08em}
-    .btn{min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:14px 25px;text-align:center;text-decoration:none;background:var(--ink);color:#fff;font-weight:800;font-size:13px;border:1px solid var(--ink);border-radius:2px;line-height:1.2;transition:background .2s ease,transform .2s ease}
+    .language-toggle{border-radius:999px;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 12px;min-width:47px;font-size:11px;font-weight:800;letter-spacing:.08em}
+    .btn{border-radius:999px;min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:14px 25px;text-align:center;text-decoration:none;background:var(--ink);color:#fff;font-weight:800;font-size:13px;border:1px solid var(--ink);border-radius:2px;line-height:1.2;transition:background .2s ease,transform .2s ease}
     .btn:hover{background:#303d44;transform:translateY(-1px)}
     .btn-outline{background:transparent;color:var(--ink)}.btn-outline:hover{background:#e8eceb}
     /* Original blue / black / yellow typographic hero; photography can be added later. */
@@ -88,7 +88,7 @@
     .waitlist-form input[type=email]{width:100%;min-height:51px;background:#fff;padding:14px 15px;border:1px solid #abb6bd;color:var(--ink);font-size:16px;border-radius:2px}
     .check-label{display:flex;align-items:flex-start;gap:11px;font-size:12px;line-height:1.5;color:#4f5b5d;margin:18px 0}
     .check-label input{margin:2px 0 0;flex:0 0 17px;width:17px;height:17px;accent-color:#191919}
-    .waitlist-form button[type=submit]{width:100%;border:1px solid var(--ink);background:var(--ink);color:#fff;min-height:52px;padding:13px;font-size:13px;font-weight:800}
+    .waitlist-form button[type=submit]{border-radius:999px;width:100%;border:1px solid var(--ink);background:var(--ink);color:#fff;min-height:52px;padding:13px;font-size:13px;font-weight:800}
     .waitlist-form button:disabled{opacity:.6;cursor:not-allowed}
     .form-feedback{font-size:12px;color:#5d696c;line-height:1.6;min-height:1.5em;margin:13px 0}
     .waitlist-form small{display:block;font-size:11px;color:#636d6f;line-height:1.6}
@@ -183,7 +183,7 @@
         <a href="#freebies" data-en="Freebies" data-es="Gratis">Freebies</a>
         <a href="#class-waitlist" data-en="The class" data-es="La clase">The class</a>
         <a href="#content-lab" class="nav-lab">Content Lab</a>
-        <button type="button" id="language-toggle" class="language-toggle" aria-label="Cambiar a español">ES</button>
+        <button type="button" id="language-toggle" class="language-toggle" aria-label="Switch to English">EN</button>
       </nav>
     </div>
   </header>
@@ -333,7 +333,7 @@
       const classLinks=["class-details-link","success-class-link","footer-class-link"];
       const labLinks=["lab-link","footer-lab-link"];
       const privacyLinks=["privacy-link","footer-privacy-link"];
-      let lang=new URLSearchParams(location.search).get("lang")==="es"?"es":"en";
+      let lang=new URLSearchParams(location.search).get("lang")==="en"?"en":"es";
       function getToday(){
         const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
         return p.year+"-"+p.month+"-"+p.day;
