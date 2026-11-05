@@ -2,6 +2,10 @@ name: Publish verified-email freebies and Studio safely
 on:
   push:
     paths:
+      - 'freebies/**'
+      - 'assets/freebies/**'
+      - 'estudio-control/src/FreebieLibrary.tsx'
+      - 'estudio-control/src/freebie-library.css'
       - '.github/workflows/deploy-november-bilingual-hotfix.yml'
   workflow_dispatch:
 permissions:
@@ -62,6 +66,9 @@ jobs:
             file="_podcast_pages/freebies/$access/index.html"
             test -s "$file"
             grep -q 'freebie-access.js' "$file"
+            # Visual-first rule: approved hero precedes the private access panel, and embedded type stays uncropped.
+            grep -q 'class="hero-media"' "$file"
+            grep -q 'object-fit:contain' "$file"
             if grep -Eq 'Act as an expert web designer|Create an editorial beauty campaign' "$file"; then
               echo "Private prompts leaked in $file" >&2; exit 1
             fi
