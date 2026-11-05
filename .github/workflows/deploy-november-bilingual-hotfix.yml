@@ -56,6 +56,35 @@ jobs:
           cp -R freebies/. _podcast_pages/freebies/
           cp -R assets/freebies/. _podcast_pages/assets/freebies/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
+          # The verified Lab snapshot is intentionally frozen, but the current
+          # Studio references newer shared sticker/background PNGs by URL.
+          # Overlay only their static image files; do not replace the paid Lab app.
+          mkdir -p _podcast_pages/content-lab/resources
+          cp -R content-lab/public/resources/. _podcast_pages/content-lab/resources/
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          source = Path('estudio-control/src/lab-assets.ts').read_text()
+          prefix = 'export const LAB_ASSETS = '
+          if not source.startswith(prefix) or ' as const;' not in source:
+              raise SystemExit('El catálogo de assets del Studio cambió de formato.')
+          assets = json.loads(source[len(prefix):].rsplit(' as const;', 1)[0])
+          if not assets:
+              raise SystemExit('El catálogo del Studio está vacío.')
+          for asset in assets:
+              relative = asset['file']
+              if not relative.startswith('resources/') or '..' in Path(relative).parts:
+                  raise SystemExit(f'Ruta de recurso inválida: {relative}')
+              destination = Path('_podcast_pages/content-lab') / relative
+              if not destination.is_file() or destination.stat().st_size < 100:
+                  raise SystemExit(f'Sticker/fondo faltante en publicación: {relative}')
+              if destination.suffix.lower() == '.png':
+                  with destination.open('rb') as image:
+                      if image.read(8) != bytes((137, 80, 78, 71, 13, 10, 26, 10)):
+                          raise SystemExit(f'PNG inválido en publicación: {relative}')
+          print(f'{len(assets)} stickers y fondos del Studio presentes y verificados.')
+          PY
           # The archived January PDF remains as a source asset, never a public bypass.
           rm -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
           test ! -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
