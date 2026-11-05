@@ -21,6 +21,7 @@ type Props = {
   onCopySticker?:(id:string,targetIndex:number)=>StickerCopyResult;
   onToggleLock?:(id:string,locked:boolean)=>void;
   onDuplicateText?:(id:string)=>void;
+  onDuplicateLayer?:(id:string)=>void;
   onUndo:()=>void;onRedo:()=>void;canUndo:boolean;canRedo:boolean;
   onAdd: (assetId: string, point: Point) => void;
   onRemove: (id: string) => void;
@@ -33,7 +34,7 @@ type Props = {
 };
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
-  onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,
+  onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
   canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -362,7 +363,7 @@ export default function PanoramaEditor({
         onSelectionChange={setSelectedLayerId}
         focusLayerId={focusedLayerId||focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
-         onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}
+         onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText} onDuplicateLayer={onDuplicateLayer}
         onDropAsset={onAdd} onDropFiles={(files, point) => { void upload(files, point); }}/>
       <details className="panorama-text-manager"><summary>Textos del carrusel ({textElements.length}) · borrar</summary>
         <p>Los textos se eliminan aquí; las fotos y stickers se borran desde el lienzo o su lista.</p>
