@@ -36,7 +36,7 @@ test('Both touch editors keep text selectable and do not reset layers on blur',(
  assert.ok(studio.includes('item.id===firstTouchId'));
  assert.ok(studio.includes('queueTransform(it.id'));;
  assert.ok(studio.includes('if(starter){setSelected(starter.id);setEditingText(starter.id)'));
- assert.ok(studio.includes('goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true)'));
+ assert.ok(studio.includes("goSlide(Math.max(0,Math.min(doc.count-1,it.role==='background'?(it.backgroundSlide??0):Math.floor(it.x/W))),true)"));
  assert.ok(studio.includes('const interacted=layerGesture.current'));
  assert.ok(studio.includes("if(!active)return;"));
 });
