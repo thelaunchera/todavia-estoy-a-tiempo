@@ -60,15 +60,6 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
-/** Normal mode clips movable panorama elements to their own slide.
- * Seamless keeps the original full-width geometry for genuine cross-slide cuts. */
-const constrainNormalLayer=<T extends {rect:TouchRect},>(layer:T,count:number):T=>{
- const n=Math.max(1,count),r=clampPanoramaRect(layer.rect,.055/n);
- const page=Math.max(0,Math.min(n-1,Math.floor((r.x+r.w/2)*n)));
- const left=page/n,width=Math.min(r.w,1/n);
- return {...layer,rect:{...r,w:width,x:Math.max(left,Math.min(left+1/n-width,r.x))}} as T;
-};
-
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
  if(!slide.assetId)return {...slide,layout};
@@ -486,7 +477,7 @@ export async function renderSavedCarouselCover(
     .some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
   const pages=await Promise.all(slides.map((part,n)=>
     drawSlide(part,n,slides.length,brand,images,style,hasBehind)));
-  const saved=(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length));
+  const saved=style.panoramaLayers||[];
   // When a customer sends a photo behind text, the native slide photos and
   // stickers must be composed between the back layers and typography too.
   const native:PanoramaLayer[]=hasBehind?slides.flatMap((part,n)=>{
@@ -513,7 +504,7 @@ export async function renderSavedCarouselCover(
   ]:saved;
   try{
     const composed=await overlayPanoramaPages(pages,ordered,images,
-      ctx=>paintCarouselTypography(ctx,slides,brand,style));
+      ctx=>paintCarouselTypography(ctx,slides,brand,style),true);
     for(const canvas of composed.slice(1)){canvas.width=1;canvas.height=1;}
     return composed[0];
   }finally{
@@ -668,14 +659,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     // Recompose only when an element is actually sent backward. The flat
     // preview otherwise stays on the existing fast rendering path.
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style,hasBehind,pixelScale)));
-    const saved=(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length));
+    const saved=style.panoramaLayers||[];
     // Native slide photos/stickers must sit ABOVE behind-layers but BELOW titles,
     // just as they do in the touch editor. Never bake them twice.
     const native=hasBehind?pageLayers.filter(layer=>layer.kind==='photo'||layer.kind==='sticker')
       .map(layer=>({...layer,placement:'behind-text' as const})):[];
     const ordered=hasBehind?[...saved.filter(layer=>layer.placement==='behind-text'),...native,
       ...saved.filter(layer=>layer.placement!=='behind-text')]:saved;
-    return overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
+    return overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography(ctx,slides,brand,style),true);
   };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     recordHistory(post.designData||encodeCarouselDesign(slides,style));
@@ -1027,8 +1018,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const panoramaLayers=[...savedPanoramaLayers.filter(layer=>layer.role==='background'),
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
     ...pageLayers,
-    ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')]
-    .map(layer=>style.seamlessEnabled?layer:constrainNormalLayer(layer,slides.length));
+    ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -1044,7 +1034,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   });
   const promoteSource=(source:(typeof pageLayers)[number],rect:TouchRect):PanoramaLayer=>({
     id:source.id,assetId:source.assetId||'',name:source.name,kind:source.kind,
-    rect:clampPanoramaRect(rect),placement:'front',
+    rect:clampPanoramaRect(rect),page:source.page,placement:'front',
     ...(source.kind==='text'?{text:source.text,font:source.font,fontSize:source.fontSize,
       lineHeight:source.lineHeight,spacing:source.spacing,color:source.color}:{}),
   });
@@ -1083,27 +1073,24 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     notify('Elemento duplicado. Puedes moverlo sin cambiar el original.');
   };
   const movePanoramaLayer=(kind:'photo'|'sticker'|'text'|'shape',id:string,rect:TouchRect)=>{
-    const crossesSeam=(r:TouchRect,count:number)=>Array.from({length:Math.max(0,count-1)},(_,i)=>(i+1)/count)
-      .some(cut=>r.x<cut-.0001&&r.x+r.w>cut+.0001);
     if((style.lockedLayerIds||[]).includes(id)||(style.panoramaLayers||[]).some(layer=>layer.id===id&&layer.locked))return;
     const source=pageLayers.find(layer=>layer.id===id);
-    // A photo crossing an internal 4:5 cut is a seamless layout even if this
-    // draft began in "Normal". Promote it instead of snapping it back.
-    const seamRequested=style.seamlessEnabled||(kind==='photo'&&crossesSeam(rect,slides.length));
+    // Overflow is a placement choice, not permission to switch from Normal.
+    // Preserve the original rectangle; normal rendering clips by owning page.
     if(source){
       if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
-      const promoted=promoteSource(source,rect);
-      setAll(stripSource(source),{...style,seamlessEnabled:seamRequested,
-        panoramaLayers:[...(style.panoramaLayers||[]),seamRequested?promoted:constrainNormalLayer(promoted,slides.length)]});
-    }else {
+      setAll(stripSource(source),{...style,
+        panoramaLayers:[...(style.panoramaLayers||[]),promoteSource(source,rect)]});
+    }else{
       const updated=(style.panoramaLayers||[]).map(layer=>{
         if(layer.id!==id)return layer;
-        const next={...layer,rect:clampPanoramaRect(rect)};
-        return seamRequested?next:constrainNormalLayer(next,slides.length);
+        const prior=clampPanoramaRect(layer.rect);
+        const owner=Number.isInteger(layer.page)?layer.page!:
+          Math.max(0,Math.min(slides.length-1,Math.floor((prior.x+prior.w/2)*slides.length)));
+        return {...layer,rect:clampPanoramaRect(rect),page:owner};
       });
-      setArtStyle({seamlessEnabled:seamRequested,panoramaLayers:updated});
+      setArtStyle({panoramaLayers:updated});
     }
-    if(!style.seamlessEnabled&&seamRequested)notify('Seamless activado: la foto ahora cruza los slides y se cortará al exportar.');
   };
   const copyPanoramaSticker=(id:string,targetIndex:number):StickerCopyResult=>{
     if(targetIndex<0||targetIndex>=slides.length)return 'invalid';
@@ -1132,7 +1119,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       ...global.rect,x:global.rect.x+(targetIndex-sourceIndex)/count,
     },.055/count);
     setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),{
-      ...global,id:'panorama-'+crypto.randomUUID(),rect,
+      ...global,id:'panorama-'+crypto.randomUUID(),rect,page:targetIndex,
       name:global.name+' · slide '+(targetIndex+1),
     }]});
     notify('Sticker copiado al slide '+(targetIndex+1)+' con su tamaño y giro.');
@@ -1161,10 +1148,10 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     const newLayer:PanoramaLayer=kind==='text'
       ?{id:currentId,kind,assetId:'',name:'Texto libre',placement:'front',
          text:'Escribe tu título',font:style.font==='brand'?(brand.headingFont||'serif').toLowerCase():style.font,fontSize:86,lineHeight:1.12,spacing:0,color:readableColor(style.canvasColor||'#FFFFFF'),
-         rect:{x:(n+.12)/count,y:.35,w:.76/count,h:.24}}
+         rect:{x:(n+.12)/count,y:.35,w:.76/count,h:.24},page:n}
       :{id:currentId,kind,assetId:'',name:'Collage · '+(shape||'paper'),shape:shape||'paper',
          placement:'front',color:shape==='tape'?'#E5C9AA':'#F1E5D2',
-         rect:{x:(n+.2)/count,y:.35,w:.60/count,h:shape==='tape'?.10:.35}};
+         rect:{x:(n+.2)/count,y:.35,w:.60/count,h:shape==='tape'?.10:.35},page:n};
     setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),newLayer]});
     setFocusWallpaperId(currentId);
     notify(kind==='text'?'Texto seleccionado: tócalo para editarlo.':'Elemento seleccionado: muévelo con el dedo.');
@@ -1218,7 +1205,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         {x:point.x-w/2,y:point.y-h/2,w,h};
       latestAddedId='panorama-'+crypto.randomUUID();
       const layer:PanoramaLayer={id:latestAddedId,assetId:asset.id,
-        name:displayAssetName(asset),kind,
+        name:displayAssetName(asset),kind,page,
         ...(isWallpaper?{role:'background' as const,placement:'behind-text' as const}:{}),
         rect:clampPanoramaRect(rect,.055/count)};
       nextStyle={...nextStyle,panoramaLayers:[...(nextStyle.panoramaLayers||[]),layer]};
@@ -1347,9 +1334,9 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           const behind=style.panoramaLayers.filter(layer=>layer.placement==='behind-text');
           const front=style.panoramaLayers.filter(layer=>layer.placement!=='behind-text');
           const ctx=page.getContext('2d');if(ctx){ctx.save();ctx.translate(-i*1080,0);
-            await paintPanoramaLayers(ctx,slides.length*1080,1350,behind,images);
+            await paintPanoramaLayers(ctx,slides.length*1080,1350,behind,images,slides.length);
             if(behind.length)await paintCarouselTypography(ctx,slides,brand,style);
-            await paintPanoramaLayers(ctx,slides.length*1080,1350,front,images);ctx.restore();}
+            await paintPanoramaLayers(ctx,slides.length*1080,1350,front,images,slides.length);ctx.restore();}
         }
         return page;
       };
@@ -1570,7 +1557,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     </div>
     {studioTab==='canvas'&&<p className="factory-mode-hint">{style.seamlessEnabled
       ?'✓ Lienzo continuo: coloca una foto sobre la línea entre dos slides. El corte se hace al descargar.'
-      :'Para poner una foto entre dos slides, muévela sobre la línea de corte o pulsa «Foto entre slides». Activaremos Seamless automáticamente.'}</p>}
+      :'En Normal puedes dejar una foto fuera del borde: se recorta en su slide y no activa Seamless.'}</p>}
     <nav className="factory-studio-tabs factory-cata-nav" aria-label="Pasos para crear el carrusel">
       <div className="factory-step-rail" role="tablist" aria-label="Proceso de diseño">
         {([
