@@ -8,6 +8,7 @@ import {PRIVATE_DEMO_KIT_SECTION} from './PrivateDemoKits';
 import ReelsProduction from './ReelsProduction';
 import BrandReelsProduction from './BrandReelsProduction';
 import BonusLibrary from './BonusLibrary';
+import FreebieLibrary, { FREEBIES_SECTION } from './FreebieLibrary';
 import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
 import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
@@ -75,6 +76,7 @@ type Page =
   | 'alumnos'
   | 'espera'
   | 'bonos'
+  | 'freebies'
   | 'club'
   | 'calendario'
   | 'tareas'
@@ -161,6 +163,7 @@ const NAV = [
   { id: 'alumnos', label: 'Aula y estudiantes', icon: BookOpen },
   { id: 'espera', label: 'Inscripciones y espera', icon: Mail },
   { id: 'bonos', label: 'Biblioteca de bonos', icon: Sparkles },
+  { id: 'freebies', label: 'Mis freebies · lanzamientos', icon: Sparkles },
   { id: 'club', label: 'Comunidad · Club', icon: Users },
   { id: 'demos', label: 'Demos de la clase', icon: Globe2 },
   { id: 'youtube', label: 'YouTube · Nia y Ruby', icon: Film, group: 'YOUTUBE · SERIE ANIMADA' },
@@ -189,6 +192,7 @@ const LABELS: Record<Page, string> = {
   alumnos: 'Clase · aula y estudiantes',
   espera: 'Lista de espera',
   bonos: 'Clase · biblioteca de bonos',
+  freebies: 'Mi Estudio · freebies y lanzamientos',
   club: 'Club de Ideas',
   calendario: 'Calendario editorial',
   tareas: 'Tareas',
@@ -292,7 +296,7 @@ function App() {
     [error, setError] = useState('');
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -665,7 +669,7 @@ function App() {
     productos: [],
     ideas: [],
   };
-  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== 'youtube-storyboards-v1' && x.section !== 'youtube-unassigned-moodboard-v1' && x.section !== MICRO_SCENE_SECTION && x.section !== PRIVATE_DEMO_KIT_SECTION);
+  const editorialIdeas = items.ideas.filter(x => x.section !== CLASS_SECTION && x.section !== REELS_SECTION && x.section !== BRAND_REELS_SECTIONS.clase && x.section !== BRAND_REELS_SECTIONS.lab && x.section !== 'clase-01-recursos-visuales' && x.section !== LINK_CENTER_SECTION && x.section !== FREEBIES_SECTION && x.section !== 'youtube-storyboards-v1' && x.section !== 'youtube-unassigned-moodboard-v1' && x.section !== MICRO_SCENE_SECTION && x.section !== PRIVATE_DEMO_KIT_SECTION);
   const episodes = useMemo(
     () =>
       [...items.episodios].sort((a,b) => {
@@ -704,7 +708,7 @@ function App() {
     setMobileNav(false);
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos') nextUrl.searchParams.set('seccion',p);
+    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1519,6 +1523,7 @@ function App() {
             </section>
           )}
           {page === 'bonos' && <BonusLibrary />}
+          {page === 'freebies' && <FreebieLibrary entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'links' && <LinkCenter entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'demos' && <FinishedDemos onOpenClass={()=>change('clases')} entries={items.ideas} />}
           {page === 'clases' && (
