@@ -57,7 +57,13 @@
     action.addEventListener('click', markSeen, {once:true});
     dialog.showModal();
   };
+  const afterCatalog = () => {
+    const ready = window.PODCAST_EPISODE_FEED_READY;
+    if (ready && typeof ready.then === 'function') {
+      ready.then(show).catch(show);
+    } else show();
+  };
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', show, {once:true});
-  } else show();
+    document.addEventListener('DOMContentLoaded', afterCatalog, {once:true});
+  } else afterCatalog();
 })();
