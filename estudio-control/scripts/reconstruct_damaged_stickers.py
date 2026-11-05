@@ -331,6 +331,54 @@ def main():
             raise SystemExit(f"Cannot safely update Content Lab metadata: {file}, matches={n}")
         bundled=new
     BUNDLED.write_text(bundled,encoding="utf-8")
+
+    # Publish the recovery atomically. Before this commit, the damaged files
+    # remain quarantined; after verified reconstruction, all 119 are available.
+    quarantine=Path("content-lab/src/QuarantinedBundledAssets.ts")
+    quarantine.write_text(
+        "/** All 33 previously truncated PNGs have been reconstructed and independently\n"
+        " * decoded. They keep their original IDs, filenames and dimensions.\n"
+        " * The damaged Git blobs remain in history; these are new illustrations,\n"
+        " * not byte-for-byte restorations of the unavailable source images.\n"
+        " */\nexport const QUARANTINED_BUNDLED_ASSET_IDS=new Set<string>([]);\n",
+        encoding="utf-8",
+    )
+    suite=Path("content-lab/tests/bundled-design-assets.test.mjs")
+    test=suite.read_text(encoding="utf-8")
+    for before,after in (
+        ("file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,1)",
+         "file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,20)"),
+        ("file.startsWith('resources/holiday-stickers-2026-11/')).length,2)",
+         "file.startsWith('resources/holiday-stickers-2026-11/')).length,16)"),
+        ("x.category==='sticker').length,66)", "x.category==='sticker').length,99)"),
+        ("new Set(files.map(x=>x.id)).size,86)", "new Set(files.map(x=>x.id)).size,119)"),
+        ("new Set(files.map(x=>x.sha256)).size,86)", "new Set(files.map(x=>x.sha256)).size,119)"),
+        ("bundledDesignAssets('sticker',[sticker.id]).length,65)",
+         "bundledDesignAssets('sticker',[sticker.id]).length,98)"),
+    ):
+        if before not in test:
+            raise SystemExit("Refusing unsafe test rewrite: "+before)
+        test=test.replace(before,after)
+    start=test.index("test('Corrupt PNG uploads are quarantined")
+    end=test.index("test('Curation hides",start)
+    test=test[:start]+"""test('All 119 released files are verified and unavailable stickers are restored',()=>{
+ const originals=bundle.ORIGINAL_BUNDLED_DESIGN_ASSETS;
+ const visible=bundle.BUNDLED_DESIGN_ASSETS;
+ assert.equal(originals.length,119);
+ assert.equal(visible.length,119);
+ assert.equal(bundle.QUARANTINED_BUNDLED_ASSET_IDS.size,0);
+ assert.equal(new Set(originals.map(x=>x.id)).size,119);
+ for(const a of originals){
+  const bytes=readFileSync(resolve(root,'public',a.file));
+  assert.equal(bytes.length,a.sizeBytes,a.file);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),a.sha256,a.file);
+  assert.equal(bytes.subarray(-12).toString('hex'),'0000000049454e44ae426082',a.file);
+ }
+});
+
+"""+test[end:]
+    suite.write_text(test,encoding="utf-8")
+
     print("Reconstructed 33 damaged individual transparent PNGs:")
     for file,size,sha in changed:
         print(f"REPAIRED {file} ({size} bytes, sha256 {sha})")
