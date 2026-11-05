@@ -38,9 +38,11 @@ export default function PanoramaEditor({
   canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [libraryOpen,setLibraryOpen]=useState(false);
-  const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('photo');
-  const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'>('all');
+  // On tablet and desktop, show the dedicated editing library immediately.
+  // On phones, the fixed tool rail remains visible and panels open on demand.
+  const [libraryOpen,setLibraryOpen]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(min-width:921px)').matches);
+  const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('sticker');
+  const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'>('stickers');
   const [selectedLayerId,setSelectedLayerId]=useState<string|null>(null);
   const [layersOpen,setLayersOpen]=useState(false);
   const [focusedLayerId,setFocusedLayerId]=useState('');
@@ -194,7 +196,7 @@ export default function PanoramaEditor({
   const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
     onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
-  const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:1360px)').matches;
+  const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:920px)').matches;
   const libraryPanel=<aside className={'panorama-library'+(mobileGallery?' panorama-library-floating':'')+(expanded?' panorama-library-expanded':'')} aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Explorar elementos</strong>
         <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
