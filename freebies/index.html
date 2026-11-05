@@ -96,11 +96,9 @@
     .lab-content{display:grid;grid-template-columns:54px 1fr;min-height:250px}
     .lab-side{background:#e4ecee;display:flex;flex-direction:column;gap:13px;padding:20px 15px}
     .lab-side i{width:24px;height:4px;border-radius:3px;background:#9aafbb}
-    .lab-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:0;align-self:center;margin:23px 14px;box-shadow:0 7px 19px #1b211b21}
-    .lab-preview img{width:100%;height:160px;object-fit:cover}
-    .lab-preview img:nth-child(1){object-position:25% center}
-    .lab-preview img:nth-child(2){object-position:center center}
-    .lab-preview img:nth-child(3){object-position:75% center}
+    .lab-preview{position:relative;align-self:center;margin:23px 14px;box-shadow:0 7px 19px #1b211b21;overflow:hidden}
+    .lab-preview img{width:100%;height:160px;object-fit:cover;object-position:center}
+    .lab-preview:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 33.1%,#fff9 33.1%,#fff9 33.6%,transparent 33.6%,transparent 66.3%,#fff9 66.3%,#fff9 66.8%,transparent 66.8%)}
     .lab-sticker{position:absolute;right:4%;bottom:7%;background:var(--yellow);font-weight:900;letter-spacing:.04em;font-size:15px;padding:13px 22px;transform:rotate(5deg)}
     .lab-copy h2{max-width:600px}
     .lab-copy p:not(.eyebrow){color:#536066;line-height:1.7;max-width:510px}
@@ -201,7 +199,7 @@
             </div>
           </a>
         </div>
-        <p class="freebie-note" data-en="No countdown or launch-date labels on the freebie cards. Each new pack is listed only after release." data-es="Los nuevos recursos aparecen automáticamente en la biblioteca cuando estén disponibles.">No countdown or launch-date labels on the freebie cards. Each new pack is listed only after release.</p>
+        <p class="freebie-note" data-en="New creative packs join the collection as soon as they are available." data-es="Los nuevos recursos aparecen automáticamente en la biblioteca cuando estén disponibles.">No countdown or launch-date labels on the freebie cards. Each new pack is listed only after release.</p>
       </div>
     </section>
     <section class="waitlist-section" id="class-waitlist" aria-labelledby="waitlist-title">
@@ -262,11 +260,7 @@
             <div class="lab-top"><strong>content lab.</strong><span>CAROUSEL STUDIO</span></div>
             <div class="lab-content">
               <div class="lab-side"><i></i><i></i><i></i><i></i></div>
-              <div class="lab-preview">
-                <img src="/content-lab/prompts/matcha-02.jpg" alt="">
-                <img src="/content-lab/prompts/matcha-03.jpg" alt="">
-                <img src="/content-lab/prompts/matcha-05.jpg" alt="">
-              </div>
+              <div class="lab-preview"><img src="/content-lab/prompts/matcha-02.jpg" alt=""></div>
             </div>
           </div>
           <span class="lab-sticker" data-en="MAKE MORE" data-es="CREA MÁS">MAKE MORE</span>
