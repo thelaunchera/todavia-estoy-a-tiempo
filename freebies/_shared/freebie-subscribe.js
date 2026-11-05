@@ -32,7 +32,7 @@ form.addEventListener("submit",async(e)=>{
  try{
   const result=await fetch("https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-monthly-freebies?action=subscribe",{
    method:"POST",headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({resource,email:mail.value,language:form.querySelector('[name="lang"]')?.value||document.documentElement.lang,website:form.querySelector('[name="website"]')?.value||"",started_at:Number(started.value),marketing_opt_in:!!form.querySelector('[name="marketing_opt_in"]')?.checked})
+   body:JSON.stringify({resource,email:mail.value,language:document.documentElement.lang==="es"?"es":"en",website:form.querySelector('[name="website"]')?.value||"",started_at:Number(started.value),marketing_opt_in:!!form.querySelector('[name="marketing_opt_in"]')?.checked})
   });
   const data=await result.json().catch(()=>({}));
   if(!result.ok||!data.ok)throw Error(data.error||(en()?"Email not sent":"No se envió el correo"));
