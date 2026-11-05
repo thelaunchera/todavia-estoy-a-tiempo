@@ -391,3 +391,36 @@
  .panorama-editor .touch-editor-help{display:none!important}
  .panorama-editor>.panorama-primary-actions{margin-top:4px!important}
 }
+
+/* iPad: the asset panel floats above the editor instead of claiming a narrow
+   first grid column (which made the artboard and sticker tiles look crushed). */
+@media (min-width:800px) and (max-width:1360px){
+ .panorama-editor .panorama-body{display:block!important;grid-template-columns:minmax(0,1fr)!important;width:100%;min-width:0}
+ .panorama-editor .panorama-workspace{width:100%;box-sizing:border-box;padding:8px!important}
+ .panorama-library-floating{
+   left:auto!important;right:18px!important;bottom:18px!important;
+   width:min(450px,calc(100vw - 36px))!important;max-width:450px!important;
+   max-height:min(75dvh,680px)!important;overflow-y:auto!important;
+   padding:16px!important
+ }
+ .panorama-library-floating .panorama-assets{
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important
+ }
+ .panorama-library-floating .panorama-asset-drag img{height:150px!important;max-height:150px!important;object-fit:contain!important}
+ .panorama-library-floating .panorama-asset-meta>small{font-size:12px!important}
+}
+.panorama-library-count{font-size:11px;color:#3a6070;font-weight:700;margin:6px 0 10px}
+.panorama-asset-visibility{display:inline-flex;align-items:center;align-self:flex-start;
+ margin:4px 4px 1px;padding:3px 7px;font-size:10px;font-weight:750;
+ border-radius:20px;background:#edf1f2;color:#3d5964}
+.panorama-asset-visibility.is-shared{background:#f7edc6;color:#473e20}
+.panorama-clear-background{display:inline-flex;align-items:center;justify-content:center;
+ gap:8px;width:100%;min-height:45px;padding:10px 12px;margin:8px 0 10px;
+ background:#fff;color:#802f30;border:1px solid #dbbfc0;border-radius:11px;
+ font:750 13px/1.3 inherit;cursor:pointer;touch-action:manipulation}
+.panorama-clear-background:hover{background:#fff5f4}
+@media(max-width:799px){
+ .panorama-library-floating{max-height:min(43dvh,430px)!important}
+ .panorama-library-floating .panorama-asset-visibility{font-size:10px}
+ .panorama-clear-background{min-height:48px;font-size:12px}
+}
