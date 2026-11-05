@@ -24,6 +24,9 @@ jobs:
         run: python -m pip install --quiet cairosvg Pillow
       - name: Rebuild only corrupted editorial PNGs
         run: python estudio-control/scripts/reconstruct_damaged_stickers.py
+      - name: Prepare Content Lab test dependencies
+        working-directory: content-lab
+        run: npm install --no-audit --no-fund
       - name: Validate manifest-integrity and exact originals left untouched
         run: |
           node --test content-lab/tests/bundled-design-assets.test.mjs
