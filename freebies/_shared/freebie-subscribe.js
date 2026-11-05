@@ -4,7 +4,7 @@ const form=document.getElementById("signup");if(!form)return;
 const resource=form.querySelector('[name="resource"]')?.value;
 // The frontend must never promise an earlier release than the email backend.
 const release=({
- november_web_one_prompt_2026:"2026-12-01",
+ november_web_one_prompt_2026:"2026-11-19",
  december_lavender_2026:"2026-12-01",
  salt_line_january_2027:"2027-01-02"
 })[resource]||form.dataset.releaseDate;
