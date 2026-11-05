@@ -43,7 +43,7 @@ export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
  const history=useRef<{past:typeof defaults[];future:typeof defaults[];current:string|null;lastChange:number;ignore:boolean}>({past:[],future:[],current:null,lastChange:0,ignore:false});
- const [historyVersion,setHistoryVersion]=useState(0);
+ const [,setHistoryVersion]=useState(0);
  const [deleteArmedId,setDeleteArmedId]=useState<number|null>(null);
  const lastTap=useRef<LayerTap|null>(null);
  const pointerStart=useRef<{pointer:number;id:number|null;x:number;y:number}|null>(null);
