@@ -36,8 +36,8 @@ function afterDecemberStart() {
   const today = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/New_York' }).format(new Date());
   return today >= LAUNCH_DATE;
 }
-function driveThumbnail(id: string) {
-  return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w650';
+function drivePreview(id: string) {
+  return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/preview';
 }
 function external(url: string, label: string, Icon: typeof ExternalLink) {
   return <a href={url} target="_blank" rel="noopener noreferrer" className="freebies-link"><Icon size={17} /> {label}<ExternalLink size={14}/></a>;
@@ -51,6 +51,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
   const november = useMemo(() => entries.find(x => x.section === NOVEMBER_SECTION && x.title === NOVEMBER_TITLE),[entries]);
   const matcha = useMemo(() => entries.find(x => x.section === FREEBIES_SECTION && x.title === MATCHA_TITLE),[entries]);
   const active = item?.status === 'activo';
+  const privateReady = item?.status === 'listo_privado';
   const canLaunch = afterDecemberStart();
   // Never enable a public launch until the email registration, protected access
   // and delivery have passed an end-to-end test. A date alone is insufficient.
@@ -122,13 +123,13 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
     <div className="freebies-card">
       <div className="freebies-approved-cover">
         <a href={'https://drive.google.com/file/d/' + DECEMBER_APPROVED_COVER_ID + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir la portada original aprobada de diciembre">
-          <img src={driveThumbnail(DECEMBER_APPROVED_COVER_ID)} alt="Portada original aprobada: December ChatGPT Prompts for Product Visuals en tonos soft purple" loading="lazy" />
+          <iframe src={drivePreview(DECEMBER_APPROVED_COVER_ID)} title="Portada original aprobada de diciembre" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
           <span>Portada original · Ver en Drive <ExternalLink size={13}/></span>
         </a>
       </div>
       <div className="freebies-info">
         <div className="freebies-status-row">
-          <span className="freebies-status"><LockKeyhole size={14}/>{active ? 'Activo en Studio · entrega sin verificar' : 'Borrador · entrega por correo pendiente'}</span>
+          <span className="freebies-status"><LockKeyhole size={14}/>{privateReady ? 'Listo en privado · no público' : active ? 'Activo en Studio · entrega sin verificar' : 'Borrador · entrega por correo pendiente'}</span>
           <span className="freebies-date"><CalendarDays size={15}/> Diciembre 2026</span>
         </div>
         <h3>{FREEBIE_TITLE}</h3>
@@ -137,6 +138,9 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           <span><ImageIcon size={15}/> 5 PNG individuales</span>
           <span><Languages size={15}/> Inglés + español</span>
           <span><ClipboardCopy size={15}/> 5 prompts copiables</span>
+        </div>
+        <div className="freebies-inline-gallery" aria-label="Cinco fotos originales del freebie de diciembre">
+          {PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={"Abrir "+photo.name+" en Drive"}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
         </div>
         <details className="freebies-details"><summary>Gestionar freebie de diciembre</summary><div className="freebies-actions">
           {external(PACK.access,'Página de acceso · 5 prompts',ExternalLink)}
@@ -168,7 +172,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <div className="freebies-gallery-head"><h3>Visuales del freebie</h3><span>5 ejemplos · Fotos en Drive</span></div>
       <div className="freebies-photo-grid">
         {PHOTOS.map(photo=><a key={photo.id} href={'https://drive.google.com/file/d/' + photo.id + '/view'} target="_blank" rel="noopener noreferrer" className="freebies-photo">
-          <span className="freebies-photo-preview"><img loading="lazy" src={driveThumbnail(photo.id)} alt={photo.name} onError={e => { e.currentTarget.style.display='none'; }}/></span>
+          <span className="freebies-photo-preview"><iframe title={photo.name} loading="lazy" src={drivePreview(photo.id)} tabIndex={-1}/></span>
           <span>{photo.name}<ExternalLink size={13}/></span>
         </a>)}
       </div>
