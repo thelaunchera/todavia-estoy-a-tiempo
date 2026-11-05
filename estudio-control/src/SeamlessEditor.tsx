@@ -12,7 +12,7 @@ import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLi
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
-import {zipSync} from 'fflate';
+import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors} from 'lucide-react';
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number};
@@ -85,6 +85,49 @@ export default function SeamlessEditor(){
  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
+ const [importedStickers,setImportedStickers]=useState<StudioLabAsset[]>([]);
+ const [importingStickers,setImportingStickers]=useState(false);
+ const [stickerImportStatus,setStickerImportStatus]=useState('');
+ const stickerInput=useRef<HTMLInputElement>(null);
+ const stickerImportReady=useRef(false);
+ useEffect(()=>{let live=true;readEditorRecord<StudioLabAsset[]>('studio-imported-stickers-v1').then(items=>{if(live){setImportedStickers(items||[]);stickerImportReady.current=true;}}).catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo.');});return()=>{live=false;};},[]);
+ const importStickers=async(files:File[])=>{
+  if(!stickerImportReady.current){setStickerImportStatus('La biblioteca todavía está cargando. Vuelve a intentarlo.');return;}
+  setImportingStickers(true);setStickerImportStatus('Importando stickers…');
+  try{
+   const images:File[]=[];let total=0;
+   for(const file of files){
+    if(file.size>60_000_000)throw Error('Cada ZIP debe pesar menos de 60 MB.');
+    if(/\.zip$/i.test(file.name)){
+     const unpacked=unzipSync(new Uint8Array(await file.arrayBuffer()),{filter:entry=>{
+      if(!/\.(png|jpe?g|webp)$/i.test(entry.name)||entry.name.includes('__MACOSX')||entry.name.split('/').pop()?.startsWith('.'))return false;
+      total+=entry.originalSize;
+      if(entry.originalSize>18_000_000||total>120_000_000)throw Error('El ZIP contiene imágenes demasiado grandes.');
+      return true;
+     }});
+     for(const [name,bytes] of Object.entries(unpacked)){const mime=/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg';images.push(new File([bytes],name.split('/').pop()!,{type:mime}));}
+    }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){total+=file.size;images.push(file);}
+   }
+   if(!images.length)throw Error('Selecciona PNG, JPG, WEBP o un ZIP que contenga imágenes.');
+   if(images.length>100||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
+   const next=[...importedStickers];let added=0;
+   for(const image of images){
+    if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
+    const bytes=await image.arrayBuffer();
+    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const id='studio-import-'+hash;
+    if(next.some(item=>item.id===id))continue;
+    const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(image);});
+    await new Promise<void>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve();img.onerror=()=>reject(Error('Imagen dañada: '+image.name));img.src=url;});
+    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:'sticker',url});added++;
+   }
+   await writeEditorRecord('studio-imported-stickers-v1',next);
+   setImportedStickers(next);setStickerSearch('');setStickerCategory('Todos');setQuickPanel('stickers');setSidebarCollapsed(false);
+   setStickerImportStatus(added?`${added} stickers guardados en este dispositivo. Ya puedes añadirlos al lienzo.`:'Estos stickers ya estaban guardados.');
+  }catch(error){setStickerImportStatus(error instanceof Error?error.message:'No se pudieron importar los stickers.');}
+  finally{setImportingStickers(false);}
+ };
+
  const [libraryStatus,setLibraryStatus]=useState('');
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
  const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
@@ -813,6 +856,9 @@ export default function SeamlessEditor(){
       </button>)}
     </div>}
     {openPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Subir stickers PNG o ZIP'}</button>
+      <small>Se guardan en este dispositivo para tus próximos diseños.</small>
+      {stickerImportStatus&&<small role="status">{stickerImportStatus}</small>}
       <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
         onChange={e=>setStickerSearch(e.target.value)}/>
       {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
@@ -823,7 +869,7 @@ export default function SeamlessEditor(){
             onClick={()=>setStickerCategory(category)}>{category}</button>)}
       </div>
       <div className="studio-sticker-gallery">
-        {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+        {[...importedStickers.map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
           ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
@@ -854,12 +900,14 @@ export default function SeamlessEditor(){
   <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
+    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Subir stickers</button>
     {wideScreen&&<button type="button" className="studio-sidebar-toggle" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(v=>!v)}} aria-expanded={!!openPanel}>{sidebarCollapsed?'Abrir biblioteca':'Ocultar biblioteca'}</button>}
     <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
     <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
     <button type="button" className="primary" onClick={()=>void downloadSlide(slide)} disabled={busy}>{busy?'Preparando…':'Exportar PNG'}</button>
    </div>
   </header>
+  <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Subir stickers PNG o ZIP" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
   <input ref={photoInput} type="file" accept="image/*" onChange={onFile}
     style={{position:'absolute',width:1,height:1,opacity:0,pointerEvents:'none'}} aria-label="Elegir foto del dispositivo"/>
 
