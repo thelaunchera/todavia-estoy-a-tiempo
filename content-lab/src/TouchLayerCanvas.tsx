@@ -50,6 +50,10 @@ export default function TouchLayerCanvas({
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
   const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|null>(null);
+  // Preview opacity locally while dragging, avoiding full-canvas render and
+  // autosave on every input event (especially costly in iPad/iPhone Safari).
+  const [opacityPreview,setOpacityPreview]=useState<{id:string;value:number}|null>(null);
+  const pendingOpacity=useRef<{id:string;value:number}|null>(null);
   const [editingText,setEditingText]=useState('');
   const [advancedOpen,setAdvancedOpen]=useState(false);
   const [copyFeedback,setCopyFeedback]=useState('');
@@ -75,7 +79,10 @@ export default function TouchLayerCanvas({
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
     pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampFreePhotoRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
-  useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false);setContextInspector(null); }, [selected]);
+  useEffect(() => {
+    setCropping(false);setCopyFeedback('');setAdvancedOpen(false);setContextInspector(null);
+    setOpacityPreview(null);pendingOpacity.current=null;
+  }, [selected]);
   useEffect(()=>{if(editingText)window.requestAnimationFrame(()=>quickTextInput.current?.focus());},[editingText]);
   useEffect(()=>{if(editingText && !layers.some(item=>item.id===editingText))setEditingText('');},[editingText,layers]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
@@ -322,6 +329,28 @@ export default function TouchLayerCanvas({
     }
   };
   const chosen = pageCount>1&&interactionMode==='navigate'?undefined:layers.find(layer => layer.id === selected);
+  const visibleOpacity=(layer:TouchLayer)=>Math.max(0,Math.min(1,
+    opacityPreview?.id===layer.id?opacityPreview.value:(layer.opacity??1)));
+  const opacityPercent=chosen?Math.round(visibleOpacity(chosen)*100):100;
+  const changeOpacity=(id:string,percent:number)=>{
+    const value=Math.max(0,Math.min(1,percent/100));
+    const draft={id,value};
+    pendingOpacity.current=draft;
+    setOpacityPreview(draft);
+  };
+  const finishOpacity=()=>{
+    const draft=pendingOpacity.current;
+    if(!draft)return;
+    pendingOpacity.current=null;
+    // One update per gesture preserves the existing undo/autosave behavior.
+    onUpdate?.(draft.id,{opacity:draft.value});
+    setOpacityPreview(null);
+  };
+  const opacitySliderEvents={
+    onPointerUp:finishOpacity,onPointerCancel:finishOpacity,
+    onTouchEnd:finishOpacity,onMouseUp:finishOpacity,
+    onKeyUp:finishOpacity,onBlur:finishOpacity,
+  };
   const selectedRect = chosen ? getRect(chosen) : undefined;
   useEffect(()=>{onSelectionChange?.(chosen?.id??null)},[chosen?.id,onSelectionChange]);
   const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
@@ -415,8 +444,8 @@ export default function TouchLayerCanvas({
             <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
           {contextInspector==='opacity'&&<label className="touch-editor-context-range">
             Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
-            value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})}/>
-            <output>{Math.round((chosen.opacity??1)*100)}%</output>
+            value={opacityPercent} onChange={e=>changeOpacity(chosen.id,Number(e.currentTarget.value))} {...opacitySliderEvents}/>
+            <output>{opacityPercent}%</output>
           </label>}
           {contextInspector==='curve'&&chosen.kind==='text'&&<div className="touch-editor-curve-inspector" role="group" aria-label="Curvatura del texto">
             <label className="touch-editor-context-range">Curvatura
@@ -504,8 +533,8 @@ export default function TouchLayerCanvas({
     </div>}
     {chosen && onUpdate && <div className="touch-editor-opacity-control" role="group" aria-label="Transparencia del elemento seleccionado">
       <label htmlFor="touch-layer-opacity">Transparencia</label>
-      <input id="touch-layer-opacity" type="range" min="0" max="100" step="1" aria-label="Transparencia de foto, sticker o elemento: 100 por ciento es opaco" value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})} style={{flex:1,minWidth:60,accentColor:'#191919'}}/>
-      <output>{Math.round((chosen.opacity??1)*100)}%</output>
+      <input id="touch-layer-opacity" type="range" min="0" max="100" step="1" aria-label="Opacidad de foto, sticker o elemento: 100 por ciento es visible" value={opacityPercent} onChange={e=>changeOpacity(chosen.id,Number(e.currentTarget.value))} {...opacitySliderEvents} style={{flex:1,minWidth:60,accentColor:'#191919'}}/>
+      <output>{opacityPercent}%</output>
     </div>}
     {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 && !inlineTextTools &&
       <div className="touch-editor-size-toolbar" role="group" aria-label="Tamaño de la fotografía seleccionada">
@@ -599,7 +628,7 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&layer.role!=='background'&&mode!=='none'&&mode!=='panorama'&&<div className="touch-editor-photo-frame"
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
-            {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:Math.max(0,Math.min(1,layer.opacity??1))}}>
+            {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
               <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
@@ -617,7 +646,7 @@ export default function TouchLayerCanvas({
                 onKeyDown={e=>e.stopPropagation()}
                 style={{
                   fontFamily:panoramaFont(layer.font),fontWeight:panoramaTextWeight(layer.fontWeight),
-                  opacity:Math.max(0,Math.min(1,layer.opacity??1)),
+                  opacity:visibleOpacity(layer),
                   fontSize:(layer.fontSize||76)*stageHeight/canvasHeight+'px',
                   letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
                   lineHeight:layer.lineHeight||1.12,color:layer.color||'#191919'
@@ -625,7 +654,7 @@ export default function TouchLayerCanvas({
               :layer.kind==='text'&&(layer.curve||0)!==0?<CurvedTextPreview layer={{...layer,assetId:''}} width={fw} height={fh}/>
               :layer.kind==='text'&&<div className="touch-editor-free-text" style={{
               fontFamily:panoramaFont(layer.font),
-              opacity:Math.max(0,Math.min(1,layer.opacity??1)),
+              opacity:visibleOpacity(layer),
               fontWeight:panoramaTextWeight(layer.fontWeight),
               fontSize:(layer.fontSize||76)*(gesture.current?.id===layer.id
                 ?rect.w/Math.max(.001,layer.rect.w):1)*stageHeight/canvasHeight+'px',
@@ -636,7 +665,7 @@ export default function TouchLayerCanvas({
               WebkitTextStroke:layer.outline?'1px #FFFFFF':undefined,
             }}>{layer.text||''}</div>}
             {layer.kind==='shape'&&<div className={'touch-editor-collage-shape shape-'+(layer.shape||'paper')}
-              style={{opacity:Math.max(0,Math.min(1,layer.opacity??1)),background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
+              style={{opacity:visibleOpacity(layer),background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
                 borderColor:layer.color||'#F1E5D2',
                 borderRadius:layer.shape==='circle'?'50%':radius(layerCornerPixels(rect,fw,fh),fw,fh)}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
