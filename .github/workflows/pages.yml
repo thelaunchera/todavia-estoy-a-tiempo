@@ -2,15 +2,8 @@ name: Publicar landing y Estudio del podcast
 on:
   push:
     branches: [main]
-    # The verified freebie/Studio overlay publishes these files and retains the last
-    # fully tested paid Content Lab. Do not relaunch a broken unrelated Lab build
-    # for a freebie-only edit; actual Lab changes still run every strict test.
-    paths-ignore:
-      - 'freebies/**'
-      - 'assets/freebies/**'
-      - 'estudio-control/**'
-      - '.github/workflows/deploy-november-bilingual-hotfix.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
   pages: write
@@ -83,6 +76,8 @@ jobs:
         run: node estudio-control/tests/check-schema.mjs
       - name: Validar JavaScript integrado en páginas públicas
         run: node scripts/check-inline-scripts.mjs
+      - name: Validar fechas, acceso y privacidad de los freebies
+        run: node --test freebies/tests/*.test.mjs
       - name: Validar instalación de la web app
         run: node estudio-control/tests/check-pwa.mjs
       - name: Validar privacidad compacta y portada de episodio sin destellos
@@ -166,6 +161,13 @@ jobs:
           cp -R estudio-control/dist/. _podcast_pages/estudio/
           mkdir -p _podcast_pages/content-lab
           cp -R content-lab/dist/. _podcast_pages/content-lab/
+          # This source PDF is archived in Git, never published as an access bypass.
+          rm -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
+      - name: Publicar recursos verificados y catálogo de stickers del Studio
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 estudio-control/scripts/verify_shared_stickers.py
+          test -s _podcast_pages/estudio/assets-health.json
       - name: Verificar que se publican landing y Estudio
         run: |
           test -s _podcast_pages/index.html

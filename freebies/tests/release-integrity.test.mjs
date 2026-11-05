@@ -63,11 +63,18 @@ test('Shared access keeps November 19 and has no old December 1 copy',()=>{
  assert.match(signup,/timeZone:"America\/New_York"/);
  assert.match(signup,/tle-monthly-freebies\?action=subscribe/);
 });
-test('Prior-approved Matcha source is excluded from the new release build',()=>{
- const workflow=read('.github/workflows/deploy-november-bilingual-hotfix.yml');
- assert.match(workflow,/Recover last verified complete site to preserve the paid Content Lab/);
+test('One current full build publishes all updates with verified Studio assets and no private PDF bypass',()=>{
+ const workflow=read('.github/workflows/pages.yml');
+ const manual=read('.github/workflows/deploy-november-bilingual-hotfix.yml');
  assert.match(workflow,/test -s _podcast_pages\/content-lab\/index\.html/);
- assert.match(workflow,/cp -R freebies\/\./);
+ assert.match(workflow,/cp -R assets productos clases alumnos centro freebies _podcast_pages\//);
  assert.doesNotMatch(workflow,/cp -R content-lab\/public\/prompts/);
  assert.match(workflow,/rm -f _podcast_pages\/assets\/freebies\/january-salt-line\/SALT_LINE_January_2027_Freebie.pdf/);
+ assert.match(workflow,/node --test freebies\/tests\/\*\.test\.mjs/);
+ assert.match(workflow,/python3 estudio-control\/scripts\/verify_shared_stickers\.py/);
+ assert.match(workflow,/test -s _podcast_pages\/estudio\/assets-health\.json/);
+ assert.doesNotMatch(workflow,/paths-ignore:/,'Studio/freebie-only edits must publish too');
+ assert.match(workflow,/workflow_call:/);
+ assert.match(manual,/uses: \.\/\.github\/workflows\/pages\.yml/);
+ assert.doesNotMatch(manual,/\bpush:|download-artifact|run-id:/,'Manual entry cannot race a stale snapshot against the full build');
 });

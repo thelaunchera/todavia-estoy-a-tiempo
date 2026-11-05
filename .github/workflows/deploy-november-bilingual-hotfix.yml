@@ -1,114 +1,13 @@
-name: Publish verified-email freebies and Studio safely
+name: Publicar freebies y Studio desde la compilación completa
 on:
-  push:
-    paths:
-      - 'freebies/**'
-      - 'assets/freebies/**'
-      - 'estudio-control/**'
-      - '.github/workflows/deploy-november-bilingual-hotfix.yml'
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
-concurrency:
-  group: verified-freebies-release
-  cancel-in-progress: false
+# The old snapshot overlay depended on an unavailable artifact and could replace
+# newer Lab changes. Manual releases now use the same checked, serialized build.
 jobs:
-  overlay:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout latest freebie pages and Studio
-        uses: actions/checkout@v4
-      - name: Run freebie regression checks (no Matcha changes)
-        run: node --test freebies/tests/*.test.mjs
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Recover last verified complete site to preserve the paid Content Lab
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          run-id: 42010546206
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          path: _published_snapshot
-      - name: Build current private Studio without touching the separate paid Content Lab
-        env:
-          VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
-          VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          set -euxo pipefail
-          cd estudio-control
-          npm install --no-audit --no-fund
-          npm run test:editorial-plan
-          npm run build
-          test -s dist/index.html
-          test -s dist/icons/studio-blue-192.png
-      - name: Overlay all verified-email freebies and current Studio
-        run: |
-          set -euxo pipefail
-          mkdir -p _podcast_pages
-          test -s _published_snapshot/artifact.tar
-          tar -xf _published_snapshot/artifact.tar -C _podcast_pages
-          test -s _podcast_pages/content-lab/index.html
-          test -s _podcast_pages/alumnos/index.html
-          mkdir -p _podcast_pages/freebies _podcast_pages/assets/freebies _podcast_pages/estudio
-          cp -R freebies/. _podcast_pages/freebies/
-          cp -R assets/freebies/. _podcast_pages/assets/freebies/
-          cp -R estudio-control/dist/. _podcast_pages/estudio/
-          # The verified Lab snapshot is intentionally frozen, but the current
-          # Studio references newer shared sticker/background PNGs by URL.
-          # Overlay only their static image files; do not replace the paid Lab app.
-          mkdir -p _podcast_pages/content-lab/resources
-          cp -R content-lab/public/resources/. _podcast_pages/content-lab/resources/
-          # Only PNGs that match the approved manifest and decode fully go into
-          # the private Studio; damaged originals remain untouched in GitHub.
-          python3 -m pip install --quiet pillow
-          python3 estudio-control/scripts/verify_shared_stickers.py
-          test -s _podcast_pages/estudio/assets-health.json
-          # The archived January PDF remains as a source asset, never a public bypass.
-          rm -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
-          test ! -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
-          for page in november-website december-lavender JanuaryNotUsed; do
-            if [ "$page" = "JanuaryNotUsed" ]; then continue; fi
-            test -s "_podcast_pages/freebies/$page/index.html"
-          done
-          for access in november-website/access december-lavender/access january-salt-line/access; do
-            file="_podcast_pages/freebies/$access/index.html"
-            test -s "$file"
-            grep -q 'freebie-access.js' "$file"
-            # Visual-first rule: approved hero precedes the private access panel, and embedded type stays uncropped.
-            grep -q 'class="hero-media"' "$file"
-            grep -q 'object-fit:contain' "$file"
-            if grep -Eq 'Act as an expert web designer|Create an editorial beauty campaign' "$file"; then
-              echo "Private prompts leaked in $file" >&2; exit 1
-            fi
-          done
-          for landing in november-website december-lavender/signup january-salt-line; do
-            file="_podcast_pages/freebies/$landing/index.html"
-            test -s "$file"
-            test "$(grep -o 'freebie-subscribe.js' "$file" | wc -l)" -eq 1
-            if grep -q 'hook.us2.make.com' "$file"; then
-              echo "Archived Make endpoint still used in $file" >&2; exit 1
-            fi
-          done
-          test -s _podcast_pages/freebies/_shared/freebie-access.js
-          test -s _podcast_pages/freebies/_shared/freebie-subscribe.js
-          test -s _podcast_pages/assets/freebies/november-website/cover-en.svg
-          test -s _podcast_pages/estudio/index.html
-          touch _podcast_pages/.nojekyll
-      - name: Upload complete preserved site with safe updates
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: _podcast_pages
-  deploy:
-    needs: overlay
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy verified-email freebies and Studio
-        id: deployment
-        uses: actions/deploy-pages@v4
+  publish:
+    uses: ./.github/workflows/pages.yml
+    secrets: inherit
