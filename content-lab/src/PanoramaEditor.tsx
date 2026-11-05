@@ -11,6 +11,7 @@ import type {StickerCopyResult} from './CarouselStickerCopy';
 type Point = {x: number; y: number};
 type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
+  pageIndex?:number;onPageIndexChange?:(index:number)=>void;
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
   onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
@@ -35,7 +36,7 @@ type Props = {
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
-  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   // On tablet and desktop, show the dedicated editing library immediately.
@@ -365,6 +366,7 @@ export default function PanoramaEditor({
       {libraryOpen&&(mobileGallery&&typeof document!=='undefined'?createPortal(libraryPanel,document.body):libraryPanel)}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
+        pageIndex={pageIndex} onPageIndexChange={onPageIndexChange}
         fullscreen={expanded}
         onSelectionChange={setSelectedLayerId}
         focusLayerId={focusedLayerId||focusLayerId}
