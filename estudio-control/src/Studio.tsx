@@ -155,10 +155,10 @@ function validPodcastArchiveArtUrl(value?:string){
       /\.(?:png|jpe?g|webp)$/i.test(url.pathname) && !url.username && !url.password;
   } catch { return false; }
 }
-function popupImageFor(row:Row):string{
+function popupImageFor(row:Partial<Row>):string{
   return String(row.popup_image_url || row.email_art_url || '').trim();
 }
-function episodeReadyForPublicArchive(row:Row,all:Row[]):string{
+function episodeReadyForPublicArchive(row:Partial<Row>,all:Row[]):string{
   if(!row.date || !/^\d{4}-\d{2}-\d{2}$/.test(row.date))return 'Selecciona la fecha real de publicación del capítulo.';
   if(!validPodcastArchiveArtUrl(row.email_art_url))return 'La portada debe estar en podcast.thelaunchera.com o nuestro CDN oficial, con enlace público directo a PNG, JPG o WebP.';
   if(!validPodcastArchiveArtUrl(popupImageFor(row)))return 'El pop-up necesita una foto pública directa del podcast o del CDN oficial.';
