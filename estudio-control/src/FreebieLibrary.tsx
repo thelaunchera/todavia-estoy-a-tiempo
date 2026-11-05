@@ -168,14 +168,6 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       </div>
     </div>
     </div>
-    <div className="freebies-photo-bank" aria-label="Galería de ejemplos">
-      <div className="freebies-gallery-head"><h3>Visuales del freebie</h3><span>5 ejemplos · Fotos en Drive</span></div>
-      <div className="freebies-photo-grid">
-        {PHOTOS.map(photo=><a key={photo.id} href={'https://drive.google.com/file/d/' + photo.id + '/view'} target="_blank" rel="noopener noreferrer" className="freebies-photo">
-          <span className="freebies-photo-preview"><iframe title={photo.name} loading="lazy" src={drivePreview(photo.id)} tabIndex={-1}/></span>
-          <span>{photo.name}<ExternalLink size={13}/></span>
-        </a>)}
-      </div>
-    </div>
+
   </section>;
 }
