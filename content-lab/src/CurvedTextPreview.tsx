@@ -34,5 +34,5 @@ export default function CurvedTextPreview({layer,width,height}:{layer:PanoramaLa
  },[layer.text,layer.font,layer.fontSize,layer.fontWeight,layer.lineHeight,layer.spacing,
     layer.curve,layer.color,layer.outline,layer.shadow,width,height]);
  return <canvas ref={canvasRef} className="touch-editor-curved-text" aria-hidden="true"
-   style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none'}}/>;
+   style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:Math.max(0,Math.min(1,layer.opacity??1))}}/>;
 }
