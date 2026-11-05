@@ -32,7 +32,9 @@ test('Carousel provides always visible upload, error notices and starts blank ra
  const editor=read('src/PanoramaEditor.tsx'),factory=read('src/CarouselFactory.tsx');
  assert.ok(editor.includes('panorama-add-photo'));
  assert.ok(editor.includes('<input ref={input} hidden type="file"'));
- assert.ok(editor.indexOf('<input ref={input} hidden')<editor.indexOf('{libraryOpen&&<aside'));
+ assert.ok(editor.includes('const libraryPanel=<aside'),'library gallery stays a single component');
+ assert.ok(editor.includes('createPortal(libraryPanel,document.body)'),'mobile gallery layers above sticky canvas');
+ assert.ok(editor.includes('ref={libraryPaneRef}'),'thumbnail loading observes the actual popup pane');
  assert.ok(editor.includes('setUploadError('));
  assert.ok(editor.includes('moreTools&&<div'));
  assert.ok(factory.includes("const [studioTab,setStudioTab]=useState"));
