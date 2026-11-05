@@ -1,6 +1,13 @@
 # The Launch Era — Standard de freebies
 La experiencia Matcha es el estándar permanente para los freebies presentes y futuros. No crear solamente una tarjeta visual: producir el freebie entero, con contenido, ejemplos originales, fotografía individual, biblioteca copiable, email verificado y registro en el Studio.
 
+## Regla visual obligatoria (excepto Matcha, que no se toca)
+- Hero original y aprobado **primero**, antes del titular, formulario, o aviso de biblioteca privada. En móvil no ocultar el hero bajo un bloque de email.
+- En imágenes con letras impresas (SALT LINE), conservar **todo el lienzo**, sin `object-fit: cover` ni proporciones forzadas que corten palabras.
+- Tipografía web adaptable a iPhone desde 320–375 px: tamaño fluido, márgenes seguros, sin `overflow:hidden` sobre títulos.
+- Después: título y subtítulo, descripción corta, solicitud por correo; después: ejemplos visuales y prompts privados.
+- Misma jerarquía para Noviembre, Diciembre y Enero, preservando sus paletas, fotografías y textos originales. La biblioteca accesible por email también enseña el hero primero.
+
 ## Regla de publicación
 - Preparar el contenido completo en privado con anticipación; no anunciar ni enlazar desde el landing público hasta la fecha acordada.
 - Visibilidad automática por fecha de America/New_York, desde 00:00 de ese día; la API bloquea solicitudes y acceso antes de lanzar.
