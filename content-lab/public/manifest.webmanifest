@@ -1,0 +1,27 @@
+{
+  "id": "/content-lab/",
+  "name": "Content Lab by The Launch Era",
+  "short_name": "Content Lab",
+  "description": "Crea carruseles, posts y contenido de marca desde tu propio espacio privado.",
+  "lang": "es",
+  "start_url": "/content-lab/?source=installed",
+  "scope": "/content-lab/",
+  "display": "standalone",
+  "background_color": "#FAF8F3",
+  "theme_color": "#191919",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/content-lab/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/content-lab/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
