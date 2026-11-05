@@ -16,9 +16,12 @@ test('Only admin-published materials are shared, never a buyer private upload',(
  assert.ok(client.includes("tab('sticker_catalog')"));
  assert.ok(client.includes("if(!admin)throw Error('Solo la administradora puede publicar fondos"));
  assert.ok(client.includes("if(!admin)throw Error('Solo la administradora puede publicar stickers"));
- assert.ok(app.includes("if(aiWallet?.admin&&category==='background'&&!forcePrivate)return publishSharedBackground(file);"));
+ assert.ok(!app.includes("if(aiWallet?.admin&&category==='background'&&!forcePrivate"));
+ assert.ok(app.includes('onPublish={publishSharedBackground}'));
+ assert.ok(app.includes("onUpload={async file=>upload(file,'background',false,brand.id,true)}"));
  assert.ok(app.includes("onUploadBackground={async file=>upload(file,'background',true,brand.id,true)}"));
- assert.ok(app.includes("if(aiWallet?.admin&&category==='sticker'&&!forcePrivate)return publishSharedSticker(file,'Aesthetic');"));
+ assert.ok(!app.includes("if(aiWallet?.admin&&category==='sticker'&&!forcePrivate"));
+ assert.ok(app.includes("onUpload={async file=>upload(file,'sticker',false,brand.id,true)}"));
  assert.ok(app.includes("upload(file,'sticker',false,brand.id,true)"));
  assert.ok(app.includes('setAssets(prev=>prev.some(x=>x.id===item.id)?prev:[...prev,item])'));
  assert.ok(app.includes("const library = assets.filter(a => a.brandId === brand?.id || a.shared === true)"));
@@ -28,7 +31,10 @@ test('Students can access shared backgrounds and personal items but not other st
   stickers=read('src/StickerDownloads.tsx'),client=read('src/platform/client.ts');
  assert.ok(gallery.includes("assetCategory(a)==='background'&&!a.shared"));
  assert.ok(gallery.includes("assetCategory(a)==='background'&&a.shared"));
- assert.ok(gallery.includes("isAdmin?'Publicar fondo para todos':'Subir mi fondo privado'"));
+ assert.ok(gallery.includes('<summary>Subir mi fondo privado</summary>'));
+ assert.ok(gallery.includes('background-admin-publish'));
+ assert.ok(gallery.includes('onPublish(uploadFile,uploadCategory)'));
+ assert.ok(gallery.includes('window.confirm('));
  assert.ok(gallery.includes("solo tú".toLowerCase())||gallery.includes('Solo tú puedes ver'));
  assert.ok(gallery.includes("asset.backgroundGroup"));
  assert.ok(controls.includes('studioBackgrounds'));
