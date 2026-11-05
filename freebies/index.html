@@ -283,8 +283,8 @@
     <section class="lab-section" id="content-lab" aria-labelledby="lab-title">
       <div class="shell lab-inner">
         <figure class="lab-art">
-          <a href="/assets/freebies/content-lab-carousels-editor-light.svg" target="_blank" rel="noopener" aria-label="Open larger view of the carousel editor design">
-            <img src="/assets/freebies/content-lab-carousels-editor-light.svg" alt="Light editorial carousel editor design showing stickers, a burgundy bow on the canvas, slide thumbnails and PNG export controls" width="1536" height="1024" loading="lazy" decoding="async">
+          <a id="carousel-preview-link" href="/assets/freebies/content-lab-carousels-editor-en.svg" target="_blank" rel="noopener" aria-label="Open the English carousel editor preview">
+            <img id="carousel-preview-image" src="/assets/freebies/content-lab-carousels-editor-en.svg" alt="English carousel editor preview with stickers, a burgundy bow, slide thumbnails and PNG export controls" width="1536" height="1024" loading="lazy" decoding="async">
           </a>
           <figcaption data-en="Carousel Studio · Creative editor preview. Tap to see the details." data-es="Carousel Studio · Vista del editor creativo. Toca para ver los detalles.">Carousel Studio · Creative editor preview. Tap to see the details.</figcaption>
         </figure>
@@ -382,6 +382,15 @@
         classLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/clases/primera-landing-en.html":"/clases/primera-landing.html"});
         labLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/content-lab/descubre/en/":"/content-lab/descubre/"});
         privacyLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/privacidad-en.html":"/privacidad.html"});
+        const carouselPreview=lang==="en"?"/assets/freebies/content-lab-carousels-editor-en.svg":"/assets/freebies/content-lab-carousels-editor-light.svg";
+        const previewImage=document.getElementById("carousel-preview-image");
+        const previewLink=document.getElementById("carousel-preview-link");
+        previewImage.src=carouselPreview;
+        previewLink.href=carouselPreview;
+        previewImage.alt=lang==="en"
+          ?"English carousel editor with sticker library, editing tools and a burgundy bow on the canvas"
+          :"Editor de carruseles en español con biblioteca de stickers, herramientas y un lazo burdeos en el lienzo";
+        previewLink.setAttribute("aria-label",lang==="en"?"Open larger English carousel editor preview":"Ampliar la vista del editor de carruseles en español");
         renderReleases();
         if(writeUrl){
           const u=new URL(location.href);
