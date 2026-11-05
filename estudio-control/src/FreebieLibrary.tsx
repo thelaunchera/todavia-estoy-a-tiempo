@@ -237,7 +237,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
             {external(SALT_LINE.make,'Escenario Make · inactivo',ExternalLink)}
           </div>
         </details>
-        <p className="freebies-disclaimer">Preparado para enero. El botón abre el PDF en una vista privada de administración. No está publicado para solicitantes: falta probar el formulario, Resend y el acceso seguro.</p>
+        <p className="freebies-disclaimer">Preparado para el 2 de enero de 2027. Abrir freebie muestra la página de solicitud; el correo, la confirmación y los prompts privados se habilitan solo desde la fecha de lanzamiento. La entrega real todavía requiere QA de extremo a extremo.</p>
       </div>
     </div>
     </div>
