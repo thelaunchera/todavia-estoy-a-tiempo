@@ -2,6 +2,7 @@ import YouTubeStudio from './YouTubeStudio';
 import { MICRO_SCENE_SECTION } from './youtube/micro-production';
 import SeamlessEditor from './SeamlessEditor';
 import SupportInbox from './SupportInbox';
+import WebsiteInquiries from './WebsiteInquiries';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
 import {PRIVATE_DEMO_KIT_SECTION} from './PrivateDemoKits';
@@ -87,6 +88,7 @@ type Page =
   | 'audiencia'
   | 'cancion'
   | 'soporte'
+  | 'inquiries'
   | 'flujos'
   | 'seo'
   | 'ajustes';
@@ -207,6 +209,7 @@ const NAV = [
   { id: 'links', label: 'Centro de links', icon: Link2 },
   { id: 'audiencia', label: 'Audiencia', icon: Users },
   { id: 'soporte', label: 'Mensajes y soporte', icon: Mail },
+  { id: 'inquiries', label: 'Website · inquiries', icon: Globe2 },
   { id: 'flujos', label: 'Automatizaciones', icon: Workflow },
   { id: 'seo', label: 'SEO y sitio web', icon: SearchCheck },
   { id: 'ajustes', label: 'Configuración', icon: Settings2 },
@@ -235,6 +238,7 @@ const LABELS: Record<Page, string> = {
   audiencia: 'Nuestra audiencia',
   cancion: 'Escuchas de la canción',
   soporte: 'Mensajes y ayuda',
+  inquiries: 'The Launch Era · inquiries de website',
   flujos: 'Automatizaciones',
   seo: 'SEO y sitio web',
   ajustes: 'Configuración',
@@ -329,7 +333,7 @@ function App() {
   const [classPendingTarget, setClassPendingTarget] = useState<{kind:'lesson'|'weekly';id:string}|null>(null);
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' ? section : 'inicio';
+    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -756,7 +760,7 @@ function App() {
     if (p === 'tareas') void refresh();
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies') nextUrl.searchParams.set('seccion',p);
+    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     if (!directPending) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1803,6 +1807,7 @@ function App() {
             </>
           )}
           {page === 'soporte' && <SupportInbox />}
+          {page === 'inquiries' && <WebsiteInquiries readOnly={recording} />}
           {page === 'flujos' && (
             <>
               {head(
