@@ -195,7 +195,7 @@ export default function PanoramaEditor({
     onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
   const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:799px)').matches;
-  const libraryPanel=<aside className={'panorama-library'+(mobileGallery?' panorama-library-floating':'')} aria-label="Elementos disponibles para arrastrar">
+  const libraryPanel=<aside className={'panorama-library'+(mobileGallery?' panorama-library-floating':'')+(expanded?' panorama-library-expanded':'')} aria-label="Elementos disponibles para arrastrar">
       <div className="panorama-library-heading"><strong>Explorar elementos</strong>
         <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
         <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
