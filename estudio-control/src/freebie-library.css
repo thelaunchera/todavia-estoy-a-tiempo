@@ -53,3 +53,9 @@
 @media(max-width:760px){.freebies-header{padding:23px}.freebies-sparkle{width:48px;height:48px}.freebies-card{grid-template-columns:1fr}.freebies-art{min-height:340px;padding:22px}.freebies-art-small{margin-top:54px}.freebies-art h3{font-size:clamp(38px,10vw,55px)}.freebies-art:after{right:48px;bottom:20px;height:180px;width:72px}.freebies-art-stamp{margin-top:22px}.freebies-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.freebies-publishing{align-items:stretch}.freebies-toggle{width:100%}}
 @media(max-width:380px){.freebies-header h2{font-size:24px}.freebies-header p{font-size:13px}.freebies-sparkle{display:none}.freebies-link{flex:1;min-width:130px}.freebies-info{padding:20px}.freebies-status-row{align-items:flex-start}.freebies-photo-grid{gap:10px}}
 @media(prefers-reduced-motion:reduce){.freebies-workspace *{transition:none!important;animation:none!important}}
+
+/* November and December appear together without mixing their source assets. */
+.freebies-november-card .freebies-art{background:radial-gradient(circle at 80% 74%,#f4e2b5 0,transparent 42%),radial-gradient(circle at 10% 25%,#fff7e7 0,transparent 50%),#efe6d7;color:#43382d}
+.freebies-november-card .freebies-art:after{background:linear-gradient(110deg,#f5e8bf,#b6c8a1,#e7d7ad);border:5px solid #f7f2e7;transform:rotate(-13deg);box-shadow:15px 18px 30px rgba(76,64,36,.15)}
+.freebies-november-card .freebies-art-stamp{background:#fff9e9;color:#5e4d2b}
+.freebies-photo-preview{position:relative}
