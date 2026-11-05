@@ -480,3 +480,68 @@
     display:none!important;
   }
 }
+
+
+/* B+C Carousel Factory artboard: keep expand, undo and redo on one line.
+   Scoped to Content Lab Factory; fullscreen/Studio retain their own controls. */
+.panorama-editor .panorama-expand-short{display:none}
+@media(max-width:920px){
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded){
+   display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+   gap:3px!important;min-width:0;padding:3px 0 calc(82px + env(safe-area-inset-bottom))!important;
+   margin:3px 0!important;border:0!important;background:transparent!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>*{
+   grid-column:1/-1;order:initial!important;min-width:0}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-heading{
+   grid-column:1!important;grid-row:1!important;min-height:42px;display:flex!important;
+   align-items:center!important;gap:5px;justify-content:space-between;
+   padding:3px 5px!important;margin:0!important;border:0}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-heading .eyebrow{
+   color:#65747A;font-size:9px;letter-spacing:.08em}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-heading>.btn{
+   min-width:0;min-height:40px;margin:0!important;padding:6px 9px!important;
+   display:inline-flex;align-items:center;justify-content:center;gap:6px;
+   background:#fff;border:1px solid #DDE2E1;border-radius:10px;
+   font-size:11px!important;font-weight:700;color:#191919;white-space:nowrap}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded) .panorama-expand-long{display:none}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded) .panorama-expand-short{display:inline}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-editor-utilities{
+   grid-column:2!important;grid-row:1!important;display:flex;align-items:center;
+   justify-self:end;justify-content:flex-end;gap:4px!important;margin:0!important;padding:0}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-editor-utilities button{
+   width:41px;min-width:41px!important;height:41px;min-height:41px!important;
+   display:inline-flex;align-items:center;justify-content:center;
+   margin:0!important;padding:6px!important;background:#fff;color:#191919;
+   border:1px solid #DDE2E1;border-radius:10px}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-editor-utilities .panorama-add-photo{display:none!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-body{
+   grid-column:1/-1!important;grid-row:2!important;align-self:stretch;min-width:0;
+   top:48px!important;max-width:100%;border:1px solid #E3E5E2;
+   border-radius:13px;box-shadow:0 3px 12px #1919190b}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-body .panorama-workspace{
+   padding:4px!important;background:#EEF2F2}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-primary-actions{
+   grid-column:1/-1!important;position:fixed!important;
+   bottom:calc(9px + env(safe-area-inset-bottom))!important;
+   width:calc(100vw - 18px)!important;max-width:690px;
+   background:#FFFEFB!important;border:1px solid #E4E1D9!important;
+   box-shadow:0 8px 24px #19191924!important;border-radius:17px!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-primary-actions button{
+   min-height:53px!important;color:#273C40}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-primary-actions button[aria-pressed=true]{
+   background:#F2D85B!important;color:#191919!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-background-sheet,
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-mobile-layer-panel,
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-quicktools{
+   bottom:calc(79px + env(safe-area-inset-bottom))!important;z-index:6013!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-upload-pending{
+   bottom:calc(79px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:380px){
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-heading>.btn{
+   padding:6px!important;font-size:10px!important}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-editor-utilities button{
+   min-width:38px!important;width:38px}
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-heading .eyebrow{
+   font-size:8px}
+}
