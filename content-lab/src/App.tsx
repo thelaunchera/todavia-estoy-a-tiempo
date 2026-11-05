@@ -11,6 +11,7 @@ import ScheduleFromEditor from './ScheduleFromEditor';
 import AccountSettings from './AccountSettings';
 import InstallContentLab from './InstallContentLab';
 import PromptStudio from './PromptStudio';
+import OneProductEightPrompts from './OneProductEightPrompts';
 import IdeaBank, {type Idea} from './IdeaBank';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
@@ -1569,12 +1570,12 @@ function App() {
             }}/>
           )}
           {brand && tab === 'prompts' && (
-            <section className="panel">
-              <div className="eyebrow">SAVED MASTER PROMPTS</div>
-              <h2>{t("One Product → 8 Compositions")}</h2>
-              <p>{t("Ocho composiciones publicitarias del mismo producto, una imagen por resultado.")}</p>
-              <a className="btn dark" href="./prompts/" target="_blank" rel="noreferrer">{t("Abrir biblioteca de prompts")}</a>
-            </section>
+            <OneProductEightPrompts
+              key={brand.id}
+              locale={loginLanguage}
+              brandName={brand.name}
+              palette={[brand.color, brand.background, brand.secondaryColor].filter(Boolean).join(', ')}
+            />
           )}
           {brand && tab === 'prompt-studio' && (
             <PromptStudio brand={brand} locale={loginLanguage} notify={toast} showError={err}
