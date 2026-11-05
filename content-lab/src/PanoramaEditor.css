@@ -316,3 +316,54 @@
 @media(max-width:370px){
  .panorama-discovery-categories button{font-size:10px;min-height:60px}
 }
+
+/* Mobile gallery is portaled outside the sticky canvas stacking context.
+   The customer always sees the sticker before choosing it. */
+.panorama-library-floating{
+ position:fixed!important;box-sizing:border-box!important;z-index:2147482001!important;
+ left:8px!important;right:8px!important;bottom:calc(160px + env(safe-area-inset-bottom))!important;
+ width:auto!important;max-width:680px!important;margin:0 auto!important;
+ max-height:min(42dvh,420px)!important;overflow-y:auto!important;overscroll-behavior:contain;
+ padding:12px!important;border:1px solid #cad8de!important;border-radius:19px!important;
+ background:#faf8f3!important;color:#191919!important;
+ box-shadow:0 -10px 36px #112f414b!important;
+}
+.panorama-library-floating .panorama-assets{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:10px!important;max-height:none!important;overflow:visible!important;touch-action:auto!important
+}
+.panorama-library-floating .panorama-asset{
+ display:grid!important;grid-template-rows:minmax(0,1fr) auto;flex:none!important;
+ width:auto!important;min-width:0!important;overflow:hidden!important;
+ border-radius:13px!important;padding:7px!important;background:#fff!important
+}
+.panorama-library-floating .panorama-asset-drag{
+ min-height:124px!important;display:grid!important;place-items:center;
+ background:#f7f7f4!important;overflow:hidden!important;touch-action:manipulation!important
+}
+.panorama-library-floating .panorama-asset-drag img{
+ display:block!important;width:100%!important;height:119px!important;
+ max-height:119px!important;object-fit:contain!important;object-position:center!important;
+ background:#f7f7f4!important;padding:7px!important;box-sizing:border-box!important
+}
+.panorama-library-floating .panorama-asset-meta>small{
+ padding:7px 2px!important;font-size:12px!important;line-height:1.3!important;
+ font-weight:700!important;color:#191919!important
+}
+.panorama-library-floating .panorama-discovery-categories{margin:7px 0!important}
+.panorama-library-floating .panorama-library-controls{margin:6px 0!important}
+@media(max-width:799px){
+ .panorama-editor>.panorama-body{grid-template-columns:minmax(0,1fr)!important}
+ .panorama-editor>.panorama-primary-actions{
+  position:sticky!important;left:auto!important;right:auto!important;transform:none!important;
+  bottom:calc(132px + env(safe-area-inset-bottom))!important;top:auto!important;
+  width:calc(100% - 6px)!important;max-width:none!important;margin:3px auto!important;
+  z-index:6014!important;box-shadow:0 6px 23px #14273335
+ }
+ .panorama-editor.expanded>.panorama-primary-actions{
+  position:sticky!important;bottom:calc(92px + env(safe-area-inset-bottom))!important;
+  width:calc(100% - 6px)!important;left:auto!important;transform:none!important
+ }
+ .panorama-editor .panorama-body:not(.panorama-library-collapsed)>.panorama-library{display:none!important}
+ .panorama-library-floating{bottom:calc(177px + env(safe-area-inset-bottom))!important}
+}
