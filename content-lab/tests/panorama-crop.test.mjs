@@ -230,7 +230,8 @@ test('a named personal asset can be opened and dragged from the compact library 
   const editor=readFileSync(new URL('../src/PanoramaEditor.tsx',import.meta.url),'utf8');
   const factory=readFileSync(new URL('../src/CarouselFactory.tsx',import.meta.url),'utf8');
   const app=readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8');
-  assert.ok(editor.includes('const [libraryOpen,setLibraryOpen]=useState(false)'),'the canvas starts unobstructed');
+  assert.ok(editor.includes("window.matchMedia('(min-width:921px)').matches"),'tablet and desktop open the editing library automatically');
+  assert.ok(editor.includes("window.matchMedia('(max-width:920px)').matches"),'phone screens use the compact floating drawer only on demand');
   assert.ok(editor.includes("openTool('photo')"),'photo drawer opens on demand');
   assert.ok(editor.includes("openTool('sticker')"),'sticker drawer opens on demand');
   assert.ok(editor.includes('panorama-mobile-layer-panel'),'layers remain accessible');
