@@ -10,18 +10,17 @@ const hero=html.slice(html.indexOf('<section class="hero dark-paper'),html.index
 assert(hero.includes('podcast-film-hero'),'Cinematic hero missing');
 assert(hero.includes('assets/podcast-hero-dailin-v3.webp'),'Approved host portrait changed');
 assert(hero.includes('Escucha historias que te inspiran'),'Listening promise changed');
-assert(hero.indexOf('podcast-host-portrait')<hero.indexOf('hero-project-links'),'Secondary offers should follow portrait');
+assert(!hero.includes('hero-project-links'),'The hero must not repeat class, prompts or Content Lab links already in the Instagram bio');
 assert(html.includes('podcast-hero-rebalance-20261102.css?v=1'),'Rebalanced mobile stylesheet must load');
-for(const link of ['https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh','clases/primera-landing.html','content-lab/prompts/','content-lab/descubre/']){
- assert(hero.includes(link),'Podcast hero link missing '+link);
-}
+assert(hero.includes('https://open.spotify.com/show/4f22tdJv8nMdTSMKc1kvIh'),'Spotify remains the main hero action');
+assert(!/href="(?:clases\/|content-lab\/)/.test(hero),'No duplicate class or Lab offers in the hero');
 assert.equal((hero.match(/data-film-select="/g)||[]).length,3,'Three scene controls required');
 assert.equal((hero.match(/data-film-scene="/g)||[]).length,3,'Three editorial scenes required');
 assert(html.includes('podcast-cinematic-hero-20261102.css?v=1')&&html.includes('podcast-cinematic-hero-20261102.js?v=1'),'Cinematic assets not linked');
 assert(css.includes('prefers-reduced-motion:reduce')&&css.includes('@media(max-width:600px)'),'Mobile/reduced-motion styling required');
 assert(js.includes('IntersectionObserver')&&js.includes("visibilitychange")&&js.includes('saveData')&&js.includes('manual=true'),'Hero must pause, avoid waste and honor visitor selection');
 assert(!hero.includes('<video')&&!hero.includes('<audio'),'Do not autoplay heavy video or any audio on homepage');
-console.log('PASS: Podcast cinematic hero, Spotify, class, prompts, Content Lab, photo and motion accessibility.');
+console.log('PASS: Podcast cinematic hero, Spotify focus, photo and motion accessibility.');
 if(!process.argv.includes('--browser'))process.exit(0);
 const {chromium}=await import('playwright');
 const origin=process.env.QA_URL||'http://127.0.0.1:4173';
@@ -50,7 +49,6 @@ try {
     cta:box('.podcast-hero-v2 .hero-cta .button-light'),
     visual:box('.podcast-hero-v2 .hero-visual'),
     captions:box('.podcast-film-captions'),
-    links:box('.podcast-hero-v2 .hero-project-links'),
     photo:!!document.querySelector('.podcast-host-portrait img')?.getAttribute('src'),
     controls:[...document.querySelectorAll('[data-film-select]')].map(x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,height:r.height}}),
    };
@@ -63,10 +61,8 @@ try {
   assert(state.controls.length===3,width+': missing cinematic controls');
   assert(state.controls.every(v=>v.left>=-2&&v.right<=width+2&&v.height>=30),width+': controls clipped');
   assert(state.title.left>=-10&&state.title.right<=width+10,width+': title clipped');
-  assert(state.links.left>=-2&&state.links.right<=width+2,width+': class/prompts links clipped');
   if(width<=430){
     assert(state.cta.bottom<state.visual.top,width+': Spotify CTA should precede the visual on phones');
-    assert(state.visual.bottom<state.links.top,width+': course and Lab links must follow the portrait on phones');
   }
   const picker=page.locator('[data-film-select="2"]');
   const hit=await picker.evaluate(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
@@ -84,5 +80,5 @@ try {
   assert.deepEqual(errors,[],width+': browser errors');
   await page.close();
  }
- console.log('PASS podcast cinematic hero 320/375/390/430/820/1440, links accessible and manual scenes work.');
+ console.log('PASS podcast cinematic hero 320/375/390/430/820/1440, Spotify CTA and manual scenes work.');
 } finally {await browser.close();}
