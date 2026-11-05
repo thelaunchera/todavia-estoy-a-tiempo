@@ -18,7 +18,7 @@ const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golde
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -42,6 +42,16 @@ test('los nuevos demos deben conservar origen e instrucciones antes de presentar
  assert.ok(demosSource.includes("kind:'live'"),'Se debe distinguir un proyecto real de una simulación');
 });
 
+
+test('Lavender Edit conserva ocho PNG individuales, prompts y seis pasos',()=>{
+ const kit=read('src/lavender-kit.ts');
+ const ids=[...kit.matchAll(/key:\s*"lavender-(\d{2})"/g)].map(match=>match[1]);
+ assert.deepEqual(ids,['01','02','03','04','05','06','07','08']);
+ assert.equal([...kit.matchAll(/url:\s*"https:\/\/thelaunchera\.com\/demos\/lavender-edit\/photos\//g)].length,8);
+ assert.match(kit,/export const lavenderRebuildPrompts: DemoRebuildPrompt\[\] = \[/);
+ assert.match(demosSource,/photos:lavenderPhotos/);
+ assert.match(demosSource,/promptsFor:'lavender-edit'/);
+});
 
 test('Golden Grid conserva sus nueve originales, pasos y carpeta Drive',()=>{
  const kit=read('src/golden-grid-kit.ts');
