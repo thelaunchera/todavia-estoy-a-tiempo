@@ -795,6 +795,43 @@ p {
 .task:first-child {
   border-top: 0;
 }
+
+/* Podcast task feed: separate live calendar actions from manually completed work. */
+.task-feed { display: flex; flex-direction: column; gap: 16px; }
+.task-calendar-heading { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; padding: 0 3px; }
+.task-calendar-heading strong { font-size: 13px; color: #284b61; }
+.task-calendar-heading small { font-size: 11px; line-height: 1.5; color: #718591; }
+.task-calendar-item > div { flex: 1; min-width: 0; }
+.task-episode-number {
+  display: grid; place-items: center; flex: 0 0 41px; width: 41px; height: 41px;
+  border-radius: 12px; background: #e9f0f5; color: #28506a; font-size: 11px; font-weight: 700;
+}
+.task-episode-open {
+  flex: 0 0 auto; border: 1px solid #c6d9e5; border-radius: 9px;
+  padding: 9px 11px; background: #f8fbfd; color: #274960; font-size: 11px; font-weight: 700;
+  cursor: pointer;
+}
+.task-episode-open:disabled { opacity: .55; cursor: not-allowed; }
+.task-feed-empty { margin: 0; padding: 20px; border: 1px solid #e1e8ed; border-radius: 14px; color: #708595; font-size: 12px; }
+.task-completed > summary { cursor: pointer; color: #567487; font-size: 12px; font-weight: 650; padding: 10px 4px; }
+.task-completed > .task-list { margin-top: 8px; }
+.task-page-refresh {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  margin: 0 0 14px; color: #6c8291; font-size: 11px; line-height: 1.5;
+}
+.task-page-refresh span { flex: 1 1 230px; min-width: 0; }
+.task-page-refresh button {
+  display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  border: 1px solid #c8dbe5; border-radius: 9px; padding: 8px 12px;
+  color: #274960; background: #fff; font-weight: 650; cursor: pointer;
+}
+.task-page-refresh button:disabled { opacity: .6; cursor: default; }
+.task-class-hint > svg { flex: 0 0 auto; margin-top: 2px; }
+.task-class-hint > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.task-class-hint .class-plan-inline-link {
+  display: inline; border: 0; background: transparent; padding: 0; margin: 0;
+  color: #365b73; text-decoration: underline; font: inherit; cursor: pointer;
+}
 .task-toggle {
   height: 25px;
   width: 25px;
