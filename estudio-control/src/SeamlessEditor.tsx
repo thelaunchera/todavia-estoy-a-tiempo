@@ -594,6 +594,15 @@ export default function SeamlessEditor(){
    </div>
   </nav>
 
+  {current&&!quickPanel&&<div className="studio-app-opacity-control" role="group" aria-label="Transparencia de foto, sticker o elemento seleccionado">
+    <label htmlFor="studio-selected-opacity">Transparencia</label>
+    <input id="studio-selected-opacity" type="range" min="0" max="100" step="1"
+      aria-label="Transparencia del elemento seleccionado: 100 por ciento es opaco"
+      value={Math.round((current.opacity??1)*100)}
+      onChange={e=>update(current.id,{opacity:Number(e.target.value)/100})}/>
+    <output htmlFor="studio-selected-opacity">{Math.round((current.opacity??1)*100)}%</output>
+    <button type="button" aria-label="Cerrar selección" onClick={()=>{setSelected(null);setEditingText(null)}}>Listo</button>
+  </div>}
   <div className="studio-app-selection">  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
     onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo'}</button>
