@@ -615,7 +615,7 @@ export default function SeamlessEditor(){
     onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
     style={{position:'absolute',left:current.x*viewportScale,top:current.y*viewportScale,
      width:Math.max(100,current.width*viewportScale),height:Math.max(52,itemBounds(current).h*viewportScale+14),
-     maxWidth:'none',font:(current.fontWeight||700)+' '+current.fontSize*viewportScale+'px/1.3 '+studioTextFont(current.fontFamily),
+     maxWidth:'none',font:(current.fontWeight||700)+' '+Math.max(16,current.fontSize*viewportScale)+'px/1.3 '+studioTextFont(current.fontFamily),
      color:current.color,background:'rgba(250,248,243,.95)',border:'2px solid #447B94',borderRadius:6,
      padding:3,resize:'none',zIndex:5,boxShadow:'0 2px 12px #0002'}}/>}
    </div>
@@ -667,7 +667,7 @@ export default function SeamlessEditor(){
   {activeInspector==='text'&&current.kind==='text'&&<div className="studio-app-font-inspector">
     <div className="studio-app-position-row">
       <button type="button" onClick={editOnCanvas}>✎ Editar texto</button>
-      <button type="button" onClick={()=>update(current.id,{fontWeight:(current.fontWeight||700)===900?400:900})}>Negrita {(current.fontWeight||700)===900?'900':'400–900'}</button>
+      <button type="button" aria-pressed={(current.fontWeight||700)===900} onClick={()=>update(current.id,{fontWeight:(current.fontWeight||700)===900?400:900})}>Negrita</button>
     </div>
     <label>Tipografía <select value={current.fontFamily||'arial'} aria-label="Tipografía del texto"
       onChange={e=>update(current.id,{fontFamily:e.target.value})}>
