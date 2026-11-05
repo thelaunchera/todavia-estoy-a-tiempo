@@ -1,4 +1,5 @@
 import {test} from 'node:test';
+import {runInNewContext} from 'node:vm';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
@@ -55,8 +56,8 @@ test('Access pages show hero before private library, and never embed ungated pro
 });
 test('Shared access keeps November 19 and has no old December 1 copy',()=>{
  const source=read('freebies/_shared/freebie-access.js');
- assert.match(source,/NOVEMBER 19 RELEASE/);
- assert.match(source,/ENTREGA 19 DE NOVIEMBRE/);
+ assert.match(source,/FREE WEBSITE RESOURCE/);
+ assert.match(source,/RECURSO GRATIS PARA TU WEB/);
  assert.doesNotMatch(source,/NOVEMBER EDITION · DECEMBER 1 RELEASE/);
  assert.doesNotMatch(source,/EDICIÓN NOVIEMBRE · ENTREGA 1 DE DICIEMBRE/);
  const signup=read('freebies/_shared/freebie-subscribe.js');
@@ -77,4 +78,32 @@ test('One current full build publishes all updates with verified Studio assets a
  assert.match(workflow,/workflow_call:/);
  assert.match(manual,/uses: \.\/\.github\/workflows\/pages\.yml/);
  assert.doesNotMatch(manual,/\bpush:|download-artifact|run-id:/,'Manual entry cannot race a stale snapshot against the full build');
+});
+
+
+test('public freebie copy contains no production notes or fixed launch notices',()=>{
+ for(const {landing,access} of routes){
+  for(const path of [landing,access]){
+   const html=read(path);
+   assert.doesNotMatch(html,/No collage exports|Sin exportaciones en collage|Launch: January|Lanzamiento: 2 de enero|Programado para el|Scheduled for/);
+  }
+ }
+ assert.doesNotMatch(read('freebies/_shared/freebie-access.js'),/ENTREGA 19|NOVEMBER 19 RELEASE|DECEMBER 1, 2026|JANUARY 2, 2027/);
+});
+
+test('all freebies switch automatically at New York midnight with clean bilingual CTAs',async()=>{
+ const script=read('freebies/_shared/freebie-subscribe.js');
+ for(const {resource,date} of routes){
+  let now=Date.parse(date+'T04:59:59Z'),timer,handler,requests=0;
+  class Clock extends Date{constructor(...args){super(...(args.length?args:[now]));}static now(){return now;}}
+  const button={},mail={validity:{valid:true},value:'example@example.com'};
+  const form={dataset:{},ownerDocument:{querySelectorAll:()=>[]},append(){},addEventListener:(event,cb)=>{if(event==='submit')handler=cb;},querySelector:(q)=>q==='[name="resource"]'?{value:resource}:q==='[type="submit"]'?button:q==='[name="email"]'?mail:null};
+  const document={documentElement:{lang:'en'},getElementById:id=>id==='signup'?form:null,createElement:()=>({setAttribute(){},style:{}})};
+  runInNewContext(script,{document,Date:Clock,Intl,setInterval:cb=>{timer=cb;},queueMicrotask:cb=>cb(),fetch:async()=>{requests++;return {ok:true,json:async()=>({ok:true})};}});
+  assert.equal(button.disabled,true);assert.equal(button.textContent,'Coming soon');
+  await handler({preventDefault(){},stopImmediatePropagation(){}});assert.equal(requests,0);
+  now=Date.parse(date+'T05:00:00Z');timer();assert.equal(button.disabled,false);assert.equal(button.textContent,'Email me the freebie');
+  document.documentElement.lang='es';timer();assert.equal(button.textContent,'Enviarme el freebie');
+  await handler({preventDefault(){},stopImmediatePropagation(){}});assert.equal(requests,1);timer();assert.equal(button.disabled,true);assert.equal(button.textContent,'Correo solicitado');
+ }
 });
