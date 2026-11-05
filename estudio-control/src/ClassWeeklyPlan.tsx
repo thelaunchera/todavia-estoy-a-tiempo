@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {BookOpen, CalendarDays, Check, CheckCircle2, Circle, Clock3, ExternalLink, LockKeyhole, ShieldCheck, Video} from 'lucide-react';
 import {classLessons, CLASS_SECTION, CLASS_TASK_SECTION, CLASS_CHECKLIST} from './class-course';
 import './class-weekly-plan.css';
@@ -13,6 +13,7 @@ export type ClassLessonRecord = {
 type Props = {
  tasks:ClassWeeklyTask[];
  lessons:ClassLessonRecord[];
+ focusTaskId?:string|null;
  onToggle:(task:ClassWeeklyTask,next:'pendiente'|'completado')=>Promise<void>;
 };
 
@@ -48,9 +49,11 @@ function taskVideoProgress(title:string,lessons:ClassLessonRecord[]){
  return finished+'/'+selected.length+' videos '+(isAll?'aprobados':'grabados');
 }
 
-export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
+export default function ClassWeeklyPlan({tasks,lessons,focusTaskId,onToggle}:Props){
  const now=currentWeekIndex();
  const [selected,setSelected]=useState(now);
+ const focusedRow=useRef<HTMLElement|null>(null);
+ const appliedFocusId=useRef<string|null>(null);
  const [busy,setBusy]=useState<string|null>(null);
  const [feedback,setFeedback]=useState('');
  const unique=useMemo(()=>{
@@ -67,6 +70,23 @@ export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
  const allDone=unique.filter(t=>t.status==='completado').length;
  const approved=classLessons.filter(l=>lessons.some(x=>x.section===CLASS_SECTION&&x.subtitle===l.id&&x.status==='aprobado')).length;
  const selectedWeek=classWeeks[selected], selectedTasks=byWeek[selected];
+ useEffect(()=>{
+   if(!focusTaskId || appliedFocusId.current===focusTaskId)return;
+   const task=unique.find(t=>t.id===focusTaskId);
+   if(!task)return;
+   const date=task.date||'';
+   const index=classWeeks.findIndex(w=>date>=w.start && date<=w.end);
+   if(index<0)return;
+   if(selected!==index){setSelected(index);return;}
+   const frame=window.requestAnimationFrame(()=>{
+     const row=focusedRow.current;
+     if(!row)return;
+     row.scrollIntoView({block:'center',behavior:'smooth'});
+     row.focus({preventScroll:true});
+     appliedFocusId.current=focusTaskId;
+   });
+   return()=>window.cancelAnimationFrame(frame);
+ },[focusTaskId,selected,unique]);
  async function toggle(t:ClassWeeklyTask){
   if(busy)return;
   setBusy(t.id);setFeedback('');
@@ -114,7 +134,7 @@ export default function ClassWeeklyPlan({tasks,lessons,onToggle}:Props){
     {selectedTasks.map(t=>{
      const done=t.status==='completado';
      const video=taskVideoProgress(t.title,lessons);
-     return <article className={'weekly-plan-item'+(done?' is-done':'')} key={t.id}>
+     return <article ref={t.id===focusTaskId?focusedRow:null} tabIndex={t.id===focusTaskId?-1:undefined} className={'weekly-plan-item'+(done?' is-done':'')+(t.id===focusTaskId?' is-focused':'')} key={t.id}>
       <button type="button" disabled={busy!==null} onClick={()=>void toggle(t)} className="weekly-plan-check" aria-label={(done?'Reabrir tarea: ':'Marcar completada: ')+t.title} aria-pressed={done}>{busy===t.id?<Clock3 size={18}/>:done?<Check size={18}/>:<Circle size={18}/>}</button>
       <div className="weekly-plan-item-main">
        <div className="weekly-plan-item-row"><strong>{t.title.replace(/^CLASE 01 · /,'')}</strong><span>{t.date?shortDate(t.date):'Sin fecha'}</span></div>
