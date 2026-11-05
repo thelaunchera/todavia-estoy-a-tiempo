@@ -70,7 +70,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         shape:['paper','tape','circle','frame'].includes(String(item.shape))?item.shape as PanoramaLayer['shape']:'paper',
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
-      opacity:Number.isFinite(Number(item.opacity))?Math.max(0,Math.min(1,Number(item.opacity))):1,
+      ...(typeof item.opacity==='number'&&Number.isFinite(item.opacity)?{opacity:Math.max(0,Math.min(1,item.opacity))}:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
       ...(item.locked===true?{locked:true}:{}),
