@@ -17,7 +17,8 @@ test('Carousel designs keep one master art direction while reading legacy data',
  assert.ok(ui.includes('getCarouselPalette(brand,style,slide.accentIndex||0)'));
  assert.ok(ui.includes('const canvas=pages?pages[n]:await drawSlide('));
  assert.ok(ui.includes('canvasToPngBlob(canvas)'));
- assert.ok(ui.includes('constrainNormalLayer(layer,slides.length)'));
+ assert.ok(!ui.includes('constrainNormalLayer('),'Normal preserves original layer geometry');
+ assert.ok(ui.includes('overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography(ctx,slides,brand,style),true)'),'Normal clips only on output');
  assert.ok(ui.includes("const hasBehind=(style.panoramaLayers||[]).some"));
  assert.ok(ui.includes("pageLayers.filter(layer=>layer.kind==='photo'||layer.kind==='sticker')"));
  assert.ok(ui.includes('overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography'));
