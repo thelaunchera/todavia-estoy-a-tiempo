@@ -286,7 +286,7 @@ export default function PanoramaEditor({
         <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
       <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
         {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
-          aria-pressed={libraryKind===kind} onClick={()=>setLibraryKind(kind)}>
+          aria-pressed={libraryKind===kind} onClick={()=>{setLibraryKind(kind);setLibrarySection(kind==='photo'?'photos':kind==='sticker'?'stickers':'all')}}>
           {kind==='photo'?'Fotos':kind==='sticker'?'Stickers':'Todos'}
         </button>)}
       </div>
