@@ -187,8 +187,8 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
     </div>
   </div>
   {filter==='shared'&&<section className="background-category" aria-label="Fondos compartidos del estudio">
-    <div className="background-category-heading"><div><h2>Fondos del estudio</h2>
-      <p>Publicados por la administradora para todos los alumnos</p></div>
+    <div className="background-category-heading"><div><h2>Fondos del Content Lab</h2>
+      <p>Biblioteca comercial: solo recursos aprobados para compradores</p></div>
       <span>{sharedVisible.length} fondos</span></div>
     <div className="background-library-grid">{sharedVisible.map(asset=><article key={asset.id}>
       <AssetPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/>
