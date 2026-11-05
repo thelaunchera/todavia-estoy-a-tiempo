@@ -110,8 +110,9 @@ export default function CreatorDashboard({
     <span className="cld-section-aside">{es?'Tu idea empieza aquí':'Your next idea starts here'}</span>
    </div>
    <div className="cld-format-grid">
-    {formats.map(item=><button type="button" key={item.key} className={'cld-format-card cld-format-'+item.key} onClick={item.go} aria-label={(es?'Crear ':'Create ')+item.title}>
+    {formats.map((item,index)=><button type="button" key={item.key} className={'cld-format-card cld-format-'+item.key} onClick={item.go} aria-label={(es?'Crear ':'Create ')+item.title}>
      <span className={'cld-format-art cld-art-'+item.key} aria-hidden="true">
+      {libraryPhotos[index]&&images[libraryPhotos[index].id]&&<img className="cld-format-photo" src={images[libraryPhotos[index].id]} loading="lazy" alt=""/>}
       <span className="cld-art-shape cld-art-shape-one"/><span className="cld-art-shape cld-art-shape-two"/><span className="cld-art-shape cld-art-shape-three"/>
       <span className="cld-art-type">the<br/>creative<br/>edit<span>.</span></span>
      </span>
