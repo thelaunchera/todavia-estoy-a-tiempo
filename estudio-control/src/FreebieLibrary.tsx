@@ -27,7 +27,7 @@ const NOVEMBER_PHOTOS = [
 ] as const;
 const SALT_LINE = {
   folder: 'https://drive.google.com/drive/folders/1KcEkuwkLcmzUY9PWsh0cvUSsCOyAzDsA',
-  pdf: 'https://drive.google.com/file/d/1WLGzHF6B4OTiSCNXiQbO2inqH6yzdgAm/view',
+  pdf: 'https://drive.google.com/file/d/1kkRLliJaRtHKYes8X8FzPuSxP2vqZ5jc/view',
   hero: '1cjtBtDSUEsMmh_v9zzpExZJYWgJLN7g0',
 } as const;
 const SALT_LINE_PHOTOS = [
@@ -102,7 +102,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <div>
         <div className="freebies-eyebrow"><Gift size={16}/> FREEBIES · MI ESTUDIO</div>
         <h2>Monthly Creative Packs</h2>
-        <p>Matcha, noviembre y diciembre juntos, conservando sus fotos y diseños originales. No se sustituirán las portadas por recreaciones. Los nuevos accesos por email requieren verificación antes de activar.</p>
+        <p>Matcha, noviembre, diciembre y enero juntos, conservando sus fotos y diseños originales. No se sustituirán las portadas por recreaciones. Los nuevos accesos por email requieren verificación antes de activar.</p>
       </div>
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
