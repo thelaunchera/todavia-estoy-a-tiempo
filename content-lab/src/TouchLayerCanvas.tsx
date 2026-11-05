@@ -26,6 +26,7 @@ type Props = {
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onToggleLock?: (id:string,locked:boolean)=>void;
   onDuplicateText?: (id:string)=>void;
+  onDuplicateLayer?: (id:string)=>void;
   onDropAsset?: (id: string, point: {x: number; y: number}) => void;
   onDropFiles?: (files: File[], point: {x: number; y: number}) => void;
   onCopySticker?: (id:string,targetIndex:number)=>StickerCopyResult;
@@ -43,7 +44,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,fullscreen=false,
+  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -404,7 +405,8 @@ export default function TouchLayerCanvas({
           <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
           <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
           <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
-          {chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
+          {onDuplicateLayer&&<button type="button" onClick={()=>onDuplicateLayer(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
+          {!onDuplicateLayer&&chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
           {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
           <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
         </div>}
