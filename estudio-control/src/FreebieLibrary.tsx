@@ -9,6 +9,10 @@ const FREEBIE_TITLE = 'December Creative Pack — The Lavender Edit';
 const LAUNCH_DATE = '2026-12-01';
 const NOVEMBER_TITLE = 'Freebie · Tu web con un solo prompt · Borrador ES/EN';
 const NOVEMBER_SECTION = 'studio-link-center-v1';
+const MATCHA_TITLE = 'Matcha · One Photo, Eight Prompts';
+const MATCHA_LINK_ES = 'https://podcast.thelaunchera.com/content-lab/prompts/';
+const MATCHA_LINK_EN = 'https://podcast.thelaunchera.com/content-lab/prompts/en/';
+const DECEMBER_APPROVED_COVER_ID = '12FpBKPtlwdACHZsVOxLIcRX_puTvfzTf';
 const PACK = {
   folder: 'https://drive.google.com/drive/folders/1qD7EmHCyKEs-aHUFlloKP9-nDuv1q7Ug',
   images: 'https://drive.google.com/drive/folders/1zqzLqSkPobH0DQnGfmFAhNkJ0o2YxQNm',
@@ -42,6 +46,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
 
   const item = useMemo(() => entries.find(x => x.section === FREEBIES_SECTION && x.title === FREEBIE_TITLE),[entries]);
   const november = useMemo(() => entries.find(x => x.section === NOVEMBER_SECTION && x.title === NOVEMBER_TITLE),[entries]);
+  const matcha = useMemo(() => entries.find(x => x.section === FREEBIES_SECTION && x.title === MATCHA_TITLE),[entries]);
   const active = item?.status === 'activo';
   const canLaunch = afterDecemberStart();
   // Never enable a public launch until the email registration, protected access
@@ -70,18 +75,38 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <div>
         <div className="freebies-eyebrow"><Gift size={16}/> FREEBIES · MI ESTUDIO</div>
         <h2>Monthly Creative Packs</h2>
-        <p>Todos tus freebies en un solo lugar: noviembre y diciembre, con sus recursos de producción y su propio estado. La entrega al público será por correo con acceso a una página, nunca mediante PDF.</p>
+        <p>Matcha, noviembre y diciembre juntos, conservando sus fotos y diseños originales. No se sustituirán las portadas por recreaciones. Los nuevos accesos por email requieren verificación antes de activar.</p>
       </div>
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
+    <div className="freebies-card freebies-matcha-card">
+      <div className="freebies-matcha-art">
+        <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>FREEBIE · ORIGINAL</span></div>
+        <span className="freebies-art-small">ONE PHOTO · EIGHT PROMPTS</span>
+        <h3>Matcha <em>Visuals</em></h3>
+        <div className="freebies-matcha-photos">
+          <img src="/content-lab/prompts/matcha-01.jpg" alt="Matcha · fotografía original 01" loading="lazy" />
+          <img src="/content-lab/prompts/matcha-02.jpg" alt="Matcha · fotografía original 02" loading="lazy" />
+          <img src="/content-lab/prompts/matcha-03.jpg" alt="Matcha · fotografía original 03" loading="lazy" />
+        </div>
+        <span className="freebies-art-bottom">IMÁGENES ORIGINALES · SIN RECREACIONES</span>
+      </div>
+      <div className="freebies-info">
+        <div className="freebies-status-row"><span className="freebies-status"><ImageIcon size={14}/> Original en Content Lab</span><span className="freebies-date">8 imágenes</span></div>
+        <h3>{MATCHA_TITLE}</h3>
+        <p className="freebies-description">Conserva exactamente las fotografías y el diseño del freebie de matcha existente. No se ha generado otra portada ni se han reemplazado los ocho ejemplos originales.</p>
+        <div className="freebies-meta"><span><Languages size={15}/> Español / English</span><span><ImageIcon size={15}/> 8 fotos originales</span></div>
+        <div className="freebies-actions">{external(MATCHA_LINK_ES,'Abrir diseño original · ES',ExternalLink)}{external(MATCHA_LINK_EN,'Original · EN',ExternalLink)}</div>
+        {!matcha && <p className="freebies-alert">Falta el registro de matcha en el Studio; la página original permanece intacta.</p>}
+      </div>
+    </div>
     <div className="freebies-card freebies-november-card">
-      <div className="freebies-art freebies-art-november">
+      <div className="freebies-art freebies-art-november freebies-art-source-only">
         <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>NOVEMBER / 2026</span></div>
-        <span className="freebies-art-small">FREEBIE · NOVEMBER</span>
+        <span className="freebies-art-small">ORIGINAL · SIN RECREAR</span>
         <h3>One Prompt.<br/><em>Your Website.</em></h3>
-        <p>Create your first website with AI</p>
-        <div className="freebies-art-stamp">CHATGPT <span>·</span> APPDEPLOY</div>
-        <span className="freebies-art-bottom">THE LAUNCH ERA · FREE RESOURCE</span>
+        <p>Portada original pendiente de vincular desde su archivo fuente. No se mostrará una imagen inventada.</p>
+        <span className="freebies-art-bottom">REFERENCIA ORIGINAL EN NOTION</span>
       </div>
       <div className="freebies-info">
         <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Noviembre 2026</span></div>
@@ -93,13 +118,11 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       </div>
     </div>
     <div className="freebies-card">
-      <div className="freebies-art">
-        <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>DECEMBER / 2026</span></div>
-        <span className="freebies-art-small">THE LAVENDER EDIT</span>
-        <h3>ChatGPT<br/><em>Prompts</em></h3>
-        <p>for Product Visuals<br/>5 ready-to-use prompts</p>
-        <div className="freebies-art-stamp">5 PROMPTS <span>·</span> 5 VISUALS</div>
-        <span className="freebies-art-bottom">CREATIVE PROMPT GUIDE</span>
+      <div className="freebies-approved-cover">
+        <a href={'https://drive.google.com/file/d/' + DECEMBER_APPROVED_COVER_ID + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir la portada original aprobada de diciembre">
+          <img src={driveThumbnail(DECEMBER_APPROVED_COVER_ID)} alt="Portada original aprobada: December ChatGPT Prompts for Product Visuals en tonos soft purple" loading="lazy" />
+          <span>Portada original · Ver en Drive <ExternalLink size={13}/></span>
+        </a>
       </div>
       <div className="freebies-info">
         <div className="freebies-status-row">
