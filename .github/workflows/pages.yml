@@ -2,6 +2,15 @@ name: Publicar landing y Estudio del podcast
 on:
   push:
     branches: [main]
+    # The verified freebie/Studio overlay publishes these files and retains the last
+    # fully tested paid Content Lab. Do not relaunch a broken unrelated Lab build
+    # for a freebie-only edit; actual Lab changes still run every strict test.
+    paths-ignore:
+      - 'freebies/**'
+      - 'assets/freebies/**'
+      - 'estudio-control/src/FreebieLibrary.tsx'
+      - 'estudio-control/src/freebie-library.css'
+      - '.github/workflows/deploy-november-bilingual-hotfix.yml'
   workflow_dispatch:
 permissions:
   contents: read
