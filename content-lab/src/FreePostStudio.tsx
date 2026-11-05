@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2,Shapes,Check,Clock3,AlertCircle} from 'lucide-react';
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
-import {paintPanoramaLayers,reorderPanoramaLayers,panoramaFont,panoramaTextWeight,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
+import {paintPanoramaLayers,panoramaFont,panoramaTextWeight,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
 import {clampRect,clampFreePhotoRect,paintCoverImage,type TouchRect} from './TouchGeometry';
 import {coverPlacement} from './PhotoCrop';
 import TouchLayerCanvas,{type TouchLayer} from './TouchLayerCanvas';
@@ -27,25 +27,36 @@ function uniqueId(){return 'free-'+crypto.randomUUID();}
 function legacyStickers(decor:CoverDecor):PanoramaLayer[]{
  return decor.stickerIds.filter(id=>!decor.layers.some(layer=>layer.assetId===id))
   .map((id,n)=>({id:'legacy-sticker-'+id,assetId:id,name:'Sticker',kind:'sticker',locked:(decor.lockedStickerIds||[]).includes(id),
+   opacity:decor.stickerOpacities?.[id]??1,
    rect:decor.stickerPositions[id]||{x:.1+(n*.19),y:.7,w:.18,h:.18}}));
 }
 export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLayer[]{
  const layers:PanoramaLayer[]=[];
  if(post.assetId&&post.assetId!==decor.backgroundImageId&&!decor.layers.some(layer=>layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
-   locked:decor.primaryPhotoLocked===true,rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
+   locked:decor.primaryPhotoLocked===true,opacity:decor.primaryPhotoOpacity??1,
+   rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
  const title=post.hook;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
    font:decor.headlineStyle?.font||brand.headingFont?.toLowerCase()||'serif',
    fontSize:decor.headlineStyle?.fontSize||84,fontWeight:decor.headlineStyle?.fontWeight||700,lineHeight:decor.headlineStyle?.lineHeight||1.12,
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
    shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,locked:decor.headlineLocked===true,
+   opacity:decor.headlineStyle?.opacity??1,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
  // Preserve creation order: user-added images/text remain above older items.
  // Only a deliberate "Send behind" action places a layer underneath the title.
  const back=decor.layers.filter(l=>l.role==='background'||l.placement==='behind-text');
  const front=decor.layers.filter(l=>l.role!=='background'&&l.placement!=='behind-text');
- return [...back,...layers,...legacyStickers(decor),...front];
+ const defaultOrder=[...back,...layers,...legacyStickers(decor),...front];
+ // A single explicit order includes legacy stickers and the original photo/title.
+ // Keep new layers on top without resetting the customer's existing stack.
+ if(!decor.layerOrder?.length)return defaultOrder;
+ const rank=new Map(decor.layerOrder.map((id,index)=>[id,index]));
+ const known=defaultOrder.filter(layer=>rank.has(layer.id))
+   .sort((a,b)=>rank.get(a.id)!-rank.get(b.id)!);
+ const fresh=defaultOrder.filter(layer=>!rank.has(layer.id));
+ return [...known,...fresh];
 }
 export const freePostDimensions=(format?:string)=>format==='Reel'||format==='Story'?{width:1080,height:1920}:{width:1080,height:1350};
 async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>,width:number,height:number){
@@ -213,6 +224,16 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(patch.text!==undefined&&currentLayer?.kind==='text'){
     patch={...fitNewText(currentLayer,patch.text),...patch};
   }
+  if(id==='main-photo'){
+   if(typeof patch.opacity==='number')update({...decor,primaryPhotoOpacity:Math.max(0,Math.min(1,patch.opacity))});
+   return;
+  }
+  if(id.startsWith('legacy-sticker-')){
+   const asset=id.slice('legacy-sticker-'.length);
+   if(typeof patch.opacity==='number')update({...decor,
+     stickerOpacities:{...decor.stickerOpacities,[asset]:Math.max(0,Math.min(1,patch.opacity))}});
+   return;
+  }
   if(id==='main-title'){
    if(patch.text!==undefined)onTitle(patch.text);
    const {text:unused,rect:nextRect,...styling}=patch;
@@ -263,8 +284,14 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  };
  const reorder=(id:string,move:LayerMove)=>{
   if(layers.find(layer=>layer.id===id)?.locked)return;
-  if(id==='main-title'||id==='main-photo')return;
-  update({...decor,layers:reorderPanoramaLayers(decor.layers,id,move)});
+  const ordered=layers.map(layer=>layer.id);
+  const index=ordered.indexOf(id);if(index<0)return;
+  ordered.splice(index,1);
+  const destination=move==='back'?0:move==='front'?ordered.length:
+    Math.max(0,Math.min(ordered.length,index+(move==='forward'?1:-1)));
+  ordered.splice(destination,0,id);
+  // One saved source of truth drives both preview stacking and PNG rendering.
+  update({...decor,layerOrder:ordered});
  };
  const cleanStarterTexts=()=>{
   const samples=new Set(['escribe aquí','write here','tu gran idea','your big idea']);
@@ -382,10 +409,12 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
         <span className="free-post-layer-symbol">{layer.kind==='text'?'T':layer.kind==='shape'?'▧':'◻'}</span>}
       <span>{layer.name}</span>
      </button>
-     {layer.id!=='main-title'&&layer.id!=='main-photo'&&<div className="free-post-layer-actions">
-      <button type="button" onClick={()=>reorder(layer.id,'back')} aria-label={plain('Move behind','Enviar atrás',locale)}>↓</button>
-      <button type="button" onClick={()=>reorder(layer.id,'front')} aria-label={plain('Move forward','Traer delante',locale)}>↑</button>
-     </div>}
+     <div className="free-post-layer-actions">
+      <button type="button" onClick={()=>reorder(layer.id,'back')} disabled={layer.locked}
+        aria-label={plain('Send to back','Enviar al fondo',locale)}>↓</button>
+      <button type="button" onClick={()=>reorder(layer.id,'front')} disabled={layer.locked}
+        aria-label={plain('Bring to front','Traer al frente',locale)}>↑</button>
+     </div>
     </div>)}
    </div>
   </aside>}
