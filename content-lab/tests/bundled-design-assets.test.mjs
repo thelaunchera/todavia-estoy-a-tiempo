@@ -8,7 +8,11 @@ import ts from 'typescript';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>readFileSync(resolve(root,p),'utf8');
-const moduleSource=read('src/BundledDesignAssets.ts').replace('import.meta.env.BASE_URL',JSON.stringify('/content-lab/'));
+// Compile the two TS modules together for portable Node.js data-URL tests.
+const quarantineSource=read('src/QuarantinedBundledAssets.ts');
+const moduleSource=(quarantineSource+'\n'+read('src/BundledDesignAssets.ts')
+ .replace(/import\s+\{QUARANTINED_BUNDLED_ASSET_IDS\}\s+from\s+['"]\.\/QuarantinedBundledAssets['"];?/,''))
+ .replace('import.meta.env.BASE_URL',JSON.stringify('/content-lab/'));
 const compiled=ts.transpileModule(moduleSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const bundle=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
 
@@ -19,12 +23,13 @@ test('Release preserves the original library and adds the seasonal and Pinterest
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/branding-marketing-stickers-2026-11/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/creative-stickers-2026-11-05/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/branding-elements-2026-11/')).length,8);
- assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,20);
+ assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,1);
+ assert.equal(files.filter(x=>x.file.startsWith('resources/holiday-stickers-2026-11/')).length,2);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Branding y Marketing').length,16);
- assert.equal(files.filter(x=>x.category==='sticker').length,99);
+ assert.equal(files.filter(x=>x.category==='sticker').length,66);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,119);
- assert.equal(new Set(files.map(x=>x.sha256)).size,119);
+ assert.equal(new Set(files.map(x=>x.id)).size,86);
+ assert.equal(new Set(files.map(x=>x.sha256)).size,86);
  for(const file of files){
   assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|pinterest-aesthetic-stickers-2026-11\/[a-z0-9_]+|(?:branding-elements-2026-11|holiday-stickers-2026-11)\/[a-z0-9-]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
@@ -72,9 +77,37 @@ test('Release preserves the original library and adds the seasonal and Pinterest
  }
 });
 
+
+test('Corrupt PNG uploads are quarantined, not renamed or counted as working stickers',()=>{
+ const originals=bundle.ORIGINAL_BUNDLED_DESIGN_ASSETS;
+ const publicAssets=bundle.BUNDLED_DESIGN_ASSETS;
+ const quarantined=bundle.QUARANTINED_BUNDLED_ASSET_IDS;
+ assert.equal(originals.length,119,'All original asset records are preserved');
+ assert.equal(quarantined.size,33,'Do not silently hide additional broken files');
+ assert.equal(publicAssets.length,86);
+ assert.equal(originals.filter(x=>x.category==='background').length,20);
+ assert.equal(new Set(originals.map(x=>x.id)).size,119);
+ assert.equal(originals.filter(x=>quarantined.has(x.id)).length,33);
+ assert.equal(publicAssets.every(x=>!quarantined.has(x.id)),true);
+ for(const original of originals.filter(x=>quarantined.has(x.id))){
+  assert.match(original.file,/^resources\/(?:pinterest-aesthetic-stickers-2026-11|holiday-stickers-2026-11)\//);
+  const bytes=readFileSync(resolve(root,'public',original.file));
+  assert.ok(bytes.length!==original.sizeBytes || 
+    bytes.subarray(-12).toString('hex')!=='0000000049454e44ae426082',
+    'Original appears restored: verify SHA-256 and remove '+original.id+' from quarantine');
+  const folder=original.file.includes('pinterest-aesthetic-stickers-2026-11')
+   ?'pinterest-aesthetic-stickers-2026-11':'holiday-stickers-2026-11';
+  const releaseManifest=JSON.parse(read('public/resources/'+folder+'/manifest.json'));
+  const approved=releaseManifest.assets.find(x=>x.id===original.id);
+  assert.ok(approved,'Keep original manifest details: '+original.id);
+  assert.equal(original.sha256,approved.sha256,'Do not rewrite original SHA-256');
+  assert.equal(original.sizeBytes,approved.sizeBytes,'Do not rewrite original size');
+ }
+});
+
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,98);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,65);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);
