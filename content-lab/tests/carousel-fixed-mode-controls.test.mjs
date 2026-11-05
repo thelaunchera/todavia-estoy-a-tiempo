@@ -32,7 +32,8 @@ test('Fullscreen keeps one persistent touch edit switch and one exit button on i
  assert.ok(editor.includes('fullscreen?:boolean'));
  assert.ok(editor.includes("if(pageCount<=1||fullscreen){setFloatingModeBar(false);return}"));
  assert.ok(editor.includes("{pageCount>1&&!fullscreen&&<div ref={navigationBar}"));
- assert.ok(editor.includes("{pageCount>1&&(fullscreen||floatingModeBar)"));
+ assert.ok(editor.includes("{pageCount>1&&!chosen&&(fullscreen||floatingModeBar)"));
+ assert.ok(editor.includes('touch-editor-context-dock'),'Selecting an element replaces floating navigation with editing tools');
  assert.ok(editor.includes("(fullscreen?' fullscreen':'')"));
  assert.ok(panorama.includes('fullscreen={expanded}'));
  assert.ok(panorama.includes('{!expanded&&<button type="button" className="btn ghost"'));
@@ -52,4 +53,26 @@ test('Private Studio seamless carousel retains the same touch-first tools',()=>{
   assert.ok(studio.includes(tool),tool);
  assert.ok(studio.includes('quickPanel'));
  assert.ok(studio.includes("touchAction:'none'"));
+});
+
+test('Mobile canvas remains present and layer-specific controls replace the creation dock',()=>{
+ const studio=read('../estudio-control/src/SeamlessEditor.tsx');
+ const studioCss=read('../estudio-control/src/seamless-app.css');
+ const panorama=read('src/PanoramaEditor.tsx');
+ const panoramaCss=read('src/PanoramaEditor.css');
+ const touch=read('src/TouchLayerCanvas.tsx');
+ const touchCss=read('src/TouchLayerCanvas.css');
+ assert.ok(studio.includes('studio-app-context-dock'));
+ assert.ok(studio.includes('studio-canvas-mini-actions'));
+ assert.ok(studio.includes('studio-app-inspector'));
+ assert.ok(studioCss.includes('.studio-app-canvas{position:sticky'));
+ assert.ok(studioCss.includes('.studio-app-context-dock{position:fixed'));
+ assert.ok(panorama.includes('onSelectionChange={setSelectedLayerId}'));
+ assert.ok(panorama.includes('panorama-discovery-categories'));
+ assert.ok(panoramaCss.includes('.panorama-editor>.panorama-body{position:sticky'));
+ assert.ok(panoramaCss.includes('.panorama-editor.layer-selected>.panorama-primary-actions{display:none!important}'));
+ assert.ok(touch.includes('touch-editor-context-dock'));
+ assert.ok(touch.includes('touch-editor-context-inspector'));
+ assert.ok(touch.includes('touch-editor-mini-actions'));
+ assert.ok(touchCss.includes('.touch-editor-context-dock{position:fixed'));
 });
