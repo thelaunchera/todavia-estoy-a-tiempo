@@ -641,12 +641,15 @@ export default function TouchLayerCanvas({
                 borderRadius:layer.shape==='circle'?'50%':radius(layerCornerPixels(rect,fw,fh),fw,fh)}}/>}
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
-            {active && pageCount===1 && inlineTextTools && onRemove && !layer.locked && <button type="button" aria-label="Quitar elemento" title="Quitar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}} style={{position:'absolute',right:-12,top:-12,zIndex:30,width:30,height:30,borderRadius:'50%',background:'#191919',color:'#fff',border:'2px solid white',fontSize:21,lineHeight:'24px',display:'grid',placeItems:'center',touchAction:'manipulation'}}>×</button>}
+            {active && !cropping && onRemove && !layer.locked && <button type="button"
+              className="touch-editor-corner-delete" aria-label={'Borrar '+layer.name}
+              title={'Borrar '+layer.name} onPointerDown={e=>e.stopPropagation()}
+              onPointerUp={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}}>×</button>}
             {active && !cropping && !layer.locked && <div className="touch-editor-mini-actions" role="toolbar" aria-label="Acciones rápidas de la capa"
                onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
                {layer.kind==='text'&&onDuplicateText&&<button type="button" aria-label="Duplicar texto" onClick={e=>{e.stopPropagation();onDuplicateText(layer.id)}}>⧉</button>}
                <button type="button" aria-label="Girar quince grados" onClick={e=>{e.stopPropagation();onCommit(layer.kind,layer.id,{...getRect(layer),angle:((getRect(layer).angle||0)+15)%360})}}>↻</button>
-               {onRemove&&<button type="button" aria-label="Borrar capa" onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}}>×</button>}
+
                <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
             </div>}
             {active && <><span className="touch-editor-outline"/>
