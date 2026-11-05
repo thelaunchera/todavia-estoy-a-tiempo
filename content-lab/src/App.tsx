@@ -9,6 +9,7 @@ import ContentCalendar from './ContentCalendar';
 import {validDate,type PlannedItem} from './CalendarPlannerModel';
 import ScheduleFromEditor from './ScheduleFromEditor';
 import AccountSettings from './AccountSettings';
+import InstallContentLab from './InstallContentLab';
 import PromptStudio from './PromptStudio';
 import IdeaBank, {type Idea} from './IdeaBank';
 import './PromptStudio.css';
@@ -1147,10 +1148,11 @@ function App() {
               </form>
             )}
             
+            <InstallContentLab locale={loginLanguage} compact/>
             <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
             <a href="./descubre/" className="btn ghost wide" style={{marginTop:8}}>{loginLanguage==='es'?'Ver qué incluye Content Lab':'See what Content Lab includes'}</a>
-            <a className="lab-login-purchase" href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer">{loginLanguage==='es'?'¿Aún no lo tienes? Consigue Content Lab por $10':'New here? Get Content Lab for $10'}</a>
-            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Acceso personal para compras verificadas · Sin contraseña':'Private access for verified purchases · No password'}</small>
+            <a className="lab-login-purchase" href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer">{loginLanguage==='es'?'Compra única · $10 USD':'One-time purchase · $10 USD'}</a>
+            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Sin suscripción · Actualizaciones mensuales incluidas · Acceso personal':'No subscription · Monthly updates included · Private access'}</small>
           </div>
         </section>
       </div>
