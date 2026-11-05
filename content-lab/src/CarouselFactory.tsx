@@ -50,6 +50,7 @@ type Slide = {
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
   onChange: (next: Post) => void; onSave: (draft?: Post) => void;
+  locale: 'es' | 'en'; onStartNewCarousel: () => Promise<boolean>;
   onNewAsset: (asset: Asset, dataUrl: string) => void;
   loadImage: (id: string) => void; uploadImage: () => void;
   notify: (message: string) => void; showError: (e: unknown) => void; saving: boolean;onOpenStickers?:()=>void; onUploadBackground:(file:File)=>Promise<Asset|null>; initialBackground?:{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}; initialSticker?:{version:number;brandId?:string;id?:string};
@@ -451,7 +452,7 @@ const filename=(post:Post,i:number,width=1080,height=1350)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-'+width+'x'+height+'.png';
 };
-export default function CarouselFactory({brand,post,assets,images,onChange,onSave,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
   const ownedAssets=useMemo(()=>assets.filter(a=>a.brandId===brand.id||a.shared),[assets,brand.id]);
@@ -530,6 +531,7 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
   const [overviewError,setOverviewError]=useState('');
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
+  const [creatingNewCarousel,setCreatingNewCarousel]=useState(false);
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id,post.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
@@ -1438,6 +1440,13 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
       setBusy('');
     }
   };
+  const createAnotherCarousel=async()=>{
+    if(creatingNewCarousel||saving||busy)return;
+    setCreatingNewCarousel(true);
+    try{await onStartNewCarousel();}
+    catch(e){showError(e)}
+    finally{setCreatingNewCarousel(false)}
+  };
   const renderPreviewPanel=(sheet:boolean)=>(
       <aside id={sheet?'factory-mobile-preview':undefined}
         className={'factory-persistent-preview factory-right'+(sheet?' is-open':'')}
@@ -1865,9 +1874,25 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
         {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
       </div>}
 
+      <div className="factory-new-carousel" aria-label={locale==='es'?'Comenzar otro carrusel':'Start another carousel'}>
+        <div className="factory-new-carousel-message">
+          <strong>{locale==='es'?'¿Listo para crear el siguiente?':'Ready for your next carousel?'}</strong>
+          <p>{locale==='es'
+            ?'Guardaremos este diseño en Mis posts antes de abrir un lienzo nuevo. Tus PNG descargados no se borrarán del dispositivo.'
+            :'We will save this design in My posts before opening a fresh canvas. PNGs already downloaded remain on your device.'}</p>
+        </div>
+        <button type="button" className="btn dark factory-new-carousel-button"
+          onClick={()=>void createAnotherCarousel()} disabled={creatingNewCarousel||saving||!!busy}>
+          {creatingNewCarousel?<LoaderCircle size={17} className="spin"/>:<Plus size={17}/>}
+          {creatingNewCarousel
+            ?(locale==='es'?'Guardando carrusel…':'Saving carousel…')
+            :(locale==='es'?'Guardar y crear otro carrusel':'Save and create another carousel')}
+        </button>
+      </div>
+
       <div className="factory-step-footer">
         <button type="button" className="btn ghost" onClick={()=>setStudioTab('review')}>Volver a vista previa</button>
-        <button type="button" className="btn dark" onClick={saveLatest} disabled={saving}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
+        <button type="button" className="btn dark" onClick={saveLatest} disabled={saving||creatingNewCarousel}><Save size={16}/> {saving?'Guardando…':'Guardar carrusel'}</button>
       </div>
 
     </section>}
