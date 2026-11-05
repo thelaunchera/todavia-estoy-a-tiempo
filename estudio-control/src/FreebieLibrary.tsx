@@ -12,7 +12,8 @@ const NOVEMBER_SECTION = 'studio-link-center-v1';
 const MATCHA_TITLE = 'Matcha · One Photo, Eight Prompts';
 const MATCHA_LINK_ES = 'https://podcast.thelaunchera.com/content-lab/prompts/';
 const MATCHA_LINK_EN = 'https://podcast.thelaunchera.com/content-lab/prompts/en/';
-const DECEMBER_APPROVED_COVER_ID = '12FpBKPtlwdACHZsVOxLIcRX_puTvfzTf';
+const DECEMBER_APPROVED_COVER_ID = '1zkXZMsBLioAiG8-LfHDmhf4HyB6VTlMj';
+const DECEMBER_PREVIOUS_COVER_ID = '12FpBKPtlwdACHZsVOxLIcRX_puTvfzTf';
 const NOVEMBER_FILES = {
   folder: 'https://drive.google.com/drive/folders/1bwCsa_Kn-NNBADo8ZisSTba63wvgN7cU',
   photos: 'https://drive.google.com/drive/folders/1_axcVjDNox1P0jevZay4OEuIOh1pHHgj',
@@ -49,11 +50,11 @@ const PACK = {
   make: 'https://us2.make.com/2964061/scenarios/6912342',
 };
 const PHOTOS = [
-  { id: '1zkXZMsBLioAiG8-LfHDmhf4HyB6VTlMj', name: '01 · Sculpted Gloss Hero' },
-  { id: '16LQJhPaM_vA63gsXaPzlsk-q_TrDlvS6', name: '02 · Droplet & Material Macro' },
-  { id: '1g3eGkdLf34HqC0I1W-GY70YN7R59-XIK', name: '03 · Botanical Still Life' },
-  { id: '1OqzMvTroJPrPdkpN9j0pZwQdt79ThLTO', name: '04 · Cream & Ritual Detail' },
-  { id: '1ixa7B19jz0raQRHptQAewQjMcvK2JmZk', name: '05 · Holiday Gift Campaign' },
+  { id: '1zkXZMsBLioAiG8-LfHDmhf4HyB6VTlMj', name: '01 · Soft Lavender' },
+  { id: '16LQJhPaM_vA63gsXaPzlsk-q_TrDlvS6', name: '02 · Lavender Mood' },
+  { id: '1g3eGkdLf34HqC0I1W-GY70YN7R59-XIK', name: '03 · Lavender Ritual' },
+  { id: '1OqzMvTroJPrPdkpN9j0pZwQdt79ThLTO', name: '04 · Cream Texture' },
+  { id: '1ixa7B19jz0raQRHptQAewQjMcvK2JmZk', name: '05 · Lavender Gifting' },
 ] as const;
 type StudioEntry = { id: string; title: string; section?: string; status?: string; notes?: string };
 type Props = { entries: StudioEntry[]; onChanged: () => Promise<unknown>; readOnly?: boolean };
@@ -164,8 +165,8 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
     <div className="freebies-card">
       <div className="freebies-approved-cover">
         <a href={'https://drive.google.com/file/d/' + DECEMBER_APPROVED_COVER_ID + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir la portada original aprobada de diciembre">
-          <iframe src={drivePreview(DECEMBER_APPROVED_COVER_ID)} title="Portada original aprobada de diciembre" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-          <span>Portada original · Ver en Drive <ExternalLink size={13}/></span>
+          <iframe src={drivePreview(DECEMBER_APPROVED_COVER_ID)} title="Portada actualizada de diciembre" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <span>Portada actualizada · Ver en Drive <ExternalLink size={13}/></span>
         </a>
       </div>
       <div className="freebies-info">
@@ -193,6 +194,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           {external(PACK.prompts,'Prompts fuente · solo administración',ClipboardCopy)}
           {external(PACK.animation,'Ver GIF',Sparkles)}
           {external(PACK.folder,'Abrir carpeta completa en Drive',ExternalLink)}
+          {external('https://drive.google.com/file/d/' + DECEMBER_PREVIOUS_COVER_ID + '/view','Portada anterior archivada',ExternalLink)}
         </div>
         </details>
         <details className="freebies-details"><summary>Estado de lanzamiento y envío</summary><div className="freebies-publishing">
