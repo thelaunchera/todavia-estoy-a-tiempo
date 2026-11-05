@@ -506,3 +506,29 @@
    width:min(410px,calc(100vw - 20px));
  }
 }
+
+/* Keep transparency accessible while a customer edits a selected layer. */
+.touch-editor-opacity-control{
+ display:flex;align-items:center;gap:9px;min-width:0;
+ padding:9px 12px;margin:8px 0;border:1px solid #cbd9dd;
+ border-radius:13px;background:#faf8f3;color:#191919;
+ box-shadow:0 5px 17px #142c3b1c;font-size:13px;font-weight:750
+}
+.touch-editor-opacity-control label{flex:0 0 auto;white-space:nowrap}
+.touch-editor-opacity-control input[type=range]{
+ min-width:45px;width:100%;flex:1;accent-color:#191919;touch-action:manipulation
+}
+.touch-editor-opacity-control output{
+ min-width:40px;font-size:12px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums
+}
+@media(max-width:799px){
+ .touch-editor-opacity-control{
+  position:fixed;z-index:6017;
+  bottom:calc(154px + env(safe-area-inset-bottom));
+  left:10px;right:10px;width:auto;box-sizing:border-box;
+  margin:0;padding:10px 12px;box-shadow:0 5px 24px #152b3b45
+ }
+ .panorama-editor.expanded .touch-editor-opacity-control{
+  bottom:calc(82px + env(safe-area-inset-bottom))
+ }
+}
