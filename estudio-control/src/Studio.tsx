@@ -187,6 +187,7 @@ const LOGO = SITE + 'assets/logo-podcast-04.svg';
 const COVER = SITE + 'assets/podcast-episodio-01-azul-v3.webp';
 const NAV = [
   { id: 'inicio', label: 'Inicio · mi agenda', icon: LayoutDashboard, group: 'MI CENTRO' },
+  { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Mis pendientes', icon: ListChecks },
   { id: 'episodios', label: 'Capítulos y guiones', icon: Mic2, group: '🎙️ PODCAST · PRODUCCIÓN' },
@@ -202,7 +203,6 @@ const NAV = [
   { id: 'demos', label: 'Demos de la clase', icon: Globe2 },
   { id: 'youtube', label: 'YouTube · Nia y Ruby', icon: Film, group: 'YOUTUBE · SERIE ANIMADA' },
   { id: 'reels-lab', label: 'Reels de Content Lab', icon: Film, group: '🎨 CREACIÓN DE CONTENIDO' },
-  { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
   { id: 'ideas', label: 'Banco de ideas', icon: Lightbulb },
   { id: 'ventas', label: 'Ventas e ingresos', icon: CreditCard, group: '💼 NEGOCIO Y OPERACIONES' },
   { id: 'productos', label: 'Centro de productos', icon: ShoppingBag },
@@ -333,7 +333,7 @@ function App() {
   const [classPendingTarget, setClassPendingTarget] = useState<{kind:'lesson'|'weekly';id:string}|null>(null);
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
+    return section === 'seamless' || section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -760,7 +760,7 @@ function App() {
     if (p === 'tareas') void refresh();
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
+    if (p==='seamless' || p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     if (!directPending) window.scrollTo({ top: 0, behavior: 'smooth' });
