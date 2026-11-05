@@ -65,6 +65,12 @@ function drivePreview(id: string) {
 function external(url: string, label: string, Icon: typeof ExternalLink) {
   return <a href={url} target="_blank" rel="noopener noreferrer" className="freebies-link"><Icon size={17} /> {label}<ExternalLink size={14}/></a>;
 }
+/** The owner can always preview a prepared freebie; this does not publish it or bypass email-delivery QA. */
+function openFreebie(url: string, title: string) {
+  return <a href={url} target="_blank" rel="noopener noreferrer" className="freebies-link freebies-link-primary" aria-label={'Abrir freebie: '+title}>
+    <ExternalLink size={17}/> Abrir freebie <ExternalLink size={14}/>
+  </a>;
+}
 export default function FreebieLibrary({entries, onChanged, readOnly=false}: Props) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -107,28 +113,6 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
     <div className="freebies-collection" aria-label="Biblioteca de freebies y lanzamientos">
-    <div className="freebies-card freebies-salt-line-card">
-      <div className="freebies-approved-cover">
-        <a href={'https://drive.google.com/file/d/' + SALT_LINE.hero + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir hero SALT LINE de enero en Drive">
-          <iframe src={drivePreview(SALT_LINE.hero)} title="SALT LINE · Hero aprobado · Enero 2027" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-          <span>Hero aprobado · Original en Drive <ExternalLink size={13}/></span>
-        </a>
-      </div>
-      <div className="freebies-info">
-        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> Preparado en privado · entrega pendiente de QA</span><span className="freebies-date"><CalendarDays size={15}/> Enero 2027</span></div>
-        <h3>SALT LINE · 8 Macro Beauty Photo Prompts</h3>
-        <p className="freebies-description">Serie editorial macro con textura real, 8 prompts adaptables y 4 fotos individuales aprobadas. Usa el hero original para mostrar calidad y textura.</p>
-        <div className="freebies-meta"><span><Languages size={15}/> Inglés</span><span><ImageIcon size={15}/> 4 fotos individuales</span><span><ClipboardCopy size={15}/> PDF · 13 páginas</span></div>
-        <div className="freebies-inline-gallery" aria-label="Cuatro fotografías individuales de SALT LINE">
-          {SALT_LINE_PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={'Abrir '+photo.name+' en Drive'}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
-        </div>
-        <div className="freebies-actions">
-          {external(SALT_LINE.folder,'Carpeta SALT LINE · Drive',ExternalLink)}
-          {external(SALT_LINE.pdf,'Revisar PDF · uso interno',ClipboardCopy)}
-        </div>
-        <p className="freebies-disclaimer">Preparado para enero. No presentar como publicado ni habilitar entrega hasta probar formulario, envío de Resend y permiso de acceso del PDF para la persona que lo solicite.</p>
-      </div>
-    </div>
     <div className="freebies-card freebies-matcha-card">
       <div className="freebies-matcha-art">
         <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>FREEBIE · ORIGINAL</span></div>
@@ -144,7 +128,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <h3>{MATCHA_TITLE}</h3>
         <p className="freebies-description">8 fotografías originales y prompts para crear imágenes de producto.</p>
         <div className="freebies-meta"><span><Languages size={15}/> Español / English</span><span><ImageIcon size={15}/> 8 fotos originales</span></div>
-        <div className="freebies-actions">{external(MATCHA_LINK_ES,'Abrir freebie · ES',ExternalLink)}{external(MATCHA_LINK_EN,'English',ExternalLink)}</div>
+        <div className="freebies-actions freebies-main-actions">{openFreebie(MATCHA_LINK_ES,'Matcha · Español')}{external(MATCHA_LINK_EN,'English',ExternalLink)}</div>
         {!matcha && <p className="freebies-alert">Falta el registro de matcha en el Studio; la página original permanece intacta.</p>}
       </div>
     </div>
@@ -160,13 +144,17 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           {NOVEMBER_PHOTOS.map(photo=><a key={photo.src} href={NOVEMBER_FILES.photos} target="_blank" rel="noopener noreferrer" aria-label={'Ver '+photo.name+' en Drive'}><img src={photo.src} alt={photo.name} loading="lazy"/></a>)}
         </div>
         <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Make activo · verificación pendiente</span></div>
-        <div className="freebies-actions">
-          {external(NOVEMBER_FILES.access,'Ver contenido · ES / EN',ExternalLink)}
-          {external(NOVEMBER_FILES.signup,'Ver formulario de correo',Mail)}
-          {external(NOVEMBER_FILES.photos,'Abrir fotos en Drive',ImageIcon)}
-          {external(NOVEMBER_FILES.folder,'Carpeta completa',ExternalLink)}
-          {external(NOVEMBER_FILES.automation,'Automatización Make',ExternalLink)}
+        <div className="freebies-actions freebies-main-actions">
+          {openFreebie(NOVEMBER_FILES.access,'Tu web con un solo prompt · ES / EN')}
+          {external(NOVEMBER_FILES.signup,'Solicitud por correo',Mail)}
         </div>
+        <details className="freebies-details"><summary>Fotos y automatización</summary>
+          <div className="freebies-actions">
+            {external(NOVEMBER_FILES.photos,'Abrir fotos en Drive',ImageIcon)}
+            {external(NOVEMBER_FILES.folder,'Carpeta completa',ExternalLink)}
+            {external(NOVEMBER_FILES.automation,'Automatización Make',ExternalLink)}
+          </div>
+        </details>
         {!november && <p className="freebies-alert">No se encontró la ficha original de noviembre en el Studio.</p>}
       </div>
     </div>
@@ -192,10 +180,11 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <div className="freebies-inline-gallery" aria-label="Cinco fotos originales del freebie de diciembre">
           {PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={"Abrir "+photo.name+" en Drive"}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
         </div>
-        <div className="freebies-actions">{external(PACK.images,'Abrir carpeta de fotos · Drive',ImageIcon)}{external(PACK.folder,'Abrir carpeta completa · Drive',ExternalLink)}</div>
+        <div className="freebies-actions freebies-main-actions">
+          {openFreebie(PACK.access,'December Creative Pack · The Lavender Edit')}
+          {external(PACK.signup,'Solicitud por correo',Mail)}
+        </div>
         <details className="freebies-details"><summary>Gestionar freebie de diciembre</summary><div className="freebies-actions">
-          {external(PACK.access,'Página de acceso · 5 prompts',ExternalLink)}
-          {external(PACK.signup,'Formulario de registro · diciembre',Mail)}
           {external(PACK.make,'Automatización Make · QA pendiente',ExternalLink)}
           {external(PACK.images,'Abrir carpeta de fotos en Drive',ImageIcon)}
           {external(PACK.prompts,'Prompts fuente · solo administración',ClipboardCopy)}
@@ -216,6 +205,33 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         {message && <p role="status" className="freebies-notice">{message}</p>}
         {failed && <p role="alert" className="freebies-alert">{failed}</p>}
         <p className="freebies-disclaimer">No compartir los archivos de Drive ni el PDF fuente con el público. La activación permanece bloqueada hasta comprobar el flujo de correo y acceso a la página.</p></details>
+      </div>
+    </div>
+    <div className="freebies-card freebies-salt-line-card">
+      <div className="freebies-approved-cover">
+        <a href={'https://drive.google.com/file/d/' + SALT_LINE.hero + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir hero SALT LINE de enero en Drive">
+          <iframe src={drivePreview(SALT_LINE.hero)} title="SALT LINE · Hero aprobado · Enero 2027" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <span>Hero aprobado · Original en Drive <ExternalLink size={13}/></span>
+        </a>
+      </div>
+      <div className="freebies-info">
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> Preparado en privado · entrega pendiente de QA</span><span className="freebies-date"><CalendarDays size={15}/> Enero 2027</span></div>
+        <h3>SALT LINE · 8 Macro Beauty Photo Prompts</h3>
+        <p className="freebies-description">Serie editorial macro con textura real, 8 prompts adaptables y 4 fotos individuales aprobadas. Usa el hero original para mostrar calidad y textura.</p>
+        <div className="freebies-meta"><span><Languages size={15}/> Inglés</span><span><ImageIcon size={15}/> 4 fotos individuales</span><span><ClipboardCopy size={15}/> PDF · 13 páginas</span></div>
+        <div className="freebies-inline-gallery" aria-label="Cuatro fotografías individuales de SALT LINE">
+          {SALT_LINE_PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={'Abrir '+photo.name+' en Drive'}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
+        </div>
+        <div className="freebies-actions freebies-main-actions">
+          {openFreebie(SALT_LINE.pdf,'SALT LINE · vista previa privada en PDF')}
+        </div>
+        <details className="freebies-details"><summary>Archivos originales y producción</summary>
+          <div className="freebies-actions">
+            {external(SALT_LINE.folder,'Carpeta SALT LINE · Drive',ExternalLink)}
+            {external(SALT_LINE.pdf,'PDF fuente · solo administración',ClipboardCopy)}
+          </div>
+        </details>
+        <p className="freebies-disclaimer">Preparado para enero. El botón abre el PDF en una vista privada de administración. No está publicado para solicitantes: falta probar el formulario, Resend y el acceso seguro.</p>
       </div>
     </div>
     </div>
