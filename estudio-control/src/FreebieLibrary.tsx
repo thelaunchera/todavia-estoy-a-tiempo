@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, Check, ClipboardCopy, Download, ExternalLink, Gift, Image as ImageIcon, Languages, LockKeyhole, Sparkles } from 'lucide-react';
+import { CalendarDays, ClipboardCopy, ExternalLink, Gift, Image as ImageIcon, Languages, LockKeyhole, Sparkles, Mail } from 'lucide-react';
 import { api } from './supabase-client';
 import './freebie-library.css';
 
@@ -7,8 +7,9 @@ import './freebie-library.css';
 export const FREEBIES_SECTION = 'studio-freebies-v1';
 const FREEBIE_TITLE = 'December Creative Pack — The Lavender Edit';
 const LAUNCH_DATE = '2026-12-01';
+const NOVEMBER_TITLE = 'Freebie · Tu web con un solo prompt · Borrador ES/EN';
+const NOVEMBER_SECTION = 'studio-link-center-v1';
 const PACK = {
-  pdf: 'https://drive.google.com/file/d/1qjwII782hZ-1ZZCLO2uow3ZxW1oIvTBZ/view',
   folder: 'https://drive.google.com/drive/folders/1qD7EmHCyKEs-aHUFlloKP9-nDuv1q7Ug',
   images: 'https://drive.google.com/drive/folders/1zqzLqSkPobH0DQnGfmFAhNkJ0o2YxQNm',
   prompts: 'https://drive.google.com/file/d/1YoVsthcjmxEamdB7CKah75eHzsnpWL4g/view',
@@ -38,88 +39,99 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [failed, setFailed] = useState('');
-  const [copied, setCopied] = useState(false);
+
   const item = useMemo(() => entries.find(x => x.section === FREEBIES_SECTION && x.title === FREEBIE_TITLE),[entries]);
+  const november = useMemo(() => entries.find(x => x.section === NOVEMBER_SECTION && x.title === NOVEMBER_TITLE),[entries]);
   const active = item?.status === 'activo';
   const canLaunch = afterDecemberStart();
+  // Never enable a public launch until the email registration, protected access
+  // and delivery have passed an end-to-end test. A date alone is insufficient.
+  const emailDeliveryVerified = false;
   const onToggle = async () => {
     if (!item || saving || readOnly) return;
-    if (!active && !canLaunch) {
-      setFailed('La activación está reservada para diciembre de 2026. El recurso permanece en borrador privado.');
+    if (!active && (!canLaunch || !emailDeliveryVerified)) {
+      setFailed('Activación bloqueada: falta comprobar el formulario, el correo y el acceso privado al recurso. No se enviará ningún PDF.');
       return;
     }
     const nextActive = !active;
-    const action = nextActive ? '¿Marcar el freebie como activo? Comprueba primero que el PDF de Drive se puede abrir con el acceso que deseas compartir. Esto NO publica contenido ni envía correos automáticamente.' : '¿Devolver este freebie a borrador privado?';
+    const action = nextActive ? '¿Marcar el freebie como activo? Confirma que la página privada y el correo de acceso funcionan. No se enviarán PDFs ni enlaces de Drive al público.' : '¿Devolver este freebie a borrador privado?';
     if (!window.confirm(action)) return;
     setSaving(true); setFailed(''); setMessage('');
     try {
       await api.put('/api/items/ideas/' + item.id, {status: nextActive ? 'activo' : 'borrador'});
       await onChanged();
-      setMessage(nextActive ? 'Estado guardado: activo. Ya puedes copiar el enlace para distribuirlo manualmente.' : 'Estado guardado: borrador privado. La ficha sigue disponible para editar.');
+      setMessage(nextActive ? 'Estado actualizado. Verifica la entrega por correo antes de promocionarlo.' : 'Estado guardado: borrador privado. La ficha sigue disponible para editar.');
     } catch {
       setFailed('No se pudo guardar el estado. No se ha cambiado la activación.');
     } finally {setSaving(false);}
-  };
-  const onCopy = async () => {
-    if (!active) return;
-    try {
-      await navigator.clipboard.writeText(PACK.pdf);
-      setCopied(true); setFailed(''); setMessage('Enlace copiado. Verifica permisos de Drive antes de compartirlo.');
-    } catch {
-      setFailed('No se pudo copiar automáticamente. Abre el PDF y copia su URL desde Drive.');
-    }
   };
   return <section className="freebies-workspace" aria-label="Biblioteca privada de freebies">
     <header className="freebies-header">
       <div>
         <div className="freebies-eyebrow"><Gift size={16}/> FREEBIES · MI ESTUDIO</div>
-        <h2>Freebies listos para lanzar, a tu ritmo.</h2>
-        <p>Una biblioteca de recursos para preparar campañas con anticipación. Cada pieza conserva su portada, guía, fotos y prompts en una misma ficha privada.</p>
+        <h2>Monthly Creative Packs</h2>
+        <p>Todos tus freebies en un solo lugar: noviembre y diciembre, con sus recursos de producción y su propio estado. La entrega al público será por correo con acceso a una página, nunca mediante PDF.</p>
       </div>
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
+    <div className="freebies-card freebies-november-card">
+      <div className="freebies-art freebies-art-november">
+        <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>NOVEMBER / 2026</span></div>
+        <span className="freebies-art-small">FREEBIE · NOVEMBER</span>
+        <h3>One Prompt.<br/><em>Your Website.</em></h3>
+        <p>Create your first website with AI</p>
+        <div className="freebies-art-stamp">CHATGPT <span>·</span> APPDEPLOY</div>
+        <span className="freebies-art-bottom">THE LAUNCH ERA · FREE RESOURCE</span>
+      </div>
+      <div className="freebies-info">
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Noviembre 2026</span></div>
+        <h3>Tu web con un solo prompt</h3>
+        <p className="freebies-description">Freebie de noviembre para crear una web con ChatGPT y AppDeploy. Recurso en español e inglés; mantenemos su ficha de producción existente y su enlace de Notion sin duplicar archivos.</p>
+        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Acceso por correo · pendiente de QA</span></div>
+        {external('https://app.notion.com/p/40da68f2ee6e81eb8308c07323903949?pvs=204','Abrir ficha original de noviembre',ExternalLink)}
+        {!november && <p className="freebies-alert">No se encontró la ficha original de noviembre en el Studio.</p>}
+      </div>
+    </div>
     <div className="freebies-card">
       <div className="freebies-art">
         <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>DECEMBER / 2026</span></div>
         <span className="freebies-art-small">THE LAVENDER EDIT</span>
-        <h3>December<br/><em>Creative Pack</em></h3>
-        <p>ChatGPT Prompts for<br/>Product Ad Visuals</p>
+        <h3>ChatGPT<br/><em>Prompts</em></h3>
+        <p>for Product Visuals<br/>5 ready-to-use prompts</p>
         <div className="freebies-art-stamp">5 PROMPTS <span>·</span> 5 VISUALS</div>
         <span className="freebies-art-bottom">CREATIVE PROMPT GUIDE</span>
       </div>
       <div className="freebies-info">
         <div className="freebies-status-row">
-          <span className={active ? 'freebies-status is-active' : 'freebies-status'}>{active ? <Check size={14}/> : <LockKeyhole size={14}/>} {active ? 'Activo · distribución manual' : 'Borrador privado'}</span>
+          <span className="freebies-status"><LockKeyhole size={14}/>{active ? 'Activo en Studio · entrega sin verificar' : 'Borrador · entrega por correo pendiente'}</span>
           <span className="freebies-date"><CalendarDays size={15}/> Diciembre 2026</span>
         </div>
         <h3>{FREEBIE_TITLE}</h3>
-        <p className="freebies-description">Freebie editorial para crear fotografías de producto en soft purple. Incluye una guía de ocho páginas, cinco visuales, cinco prompts originales reutilizables y una presentación GIF.</p>
+        <p className="freebies-description">Freebie de diciembre con cinco prompts de ChatGPT y cinco visuales de producto en lavanda. La audiencia recibirá por email acceso a una página con los prompts copiables y las imágenes; no recibirá un PDF.</p>
         <div className="freebies-meta">
           <span><ImageIcon size={15}/> 5 PNG individuales</span>
           <span><Languages size={15}/> Inglés + español</span>
           <span><ClipboardCopy size={15}/> 5 prompts copiables</span>
         </div>
         <div className="freebies-actions">
-          {external(PACK.pdf,'Ver guía PDF',Download)}
           {external(PACK.images,'Ver 5 imágenes',ImageIcon)}
-          {external(PACK.prompts,'Prompts EN / ES',ClipboardCopy)}
+          {external(PACK.prompts,'Prompts fuente · solo administración',ClipboardCopy)}
           {external(PACK.animation,'Ver GIF',Sparkles)}
           {external(PACK.folder,'Carpeta completa',ExternalLink)}
         </div>
         <div className="freebies-publishing">
           <div>
-            <strong>{active ? 'Disponible para compartir' : 'Reservado para diciembre'}</strong>
-            <small>{active ? 'La activación está guardada en el Studio. Compartir la URL y cambiar permisos de Drive sigue siendo manual.' : 'El contenido ya está guardado; no se ha activado ni entregado públicamente.'}</small>
+            <strong>{emailDeliveryVerified ? 'Preparado para activar' : 'Entrega por correo pendiente de configurar y probar'}</strong>
+            <small>Falta comprobar registro de email, envío, enlace de acceso y protección de la página. El material de Drive es solo para producción interna.</small>
           </div>
-          <button type="button" className={active ? 'freebies-toggle is-active' : 'freebies-toggle'} onClick={() => void onToggle()} disabled={saving || readOnly || !item || (!active && !canLaunch)}>
-            {saving ? 'Guardando…' : active ? 'Volver a borrador' : 'Activar en diciembre'}
+          <button type="button" className={active ? 'freebies-toggle is-active' : 'freebies-toggle'} onClick={() => void onToggle()} disabled={saving || readOnly || !item || (!active && (!canLaunch || !emailDeliveryVerified))}>
+            {saving ? 'Guardando…' : active ? 'Volver a borrador' : 'Activar tras verificar email'}
           </button>
         </div>
-        {active && <button type="button" className="freebies-copy" onClick={() => void onCopy()}><ClipboardCopy size={17}/>{copied ? 'Enlace copiado' : 'Copiar enlace de entrega'}</button>}
         {!item && <p role="alert" className="freebies-alert">No se encontró el registro de este freebie en el Studio. La activación está deshabilitada hasta restaurarlo.</p>}
         {message && <p role="status" className="freebies-notice">{message}</p>}
         {failed && <p role="alert" className="freebies-alert">{failed}</p>}
-        <p className="freebies-disclaimer">Esta sección es privada. Cambiar a «activo» no publica en Instagram, ni manda DMs o emails, ni hace públicas las carpetas de Drive.</p>
+        <p className="freebies-disclaimer">No compartir los archivos de Drive ni el PDF fuente con el público. La activación permanece bloqueada hasta comprobar el flujo de correo y acceso a la página.</p>
       </div>
     </div>
     <div className="freebies-photo-bank" aria-label="Galería de ejemplos">
