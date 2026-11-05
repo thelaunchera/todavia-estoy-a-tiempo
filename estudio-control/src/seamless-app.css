@@ -487,3 +487,49 @@
    display:none!important;
  }
 }
+
+
+/* Strict phone-only editor layout. No informational content may create extra
+   grid tracks or shrink the drawing surface. */
+@media(max-width:799px){
+ .studio-carousel-editor-mode .studio-seamless-app{
+   grid-template-rows:54px minmax(180px,1fr) 52px 66px!important;
+   grid-auto-rows:0!important;
+   gap:5px!important;
+ }
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-app-topbar{
+   grid-row:1!important;height:54px!important;max-height:54px!important;
+   overflow:hidden!important;flex-wrap:nowrap!important;
+ }
+ .studio-carousel-editor-mode .studio-app-topbar .studio-app-name{
+   flex:1 1 90px!important;overflow:hidden;
+ }
+ .studio-carousel-editor-mode .studio-app-topbar .studio-app-name>span{display:none}
+ .studio-carousel-editor-mode .studio-app-topbar .studio-app-name input{
+   font-size:14px!important;max-width:100%;white-space:nowrap;
+ }
+ .studio-carousel-editor-mode .studio-app-topbar .studio-app-actions{
+   flex-wrap:nowrap!important;flex:0 0 auto!important;
+ }
+ .studio-carousel-editor-mode .studio-app-topbar .studio-app-actions>button:first-child{display:none!important}
+ .studio-carousel-editor-mode .studio-app-canvas{
+   grid-row:2!important;min-height:180px!important;
+   height:100%!important;max-height:100%!important;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tray{
+   grid-row:3!important;height:52px!important;max-height:52px!important;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar,
+ .studio-carousel-editor-mode .studio-app-context-dock{
+   grid-row:4!important;height:66px!important;max-height:66px!important;
+ }
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-editor-help-text,
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-app-admin,
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-app-selection{
+   display:none!important;
+ }
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-editor-message:empty{
+   display:none!important;
+ }
+ .studio-carousel-editor-mode .top-label{display:none!important}
+}
