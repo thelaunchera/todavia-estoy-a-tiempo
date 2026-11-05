@@ -13,7 +13,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;
+  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
@@ -620,6 +620,14 @@ export default function TouchLayerCanvas({
           : <div className="touch-editor-loading">Preparando lienzo…</div>}
         {layers.map((layer, layerIndex) => {
           const rect = getRect(layer), active = selected === layer.id;
+          // Normal is a collection of independent slide windows, not an
+          // accidental seamless panorama when an image crosses a boundary.
+          const owner=Math.max(0,Math.min(pageCount-1,
+            Number.isInteger(layer.page)?layer.page!:Math.floor((rect.x+rect.w/2)*pageCount)));
+          const leftEdge=owner/pageCount,rightEdge=(owner+1)/pageCount;
+          const normalClip=!continuous&&pageCount>1&&rect.w>0
+            ?`inset(0 ${Math.max(0,100*(rect.x+rect.w-rightEdge)/rect.w)}% 0 ${Math.max(0,100*(leftEdge-rect.x)/rect.w)}%)`
+            :undefined;
           // Every new element stays above earlier ones. Selection must NEVER
           // change stacking order: tapping a photo should not bury its siblings.
           // Background is always the bottom-most layer, independent of locking.
@@ -645,7 +653,7 @@ export default function TouchLayerCanvas({
             className={'touch-editor-layer ' + layer.kind + (layer.role==='background'?' is-background':'') + (active ? ' active' : '') + (layer.locked?' is-locked':'') + (active && cropping ? ' cropping' : '')}
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
-               zIndex:z,
+               clipPath:normalClip,zIndex:z,
                pointerEvents:layer.locked||layer.role==='background'||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
