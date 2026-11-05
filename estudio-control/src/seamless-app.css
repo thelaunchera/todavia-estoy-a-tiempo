@@ -447,3 +447,43 @@
    max-height:min(43dvh,350px)!important;
  }
 }
+
+
+/* Keep auxiliary copy out of the mobile artboard layout. */
+@media(max-width:799px){
+ .studio-carousel-editor-mode .studio-editor-help-text{display:none!important}
+ .studio-carousel-editor-mode .studio-editor-message:not(:empty){
+   position:fixed;top:65px;left:12px;right:12px;
+   z-index:1950;padding:8px 12px;background:#fff7d8;
+   border-radius:10px;font-size:12px;pointer-events:none;
+ }
+ .studio-carousel-editor-mode .studio-editor-message:empty{display:none!important}
+ .studio-carousel-editor-mode .studio-seamless-app{
+   grid-template-rows:minmax(0,auto) minmax(0,1fr) 57px 70px!important;
+   grid-auto-rows:0!important;
+   align-content:stretch!important;
+ }
+ .studio-carousel-editor-mode .studio-app-canvas{
+   align-self:stretch!important;
+   max-height:none!important;
+   margin:0!important;
+ }
+ .studio-carousel-editor-mode .studio-app-canvas>div{
+   height:100%!important;
+   max-height:none!important;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tray{
+   max-height:57px!important;height:57px!important;
+   align-self:stretch!important;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar,
+ .studio-carousel-editor-mode .studio-app-context-dock{
+   max-height:70px!important;height:70px!important;
+ }
+ .studio-carousel-editor-mode .studio-app-admin,
+ .studio-carousel-editor-mode .studio-app-selection,
+ .studio-carousel-editor-mode .studio-editor-help-text,
+ .studio-carousel-editor-mode .studio-seamless-app>details{
+   display:none!important;
+ }
+}
