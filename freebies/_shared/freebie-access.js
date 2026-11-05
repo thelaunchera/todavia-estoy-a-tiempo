@@ -5,12 +5,49 @@ const resource=root.dataset.resource,languageToggle=document.getElementById("lan
 const api="https://bowacxhmjvrqixtwaikv.supabase.co/functions/v1/tle-monthly-freebies";
 const status=document.getElementById("access-status"),cards=document.getElementById("prompt-cards"),download=document.getElementById("protected-download");
 const key="tle_freebie_access_"+resource;
-let lang=document.documentElement.lang==="es"?"es":"en",items=[];
+const urlLanguage=new URLSearchParams(location.search).get("lang");
+let lang=(urlLanguage==="es"||urlLanguage==="en")?urlLanguage:(document.documentElement.lang==="es"?"es":"en"),items=[];
 const copy={
  es:{waiting:"Revisa tu correo: tu enlace personal abre este freebie.",loading:"Verificando tu enlace…",denied:"Acceso no disponible. Solicita otro enlace por correo.",ready:"Tus prompts están abiertos. Edítalos y copia cada uno.",copy:"Copiar prompt",copied:"Copiado",error:"No se pudo copiar. Selecciona el texto y cópialo manualmente."},
  en:{waiting:"Check your inbox: your personal link opens this freebie.",loading:"Verifying your link…",denied:"Access is unavailable. Request a new email link.",ready:"Your prompts are unlocked. Edit and copy each one.",copy:"Copy prompt",copied:"Copied",error:"Copy failed. Select the text and copy manually."}
 };
 function setText(t){status.textContent=t}
+
+const languageCopy={
+ november_web_one_prompt_2026:{
+ es:{title:"Tu web con un solo prompt | The Launch Era",eyebrow:"EDICIÓN NOVIEMBRE · ENTREGA 1 DE DICIEMBRE",heading:"Tu web con un solo prompt",subtitle:"Un prompt. Tu propio sitio web.",detail:"Fotografías originales y un prompt editable. El acceso personal llega por correo.",notice:"BIBLIOTECA PRIVADA DE PROMPTS",request:"SOLICITAR ACCESO POR CORREO",galleryEyebrow:"EJEMPLOS VISUALES",galleryTitle:"Inspírate con tres fotografías.",privateEyebrow:"ACCESO PERSONAL",privateTitle:"Tu prompt para copiar.",privateDescription:"El prompt aparece después de confirmar tu correo mediante el enlace personal. Puedes editar el texto antes de copiarlo.",footer:"POWERED BY THE LAUNCH ERA · EDICIÓN NOVIEMBRE",captions:["01 · Computadora","02 · Planificación","03 · Móvil"],cover:"cover.svg",coverAlt:"Portada española: Tu web con un solo prompt"},
+ en:{title:"Build Your Website with One Prompt | The Launch Era",eyebrow:"NOVEMBER EDITION · DECEMBER 1 RELEASE",heading:"Build your website with one prompt",subtitle:"One prompt. Your own website.",detail:"Original visual examples and an editable prompt. Your personal access arrives by email.",notice:"PRIVATE PROMPT LIBRARY",request:"REQUEST EMAIL ACCESS",galleryEyebrow:"VISUAL EXAMPLES",galleryTitle:"Explore three photo references.",privateEyebrow:"PERSONAL ACCESS",privateTitle:"Your copyable prompt.",privateDescription:"The prompt appears after you confirm your email with your personal link. Edit the text before copying.",footer:"POWERED BY THE LAUNCH ERA · NOVEMBER EDITION",captions:["01 · Desktop","02 · Planning","03 · Mobile"],cover:"cover-en.svg",coverAlt:"English cover: Build Your Website with One Prompt"}
+ },
+ december_lavender_2026:{
+ es:{title:"The Lavender Edit | The Launch Era",eyebrow:"FREEBIE CREATIVO · 1 DE DICIEMBRE DE 2026",heading:"The Lavender Edit",subtitle:"5 prompts. Una campaña de producto coherente.",detail:"Cinco fotos originales y prompts editables. Tu acceso personal llega por correo.",notice:"BIBLIOTECA PRIVADA DE PROMPTS",request:"SOLICITAR ACCESO POR CORREO",galleryEyebrow:"TEXTURAS Y DETALLES",galleryTitle:"Explora los cinco ejemplos visuales.",privateEyebrow:"ACCESO PERSONAL",privateTitle:"Tus prompts para copiar.",privateDescription:"Los prompts aparecen después de confirmar tu correo mediante el enlace personal. Puedes editarlos antes de copiarlos.",footer:"POWERED BY THE LAUNCH ERA · DICIEMBRE 2026",captions:["01 · Brillo editorial","02 · Macro y gotas","03 · Botánicos","04 · Ritual de crema","05 · Regalos"]},
+ en:{title:"The Lavender Edit | The Launch Era",eyebrow:"CREATIVE FREEBIE · DECEMBER 1, 2026",heading:"The Lavender Edit",subtitle:"5 prompts. One cohesive product campaign.",detail:"Five original visual examples and editable prompts. Your personal access arrives by email.",notice:"PRIVATE PROMPT LIBRARY",request:"REQUEST EMAIL ACCESS",galleryEyebrow:"TEXTURE & QUALITY",galleryTitle:"Explore the five visual examples.",privateEyebrow:"PERSONAL ACCESS",privateTitle:"Your copyable prompts.",privateDescription:"The prompts appear after you confirm your email with your personal link. Edit each prompt before copying.",footer:"POWERED BY THE LAUNCH ERA · DECEMBER 2026",captions:["01 · Editorial gloss","02 · Droplet macro","03 · Botanical still life","04 · Cream ritual","05 · Holiday gifting"]}
+ },
+ salt_line_january_2027:{
+ es:{title:"SALT LINE | The Launch Era",eyebrow:"FREEBIE CREATIVO · 2 DE ENERO DE 2027",heading:"SALT LINE",subtitle:"8 prompts de belleza macro · Piel, sal y luz plateada",detail:"Ejemplos visuales originales y ocho prompts editables. Tu acceso personal llega por correo.",notice:"BIBLIOTECA PRIVADA DE PROMPTS",request:"SOLICITAR ACCESO POR CORREO",galleryEyebrow:"TEXTURAS Y DETALLES",galleryTitle:"Explora los ejemplos visuales.",privateEyebrow:"ACCESO PERSONAL",privateTitle:"Tus prompts para copiar.",privateDescription:"Los ocho prompts aparecen al confirmar tu correo mediante el enlace personal. Edítalos y cópialos directamente en la web.",footer:"POWERED BY THE LAUNCH ERA · ENERO 2027",captions:["01 · La mujer","02 · Iris","03 · Labios","04 · Clavícula"]},
+ en:{title:"SALT LINE | The Launch Era",eyebrow:"CREATIVE FREEBIE · JANUARY 2, 2027",heading:"SALT LINE",subtitle:"8 Macro Beauty Prompts · Skin, Salt & Silver Light",detail:"Original visual examples and eight editable prompts. Your personal access arrives by email.",notice:"PRIVATE PROMPT LIBRARY",request:"REQUEST EMAIL ACCESS",galleryEyebrow:"TEXTURE & QUALITY",galleryTitle:"Explore the visual examples.",privateEyebrow:"PERSONAL ACCESS",privateTitle:"Your copyable prompts.",privateDescription:"The eight prompts appear after you confirm your email with your personal link. Edit and copy them directly on the web.",footer:"POWERED BY THE LAUNCH ERA · JANUARY 2027",captions:["01 · The Woman","02 · The Iris","03 · The Lip","04 · The Hollow"]}
+ }
+};
+function applyLanguage(){
+ const config=languageCopy[resource]?.[lang];
+ document.documentElement.lang=lang;
+ if(languageToggle){languageToggle.textContent=lang==="es"?"EN":"ES";languageToggle.setAttribute("aria-label",lang==="es"?"Switch to English":"Cambiar a español")}
+ if(!config)return;
+ document.title=config.title;
+ const put=(selector,text)=>{const n=root.querySelector(selector);if(n)n.textContent=text};
+ put(".hero .eyebrow",config.eyebrow);put(".hero h1",config.heading);
+ const heroP=root.querySelectorAll(".hero-copy > p");
+ if(heroP[0])heroP[0].textContent=config.subtitle;
+ if(heroP[1])heroP[1].textContent=config.detail;
+ put(".notice strong",config.notice);
+ const cta=root.querySelector(".notice a.cta");if(cta){cta.textContent=config.request;try{const url=new URL(cta.href,location.href);url.searchParams.set("lang",lang);cta.href=url.pathname+url.search}catch{}}
+ const visual=root.querySelector('section[aria-label]');
+ if(visual){const visualEyebrow=visual.querySelector(".eyebrow"),visualHeading=visual.querySelector("h2");if(visualEyebrow)visualEyebrow.textContent=config.galleryEyebrow;if(visualHeading)visualHeading.textContent=config.galleryTitle;visual.querySelectorAll(".gallery figcaption").forEach((n,i)=>{if(config.captions[i])n.textContent=config.captions[i]})}
+ put(".private > .eyebrow",config.privateEyebrow);put(".private > h2",config.privateTitle);put(".private > p",config.privateDescription);
+ const foot=document.querySelector(".footer");if(foot)foot.textContent=config.footer;
+ if(config.cover){const im=root.querySelector(".hero-img");if(im){im.src="/assets/freebies/november-website/"+config.cover;im.alt=config.coverAlt}}
+}
+applyLanguage();
+
 function render(){
  cards.replaceChildren();
  for(const item of items){
@@ -25,7 +62,8 @@ function render(){
  cards.hidden=false;setText(copy[lang].ready);if(download)download.hidden=false;
 }
 if(languageToggle)languageToggle.addEventListener("click",()=>{
- lang=lang==="es"?"en":"es";document.documentElement.lang=lang;languageToggle.textContent=lang==="es"?"EN":"ES";
+ lang=lang==="es"?"en":"es";applyLanguage();
+ const nextUrl=new URL(location.href);nextUrl.searchParams.set("lang",lang);history.replaceState(null,"",nextUrl.pathname+nextUrl.search+nextUrl.hash);
  if(items.length)render();else setText(copy[lang].waiting);
 });
 const request=async(action,payload)=>{
