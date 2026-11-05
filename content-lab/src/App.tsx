@@ -1376,7 +1376,7 @@ function App() {
                 <Save size={16}/>{loginLanguage==='es'?'Guardar y volver al calendario':'Save and return to calendar'}
               </button>
             </div>}
-          {brand&&['factory','vertical','create'].includes(tab)&&account?.email&&
+          {brand&&['vertical','create'].includes(tab)&&account?.email&&
             <QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="editor"/>}
           {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
             <span role="status" aria-live="polite">
@@ -1529,7 +1529,13 @@ function App() {
               notify={toast}
               showError={err}
               saving={busy === 'save'}
+              saveState={draftStatus}
             />
+          )}
+          {brand && tab === 'factory' && account?.email && (
+            <section className="lab-factory-help" aria-label={loginLanguage==='es'?'Ayuda de Carousel Factory':'Carousel Factory help'}>
+              <QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="editor"/>
+            </section>
           )}
           {brand && tab === 'vertical' && (
             <VerticalStudio post={editor} brand={brand} assets={library} images={images}

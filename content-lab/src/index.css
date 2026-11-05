@@ -1890,3 +1890,24 @@ input::placeholder {
     padding: 8px 10px;
   }
 }
+
+
+/* B+C Carousel Factory shell: one narrow app bar and the canvas immediately after tools. */
+.lab-carousel-editor-mode .top{background:#FAF8F3;border-bottom:1px solid #E6E1D8;min-height:50px;height:50px;padding:6px clamp(9px,2vw,20px);z-index:21}
+.lab-carousel-editor-mode .top .lab-current-page{font-size:13px;color:#191919}
+.lab-carousel-editor-mode .content[data-lab-tab="factory"]{background:#FAF8F3;padding:7px clamp(7px,1.7vw,20px) 30px}
+.lab-carousel-editor-mode .lab-factory-help{margin:30px 0 16px;padding:6px 0}
+.lab-carousel-editor-mode .lab-factory-help .lab-first-guide{background:#fff;border-color:#E4E3DD}
+.lab-carousel-editor-mode .lab-draft-safety:not(:has(.lab-draft-recovery)){position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;padding:0;margin:0}
+.lab-carousel-editor-mode .lab-draft-safety:has(.lab-draft-recovery){margin:4px 0 9px;max-width:760px}
+.lab-carousel-editor-mode .lab-carousel-editor-exit{background:#fff;border-color:#E2DED5;color:#191919;border-radius:10px;min-height:38px;padding:6px 10px}
+@media(max-width:920px){
+ .lab-carousel-editor-mode .top{position:relative!important;z-index:21;display:flex;align-items:center;
+   justify-content:space-between;min-height:43px!important;height:43px!important;padding:3px 9px!important;gap:6px!important}
+ .lab-carousel-editor-mode .top>div:first-of-type{flex:1;min-width:0}
+ .lab-carousel-editor-mode .top .lab-current-page{font-size:12px;line-height:1.2}
+ .lab-carousel-editor-mode .lab-carousel-editor-exit{min-height:36px!important;font-size:11px!important;
+   padding:5px 8px!important;white-space:nowrap}
+ .lab-carousel-editor-mode .content[data-lab-tab="factory"]{padding:6px 8px calc(100px + env(safe-area-inset-bottom))!important}
+ .lab-carousel-editor-mode .lab-factory-help{margin-top:12px}
+}

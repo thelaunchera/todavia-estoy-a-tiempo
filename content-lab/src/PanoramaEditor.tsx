@@ -280,8 +280,8 @@ export default function PanoramaEditor({
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Arrastra elementos a tu carrusel.</h2>
       <p>Como en el ejemplo: elige una foto o un sticker de tu biblioteca, arrástralo al lienzo y cambia su tamaño. En seamless puedes cruzar los límites de los slides.</p>
-    </div>{!expanded&&<button type="button" className="btn ghost" onClick={()=>setExpanded(true)}>
-      <Maximize2 size={16}/> Ampliar lienzo
+    </div>{!expanded&&<button type="button" className="btn ghost" onClick={()=>setExpanded(true)} aria-label="Ampliar lienzo">
+      <Maximize2 size={16}/><span className="panorama-expand-long">Ampliar lienzo</span><span className="panorama-expand-short">Ampliar</span>
     </button>}</header>
     {expanded&&<button type="button" className="panorama-exit-fixed" onClick={()=>setExpanded(false)}>
       <Minimize2 size={17}/> Cerrar vista amplia
