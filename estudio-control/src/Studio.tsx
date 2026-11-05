@@ -794,7 +794,9 @@ function App() {
       if(item.status!=='hecho') {setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(item.link)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError(SPOTIFY_EPISODE_ERROR);return;}
       if(!validEmailArtUrl(item.email_art_url)){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError('Antes de avisar a los oyentes, guarda una imagen pública directa de este capítulo (.png, .jpg o .webp).');return;}
-      if(!window.confirm('¿Confirmas que ya publicaste este capítulo en Spotify? Enviaremos un aviso a los oyentes suscritos.'))return;
+      const archiveIssue=episodeReadyForPublicArchive(item,episodes);
+      if(archiveIssue){setEdit({kind:'episodios',item:{...item},newItem:false});setFormError(archiveIssue);return;}
+      if(!window.confirm('¿Confirmas que el capítulo ya está publicado en Spotify? Se añadirá al archivo permanente con su propio banner, y enviaremos el aviso a oyentes con consentimiento.'))return;
     }
     setSaving(true);
     try {
@@ -821,7 +823,9 @@ function App() {
       if(original?.status!=='hecho'){setFormError('Primero marca el episodio como hecho.');return;}
       if(!validSpotifyEpisode(edit.item.link)){setFormError(SPOTIFY_EPISODE_ERROR);return;}
       if(!validEmailArtUrl(edit.item.email_art_url)){setFormError('El capítulo necesita su imagen pública directa (.png, .jpg o .webp) antes de notificar por correo.');return;}
-      if(!window.confirm('¿Este capítulo ya está publicado en Spotify? Confirmar enviará el aviso a los oyentes suscritos.'))return;
+      const archiveIssue=episodeReadyForPublicArchive(edit.item,episodes);
+      if(archiveIssue){setFormError(archiveIssue);return;}
+      if(!window.confirm('¿Este capítulo ya está publicado en Spotify? Al confirmar se añadirá al archivo permanente y se avisará solo a oyentes con consentimiento.'))return;
       edit.item.announcement_state='pending';
     }
     setSaving(true);
