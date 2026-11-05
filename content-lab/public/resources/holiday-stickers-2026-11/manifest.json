@@ -12,10 +12,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/osito-navidad.png",
-      "width": 1254,
-      "height": 1254,
-      "sizeBytes": 178670,
-      "sha256": "af9abec84980fbf3082de2d775bcd83ffb6b24a04af1d3198fe744ee674ff88c",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 660313,
+      "sha256": "08218a8f8fb8dfed64bb7ba8fb2fa73f560a2d19e50591c9a51a2081adf012f7",
       "stickerGroup": "Temporadas"
     },
     {
@@ -28,10 +28,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/lazo-cascabeles.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 111340,
-      "sha256": "6b99bc5392f50da9a35b51c5f69447b5cc77ae29389feddb63c860baa67bb223",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 616976,
+      "sha256": "69e682ffd220bff58171cf1aeadebbb318ce08d9337c519127bf87b747a93422",
       "stickerGroup": "Temporadas"
     },
     {
@@ -44,10 +44,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/galleta-navidad.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 132980,
-      "sha256": "0fd87537682e014d156b7c8e0d60280cf6d72a115a5de84c985ba4443b3edd29",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 629400,
+      "sha256": "f4aa23b4dddeb1c1e83f132b5f7daf7ba1eaf6fbaebd65d578aee5459b2653c3",
       "stickerGroup": "Temporadas"
     },
     {
@@ -60,10 +60,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/esfera-perlada.png",
-      "width": 1254,
-      "height": 1254,
-      "sizeBytes": 148768,
-      "sha256": "37845987c7ae705b88a1028e2166380da1f826c4eb193f80156909ca33c4ee1a",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 421626,
+      "sha256": "e6763e553b093ddfc7df5dfa20a0c98e1a4807838142e79917628149e3632392",
       "stickerGroup": "Temporadas"
     },
     {
@@ -76,10 +76,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/globo-nieve.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 137592,
-      "sha256": "bcc5066b703ffc188e80a0de6afd83697242eb18e22b1887c466289310449191",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 551764,
+      "sha256": "77f87c3eb05e794da9a82534672a79b48a268728d4a095ba77a32ecdd19af041",
       "stickerGroup": "Temporadas"
     },
     {
@@ -92,10 +92,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/conejito-valentin.png",
-      "width": 1254,
-      "height": 1254,
-      "sizeBytes": 143067,
-      "sha256": "477071e24461f0accb43500c24b3e2f981d6d8f1facf4ebb5e87fa92f40c9c78",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 650736,
+      "sha256": "f3bfe5bc5b5fadff2647e1d449af2596ead00abc124b72b1a9a5ebf25b916521",
       "stickerGroup": "Temporadas"
     },
     {
@@ -108,10 +108,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/carta-amor.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 141762,
-      "sha256": "4d7d9389c62bfb84bfb854216946ea1d98da50291758f084b34f2f1bf6b949b0",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 478205,
+      "sha256": "6fe27f64567328a9c4ac8a69567f88086b0393919221e6accdb16cfef4ac86dd",
       "stickerGroup": "Temporadas"
     },
     {
@@ -124,10 +124,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/cerezas-corazon.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 97769,
-      "sha256": "e6bf4eb082ef5162efc1150f81bc9ccc07ea1bbfeff2b1fd23d96e624a815597",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 412683,
+      "sha256": "618f367f530c93849613ec608b0fbcff4f8823c0f68d5e658e8d12ac4513a7da",
       "stickerGroup": "Temporadas"
     },
     {
@@ -140,10 +140,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/caja-bombones.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 151070,
-      "sha256": "2155cf17b3243a0411b168e929223dedae46f11251ec00d4e22039819f0e84a5",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 587203,
+      "sha256": "76ef259d35b7097819c7da3e27134b3a0683ba24f8037604195ef5e92b798f8d",
       "stickerGroup": "Temporadas"
     },
     {
@@ -156,10 +156,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/corazon-terciopelo.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 109171,
-      "sha256": "1b91a77031a759232deba1a63d4a73e8e3ffa4f08db7fddca13fec9e0f78177b",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 607675,
+      "sha256": "afda1438a001c3c37813f7894de97d46ac342e584acf211829d78b442df2c073",
       "stickerGroup": "Temporadas"
     },
     {
@@ -172,10 +172,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/lazo-rosa.png",
-      "width": 1315,
-      "height": 1196,
-      "sizeBytes": 121864,
-      "sha256": "d41103494560e2c535a7fd2b4eaea1934cbf8ee044aee8332360806383a03508",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 589381,
+      "sha256": "4fe2dd36ead9da54de450dc637eeb79f97351f49553768b95c294d784c4018f9",
       "stickerGroup": "Temporadas"
     },
     {
@@ -188,10 +188,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/estrella-dorada.png",
-      "width": 1536,
+      "width": 1024,
       "height": 1024,
-      "sizeBytes": 125626,
-      "sha256": "30c78d012a153454a545cc1c7e30c6a7ec8ba4805a9ead922bf84f4f71609da2",
+      "sizeBytes": 367729,
+      "sha256": "752dcc7f5294c917b11d6afa9e6155dc64b641dea6e90d01fe83e21fc5538eb8",
       "stickerGroup": "Temporadas"
     },
     {
@@ -220,10 +220,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/cinta-roja.png",
-      "width": 1199,
-      "height": 1312,
-      "sizeBytes": 771425,
-      "sha256": "c4705d4a7a4888a3319eec5ab93d4f72f9466ca48dc3e6c496e2042d2a592687",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 347094,
+      "sha256": "8e0280a311431844832c1b47e311be39610ed84734931364585f834181128e36",
       "stickerGroup": "Temporadas"
     },
     {
@@ -236,10 +236,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/baston-rosa.png",
-      "width": 1145,
-      "height": 1374,
-      "sizeBytes": 62564,
-      "sha256": "f266b0129b183db3723ed0d3e5be391260321c509e661ec0b3e5549bb824e4a2",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 351515,
+      "sha256": "60b484c22f973dc4fd667d5b2885a00f04c422e3b02992d2e20511664ba37617",
       "stickerGroup": "Temporadas"
     },
     {
@@ -252,10 +252,10 @@
       "shared": true,
       "bundled": true,
       "file": "resources/holiday-stickers-2026-11/copo-perlado.png",
-      "width": 1312,
-      "height": 1199,
-      "sizeBytes": 97067,
-      "sha256": "4b9bf187970f320b857d319445b172440a5ff3879fd45ec0cc14140e62395087",
+      "width": 1024,
+      "height": 1024,
+      "sizeBytes": 603840,
+      "sha256": "4bcb3c139926b7ce65e27e297bacd62943946395e6701b11043b4f27388babe1",
       "stickerGroup": "Temporadas"
     }
   ]
