@@ -73,14 +73,15 @@ export function curvedTextExtraHeight(
 
 export function drawCurvedTextLine(
  ctx:CanvasRenderingContext2D,line:string,x:number,y:number,
- fontSize:number,curve:number,maxWidth:number,letterSpacing=0
+ fontSize:number,curve:number,maxWidth:number,letterSpacing=0,stroke=false
 ):void{
  const strength=clampTextCurve(curve);
  const tracking=clampLetterSpacing(letterSpacing)*fontSize/100;
- if(!strength&&!tracking){ctx.fillText(line,x,y);return;}
+ if(!strength&&!tracking){if(stroke)ctx.strokeText(line,x,y);ctx.fillText(line,x,y);return;}
  if(!strength){
   let cursor=0;
   for(const char of splitLetters(line)){
+   if(stroke)ctx.strokeText(char,x+cursor,y);
    ctx.fillText(char,x+cursor,y);
    cursor+=ctx.measureText(char).width+tracking;
   }
@@ -93,6 +94,7 @@ export function drawCurvedTextLine(
    y+layout.top+glyph.py*layout.fit);
   ctx.rotate(glyph.angle);
   ctx.scale(layout.scaleX*layout.fit,layout.fit);
+  if(stroke)ctx.strokeText(glyph.char,-glyph.width/2,-fontSize/2);
   ctx.fillText(glyph.char,-glyph.width/2,-fontSize/2);
   ctx.restore();
  }
