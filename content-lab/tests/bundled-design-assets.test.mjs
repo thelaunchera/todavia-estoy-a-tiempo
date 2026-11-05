@@ -26,11 +26,11 @@ test('Release preserves the original library and adds the seasonal and Pinterest
  assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,20);
  assert.equal(files.filter(x=>x.file.startsWith('resources/holiday-stickers-2026-11/')).length,16);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Branding y Marketing').length,16);
- assert.equal(files.filter(x=>x.category==='sticker').length,99);
+ assert.equal(files.filter(x=>x.category==='sticker').length,129);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,119);
- assert.equal(new Set(files.map(x=>x.sha256)).size,119);
- for(const file of files){
+ assert.equal(new Set(files.map(x=>x.id)).size,149);
+ assert.equal(new Set(files.filter(x=>x.mime==='image/png').map(x=>x.sha256)).size,119);
+ for(const file of files.filter(x=>x.mime==='image/png')){
   assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|pinterest-aesthetic-stickers-2026-11\/[a-z0-9_]+|(?:branding-elements-2026-11|holiday-stickers-2026-11)\/[a-z0-9-]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
@@ -82,7 +82,7 @@ test('All 119 released files are verified and unavailable stickers are restored'
  const originals=bundle.ORIGINAL_BUNDLED_DESIGN_ASSETS;
  const visible=bundle.BUNDLED_DESIGN_ASSETS;
  assert.equal(originals.length,119);
- assert.equal(visible.length,119);
+ assert.equal(visible.length,149);
  assert.equal(bundle.QUARANTINED_BUNDLED_ASSET_IDS.size,0);
  assert.equal(new Set(originals.map(x=>x.id)).size,119);
  for(const a of originals){
@@ -95,10 +95,27 @@ test('All 119 released files are verified and unavailable stickers are restored'
 
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,98);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,128);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);
  assert.equal(bundle.bundledDesignAssetUrl(sticker,'/content-lab'),'/content-lab/'+sticker.file);
  assert.equal(bundle.bundledDesignAssetUrl(sticker,'/content-lab/'),'/content-lab/'+sticker.file);
+});
+
+test('Thirty approved universal Studio SVGs are included without sharing private brand files',()=>{
+ const items=bundle.UNIVERSAL_EDITORIAL_STICKERS;
+ assert.equal(items.length,30);
+ assert.equal(new Set(items.map(x=>x.id)).size,30);
+ for(const item of items){
+  assert.equal(item.category,'sticker');
+  assert.equal(item.shared,true);
+  assert.equal(item.mime,'image/svg+xml');
+  assert.equal(item.stickerGroup,'Editoriales universales');
+  assert.match(item.file,/^resources\/universal-editorial-stickers\/[a-z0-9-]+\.svg$/);
+  const svg=read('public/'+item.file);
+  assert.match(svg,/^<svg\s/);
+  assert.doesNotMatch(svg,/<script|<foreignObject|<iframe|href\s*=\s*["']https?:/i);
+  assert.match(svg,/viewBox="/);
+ }
 });
