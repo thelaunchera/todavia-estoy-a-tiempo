@@ -1,3 +1,4 @@
+import {createPortal} from 'react-dom';
 import BrandAssetLibrary from './BrandAssetLibrary';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
 import {type SovaCarouselAsset} from './sova-carousel-assets';
@@ -52,6 +53,7 @@ export default function SeamlessEditor(){
  useEffect(()=>{try{localStorage.setItem('studio-hidden-carousel-drafts-v1',JSON.stringify(hiddenDraftIds))}catch{}},[hiddenDraftIds]);
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
+ const [stickerSearch,setStickerSearch]=useState('');
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
@@ -686,7 +688,7 @@ export default function SeamlessEditor(){
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
    </div>}
-  {quickPanel&&<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+quickPanel}
+  {quickPanel&&typeof document!=='undefined'&&createPortal(<div className="studio-app-sheet" role="region" aria-label={'Opciones de '+quickPanel}
     style={{position:'fixed',left:'50%',transform:'translateX(-50%)',bottom:'calc(133px + env(safe-area-inset-bottom))',
       zIndex:1800,maxHeight:'min(36dvh,340px)',overflowY:'auto',maxWidth:700,width:'calc(100vw - 24px)',padding:12,
       background:'#FAF8F3',border:'1px solid #cbdce2',borderRadius:16,boxShadow:'0 -7px 20px #172e3b40'}}>
@@ -732,22 +734,27 @@ export default function SeamlessEditor(){
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
     </div>}
-    {quickPanel==='stickers'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(68px,1fr))',gap:8}}>
-      <div style={{gridColumn:'1 / -1'}}>
-        <BrandAssetLibrary compact onlyEditorial onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>
+    {quickPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
+      <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
+        onChange={e=>setStickerSearch(e.target.value)}/>
+      <div className="studio-sticker-gallery">
+        {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+          ...LAB_ASSETS.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
+           .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
+           .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
+           .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
+             onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
+               else if(asset.file)addLabSticker(asset.file);setQuickPanel(null)}}>
+             <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
+             <span className="studio-sticker-label">{asset.name}</span>
+           </button>)}
       </div>
-      {LAB_STICKERS.map((emoji,i)=><button type="button" key={i} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}
-        style={{...control,minHeight:60,fontSize:27,padding:5}}>{emoji}</button>)}
-      {[...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
-        ...LAB_ASSETS.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))].map(asset=><button type="button" key={asset.key}
-          onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
-            else if(asset.file)addLabSticker(asset.file);setQuickPanel(null)}}
-          style={{...control,padding:4,fontSize:10,minWidth:0}}>
-          <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:59,objectFit:'contain'}}/>{asset.name}
-        </button>)}
+      <details className="studio-sticker-symbols"><summary>Stickers de símbolos</summary>
+        <div>{LAB_STICKERS.map((emoji,i)=><button type="button" key={i} aria-label={'Añadir símbolo '+emoji} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}>{emoji}</button>)}</div>
+      </details>
     </div>}
     {libraryStatus&&<small role="status">{libraryStatus}</small>}
-  </div>}
+  </div>,document.body)}
 
   <details className="studio-app-admin"><summary>Proyectos, pendientes y herramientas avanzadas</summary>
   <details style={{marginBottom:14,border:'1px solid #D6D8DD',borderRadius:14,padding:14,background:'#F7F8FA'}}>
