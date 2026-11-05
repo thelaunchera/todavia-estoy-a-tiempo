@@ -22,6 +22,7 @@ type Props = {
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
   onSelectionChange?: (id:string|null)=>void;
   ratio?: number; pageCount?: number; continuous?:boolean; canvasHeight?: number; onEmpty?: () => void;
+  pageIndex?:number;onPageIndexChange?:(index:number)=>void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
   onToggleLock?: (id:string,locked:boolean)=>void;
@@ -44,7 +45,7 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,
+  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,pageIndex,onPageIndexChange,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
@@ -59,7 +60,7 @@ export default function TouchLayerCanvas({
   const [copyFeedback,setCopyFeedback]=useState('');
   // Separate browsing the panorama from handling a selected object.
   const [interactionMode,setInteractionMode]=useState<'navigate'|'edit'>(pageCount>1?'navigate':'edit');
-  const [activePage,setActivePage]=useState(0);
+  const [activePage,setActivePage]=useState(pageIndex??0);
   const [floatingModeBar,setFloatingModeBar]=useState(false);
   const canvasRoot=useRef<HTMLDivElement>(null);
   const navigationBar=useRef<HTMLDivElement>(null);
@@ -167,6 +168,7 @@ export default function TouchLayerCanvas({
     const viewport=scrollArea.current,canvas=stage.current;
     const next=Math.max(0,Math.min(pageCount-1,index));
     setActivePage(next);
+    onPageIndexChange?.(next);
     if(!viewport||!canvas)return;
     const width=canvas.getBoundingClientRect().width/pageCount;
     viewport.scrollTo({left:Math.max(0,Math.min(viewport.scrollWidth-viewport.clientWidth,
@@ -177,9 +179,17 @@ export default function TouchLayerCanvas({
     const viewport=scrollArea.current,canvas=stage.current;
     if(!viewport||!canvas)return;
     const width=canvas.getBoundingClientRect().width/pageCount;
-    if(width>0)setActivePage(Math.max(0,Math.min(pageCount-1,
-      Math.floor((viewport.scrollLeft+viewport.clientWidth/2)/width))));
+    if(width>0){
+      const next=Math.max(0,Math.min(pageCount-1,
+        Math.floor((viewport.scrollLeft+viewport.clientWidth/2)/width)));
+      if(next!==activePage){setActivePage(next);onPageIndexChange?.(next)}
+    }
   };
+  useEffect(()=>{
+    if(pageIndex===undefined||pageCount<=1)return;
+    const next=Math.max(0,Math.min(pageCount-1,pageIndex));
+    if(next!==activePage)goToPage(next);
+  },[pageIndex,pageCount]);
   const getRect = (layer: TouchLayer) => draftRef.current[layer.id] || layer.rect;
   const selectFromList=(id:string)=>{
     setInteractionMode('edit');setSelected(id);setCropping(false);
