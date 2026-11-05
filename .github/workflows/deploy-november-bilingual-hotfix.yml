@@ -10,7 +10,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: github-pages
+  group: november-freebie-hotfix
   cancel-in-progress: false
 jobs:
   overlay:
