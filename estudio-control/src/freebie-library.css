@@ -140,3 +140,21 @@
 .freebies-november-photos a{display:block;min-width:0;border-radius:8px;overflow:hidden;background:#faf4e9}
 .freebies-november-photos img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
 @media(max-width:650px){.freebies-november-cover{height:210px}.freebies-november-photos{gap:5px}.freebies-november-photos a{border-radius:5px}}
+
+
+/* A single, recognizable primary action across every freebie card. */
+.freebies-collection .freebies-main-actions{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:12px}
+.freebies-collection .freebies-main-actions .freebies-link{width:100%}
+.freebies-collection .freebies-main-actions .freebies-link-primary{background:#191919;color:#fff!important;border-color:#191919;min-height:44px;font-size:12px;font-weight:750}
+.freebies-collection .freebies-main-actions .freebies-link-primary:hover{background:#353535;border-color:#353535}
+.freebies-collection .freebies-main-actions .freebies-link-primary:focus-visible{outline:3px solid #f2d85b;outline-offset:2px}
+@media(max-width:650px){
+  .freebies-collection{grid-template-columns:1fr;gap:14px}
+  .freebies-collection .freebies-matcha-art,.freebies-collection .freebies-art,.freebies-collection .freebies-approved-cover,.freebies-collection .freebies-november-cover{height:245px}
+  .freebies-collection .freebies-info{padding:18px}
+  .freebies-collection .freebies-info h3{font-size:21px}
+  .freebies-collection .freebies-description{font-size:13px}
+  .freebies-collection .freebies-meta{display:flex;flex-wrap:wrap}
+  .freebies-collection .freebies-meta span{font-size:10px}
+  .freebies-collection .freebies-main-actions .freebies-link{min-height:45px;font-size:12px}
+}
