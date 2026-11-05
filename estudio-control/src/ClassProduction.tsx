@@ -15,6 +15,7 @@ export type ClassEntry = {
 type Props = {
   entries: ClassEntry[];
   tasks: ClassWeeklyTask[];
+  focusPending?: {kind:'lesson'|'weekly';id:string}|null;
   onTaskToggle: (task:ClassWeeklyTask,next:'pendiente'|'completado')=>Promise<void>;
   launchStats?: {waitlist:number; buyers:number}|null;
   onSave: (item: ClassEntry, fields: Pick<ClassEntry,'status'|'notes'|'link'|'performance_notes'>) => Promise<void>;
@@ -30,8 +31,9 @@ function safeStatus(value?:string) {
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
 
-export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
+export default function ClassProduction({entries,tasks,focusPending,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
  const [lessonId,setLessonId]=useState('00');
+ const focusedLessonOnce = useRef<string|null>(null);
  const filePicker=useRef<HTMLInputElement>(null);
  const targetChapter=useRef<string>('00');
  const [uploadingId,setUploadingId]=useState<string|null>(null);
@@ -49,6 +51,25 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
  const [notice,setNotice]=useState('');
  const [copied,setCopied]=useState('');
  const [showAdminRoom,setShowAdminRoom]=useState(false);
+ // A task card in Mis tareas opens the exact existing class workspace.
+ useEffect(()=>{
+   if(focusPending?.kind==='weekly') setArea('plan');
+   if(focusPending?.kind==='lesson' && classLessons.some(x=>x.id===focusPending.id)){
+     setArea('grabar');
+     setLessonId(focusPending.id);
+   }
+ },[focusPending?.kind,focusPending?.id]);
+ useEffect(()=>{
+   if(focusPending?.kind!=='lesson' || area!=='grabar' || lessonId!==focusPending.id)return;
+   if(focusedLessonOnce.current===focusPending.id)return;
+   const frame=window.requestAnimationFrame(()=>{
+     const header=document.querySelector<HTMLElement>('#class-filming-workspace .class-lesson-header');
+     if(!header)return;
+     header.scrollIntoView({block:'start',behavior:'smooth'});
+     focusedLessonOnce.current=focusPending.id;
+   });
+   return()=>window.cancelAnimationFrame(frame);
+ },[focusPending?.kind,focusPending?.id,area,lessonId]);
  const lesson=useMemo(()=>classLessons.find(x=>x.id===lessonId)||classLessons[0],[lessonId]);
  const recordingStart=recordingStarts[lesson.id];
  const records=useMemo(()=>entries.filter(x=>x.section===CLASS_SECTION),[entries]);
@@ -180,7 +201,7 @@ export default function ClassProduction({entries,tasks,onTaskToggle,launchStats,
     <div><strong>{launchStats?.buyers ?? '—'}</strong><span>Compras con acceso activo</span></div>
     <div><strong>Inactivo</strong><span>Checkout de la clase, pendiente de activar</span></div>
    </div>
-   <ClassWeeklyPlan tasks={tasks} lessons={entries} onToggle={onTaskToggle}/>
+   <ClassWeeklyPlan tasks={tasks} lessons={entries} focusTaskId={focusPending?.kind==='weekly'?focusPending.id:null} onToggle={onTaskToggle}/>
   </div>}
   {area==='recursos'&&<div className="class-resources-panel">
    <div className="class-admin-room-entry">
