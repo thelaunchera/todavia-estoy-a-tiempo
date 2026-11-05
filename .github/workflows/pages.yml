@@ -150,7 +150,7 @@ jobs:
       - name: Empaquetar el podcast y su estudio
         run: |
           mkdir -p _podcast_pages/estudio
-          cp -R assets productos clases alumnos centro _podcast_pages/
+          cp -R assets productos clases alumnos centro freebies _podcast_pages/
           cp -- *.html *.css *.js *.xml *.txt CNAME _podcast_pages/
           cp .nojekyll _podcast_pages/
           cp -R estudio-control/dist/. _podcast_pages/estudio/
@@ -162,6 +162,10 @@ jobs:
           test -s _podcast_pages/content-lab/index.html
           test -s _podcast_pages/content-lab/lab-recovery.css
           test -s _podcast_pages/content-lab/prompts/index.html
+          test -s _podcast_pages/assets/freebies/november-website/01_laptop_workspace.svg
+          test -s _podcast_pages/assets/freebies/november-website/02_coffee_planning.svg
+          test -s _podcast_pages/assets/freebies/november-website/03_mobile_review.svg
+          test -s _podcast_pages/freebies/november-website/access/index.html
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
           test -s _podcast_pages/clases/primera-landing.html
