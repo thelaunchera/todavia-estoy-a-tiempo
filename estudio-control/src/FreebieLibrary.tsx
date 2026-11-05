@@ -31,8 +31,6 @@ const SALT_LINE = {
   access: 'https://podcast.thelaunchera.com/freebies/january-salt-line/access/',
   signup: 'https://podcast.thelaunchera.com/freebies/january-salt-line/',
   hero: '1cjtBtDSUEsMmh_v9zzpExZJYWgJLN7g0',
-  signup: 'https://podcast.thelaunchera.com/freebies/january-salt-line/',
-  access: 'https://podcast.thelaunchera.com/freebies/january-salt-line/access/',
   make: 'https://us2.make.com/2964061/scenarios/6912745',
 } as const;
 const SALT_LINE_PHOTOS = [
