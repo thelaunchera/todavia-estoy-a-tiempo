@@ -1529,6 +1529,7 @@ function App() {
               notify={toast}
               showError={err}
               saving={busy === 'save'}
+              saveState={draftStatus}
             />
           )}
           {brand && tab === 'factory' && account?.email && (
