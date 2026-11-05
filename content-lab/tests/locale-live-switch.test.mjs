@@ -3,27 +3,23 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('Switching ES/EN updates the real React header, dashboard, shortcuts, stats and dock',()=>{
- const app=read('src/App.tsx'),locale=read('src/LabLocale.ts');
+test('Switching ES/EN updates the React header, new dashboard, shortcuts and mobile dock',()=>{
+ const app=read('src/App.tsx'),locale=read('src/LabLocale.ts'),dashboard=read('src/CreatorDashboard.tsx');
  assert.ok(app.includes("const t = (value:string):string=>uiText(value,loginLanguage)"));
  assert.ok(app.includes("{t(nav.find(n => n.id === tab)?.title||'')}"));
- assert.ok(app.includes("loginLanguage==='es'?'¿Qué carrusel creamos hoy?':'What carousel will you create today?'"));
- assert.ok(app.includes("'Tus fotos, tus textos y tu estilo. Crea un carrusel o empieza con otro formato.'"));
- assert.ok(app.includes("{t(s.label)}"));
- assert.ok(app.includes("{t(s.detail)}"));
- assert.ok(app.includes("{t(step.title)}"));
-  assert.ok(app.includes("{t(item.label)}"));
- assert.ok(app.includes('lab-home-greeting'));
- assert.ok(!app.includes('<section className="lab-quickstart"'));
- assert.ok(app.includes('<details className="lab-greeting-progress">'));
- assert.ok(app.includes('lab-greeting-actions'));
+ assert.ok(app.includes('locale={loginLanguage}'));
+ assert.ok(dashboard.includes("const es=locale==='es'"));
+ assert.ok(dashboard.includes("es?'¿Qué vamos a':'What shall we'"));
+ assert.ok(dashboard.includes("es?'Crea algo nuevo':'Create something new'"));
+ assert.ok(dashboard.includes("es?'Continúa diseñando':'Keep creating'"));
+ assert.ok(dashboard.includes("es?'Todo en un solo lugar':'Everything in one place'"));
+ assert.ok(dashboard.includes('cld-activity-stats'));
+ assert.ok(dashboard.includes('cld-format-grid'));
+ assert.ok(app.includes("{t(item.label)}"));
  assert.ok(app.includes("loginLanguage==='es'?'Elige el idioma de tu cuenta':'Choose your account language'"));
  assert.ok(app.includes("onClick={()=>chooseLanguage('es')}"));
  assert.ok(app.includes("onClick={()=>chooseLanguage('en')}"));
  assert.ok(locale.includes("export function uiText(source:string,language:LabLanguage)"));
- for(const key of ['TOTAL PIECES','IN PROGRESS','READY TO POST','YOUR MEDIA','Make room for','YOUR CREATIVE DESK','Overview','Create content']){
-  assert.ok(locale.includes(JSON.stringify(key))||locale.includes("'"+key+"'"),key);
- }
 });
 test('UI language and creative brand language remain independent',()=>{
  const app=read('src/App.tsx'),platform=read('src/platform/client.ts');
@@ -33,13 +29,18 @@ test('UI language and creative brand language remain independent',()=>{
  assert.ok(app.includes('auth.setPreferredLanguage(next)'));
 });
 
-test('Home greeting is compact, actionable, and keeps incomplete onboarding tucked away',()=>{
- const app=read('src/App.tsx'),styles=read('src/index.css');
- assert.ok(app.includes("setupStepsDone<3&&<details"));
- assert.ok(app.includes("onClick={()=>start()}"));
- assert.ok(app.includes("onClick={startFactory}"));
- assert.ok(app.includes("brand.name&&brand.name!=='My Brand'"));
- assert.ok(!app.includes('<section className="intro">'));
- assert.ok(styles.includes('.lab-home-greeting'));
- assert.ok(styles.includes('@media(max-width:640px)'));
+test('Creator-first Home has accessible format actions, recent projects and optional onboarding',()=>{
+ const app=read('src/App.tsx'),dashboard=read('src/CreatorDashboard.tsx'),styles=read('src/CreatorDashboard.css');
+ assert.ok(app.includes('setupStepsDone<3&&'));
+ assert.ok(app.includes('<details className="cld-onboarding">'));
+ assert.ok(app.includes('onNewNormal={startFactory}'));
+ assert.ok(app.includes('onNewSeamless={startSeamless}'));
+ assert.ok(dashboard.includes('onNewStory'));
+ assert.ok(dashboard.includes('cld-format-grid'));
+ assert.ok(dashboard.includes('cld-project-grid'));
+ assert.ok(dashboard.includes('cld-brand-pill'));
+ assert.ok(dashboard.includes("onNavigate('media')"));
+ assert.ok(dashboard.includes('cld-empty-project'));
+ assert.ok(styles.includes('--ivory:#FAF8F3'));
+ assert.ok(styles.includes('@media(max-width:660px)'));
 });
