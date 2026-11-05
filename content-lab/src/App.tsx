@@ -534,8 +534,9 @@ function App() {
       .catch(err)
       .finally(() => setWaiting(false));
   }, []);
-  // A verified Supabase session survives normal iPhone tab/app closures. Only
-  // 24h without actual interactions requires a new email code.
+  // Buyers verify a NEW email code 24 hours after their previous OTP sign-in.
+  // Interaction, JWT refresh and opening the installed app NEVER renew that window.
+  // Admin-only idle protection remains separate.
   useEffect(()=>{
     if(!account)return;
     let checking=false;
@@ -544,8 +545,13 @@ function App() {
       checking=true;
       void auth.checkIdle().then(valid=>{
         if(!valid){
+          setLoginEmail(account.email||'');
           setAccount(null);setAiWallet(null);setLoginStage('email');setLoginCode('');
           setPosts([]);setImages({});setAssets([]);setBrands([]);
+          setCurrent('');setTab('home');
+          toast(loginLanguage==='es'
+            ?'Pasaron 24 horas desde tu código. Solicita uno nuevo para continuar.'
+            :'Your code is 24 hours old. Request a new code to continue.');
         }else auth.noteActivity();
       }).catch(err).finally(()=>{checking=false;});
     };
@@ -556,7 +562,10 @@ function App() {
       document.addEventListener(event,interact,opts);
     document.addEventListener('visibilitychange',onVisibility);
     window.addEventListener('focus',logoutWhenIdle);
+    // Expire open browser/PWA sessions even when the buyer is not tapping.
+    const expiryTimer=window.setInterval(logoutWhenIdle,30_000);
     return()=>{
+      window.clearInterval(expiryTimer);
       for(const event of ['pointerdown','touchstart','keydown','input','scroll'])
         document.removeEventListener(event,interact,opts);
       document.removeEventListener('visibilitychange',onVisibility);
@@ -1114,8 +1123,8 @@ function App() {
             <div className="eyebrow">{loginLanguage==='es'?'TU ESPACIO CREATIVO PRIVADO':'YOUR PRIVATE CREATIVE SPACE'}</div>
             <h2>{loginLanguage==='es'?'Tu Content Lab.':'Your Content Lab.'}</h2>
             <p>{loginLanguage==='es'
-                ? 'Entra con un código sin salir de esta pantalla. Cada cuenta tendrá su propia biblioteca de fotos y publicaciones.'
-                : 'Sign in with a code without leaving this screen. Each account will have its own photo and content library.'}</p>
+                ? 'Entra con un código enviado a tu correo. Por seguridad, necesitarás uno nuevo cada 24 horas. Tus fotos y proyectos se conservan.'
+                : 'Sign in with a code sent to your email. For security, you will need a new code every 24 hours. Your photos and projects are kept.'}</p>
             {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
               <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
                 {loginLanguage==='es'?'El acceso está temporalmente no disponible. Puedes usar los 8 prompts gratuitos mientras tanto.':'Access is temporarily unavailable. You can still use the 8 free prompts.'}
