@@ -4,8 +4,7 @@ on:
     paths:
       - 'freebies/**'
       - 'assets/freebies/**'
-      - 'estudio-control/src/FreebieLibrary.tsx'
-      - 'estudio-control/src/freebie-library.css'
+      - 'estudio-control/**'
       - '.github/workflows/deploy-november-bilingual-hotfix.yml'
   workflow_dispatch:
 permissions:
