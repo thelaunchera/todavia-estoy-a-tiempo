@@ -77,14 +77,29 @@ export function drawCurvedTextLine(
 ):void{
  const strength=clampTextCurve(curve);
  const tracking=clampLetterSpacing(letterSpacing)*fontSize/100;
- if(!strength&&!tracking){if(stroke)ctx.strokeText(line,x,y);ctx.fillText(line,x,y);return;}
+ // A narrow mobile text frame must never draw past its own right edge.
+ // Canvas maxWidth preserves legacy straight text when it already fits.
+ if(!strength&&!tracking){
+  const safeWidth=Math.max(1,maxWidth);
+  if(stroke)ctx.strokeText(line,x,y,safeWidth);
+  ctx.fillText(line,x,y,safeWidth);
+  return;
+ }
  if(!strength){
+  const letters=splitLetters(line);
+  const naturalWidth=letters.reduce((sum,char)=>sum+ctx.measureText(char).width,0)
+    +Math.max(0,letters.length-1)*tracking;
+  const fit=Math.min(1,Math.max(1,maxWidth)/Math.max(1,naturalWidth));
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(fit,1);
   let cursor=0;
-  for(const char of splitLetters(line)){
-   if(stroke)ctx.strokeText(char,x+cursor,y);
-   ctx.fillText(char,x+cursor,y);
+  for(const char of letters){
+   if(stroke)ctx.strokeText(char,cursor,0);
+   ctx.fillText(char,cursor,0);
    cursor+=ctx.measureText(char).width+tracking;
   }
+  ctx.restore();
   return;
  }
  const layout=arcLayout(ctx,line,fontSize,strength,maxWidth,letterSpacing);
