@@ -1809,3 +1809,84 @@ input::placeholder {
 @media(max-width:600px){.composer-direct-touch>.cover-studio{padding:8px}.composer-direct-touch{gap:9px}.composer-direct-touch>.cover-studio .cover-studio-heading{display:none}}
 
 .lab-format-launcher{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;margin:20px 0}.lab-format-launcher>button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:20px;border:1px solid #d8e0e1;border-radius:18px;background:#fff;color:#191919;cursor:pointer;min-width:0}.lab-format-launcher>button:hover{border-color:#688da5}.lab-format-launcher>button:focus-visible{outline:3px solid #688da5;outline-offset:3px}.lab-format-launcher .lab-format-featured{background:#e7f0f5}.lab-format-launcher strong{font-size:20px;margin:15px 0 5px;letter-spacing:-.04em}.lab-format-launcher small{font-size:12px;line-height:1.5;color:#53636b}.lab-format-launcher button>span:last-child{font-size:10px;letter-spacing:.08em;margin-top:12px;color:#53636b}.lab-format-art{display:flex;gap:3px;align-items:center;height:67px}.lab-format-art i{display:block;width:40px;height:53px;background:#f2d85b;border:1px solid #19191922;border-radius:3px}.lab-format-art i:nth-child(2){background:#faf8f3;transform:translateY(-5px)}.lab-format-art i:nth-child(3){background:#bed8e9}.lab-format-art.single i{width:53px;background:#faf8f3}.lab-format-art.vertical i{width:37px;height:65px;background:#bed8e9}@media(max-width:600px){.lab-format-launcher{grid-template-columns:1fr 1fr;gap:10px}.lab-format-launcher>button{padding:16px}.lab-format-launcher .lab-format-featured{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;column-gap:12px}.lab-format-featured .lab-format-art{grid-column:2;grid-row:1/4}.lab-format-featured strong{margin-top:0}.lab-format-launcher strong{font-size:18px}}
+
+
+/* Carousel editing is a dedicated workspace, not a second page inside the Lab dashboard. */
+.app-shell.lab-carousel-editor-mode > .sidebar,
+.app-shell.lab-carousel-editor-mode > .overlay,
+.app-shell.lab-carousel-editor-mode .lab-mobile-dock {
+  display: none !important;
+}
+.app-shell.lab-carousel-editor-mode > main {
+  margin-left: 0 !important;
+  width: 100% !important;
+  min-width: 0;
+}
+.lab-carousel-editor-mode .top {
+  min-height: 61px;
+  height: auto;
+  padding: 8px clamp(10px,2vw,27px);
+  justify-content: flex-start;
+}
+.lab-carousel-editor-mode .top .hamburger,
+.lab-carousel-editor-mode .top .lab-create-menu,
+.lab-carousel-editor-mode .top .private {
+  display: none !important;
+}
+.lab-carousel-editor-exit {
+  border: 1px solid #e6ded1;
+  border-radius: 12px;
+  background: #faf8f3;
+  color: #191919;
+  min-height: 42px;
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+.lab-carousel-editor-exit:hover,
+.lab-carousel-editor-exit:focus-visible {
+  border-color: #d7bf4d;
+  background: #f2d85b;
+}
+.lab-carousel-editor-mode .content[data-lab-tab="factory"] {
+  max-width: none;
+  padding: 10px clamp(8px,1.8vw,24px) 38px;
+}
+.lab-carousel-editor-mode .lab-quickstart {
+  display: none;
+}
+.lab-carousel-editor-mode .lab-draft-safety {
+  margin: 0 0 8px;
+}
+@media(max-width: 850px) {
+  .lab-carousel-editor-mode .top {
+    padding: 7px 9px;
+    min-height: 55px;
+    height: auto;
+    gap: 8px;
+  }
+  .lab-carousel-editor-mode .top .eyebrow,
+  .lab-carousel-editor-mode .top .slash,
+  .lab-carousel-editor-mode .top .lab-site-locale {
+    display: none;
+  }
+  .lab-carousel-editor-mode .top .lab-current-page {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lab-carousel-editor-mode .content[data-lab-tab="factory"] {
+    padding: 7px 5px calc(98px + env(safe-area-inset-bottom));
+  }
+  .lab-carousel-editor-exit {
+    font-size: 11px;
+    min-height: 42px;
+    padding: 8px 10px;
+  }
+}
