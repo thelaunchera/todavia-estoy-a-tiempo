@@ -5,7 +5,8 @@ export type CoverDecor={
  backgroundId:FreeBackgroundId;backgroundImageId:string;stickerIds:string[];
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
- headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number};
+ layerOrder?:string[];primaryPhotoOpacity?:number;stickerOpacities?:Record<string,number>;
+ headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number,opacity?:number};
  color:string;gradient:string;headlineLocked?:boolean;primaryPhotoLocked?:boolean;lockedStickerIds?:string[];
 };
 export const blankCoverDecor=():CoverDecor=>({backgroundId:'brand',backgroundImageId:'',
@@ -21,6 +22,13 @@ export function readCoverDecor(data?:string):CoverDecor{
    stickerIds:Array.isArray(p.stickerIds)?p.stickerIds.filter((id:unknown)=>typeof id==='string').slice(0,3):[],
    stickerPositions:normalizedPositions(p.stickerPositions),
    layers:normalizePanoramaLayers(p.layers),
+   layerOrder:Array.isArray(p.layerOrder)?[...new Set((p.layerOrder as unknown[]).filter((id):id is string=>typeof id==='string'&&id.length<180))].slice(0,32):undefined,
+   primaryPhotoOpacity:typeof p.primaryPhotoOpacity==='number'&&Number.isFinite(p.primaryPhotoOpacity)
+     ?Math.max(0,Math.min(1,p.primaryPhotoOpacity)):undefined,
+   stickerOpacities:p.stickerOpacities&&typeof p.stickerOpacities==='object'
+     ?Object.fromEntries(Object.entries(p.stickerOpacities as Record<string,unknown>).filter(
+       ([id,value])=>id.length<150&&typeof value==='number'&&Number.isFinite(value)).slice(0,24)
+       .map(([id,value])=>[id,Math.max(0,Math.min(1,value as number))])):undefined,
    headlineRect:p.headlineRect&&typeof p.headlineRect==='object'?p.headlineRect:undefined,
    primaryPhotoRect:p.primaryPhotoRect&&typeof p.primaryPhotoRect==='object'?p.primaryPhotoRect:undefined,
    headlineStyle:p.headlineStyle&&typeof p.headlineStyle==='object'?{
@@ -29,6 +37,8 @@ export function readCoverDecor(data?:string):CoverDecor{
     color:hex(p.headlineStyle.color,'#191919'),shadow:p.headlineStyle.shadow===true,
     outline:p.headlineStyle.outline===true,
     lineHeight:Number(p.headlineStyle.lineHeight)||1.12,spacing:Number(p.headlineStyle.spacing)||0,
+    opacity:typeof p.headlineStyle.opacity==='number'&&Number.isFinite(p.headlineStyle.opacity)
+      ?Math.max(0,Math.min(1,p.headlineStyle.opacity)):undefined,
    }:undefined,
    color:hex(p.color,'#FFFFFF'),gradient:hex(p.gradient,''),
    headlineLocked:p.headlineLocked===true,primaryPhotoLocked:p.primaryPhotoLocked===true,
