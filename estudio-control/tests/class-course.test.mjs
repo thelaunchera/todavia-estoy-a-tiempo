@@ -71,7 +71,7 @@ test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>
  assert.match(production,/focusPending\?\.kind==='lesson'/);
  assert.match(production,/focusPending\?\.kind==='weekly'/);
  assert.match(component,/focusTaskId/);
- assert.match(component,/focusedRow\.current\?\.scrollIntoView/);
+ assert.match(component,/row\.scrollIntoView\(/);
 });
 
 test('una sola demo informativa: publicar gratis y separar los pagos',()=>{
