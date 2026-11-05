@@ -15,7 +15,7 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors} from 'lucide-react';
 import './seamless-app.css';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // Studio copies its own shared resources on deployment.
@@ -283,7 +283,9 @@ export default function SeamlessEditor(){
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
   for(let slideIndex=0;slideIndex<doc.count;slideIndex++){const src=doc.backgroundImages?.[slideIndex];if(src){try{const bg=await loadImage(src);const left=slideIndex*W-clipStart;ctx.save();ctx.beginPath();ctx.rect(left,0,W,H);ctx.clip();const factor=Math.max(W/bg.width,H/bg.height);const dw=bg.width*factor,dh=bg.height*factor;ctx.drawImage(bg,left+(W-dw)/2,(H-dh)/2,dw,dh);ctx.restore()}catch{}}}
-  for(const it of doc.items){
+  // Background images are editable, seamless layers beneath the content.
+  const paintOrder=[...doc.items.filter(it=>it.role==='background'),...doc.items.filter(it=>it.role!=='background')];
+  for(const it of paintOrder){
    if(it.kind==='text'&&it.id===omitTextId)continue;
    const x=it.x-clipStart;
    const bounds=itemBounds(it);
@@ -463,7 +465,27 @@ export default function SeamlessEditor(){
    setDoc(d=>({...d,items:d.items.map(item=>item.id===id&&item.shape
      ?{...item,color,src:studioShapeData(item.shape,color)}:item)}));
  };
- const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
+ // Keep old projects unchanged until someone explicitly edits their old background.
+ const addEditableBackground=async(src:string)=>{
+  try{
+   const im=await loadImage(src);
+   const layerWidth=Math.max(W,H*im.naturalWidth/im.naturalHeight);
+   const layerHeight=layerWidth*im.naturalHeight/im.naturalWidth;
+   const homeSlide=slide,id=++nextId.current;
+   setDoc(d=>{
+    const backgroundImages={...d.backgroundImages};delete backgroundImages[homeSlide];
+    return {...d,backgroundImages,items:[
+      {id,kind:'image',role:'background',backgroundSlide:homeSlide,src,
+       x:Math.round(homeSlide*W+(W-layerWidth)/2),y:Math.round((H-layerHeight)/2),
+       width:Math.round(layerWidth),fontSize:100,color:'#191919'},
+      ...d.items.filter(it=>!(it.role==='background'&&it.backgroundSlide===homeSlide))
+    ]};
+   });
+   setSelected(id);setQuickPanel(null);setActiveInspector('size');
+   setMessage('Fondo editable: arrástralo o agrándalo con dos dedos, también entre slides.');
+  }catch{setMessage('No se pudo cargar el fondo. El diseño anterior sigue intacto.');}
+ };
+ const setPrivateBackground=(url:string)=>void addEditableBackground(url);
  const addLabSticker=async(file:string)=>{
  const src=labUrl(file);
  try{
@@ -478,13 +500,8 @@ export default function SeamlessEditor(){
  }
 };
  const setLabBackground=async(file:string)=>{
- const src=labUrl(file);
- try{
-  await loadImage(src);
-  setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:src}}));
-  setQuickPanel(null);
- }catch{setMessage('El fondo no está disponible. Tu diseño anterior sigue intacto.');}
-};
+  await addEditableBackground(labUrl(file));
+ };
  const addSticker=(emoji:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'sticker',text:emoji,x:slide*W+200,y:220,width:180,fontSize:160,color:'#191919'}]}));setSelected(id)};
  const addText=(style:'hook'|'title'|'paragraph'|'caption'='paragraph')=>{
    const starter=doc.items.find(it=>it.kind==='text'&&Math.floor((it.x+(it.width||900)/2)/W)===slide&&!(it.text||'').trim());
@@ -508,7 +525,7 @@ export default function SeamlessEditor(){
   return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,
     h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width};
  };
- const hit=(x:number,y:number)=>[...doc.items].reverse().find(it=>{
+ const hit=(x:number,y:number)=>[...doc.items.filter(it=>it.role==='background'),...doc.items.filter(it=>it.role!=='background')].reverse().find(it=>{
     if(it.locked)return false;
    // The hit area must match the wrapped, rotated element that was painted.
    // Otherwise a finger selects the photograph underneath the text.
@@ -589,7 +606,7 @@ export default function SeamlessEditor(){
    const it=doc.items.find(item=>item.id===start.id);
    if(it&&!it.locked){
     const isImage=it.kind==='image';
-    const size=Math.max(isImage?80:24,Math.min(isImage?2400:800,Math.round(start.size*ratio)));
+    const size=Math.max(isImage?80:24,Math.min(isImage?(it.role==='background'?doc.count*W*2:2400):800,Math.round(start.size*ratio)));
     const scale=size/start.size;
     // Scale around the fingers' midpoint; leave rotation to the precise slider.
     const w=(isImage||it.kind==='sticker')?start.w*scale:start.w,h=start.h*scale;
@@ -606,7 +623,7 @@ export default function SeamlessEditor(){
   if(doc.items.find(item=>item.id===d.id)?.locked)return;
   if(d.mode==='resize'){
    const it=doc.items.find(item=>item.id===d.id);if(!it)return;
-   const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?2400:800,Math.round(d.startSize+p.x-d.x)));
+   const size=Math.max(it.kind==='image'?80:24,Math.min(it.kind==='image'?(it.role==='background'?doc.count*W*2:2400):800,Math.round(d.startSize+p.x-d.x)));
    queueTransform(d.id,it.kind==='image'?{width:size}:{fontSize:size});
   }else queueTransform(d.id,{x:Math.round(d.ox+p.x-d.x),y:Math.round(d.oy+p.y-d.y)});
  };
@@ -735,8 +752,12 @@ export default function SeamlessEditor(){
    setSelected(item.id);setRecentlyDeleted(null);setMessage('Elemento recuperado.');
  };
  const removeSlideBackground=()=>{
-   setDoc(d=>{const backgroundImages={...d.backgroundImages};delete backgroundImages[slide];return {...d,backgroundImages}});
-   setMessage('Foto de fondo quitada del slide '+(slide+1)+'.');
+  setDoc(d=>{
+   const backgroundImages={...d.backgroundImages};delete backgroundImages[slide];
+   return {...d,backgroundImages,items:d.items.filter(it=>!(it.role==='background'&&it.backgroundSlide===slide))};
+  });
+  setSelected(null);
+  setMessage('Foto de fondo quitada del slide '+(slide+1)+'.');
  };
  const duplicateSelected=()=>{if(selected===null)return;const item=doc.items.find(it=>it.id===selected);if(!item)return;const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{...item,id,x:item.x+55,y:item.y+55}]}));setSelected(id);setMessage('Elemento duplicado. Puedes mover la copia.')};
  const reorderSelected=(position:'front'|'back'|'forward'|'backward')=>{if(selected===null)return;setDoc(d=>{const items=[...d.items];const index=items.findIndex(it=>it.id===selected);if(index<0)return d;const [item]=items.splice(index,1);const target=position==='front'?items.length:position==='back'?0:position==='forward'?Math.min(index+1,items.length):Math.max(index-1,0);items.splice(target,0,item);return {...d,items}})};
@@ -837,20 +858,23 @@ export default function SeamlessEditor(){
     {openPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
-        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,Math.floor(it.x/W))),true);setQuickPanel(null)}}>
+        onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,it.role==='background'?(it.backgroundSlide??0):Math.floor(it.x/W))),true);setQuickPanel(null)}}>
          {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
            style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
            (it.text||'Sticker').slice(0,40)}
       </button>)}
     </div>}
     {openPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
-     {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>}
+     {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}} onClick={()=>void addEditableBackground(doc.backgroundImages[slide])}>✎ Editar fondo de este slide</button>}
+     {doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide)&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}}
+       onClick={()=>{const layer=doc.items.find(it=>it.role==='background'&&it.backgroundSlide===slide);if(layer){setSelected(layer.id);setActiveInspector('size');setQuickPanel(null)}}}>✎ Seleccionar y agrandar fondo</button>}
+     {(doc.backgroundImages?.[slide]||doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide))&&<button type="button" style={{...control,gridColumn:'1 / -1',borderColor:'#B35C58',color:'#9B3835'}} onClick={()=>{removeSlideBackground();setQuickPanel(null)}}>× Quitar foto de fondo de este slide</button>
       {LAB_BACKGROUNDS.map(([name,color])=><button type="button" key={name} onClick={()=>{setDoc(d=>({...d,background:color}));setQuickPanel(null)}}
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
       </button>)}
       {privateAssets.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
-        onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'));setQuickPanel(null)}}
+        onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'))}}
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
@@ -973,7 +997,7 @@ export default function SeamlessEditor(){
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
   {activeInspector==='size'&&<div className="studio-app-range-row">
     <label>Tamaño</label><input type="range" aria-label="Ajustar tamaño del elemento" min={current.kind==='image'?50:current.kind==='sticker'?40:24}
-     max={current.kind==='image'?2100:current.kind==='sticker'?800:260} step="2" value={current.kind==='image'?current.width:current.fontSize}
+     max={current.kind==='image'?(current.role==='background'?doc.count*W*2:2100):current.kind==='sticker'?800:260} step="2" value={current.kind==='image'?current.width:current.fontSize}
      onChange={e=>update(current.id,current.kind==='image'?{width:Number(e.target.value)}:{fontSize:Number(e.target.value)})}/>
     <output>{current.kind==='image'?current.width:current.fontSize}px</output>
   </div>}
@@ -1060,7 +1084,7 @@ export default function SeamlessEditor(){
     <button type="button" onClick={duplicateSelected}>Duplicar</button>
   </div></div>}
  </div>}
- <div className="studio-app-selection">  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
+ <div className="studio-app-selection">  {current?.kind==='image'&&current.role!=='background'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
     onClick={()=>void removePhotoBackground()}>{busy?'Procesando…':'Quitar fondo'}</button>
    {current.originalBackupId&&<button type="button" style={control} disabled={busy} onClick={()=>void restorePhotoBackground()}>Restaurar original</button>}
@@ -1134,7 +1158,7 @@ export default function SeamlessEditor(){
      <button type="button" disabled={!current} aria-pressed={!!current?.flipX} onClick={()=>current&&update(current.id,{flipX:!current.flipX})}><FlipHorizontal size={20}/><small>Voltear H</small></button>
      <button type="button" disabled={!current} aria-pressed={!!current?.flipY} onClick={()=>current&&update(current.id,{flipY:!current.flipY})}><FlipVertical size={20}/><small>Voltear V</small></button>
      <button type="button" disabled={current?.kind!=='text'} aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector('curve')}><Type size={20}/><small>Curvar texto</small></button>
-     <button type="button" disabled={!current||current.kind!=='image'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo</small></button>
+     <button type="button" disabled={!current||current.kind!=='image'||current.role==='background'||busy} onClick={()=>void removePhotoBackground()}><Scissors size={20}/><small>Quitar fondo</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='color'} onClick={()=>setActiveInspector('color')}><Paintbrush size={20}/><small>Color</small></button>
      <button type="button" disabled={!current} aria-pressed={activeInspector==='effects'} onClick={()=>setActiveInspector('effects')}><Sun size={20}/><small>Sombras</small></button>
      <button type="button" disabled={!current} onClick={duplicateSelected}><Copy size={20}/><small>Duplicar</small></button>
@@ -1177,7 +1201,7 @@ export default function SeamlessEditor(){
    <button style={{...control,background:'#F2D85B',fontWeight:700}} disabled={busy} onClick={()=>void downloadSlide(slide)}>{busy?'Preparando…':'Guardar slide '+(slide+1)+' en mi teléfono'}</button>
    <button style={control} disabled={busy} onClick={()=>void exportSlides()}>Descargar carrusel completo (ZIP)</button>
   </div></details>
-  {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
+  {current&&<details style={{marginBottom:10,padding:'8px 12px',border:'1px solid #D7DFE2',borderRadius:12,background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:750,fontSize:13,padding:'7px 0'}}>Más ajustes · {current.kind==='text'?'Texto':current.role==='background'?'Fondo editable':current.kind==='image'?'Foto':'Sticker'}</summary><div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10,marginTop:12}}>
     {current&&<label style={{display:'flex',alignItems:'center',gap:6}}>Girar <input aria-label="Girar elemento" type="range" min="-180" max="180" step="1" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/><output>{current.rotation||0}°</output></label>}{current.kind==='text'&&<><div style={{flex:'1 1 100%',padding:12,background:'#FAF8F3',borderRadius:12}}><label htmlFor="seamless-text-editor" style={{display:'block',fontWeight:700,marginBottom:6}}>Escribe o edita este texto</label><textarea ref={textEditor} id="seamless-text-editor" aria-label="Escribir texto de la diapositiva" rows={6} placeholder="Escribe aquí todo lo que quieras explicar. Puedes añadir párrafos y saltos de línea…" style={{...control,width:'100%',boxSizing:'border-box',resize:'vertical',fontFamily:'inherit'}} value={current.text||''} onChange={e=>update(current.id,{text:e.target.value})}/><div style={{fontSize:12,marginTop:5}}>Cada texto es independiente. El párrafo se ajusta automáticamente al ancho del bloque.</div><label style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>Ancho del texto <input aria-label="Ancho del párrafo" type="range" min="200" max="1000" step="20" value={current.width||900} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label></div><label>Tamaño <input aria-label="Tamaño de letra" type="range" min="28" max="220" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label><input aria-label="Color del texto" type="color" value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></>}
     {current.kind==='text'&&<div role="group" aria-label="Curvar texto" style={{flex:'1 1 100%',display:'grid',gap:9,padding:'10px 12px',border:'1px solid #E4DECF',borderRadius:12,background:'#FFFDF7'}}>
       <strong style={{fontSize:14}}>Efecto de texto · Curva circular</strong>
@@ -1205,7 +1229,7 @@ export default function SeamlessEditor(){
       <small style={{color:'#647075'}}>Las letras siguen un círculo real. Ajusta la curva y la separación; los cambios también aparecen en los PNG.</small>
     </div>}
     {current.kind==='sticker'&&<label>Tamaño del sticker <input aria-label="Tamaño de sticker" type="range" min="40" max="600" value={current.fontSize} onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/></label>}
-    {current.kind==='image'&&<><label>Ancho <input aria-label="Ancho de foto" type="range" min="100" max="1800" value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
+    {current.kind==='image'&&<><label>Ancho <input aria-label={current.role==='background'?'Ancho del fondo':'Ancho de foto'} type="range" min="100" max={current.role==='background'?doc.count*W*2:1800} value={current.width} onChange={e=>update(current.id,{width:Number(e.target.value)})}/></label><button style={control} onClick={()=>{replacePhotoId.current=current.id;photoInput.current?.click()}} >Cambiar foto</button><label>Esquinas <input type="range" min="0" max="250" step="5" aria-label="Redondear esquinas" value={current.radius||0} onChange={e=>update(current.id,{radius:Number(e.target.value)})}/></label></>}
     <details style={{flex:'1 1 100%'}}><summary style={{cursor:'pointer',padding:'8px 0'}}>Ajustes precisos (opcional)</summary><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><label>Posición horizontal <input aria-label="Mover elemento horizontalmente" type="range" min="0" max={doc.count*W} value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/></label><label>Posición vertical <input aria-label="Mover elemento verticalmente" type="range" min="0" max={H} value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/></label></div></details>
     <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center',background:'#FAF8F3',padding:8,borderRadius:12,flex:'1 1 100%'}}><strong style={{marginRight:6}}>Elemento seleccionado:</strong><button style={control} onClick={()=>reorderSelected('front')}>Al frente</button><button style={control} onClick={()=>reorderSelected('forward')}>Adelante</button><button style={control} onClick={()=>reorderSelected('backward')}>Atrás</button><button style={control} onClick={()=>reorderSelected('back')}>Al fondo</button><button style={{...control,background:'#F2D85B'}} onClick={duplicateSelected}>Duplicar</button><button type="button" style={{...control,background:current.locked?'#DCECF4':'#F2D85B'}} onClick={()=>toggleLock(current.id)}>{current.locked?'🔓 Desbloquear':'🔒 Bloquear'}</button></div>
     {current.kind==='image'&&<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
