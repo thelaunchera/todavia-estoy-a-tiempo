@@ -84,6 +84,7 @@ export default function PanoramaEditor({
     return()=>document.removeEventListener('keydown',onKey);
   },[onUndo,onRedo,canUndo,canRedo]);
   const input = useRef<HTMLInputElement>(null);
+  const libraryPaneRef=useRef<HTMLDivElement>(null);
   // Keep personal uploads first; shared packs remain searchable below them.
   const available = assets.filter(a =>
     (libraryKind==='all'||(libraryKind==='sticker'?assetCategory(a)==='sticker':assetCategory(a)!=='sticker'))&&
@@ -93,7 +94,7 @@ export default function PanoramaEditor({
   const libraryIds=available.map(a=>a.id).join('|');
   useEffect(()=>{
     if(!libraryOpen)return;
-    const pane=containerRef.current?.querySelector('.panorama-assets');
+    const pane=libraryPaneRef.current;
     if(!pane)return;
     if(typeof IntersectionObserver==='undefined'){
       available.slice(0,24).forEach(asset=>{if(!images[asset.id])loadImage(asset.id)});
@@ -193,6 +194,80 @@ export default function PanoramaEditor({
   const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
     onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
+  const mobileGallery=typeof window!=='undefined'&&window.matchMedia('(max-width:799px)').matches;
+  const libraryPanel=<aside className={'panorama-library'+(mobileGallery?' panorama-library-floating':'')} aria-label="Elementos disponibles para arrastrar">
+      <div className="panorama-library-heading"><strong>Explorar elementos</strong>
+        <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
+        <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
+      <div className="panorama-library-controls">
+        <input aria-label="Buscar mis imágenes y stickers" placeholder="Buscar por nombre…" value={filter}
+          onChange={e=>setFilter(e.target.value)}/>
+        <button type="button" onClick={()=>input.current?.click()} disabled={uploading}>
+          <Upload size={15}/> Subir
+        </button>
+      </div>
+<div className="panorama-discovery-categories" role="group" aria-label="Explorar categorías de la biblioteca">
+        <button type="button" aria-pressed={librarySection==='all'} onClick={()=>{setLibrarySection('all');setLibraryKind('all');setFilter('')}}><Shapes size={21}/><span>Todos</span></button>
+        <button type="button" aria-pressed={librarySection==='shapes'} onClick={()=>setLibrarySection('shapes')}><Shapes size={21}/><span>Formas</span></button>
+        <button type="button" aria-pressed={librarySection==='stickers'} onClick={()=>{setLibrarySection('stickers');setLibraryKind('sticker');setFilter('')}}><Sticker size={21}/><span>Stickers</span></button>
+        <button type="button" aria-pressed={librarySection==='photos'} onClick={()=>{setLibrarySection('photos');setLibraryKind('photo');setFilter('')}}><ImagePlus size={21}/><span>Fotos</span></button>
+      </div>
+      {librarySection==='shapes'&&<div className="panorama-shape-gallery" aria-label="Formas editables">
+        {([['Papel','paper'],['Cinta','tape'],['Marco','frame'],['Círculo','circle']] as const).map(([name,shape])=><button type="button" key={shape} onClick={()=>{addFromElements('shape',shape);setLibraryOpen(false)}}>
+          <span className={'panorama-shape-preview shape-'+shape} aria-hidden="true"/><small>{name}</small>
+        </button>)}
+      </div>}
+      {librarySection!=='shapes'&&<div className="panorama-assets" ref={libraryPaneRef} aria-label="Biblioteca de fotos, fondos y stickers">
+        {available.map(asset=><article key={asset.id} className="panorama-asset">
+          <button type="button" className="panorama-asset-drag"
+            title={'Arrastrar '+displayAssetName(asset)}
+            data-library-asset={asset.id}
+            draggable={!!images[asset.id]}
+            onFocus={()=>{if(!images[asset.id])loadImage(asset.id)}}
+            onPointerEnter={()=>{if(!images[asset.id])loadImage(asset.id)}}
+            onDragStart={e=>{
+              e.dataTransfer.setData('application/x-content-lab-asset',asset.id);
+              e.dataTransfer.effectAllowed='copy';
+            }}
+            onPointerDown={e=>dragStart(e,asset)}
+            onPointerMove={dragMove}
+            onPointerUp={dragEnd}
+            onPointerCancel={()=>{draggingRef.current=null;setGhost(null)}}
+            onClick={()=>{
+              if(ignoreClick.current===asset.id){ignoreClick.current='';return}
+              const stage=containerRef.current?.querySelector('.touch-editor-stage');
+              const view=containerRef.current?.querySelector('.touch-editor-scroll');
+              const center=stage&&view?(view.scrollLeft+view.clientWidth/2)/stage.getBoundingClientRect().width:(.5/count);
+              onAdd(asset.id,{x:Math.min(.99,Math.max(.01,center)),y:.5});
+              setLibraryOpen(false);revealCanvas();
+              setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
+            }}>
+            {images[asset.id]
+              ?<img src={images[asset.id]} alt="" draggable={false}/>
+              :<span className="panorama-library-loading">Cargando…</span>}
+            <span className="panorama-asset-add" aria-hidden="true">＋</span>
+          </button>
+          {renameId===asset.id
+            ?<div className="panorama-asset-rename">
+              <input aria-label={'Nuevo nombre para '+displayAssetName(asset)} value={renameName}
+                maxLength={85} onChange={e=>setRenameName(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void saveAssetName(asset)}}}/>
+              <button type="button" aria-label="Guardar nombre" disabled={renaming||!cleanAssetName(renameName)}
+                onClick={()=>void saveAssetName(asset)}><Check size={13}/></button>
+              <button type="button" aria-label="Cancelar nombre" onClick={()=>setRenameId('')}><X size={13}/></button>
+            </div>
+            :<div className="panorama-asset-meta">
+              <small title={displayAssetName(asset)}>{displayAssetName(asset)}</small>
+              {asset.brandId===brandId&&!asset.shared&&
+                <button type="button" aria-label={'Cambiar nombre de '+displayAssetName(asset)}
+                  onClick={()=>{setRenameId(asset.id);setRenameName(displayAssetName(asset))}}>
+                  <Pencil size={13}/>
+                </button>}
+            </div>}
+        </article>)}
+      </div>}
+      {librarySection!=='shapes'&&!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
+    </aside>;
   const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')+(selectedLayerId?' layer-selected':'')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
@@ -280,85 +355,7 @@ export default function PanoramaEditor({
       <button type="button" disabled={!canRedo} onClick={onRedo}><Redo2 size={16}/> Rehacer</button>
     </div>}
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
-      {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
-      <div className="panorama-library-heading"><strong>Explorar elementos</strong>
-        <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
-        <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
-      <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
-        {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
-          aria-pressed={libraryKind===kind} onClick={()=>{setLibraryKind(kind);setLibrarySection(kind==='photo'?'photos':kind==='sticker'?'stickers':'all')}}>
-          {kind==='photo'?'Fotos':kind==='sticker'?'Stickers':'Todos'}
-        </button>)}
-      </div>
-      <div className="panorama-library-controls">
-        <input aria-label="Buscar mis imágenes y stickers" placeholder="Buscar por nombre…" value={filter}
-          onChange={e=>setFilter(e.target.value)}/>
-        <button type="button" onClick={()=>input.current?.click()} disabled={uploading}>
-          <Upload size={15}/> Subir
-        </button>
-      </div>
-<div className="panorama-discovery-categories" role="group" aria-label="Explorar categorías de la biblioteca">
-        <button type="button" aria-pressed={librarySection==='all'} onClick={()=>{setLibrarySection('all');setLibraryKind('all');setFilter('')}}><Shapes size={21}/><span>Todos</span></button>
-        <button type="button" aria-pressed={librarySection==='shapes'} onClick={()=>setLibrarySection('shapes')}><Shapes size={21}/><span>Formas</span></button>
-        <button type="button" aria-pressed={librarySection==='stickers'} onClick={()=>{setLibrarySection('stickers');setLibraryKind('sticker');setFilter('')}}><Sticker size={21}/><span>Stickers</span></button>
-        <button type="button" aria-pressed={librarySection==='photos'} onClick={()=>{setLibrarySection('photos');setLibraryKind('photo');setFilter('')}}><ImagePlus size={21}/><span>Fotos</span></button>
-      </div>
-      {librarySection==='shapes'&&<div className="panorama-shape-gallery" aria-label="Formas editables">
-        {([['Papel','paper'],['Cinta','tape'],['Marco','frame'],['Círculo','circle']] as const).map(([name,shape])=><button type="button" key={shape} onClick={()=>{addFromElements('shape',shape);setLibraryOpen(false)}}>
-          <span className={'panorama-shape-preview shape-'+shape} aria-hidden="true"/><small>{name}</small>
-        </button>)}
-      </div>}
-      {librarySection!=='shapes'&&<div className="panorama-assets" aria-label="Biblioteca de fotos, fondos y stickers">
-        {available.map(asset=><article key={asset.id} className="panorama-asset">
-          <button type="button" className="panorama-asset-drag"
-            title={'Arrastrar '+displayAssetName(asset)}
-            data-library-asset={asset.id}
-            draggable={!!images[asset.id]}
-            onFocus={()=>{if(!images[asset.id])loadImage(asset.id)}}
-            onPointerEnter={()=>{if(!images[asset.id])loadImage(asset.id)}}
-            onDragStart={e=>{
-              e.dataTransfer.setData('application/x-content-lab-asset',asset.id);
-              e.dataTransfer.effectAllowed='copy';
-            }}
-            onPointerDown={e=>dragStart(e,asset)}
-            onPointerMove={dragMove}
-            onPointerUp={dragEnd}
-            onPointerCancel={()=>{draggingRef.current=null;setGhost(null)}}
-            onClick={()=>{
-              if(ignoreClick.current===asset.id){ignoreClick.current='';return}
-              const stage=containerRef.current?.querySelector('.touch-editor-stage');
-              const view=containerRef.current?.querySelector('.touch-editor-scroll');
-              const center=stage&&view?(view.scrollLeft+view.clientWidth/2)/stage.getBoundingClientRect().width:(.5/count);
-              onAdd(asset.id,{x:Math.min(.99,Math.max(.01,center)),y:.5});
-              setLibraryOpen(false);revealCanvas();
-              setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
-            }}>
-            {images[asset.id]
-              ?<img src={images[asset.id]} alt="" draggable={false}/>
-              :<span className="panorama-library-loading">Cargando…</span>}
-            <span className="panorama-asset-add" aria-hidden="true">＋</span>
-          </button>
-          {renameId===asset.id
-            ?<div className="panorama-asset-rename">
-              <input aria-label={'Nuevo nombre para '+displayAssetName(asset)} value={renameName}
-                maxLength={85} onChange={e=>setRenameName(e.target.value)}
-                onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void saveAssetName(asset)}}}/>
-              <button type="button" aria-label="Guardar nombre" disabled={renaming||!cleanAssetName(renameName)}
-                onClick={()=>void saveAssetName(asset)}><Check size={13}/></button>
-              <button type="button" aria-label="Cancelar nombre" onClick={()=>setRenameId('')}><X size={13}/></button>
-            </div>
-            :<div className="panorama-asset-meta">
-              <small title={displayAssetName(asset)}>{displayAssetName(asset)}</small>
-              {asset.brandId===brandId&&!asset.shared&&
-                <button type="button" aria-label={'Cambiar nombre de '+displayAssetName(asset)}
-                  onClick={()=>{setRenameId(asset.id);setRenameName(displayAssetName(asset))}}>
-                  <Pencil size={13}/>
-                </button>}
-            </div>}
-        </article>)}
-      </div>}
-      {librarySection!=='shapes'&&!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
-    </aside>}<div className="panorama-workspace">
+      {libraryOpen&&(mobileGallery&&typeof document!=='undefined'?createPortal(libraryPanel,document.body):libraryPanel)}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
         fullscreen={expanded}
