@@ -111,7 +111,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <div>
         <div className="freebies-eyebrow"><Gift size={16}/> FREEBIES · MI ESTUDIO</div>
         <h2>Monthly Creative Packs</h2>
-        <p>Matcha, noviembre, diciembre y enero juntos, conservando sus fotos y diseños originales. No se sustituirán las portadas por recreaciones. Los nuevos accesos por email requieren verificación antes de activar.</p>
+        <p>Regla: todos funcionan como Matcha — ejemplos originales, formulario por correo, confirmación personal y biblioteca de prompts editables. Nov 19 · Dic 1 · Ene 2. El contenido se prepara en privado y solo se muestra en el landing desde su fecha.</p>
       </div>
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
@@ -140,15 +140,15 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <img src="/assets/freebies/november-website/cover.svg" alt="Portada aprobada: Tu web con un solo prompt" loading="lazy"/>
       </div>
       <div className="freebies-info">
-        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status === 'listo_privado' ? 'Preparado · privado' : november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Lanzamiento diciembre</span></div>
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status === 'listo_privado' ? 'Preparado · privado' : november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> 19 noviembre 2026</span></div>
         <h3>Tu web con un solo prompt</h3>
         <p className="freebies-description">Crea tu primera web con ChatGPT y AppDeploy. Incluye 3 fotografías sin texto y el prompt copiable en ES / EN.</p>
         <div className="freebies-november-photos" aria-label="Las tres fotos del freebie de noviembre">
           {NOVEMBER_PHOTOS.map(photo=><a key={photo.src} href={NOVEMBER_FILES.photos} target="_blank" rel="noopener noreferrer" aria-label={'Ver '+photo.name+' en Drive'}><img src={photo.src} alt={photo.name} loading="lazy"/></a>)}
         </div>
-        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Make activo · verificación pendiente</span></div>
+        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Confirmación de email · acceso personal</span></div>
         <div className="freebies-actions freebies-main-actions">
-          {openFreebie(NOVEMBER_FILES.access,'Tu web con un solo prompt · ES / EN')}
+          {openFreebie(NOVEMBER_FILES.signup,'Tu web con un solo prompt · solicitud por correo')}
           {external(NOVEMBER_FILES.signup,'Solicitud por correo',Mail)}
         </div>
         <details className="freebies-details"><summary>Fotos y automatización</summary>
@@ -171,10 +171,10 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       <div className="freebies-info">
         <div className="freebies-status-row">
           <span className="freebies-status"><LockKeyhole size={14}/>{privateReady ? 'Listo en privado · no público' : active ? 'Activo en Studio · entrega sin verificar' : 'Borrador · entrega por correo pendiente'}</span>
-          <span className="freebies-date"><CalendarDays size={15}/> Diciembre 2026</span>
+          <span className="freebies-date"><CalendarDays size={15}/> 1 diciembre 2026</span>
         </div>
         <h3>{FREEBIE_TITLE}</h3>
-        <p className="freebies-description">5 prompts para fotografías de producto con estética soft purple. Acceso web por correo, sin PDF.</p>
+        <p className="freebies-description">5 prompts para fotografías de producto con estética soft purple, galería de ejemplos y entrega mediante confirmación personal por correo.</p>
         <div className="freebies-meta">
           <span><ImageIcon size={15}/> 5 PNG individuales</span>
           <span><Languages size={15}/> Inglés + español</span>
@@ -184,7 +184,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           {PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={"Abrir "+photo.name+" en Drive"}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
         </div>
         <div className="freebies-actions freebies-main-actions">
-          {openFreebie(PACK.access,'December Creative Pack · The Lavender Edit')}
+          {openFreebie(PACK.signup,'December Creative Pack · solicitud por correo')}
           {external(PACK.signup,'Solicitud por correo',Mail)}
         </div>
         <details className="freebies-details"><summary>Gestionar freebie de diciembre</summary><div className="freebies-actions">
@@ -197,8 +197,8 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         </details>
         <details className="freebies-details"><summary>Estado de lanzamiento y envío</summary><div className="freebies-publishing">
           <div>
-            <strong>{emailDeliveryVerified ? 'Preparado para activar' : 'Escenario de envío creado en Make · inactivo hasta QA'}</strong>
-            <small>Formulario y envío preparados; falta probar una entrega real, revisar el acceso y validar los cinco ejemplos visuales. El material de Drive es solo para producción interna.</small>
+            <strong>Entrega unificada por correo · publicación programada para el 1 de diciembre</strong>
+            <small>La nueva biblioteca necesita confirmación por email. Su anuncio público se mantiene oculto hasta la fecha de lanzamiento. Las imágenes y prompts originales están conservados.</small>
           </div>
           <button type="button" className={active ? 'freebies-toggle is-active' : 'freebies-toggle'} onClick={() => void onToggle()} disabled={saving || readOnly || !item || (!active && (!canLaunch || !emailDeliveryVerified))}>
             {saving ? 'Guardando…' : active ? 'Volver a borrador' : 'Activar tras verificar email'}
@@ -207,7 +207,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         {!item && <p role="alert" className="freebies-alert">No se encontró el registro de este freebie en el Studio. La activación está deshabilitada hasta restaurarlo.</p>}
         {message && <p role="status" className="freebies-notice">{message}</p>}
         {failed && <p role="alert" className="freebies-alert">{failed}</p>}
-        <p className="freebies-disclaimer">No compartir los archivos de Drive ni el PDF fuente con el público. La activación permanece bloqueada hasta comprobar el flujo de correo y acceso a la página.</p></details>
+        <p className="freebies-disclaimer">No publicar materiales privados de Drive. El acceso público utiliza confirmación de correo y las fechas programadas, nunca los enlaces de administración.</p></details>
       </div>
     </div>
     <div className="freebies-card freebies-salt-line-card">
@@ -218,7 +218,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         </a>
       </div>
       <div className="freebies-info">
-        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> Preparado en privado · entrega pendiente de QA</span><span className="freebies-date"><CalendarDays size={15}/> Enero 2027</span></div>
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> Preparado en privado · entrega pendiente de QA</span><span className="freebies-date"><CalendarDays size={15}/> 2 enero 2027</span></div>
         <h3>SALT LINE · 8 Macro Beauty Photo Prompts</h3>
         <p className="freebies-description">Serie editorial macro con textura real, 8 prompts adaptables y 4 fotos individuales aprobadas. Usa el hero original para mostrar calidad y textura.</p>
         <div className="freebies-meta"><span><Languages size={15}/> Inglés</span><span><ImageIcon size={15}/> 4 fotos individuales</span><span><ClipboardCopy size={15}/> PDF · 13 páginas</span></div>
@@ -226,7 +226,7 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           {SALT_LINE_PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={'Abrir '+photo.name+' en Drive'}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
         </div>
         <div className="freebies-actions freebies-main-actions">
-          {openFreebie(SALT_LINE.pdf,'SALT LINE · vista previa privada en PDF')}
+          {openFreebie('https://podcast.thelaunchera.com/freebies/january-salt-line/','SALT LINE · solicitud por correo')}
         </div>
         <details className="freebies-details"><summary>Archivos originales y producción</summary>
           <div className="freebies-actions">
