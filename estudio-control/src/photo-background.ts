@@ -1,5 +1,4 @@
 /** Local photo background removal, with original photos preserved for undo. */
-type ProgressCallback=(label:string)=>void;
 const ORIGINAL_DB='studio-photo-originals-v1';
 const STORE='photos';
 const sessionOriginals=new Map<string,Blob>();
