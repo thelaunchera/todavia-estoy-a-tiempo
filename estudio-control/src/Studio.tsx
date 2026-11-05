@@ -1164,7 +1164,7 @@ function App() {
       </div>
     );
   return (
-    <div className={'studio ' + (recording ? 'recording' : '')}>
+    <div className={'studio ' + (recording ? 'recording' : '') + (page === 'seamless' ? ' studio-carousel-editor-mode' : '')}>
       <aside className={'sidebar ' + (mobileNav ? 'open' : '')}>
         <div className="brand">
           <img src={LOGO} alt="Todavía estoy a tiempo" />
@@ -1228,6 +1228,7 @@ function App() {
       )}
       <div className="frame">
         <header className="topbar">
+          {page === 'seamless' && <button type="button" className="studio-editor-exit" onClick={() => change('inicio')} aria-label="Volver al Studio y salir del editor">← <span>Volver al Studio</span></button>}
           <button className="menu" onClick={() => setMobileNav(true)}>
             <Menu size={23} />
           </button>
