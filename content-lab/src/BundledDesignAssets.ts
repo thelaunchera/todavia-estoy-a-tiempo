@@ -1,4 +1,5 @@
 import type {LibraryAsset,MediaCategory} from './MediaAsset';
+import {QUARANTINED_BUNDLED_ASSET_IDS} from './QuarantinedBundledAssets';
 
 /** Studio-owned release resources only. Never put buyer uploads or private
  * media here: these original release files are served with the static app.
@@ -8,7 +9,7 @@ import type {LibraryAsset,MediaCategory} from './MediaAsset';
 export type BundledDesignAsset=LibraryAsset&{
  bundled:true;file:string;phrase?:string;width:number;height:number;
 };
-export const BUNDLED_DESIGN_ASSETS:BundledDesignAsset[]=[
+export const ORIGINAL_BUNDLED_DESIGN_ASSETS:BundledDesignAsset[]=[
  {"id":"included-pinterest-01-lazo-terciopelo-burgundy","brandId":"shared","name":"Lazo de terciopelo burgundy","displayName":"Lazo de terciopelo burgundy","mime":"image/png","category":"sticker","shared":true,"bundled":true,"file":"resources/pinterest-aesthetic-stickers-2026-11/01_lazo_terciopelo_burgundy.png","width":1312,"height":1199,"sizeBytes":1051914,"sha256":"7721eb2edf48b852205b352d7c4af867046ae7fcdfa95ca723b1116d9d78f94b","stickerGroup":"Pinterest aesthetic"},
  {"id":"included-pinterest-02-lazo-vichy-mantequilla","brandId":"shared","name":"Lazo vichy mantequilla","displayName":"Lazo vichy mantequilla","mime":"image/png","category":"sticker","shared":true,"bundled":true,"file":"resources/pinterest-aesthetic-stickers-2026-11/02_lazo_vichy_mantequilla.png","width":1312,"height":1199,"sizeBytes":1280115,"sha256":"6ae6ae8479648d48aa9777cba08aeec250f6db4c810293969f93e64ae0cf9a84","stickerGroup":"Pinterest aesthetic"},
  {"id":"included-pinterest-03-lazo-organza-azul","brandId":"shared","name":"Lazo de organza azul","displayName":"Lazo de organza azul","mime":"image/png","category":"sticker","shared":true,"bundled":true,"file":"resources/pinterest-aesthetic-stickers-2026-11/03_lazo_organza_azul.png","width":1312,"height":1199,"sizeBytes":1012360,"sha256":"d44e8470e1543efbd2000462679e14b29fcbda25dbdb0ac38b3df84c33271aaa","stickerGroup":"Pinterest aesthetic"},
@@ -751,6 +752,15 @@ export const BUNDLED_DESIGN_ASSETS:BundledDesignAsset[]=[
   "backgroundGroup": "Editoriales"
  }
 ];
+
+/** Only verified complete originals are offered in picker or placed on canvas.
+ * Bad uploads are not deleted, re-encoded or substituted with a fake asset;
+ * their original IDs, filenames and SHA-256 remain in the archival list above.
+ * To restore one, upload its original full PNG and remove its ID from the
+ * quarantine after validating the manifest SHA and dimensions.
+ */
+export const BUNDLED_DESIGN_ASSETS:BundledDesignAsset[]=
+ ORIGINAL_BUNDLED_DESIGN_ASSETS.filter(asset=>!QUARANTINED_BUNDLED_ASSET_IDS.has(asset.id));
 
 export const findBundledDesignAsset=(id:string)=>BUNDLED_DESIGN_ASSETS.find(item=>item.id===id);
 export const isBundledDesignAsset=(id:string)=>Boolean(findBundledDesignAsset(id));
