@@ -13,7 +13,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutOriginalPhoto,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
-import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
+import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors} from 'lucide-react';
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
@@ -911,8 +911,41 @@ export default function SeamlessEditor(){
   </nav>
 
   {current&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
-  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':'Posición'}</strong>
+  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':activeInspector==='effects'?'Sombras':activeInspector==='color'?'Cambiar color':activeInspector==='size'?'Ajustar tamaño':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
+  {activeInspector==='size'&&<div className="studio-app-range-row">
+    <label>Tamaño</label><input type="range" aria-label="Ajustar tamaño del elemento" min={current.kind==='image'?50:current.kind==='sticker'?40:24}
+     max={current.kind==='image'?2100:current.kind==='sticker'?800:260} step="2" value={current.kind==='image'?current.width:current.fontSize}
+     onChange={e=>update(current.id,current.kind==='image'?{width:Number(e.target.value)}:{fontSize:Number(e.target.value)})}/>
+    <output>{current.kind==='image'?current.width:current.fontSize}px</output>
+  </div>}
+  {activeInspector==='effects'&&<div className="studio-app-effects-inspector">
+    <label><input type="checkbox" checked={!!current.shadowEnabled} onChange={e=>update(current.id,{shadowEnabled:e.target.checked})}/> Activar sombra de la capa</label>
+    <div className="studio-app-range-row"><label>Suavidad</label><input aria-label="Difuminado de sombra" type="range" min="0" max="120" value={current.shadowBlur??20}
+     onChange={e=>update(current.id,{shadowBlur:Number(e.target.value),shadowEnabled:true})}/><output>{current.shadowBlur??20}px</output></div>
+    <div className="studio-app-range-row"><label>Horizontal</label><input aria-label="Sombra horizontal" type="range" min="-80" max="80" value={current.shadowOffsetX??8}
+     onChange={e=>update(current.id,{shadowOffsetX:Number(e.target.value),shadowEnabled:true})}/><output>{current.shadowOffsetX??8}px</output></div>
+    <div className="studio-app-range-row"><label>Vertical</label><input aria-label="Sombra vertical" type="range" min="-80" max="80" value={current.shadowOffsetY??12}
+     onChange={e=>update(current.id,{shadowOffsetY:Number(e.target.value),shadowEnabled:true})}/><output>{current.shadowOffsetY??12}px</output></div>
+    <label>Color de sombra <input aria-label="Color de sombra" type="color" value={current.shadowColor||'#191919'}
+     onChange={e=>update(current.id,{shadowColor:e.target.value,shadowEnabled:true})}/></label>
+    <button type="button" onClick={()=>update(current.id,{shadowEnabled:false,textShadow:false})}>Quitar sombra</button>
+  </div>}
+  {activeInspector==='color'&&<div className="studio-app-color-inspector">
+    {current.shape?<label>Color de elemento <input type="color" aria-label="Cambiar color de la forma"
+      value={current.color} onChange={e=>recolorShape(current.id,e.target.value)}/></label>
+     :current.kind==='text'?<label>Color de texto <input type="color" aria-label="Cambiar color de texto"
+      value={current.color} onChange={e=>update(current.id,{color:e.target.value})}/></label>
+     :current.kind==='image'?<>
+       <label>Teñir sticker sin borrar original <input type="color" aria-label="Cambiar color del sticker"
+        value={current.tintColor||'#B74670'} onChange={e=>update(current.id,{tintColor:e.target.value})}/></label>
+       <div className="studio-app-range-row"><label>Intensidad</label><input type="range" aria-label="Intensidad del color"
+        min="0" max="100" value={Math.round((current.tintStrength??.38)*100)}
+        onChange={e=>update(current.id,{tintStrength:Number(e.target.value)/100,tintColor:current.tintColor||'#B74670'})}/>
+        <output>{Math.round((current.tintStrength??.38)*100)}%</output></div>
+       <button type="button" onClick={()=>update(current.id,{tintColor:undefined,tintStrength:undefined})}>Color original</button>
+      </>:<p>Los símbolos emoji conservan su color original.</p>}
+  </div>}
   {activeInspector==='opacity'&&<div className="studio-app-range-row">
     <label htmlFor="studio-selected-opacity">Opacidad</label><input id="studio-selected-opacity" type="range" min="0" max="100" step="1"
      aria-label="Transparencia del elemento: 100 por ciento opaco" value={Math.round((current.opacity??1)*100)}
@@ -963,11 +996,11 @@ export default function SeamlessEditor(){
       value={current.color} onChange={e=>recolorShape(current.id,e.target.value)}/></label>
     <span style={{fontSize:12,color:'#65717b'}}>Puedes mover, girar y cambiar el tamaño de la forma directamente en el lienzo.</span>
   </div>}
-  {activeInspector==='position'&&<div className="studio-app-position-row">
+  {activeInspector==='position'&&<div className="studio-app-position-inspector"><div className="studio-app-range-row"><label>Horizontal</label><input type="range" min="0" max={doc.count*W} aria-label="Mover horizontalmente" value={Math.max(0,current.x)} onChange={e=>update(current.id,{x:Number(e.target.value)})}/><output>{Math.round(current.x)}</output></div><div className="studio-app-range-row"><label>Vertical</label><input type="range" min="0" max={H} aria-label="Mover verticalmente" value={Math.max(0,current.y)} onChange={e=>update(current.id,{y:Number(e.target.value)})}/><output>{Math.round(current.y)}</output></div><div className="studio-app-position-row">
     <button type="button" onClick={()=>reorderSelected('front')}>Traer delante</button>
     <button type="button" onClick={()=>reorderSelected('back')}>Enviar detrás</button>
     <button type="button" onClick={duplicateSelected}>Duplicar</button>
-  </div>}
+  </div></div>}
  </div>}
  <div className="studio-app-selection">  {current?.kind==='image'&&<div role="toolbar" aria-label="Fondo de foto seleccionada" style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginBottom:8}}>
    <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={busy}
