@@ -195,6 +195,9 @@ async function drawSlide(slide:Slide,i:number,total:number,brand:Brand,images:Re
     ctx.fillText(text.slice(0,50),x,y);
   };
   const photo=async(x:number,y:number,w:number,h:number,free=false)=>{
+    // In edit/layer-composition mode, live layers (not the baked base image)
+    // own the photos. This avoids duplicate alpha edges when sending behind.
+    if(editorMode&&slide.assetId)return true;
     if(slide.photoPosition&&!free)return true;
     if(!slide.assetId||!images[slide.assetId])return false;
     const img=new Image();img.src=images[slide.assetId];
@@ -588,8 +591,18 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
     if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds,outputScale:pixelScale});
-    const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style,false,pixelScale)));
-    return overlayPanoramaPages(all,style.seamlessEnabled?(style.panoramaLayers||[]):(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length)),images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
+    const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+    // Recompose only when an element is actually sent backward. The flat
+    // preview otherwise stays on the existing fast rendering path.
+    const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style,hasBehind,pixelScale)));
+    const saved=(style.panoramaLayers||[]).map(layer=>constrainNormalLayer(layer,slides.length));
+    // Native slide photos/stickers must sit ABOVE behind-layers but BELOW titles,
+    // just as they do in the touch editor. Never bake them twice.
+    const native=hasBehind?pageLayers.filter(layer=>layer.kind==='photo'||layer.kind==='sticker')
+      .map(layer=>({...layer,placement:'behind-text' as const})):[];
+    const ordered=hasBehind?[...saved.filter(layer=>layer.placement==='behind-text'),...native,
+      ...saved.filter(layer=>layer.placement!=='behind-text')]:saved;
+    return overlayPanoramaPages(all,ordered,images,ctx=>paintCarouselTypography(ctx,slides,brand,style));
   };
   const setAll=(all:Slide[],nextStyle:CarouselStyle=style)=>{
     recordHistory(post.designData||encodeCarouselDesign(slides,style));
@@ -1247,6 +1260,14 @@ export default function CarouselFactory({brand,post,assets,images,onChange,onSav
           if(previewCtx){previewCtx.imageSmoothingQuality='high';
             previewCtx.drawImage(wide,i*1080,0,1080,1350,0,0,page.width,page.height);}
           wide.width=1;return page;
+        }
+        const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+        if(!touchEdit&&hasBehind){
+          // Use the exact same stacking/rendering pipeline as individual PNGs.
+          const pages=await renderAllSlides();
+          const selectedPage=pages[i];
+          pages.forEach((other,n)=>{if(n!==i){other.width=1;other.height=1;}});
+          return selectedPage;
         }
         const page=await drawSlide(slide,i,slides.length,brand,images,style,touchEdit);
         if(!touchEdit&&style.panoramaLayers?.length){
