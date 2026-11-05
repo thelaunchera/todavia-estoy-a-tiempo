@@ -35,7 +35,7 @@
 .class-module-main small{font-size:10px;line-height:1.35;color:#77899a}
 .class-module>svg{flex-shrink:0;margin-top:2px;color:#7a98b2}
 .class-workspace{min-width:0}
-.class-lesson-header{background:#fff;border:1px solid #e0e5e9;border-radius:18px;padding:clamp(20px,3vw,29px);margin-bottom:16px}
+.class-lesson-header{scroll-margin-top:95px;background:#fff;border:1px solid #e0e5e9;border-radius:18px;padding:clamp(20px,3vw,29px);margin-bottom:16px}
 .class-lesson-header h3{font:400 clamp(25px,2.6vw,36px)/1.12 'DM Serif Display',Georgia,serif;margin:10px 0 11px;color:#18324d}
 .class-lesson-header p{font-size:13px;line-height:1.6;color:#62758a}
 .class-prepare,.class-prompt-section,.class-production-state{background:#fff;border:1px solid #e0e6ea;border-radius:18px;padding:clamp(17px,2.2vw,24px);margin-bottom:16px}
