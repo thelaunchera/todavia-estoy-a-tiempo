@@ -23,13 +23,13 @@ test('Release preserves the original library and adds the seasonal and Pinterest
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/branding-marketing-stickers-2026-11/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/creative-stickers-2026-11-05/')).length,8);
  assert.equal(files.filter(x=>x.file.startsWith('resources/branding-elements-2026-11/')).length,8);
- assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,20);
+ assert.equal(files.filter(x=>x.file.startsWith('resources/pinterest-aesthetic-stickers-2026-11/')).length,22);
  assert.equal(files.filter(x=>x.file.startsWith('resources/holiday-stickers-2026-11/')).length,16);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Branding y Marketing').length,16);
- assert.equal(files.filter(x=>x.category==='sticker').length,129);
+ assert.equal(files.filter(x=>x.category==='sticker').length,131);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,149);
- assert.equal(new Set(files.filter(x=>x.mime==='image/png').map(x=>x.sha256)).size,119);
+ assert.equal(new Set(files.map(x=>x.id)).size,151);
+ assert.equal(new Set(files.filter(x=>x.mime==='image/png').map(x=>x.sha256)).size,121);
  for(const file of files.filter(x=>x.mime==='image/png')){
   assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+|pinterest-aesthetic-stickers-2026-11\/[a-z0-9_]+|(?:branding-elements-2026-11|holiday-stickers-2026-11)\/[a-z0-9-]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
@@ -78,13 +78,13 @@ test('Release preserves the original library and adds the seasonal and Pinterest
 });
 
 
-test('All 119 released files are verified and unavailable stickers are restored',()=>{
+test('All 121 released files are verified and unavailable stickers are restored',()=>{
  const originals=bundle.ORIGINAL_BUNDLED_DESIGN_ASSETS;
  const visible=bundle.BUNDLED_DESIGN_ASSETS;
- assert.equal(originals.length,119);
- assert.equal(visible.length,149);
+ assert.equal(originals.length,121);
+ assert.equal(visible.length,151);
  assert.equal(bundle.QUARANTINED_BUNDLED_ASSET_IDS.size,0);
- assert.equal(new Set(originals.map(x=>x.id)).size,119);
+ assert.equal(new Set(originals.map(x=>x.id)).size,121);
  for(const a of originals){
   const bytes=readFileSync(resolve(root,'public',a.file));
   assert.equal(bytes.length,a.sizeBytes,a.file);
@@ -95,7 +95,7 @@ test('All 119 released files are verified and unavailable stickers are restored'
 
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,128);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,130);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);

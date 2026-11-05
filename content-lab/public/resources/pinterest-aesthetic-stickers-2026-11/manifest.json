@@ -322,6 +322,38 @@
       "sizeBytes": 303466,
       "sha256": "ff743ea3f4ebbc3d9f7a027bf08f7c2d40c9d9acd38a810ffb790f172a100ee7",
       "stickerGroup": "Pinterest aesthetic"
+    },
+    {
+      "id": "included-pinterest-21-estrella-cromada",
+      "brandId": "shared",
+      "name": "Estrella cromada",
+      "displayName": "Estrella cromada",
+      "mime": "image/png",
+      "category": "sticker",
+      "shared": true,
+      "bundled": true,
+      "file": "resources/pinterest-aesthetic-stickers-2026-11/21_estrella_cromada.png",
+      "width": 1536,
+      "height": 1024,
+      "sizeBytes": 895824,
+      "sha256": "14809e84bf3a3895ed44994c47d3357bd0c278a837f516e05b65a771b5023d51",
+      "stickerGroup": "Pinterest aesthetic"
+    },
+    {
+      "id": "included-pinterest-22-estrella-satin-champagne",
+      "brandId": "shared",
+      "name": "Estrella de satén champagne",
+      "displayName": "Estrella de satén champagne",
+      "mime": "image/png",
+      "category": "sticker",
+      "shared": true,
+      "bundled": true,
+      "file": "resources/pinterest-aesthetic-stickers-2026-11/22_estrella_satin_champagne.png",
+      "width": 1536,
+      "height": 1024,
+      "sizeBytes": 1729427,
+      "sha256": "f7d49a7833ab5e9f6271f4ff46d4bb1bad50bd5d010cb9e9e4c90cf7b816d760",
+      "stickerGroup": "Pinterest aesthetic"
     }
   ]
 }
