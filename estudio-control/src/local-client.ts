@@ -15,7 +15,7 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 const kinds: Kind[] = ['episodios', 'tareas', 'productos', 'ideas'];
 const fields: Record<Kind, string[]> = {
-  episodios: ['title', 'date', 'status', 'summary', 'link', 'audio', 'art', 'notes'],
+  episodios: ['title', 'date', 'status', 'summary', 'summary_en', 'title_en', 'link', 'audio', 'art', 'email_art_url', 'popup_image_url', 'popup_headline', 'popup_headline_en', 'popup_message', 'popup_message_en', 'number', 'series', 'notes'],
   tareas: ['title', 'date', 'status', 'section', 'notes', 'priority'],
   productos: ['title', 'subtitle', 'price', 'status', 'link', 'notes'],
   ideas: ['title', 'section', 'status', 'notes']
@@ -163,11 +163,11 @@ function sanitize(kind: Kind, value: unknown): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const field of fields[kind]) {
     if (!(field in v)) continue;
-    if (field === 'price') {
+    if ((field === 'number' || field === 'series_number') && Number.isInteger(Number(v[field]))) { result[field] = Number(v[field]); } else if (field === 'price') {
       const amount = Number(v[field]);
       if (Number.isFinite(amount) && amount >= 0 && amount <= 99999) result.price = Math.round(amount * 100) / 100;
     } else if (typeof v[field] === 'string') {
-      result[field] = (v[field] as string).trim().slice(0, field === 'notes' ? 2500 : 400);
+      result[field] = (v[field] as string).trim().slice(0, field === 'notes' ? 2500 : ['popup_message','popup_message_en','summary','summary_en'].includes(field) ? 600 : 400);
     }
   }
   return result;
