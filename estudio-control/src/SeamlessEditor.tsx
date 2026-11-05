@@ -18,7 +18,15 @@ import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
-const labUrl=(file:string)=>'/content-lab/'+file;
+// Studio copies its own shared resources on deployment.
+const labUrl=(file:string)=>new URL('resources/'+file.replace(/^resources\//,''),document.baseURI).href;
+const resolveImageSource=(src:string)=>{
+ const marker='/content-lab/resources/';
+ const index=src.indexOf(marker);
+ // Keep images in previously saved carousels working after migration.
+ if(index>=0&&(src.startsWith('/')||src.startsWith(window.location.origin)))return labUrl('resources/'+src.slice(index+marker.length).split('?')[0]);
+ return src;
+};
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
 const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙','🦋','🍒','📌','📎','📝','🧘🏽‍♀️','🏋🏽‍♀️','🍵','💪','👟'];
 const STUDIO_TEXT_FONTS:Record<string,string>={
@@ -155,7 +163,15 @@ export default function SeamlessEditor(){
   if(!storageReady||previous===null||doc.items.length<=previous)return;
   requestAnimationFrame(()=>workspaceRef.current?.scrollIntoView({block:'nearest',behavior:'smooth'}));
  },[doc.items.length,storageReady]);
- const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{const existing=images.current.get(src);if(existing?.complete){resolve(existing);return}const im=new Image();im.onload=()=>{images.current.set(src,im);resolve(im)};im.onerror=reject;im.src=src});
+ const loadImage=(src:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
+ const resolved=resolveImageSource(src);
+ const existing=images.current.get(resolved);
+ if(existing?.complete&&existing.naturalWidth>0){resolve(existing);return;}
+ const im=new Image();
+ im.onload=()=>{if(!im.naturalWidth){reject(new Error('La imagen llegó vacía.'));return;}images.current.set(resolved,im);resolve(im);};
+ im.onerror=()=>reject(new Error('No se pudo cargar la imagen desde la biblioteca.'));
+ im.src=resolved;
+});
  const paint=async(ctx:CanvasRenderingContext2D,scale=1,clipStart=0,clipWidth=width,omitTextId:number|null=null)=>{
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
   for(let slideIndex=0;slideIndex<doc.count;slideIndex++){const src=doc.backgroundImages?.[slideIndex];if(src){try{const bg=await loadImage(src);const left=slideIndex*W-clipStart;ctx.save();ctx.beginPath();ctx.rect(left,0,W,H);ctx.clip();const factor=Math.max(W/bg.width,H/bg.height);const dw=bg.width*factor,dh=bg.height*factor;ctx.drawImage(bg,left+(W-dw)/2,(H-dh)/2,dw,dh);ctx.restore()}catch{}}}
@@ -205,7 +221,15 @@ export default function SeamlessEditor(){
  },[doc,selected,editingText]);
  const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
- const addPrivateSticker=(url:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id)};
+ const addPrivateSticker=async(url:string)=>{
+ try{
+  await loadImage(url);
+  const id=++nextId.current;
+  setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:url,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));
+  setSelected(id);setQuickPanel(null);
+  setMessage('Sticker añadido al lienzo.');
+ }catch{setMessage('No se pudo abrir ese sticker. No se ha añadido ninguna capa invisible.');}
+};
  const goldenGridAssetUrl=(file:string)=>new URL('brand-kits/golden-grid/'+file,document.baseURI).href;
  const addGoldenGridAsset=async(asset:GoldenGridCarouselAsset)=>{
   try{
@@ -254,8 +278,27 @@ export default function SeamlessEditor(){
      ?{...item,color,src:studioShapeData(item.shape,color)}:item)}));
  };
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
- const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
- const setLabBackground=(file:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:labUrl(file)}}));
+ const addLabSticker=async(file:string)=>{
+ const src=labUrl(file);
+ try{
+  await loadImage(src);
+  const id=++nextId.current;
+  setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src,x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));
+  setSelected(id);setQuickPanel(null);
+  setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.');
+ }catch{
+  setLibraryStatus('No se pudo abrir el PNG de este sticker. Intenta recargar el Studio.');
+  setMessage('Ese sticker no se cargó; no se añadió una capa invisible.');
+ }
+};
+ const setLabBackground=async(file:string)=>{
+ const src=labUrl(file);
+ try{
+  await loadImage(src);
+  setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:src}}));
+  setQuickPanel(null);
+ }catch{setMessage('El fondo no está disponible. Tu diseño anterior sigue intacto.');}
+};
  const addSticker=(emoji:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'sticker',text:emoji,x:slide*W+200,y:220,width:180,fontSize:160,color:'#191919'}]}));setSelected(id)};
  const addText=(style:'hook'|'title'|'paragraph'|'caption'='paragraph')=>{
    const starter=doc.items.find(it=>it.kind==='text'&&Math.floor((it.x+(it.width||900)/2)/W)===slide&&!(it.text||'').trim());
@@ -803,7 +846,7 @@ export default function SeamlessEditor(){
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
       {LAB_ASSETS.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
-        onClick={()=>{setLabBackground(asset.file);setQuickPanel(null)}} style={{...control,padding:5,fontSize:11}}>
+        onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
     </div>}
@@ -817,7 +860,7 @@ export default function SeamlessEditor(){
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
            .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
              onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
-               else if(asset.file)addLabSticker(asset.file);setQuickPanel(null)}}>
+               else if(asset.file)void addLabSticker(asset.file)}}>
              <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
              <span className="studio-sticker-label">{asset.name}</span>
            </button>)}
