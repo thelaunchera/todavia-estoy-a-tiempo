@@ -86,3 +86,40 @@
 .freebies-matcha-photos{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:15px 5px 20px;gap:9px}
 .freebies-matcha-photos img{width:130px;min-width:130px;max-width:none;height:185px;transform:none!important;scroll-snap-align:start;z-index:auto!important;box-shadow:0 7px 18px #23371d24}
 @media(max-width:760px){.freebies-matcha-photos img{width:115px;min-width:115px;height:160px}}
+
+/* November 2026: unified freebie shelf. Equal-size covers, no long cascade. */
+.freebies-collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+.freebies-collection>.freebies-card{display:flex;flex-direction:column;min-width:0;height:100%;border-radius:19px;box-shadow:0 8px 24px #2920310c}
+.freebies-collection .freebies-matcha-art,.freebies-collection .freebies-art,.freebies-collection .freebies-approved-cover{height:clamp(260px,29vw,360px);min-height:0;flex:none;overflow:hidden}
+.freebies-collection .freebies-info{padding:20px;display:flex;flex-direction:column;flex:1}
+.freebies-collection .freebies-info h3{font-size:20px;margin:14px 0 8px;line-height:1.2}
+.freebies-collection .freebies-description{font-size:12px;line-height:1.55}
+.freebies-collection .freebies-status-row{gap:6px}
+.freebies-collection .freebies-status,.freebies-collection .freebies-date{font-size:10px;padding:6px 8px}
+.freebies-collection .freebies-meta{gap:5px;margin:13px 0}
+.freebies-collection .freebies-meta span{padding:6px 7px;font-size:10px}
+.freebies-collection .freebies-actions{margin-top:auto}
+.freebies-collection .freebies-link{min-height:37px;font-size:11px;padding:8px 10px}
+.freebies-collection .freebies-matcha-art{padding:19px}
+.freebies-collection .freebies-matcha-art .freebies-art-small{margin-top:25px;font-size:9px}
+.freebies-collection .freebies-matcha-art h3{font-size:38px;margin:6px 0 12px}
+.freebies-collection .freebies-matcha-photos{min-height:0;flex:1;align-items:center}
+.freebies-collection .freebies-matcha-photos img{width:110px;min-width:110px;height:146px}
+.freebies-collection .freebies-art-bottom{padding-top:8px;font-size:8px}
+.freebies-collection .freebies-art-source-only{padding:20px;background:#f4eee6}
+.freebies-collection .freebies-art-source-only .freebies-art-small{margin-top:45px}
+.freebies-collection .freebies-art-source-only h3{font-size:39px}
+.freebies-collection .freebies-art-source-only p{font-size:12px}
+.freebies-collection .freebies-approved-cover{padding:0;background:#eae1f2;display:block}
+.freebies-collection .freebies-approved-cover a{height:100%;display:block;position:relative}
+.freebies-collection .freebies-approved-cover img{width:100%;height:100%;max-height:none;object-fit:contain;border-radius:0;box-shadow:none}
+.freebies-collection .freebies-approved-cover a span{position:absolute;bottom:8px;left:8px;right:8px;justify-content:center;padding:7px;border-radius:8px;background:#fffc;font-size:10px}
+.freebies-details{margin-top:12px;border-top:1px solid #ece5ef;padding-top:12px}
+.freebies-details summary{cursor:pointer;font-size:12px;font-weight:750;color:#654a7b;list-style:revert}
+.freebies-details[open] .freebies-actions{margin-top:12px}
+.freebies-collection .freebies-publishing{margin-top:12px;padding:12px}
+.freebies-collection .freebies-publishing>div{min-width:0}
+.freebies-collection .freebies-toggle{width:100%}
+@media(max-width:1050px){.freebies-collection{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.freebies-collection{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.freebies-collection>.freebies-card{border-radius:13px}.freebies-collection .freebies-info{padding:12px}.freebies-collection .freebies-matcha-art,.freebies-collection .freebies-art,.freebies-collection .freebies-approved-cover{height:210px}.freebies-collection .freebies-matcha-art,.freebies-collection .freebies-art-source-only{padding:12px}.freebies-collection .freebies-art-top{font-size:7px}.freebies-collection .freebies-matcha-art .freebies-art-small{margin-top:18px}.freebies-collection .freebies-matcha-art h3,.freebies-collection .freebies-art-source-only h3{font-size:26px}.freebies-collection .freebies-art-source-only .freebies-art-small{margin-top:22px;font-size:8px}.freebies-collection .freebies-art-source-only p{font-size:10px}.freebies-collection .freebies-matcha-photos img{width:73px;min-width:73px;height:94px}.freebies-collection .freebies-info h3{font-size:15px}.freebies-collection .freebies-description{font-size:11px}.freebies-collection .freebies-status,.freebies-collection .freebies-date{font-size:9px}.freebies-collection .freebies-meta{display:none}.freebies-collection .freebies-actions{gap:6px}.freebies-collection .freebies-link{width:100%;font-size:10px;min-height:35px}.freebies-collection .freebies-art-bottom{font-size:7px}.freebies-collection .freebies-approved-cover a span{font-size:8px}}
+@media(max-width:360px){.freebies-collection{grid-template-columns:1fr}.freebies-collection .freebies-matcha-art,.freebies-collection .freebies-art,.freebies-collection .freebies-approved-cover{height:275px}}
