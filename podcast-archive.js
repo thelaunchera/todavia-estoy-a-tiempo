@@ -3,8 +3,9 @@
 (() => {
   'use strict';
   const section = document.getElementById('escuchar');
-  const source = window.PODCAST_EPISODES;
-  if (!section || !Array.isArray(source)) return;
+  const fallback = window.PODCAST_EPISODES;
+  if (!section || !Array.isArray(fallback)) return;
+  const render = source => {
   const english = document.documentElement.lang === 'en';
   const today = new Intl.DateTimeFormat('sv-SE', {
     timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -138,4 +139,46 @@
   // se ocultan para evitar que el usuario vea los mismos capítulos dos veces.
   for (const card of section.querySelectorAll('[data-ep-previous],[data-ep-earlier]')) card.hidden = true;
   section.classList.add('has-episode-archive');
+  };
+  const loadPublished = async () => {
+    const config = window.PODCAST_CONFIG || {};
+    const url = config.publishedEpisodesEndpoint;
+    const key = config.themeSongAnalytics?.publishableKey;
+    const catalog = new Map(fallback.map(e => [e.number,e]));
+    if (typeof url === 'string' && url.startsWith('https://fhrvuhikrybobidxpvnh.supabase.co/rest/v1/podcast_published_episodes?') &&
+        typeof key === 'string' && key.startsWith('sb_publishable_')) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(url, {
+          method: 'GET', cache: 'no-store', signal: controller.signal,
+          headers: {apikey:key,Accept:'application/json'}
+        });
+        if (!response.ok) throw new Error('Episode archive feed unavailable');
+        const rows = await response.json();
+        if (Array.isArray(rows)) {
+          for (const row of rows) {
+            if (!row || !Number.isInteger(row.number) || row.number < 1 ||
+                typeof row.url !== 'string' || !/^https:\/\/open\.spotify\.com\/episode\/[A-Za-z0-9]+/.test(row.url) ||
+                typeof row.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(row.date)) continue;
+            catalog.set(row.number, {
+              number:row.number, date:row.date, published:true,
+              title:row.title, titleEn:row.title_en || row.title,
+              summary:row.summary || '', summaryEn:row.summary_en || row.summary || '',
+              url:row.url, art:row.art, popupImage:row.popup_image,
+              popupHeadline:row.popup_headline || row.title,
+              popupHeadlineEn:row.popup_headline_en || row.title_en || row.title,
+              popupMessage:row.popup_message || row.summary || '',
+              popupMessageEn:row.popup_message_en || row.summary_en || row.summary || ''
+            });
+          }
+        }
+      } catch (_) {
+        // Si falla la red, el catálogo empaquetado conserva las entradas verificadas.
+      } finally { clearTimeout(timer); }
+    }
+    render([...catalog.values()]);
+    return window.PODCAST_PUBLISHED_EPISODES || [];
+  };
+  window.PODCAST_EPISODE_FEED_READY = loadPublished();
 })();
