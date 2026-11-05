@@ -39,6 +39,8 @@ export default function PanoramaEditor({
   const [expanded, setExpanded] = useState(false);
   const [libraryOpen,setLibraryOpen]=useState(false);
   const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('photo');
+  const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'>('all');
+  const [selectedLayerId,setSelectedLayerId]=useState<string|null>(null);
   const [layersOpen,setLayersOpen]=useState(false);
   const [focusedLayerId,setFocusedLayerId]=useState('');
   const containerRef=useRef<HTMLElement>(null);
@@ -61,11 +63,13 @@ export default function PanoramaEditor({
   const openTool=(tool:'photo'|'sticker'|'background'|'layers'|'elements')=>{
     const openingPhoto=tool==='photo'&&!(libraryOpen&&libraryKind==='photo');
     const openingSticker=tool==='sticker'&&!(libraryOpen&&libraryKind==='sticker');
-    setLibraryOpen(openingPhoto||openingSticker);
-    if(openingPhoto||openingSticker)setLibraryKind(openingPhoto?'photo':'sticker');
+    const openingElements=tool==='elements'&&!(libraryOpen&&librarySection==='all');
+    setLibraryOpen(openingPhoto||openingSticker||openingElements);
+    if(openingPhoto||openingSticker){setLibraryKind(openingPhoto?'photo':'sticker');setLibrarySection(openingPhoto?'photos':'stickers');}
+    if(openingElements){setLibraryKind('all');setLibrarySection('all');setFilter('');}
     setLayersOpen(tool==='layers'&&!layersOpen);
     setBackgroundOpen(tool==='background'&&!backgroundOpen);
-    setMoreTools(tool==='elements'&&!moreTools);
+    setMoreTools(false);
   };
   useEffect(()=>{
     const onKey=(event:KeyboardEvent)=>{
@@ -189,7 +193,7 @@ export default function PanoramaEditor({
   const addFromElements=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
     onAddLayer(kind,shape);setMoreTools(false);revealCanvas();
   };
-  const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')}
+  const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')+(selectedLayerId?' layer-selected':'')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Arrastra elementos a tu carrusel.</h2>
@@ -277,8 +281,8 @@ export default function PanoramaEditor({
     </div>}
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&<aside className="panorama-library" aria-label="Elementos disponibles para arrastrar">
-      <div className="panorama-library-heading"><strong>Mis elementos</strong>
-        <small>Arrastra una miniatura al lienzo · toca + para añadir al centro</small>
+      <div className="panorama-library-heading"><strong>Explorar elementos</strong>
+        <small>Toca un elemento para agregarlo. El lienzo permanece a la vista.</small>
         <button type="button" className="panorama-library-close" onClick={()=>setLibraryOpen(false)} aria-label="Cerrar biblioteca">×</button></div>
       <div className="panorama-library-tabs" role="group" aria-label="Tipo de elemento">
         {(['photo','sticker','all'] as const).map(kind=><button type="button" key={kind}
@@ -293,7 +297,18 @@ export default function PanoramaEditor({
           <Upload size={15}/> Subir
         </button>
       </div>
-      <div className="panorama-assets" aria-label="Biblioteca de fotos, fondos y stickers">
+<div className="panorama-discovery-categories" role="group" aria-label="Explorar categorías de la biblioteca">
+        <button type="button" aria-pressed={librarySection==='all'} onClick={()=>{setLibrarySection('all');setLibraryKind('all');setFilter('')}}><Shapes size={21}/><span>Todos</span></button>
+        <button type="button" aria-pressed={librarySection==='shapes'} onClick={()=>setLibrarySection('shapes')}><Shapes size={21}/><span>Formas</span></button>
+        <button type="button" aria-pressed={librarySection==='stickers'} onClick={()=>{setLibrarySection('stickers');setLibraryKind('sticker');setFilter('')}}><Sticker size={21}/><span>Stickers</span></button>
+        <button type="button" aria-pressed={librarySection==='photos'} onClick={()=>{setLibrarySection('photos');setLibraryKind('photo');setFilter('')}}><ImagePlus size={21}/><span>Fotos</span></button>
+      </div>
+      {librarySection==='shapes'&&<div className="panorama-shape-gallery" aria-label="Formas editables">
+        {([['Papel','paper'],['Cinta','tape'],['Marco','frame'],['Círculo','circle']] as const).map(([name,shape])=><button type="button" key={shape} onClick={()=>{addFromElements('shape',shape);setLibraryOpen(false)}}>
+          <span className={'panorama-shape-preview shape-'+shape} aria-hidden="true"/><small>{name}</small>
+        </button>)}
+      </div>}
+      {librarySection!=='shapes'&&<div className="panorama-assets" aria-label="Biblioteca de fotos, fondos y stickers">
         {available.map(asset=><article key={asset.id} className="panorama-asset">
           <button type="button" className="panorama-asset-drag"
             title={'Arrastrar '+displayAssetName(asset)}
@@ -341,12 +356,13 @@ export default function PanoramaEditor({
                 </button>}
             </div>}
         </article>)}
-      </div>
-      {!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
+      </div>}
+      {librarySection!=='shapes'&&!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
     </aside>}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
         fullscreen={expanded}
+        onSelectionChange={setSelectedLayerId}
         focusLayerId={focusedLayerId||focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText}
