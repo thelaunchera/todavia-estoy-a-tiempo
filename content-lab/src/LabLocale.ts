@@ -5,6 +5,14 @@
  */
 export type LabLanguage='es'|'en';
 const pairs:[string,string][]=[
+ ["Creative cloud with color swatches","Nube creativa con paleta"],
+ ["Branding fox","Zorrito de branding"],
+ ["Lilac megaphone with star","Megáfono lila con estrella"],
+ ["Blue creative camera","Cámara creativa azul"],
+ ["Lilac ideas notebook","Libreta de ideas lila"],
+ ["ON BRAND seal","Sello ON BRAND"],
+ ["Creator cat with laptop","Gatito creador con laptop"],
+ ["Creative brain with lightbulb","Cerebro creativo con bombilla"],
  ['Overview','Inicio'],['Create content','Crear contenido'],['Carousel Factory','Fábrica de carruseles'],
  ['1 Photo → 9 Posts','1 foto → 9 posts'],['Stickers PNG · gratis','Stickers · gratis'],
  ['Backgrounds · gratis','Fondos · gratis'],['Prompt Studio · 30 Recipes','Estudio de prompts · 30 recetas'],

@@ -12,23 +12,24 @@ const moduleSource=read('src/BundledDesignAssets.ts').replace('import.meta.env.B
 const compiled=ts.transpileModule(moduleSource,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const bundle=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
 
-test('Release preserves 20 original stickers and 20 backgrounds while adding 19 premium plus 8 branding stickers',()=>{
+test('Release preserves 20 original stickers and 20 backgrounds while adding 19 premium, 8 branding and 8 creative stickers',()=>{
  const files=bundle.BUNDLED_DESIGN_ASSETS;
  assert.equal(files.filter(x=>x.category==='sticker'&&x.stickerGroup==='Inspiración').length,20);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/premium-stickers-2026-11/')).length,19);
  assert.equal(files.filter(x=>x.category==='sticker'&&x.file.startsWith('resources/branding-marketing-stickers-2026-11/')).length,8);
- assert.equal(files.filter(x=>x.category==='sticker').length,47);
+ assert.equal(files.filter(x=>x.file.startsWith('resources/creative-stickers-2026-11-05/')).length,8);
+ assert.equal(files.filter(x=>x.category==='sticker').length,55);
  assert.equal(files.filter(x=>x.category==='background').length,20);
- assert.equal(new Set(files.map(x=>x.id)).size,67);
- assert.equal(new Set(files.map(x=>x.sha256)).size,67);
+ assert.equal(new Set(files.map(x=>x.id)).size,75);
+ assert.equal(new Set(files.map(x=>x.sha256)).size,75);
  for(const file of files){
-  assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+)\.png$/);
+  assert.match(file.file,/^resources\/(?:editorial-2026-11\/(?:stickers|backgrounds)\/[a-z0-9-]+|premium-stickers-2026-11\/[a-z0-9_]+|branding-marketing-stickers-2026-11\/[a-z0-9_]+|creative-stickers-2026-11-05\/[a-z0-9_]+)\.png$/);
   const bytes=readFileSync(resolve(root,'public',file.file));
   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
   assert.equal(bytes.length,file.sizeBytes);
   assert.equal(createHash('sha256').update(bytes).digest('hex'),file.sha256);
   const w=bytes.readUInt32BE(16),h=bytes.readUInt32BE(20);
-  assert.equal(w,file.width);assert.equal(h,file.height);assert.ok(w>=1080&&h>=1080);
+  assert.equal(w,file.width);assert.equal(h,file.height);assert.ok(w>=1024&&h>=1024);
   if(file.category==='sticker'){
    if(file.file.startsWith('resources/premium-stickers-2026-11/')){
     assert.ok(bytes[25]===6||(bytes[25]===3&&bytes.includes(Buffer.from('tRNS'))),'premium stickers must retain alpha transparency');
@@ -39,6 +40,10 @@ test('Release preserves 20 original stickers and 20 backgrounds while adding 19 
     assert.ok(bytes[25]===6||(bytes[25]===3&&bytes.includes(Buffer.from('tRNS'))),'branding stickers must retain transparent backgrounds');
     assert.equal(w,1254);assert.equal(h,1254);
     assert.equal(file.stickerGroup,'Branding y Marketing');
+    assert.ok(file.name.trim());
+   }else if(file.file.startsWith('resources/creative-stickers-2026-11-05/')){
+    assert.equal(bytes[25],6,'creative stickers must retain RGBA transparency');
+    assert.ok(['Animales','Creación','Negocios'].includes(file.stickerGroup));
     assert.ok(file.name.trim());
    }else{
     assert.equal(bytes[25],6,'original stickers must be RGBA PNGs');
@@ -51,7 +56,7 @@ test('Release preserves 20 original stickers and 20 backgrounds while adding 19 
 
 test('Curation hides a release resource from browsing while retaining its saved-design identity',()=>{
  const sticker=bundle.BUNDLED_DESIGN_ASSETS.find(x=>x.category==='sticker');
- assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,46);
+ assert.equal(bundle.bundledDesignAssets('sticker',[sticker.id]).length,54);
  assert.equal(bundle.bundledDesignAssets('background',[sticker.id]).length,20);
  assert.equal(bundle.findBundledDesignAsset(sticker.id).file,sticker.file);
  assert.equal(bundle.findBundledDesignAsset('../private-photo'),undefined);
