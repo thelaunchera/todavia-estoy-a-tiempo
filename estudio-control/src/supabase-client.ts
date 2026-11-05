@@ -77,7 +77,7 @@ function payload(input: unknown): {title:string;payload:Record<string,unknown>} 
   const value = input && typeof input==='object'?input as Record<string,unknown>:{};
   const title = String(value.title || '').trim().slice(0,180);
   const content:Record<string,unknown>={};
-  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','email_art_url','script','announcement_state','script_reviewed','number','series','series_number','spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes','recording_path','recording_name','recording_bytes']) {
+  for(const k of ['status','date','summary','subtitle','price','link','notes','section','priority','audio','art','email_art_url','popup_image_url','popup_headline','popup_headline_en','popup_message','popup_message_en','title_en','summary_en','script','announcement_state','script_reviewed','number','series','series_number','spotify_description','reel_excerpt','reel_overlay','visual_idea','performance_notes','recording_path','recording_name','recording_bytes']) {
     const v=value[k];
     if((k==='number'||k==='series_number') && typeof v==='number' && Number.isInteger(v) && v>=1 && v<=999) content[k]=v;
     if(k==='script_reviewed' && typeof v==='boolean') content[k]=v;
