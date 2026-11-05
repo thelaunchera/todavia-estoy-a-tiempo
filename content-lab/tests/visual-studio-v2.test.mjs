@@ -78,15 +78,20 @@ test('fixed Content Lab sidebar scrolls independently on mobile Safari',()=>{
  assert.ok(app.includes('aria-expanded={menu}'));
 });
 
-test('home gives a personalized greeting and compact expandable onboarding plus iPhone dock',()=>{
- const app=src('src/App.tsx'),css=src('src/index.css');
- assert.ok(app.includes('lab-home-greeting'));
- assert.ok(app.includes('setupStepsDone<3&&<details'));
- assert.ok(app.includes('lab-greeting-checklist'));
- assert.ok(!app.includes('lab-quick-steps'));
+test('Home prioritizes formats and recent designs with compact onboarding and iPhone dock',()=>{
+ const app=src('src/App.tsx'),css=src('src/CreatorDashboard.css'),dashboard=src('src/CreatorDashboard.tsx');
+ assert.ok(app.includes('<CreatorDashboard'));
+ assert.ok(app.includes('setupStepsDone<3&&'));
+ assert.ok(app.includes('<details className="cld-onboarding">'));
+ assert.ok(dashboard.includes('cld-intro'));
+ assert.ok(dashboard.includes('cld-format-grid'));
+ assert.ok(dashboard.includes('cld-project-grid'));
+ assert.ok(dashboard.indexOf('cld-format-grid')<dashboard.indexOf('cld-project-grid'));
+ assert.ok(dashboard.includes('cld-resource-grid'));
+ assert.ok(dashboard.includes('cld-bottom-panel'));
  assert.ok(app.includes('lab-mobile-dock'));
- assert.ok(css.includes('env(safe-area-inset-bottom)'));
- assert.ok(app.includes('onClick={startFactory}'));
+ assert.ok(css.includes('safe-area-inset-bottom'));
+ assert.ok(app.includes('onNewNormal={startFactory}'));
 });
 test('grid edits autosave without exposing data in local browser storage',()=>{
  const grid=src('src/BrandGrid.tsx');
