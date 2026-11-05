@@ -13,7 +13,7 @@ const mail=form.querySelector('[name="email"]');
 const started=document.createElement("input");started.type="hidden";started.name="started_at";started.value=String(Date.now());form.append(started);
 const notice=document.createElement("p");notice.className="freebie-request-feedback";notice.setAttribute("role","status");notice.style.cssText="font-size:13px;line-height:1.5;margin:10px 0;color:#53615b";form.append(notice);
 const en=()=>document.documentElement.lang==="en";
-const day=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+const day=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()).map(x=>[x.type,x.value]));return p.year+"-"+p.month+"-"+p.day};
 function update(){
  const ready=day()>=release;
  submit.disabled=!ready;
@@ -21,7 +21,7 @@ function update(){
  form.dataset.launchReady=String(ready);
 }
 update();
-const switcher=document.getElementById("language");if(switcher)switcher.addEventListener("click",()=>queueMicrotask(update));
+const switcher=document.getElementById("language");if(switcher)switcher.addEventListener("click",()=>queueMicrotask(update));for(const id of ["es","en"]){const b=document.getElementById(id);if(b)b.addEventListener("click",()=>queueMicrotask(update));}
 for(const button of form.ownerDocument.querySelectorAll("[data-lang]"))button.addEventListener("click",()=>queueMicrotask(update));
 form.addEventListener("submit",async(e)=>{
  e.preventDefault();e.stopImmediatePropagation();
