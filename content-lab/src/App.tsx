@@ -21,6 +21,7 @@ import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import CreatorDashboard from './CreatorDashboard';
+import ProjectCover from './ProjectCover';
 import {UniversalLabIcon,APP_ICON_MAP} from './UniversalLabIcon';
 import QuickStartGuide from './QuickStartGuide';
 import FreeDecorControls from './FreeDecorControls';
@@ -1782,6 +1783,7 @@ function App() {
                     .reverse()
                     .map(p => (
                       <article className="postcard" key={p.id}>
+                        <ProjectCover post={p} brand={brand} images={images} loadImage={imageLoad} locale={loginLanguage}/>
                         <div className="posttop">
                           <span>
                             {p.format} · {p.angle}
