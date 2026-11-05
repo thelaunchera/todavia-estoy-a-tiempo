@@ -367,3 +367,83 @@
  .studio-sticker-gallery{grid-template-columns:repeat(2,minmax(0,1fr))!important}
  .studio-sticker-thumb{height:128px!important}
 }
+
+
+/* iPhone focus mode: the editor is a self-contained viewport, never a
+   sticky artboard floating over the Studio's long dashboard content. */
+@media(max-width:799px){
+ .studio-carousel-editor-mode .frame{min-height:100dvh}
+ .studio-carousel-editor-mode .topbar{
+   position:fixed!important;top:0;left:0;right:0;z-index:1900;
+   min-height:58px!important;height:58px!important;
+   box-sizing:border-box;background:#faf8f3;
+   border-bottom:1px solid #e5dfd5;
+ }
+ .studio-carousel-editor-mode .top-label{
+   flex:1;min-width:0;text-align:right;font-size:11px;
+ }
+ .studio-carousel-editor-mode .main{padding:0!important}
+ .studio-carousel-editor-mode .studio-seamless-app{
+   position:fixed!important;inset:58px 0 0!important;
+   width:100%!important;max-width:none!important;height:auto!important;
+   box-sizing:border-box;z-index:1800;background:#faf8f3;
+   display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+   grid-template-rows:auto minmax(0,1fr) auto 78px!important;
+   gap:6px!important;padding:7px 7px calc(6px + env(safe-area-inset-bottom))!important;
+   margin:0!important;overflow:hidden!important;
+ }
+ .studio-carousel-editor-mode .studio-seamless-app>.studio-app-topbar{
+   grid-row:1;min-width:0;max-height:106px;overflow:auto;
+   padding:6px 8px;
+ }
+ .studio-carousel-editor-mode .studio-app-name{flex-basis:105px}
+ .studio-carousel-editor-mode .studio-app-actions{gap:4px}
+ .studio-carousel-editor-mode .studio-app-actions button{font-size:10px;padding:6px 8px;min-height:36px}
+ .studio-carousel-editor-mode .studio-app-canvas{
+   grid-row:2;position:relative!important;top:auto!important;bottom:auto!important;
+   z-index:1!important;min-height:0!important;height:100%!important;
+   box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;
+   box-shadow:none!important;
+ }
+ .studio-carousel-editor-mode .studio-app-canvas>div{
+   flex:1;min-height:0;max-height:none!important;overflow:auto!important;
+   -webkit-overflow-scrolling:touch;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tray{
+   grid-row:3;min-height:0;max-height:92px;overflow:hidden;
+   flex-wrap:nowrap;gap:5px;padding:4px 6px;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tabs{
+   flex:1 1 auto;order:0;min-width:0;gap:4px;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tabs>button{
+   width:37px;height:47px;display:flex;flex-direction:column;
+   align-items:center;justify-content:center;font-size:11px;
+ }
+ .studio-carousel-editor-mode .studio-app-slide-tabs .studio-slide-preview{display:none}
+ .studio-carousel-editor-mode .studio-app-zoom{
+   width:auto;order:1;flex:0 0 auto;gap:3px;
+ }
+ .studio-carousel-editor-mode .studio-app-zoom>span,
+ .studio-carousel-editor-mode .studio-app-zoom label{display:none}
+ .studio-carousel-editor-mode .studio-app-zoom>button{min-width:34px;min-height:40px}
+ .studio-carousel-editor-mode .studio-app-toolbar,
+ .studio-carousel-editor-mode .studio-app-context-dock{
+   position:relative!important;grid-row:4;
+   left:auto!important;right:auto!important;bottom:auto!important;
+   transform:none!important;width:100%!important;max-width:none!important;
+   margin:0!important;z-index:2!important;align-self:stretch;
+   min-height:66px;max-height:76px;box-shadow:0 3px 12px #1919191c;
+ }
+ .studio-carousel-editor-mode .studio-app-admin,
+ .studio-carousel-editor-mode .studio-app-selection,
+ .studio-carousel-editor-mode .studio-desktop-edit-toolbar{display:none!important}
+ .studio-carousel-editor-mode .studio-app-inspector{
+   bottom:calc(90px + env(safe-area-inset-bottom))!important;
+   max-height:min(28dvh,230px)!important;
+ }
+ .studio-carousel-editor-mode .studio-app-sheet{
+   bottom:calc(90px + env(safe-area-inset-bottom))!important;
+   max-height:min(43dvh,350px)!important;
+ }
+}
