@@ -8,8 +8,8 @@ const room=read('alumnos/index.html');
 const roomScript=read('alumnos/curso.js');
 const config=read('clases/course-config.js');
 const workflow=read('.github/workflows/pages.yml');
-assert.match(home,/clases\/primera-landing\.html/,'El podcast enlaza la clase de preparación');
-assert.match(home,/incluso si solo tienes tu celular/i,'El podcast invita a empezar desde el teléfono');
+assert.doesNotMatch(home,/href="clases\/primera-landing\.html"/,'La portada del podcast no repite la oferta de la clase enlazada en la bio');
+assert.doesNotMatch(home,/<section class="learning-section"/,'La portada no incluye un bloque comercial de la clase');
 assert.match(classPage,/También desde tu celular/i,'El hero ofrece una vía móvil sin computadora');
 assert.doesNotMatch(classPage,/(?:tres|3) webs(?: en un día| diarias)?/i,'No se promocionan cifras de productividad');
 assert.doesNotMatch(classPage,/\*Cada herramienta tiene límites propios/,'La letra pequeña de límites no se coloca bajo el hero');
@@ -28,9 +28,8 @@ assert.ok(freebie.includes('margin:18px 0 0!important')||(freebie.includes('padd
 
 const podcastGiftPos=home.indexOf('id="regalo"');
 const podcastCollectionPos=home.indexOf('id="coleccion"');
-const podcastClassPos=home.indexOf('<section class="learning-section" id="aprender"');
-assert.ok(podcastGiftPos>0&&podcastCollectionPos>podcastGiftPos&&podcastClassPos>podcastGiftPos,'El freebie emocional aparece antes de los productos y la clase');
-assert.match(home,/href="#regalo" class="fine-link">Recibir las 5 preguntas gratis/,'El hero lleva al recurso propio del podcast');
+assert.ok(podcastGiftPos>0&&podcastCollectionPos>podcastGiftPos,'El regalo del podcast aparece antes de sus cuadernos');
+assert.doesNotMatch(home,/href="#regalo" class="fine-link"/,'El hero invita a escuchar sin un segundo CTA comercial');
 assert.equal((home.match(/id="regalo"/g)||[]).length,1,'El regalo emocional no se duplica');
 assert.doesNotMatch(home,/id="matcha-gratis"|id="freebie-prompts-inicio"/,'La portada del podcast no promociona el Content Lab');
 assert.match(home,/Powered by <a href="https:\/\/thelaunchera\.com\//,'El footer conserva el crédito oficial Powered by The Launch Era');
@@ -264,8 +263,8 @@ assert.match(heroCopy,/sin saber programar/i,'El mensaje para principiantes est�
 assert.equal((publicReadable.match(/3 de diciembre/g)||[]).length,1,'Una sola mención pública de la fecha de lanzamiento');
 assert.doesNotMatch(publicReadable,/CLASE 01|Conocer la clase|Sin programar/i);
 assert.match(newStyles,/\.class-hero \.class-hero-grid > \.class-hero-intro > p\.class-lede/);
-assert.match(home,/href="clases\/primera-landing.html">Conoce la clase<\/a>/,'La masterclass aparece como extra independiente');
-assert.ok(home.indexOf('id="coleccion"') < home.indexOf('id="aprender"'),'Los productos del podcast preceden a la clase complementaria');
+assert.doesNotMatch(home,/href="clases\/primera-landing\.html"/,'La masterclass usa su propio enlace en la bio');
+assert.ok(home.indexOf('id="coleccion"') > home.indexOf('id="escuchar"'),'Los cuadernos acompañan a los episodios, no los reemplazan');
 assert.match(home,/id="help-toggle"[^>]*aria-expanded="false"/,'Ayuda se abre con un botón');
 assert.match(home,/id="help-panel" hidden/,'No mostrar la plantilla del formulario hasta solicitarla');
 assert.doesNotMatch(home,/EPISODIO 0[12] · YA DISPONIBLE/,'No repetir la disponibilidad de capítulos publicados');
