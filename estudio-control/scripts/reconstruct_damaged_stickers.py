@@ -325,7 +325,7 @@ def main():
     bundled=BUNDLED.read_text(encoding="utf-8")
     for file,size,sha in changed:
         escaped=re.escape(file)
-        pattern=rf'("file":"{escaped}","width":\d+,"height":\d+,"sizeBytes":)\d+(,"sha256":")[0-9a-f]+(")'
+        pattern=rf'("file"\s*:\s*"{escaped}"\s*,\s*"width"\s*:\s*\d+\s*,\s*"height"\s*:\s*\d+\s*,\s*"sizeBytes"\s*:\s*)\d+(\s*,\s*"sha256"\s*:\s*")[0-9a-f]+(")'
         new,n=re.subn(pattern,lambda m:m[1]+str(size)+m[2]+sha+m[3],bundled)
         if n!=1:
             raise SystemExit(f"Cannot safely update Content Lab metadata: {file}, matches={n}")
