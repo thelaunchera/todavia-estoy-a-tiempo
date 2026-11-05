@@ -114,3 +114,26 @@ assert.ok(authJs.includes('background.inert=on'),'La ventana de acceso bloquea f
 assert.ok(authJs.includes("event.key!=='Tab'"),'El foco no escapa del formulario');
 assert.ok(authJs.includes('validMarker(user.id)'),'Sesiones recordadas verificadas');
 console.log('QA OK: centro interactivo, accesible y separado de cobros/permisos.');
+
+
+// Podcast first: keep each public language on its own canonical route,
+// with navigation focused on episodes and the podcast's own resources.
+// Do not duplicate the Instagram class / Content Lab offers on this homepage.
+for(const [path,locale,canonical,homeHref] of [
+ ['index.html','es_ES','https://podcast.thelaunchera.com/','index.html'],
+ ['index-en.html','en_US','https://podcast.thelaunchera.com/index-en.html','index-en.html']
+]){
+ const page=read(path);
+ assert.equal((page.match(/<link rel="canonical"/g)||[]).length,1,path+' has exactly one canonical');
+ assert.ok(page.includes('rel="canonical" href="'+canonical+'"'),path+' self-canonicalizes');
+ assert.ok(page.includes('property="og:url" content="'+canonical+'"'),path+' social URL matches');
+ assert.ok(page.includes('property="og:locale" content="'+locale+'"'),path+' social language matches');
+ assert.ok(page.includes('class="wordmark" href="'+homeHref+'"'),path+' logo stays in the chosen language');
+ assert.ok(page.includes('podcast-hero-rebalance-20261102.css?v=1'),path+' mobile hero styles load');
+ assert.ok(page.includes('href="#escuchar"')&&page.includes('href="#regalo"')&&page.includes('href="#coleccion"')&&page.includes('href="#ayuda"'),path+' navigation stays relevant to the podcast');
+ assert.ok(!/<a\\b[^>]*href="(?:clases\\/primera-landing|content-lab\\/)/i.test(page),path+' avoids duplicated class or Lab offers');
+ for(const id of ['guide-form','newsletter-form','help-form']) assert.ok(page.includes('id="'+id+'"'),path+' keeps form '+id);
+ const hashes=[...page.matchAll(/<a\\b[^>]*href="#([^"]+)"/g)].map(match=>match[1]);
+ for(const anchor of hashes) assert.ok(page.includes('id="'+anchor+'"'),path+' valid in-page target #'+anchor);
+}
+console.log('QA OK: podcast-only menus, bilingual canonical metadata, mobile styling and linked forms.');
