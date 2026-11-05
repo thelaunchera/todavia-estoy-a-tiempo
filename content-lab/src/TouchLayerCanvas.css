@@ -596,6 +596,12 @@
  .touch-editor .touch-snap-toggle input{flex-shrink:0!important}
  .touch-editor-opacity-control{display:none!important}
 }
+
 @media(max-width:799px){
- .panorama-editor.expanded ~ .touch-editor-context-dock{bottom:calc(92px + env(safe-area-inset-bottom))!important}
+ .touch-editor-context-dock.is-fullscreen{
+  bottom:calc(92px + env(safe-area-inset-bottom))!important
+ }
+ .touch-editor-context-inspector.is-fullscreen{
+  bottom:calc(168px + env(safe-area-inset-bottom))!important
+ }
 }
