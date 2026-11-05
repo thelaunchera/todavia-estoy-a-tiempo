@@ -605,3 +605,16 @@
   bottom:calc(168px + env(safe-area-inset-bottom))!important
  }
 }
+
+/* Accessible iPhone curvature presets, always above the editing dock. */
+.touch-editor-curved-text{display:block;object-fit:fill;user-select:none;-webkit-user-select:none}
+.touch-editor-curve-inspector{display:grid;gap:9px;min-width:0}
+.touch-editor-curve-presets{display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:none}
+.touch-editor-curve-presets button{flex:1 0 auto;min-height:36px;padding:7px 8px;
+ border:1px solid #d0dbde;border-radius:9px;background:#fff;color:#191919;
+ font-size:11px;font-weight:700;cursor:pointer}
+.touch-editor-curve-presets button[aria-pressed=true]{background:#f2d85b;border-color:#d0b454}
+@media(max-width:799px){
+ .touch-editor-context-inspector{max-height:min(32dvh,270px);overflow-y:auto;overscroll-behavior:contain}
+ .touch-editor-curve-presets button{flex-basis:auto}
+}
