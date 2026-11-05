@@ -21,6 +21,7 @@ import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory from './CarouselFactory';
 import CreatorDashboard from './CreatorDashboard';
+import {UniversalLabIcon,APP_ICON_MAP} from './UniversalLabIcon';
 import QuickStartGuide from './QuickStartGuide';
 import FreeDecorControls from './FreeDecorControls';
 import {readCoverDecor,writeCoverDecor,type CoverDecor} from './CoverDecor';
@@ -1281,7 +1282,8 @@ function App() {
               return <button type="button" key={id} className={tab===id?'active':''}
                 aria-current={tab===id?'page':undefined}
                 onClick={()=>id==='create'?start():id==='factory'?startFactory():navigate(id)}>
-                <Icon size={19} strokeWidth={1.8}/>{id==='home'?(loginLanguage==='es'?'Inicio':'Home'):
+                {APP_ICON_MAP[id]?<UniversalLabIcon name={APP_ICON_MAP[id]!} size={23}/>:<Icon size={19} strokeWidth={1.8}/>}
+                 {id==='home'?(loginLanguage==='es'?'Inicio':'Home'):
                  id==='create'?(loginLanguage==='es'?'Crear publicación':'Create a post'):
                  id==='factory'?(loginLanguage==='es'?'Crear carrusel':'Create a carousel'):
                  loginLanguage==='es'?'Organizar contenido':'Plan content'}
@@ -1300,7 +1302,8 @@ function App() {
                   const Icon=item.icon;
                   return <button type="button" key={id} className={tab===id?'active':''}
                     onClick={()=>id==='vertical'?startVertical():navigate(id)}>
-                    <Icon size={19} strokeWidth={1.8}/>{t(item.title)}
+                    {APP_ICON_MAP[id]?<UniversalLabIcon name={APP_ICON_MAP[id]!} size={23}/>:<Icon size={19} strokeWidth={1.8}/>}
+                     {t(item.title)}
                     {id==='posts'&&<b>{mine.length}</b>}
                   </button>;
                 })}
@@ -2118,7 +2121,8 @@ function App() {
                       :item.id==='create'
                         ?(tab==='create'?navigate('create'):start())
                         :navigate(item.id)}>
-                    <item.icon size={21}/><span>{t(item.label)}</span></button>)}
+                    {APP_ICON_MAP[item.id]?<UniversalLabIcon name={APP_ICON_MAP[item.id]!} size={28}/>:<item.icon size={21}/>}
+                     <span>{t(item.label)}</span></button>)}
               </nav>}
     </div>
   );
