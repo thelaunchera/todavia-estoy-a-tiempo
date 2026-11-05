@@ -1,0 +1,31 @@
+name: Studio release syntax diagnostics
+on:
+  push:
+    branches: ['fix/studio-inquiries-deploy-unblock-20261105']
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install TypeScript for parse check
+        run: npm install --no-audit --no-fund --ignore-scripts --prefix content-lab
+      - name: Locate parser diagnostics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import ts from './content-lab/node_modules/typescript/lib/typescript.js';
+          const files=['estudio-control/src/SeamlessEditor.tsx','estudio-control/src/photo-background.ts'];
+          for(const file of files) {
+            const src=fs.readFileSync(file,'utf8');
+            const parsed=ts.createSourceFile(file,src,ts.ScriptTarget.Latest,true,file.endsWith('tsx')?ts.ScriptKind.TSX:ts.ScriptKind.TS);
+            for(const e of parsed.parseDiagnostics){
+              const loc=parsed.getLineAndCharacterOfPosition(e.start||0);
+              console.log('PARSE ERROR',file,loc.line+1,loc.character+1,ts.flattenDiagnosticMessageText(e.messageText,' '));
+              console.log(src.split('\n').slice(Math.max(0,loc.line-7),loc.line+7).map((v,i)=>(loc.line-6+i)+': '+v).join('\n'));
+            }
+            if(parsed.parseDiagnostics.length===0)console.log('PARSE OK',file);
+          }
+          NODE
