@@ -2439,3 +2439,79 @@ a:focus-visible {
 @media(max-width:600px){
   .studio-update-notice button{width:100%}
 }
+
+
+/* Focused Seamless Carousel workspace: the editor owns navigation here. */
+.studio.studio-carousel-editor-mode > .sidebar,
+.studio.studio-carousel-editor-mode > .backdrop-nav {
+  display: none !important;
+}
+.studio.studio-carousel-editor-mode > .frame {
+  width: 100%;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.studio-carousel-editor-mode .page-head {
+  display: none;
+}
+.studio-carousel-editor-mode .topbar {
+  min-height: 64px;
+  height: auto;
+  padding: 10px clamp(12px, 2vw, 28px);
+  gap: 14px;
+  justify-content: flex-start;
+}
+.studio-carousel-editor-mode .topbar > .menu,
+.studio-carousel-editor-mode .topbar > .top-star,
+.studio-carousel-editor-mode .topbar > .studio-aula-mobile-link,
+.studio-carousel-editor-mode .topbar > .top-actions {
+  display: none !important;
+}
+.studio-editor-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #faf8f3;
+  color: #191919;
+  border: 1px solid #e7e0d6;
+  border-radius: 12px;
+  min-height: 43px;
+  padding: 9px 15px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.studio-editor-exit:hover,
+.studio-editor-exit:focus-visible {
+  background: #f2d85b;
+  border-color: #d9c24e;
+}
+.studio-carousel-editor-mode .main {
+  max-width: none;
+  padding: 14px clamp(8px, 2vw, 26px) 40px;
+}
+@media (max-width: 799px) {
+  .studio-carousel-editor-mode .topbar {
+    min-height: 57px;
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .studio-carousel-editor-mode .top-label {
+    font-size: 10px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .studio-editor-exit {
+    padding: 8px 10px;
+    min-height: 42px;
+    font-size: 12px;
+  }
+  .studio-carousel-editor-mode .main {
+    padding: 7px 6px calc(108px + env(safe-area-inset-bottom));
+  }
+}
