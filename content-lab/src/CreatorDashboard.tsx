@@ -62,6 +62,13 @@ export default function CreatorDashboard({
   {key:'post',title:es?'Post individual':'Single post',detail:es?'Una idea, una imagen':'One idea, one image',eyebrow:'POST · 4:5',go:()=>onNewPost()},
   {key:'story',title:es?'Historia':'Story',detail:es?'Formato vertical':'Vertical format',eyebrow:'STORY · 9:16',go:onNewStory}
  ] as const;
+ // Four fixed, non-personal product examples: identical for every brand.
+ const cardPhotos={
+  normal:`${import.meta.env.BASE_URL}dashboard/soluna-matcha.webp`,
+  seamless:`${import.meta.env.BASE_URL}dashboard/sova-headphones.png`,
+  post:`${import.meta.env.BASE_URL}dashboard/casa-brownie-gift-box.png`,
+  story:`${import.meta.env.BASE_URL}dashboard/golden-grid-waffles.png`,
+ } as const;
  const formatLabel=(post:CreatorDashboardPost)=>{
   const kind=postKind(post);
   return kind==='seamless'?'Seamless':kind==='normal'?(es?'Carrusel normal':'Carousel'):
@@ -93,9 +100,7 @@ export default function CreatorDashboard({
    <div className="cld-format-grid">
     {formats.map((item,index)=><button type="button" key={item.key} className={'cld-format-card cld-format-'+item.key} onClick={item.go} aria-label={(es?'Crear ':'Create ')+item.title}>
      <span className={'cld-format-art cld-art-'+item.key} aria-hidden="true">
-      {libraryPhotos[index]&&images[libraryPhotos[index].id]&&<img className="cld-format-photo" src={images[libraryPhotos[index].id]} loading="lazy" alt=""/>}
-      <span className="cld-art-shape cld-art-shape-one"/><span className="cld-art-shape cld-art-shape-two"/><span className="cld-art-shape cld-art-shape-three"/>
-      <span className="cld-art-type">the<br/>creative<br/>edit<span>.</span></span>
+      <img className="cld-format-photo" src={cardPhotos[item.key]} loading="lazy" decoding="async" alt=""/>
      </span>
      <span className="cld-format-meta">{item.eyebrow}</span>
      <span className="cld-format-name">{item.title}<span className="cld-format-plus"><Plus size={16}/></span></span>
