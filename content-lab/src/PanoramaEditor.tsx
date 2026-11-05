@@ -57,9 +57,11 @@ export default function PanoramaEditor({
   const [renameName,setRenameName]=useState('');
   const [renaming,setRenaming]=useState(false);
   const [libraryFeedback,setLibraryFeedback]=useState('');
+  useEffect(()=>{if(!libraryFeedback)return;const timer=window.setTimeout(()=>setLibraryFeedback(''),2000);return()=>window.clearTimeout(timer)},[libraryFeedback]);
   const [filter, setFilter] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadError,setUploadError]=useState('');
+  useEffect(()=>{if(!uploadError)return;const timer=window.setTimeout(()=>setUploadError(''),2000);return()=>window.clearTimeout(timer)},[uploadError]);
   const [moreTools,setMoreTools]=useState(false);
   const [backgroundOpen,setBackgroundOpen]=useState(false);
   const revealCanvas=()=>requestAnimationFrame(()=>containerRef.current?.querySelector('.panorama-workspace')?.scrollIntoView({block:'nearest',behavior:'smooth'}));
