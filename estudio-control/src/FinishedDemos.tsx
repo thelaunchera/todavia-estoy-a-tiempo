@@ -4,6 +4,7 @@ import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './gol
 import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
 import {mareaDrive} from './marea-kit';
 import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-kit';
+import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalPrompts} from './lavender-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -15,7 +16,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -24,6 +25,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+ {
+  id:'lavender-edit',
+  title:'The Lavender Edit · Soft Beauty Editorial',
+  category:'Belleza editorial · campaña conceptual bilingüe',
+  description:'Una landing de belleza editorial en tonos lavanda y marfil, construida con ocho fotografías originales individuales, con secciones de ritual, textura, gifting y galería.',
+  image:lavenderPhotos[0].url,
+  url:'https://thelaunchera.com/demos/lavender-edit/',
+  source:'https://github.com/thelaunchera/the-launch-era-new-website-/tree/main/public/demos/lavender-edit',
+  note:'Concepto ficticio, no tienda real. Kit privado: 8 PNG originales en Drive, 8 prompts de recreación, documento de prompts fuente y 6 pasos de construcción. Sin checkout, descuentos ni promesas de producto.',
+  kind:'other',
+  photos:lavenderPhotos,
+  promptsFor:'lavender-edit',
+ },
  {
   id:'havana-19',
   title:'Havana 19 · Cuban Cuisine · Boston',
@@ -244,7 +258,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -267,6 +281,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='havana-19'&&<p><a href={havana19Drive} target="_blank" rel="noopener noreferrer">Abrir carpeta Havana 19 en Drive</a></p>}
+       {d.id==='lavender-edit'&&<p><a href={lavenderDrive} target="_blank" rel="noopener noreferrer">Abrir las 8 fotografías de Lavanda en Drive</a> · <a href={lavenderOriginalPrompts} target="_blank" rel="noopener noreferrer">Prompts originales disponibles</a></p>}
        {d.id==='marea-wigs-miami'&&<p><a href={mareaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
