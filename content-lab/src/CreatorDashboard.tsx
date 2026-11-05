@@ -1,7 +1,7 @@
-import React, {useEffect, useMemo, useRef} from 'react';
-import {ArrowRight, BookOpen, CalendarDays, Check, ChevronRight, FolderOpen, Images, Layers3, Lightbulb, Palette, Plus, Sparkles, WandSparkles} from 'lucide-react';
+import {useEffect, useMemo, useRef} from 'react';
+import {ArrowRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Images, Layers3, Lightbulb, Palette, Plus, Sparkles} from 'lucide-react';
 import {readCarouselDesign} from './CarouselArtDirection';
-import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
+import {assetCategory,type LibraryAsset} from './MediaAsset';
 import './CreatorDashboard.css';
 
 export type CreatorDashboardPost = {
@@ -89,7 +89,8 @@ export default function CreatorDashboard({
  const ideaActions=[
   {label:es?'Enseñar algo':'Teach something',angle:'Educational',icon:BookOpen},
   {label:es?'Resolver un problema':'Solve a problem',angle:'Pain point',icon:Lightbulb},
-  {label:es?'Antes y después':'Before and after',angle:'Before / after',icon:Layers3}
+  {label:es?'Antes y después':'Before and after',angle:'Before / after',icon:Layers3},
+  {label:es?'Algo cercano':'Something relatable',angle:'POV / Relatable',icon:Sparkles}
  ];
  return <div className="cld" id="lab-dashboard" aria-label={es?'Tu espacio creativo':'Your creative workspace'}>
   <section className="cld-intro">
