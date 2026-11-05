@@ -117,7 +117,7 @@
  .studio-seamless-app{padding-bottom:calc(95px + env(safe-area-inset-bottom))}
  .studio-app-canvas{position:sticky;top:clamp(58px,13dvh,115px);z-index:17;
    background:#eff1f1;box-shadow:0 3px 13px #182a3b14}
- .studio-app-canvas>div{max-height:min(61dvh,530px);overflow-x:auto;overflow-y:hidden}
+ .studio-app-canvas>div{max-height:min(61dvh,530px);overflow-x:auto;overflow-y:auto;overscroll-behavior:contain}
  .studio-app-toolbar{display:flex!important;justify-content:flex-start!important;overflow-x:auto!important;
    overflow-y:hidden!important;scrollbar-width:none!important;gap:2px!important}
  .studio-app-toolbar button{flex:0 0 77px!important;min-width:77px!important;max-width:none!important}
