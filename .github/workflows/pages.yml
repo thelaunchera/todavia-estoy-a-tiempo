@@ -233,3 +233,6 @@ jobs:
       - name: Publicar landing y Estudio
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1200000
+          reporting_interval: 10000
