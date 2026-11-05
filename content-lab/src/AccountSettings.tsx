@@ -1,5 +1,6 @@
 import React,{useRef,useState} from 'react';
-import {Camera,Check,Smartphone,Tablet,Upload,UserRound,Settings2} from 'lucide-react';
+import {Camera,UserRound,Settings2} from 'lucide-react';
+import InstallContentLab from './InstallContentLab';
 import './AccountSettings.css';
 type Props={email:string;avatarSrc?:string;locale:'es'|'en';
  onUpload:(file:File)=>Promise<boolean>;onClear:()=>Promise<void>;onBrands:()=>void};
@@ -34,18 +35,6 @@ export default function AccountSettings({email,avatarSrc,locale,onUpload,onClear
       <small>{es?'Colores, logos, idioma de tus publicaciones y reglas para la IA.':'Colors, logos, content language and AI rules.'}</small></div>
       <button type="button" onClick={onBrands}>{es?'Abrir marcas':'Open brands'}</button>
    </section>
-   <section className="lab-settings-device">
-     <h2>{es?'Añadir Content Lab a tu pantalla de inicio':'Add Content Lab to your home screen'}</h2>
-     <p>{es?'Usa el mismo correo de acceso. No necesitas descargarlo de una tienda de apps.':'Use the same sign-in email. No app store download needed.'}</p>
-     <details><summary><Smartphone size={18}/> iPhone / iPad</summary>
-       <ol><li>{es?'Abre el Lab en Safari.':'Open the Lab in Safari.'}</li>
-       <li>{es?'Toca Compartir y selecciona “Añadir a pantalla de inicio”.':'Tap Share, then “Add to Home Screen”.'}</li>
-       <li>{es?'Toca Añadir.':'Tap Add.'}</li></ol></details>
-     <details><summary><Tablet size={18}/> Android / tablets</summary>
-       <ol><li>{es?'Abre el Lab en Chrome.':'Open the Lab in Chrome.'}</li>
-       <li>{es?'Toca ⋮ y selecciona “Añadir a pantalla de inicio” o “Instalar app”.':'Tap ⋮ and choose “Add to Home Screen” or “Install app”.'}</li>
-       <li>{es?'Confirma Añadir o Instalar.':'Confirm Add or Install.'}</li></ol></details>
-     <small><Check size={14}/>{es?'Es un acceso directo al sitio, no un editor de video. Tus diseños guardados se abren con tu cuenta.':'It opens the website, not a video editor. Saved designs are linked to your account.'}</small>
-   </section>
+   <InstallContentLab locale={locale}/>
  </section>;
 }
