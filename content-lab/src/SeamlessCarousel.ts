@@ -138,6 +138,12 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
  ctx.beginPath();ctx.moveTo(0,H*.68);
  for(let i=0;i<total;i++){const x=i*W;ctx.bezierCurveTo(x+W*.3,H*.55,x+W*.72,H*.81,x+W,H*.62)}
  ctx.stroke();ctx.restore();}
+ // A layer sent behind must be painted before the slide's photos and texts.
+ // Previously it was painted after them, so a sphere appeared in front in PNGs.
+ if(!opts.editorMode){
+  const behind=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+  if(behind.length)await paintPanoramaLayers(ctx,virtualWidth,H,behind,images);
+ }
  // The heading is resolved for each slide, so local overrides match the master type picker.
  for(let i=0;i<total;i++){
   const x=i*W,page=pages[i];
@@ -188,12 +194,7 @@ export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBran
   ctx.restore();
  }
  if(!opts.editorMode) {
-  const behind=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement==='behind-text');
   const front=(opts.layers||[]).filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text');
-  await paintPanoramaLayers(ctx,virtualWidth,H,behind,images);
-  if(behind.length)await paintSeamlessTypography(ctx,
-     opts.usePageBackgrounds?pages:pages.map(p=>({...p,backgroundId:opts.backgroundId,backgroundColor:opts.canvasColor})),
-     brand,opts.backgroundId,opts.font,opts.freeCanvas,opts.canvasColor,opts.editorialRhythm);
   await paintPanoramaLayers(ctx,virtualWidth,H,front,images);
  }
  return wide;
