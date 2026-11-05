@@ -84,10 +84,8 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>FREEBIE · ORIGINAL</span></div>
         <span className="freebies-art-small">ONE PHOTO · EIGHT PROMPTS</span>
         <h3>Matcha <em>Visuals</em></h3>
-        <div className="freebies-matcha-photos">
-          <img src="/content-lab/prompts/matcha-01.jpg" alt="Matcha · fotografía original 01" loading="lazy" />
-          <img src="/content-lab/prompts/matcha-02.jpg" alt="Matcha · fotografía original 02" loading="lazy" />
-          <img src="/content-lab/prompts/matcha-03.jpg" alt="Matcha · fotografía original 03" loading="lazy" />
+        <div className="freebies-matcha-photos" aria-label="Las ocho fotos originales del freebie de matcha">
+          {Array.from({length:8},(_,i)=><img key={i} src={'/content-lab/prompts/matcha-'+String(i+1).padStart(2,'0')+'.jpg'} alt={'Matcha · fotografía original '+String(i+1).padStart(2,'0')} loading="lazy" />)}
         </div>
         <span className="freebies-art-bottom">IMÁGENES ORIGINALES · SIN RECREACIONES</span>
       </div>
