@@ -178,3 +178,17 @@
 @media(prefers-reduced-motion:reduce){
  .cld *, .cld *:before, .cld *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+/* App-owned universal iconography: consistent across brands and devices. */
+.cld-resource-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;background:transparent;margin-bottom:9px;border-radius:10px}
+.cld-resource-feature{display:block;position:absolute;right:9px;bottom:6px;width:84px;height:84px;pointer-events:none;opacity:.96;transform:rotate(-7deg)}
+.cld-resource-prompts .cld-resource-feature{transform:rotate(5deg);right:5px;bottom:2px}
+.cld-resource-brand .cld-resource-feature{transform:rotate(-3deg);right:6px;bottom:5px}
+.cld-resource-elements .cld-resource-feature{right:6px;bottom:-3px;transform:rotate(9deg)}
+.cld-resource-card strong,.cld-resource-card small{max-width:78%}
+@media(max-width:660px){
+ .cld-resource-icon{width:34px;height:34px;margin-bottom:8px}
+ .cld-resource-icon .lab-universal-icon{width:33px!important;height:33px!important}
+ .cld-resource-feature{right:0;bottom:-2px;opacity:.9}
+ .cld-resource-feature .lab-universal-icon{width:67px!important;height:67px!important}
+ .cld-resource-card strong,.cld-resource-card small{max-width:77%}
+}
