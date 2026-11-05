@@ -13,6 +13,17 @@ const MATCHA_TITLE = 'Matcha · One Photo, Eight Prompts';
 const MATCHA_LINK_ES = 'https://podcast.thelaunchera.com/content-lab/prompts/';
 const MATCHA_LINK_EN = 'https://podcast.thelaunchera.com/content-lab/prompts/en/';
 const DECEMBER_APPROVED_COVER_ID = '12FpBKPtlwdACHZsVOxLIcRX_puTvfzTf';
+const NOVEMBER_FILES = {
+  folder: 'https://drive.google.com/drive/folders/1bwCsa_Kn-NNBADo8ZisSTba63wvgN7cU',
+  photos: 'https://drive.google.com/drive/folders/1_axcVjDNox1P0jevZay4OEuIOh1pHHgj',
+  access: 'https://podcast.thelaunchera.com/freebies/november-website/access/',
+  signup: 'https://podcast.thelaunchera.com/freebies/november-website/',
+};
+const NOVEMBER_PHOTOS = [
+  {src:'/assets/freebies/november-website/01_laptop_workspace.svg',name:'01 · Website planning'},
+  {src:'/assets/freebies/november-website/02_coffee_planning.svg',name:'02 · Creative process'},
+  {src:'/assets/freebies/november-website/03_mobile_review.svg',name:'03 · Mobile review'},
+] as const;
 const PACK = {
   folder: 'https://drive.google.com/drive/folders/1qD7EmHCyKEs-aHUFlloKP9-nDuv1q7Ug',
   images: 'https://drive.google.com/drive/folders/1zqzLqSkPobH0DQnGfmFAhNkJ0o2YxQNm',
@@ -104,19 +115,22 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       </div>
     </div>
     <div className="freebies-card freebies-november-card">
-      <div className="freebies-art freebies-art-november freebies-art-source-only">
-        <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>NOVEMBER / 2026</span></div>
-        <span className="freebies-art-small">NOVEMBER · WEBSITE FREEBIE</span>
-        <h3>One Prompt.<br/><em>Your Website.</em></h3>
-        <p>Un prompt para crear tu propia web con IA.</p>
-        <span className="freebies-art-bottom">PORTADA ORIGINAL PENDIENTE · VER FICHA</span>
+      <div className="freebies-november-cover">
+        <img src="/assets/freebies/november-website/cover.svg" alt="Portada aprobada: Tu web con un solo prompt" loading="lazy"/>
       </div>
       <div className="freebies-info">
         <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> {november?.status || 'Pendiente de revisión'}</span><span className="freebies-date"><CalendarDays size={15}/> Noviembre 2026</span></div>
         <h3>Tu web con un solo prompt</h3>
-        <p className="freebies-description">Crea tu primera web con ChatGPT y AppDeploy. Recursos ES / EN.</p>
-        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Acceso por correo · pendiente de QA</span></div>
-        <div className="freebies-actions"><a className="freebies-link" href="/estudio/?seccion=links"><ExternalLink size={17}/> Abrir recursos de noviembre <ExternalLink size={14}/></a></div><p className="freebies-disclaimer">La carpeta original de noviembre aún no está identificada en Drive. No se muestra un enlace inventado.</p>
+        <p className="freebies-description">Crea tu primera web con ChatGPT y AppDeploy. Incluye 3 fotografías sin texto y el prompt copiable en ES / EN.</p>
+        <div className="freebies-november-photos" aria-label="Las tres fotos del freebie de noviembre">
+          {NOVEMBER_PHOTOS.map(photo=><a key={photo.src} href={NOVEMBER_FILES.photos} target="_blank" rel="noopener noreferrer" aria-label={'Ver '+photo.name+' en Drive'}><img src={photo.src} alt={photo.name} loading="lazy"/></a>)}
+        </div>
+        <div className="freebies-meta"><span><Languages size={15}/> ES / EN</span><span><Mail size={15}/> Envío programado para diciembre</span></div>
+        <div className="freebies-actions">
+          {external(NOVEMBER_FILES.access,'Abrir freebie · ES / EN',ExternalLink)}
+          {external(NOVEMBER_FILES.photos,'Abrir fotos en Drive',ImageIcon)}
+          {external(NOVEMBER_FILES.folder,'Carpeta completa',ExternalLink)}
+        </div>
         {!november && <p className="freebies-alert">No se encontró la ficha original de noviembre en el Studio.</p>}
       </div>
     </div>
