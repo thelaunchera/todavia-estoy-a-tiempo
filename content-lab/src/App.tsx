@@ -1203,8 +1203,8 @@ function App() {
       </div>
     );
   return (
-    <div className="app-shell" lang={loginLanguage==='es'?'es-419':'en'}>
-      {menu && <div className="overlay" onClick={() => setMenu(false)} />}
+    <div className={tab === 'factory' ? 'app-shell lab-carousel-editor-mode' : 'app-shell'} lang={loginLanguage==='es'?'es-419':'en'}>
+      {menu && tab !== 'factory' && <div className="overlay" onClick={() => setMenu(false)} />}
       <aside className={'sidebar ' + (menu ? 'open' : '')} aria-label="Menú de Content Lab">
         <div className="identity">
           <div className="monogram">c.</div>
@@ -1321,6 +1321,7 @@ function App() {
       </aside>
       <main>
         <header className="top">
+          {tab === 'factory' && <button type="button" className="lab-carousel-editor-exit" onClick={() => navigate('home')} aria-label={loginLanguage==='es'?'Volver al Content Lab y salir del editor':'Back to Content Lab and exit editor'}><span aria-hidden="true">←</span> {loginLanguage==='es'?'Volver al Lab':'Back to Lab'}</button>}
           <div>
             <button className="hamburger" type="button" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu(true)}>
               <Menu size={22} />
