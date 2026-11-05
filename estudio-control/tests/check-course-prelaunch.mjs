@@ -203,7 +203,7 @@ console.log('QA móvil: hero cinematográfico, reloj legible, sin botón flotant
 /* Fotos originales individuales aprobadas para hero, evidencia y podcast (no collage). */
 const podcastCss = read('episodios-destacados.css');
 const podcastHeroCss = read('styles-redesign.css');
-assert.match(home,/assets\/clase-bot-home-2026\.webp/);
+assert.match(home,/assets\/podcast-hero-dailin-v3\.webp/,'El podcast conserva su retrato principal');
 assert.match(home,/Historias sobre la vida real/);
 assert.match(home,/episode-mini-card-latest/);
 assert.match(home,/episode-previous episode-mini-card/);
@@ -314,7 +314,7 @@ assert.doesNotMatch(newExperience,/requestAnimationFrame\(step\)/,'La mezcla de 
 const casaPreviewCss=read('clases/casa-brownie-real-preview-20261102.css');
 assert.match(casaPreviewCss,/data-stage="after"\] \.class-idea-board\{display:none!important\}/,'Al mostrar Resultado el Boceto no se pinta');
 assert.match(casaPreviewCss,/data-loaded="true"\] \.class-casa-real-fallback\{[\s\S]*?display:none!important/,'El iframe sustituye el fallback, no se superpone');
-assert.match(home,/paso a paso[\s\S]{0,100}Sin saber programar\./i,'Mensaje claro del extra de IA sin jerga técnica');
+assert.doesNotMatch(home,/paso a paso[\s\S]{0,100}Sin saber programar\./i,'La propuesta de la clase no invade la portada del podcast');
 assert.doesNotMatch(classPage,/experta|experto|alumnas|bienvenida a tu/i);
 assert.doesNotMatch(home,/experta|experto/i);
 assert.doesNotMatch(clubPage,/reservado a alumnas|BIENVENIDA A TU COMUNIDAD/);
