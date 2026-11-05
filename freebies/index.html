@@ -44,6 +44,9 @@
     .hero-feature:before{content:'';position:absolute;width:min(92%,480px);aspect-ratio:1;border-radius:50%;background:var(--yellow);top:1%;right:-4%}
     .hero-feature:after{content:'';position:absolute;width:110px;height:110px;border:8px solid var(--ink);border-radius:50%;bottom:1%;left:0}
     .hero-poster{position:relative;z-index:1;width:min(100%,370px);aspect-ratio:4/4.7;background:var(--ink);color:#fff;padding:clamp(24px,3vw,35px);display:flex;flex-direction:column;justify-content:space-between;transform:rotate(5deg);box-shadow:18px 18px 0 #f8f5eb;overflow:hidden}
+    .hero-backtype{position:absolute;z-index:0;top:15%;left:-9%;font:900 clamp(75px,9vw,138px)/.95 Arial,Helvetica,sans-serif;letter-spacing:-.1em;color:#19191925;transform:rotate(-10deg);pointer-events:none}
+    .hero-portrait-frame{position:relative;z-index:1;margin:0;width:min(86%,360px);aspect-ratio:4/5;transform:rotate(3deg);border:9px solid var(--paper);background:var(--ink);box-shadow:17px 17px 0 var(--ink);overflow:hidden}
+    .hero-portrait-image{display:block;width:100%;height:100%;object-fit:cover}
     .poster-kicker{font:800 12px/1.3 Arial,sans-serif;letter-spacing:.16em}
     .poster-type{position:relative;font:900 clamp(69px,8vw,116px)/.82 Arial,Helvetica,sans-serif;letter-spacing:-.115em;transform:translateX(-5px)}
     .poster-type span{color:var(--yellow)}
@@ -136,6 +139,8 @@
       .hero-feature:before{width:280px;right:3%;top:12px}
       .hero-feature:after{width:73px;height:73px;border-width:6px;left:8%;bottom:10px}
       .hero-poster{width:245px;padding:23px;box-shadow:12px 12px 0 #f8f5eb}
+      .hero-backtype{font-size:77px;left:-3%;top:11%}
+      .hero-portrait-frame{width:min(76%,255px);border-width:6px;box-shadow:10px 10px 0 var(--ink)}
       .poster-type{font-size:75px}
       .poster-kicker,.poster-bottom{font-size:9px}
       .poster-seal{width:82px;height:82px;right:2%;bottom:36px;font-size:11px}
@@ -190,11 +195,10 @@
         <p class="hero-footnote" data-en="Made for creators, small businesses and big ideas." data-es="Para creadores, emprendedores y grandes ideas.">Made for creators, small businesses and big ideas.</p>
       </div>
       <div class="hero-feature" role="img" aria-label="Original blue, black and yellow editorial poster for The Launch Era Freebie Library">
-        <div class="hero-poster" aria-hidden="true">
-          <span class="poster-kicker">THE LAUNCH ERA / CREATIVE EDITION</span>
-          <span class="poster-type">FREE<br><span>IDEAS.</span></span>
-          <span class="poster-bottom">PROMPTS / VISUALS / MORE<br>THE CREATIVE COLLECTION</span>
-        </div>
+        <span class="hero-backtype" aria-hidden="true">CREATE</span>
+        <figure class="hero-portrait-frame">
+          <img class="hero-portrait-image" src="/assets/freebies/the-launch-era-personal-hero.svg" alt="The Launch Era founder at her creative workspace, wearing a black blazer with blue and yellow branding details" width="500" height="625" decoding="async" fetchpriority="high">
+        </figure>
         <span class="poster-seal" aria-hidden="true">GO<br>CREATE.</span>
         <span class="hero-ribbon" data-en="A NEW SPACE FOR CREATIVE IDEAS" data-es="UN NUEVO ESPACIO PARA IDEAS CREATIVAS">A NEW SPACE FOR CREATIVE IDEAS</span>
       </div>
