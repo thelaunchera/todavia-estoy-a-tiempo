@@ -604,7 +604,11 @@ export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
  if(authError||!user)throw Error('Inicia sesión en Studio para abrir la biblioteca.');
  const result:StudioLabAsset[]=[];
  for(const [table,category] of [['content_lab_sticker_catalog','sticker'],['content_lab_background_catalog','background']] as const){
-  const {data,error}=await client.from(table).select('id,name,path').eq('published',true).order('created_at',{ascending:true});
+  // Studio is owner-only. Keep unpublished personal backgrounds visible here;
+  // buyers still read ONLY published catalog rows through separate RLS policies.
+  const query=client.from(table).select('id,name,path');
+  const {data,error}=await (category==='background'?query:query.eq('published',true))
+   .order('created_at',{ascending:true});
   if(error)throw Error('No se pudo consultar '+category+': '+error.message);
   const entries=(data||[]).filter(x=>Boolean(x.path));
   for(let i=0;i<entries.length;i+=50){
