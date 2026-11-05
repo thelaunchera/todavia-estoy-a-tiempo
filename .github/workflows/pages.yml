@@ -172,6 +172,10 @@ jobs:
         run: |
           test -s _podcast_pages/index.html
           test -s _podcast_pages/content-lab/index.html
+          test -s _podcast_pages/content-lab/favicon-32.png
+          test -s _podcast_pages/content-lab/icon-192.png
+          test -s _podcast_pages/content-lab/icon-512.png
+          test -s _podcast_pages/content-lab/apple-touch-icon.png
           test -s _podcast_pages/content-lab/lab-recovery.css
           test -s _podcast_pages/content-lab/prompts/index.html
           test -s _podcast_pages/assets/freebies/november-website/01_laptop_workspace.svg
