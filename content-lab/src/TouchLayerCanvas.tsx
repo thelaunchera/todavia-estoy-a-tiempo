@@ -395,6 +395,37 @@ export default function TouchLayerCanvas({
     onRemove(id);
     if (selected === id) setSelected('');
   };
+  const mobileContextControls=<>
+    {chosen&&onUpdate&&<div className={'touch-editor-context-dock'+(fullscreen?' is-fullscreen':'')} role="toolbar" aria-label="Editar elemento seleccionado">
+          <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
+          <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
+          <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
+          <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
+          <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
+          {chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
+          {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
+          <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
+        </div>}
+        {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento">
+          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':'Posición'}</strong>
+            <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
+          {contextInspector==='opacity'&&<label className="touch-editor-context-range">
+            Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
+            value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})}/>
+            <output>{Math.round((chosen.opacity??1)*100)}%</output>
+          </label>}
+          {contextInspector==='rotation'&&<label className="touch-editor-context-range">
+            Rotación <input type="range" min="-180" max="180" step="1" aria-label="Girar elemento"
+            value={selectedRect.angle||0} onChange={e=>onCommit(chosen.kind,chosen.id,{...selectedRect,angle:Number(e.target.value)})}/>
+            <output>{selectedRect.angle||0}°</output>
+          </label>}
+          {contextInspector==='position'&&<div className="touch-editor-context-position">
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer delante</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar detrás</button>}
+            {onToggleLock&&<button type="button" onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?'Desbloquear':'Bloquear'}</button>}
+          </div>}
+        </div>}
+  </>;
   return <div ref={canvasRoot} className={'touch-editor' + (pageCount > 1 ? ' panorama-canvas' : '')+
     (pageCount>1&&interactionMode==='navigate'?' touch-editor-navigation-mode':' touch-editor-edit-mode')+
     (pageCount>1&&!continuous?' touch-editor-normal-pages':' touch-editor-seamless-pages')+
@@ -613,36 +644,9 @@ export default function TouchLayerCanvas({
           {onRemove&&<button type="button" aria-label="Borrar elemento" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={16}/></button>}
         </div>}
     
-        {chosen&&onUpdate&&<div className="touch-editor-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
-          <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
-          <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
-          <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
-          <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
-          <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
-          {chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
-          {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
-          <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
-        </div>}
-        {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className="touch-editor-context-inspector" role="group" aria-label="Ajustes del elemento">
-          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':'Posición'}</strong>
-            <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
-          {contextInspector==='opacity'&&<label className="touch-editor-context-range">
-            Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
-            value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})}/>
-            <output>{Math.round((chosen.opacity??1)*100)}%</output>
-          </label>}
-          {contextInspector==='rotation'&&<label className="touch-editor-context-range">
-            Rotación <input type="range" min="-180" max="180" step="1" aria-label="Girar elemento"
-            value={selectedRect.angle||0} onChange={e=>onCommit(chosen.kind,chosen.id,{...selectedRect,angle:Number(e.target.value)})}/>
-            <output>{selectedRect.angle||0}°</output>
-          </label>}
-          {contextInspector==='position'&&<div className="touch-editor-context-position">
-            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer delante</button>}
-            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar detrás</button>}
-            {onToggleLock&&<button type="button" onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?'Desbloquear':'Bloquear'}</button>}
-          </div>}
-        </div>}
-    {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
+        {typeof document!=='undefined'&&window.matchMedia('(max-width:799px)').matches
+   ?createPortal(mobileContextControls,document.body):mobileContextControls}
+        {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
           alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
           {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
