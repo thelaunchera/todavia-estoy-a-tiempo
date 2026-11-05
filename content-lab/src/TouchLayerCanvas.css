@@ -571,3 +571,31 @@
  .touch-editor-mini-actions{top:-40px;padding:2px;gap:1px}
  .touch-editor-mini-actions button{width:33px;height:33px;font-size:18px}
 }
+
+/* Portaled, layer-specific controls are independent of the sticky artboard's
+   stacking context and always appear above the bottom app navigation. */
+@media(max-width:799px){
+ .touch-editor-context-dock{
+  position:fixed!important;z-index:2147482002!important;
+  left:8px!important;right:8px!important;
+  bottom:calc(132px + env(safe-area-inset-bottom))!important;
+  max-width:680px!important;width:auto!important;margin:0 auto!important;
+  background:#fff!important;box-sizing:border-box
+ }
+ .touch-editor-context-inspector{
+  position:fixed!important;z-index:2147482003!important;
+  left:8px!important;right:8px!important;max-width:680px!important;
+  bottom:calc(208px + env(safe-area-inset-bottom))!important;
+  margin:0 auto!important;box-sizing:border-box
+ }
+ .touch-editor .panorama-guide-legend{display:flex!important;flex-wrap:nowrap!important;
+  align-items:center!important;gap:5px!important;min-height:28px!important;max-height:42px!important;
+  padding:3px!important;margin:0 0 5px!important;font-size:10px!important}
+ .touch-editor .touch-snap-toggle{flex:0 0 auto!important;width:auto!important;
+  max-width:47%!important;margin-left:auto!important;font-size:10px!important;white-space:normal!important}
+ .touch-editor .touch-snap-toggle input{flex-shrink:0!important}
+ .touch-editor-opacity-control{display:none!important}
+}
+@media(max-width:799px){
+ .panorama-editor.expanded ~ .touch-editor-context-dock{bottom:calc(92px + env(safe-area-inset-bottom))!important}
+}
