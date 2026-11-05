@@ -424,3 +424,59 @@
  .panorama-library-floating .panorama-asset-visibility{font-size:10px}
  .panorama-clear-background{min-height:48px;font-size:12px}
 }
+
+
+/* Carousel-first editor mode: persistent contextual library beside the artboard. */
+@media(min-width:921px) and (max-width:1360px){
+  .lab-carousel-editor-mode .factory-canvas-active .panorama-editor .panorama-body:not(.panorama-library-collapsed){
+    display:grid!important;
+    grid-template-columns:minmax(245px,305px) minmax(0,1fr)!important;
+    align-items:start;
+    gap:14px;
+  }
+  .lab-carousel-editor-mode .panorama-editor .panorama-body>.panorama-library{
+    display:block!important;
+    position:sticky;
+    top:12px;
+    width:100%;
+    max-height:calc(100dvh - 105px);
+    overflow-y:auto;
+    background:#fffefa;
+    border:1px solid #e8e0d7;
+    border-radius:17px;
+    box-shadow:0 3px 16px #1919190c;
+    padding:14px;
+  }
+  .lab-carousel-editor-mode .panorama-editor .panorama-body:not(.panorama-library-collapsed)>.panorama-workspace{
+    width:100%;
+    min-width:0;
+  }
+  .lab-carousel-editor-mode .panorama-editor .panorama-assets{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    max-height:none;
+  }
+}
+@media(max-width:920px){
+  .lab-carousel-editor-mode .panorama-editor>.panorama-primary-actions{
+    position:fixed!important;
+    bottom:calc(9px + env(safe-area-inset-bottom))!important;
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    z-index:6012!important;
+    width:calc(100vw - 16px);
+    max-width:700px;
+    margin:0!important;
+    box-sizing:border-box;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    background:#fffefa;
+    border:1px solid #e4ded5;
+    box-shadow:0 7px 24px #19191924;
+  }
+  .lab-carousel-editor-mode .panorama-editor.layer-selected>.panorama-primary-actions{
+    display:none!important;
+  }
+}
