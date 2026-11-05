@@ -220,7 +220,7 @@ export default function FreeDecorControls({
       <button type="button" onClick={()=>{setSearch('');setBackgroundKind('all')}}>Mostrar todos</button>
      </div>}
    </div>:<>
-    <div className="free-decor-groups">{['Todos','Inspiración','Avatares','Matcha','Pilates','Ejercicios','Aesthetic']
+    <div className="free-decor-groups">{['Todos','Branding y Marketing','Inspiración','Avatares','Matcha','Pilates','Ejercicios','Aesthetic']
      .map(g=><button type="button" key={g} aria-pressed={group===g} className={group===g?'active':''}
       onClick={()=>setGroup(g)}>{g}</button>)}</div>
     {selected.length>0&&<div className="free-decor-selected-stickers"

@@ -5,6 +5,11 @@
  */
 export type LabLanguage='es'|'en';
 const pairs:[string,string][]=[
+ ['Branding & Marketing','Branding y Marketing'],
+ ['Blue satin ribbon','Cinta satinada azul'],['Creative Studio tape','Cinta Creative Studio'],
+ ['Brand in Progress · lilac','Brand in Progress · lila'],['Good Ideas ticket','Ticket Good Ideas'],
+ ['Chrome paperclip','Clip cromado'],['The Details hangtag','Etiqueta The Details'],
+ ['The Next Big Thing seal','Sello The Next Big Thing'],['Make It Happen ribbon','Cinta Make It Happen'],
  ["Creative cloud with color swatches","Nube creativa con paleta"],
  ["Branding fox","Zorrito de branding"],
  ["Lilac megaphone with star","Megáfono lila con estrella"],
