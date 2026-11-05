@@ -100,6 +100,7 @@ export default function SeamlessEditor(){
  const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
  const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:1100px)').matches);
  const [artboardSpace,setArtboardSpace]=useState(740);
+ const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
  useEffect(()=>{
    const mq=window.matchMedia('(min-width:1100px)');
    const change=()=>setWideScreen(mq.matches);
@@ -697,7 +698,7 @@ export default function SeamlessEditor(){
  const current=doc.items.find(it=>it.id===selected);
  useEffect(()=>{setActiveInspector(null)},[selected]);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
- const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
+
  const viewportScale=slideWidthPx/W;
  useEffect(()=>{viewport.current?.scrollTo({left:slide*slideWidthPx});},[canvasZoom]);
  const control:React.CSSProperties={padding:'11px 12px',border:'1px solid #ddd',borderRadius:12,background:'white',color:'#191919',fontSize:15};
