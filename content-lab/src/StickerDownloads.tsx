@@ -9,7 +9,7 @@ type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
  onDelete:(asset:LibraryAsset)=>Promise<void>;
  isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
-const groups=['Todos','Inspiración','Avatares','Animales','Creación','Negocios','Matcha','Pilates','Ejercicios','Aesthetic'];
+const groups=['Todos','Branding y Marketing','Inspiración','Avatares','Animales','Creación','Negocios','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
  if(/avatar|character|girl|portrait/.test(n))return 'Avatares';
@@ -104,7 +104,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   if(blobUrl)window.setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
  };
  return <section className="sticker-downloads" aria-label="Stickers PNG originales">
-  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Avatares, matcha, Pilates, ejercicios y wellness. Los archivos compartidos los publica el estudio; puedes utilizarlos y descargar sus PNG transparentes.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
+  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Branding, marketing digital, avatares y recursos creativos para posts y carruseles continuos. Usa cada PNG transparente directamente en el editor.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
   <div className={'sticker-import-bar'+(dragActive?' drag-active':'')}
    onDragOver={e=>{e.preventDefault();if(!running)setDragActive(true)}}
    onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setDragActive(false)}}
