@@ -90,8 +90,7 @@ export default function PanoramaEditor({
   const available = assets.filter(a =>
     (libraryKind==='all'||(libraryKind==='sticker'?assetCategory(a)==='sticker':assetCategory(a)!=='sticker'))&&
     displayAssetName(a).toLowerCase().includes(filter.toLowerCase()))
-    .sort((a,b)=>Number(!(a.brandId===brandId&&!a.shared))-Number(!(b.brandId===brandId&&!b.shared)))
-    ;
+    .sort((a,b)=>Number(!(a.brandId===brandId&&!a.shared))-Number(!(b.brandId===brandId&&!b.shared)));
   const libraryIds=available.map(a=>a.id).join('|');
   useEffect(()=>{
     if(!libraryOpen)return;
