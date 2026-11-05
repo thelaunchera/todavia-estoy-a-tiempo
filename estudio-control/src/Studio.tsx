@@ -105,6 +105,13 @@ type Row = {
   audio?: string;
   art?: string;
   email_art_url?: string;
+  popup_image_url?: string;
+  popup_headline?: string;
+  popup_headline_en?: string;
+  popup_message?: string;
+  popup_message_en?: string;
+  title_en?: string;
+  summary_en?: string;
   script?: string;
   announcement_state?: string;
   audio_ready?: boolean;
@@ -138,6 +145,28 @@ function validEmailArtUrl(value?:string){
     return url.protocol==='https:' && !url.username && !url.password &&
       /\.(?:png|jpe?g|webp)$/i.test(url.pathname);
   } catch { return false; }
+}
+// El archivo público tiene una lista restringida de hosts de fotos verificadas.
+function validPodcastArchiveArtUrl(value?:string){
+  try {
+    const url = new URL((value||'').trim());
+    return url.protocol==='https:' &&
+      ['podcast.thelaunchera.com','d2ol7oe51mr4n9.cloudfront.net'].includes(url.hostname) &&
+      /\.(?:png|jpe?g|webp)$/i.test(url.pathname) && !url.username && !url.password;
+  } catch { return false; }
+}
+function popupImageFor(row:Row):string{
+  return String(row.popup_image_url || row.email_art_url || '').trim();
+}
+function episodeReadyForPublicArchive(row:Row,all:Row[]):string{
+  if(!row.date || !/^\d{4}-\d{2}-\d{2}$/.test(row.date))return 'Selecciona la fecha real de publicación del capítulo.';
+  if(!validPodcastArchiveArtUrl(row.email_art_url))return 'La portada debe estar en podcast.thelaunchera.com o nuestro CDN oficial, con enlace público directo a PNG, JPG o WebP.';
+  if(!validPodcastArchiveArtUrl(popupImageFor(row)))return 'El pop-up necesita una foto pública directa del podcast o del CDN oficial.';
+  if(!String(row.popup_headline||'').trim() || !String(row.popup_message||'').trim())return 'Escribe un titular y un mensaje propios del capítulo para el pop-up.';
+  const image=popupImageFor(row);
+  if(all.some(item=>item.id!==row.id&&item.status==='publicado'&&popupImageFor(item)===image))
+    return 'El anuncio necesita una imagen distinta de las usadas en capítulos publicados.';
+  return '';
 }
 /** Formatea solo la moneda que realmente consta en el registro, sin asumir USD. */
 function formatSaleAmount(s: VerifiedSale):string{
