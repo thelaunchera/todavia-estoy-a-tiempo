@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content-lab/public/resources/pinterest-aesthetic-stickers-2026-11 content-lab/public/resources/holiday-stickers-2026-11 content-lab/src/BundledDesignAssets.ts
+          git add content-lab/public/resources/pinterest-aesthetic-stickers-2026-11 content-lab/public/resources/holiday-stickers-2026-11 content-lab/src/BundledDesignAssets.ts content-lab/src/QuarantinedBundledAssets.ts content-lab/tests/bundled-design-assets.test.mjs
           git diff --cached --stat
           if git diff --cached --quiet; then
             echo 'No changes to commit'; exit 0
