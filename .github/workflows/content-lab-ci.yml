@@ -45,7 +45,9 @@ jobs:
       - name: Verify build output
         run: test -s content-lab/dist/index.html
       - name: Install Studio dependencies
-        run: npm install --no-audit --no-fund
+        # The browser build does not run ONNX native Node binaries.
+        # Skip flaky postinstall downloads from the optional onnxruntime-node package.
+        run: npm install --no-audit --no-fund --ignore-scripts
         working-directory: estudio-control
       - name: Type-check Studio TypeScript
         run: npx tsc --noEmit
