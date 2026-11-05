@@ -3,7 +3,7 @@ import {createPortal} from 'react-dom';
 import type { TouchRect } from './TouchGeometry';
 import { clampRect, clampFreePhotoRect, clampPanoramaRect, layerCornerPixels } from './TouchGeometry';
 import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoRect } from './PhotoCrop';
-import { Trash2, LockKeyhole, LockKeyholeOpen, Copy } from 'lucide-react';
+import { Trash2, LockKeyhole, LockKeyholeOpen, Copy, Layers3 } from 'lucide-react';
 import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
@@ -19,6 +19,7 @@ type Props = {
   preview: string; textOverlay?: string; layers: TouchLayer[];
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
+  onSelectionChange?: (id:string|null)=>void;
   ratio?: number; pageCount?: number; continuous?:boolean; canvasHeight?: number; onEmpty?: () => void;
   onRemove?: (id: string) => void;
   onReorder?: (id: string, move: 'backward' | 'forward' | 'back' | 'front') => void;
@@ -41,11 +42,12 @@ type Gesture = {
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
-  onRemove, onReorder, onUpdate, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,fullscreen=false,
+  onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,focusLayerId,inlineTextTools=false,fullscreen=false,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
+  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|null>(null);
   const [editingText,setEditingText]=useState('');
   const [advancedOpen,setAdvancedOpen]=useState(false);
   const [copyFeedback,setCopyFeedback]=useState('');
@@ -71,7 +73,7 @@ export default function TouchLayerCanvas({
   const clamp = (rect: TouchRect, kind:TouchLayer['kind']='sticker') =>
     pageCount>1?clampPanoramaRect(rect,.055/pageCount):kind==='photo'?clampFreePhotoRect(rect):clampFreePhotoRect(rect);
   useEffect(() => { if (!gesture.current) setDraft({}); }, [layers]);
-  useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false); }, [selected]);
+  useEffect(() => { setCropping(false);setCopyFeedback('');setAdvancedOpen(false);setContextInspector(null); }, [selected]);
   useEffect(()=>{if(editingText)window.requestAnimationFrame(()=>quickTextInput.current?.focus());},[editingText]);
   useEffect(()=>{if(editingText && !layers.some(item=>item.id===editingText))setEditingText('');},[editingText,layers]);
   useEffect(() => { if (selected && !layers.some(layer => layer.id === selected)) setSelected(''); }, [layers, selected]);
@@ -319,6 +321,7 @@ export default function TouchLayerCanvas({
   };
   const chosen = pageCount>1&&interactionMode==='navigate'?undefined:layers.find(layer => layer.id === selected);
   const selectedRect = chosen ? getRect(chosen) : undefined;
+  useEffect(()=>{onSelectionChange?.(chosen?.id??null)},[chosen?.id,onSelectionChange]);
   const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
     ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight,
       chosen.frameStyle||'panorama').radius/Math.max(1,Math.min(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight)))
@@ -586,6 +589,13 @@ export default function TouchLayerCanvas({
             {layer.kind==='photo'&&mode==='double-border'&&<div className="touch-editor-double-border"
               style={{borderColor:layer.accent||'#BED8E9',borderRadius:radius(outerRadius,fw,fh)}}/>}
             {active && pageCount===1 && inlineTextTools && onRemove && !layer.locked && <button type="button" aria-label="Quitar elemento" title="Quitar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}} style={{position:'absolute',right:-12,top:-12,zIndex:30,width:30,height:30,borderRadius:'50%',background:'#191919',color:'#fff',border:'2px solid white',fontSize:21,lineHeight:'24px',display:'grid',placeItems:'center',touchAction:'manipulation'}}>×</button>}
+            {active && !cropping && !layer.locked && <div className="touch-editor-mini-actions" role="toolbar" aria-label="Acciones rápidas de la capa"
+               onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
+               {layer.kind==='text'&&onDuplicateText&&<button type="button" aria-label="Duplicar texto" onClick={e=>{e.stopPropagation();onDuplicateText(layer.id)}}>⧉</button>}
+               <button type="button" aria-label="Girar quince grados" onClick={e=>{e.stopPropagation();onCommit(layer.kind,layer.id,{...getRect(layer),angle:((getRect(layer).angle||0)+15)%360})}}>↻</button>
+               {onRemove&&<button type="button" aria-label="Borrar capa" onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}}>×</button>}
+               <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
+            </div>}
             {active && <><span className="touch-editor-outline"/>
               {!cropping&&!layer.locked && !inlineTextTools && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
@@ -602,7 +612,37 @@ export default function TouchLayerCanvas({
             onClick={()=>setAdvancedOpen(v=>!v)}>···</button>
           {onRemove&&<button type="button" aria-label="Borrar elemento" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={16}/></button>}
         </div>}
-        {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
+    
+        {chosen&&onUpdate&&<div className="touch-editor-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
+          <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
+          <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
+          <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
+          <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
+          <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
+          {chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
+          {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
+          <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
+        </div>}
+        {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className="touch-editor-context-inspector" role="group" aria-label="Ajustes del elemento">
+          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':'Posición'}</strong>
+            <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
+          {contextInspector==='opacity'&&<label className="touch-editor-context-range">
+            Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
+            value={Math.round((chosen.opacity??1)*100)} onChange={e=>onUpdate(chosen.id,{opacity:Number(e.target.value)/100})}/>
+            <output>{Math.round((chosen.opacity??1)*100)}%</output>
+          </label>}
+          {contextInspector==='rotation'&&<label className="touch-editor-context-range">
+            Rotación <input type="range" min="-180" max="180" step="1" aria-label="Girar elemento"
+            value={selectedRect.angle||0} onChange={e=>onCommit(chosen.kind,chosen.id,{...selectedRect,angle:Number(e.target.value)})}/>
+            <output>{selectedRect.angle||0}°</output>
+          </label>}
+          {contextInspector==='position'&&<div className="touch-editor-context-position">
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'front')}>Traer delante</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'back')}>Enviar detrás</button>}
+            {onToggleLock&&<button type="button" onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?'Desbloquear':'Bloquear'}</button>}
+          </div>}
+        </div>}
+    {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
           alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
           {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
