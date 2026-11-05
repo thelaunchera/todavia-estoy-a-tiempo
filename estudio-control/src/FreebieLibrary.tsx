@@ -6,7 +6,6 @@ import './freebie-library.css';
 /** Private production record: launching does not send emails, post to Instagram or change Google Drive permissions. */
 export const FREEBIES_SECTION = 'studio-freebies-v1';
 const FREEBIE_TITLE = 'December Creative Pack — The Lavender Edit';
-const FREEBIE_KEY = 'studio-freebie:december-creative-pack-lavender';
 const LAUNCH_DATE = '2026-12-01';
 const PACK = {
   pdf: 'https://drive.google.com/file/d/1qjwII782hZ-1ZZCLO2uow3ZxW1oIvTBZ/view',
