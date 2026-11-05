@@ -12,7 +12,22 @@ const sb=createClient(url||'https://not-configured.supabase.co',key||'missing-pu
 });
 const bucket='content-lab-private';
 let activeUserId='';
+let activeBuyerExpiresAt:number|null=null;
 let lastRecordedInteraction=0;
+const buyerDeadline=async():Promise<number>=>{
+ const {data,error}=await sb.rpc('content_lab_session_expires_at');
+ if(error)throw Error('No se pudo verificar tu acceso. Revisa tu conexión.');
+ const deadline=typeof data==='string'?Date.parse(data):NaN;
+ return Number.isFinite(deadline)?deadline:0;
+};
+const expiryReached=(deadline:number,now=Date.now())=>
+ !Number.isFinite(deadline)||deadline<=0||deadline<=now;
+const endExpiredSession=async(id:string)=>{
+ clearActivity(id);
+ activeUserId='';
+ activeBuyerExpiresAt=null;
+ await sb.auth.signOut();
+};
 const requireConfig=()=>{if(!configured)throw Error('Configura VITE_CONTENT_LAB_SUPABASE_URL y VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY en tu entorno.');};
 const out=(r:any)=>{if(r.error)throw Error(r.error.message||'Error de Supabase');return r.data;};
 const current=async()=>{
@@ -20,11 +35,20 @@ const current=async()=>{
  const {data:{user},error}=await sb.auth.getUser();
  if(error||!user)throw Error('Inicia sesión para continuar.');
  if(hasExpiredActivity(user.id)){
-  clearActivity(user.id);
-  await sb.auth.signOut();
-  activeUserId='';
-  throw Error('Pasaron 24 horas sin actividad. Solicita un código nuevo para entrar.');
+  await endExpiredSession(user.id);
+  throw Error('Solicita un código nuevo para continuar.');
  }
+ const {data:admin,error:roleError}=await sb.from('content_lab_admins')
+  .select('user_id').eq('user_id',user.id).maybeSingle();
+ if(roleError)throw Error(roleError.message);
+ if(!admin){
+  const deadline=await buyerDeadline();
+  if(expiryReached(deadline)){
+   await endExpiredSession(user.id);
+   throw Error('Tu código cumplió 24 horas. Solicita uno nuevo.');
+  }
+  activeBuyerExpiresAt=deadline;
+ }else activeBuyerExpiresAt=null;
  return user;
 };
 const tab=(name:string)=>sb.from('content_lab_'+name);
@@ -116,21 +140,35 @@ async function useEdge(action:string,body:any){
 export const auth={
   getUser:async():Promise<{email?:string}|null>=>{
     if(!configured)return null;
-    const {data:{user}}=await sb.auth.getUser();
-    if(!user){activeUserId='';return null;}
+    const {data:{user},error:userError}=await sb.auth.getUser();
+    if(userError||!user){activeUserId='';activeBuyerExpiresAt=null;return null;}
     if(hasExpiredActivity(user.id)){
-      clearActivity(user.id);
-      await sb.auth.signOut();
-      activeUserId='';
+      await endExpiredSession(user.id);
       return null;
     }
-    const {data:admin}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
-    if(admin){activeUserId=user.id;if(lastActivity(user.id)===null)recordActivity(user.id);return {email:user.email};}
+    const {data:admin,error:roleError}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
+    if(roleError)throw Error(roleError.message);
+    if(admin){
+      activeUserId=user.id;activeBuyerExpiresAt=null;
+      if(lastActivity(user.id)===null)recordActivity(user.id);
+      return {email:user.email};
+    }
     if(!user.email)return null;
-    // Server-enforced RLS returns only this verified email's active membership.
-    const {data:paid}=await sb.from('content_lab_memberships')
+    // Same exact server-derived OTP deadline used by RLS.
+    const deadline=await buyerDeadline();
+    if(expiryReached(deadline)){
+      await endExpiredSession(user.id);
+      return null;
+    }
+    const {data:paid,error:membershipError}=await sb.from('content_lab_memberships')
       .select('id').eq('buyer_email',user.email.trim().toLowerCase()).eq('status','active').maybeSingle();
-    if(paid){activeUserId=user.id;if(lastActivity(user.id)===null)recordActivity(user.id);}
+    if(membershipError)throw Error(membershipError.message);
+    if(paid){
+      activeUserId=user.id;activeBuyerExpiresAt=deadline;
+      if(lastActivity(user.id)===null)recordActivity(user.id);
+    }else{
+      activeUserId='';activeBuyerExpiresAt=null;
+    }
     return paid?{email:user.email}:null;
   },
   signInWithOtp:async(email:string,preferredLanguage:'es'|'en'='es')=>{
@@ -145,7 +183,7 @@ export const auth={
     if(!/^[0-9]{6,8}$/.test(code))throw Error('Introduce el código numérico que recibiste por correo.');
     const result=out(await sb.auth.verifyOtp({email:email.trim(),token:code,type:'email'}));
     if(!result?.session)throw Error('No se pudo completar el acceso. Solicita un código nuevo.');
-    if(result.user?.id){activeUserId=result.user.id;recordActivity(activeUserId);lastRecordedInteraction=Date.now();}
+    if(result.user?.id){activeUserId=result.user.id;activeBuyerExpiresAt=null;recordActivity(activeUserId);lastRecordedInteraction=Date.now();}
     return result;
   },
   getPreferredLanguage:async():Promise<'es'|'en'|null>=>{
@@ -174,6 +212,7 @@ export const auth={
     if(!activeUserId)return false;
     if(hasExpiredActivity(activeUserId))return false;
     const now=Date.now();
+    if(activeBuyerExpiresAt!==null&&expiryReached(activeBuyerExpiresAt,now))return false;
     if(now-lastRecordedInteraction>=30000){
       recordActivity(activeUserId,now);
       lastRecordedInteraction=now;
@@ -183,15 +222,14 @@ export const auth={
   /** Check first, without resetting the idle clock on a resumed iPhone tab. */
   checkIdle:async():Promise<boolean>=>{
     if(!activeUserId)return false;
-    if(!hasExpiredActivity(activeUserId))return true;
-    clearActivity(activeUserId);
-    activeUserId='';
-    await sb.auth.signOut();
+    if(!hasExpiredActivity(activeUserId)&&
+        (activeBuyerExpiresAt===null||!expiryReached(activeBuyerExpiresAt)))return true;
+    await endExpiredSession(activeUserId);
     return false;
   },
   signOut:async()=>{
     const id=activeUserId;
-    activeUserId='';
+    activeUserId='';activeBuyerExpiresAt=null;
     if(id)clearActivity(id);
     out(await sb.auth.signOut());
   }
