@@ -1,5 +1,6 @@
 import {createPortal} from 'react-dom';
 import BrandAssetLibrary from './BrandAssetLibrary';
+import {STUDIO_SHAPES,studioShapeData,type StudioShape} from './studio-shapes';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
 import {type SovaCarouselAsset} from './sova-carousel-assets';
 import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
@@ -14,7 +15,7 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
 import './seamless-app.css';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
@@ -64,7 +65,7 @@ export default function SeamlessEditor(){
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [stickerSearch,setStickerSearch]=useState('');
- const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|null>(null);
+ const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
@@ -235,6 +236,22 @@ export default function SeamlessEditor(){
    setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src,x:slide*W+80,y:220,width:asset.width,fontSize:80,color:'#191919'}]}));
    setSelected(id);setQuickPanel(null);setMessage(asset.name+' añadido al lienzo. Puedes escalarlo con dos dedos.');
   }catch{setMessage('No se pudo cargar el sticker. Inténtalo nuevamente.')}
+ };
+ const addShape=async(shape:StudioShape)=>{
+   const color=STUDIO_SHAPES.find(item=>item.id===shape)?.color||'#F2D85B';
+   const src=studioShapeData(shape,color);
+   try{
+     await loadImage(src);
+     const id=++nextId.current;
+     setDoc(d=>({...d,items:[...d.items,{id,kind:'image',shape,src,x:slide*W+160,
+       y:240,width:shape==='tape'?620:shape==='circle'?380:550,fontSize:80,color}]}));
+     setSelected(id);setQuickPanel(null);setMessage('Forma editable añadida al lienzo.');
+   }catch{setMessage('No se pudo añadir la forma. Inténtalo nuevamente.');}
+ };
+ const recolorShape=(id:number,color:string)=>{
+   if(!/^#[0-9a-f]{6}$/i.test(color))return;
+   setDoc(d=>({...d,items:d.items.map(item=>item.id===id&&item.shape
+     ?{...item,color,src:studioShapeData(item.shape,color)}:item)}));
  };
  const setPrivateBackground=(url:string)=>setDoc(d=>({...d,backgroundImages:{...d.backgroundImages,[slide]:url}}));
  const addLabSticker=(file:string)=>{const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{id,kind:'image',src:labUrl(file),x:slide*W+200,y:200,width:460,fontSize:100,color:'#191919'}]}));setSelected(id);setMessage('Sticker añadido. Muévelo o agrándalo directamente sobre el diseño.')};
@@ -620,7 +637,7 @@ export default function SeamlessEditor(){
   </nav>
 
   {current&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
-  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':'Posición'}</strong>
+  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
   {activeInspector==='opacity'&&<div className="studio-app-range-row">
     <label htmlFor="studio-selected-opacity">Opacidad</label><input id="studio-selected-opacity" type="range" min="0" max="100" step="1"
@@ -666,6 +683,11 @@ export default function SeamlessEditor(){
       <button type="button" aria-pressed={!!current.textShadow} onClick={()=>update(current.id,{textShadow:!current.textShadow})}>Sombra</button>
       <button type="button" aria-pressed={!!current.textOutline} onClick={()=>update(current.id,{textOutline:!current.textOutline})}>Contorno</button>
     </div>
+  </div>}
+  {activeInspector==='shape'&&current.shape&&<div className="studio-app-font-inspector">
+    <label>Color de la forma <input type="color" aria-label="Elegir color de la forma"
+      value={current.color} onChange={e=>recolorShape(current.id,e.target.value)}/></label>
+    <span style={{fontSize:12,color:'#65717b'}}>Puedes mover, girar y cambiar el tamaño de la forma directamente en el lienzo.</span>
   </div>}
   {activeInspector==='position'&&<div className="studio-app-position-row">
     <button type="button" onClick={()=>reorderSelected('front')}>Traer delante</button>
@@ -727,6 +749,8 @@ export default function SeamlessEditor(){
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>}
   {current&&<div className="studio-app-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
+    {current.shape&&<button type="button" aria-pressed={activeInspector==='shape'}
+      onClick={()=>setActiveInspector(v=>v==='shape'?null:'shape')}><Palette size={19}/><small>Color</small></button>}
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='text'} onClick={()=>setActiveInspector(v=>v==='text'?null:'text')}><Type size={20}/><small>Texto</small></button>}
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
     <button type="button" aria-pressed={activeInspector==='opacity'} onClick={()=>setActiveInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
@@ -757,7 +781,7 @@ export default function SeamlessEditor(){
          </button>)}
       </div>
      </div>}
-    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset}/>}
+    {quickPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape}/>}
     {quickPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
