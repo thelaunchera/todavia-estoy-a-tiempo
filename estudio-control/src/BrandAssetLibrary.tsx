@@ -42,7 +42,7 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,compact=f
   <div role="group" aria-label="Filtrar tipo de elemento" style={{display:compact?'none':'flex',gap:6,overflowX:'auto',padding:'0 0 5px'}}>
    {categories.map(c=><button key={c} type="button" aria-pressed={kind===c} onClick={()=>setKind(c)} style={{...control,flexShrink:0,whiteSpace:'nowrap',minHeight:42,fontWeight:kind===c?800:500,background:kind===c?'#F2D85B':'#fff'}}>{c}</button>)}
   </div>
-  <div className={compact?'studio-sticker-gallery studio-element-gallery':'studio-element-gallery'} aria-label="Galería de elementos individuales para colocar en el lienzo"
+  <div key={kind} className={compact?'studio-sticker-gallery studio-element-gallery':'studio-element-gallery'} aria-label="Galería de elementos individuales para colocar en el lienzo"
     style={{display:'grid',gridTemplateColumns:compact?'repeat(2,minmax(0,1fr))':'repeat(auto-fill,minmax(150px,1fr))',
       gridAutoRows:'max-content',alignContent:'start',gap:10,overflowY:'auto',padding:3}}>
    {filtered.map(a=><button type="button" key={a.key} aria-label={'Añadir '+a.name+' al lienzo'}
