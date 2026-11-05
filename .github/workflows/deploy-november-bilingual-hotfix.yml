@@ -1,4 +1,4 @@
-name: Publish bilingual November freebie safely
+name: Publish verified-email freebies and Studio safely
 on:
   push:
     paths:
@@ -10,17 +10,17 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: november-freebie-hotfix
+  group: github-pages
   cancel-in-progress: false
 jobs:
   overlay:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout latest bilingual freebie
+      - name: Checkout latest freebie pages and Studio
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Recover last successful published website
+      - name: Recover last verified complete site to preserve the paid Content Lab
         uses: actions/download-artifact@v4
         with:
           name: github-pages
@@ -28,26 +28,58 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           path: _published_snapshot
-      - name: Overlay only November freebie assets and pages
+      - name: Build current private Studio without touching the separate paid Content Lab
+        env:
+          VITE_PODCAST_SUPABASE_URL: ${{ vars.VITE_PODCAST_SUPABASE_URL }}
+          VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euxo pipefail
+          cd estudio-control
+          npm install --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+          test -s dist/icons/studio-blue-192.png
+      - name: Overlay all verified-email freebies and current Studio
         run: |
           set -euxo pipefail
           mkdir -p _podcast_pages
           test -s _published_snapshot/artifact.tar
           tar -xf _published_snapshot/artifact.tar -C _podcast_pages
           test -s _podcast_pages/content-lab/index.html
-          test -s _podcast_pages/estudio/index.html
-          mkdir -p _podcast_pages/freebies/november-website/access
-          mkdir -p _podcast_pages/assets/freebies/november-website
-          cp freebies/november-website/index.html _podcast_pages/freebies/november-website/index.html
-          cp freebies/november-website/access/index.html _podcast_pages/freebies/november-website/access/index.html
-          cp assets/freebies/november-website/cover-en.svg _podcast_pages/assets/freebies/november-website/cover-en.svg
-          test -s _podcast_pages/assets/freebies/november-website/cover.svg
+          test -s _podcast_pages/alumnos/index.html
+          mkdir -p _podcast_pages/freebies _podcast_pages/assets/freebies _podcast_pages/estudio
+          cp -R freebies/. _podcast_pages/freebies/
+          cp -R assets/freebies/. _podcast_pages/assets/freebies/
+          cp -R estudio-control/dist/. _podcast_pages/estudio/
+          # The archived January PDF remains as a source asset, never a public bypass.
+          rm -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
+          test ! -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
+          for page in november-website december-lavender JanuaryNotUsed; do
+            if [ "$page" = "JanuaryNotUsed" ]; then continue; fi
+            test -s "_podcast_pages/freebies/$page/index.html"
+          done
+          for access in november-website/access december-lavender/access january-salt-line/access; do
+            file="_podcast_pages/freebies/$access/index.html"
+            test -s "$file"
+            grep -q 'freebie-access.js' "$file"
+            if grep -Eq 'Act as an expert web designer|Create an editorial beauty campaign' "$file"; then
+              echo "Private prompts leaked in $file" >&2; exit 1
+            fi
+          done
+          for landing in november-website december-lavender/signup january-salt-line; do
+            file="_podcast_pages/freebies/$landing/index.html"
+            test -s "$file"
+            test "$(grep -o 'freebie-subscribe.js' "$file" | wc -l)" -eq 1
+            if grep -q 'hook.us2.make.com' "$file"; then
+              echo "Archived Make endpoint still used in $file" >&2; exit 1
+            fi
+          done
+          test -s _podcast_pages/freebies/_shared/freebie-access.js
+          test -s _podcast_pages/freebies/_shared/freebie-subscribe.js
           test -s _podcast_pages/assets/freebies/november-website/cover-en.svg
-          test -s _podcast_pages/freebies/november-website/access/index.html
-          grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/index.html
-          grep -q 'cover-en.svg' _podcast_pages/freebies/november-website/access/index.html
+          test -s _podcast_pages/estudio/index.html
           touch _podcast_pages/.nojekyll
-      - name: Upload site without touching existing Lab or Studio builds
+      - name: Upload complete preserved site with safe updates
         uses: actions/upload-pages-artifact@v4
         with:
           path: _podcast_pages
@@ -58,6 +90,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy bilingual freebie hotfix
+      - name: Deploy verified-email freebies and Studio
         id: deployment
         uses: actions/deploy-pages@v4
