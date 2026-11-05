@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout latest freebie pages and Studio
         uses: actions/checkout@v4
+      - name: Run freebie regression checks (no Matcha changes)
+        run: node --test freebies/tests/*.test.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Recover last verified complete site to preserve the paid Content Lab
