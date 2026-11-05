@@ -76,3 +76,19 @@ test('Studio displays a canvas-first app workspace with the shared six-tool dock
  assert.match(editor,/onClick=\{\(\)=>void downloadSlide\(slide\)\}/);
  assert.equal((editor.match(/ref=\{photoInput\}/g)||[]).length,1);
 });
+
+test('Mobile curved text editing cannot zoom the Safari viewport or widen the Studio',()=>{
+ const css=read('src/seamless-app.css');
+ const arc=read('src/curved-text.ts');
+ assert.match(editor,/Math\.max\(16,current\.fontSize\*viewportScale\)/,
+  'iPhone must never focus an editable textarea smaller than 16px');
+ assert.match(css,/\.studio-seamless-app textarea/);
+ assert.match(css,/font-size:16px!important/);
+ assert.match(css,/\.studio-app-inspector\{[\s\S]*?width:calc\(100vw - 16px\)/);
+ assert.match(css,/\.studio-seamless-app\{[\s\S]*?overflow-x:clip/);
+ assert.match(css,/\.studio-app-range-row input\[type=range\]/);
+ assert.match(arc,/ctx\.fillText\(line,x,y,safeWidth\)/,
+  'unbent text must be constrained to its editable width');
+ assert.match(arc,/ctx\.scale\(fit,1\)/,
+  'spaced text must fit the same editable width');
+});
