@@ -41,6 +41,7 @@ jobs:
           set -euxo pipefail
           cd estudio-control
           npm install --no-audit --no-fund
+          npm run test:editorial-plan
           npm run build
           test -s dist/index.html
           test -s dist/icons/studio-blue-192.png
@@ -61,9 +62,14 @@ jobs:
           # Overlay only their static image files; do not replace the paid Lab app.
           mkdir -p _podcast_pages/content-lab/resources
           cp -R content-lab/public/resources/. _podcast_pages/content-lab/resources/
+          # Studio renders from its own static directory, independent of the frozen Lab build.
+          mkdir -p _podcast_pages/estudio/resources
+          cp -R content-lab/public/resources/. _podcast_pages/estudio/resources/
+          python3 -m pip install --quiet pillow
           python3 - <<'PY'
           import json
           from pathlib import Path
+          from PIL import Image
 
           source = Path('estudio-control/src/lab-assets.ts').read_text()
           prefix = 'export const LAB_ASSETS = '
@@ -76,13 +82,21 @@ jobs:
               relative = asset['file']
               if not relative.startswith('resources/') or '..' in Path(relative).parts:
                   raise SystemExit(f'Ruta de recurso inválida: {relative}')
-              destination = Path('_podcast_pages/content-lab') / relative
-              if not destination.is_file() or destination.stat().st_size < 100:
-                  raise SystemExit(f'Sticker/fondo faltante en publicación: {relative}')
-              if destination.suffix.lower() == '.png':
-                  with destination.open('rb') as image:
-                      if image.read(8) != bytes((137, 80, 78, 71, 13, 10, 26, 10)):
-                          raise SystemExit(f'PNG inválido en publicación: {relative}')
+              for root in ('estudio', 'content-lab'):
+                  destination = Path('_podcast_pages') / root / relative
+                  if not destination.is_file() or destination.stat().st_size < 100:
+                      raise SystemExit(f'Archivo faltante en {root}: {relative}')
+                  if destination.suffix.lower() == '.png':
+                      try:
+                          with Image.open(destination) as image:
+                              image.verify()
+                          with Image.open(destination) as image:
+                              rgba = image.convert('RGBA')
+                              alpha_max = rgba.getchannel('A').getextrema()[1]
+                              if image.width < 32 or image.height < 32 or alpha_max == 0:
+                                  raise ValueError('Imagen vacía o dimensiones inválidas')
+                      except Exception as exc:
+                          raise SystemExit(f'PNG no se puede dibujar en lienzo {root}: {relative}: {exc}')
           print(f'{len(assets)} stickers y fondos del Studio presentes y verificados.')
           PY
           # The archived January PDF remains as a source asset, never a public bypass.
