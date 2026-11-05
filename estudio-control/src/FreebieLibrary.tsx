@@ -18,6 +18,9 @@ const PACK = {
   images: 'https://drive.google.com/drive/folders/1zqzLqSkPobH0DQnGfmFAhNkJ0o2YxQNm',
   prompts: 'https://drive.google.com/file/d/1YoVsthcjmxEamdB7CKah75eHzsnpWL4g/view',
   animation: 'https://drive.google.com/file/d/1QZ-QmXCnen-EEwWoYw50lmLRjHWaUoHX/view',
+  access: 'https://podcast.thelaunchera.com/freebies/december-lavender/',
+  signup: 'https://podcast.thelaunchera.com/freebies/december-lavender/signup/',
+  make: 'https://us2.make.com/2964061/scenarios/6912342',
 };
 const PHOTOS = [
   { id: '1zkXZMsBLioAiG8-LfHDmhf4HyB6VTlMj', name: '01 · Sculpted Gloss Hero' },
@@ -135,6 +138,9 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
           <span><ClipboardCopy size={15}/> 5 prompts copiables</span>
         </div>
         <div className="freebies-actions">
+          {external(PACK.access,'Página de acceso · 5 prompts',ExternalLink)}
+          {external(PACK.signup,'Formulario de registro · diciembre',Mail)}
+          {external(PACK.make,'Automatización Make · QA pendiente',ExternalLink)}
           {external(PACK.images,'Ver 5 imágenes',ImageIcon)}
           {external(PACK.prompts,'Prompts fuente · solo administración',ClipboardCopy)}
           {external(PACK.animation,'Ver GIF',Sparkles)}
@@ -142,8 +148,8 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
         </div>
         <div className="freebies-publishing">
           <div>
-            <strong>{emailDeliveryVerified ? 'Preparado para activar' : 'Entrega por correo pendiente de configurar y probar'}</strong>
-            <small>Falta comprobar registro de email, envío, enlace de acceso y protección de la página. El material de Drive es solo para producción interna.</small>
+            <strong>{emailDeliveryVerified ? 'Preparado para activar' : 'Escenario de envío creado en Make · inactivo hasta QA'}</strong>
+            <small>Formulario y envío preparados; falta probar una entrega real, revisar el acceso y validar los cinco ejemplos visuales. El material de Drive es solo para producción interna.</small>
           </div>
           <button type="button" className={active ? 'freebies-toggle is-active' : 'freebies-toggle'} onClick={() => void onToggle()} disabled={saving || readOnly || !item || (!active && (!canLaunch || !emailDeliveryVerified))}>
             {saving ? 'Guardando…' : active ? 'Volver a borrador' : 'Activar tras verificar email'}
