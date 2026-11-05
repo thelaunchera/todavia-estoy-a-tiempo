@@ -98,17 +98,11 @@
     .waitlist-success button,.waitlist-pending button,.class-waitlist-optout{background:#191919;color:white;border:0;padding:13px 17px;font-size:12px;font-weight:700;min-height:44px;margin-top:12px}
     .waitlist-success a{display:inline-block;margin:10px 14px 10px 0}
     .lab-section{padding:90px 0}
-    .lab-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(35px,6vw,85px)}
-    .lab-art{min-height:415px;background:#c1d9e7;padding:28px;position:relative;display:flex;align-items:center;justify-content:center}
-    .lab-editor{background:#fbfbf8;border:1px solid #a1b4bd;box-shadow:0 19px 40px #19191918;width:100%;max-width:440px;transform:rotate(-2deg);overflow:hidden}
-    .lab-top{display:flex;justify-content:space-between;border-bottom:1px solid #dce4e6;padding:14px;font-size:10px;font-weight:800;letter-spacing:.04em}
-    .lab-content{display:grid;grid-template-columns:54px 1fr;min-height:250px}
-    .lab-side{background:#e4ecee;display:flex;flex-direction:column;gap:13px;padding:20px 15px}
-    .lab-side i{width:24px;height:4px;border-radius:3px;background:#9aafbb}
-    .lab-preview{position:relative;align-self:center;margin:23px 14px;box-shadow:0 7px 19px #1b211b21;overflow:hidden}
-    .lab-preview img{width:100%;height:160px;object-fit:cover;object-position:center}
-    .lab-preview:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 33.1%,#fff9 33.1%,#fff9 33.6%,transparent 33.6%,transparent 66.3%,#fff9 66.3%,#fff9 66.8%,transparent 66.8%)}
-    .lab-sticker{position:absolute;right:4%;bottom:7%;background:var(--yellow);font-weight:900;letter-spacing:.04em;font-size:15px;padding:13px 22px;transform:rotate(5deg)}
+    .lab-inner{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);align-items:center;gap:clamp(28px,4vw,68px)}
+    .lab-art{margin:0;min-width:0;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:#fff;box-shadow:0 18px 42px #19191917}
+    .lab-art a{display:block;cursor:zoom-in}
+    .lab-art img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;background:var(--paper)}
+    .lab-art figcaption{padding:11px 17px;font-size:11px;line-height:1.5;color:#58656b;background:#fff}
     .lab-copy h2{max-width:600px}
     .lab-copy p:not(.eyebrow){color:#536066;line-height:1.7;max-width:510px}
     .lab-price{display:inline-flex;align-items:baseline;gap:10px;margin:21px 0}
@@ -155,9 +149,8 @@
       .waitlist-form,.waitlist-success,.waitlist-pending{padding:26px 20px}
       .lab-section{padding:60px 0}
       .lab-inner{grid-template-columns:1fr}
-      .lab-art{min-height:340px;padding:18px}
-      .lab-content{min-height:207px}
-      .lab-preview img{height:122px}
+      .lab-art{border-radius:11px}
+      .lab-art figcaption{font-size:10px;padding:9px 12px}
       .footer-line{align-items:flex-start}
     }
     @media(max-width:375px){.top-nav{gap:7px}.brand{font-size:16px}.top-nav a{font-size:10px}.hero-actions .btn{width:100%}.hero-title{font-size:clamp(42px,10.5vw,50px)}.hero-band,.hero{min-height:785px}}
@@ -271,16 +264,12 @@
     </section>
     <section class="lab-section" id="content-lab" aria-labelledby="lab-title">
       <div class="shell lab-inner">
-        <div class="lab-art" aria-label="Illustration of a three-slide editorial carousel in the Content Lab interface">
-          <div class="lab-editor" aria-hidden="true">
-            <div class="lab-top"><strong>content lab.</strong><span>CAROUSEL STUDIO</span></div>
-            <div class="lab-content">
-              <div class="lab-side"><i></i><i></i><i></i><i></i></div>
-              <div class="lab-preview"><img src="/content-lab/prompts/matcha-02.jpg" alt=""></div>
-            </div>
-          </div>
-          <span class="lab-sticker" data-en="MAKE MORE" data-es="CREA MÁS">MAKE MORE</span>
-        </div>
+        <figure class="lab-art">
+          <a href="/assets/freebies/content-lab-carousels-editor-light.svg" target="_blank" rel="noopener" aria-label="Open larger view of the carousel editor design">
+            <img src="/assets/freebies/content-lab-carousels-editor-light.svg" alt="Light editorial carousel editor design showing stickers, a burgundy bow on the canvas, slide thumbnails and PNG export controls" width="1536" height="1024" loading="lazy" decoding="async">
+          </a>
+          <figcaption data-en="Carousel Studio · Creative editor preview. Tap to see the details." data-es="Carousel Studio · Vista del editor creativo. Toca para ver los detalles.">Carousel Studio · Creative editor preview. Tap to see the details.</figcaption>
+        </figure>
         <div class="lab-copy">
           <p class="eyebrow" data-en="LOVE THE IDEAS? MEET CONTENT LAB." data-es="¿TE GUSTAN LAS IDEAS? CONOCE CONTENT LAB.">LOVE THE IDEAS? MEET CONTENT LAB.</p>
           <h2 id="lab-title"><span data-en="From free prompts" data-es="De los prompts gratis">From free prompts</span><br><em data-en="to finished content." data-es="a contenido terminado.">to finished content.</em></h2>
