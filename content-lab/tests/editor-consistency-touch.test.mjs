@@ -3,10 +3,14 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('Post uses creation order and only explicit send-behind changes it',()=>{
+test('Post uses default creation order until explicit saved layer reorder overrides it',()=>{
  const free=read('src/FreePostStudio.tsx');
  assert.ok(free.includes("const back=decor.layers.filter(l=>l.role==='background'||l.placement==='behind-text')"));
- assert.ok(free.includes('return [...back,...layers,...legacyStickers(decor),...front]'));
+ assert.ok(free.includes('const defaultOrder=[...back,...layers,...legacyStickers(decor),...front]'));
+ assert.ok(free.includes('if(!decor.layerOrder?.length)return defaultOrder'));
+ assert.ok(free.includes('const rank=new Map(decor.layerOrder.map'));
+ assert.ok(free.includes('return [...known,...fresh]'));
+ assert.ok(free.includes('update({...decor,layerOrder:ordered})'));
  assert.ok(free.includes('renderFreePost(post,brand,images'));
  assert.ok(free.includes('onCommit={commit}'));
 });
