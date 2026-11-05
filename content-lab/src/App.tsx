@@ -587,21 +587,27 @@ function App() {
   ];
   const change = (key: keyof Post, val: string) =>
     setEditor(p => ({ ...p, [key]: val }));
-  const startFactoryWithMode = (seamless:boolean) => {
+  const startFactory = () => {
     if (!brand) return;
     setCalendarEditId('');
     // A new session must not inherit media selected for a previous carousel.
     setBackgroundPref({version:0});
     setStickerPref({version:0});
     editorSessionRef.current++;
-    const initial = {...newPost(brand.id),format:'Carousel'};
-    setEditor(inspectRecovery(seamless
-      ? {...initial,designData:JSON.stringify({version:2,slides:[],style:{seamlessEnabled:true}})}
-      : initial));
+    setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel'}));
     navigate('factory');
   };
-  const startFactory = () => startFactoryWithMode(false);
-  const startSeamless = () => startFactoryWithMode(true);
+  const startSeamless = () => {
+    if (!brand) return;
+    setCalendarEditId('');
+    setBackgroundPref({version:0});
+    setStickerPref({version:0});
+    editorSessionRef.current++;
+    // Independent draft; never changes a previously saved normal carousel.
+    setEditor(inspectRecovery({...newPost(brand.id),format:'Carousel',
+      designData:JSON.stringify({version:2,slides:[],style:{seamlessEnabled:true}})}));
+    navigate('factory');
+  };
   const startVertical = (format:'Reel'|'Story'='Reel')=>{
     if(!brand)return;
     setCalendarEditId('');
