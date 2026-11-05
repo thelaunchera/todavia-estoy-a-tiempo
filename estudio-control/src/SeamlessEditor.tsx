@@ -14,12 +14,22 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3} from 'lucide-react';
 import './seamless-app.css';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 const labUrl=(file:string)=>'/content-lab/'+file;
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
 const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙','🦋','🍒','📌','📎','📝','🧘🏽‍♀️','🏋🏽‍♀️','🍵','💪','👟'];
+const STUDIO_TEXT_FONTS:Record<string,string>={
+ arial:'Arial,sans-serif',prompt:'Prompt,Arial,sans-serif',futura:'Futura,Arial,sans-serif',
+ poster:'"Archivo Black",Impact,"Arial Black",sans-serif',
+ playfair:'"Playfair Display",Georgia,serif',
+ cormorant:'"Cormorant Garamond",Georgia,serif',
+ outfit:'Outfit,Arial,sans-serif',
+ manrope:'Manrope,Arial,sans-serif',
+ syne:'Syne,Arial,sans-serif'
+};
+const studioTextFont=(font?:string)=>STUDIO_TEXT_FONTS[font||'']||STUDIO_TEXT_FONTS.arial;
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
@@ -54,7 +64,7 @@ export default function SeamlessEditor(){
  const [activeBrief,setActiveBrief]=useState<EditorialDraft|null>(null);
  const [quickPanel,setQuickPanel]=useState<'fotos'|'fondos'|'stickers'|'capas'|'elementos'|null>(null);
  const [stickerSearch,setStickerSearch]=useState('');
- const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|null>(null);
+ const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [libraryStatus,setLibraryStatus]=useState('');
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
@@ -149,10 +159,12 @@ export default function SeamlessEditor(){
   ctx.save();ctx.scale(scale,scale);ctx.fillStyle=doc.background;ctx.fillRect(0,0,clipWidth,H);
   for(let slideIndex=0;slideIndex<doc.count;slideIndex++){const src=doc.backgroundImages?.[slideIndex];if(src){try{const bg=await loadImage(src);const left=slideIndex*W-clipStart;ctx.save();ctx.beginPath();ctx.rect(left,0,W,H);ctx.clip();const factor=Math.max(W/bg.width,H/bg.height);const dw=bg.width*factor,dh=bg.height*factor;ctx.drawImage(bg,left+(W-dw)/2,(H-dh)/2,dw,dh);ctx.restore()}catch{}}}
   for(const it of doc.items){if(it.kind==='text'&&it.id===omitTextId)continue;const x=it.x-clipStart;const bounds=itemBounds(it);ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,it.opacity??1));if(it.rotation){ctx.translate(x+bounds.w/2,it.y+bounds.h/2);ctx.rotate(it.rotation*Math.PI/180);ctx.translate(-(x+bounds.w/2),-(it.y+bounds.h/2))}if(it.kind==='sticker'){ctx.font=it.fontSize+'px Apple Color Emoji, Segoe UI Emoji, sans-serif';ctx.textBaseline='top';ctx.fillText(it.text||'✨',x,it.y)}else if(it.kind==='text'){
-    ctx.fillStyle=it.color;ctx.font='bold '+it.fontSize+'px Arial, sans-serif';ctx.textBaseline='top';
+    ctx.fillStyle=it.color;ctx.font=(it.fontWeight||700)+' '+it.fontSize+'px '+studioTextFont(it.fontFamily);ctx.textBaseline='top';
+    if(it.textShadow){ctx.shadowColor='#19191966';ctx.shadowBlur=it.fontSize*.12;ctx.shadowOffsetY=it.fontSize*.05}
+    if(it.textOutline){ctx.strokeStyle='#FFFFFF';ctx.lineWidth=Math.max(1,it.fontSize*.045);ctx.lineJoin='round'}
     const lines=textLines(it),curve=clampTextCurve(it.curve||0);
     const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines,it.letterSpacing||0);
-    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0));
+    lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0,!!it.textOutline));
    }else if(it.src){try{const im=await loadImage(it.src);ctx.save();ctx.beginPath();const h=it.width*im.height/im.width;const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));ctx.roundRect(x,it.y,it.width,h,radius);ctx.clip();ctx.drawImage(im,x,it.y,it.width,h);ctx.restore()}catch{}}ctx.restore()}
   ctx.restore();
  };
@@ -586,7 +598,7 @@ export default function SeamlessEditor(){
     onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
     style={{position:'absolute',left:current.x*viewportScale,top:current.y*viewportScale,
      width:Math.max(100,current.width*viewportScale),height:Math.max(52,itemBounds(current).h*viewportScale+14),
-     maxWidth:'none',font:'700 '+current.fontSize*viewportScale+'px/1.3 Arial,sans-serif',
+     maxWidth:'none',font:(current.fontWeight||700)+' '+current.fontSize*viewportScale+'px/1.3 '+studioTextFont(current.fontFamily),
      color:current.color,background:'rgba(250,248,243,.95)',border:'2px solid #447B94',borderRadius:6,
      padding:3,resize:'none',zIndex:5,boxShadow:'0 2px 12px #0002'}}/>}
    </div>
@@ -608,7 +620,7 @@ export default function SeamlessEditor(){
   </nav>
 
   {current&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
-  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':'Posición'}</strong>
+  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
   {activeInspector==='opacity'&&<div className="studio-app-range-row">
     <label htmlFor="studio-selected-opacity">Opacidad</label><input id="studio-selected-opacity" type="range" min="0" max="100" step="1"
@@ -620,6 +632,41 @@ export default function SeamlessEditor(){
     <label htmlFor="studio-selected-rotate">Rotación</label><input id="studio-selected-rotate" type="range" min="-180" max="180" step="1"
      aria-label="Girar elemento" value={current.rotation||0} onChange={e=>update(current.id,{rotation:Number(e.target.value)})}/>
     <output htmlFor="studio-selected-rotate">{current.rotation||0}°</output></div>}
+  {activeInspector==='curve'&&current.kind==='text'&&<div className="studio-app-curve-inspector" role="group" aria-label="Curvar texto en el Studio">
+    <div className="studio-app-range-row"><label htmlFor="studio-selected-curve">Curvatura</label>
+      <input id="studio-selected-curve" type="range" min="-100" max="100" step="1" value={clampTextCurve(current.curve||0)}
+        onChange={e=>update(current.id,{curve:Number(e.target.value)})}/>
+      <output>{clampTextCurve(current.curve||0)}%</output></div>
+    <div className="studio-app-position-row">
+      {([['Recto',0],['Arco',45],['Círculo',90],['Hacia abajo',-55]] as const)
+        .map(([name,value])=><button type="button" key={name} aria-pressed={(current.curve||0)===value}
+          onClick={()=>update(current.id,{curve:value})}>{name}</button>)}
+    </div>
+    <div className="studio-app-range-row"><label htmlFor="studio-selected-tracking">Espaciado</label>
+      <input id="studio-selected-tracking" type="range" min="-8" max="30" step="1" value={clampLetterSpacing(current.letterSpacing||0)}
+        onChange={e=>update(current.id,{letterSpacing:Number(e.target.value)})}/><output>{clampLetterSpacing(current.letterSpacing||0)}</output>
+    </div>
+  </div>}
+  {activeInspector==='text'&&current.kind==='text'&&<div className="studio-app-font-inspector">
+    <div className="studio-app-position-row">
+      <button type="button" onClick={editOnCanvas}>✎ Editar texto</button>
+      <button type="button" onClick={()=>update(current.id,{fontWeight:(current.fontWeight||700)===900?400:900})}>Negrita {(current.fontWeight||700)===900?'900':'400–900'}</button>
+    </div>
+    <label>Tipografía <select value={current.fontFamily||'arial'} aria-label="Tipografía del texto"
+      onChange={e=>update(current.id,{fontFamily:e.target.value})}>
+      {Object.keys(STUDIO_TEXT_FONTS).map(name=><option value={name} key={name}>{name==='poster'?'Poster Extra Bold':name[0].toUpperCase()+name.slice(1)}</option>)}
+    </select></label>
+    <div className="studio-app-range-row"><label htmlFor="studio-font-size">Tamaño</label>
+      <input id="studio-font-size" type="range" min="20" max="240" step="2" value={current.fontSize}
+       onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/><output>{current.fontSize}px</output>
+    </div>
+    <label>Color <input type="color" aria-label="Color del texto" value={current.color}
+      onChange={e=>update(current.id,{color:e.target.value})}/></label>
+    <div className="studio-app-position-row">
+      <button type="button" aria-pressed={!!current.textShadow} onClick={()=>update(current.id,{textShadow:!current.textShadow})}>Sombra</button>
+      <button type="button" aria-pressed={!!current.textOutline} onClick={()=>update(current.id,{textOutline:!current.textOutline})}>Contorno</button>
+    </div>
+  </div>}
   {activeInspector==='position'&&<div className="studio-app-position-row">
     <button type="button" onClick={()=>reorderSelected('front')}>Traer delante</button>
     <button type="button" onClick={()=>reorderSelected('back')}>Enviar detrás</button>
@@ -680,6 +727,8 @@ export default function SeamlessEditor(){
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>}
   {current&&<div className="studio-app-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
+    {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='text'} onClick={()=>setActiveInspector(v=>v==='text'?null:'text')}><Type size={20}/><small>Texto</small></button>}
+    {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
     <button type="button" aria-pressed={activeInspector==='opacity'} onClick={()=>setActiveInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
     <button type="button" aria-pressed={quickPanel==='capas'} onClick={()=>{setActiveInspector(null);setQuickPanel(v=>v==='capas'?null:'capas')}}><Layers3 size={20}/><small>Capas</small></button>
     <button type="button" aria-pressed={activeInspector==='position'} onClick={()=>setActiveInspector(v=>v==='position'?null:'position')}><span aria-hidden="true">▣</span><small>Posición</small></button>
