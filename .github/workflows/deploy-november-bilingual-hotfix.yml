@@ -62,43 +62,11 @@ jobs:
           # Overlay only their static image files; do not replace the paid Lab app.
           mkdir -p _podcast_pages/content-lab/resources
           cp -R content-lab/public/resources/. _podcast_pages/content-lab/resources/
-          # Studio renders from its own static directory, independent of the frozen Lab build.
-          mkdir -p _podcast_pages/estudio/resources
-          cp -R content-lab/public/resources/. _podcast_pages/estudio/resources/
+          # Only PNGs that match the approved manifest and decode fully go into
+          # the private Studio; damaged originals remain untouched in GitHub.
           python3 -m pip install --quiet pillow
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          from PIL import Image
-
-          source = Path('estudio-control/src/lab-assets.ts').read_text()
-          prefix = 'export const LAB_ASSETS = '
-          if not source.startswith(prefix) or ' as const;' not in source:
-              raise SystemExit('El catálogo de assets del Studio cambió de formato.')
-          assets = json.loads(source[len(prefix):].rsplit(' as const;', 1)[0])
-          if not assets:
-              raise SystemExit('El catálogo del Studio está vacío.')
-          for asset in assets:
-              relative = asset['file']
-              if not relative.startswith('resources/') or '..' in Path(relative).parts:
-                  raise SystemExit(f'Ruta de recurso inválida: {relative}')
-              for root in ('estudio', 'content-lab'):
-                  destination = Path('_podcast_pages') / root / relative
-                  if not destination.is_file() or destination.stat().st_size < 100:
-                      raise SystemExit(f'Archivo faltante en {root}: {relative}')
-                  if destination.suffix.lower() == '.png':
-                      try:
-                          with Image.open(destination) as image:
-                              image.verify()
-                          with Image.open(destination) as image:
-                              rgba = image.convert('RGBA')
-                              alpha_max = rgba.getchannel('A').getextrema()[1]
-                              if image.width < 32 or image.height < 32 or alpha_max == 0:
-                                  raise ValueError('Imagen vacía o dimensiones inválidas')
-                      except Exception as exc:
-                          raise SystemExit(f'PNG no se puede dibujar en lienzo {root}: {relative}: {exc}')
-          print(f'{len(assets)} stickers y fondos del Studio presentes y verificados.')
-          PY
+          python3 estudio-control/scripts/verify_shared_stickers.py
+          test -s _podcast_pages/estudio/assets-health.json
           # The archived January PDF remains as a source asset, never a public bypass.
           rm -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
           test ! -f _podcast_pages/assets/freebies/january-salt-line/SALT_LINE_January_2027_Freebie.pdf
