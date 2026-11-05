@@ -1,7 +1,8 @@
 import {useEffect, useMemo, useRef} from 'react';
-import {ArrowRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Images, Layers3, Lightbulb, Palette, Plus, Sparkles} from 'lucide-react';
+import {ArrowRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Layers3, Lightbulb, Plus, Sparkles} from 'lucide-react';
 import {readCarouselDesign} from './CarouselArtDirection';
 import {assetCategory,type LibraryAsset} from './MediaAsset';
+import {UniversalLabIcon} from './UniversalLabIcon';
 import './CreatorDashboard.css';
 
 export type CreatorDashboardPost = {
@@ -152,22 +153,22 @@ export default function CreatorDashboard({
    </div>
    <div className="cld-resource-grid">
     <button type="button" className="cld-resource-card cld-resource-media" onClick={()=>onNavigate('media')}>
-     <span className="cld-resource-icon"><Images size={20}/></span><strong>{es?'Mis fotografías':'My photos'}</strong><small>{es?'Tus imágenes y archivos':'Your images and files'}</small>
+     <span className="cld-resource-icon"><UniversalLabIcon name="media" size={37}/></span><strong>{es?'Mis fotografías':'My photos'}</strong><small>{es?'Tus imágenes y archivos':'Your images and files'}</small>
      <span className="cld-resource-media-strip" aria-hidden="true">
       {libraryPhotos.length>0?libraryPhotos.slice(0,3).map(a=><span key={a.id}>{images[a.id]&&<img src={images[a.id]} alt=""/>}</span>):<><i/><i/><i/></>}
      </span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-elements" onClick={()=>onNavigate('stickers')}>
-     <span className="cld-resource-icon"><Sparkles size={20}/></span><strong>{es?'Stickers y elementos':'Stickers & elements'}</strong><small>{es?'Detalles para diseñar':'Details for your designs'}</small>
-     <span className="cld-resource-sticker" aria-hidden="true"><span>✳</span></span>
+     <span className="cld-resource-icon"><UniversalLabIcon name="stickers" size={37}/></span><strong>{es?'Stickers y elementos':'Stickers & elements'}</strong><small>{es?'Detalles para diseñar':'Details for your designs'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="stickers" size={83}/></span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-prompts" onClick={()=>onNavigate('prompts')}>
-     <span className="cld-resource-icon"><BookOpen size={20}/></span><strong>{es?'Biblioteca de prompts':'Prompt library'}</strong><small>{es?'Ideas para crear mejor':'Ideas to create better'}</small>
-     <span className="cld-resource-paper" aria-hidden="true"><i/><i/><i/></span>
+     <span className="cld-resource-icon"><UniversalLabIcon name="prompts" size={37}/></span><strong>{es?'Biblioteca de prompts':'Prompt library'}</strong><small>{es?'Ideas para crear mejor':'Ideas to create better'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="prompts" size={86}/></span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-brand" onClick={onEditBrand}>
-     <span className="cld-resource-icon"><Palette size={20}/></span><strong>{es?'Mi Brand Kit':'My Brand Kit'}</strong><small>{es?'Colores y estilo de marca':'Brand colors and style'}</small>
-     <span className="cld-resource-swatches" aria-hidden="true"><i style={{backgroundColor:brand.color||'#F2D85B'}}/><i style={{backgroundColor:brand.background||'#FAF8F3'}}/><i style={{backgroundColor:brand.secondaryColor||'#CFE4EA'}}/><i style={{backgroundColor:'#191919'}}/></span>
+     <span className="cld-resource-icon"><UniversalLabIcon name="brand" size={37}/></span><strong>{es?'Mi Brand Kit':'My Brand Kit'}</strong><small>{es?'Colores y estilo de marca':'Brand colors and style'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="brand" size={84}/></span>
     </button>
    </div>
   </section>
