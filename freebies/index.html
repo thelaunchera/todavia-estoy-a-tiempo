@@ -35,8 +35,8 @@
 
     /* Full-bleed editorial photography: no inset image or framed card. */
     .hero-band{position:relative;min-height:clamp(690px,82svh,830px);overflow:hidden;display:flex;align-items:flex-end;background:var(--ink);color:var(--paper)}
-    .hero-cover{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}
-    .hero-band:after{content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(10,18,26,.87) 0%,rgba(10,18,26,.64) 33%,rgba(10,18,26,.04) 80%),linear-gradient(0deg,rgba(10,18,26,.54),transparent 60%)}
+    .hero-cover{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 50%}
+    .hero-band:after{content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(7,18,31,.23) 0%,rgba(7,18,31,.08) 42%,transparent 68%)}
     .hero{position:relative;z-index:2;width:min(1220px,100% - 44px);min-height:inherit;display:flex;align-items:center;padding:82px 0}
     .hero-copy{min-width:0;max-width:580px}
     .hero .eyebrow{color:#e3eff4}
@@ -155,6 +155,24 @@
     }
     @media(max-width:375px){.top-nav{gap:7px}.brand{font-size:16px}.top-nav a{font-size:10px}.hero-actions .btn{width:100%}.hero-title{font-size:clamp(42px,10.5vw,50px)}.hero-band,.hero{min-height:785px}}
         @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+  
+    /* Photo-first hero for mobile and tablet: preserve the entire supplied 16:9 image,
+       with editorial copy below rather than cutting off the face in an ultra-tall crop. */
+    @media(max-width:900px){
+      .hero-band{display:block;min-height:0;background:#17263a}
+      .hero-cover{position:relative;inset:auto;z-index:0;width:100%;height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center}
+      .hero-band:after{display:none}
+      .hero{min-height:0;display:flex;align-items:stretch;padding:30px 0 43px}
+      .hero-copy{max-width:650px}
+      .hero-title{font-size:clamp(45px,8.6vw,77px);line-height:1.02;letter-spacing:-.065em;margin:15px 0 20px}
+      .hero-sub{max-width:570px}
+      .hero .btn-outline{background:transparent}
+    }
+    @media(max-width:375px){
+      .hero-band,.hero{min-height:0}
+      .hero-title{font-size:clamp(42px,11vw,51px)}
+    }
+
   </style>
 </head>
 <body>
@@ -171,7 +189,7 @@
   </header>
   <main>
     <section class="hero-band" aria-labelledby="main-title">
-      <img class="hero-cover" src="/assets/freebies/freebie-library-fullbleed-hero.svg" width="1536" height="1024" alt="Creative founder working from a sofa on the Jaramillo Boutique website with photography and branding notes" fetchpriority="high" decoding="async">
+      <img class="hero-cover" src="/assets/freebies/freebie-library-hero-navy-20261105.jpg" width="1536" height="864" alt="The Launch Era founder smiling at her creative desk, with a laptop, notebook and coffee against a navy studio backdrop" fetchpriority="high" decoding="async">
       <div class="shell hero">
       <div class="hero-copy">
         <p class="eyebrow" data-en="THE LAUNCH ERA / FREEBIE LIBRARY" data-es="THE LAUNCH ERA / BIBLIOTECA GRATUITA">THE LAUNCH ERA / FREEBIE LIBRARY</p>
