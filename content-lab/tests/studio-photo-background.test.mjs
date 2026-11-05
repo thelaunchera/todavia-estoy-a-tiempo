@@ -8,20 +8,24 @@ const moduleSource=readFileSync(new URL('../../estudio-control/src/photo-backgro
 const parsedStudio=ts.createSourceFile('SeamlessEditor.tsx',studio,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const parsedModule=ts.createSourceFile('photo-background.ts',moduleSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
 
-test('photo background tool and Studio editor parse as valid TypeScript/TSX',()=>{
- assert.deepEqual(parsedStudio.parseDiagnostics.map(d=>ts.flattenDiagnosticMessageText(d.messageText,' ')),[]);
- assert.deepEqual(parsedModule.parseDiagnostics.map(d=>ts.flattenDiagnosticMessageText(d.messageText,' ')),[]);
+test('background tool and Studio editor parse as valid TypeScript/TSX',()=>{
+ const diagnostics=source=>source.parseDiagnostics.map(d=>{
+  const {line,character}=source.getLineAndCharacterOfPosition(d.start||0);
+  return (line+1)+':'+(character+1)+' '+ts.flattenDiagnosticMessageText(d.messageText,' ');
+ });
+ assert.deepEqual(diagnostics(parsedStudio),[]);
+ assert.deepEqual(diagnostics(parsedModule),[]);
 });
 
-test('uploaded photos are eligible for background removal and in-place replacement',()=>{
- assert.match(studio,/readAsDataURL\(file\)/,'uploaded files enter the normal image layer');
- assert.match(studio,/photo\.id===item\.id&&photo\.src===item\.src/,'replace only the selected image in the same document');
- assert.match(studio,/aria-label="Fondo de foto seleccionada"/,'background removal visible in compact toolbar');
- assert.match(studio,/onClick=\{\(\)=>void removePhotoBackground\(\)\}/,'remove action present for selected photo');
- assert.match(studio,/setMessage\('Fondo eliminado/);
+test('uploaded photos can be cut out in place, without replacing other elements',()=>{
+ assert.match(studio,/readAsDataURL\(file\)/);
+ assert.match(studio,/photo\.id===item\.id&&photo\.src===item\.src/);
+ assert.match(studio,/aria-label="Fondo de foto seleccionada"/);
+ assert.match(studio,/onClick=\{\(\)=>void removePhotoBackground\(\)\}/);
+ assert.match(studio,/setMessage\('Fondo liso eliminado/);
 });
 
-test('original photo remains available for restoring across saved project sessions',()=>{
+test('original photo remains available for restoration across saved projects',()=>{
  assert.match(studio,/originalBackupId\?:string/);
  assert.match(studio,/storeOriginalPhoto\(original\)/);
  assert.match(studio,/restorePhotoBackground=async/);
@@ -29,22 +33,22 @@ test('original photo remains available for restoring across saved project sessio
  assert.match(moduleSource,/readAsDataURL\(blob\)/);
 });
 
-test('background removal avoids double compositing and large mobile canvases',()=>{
- assert.match(moduleSource,/const maxPixels=mobile\?2_400_000:8_000_000/);
- assert.match(moduleSource,/const maxSide=mobile\?2048:4096/);
- assert.match(moduleSource,/const prepared=await prepareRemovalPhoto\(original\)/);
- assert.match(moduleSource,/removeBackground\(prepared/);
- assert.match(moduleSource,/fileToDataUrl\(result\.blob\)/,'BG0 returns a finished transparent PNG');
- assert.match(moduleSource,/bitmap\.close\(\)/,'source pixels are released before AI inference');
- assert.match(moduleSource,/canvas\.width=1;canvas\.height=1/,'intermediate canvas is released');
- assert.doesNotMatch(moduleSource,/globalCompositeOperation='destination-in'/,'avoid a duplicate full-size compositing pass');
- assert.match(moduleSource,/quality:'quality'/);
- assert.doesNotMatch(moduleSource,/model:'lite'/,'BG0 chooses the supported model automatically');
+test('only a color-uniform, edge-connected background may be removed without AI',()=>{
+ assert.match(moduleSource,/export async function cutoutSolidBackground/);
+ assert.match(moduleSource,/Math\.sqrt\(2_400_000\/\(bitmap\.width\*bitmap\.height\)\)/);
+ assert.match(moduleSource,/new Uint8Array\(w\*h\)/);
+ assert.match(moduleSource,/if\(candidates\.length<6\)/);
+ assert.match(moduleSource,/if\(removed<w\*h\*\.02\)/);
+ assert.match(moduleSource,/bitmap\.close\(\)/);
+ assert.match(moduleSource,/canvas\.width=1;canvas\.height=1/);
+ assert.doesNotMatch(moduleSource,/@bg0\/browser|removeBackground\(prepared|globalCompositeOperation='destination-in'/);
+ assert.doesNotMatch(studio,/Quitar fondo con IA|cutoutOriginalPhoto/);
 });
 
-test('background failure leaves original photo untouched and offers a fallback',()=>{
+test('failure preserves the original and does not redirect out of Studio',()=>{
  assert.match(studio,/catch\(err\)\{\s*if\(generation===backgroundGeneration\.current\)/);
  assert.match(studio,/La foto original sigue intacta/);
  assert.match(studio,/Quitar fondo liso/);
  assert.match(studio,/if\(busy\)return/);
+ assert.doesNotMatch(studio,/window\.location\.href=.*background|window\.location\.replace\(.*background/);
 });
