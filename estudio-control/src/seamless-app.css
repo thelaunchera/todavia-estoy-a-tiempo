@@ -77,7 +77,7 @@
 .studio-app-opacity-control label{font-size:13px;font-weight:800;white-space:nowrap}
 .studio-app-opacity-control input[type=range]{min-width:48px;flex:1;accent-color:#191919;touch-action:manipulation}
 .studio-app-opacity-control output{min-width:41px;text-align:right;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
-.studio-app-opacity-control button{flex:0 0 auto;min-height:38px;padding:7px 10px;border:1px solid #d3d9db;border-radius:10px;background:#fff;color:#191919;font:700 12px inherit}
+.studio-app-opacity-control button{flex:0 0 auto;min-height:38px;padding:7px 10px;border:1px solid #d3d9db;border-radius:10px;background:#fff;color:#191919;font-size:12px;font-weight:700;font-family:inherit}
 @media(max-width:799px){
   .studio-app-opacity-control{
     position:fixed;left:8px;right:8px;width:auto;max-width:650px;
