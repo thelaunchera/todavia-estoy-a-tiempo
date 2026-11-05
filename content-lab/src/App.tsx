@@ -128,7 +128,7 @@ const nav: { id: Tab; title: string; icon: typeof Sparkles }[] = [
   { id: 'stickers', title: 'Stickers', icon: ImagePlus },
   { id: 'backgrounds', title: 'Fondos', icon: Palette },
   { id: 'idea-bank', title: 'Banco de ideas + IA', icon: Lightbulb },
-  { id: 'prompt-studio', title: 'Prompt Studio · 30 Recipes', icon: BookOpen },
+  { id: 'prompt-studio', title: 'Prompt Studio', icon: BookOpen },
   { id: 'prompts', title: '1 Product → 8 Prompts', icon: Palette },
   { id: 'posts', title: 'My content', icon: FolderOpen },
   { id: 'media', title: 'Media library', icon: Images },
@@ -1562,7 +1562,7 @@ function App() {
             </>
           )}
           {brand && tab === 'idea-bank' && (
-            <IdeaBank brandName={brand.name} audience={brand.audience} language={brand.language} locale={loginLanguage} onUse={(idea:Idea)=>{
+            <IdeaBank brandName={brand.name} audience={brand.audience} locale={loginLanguage} onUse={(idea:Idea)=>{
               start(idea.angle);
               setEditor(p=>({...p,title:idea.title,hook:idea.hook,slides:idea.brief}));
               setManualOpen(true);

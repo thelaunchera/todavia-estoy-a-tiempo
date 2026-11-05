@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {BookOpen,Bookmark,Check,Copy,Search,SlidersHorizontal,ArrowRight,Trash2,Sparkles,FolderHeart} from 'lucide-react';
-import {PROMPT_CATEGORIES,PROMPT_SHELVES,isPhotoTemplate,fillTemplate,promptLang,type PromptTemplate} from './PromptLibrary';
+import {PROMPT_CATEGORIES,PROMPT_SHELVES,isPhotoTemplate,fillTemplate,type PromptTemplate} from './PromptLibrary';
 import {DEFAULT_CONTROLS,composeCreativePrompt,type PromptControls} from './PromptEngine';
 import {api} from './platform/client';
 type Brand={id:string;name:string;language:string;background:string;rules:string};
@@ -8,7 +8,7 @@ type Saved={id:string;brandId:string;title:string;text:string;rawInstruction?:st
 type Props={brand:Brand;locale:'es'|'en';onUse:(draft:string,settings:PromptControls)=>void;notify:(s:string)=>void;showError:(e:unknown)=>void};
 const getError=(e:unknown)=>e instanceof Error?e.message:'No se pudo completar la acción.';
 export default function PromptStudio({brand,locale,onUse,notify,showError}:Props){
- const language=locale,contentLanguage=promptLang(brand.language),en=language==='en';
+ const language=locale,contentLanguage=locale,en=language==='en';
  const editorRef=useRef<HTMLElement|null>(null),manualRef=useRef<HTMLTextAreaElement|null>(null);
  const moveToEditor=()=>{requestAnimationFrame(()=>{editorRef.current?.scrollIntoView({behavior:'smooth',block:'start'});manualRef.current?.focus({preventScroll:true})})};
  const [query,setQuery]=useState(''),[category,setCategory]=useState('');
@@ -33,7 +33,7 @@ export default function PromptStudio({brand,locale,onUse,notify,showError}:Props
  };
  useEffect(()=>{void load()},[brand.id]);
  const select=(p:PromptTemplate)=>{
-  setManual(fillTemplate(p.body[contentLanguage],{subject:settings.subject,background:settings.environment}));
+  setManual(fillTemplate(p.body[contentLanguage],{subject:settings.subject,background:settings.environment},language));
   setCustomTitle(p.title[language]);setSelectedKind(isPhotoTemplate(p.category)?'photo':'text');setMode('library');moveToEditor();
  };
  const compiled=useMemo(()=>selectedKind==='text'?manual:composeCreativePrompt({...settings,instruction:manual||settings.instruction},contentLanguage),[settings,manual,contentLanguage,selectedKind]);

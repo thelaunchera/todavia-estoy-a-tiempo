@@ -127,18 +127,18 @@ const englishIdeas:Pick<Idea,'title'|'hook'|'brief'>[]=[
   }
 ];
 const englishCategories:Record<string,string>={Educativo:'Educational','Problema real':'Real problems',Historia:'Stories',Producto:'Product',Comunidad:'Community'};
-type Props={brandName:string;audience:string;language:string;locale?:'es'|'en';onUse:(idea:Idea)=>void};
-export default function IdeaBank({brandName,audience,language,locale='es',onUse}:Props){
+type Props={brandName:string;audience:string;locale?:'es'|'en';onUse:(idea:Idea)=>void};
+export default function IdeaBank({brandName,audience,locale='es',onUse}:Props){
  const en=locale==='en';
  const [category,setCategory]=useState('Todas'),[search,setSearch]=useState(''),[offer,setOffer]=useState(''),[goal,setGoal]=useState('conectar'),[copied,setCopied]=useState('');
- const localIdeas=useMemo(()=>ideas.map((idea,i)=>language==='English'?{...idea,...englishIdeas[i],category:en?englishCategories[idea.category]||idea.category:idea.category}:{...idea,category:en?englishCategories[idea.category]||idea.category:idea.category}),[en,language]);
+ const localIdeas=useMemo(()=>ideas.map((idea,i)=>en?{...idea,...englishIdeas[i],category:englishCategories[idea.category]||idea.category}:idea),[en]);
  const allLabel=en?'All':'Todas';
  useEffect(()=>{setCategory(en?'All':'Todas')},[en]);
  const categories=[allLabel,...Array.from(new Set(localIdeas.map(i=>i.category)))];
  const filtered=useMemo(()=>localIdeas.filter(i=>(category===allLabel||!categories.includes(category)||i.category===category)&&(i.title+' '+i.hook+' '+i.brief).toLowerCase().includes(search.toLowerCase())),[localIdeas,category,search,allLabel]);
  const goalEnglish:Record<string,string>={conectar:'build a connection',educar:'educate','mostrar mi producto':'show my product','invitar a comprar sin presión':'invite someone to buy without pressure'};
  const prompt=(idea:Idea)=>{
-  const contentLanguage=language==='English'?'natural US English':'natural Spanish';
+  const contentLanguage=en?'natural US English':'español latinoamericano natural';
   if(en)return 'Act as a content strategist for '+brandName+'. Create ORIGINAL content for my audience: '+(audience||'my ideal customer')+'. Content language: '+contentLanguage+'. What I offer: '+(offer.trim()||'[describe your product or service]')+'. Goal: '+(goalEnglish[goal]||goal)+'. Idea: '+idea.title+'. Opening hook: "'+idea.hook+'". Direction: '+idea.brief+'. Give me three short alternative hooks, a single-post outline, a five-slide carousel structure when appropriate, a static reel-cover concept, a short caption and a clear CTA. Do not invent reviews, sales data, benefits or personal stories. Use specific, human language with no generic AI phrases. Make the idea instantly understandable. Do not generate images: I will use my own photos in Content Lab.';
   return 'Actúa como estratega de contenido para '+brandName+'. Crea una propuesta ORIGINAL para mi audiencia: '+(audience||'mi público ideal')+'. Idioma del contenido: '+contentLanguage+'. Lo que vendo u ofrezco: '+(offer.trim()||'[describe aquí tu producto o servicio]')+'. Mi objetivo: '+goal+'. Idea: '+idea.title+'. Hook inicial: "'+idea.hook+'". Dirección: '+idea.brief+'. Devuélveme tres hooks cortos, estructura de post, guion de cinco slides si aplica, portada estática de reel, caption breve y CTA claro. No inventes testimonios, ventas ni experiencias personales. Usa un tono humano y específico, sin frases genéricas. No generes imágenes; usaré mis fotos en Content Lab.';
  };
