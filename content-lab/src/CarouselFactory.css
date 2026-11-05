@@ -586,3 +586,34 @@
  .factory-canvas-active .factory-app-header-actions .btn svg{width:14px;height:14px}
 }
 @media(max-width:365px){.factory-canvas-active .factory-app-header-actions .btn svg{display:none}}
+
+/* iPad landscape/portrait: never squeeze a six-slide artboard between the
+   library and an always-visible right preview. Preview opens on demand. */
+@media (min-width:921px) and (max-width:1360px){
+ .factory-canvas-active .factory-persistent-layout{display:block!important;min-width:0}
+ .factory-canvas-active .factory-persistent-content{width:100%;min-width:0}
+ .factory-canvas-active .factory-persistent-preview{display:none}
+ .factory-canvas-active .factory-mobile-preview-trigger{
+   display:flex;align-items:center;justify-content:center;gap:8px;
+   margin:5px 0 9px auto;min-height:44px;padding:8px 13px;
+   border:1px solid #cad9de;background:#fff;color:#284e60;
+   border-radius:11px;font-size:12px;font-weight:750;cursor:pointer
+ }
+ .factory-canvas-active .factory-mobile-preview-trigger img{width:30px;height:37px;object-fit:cover;border-radius:5px}
+ .factory-canvas-active .factory-mobile-preview-backdrop{
+   display:block;position:fixed;inset:0;z-index:7001;border:0;background:#15273583
+ }
+ .factory-canvas-active .factory-persistent-preview.is-open{
+   display:block;position:fixed;z-index:7002;top:50%;left:50%;right:auto;
+   bottom:auto;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 40px));
+   max-width:none;max-height:86dvh;overflow:auto;margin:0;padding:20px;
+   background:#fff;border:1px solid #cedde1;border-radius:18px;
+   box-shadow:0 18px 60px #13222d5c
+ }
+ .factory-canvas-active .factory-mobile-preview-close{
+   display:flex;align-items:center;justify-content:center;gap:7px;
+   margin:0 0 10px auto;min-height:42px;padding:8px 12px;
+   background:#f5f6f4;color:#191919;border:1px solid #d5dfe1;border-radius:9px
+ }
+ .factory-canvas-active .factory-persistent-content .factory-work{display:block}
+}
