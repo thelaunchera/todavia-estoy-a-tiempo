@@ -593,7 +593,7 @@
  .factory-canvas-active .factory-persistent-layout{display:block!important;min-width:0}
  .factory-canvas-active .factory-persistent-content{width:100%;min-width:0}
  .factory-canvas-active .factory-persistent-preview{display:none}
- .factory-canvas-active .factory-mobile-preview-trigger{
+ .factory .factory-mobile-preview-trigger{
    display:flex;align-items:center;justify-content:center;gap:8px;
    margin:5px 0 9px auto;min-height:44px;padding:8px 13px;
    border:1px solid #cad9de;background:#fff;color:#284e60;
