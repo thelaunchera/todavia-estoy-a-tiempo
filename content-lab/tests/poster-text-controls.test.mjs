@@ -47,6 +47,7 @@ test('Pure export typography helper validates weights and poster font choices',(
  runInNewContext(transpiled,{module,exports:module.exports,require:(path)=>{
   if(path==='./TouchGeometry')return {clampPanoramaRect:x=>x,layerCornerPixels:()=>0};
   if(path==='./PhotoCrop')return {coverPlacement:()=>({})};
+  if(path==='./CurvedText')return {clampTextCurve:n=>Math.max(-100,Math.min(100,n||0)),drawCurvedTextLine:()=>{},curvedTextExtraHeight:()=>0};
   throw Error('Unexpected import '+path);
  }});
  assert.equal(module.exports.panoramaTextWeight(900),900);
