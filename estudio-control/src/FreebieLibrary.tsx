@@ -25,6 +25,17 @@ const NOVEMBER_PHOTOS = [
   {src:'/assets/freebies/november-website/02_coffee_planning.svg',name:'02 · Creative process'},
   {src:'/assets/freebies/november-website/03_mobile_review.svg',name:'03 · Mobile review'},
 ] as const;
+const SALT_LINE = {
+  folder: 'https://drive.google.com/drive/folders/1KcEkuwkLcmzUY9PWsh0cvUSsCOyAzDsA',
+  pdf: 'https://drive.google.com/file/d/1WLGzHF6B4OTiSCNXiQbO2inqH6yzdgAm/view',
+  hero: '1cjtBtDSUEsMmh_v9zzpExZJYWgJLN7g0',
+} as const;
+const SALT_LINE_PHOTOS = [
+  { id: '1wbN3yQEhlC6hAWg9h5oDQSXhhsfy7Pkx', name: '01 · The Woman' },
+  { id: '1PBlU6oDOb2EIVkULqJpw4rHaFt0bXVRI', name: '04 · The Iris' },
+  { id: '1Mk-bNVW1vZ0SVFTPs2nN57U8eYLEdfsR', name: '07 · The Lip' },
+  { id: '1PIe48A_dJaZmQ7noiDLijxBivcqIz9l6', name: '06 · The Hollow' },
+] as const;
 const PACK = {
   folder: 'https://drive.google.com/drive/folders/1qD7EmHCyKEs-aHUFlloKP9-nDuv1q7Ug',
   images: 'https://drive.google.com/drive/folders/1zqzLqSkPobH0DQnGfmFAhNkJ0o2YxQNm',
@@ -95,7 +106,29 @@ export default function FreebieLibrary({entries, onChanged, readOnly=false}: Pro
       </div>
       <span className="freebies-sparkle" aria-hidden="true"><Sparkles size={26}/></span>
     </header>
-    <div className="freebies-collection" aria-label="Los tres freebies en una galería">
+    <div className="freebies-collection" aria-label="Biblioteca de freebies y lanzamientos">
+    <div className="freebies-card freebies-salt-line-card">
+      <div className="freebies-approved-cover">
+        <a href={'https://drive.google.com/file/d/' + SALT_LINE.hero + '/view'} target="_blank" rel="noopener noreferrer" aria-label="Abrir hero SALT LINE de enero en Drive">
+          <iframe src={drivePreview(SALT_LINE.hero)} title="SALT LINE · Hero aprobado · Enero 2027" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+          <span>Hero aprobado · Original en Drive <ExternalLink size={13}/></span>
+        </a>
+      </div>
+      <div className="freebies-info">
+        <div className="freebies-status-row"><span className="freebies-status"><LockKeyhole size={14}/> Preparado en privado · entrega pendiente de QA</span><span className="freebies-date"><CalendarDays size={15}/> Enero 2027</span></div>
+        <h3>SALT LINE · 8 Macro Beauty Photo Prompts</h3>
+        <p className="freebies-description">Serie editorial macro con textura real, 8 prompts adaptables y 4 fotos individuales aprobadas. Usa el hero original para mostrar calidad y textura.</p>
+        <div className="freebies-meta"><span><Languages size={15}/> Inglés</span><span><ImageIcon size={15}/> 4 fotos individuales</span><span><ClipboardCopy size={15}/> PDF · 13 páginas</span></div>
+        <div className="freebies-inline-gallery" aria-label="Cuatro fotografías individuales de SALT LINE">
+          {SALT_LINE_PHOTOS.map(photo => <a key={photo.id} href={'https://drive.google.com/file/d/'+photo.id+'/view'} target="_blank" rel="noopener noreferrer" className="freebies-inline-photo" aria-label={'Abrir '+photo.name+' en Drive'}><iframe title={photo.name} src={drivePreview(photo.id)} loading="lazy" tabIndex={-1} /><span>{photo.name}</span></a>)}
+        </div>
+        <div className="freebies-actions">
+          {external(SALT_LINE.folder,'Carpeta SALT LINE · Drive',ExternalLink)}
+          {external(SALT_LINE.pdf,'Revisar PDF · uso interno',ClipboardCopy)}
+        </div>
+        <p className="freebies-disclaimer">Preparado para enero. No presentar como publicado ni habilitar entrega hasta probar formulario, envío de Resend y permiso de acceso del PDF para la persona que lo solicite.</p>
+      </div>
+    </div>
     <div className="freebies-card freebies-matcha-card">
       <div className="freebies-matcha-art">
         <div className="freebies-art-top"><span>THE LAUNCH ERA</span><span>FREEBIE · ORIGINAL</span></div>
