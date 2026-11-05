@@ -8,7 +8,7 @@ import {ArrowRight,Download,Search,Upload,Trash2} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import './BackgroundLibrary.css';
 
-type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;onDeletePreset:(id:FreeBackgroundId,name:string)=>Promise<void>;isAdmin?:boolean};
+type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onPublish?:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;onDeletePreset:(id:FreeBackgroundId,name:string)=>Promise<void>;isAdmin?:boolean};
 type GalleryFilter=BackgroundCategory|'mine'|'shared';
 function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;loadImage:(id:string)=>void}){
  const target=useRef<HTMLSpanElement>(null);
@@ -25,8 +25,8 @@ function AssetPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;load
    {src?<img loading="lazy" src={src} alt={'Fondo '+displayAssetName(asset)}/>:<span className="background-shared-loading"/>}
  </span>;
 }
-export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,onDelete,onDeletePreset,isAdmin=false}:Props){
- const fileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
+export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUpload,onPublish,onDelete,onDeletePreset,isAdmin=false}:Props){
+ const fileRef=useRef<HTMLInputElement>(null),publishFileRef=useRef<HTMLInputElement>(null),bulkFileRef=useRef<HTMLInputElement>(null),
   [busy,setBusy]=useState(false),[error,setError]=useState(''),[zipError,setZipError]=useState(''),
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<GalleryFilter>('all'),[search,setSearch]=useState('');
@@ -51,10 +51,20 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    catch(e){setError(e instanceof Error?e.message:'No se pudo subir el fondo.')}
    finally{setBusy(false);if(fileRef.current)fileRef.current.value=''}
  };
+ const publish=async(file?:File)=>{
+   if(!file||!onPublish)return;
+   if(!window.confirm('¿Publicar «'+file.name+'» para todos los compradores del Content Lab?\\n\\nUsa «Mi fondo privado» para tus propios fondos.')){if(publishFileRef.current)publishFileRef.current.value='';return}
+   setBusy(true);setError('');
+   try{const item=await onPublish(file,uploadCategory);if(item)loadImage(item.id)}
+   catch(e){setError(e instanceof Error?e.message:'No se pudo publicar el fondo.')}
+   finally{setBusy(false);if(publishFileRef.current)publishFileRef.current.value=''}
+ };
  const importCollection=async(file?:File)=>{
    if(!file)return;
    setZipError('');setBusy(true);setBulkProgress(null);
    try{
+     if(!onPublish)throw Error('Solo la administración publica colecciones para compradores.');
+     if(!window.confirm('¿Publicar esta colección para todos los compradores?\\n\\nComprueba que no incluye fotos ni fondos personales.'))return;
      const name=file.name||'archivo';
      const sizeMB=(file.size/1_000_000).toFixed(1);
      if(!/\.zip$/i.test(name)&&!/(application\/zip|x-zip-compressed)/i.test(file.type))
@@ -80,7 +90,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
        const mime=/\.png$/i.test(filename)?'image/png':/\.webp$/i.test(filename)?'image/webp':'image/jpeg';
        const uploadFile=new File([new Uint8Array(bytes)],filename,{type:mime});
        try{
-         const item=await onUpload(uploadFile,uploadCategory);
+         const item=await onPublish(uploadFile,uploadCategory);
          if(item){existing.add(key);loadImage(item.id)}else failed++;
        }catch{failed++}
        done++;setBulkProgress({done,total:entries.length,failed});
@@ -101,7 +111,7 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  const categoryButtons:{id:GalleryFilter;label:string}[]=[
    {id:'all',label:'Todos'},
    ...BACKGROUND_CATEGORIES.map(group=>({id:group.id,label:group.label})),
-   {id:'shared',label:'Del estudio'},
+   {id:'shared',label:'Colección compartida'},
    {id:'mine',label:'Mis fondos'},
  ];
  const ownVisible=own.filter(a=>displayAssetName(a).toLowerCase().includes(search.toLowerCase().trim()));
@@ -217,20 +227,30 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
    </div>
   </details>}
   <details className="background-library-upload">
-    <summary>{isAdmin?'Publicar fondo para todos':'Subir mi fondo privado'}</summary>
-    <div><strong>{isAdmin?'Biblioteca compartida de alumnos':'Mi biblioteca privada'}</strong>
-     <p>{isAdmin?'Este fondo quedará incluido para todas las cuentas con acceso activo.':
-      'Solo tú puedes ver y utilizar este fondo. Ninguna otra cuenta tendrá acceso.'}</p>
-     {isAdmin&&<label className="background-publish-category">Categoría del fondo
-       <select value={uploadCategory} onChange={e=>setUploadCategory(e.target.value)}>
-        {BACKGROUND_CATEGORIES.map(cat=><option key={cat.id} value={cat.label}>{cat.label}</option>)}
-       </select>
-     </label>}
+    <summary>Subir mi fondo privado</summary>
+    <div><strong>Mi biblioteca privada</strong>
+     <p>Solo tú puedes ver y utilizar este fondo. Ninguna otra cuenta tendrá acceso.</p>
+     
      <button className="btn dark" type="button" disabled={busy} onClick={()=>fileRef.current?.click()}>
        <Upload size={16}/>{busy?'Subiendo…':'Elegir archivo'}</button>
      <input ref={fileRef} hidden type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void upload(e.target.files?.[0])}/>
     </div>
   </details>
+  {isAdmin&&onPublish&&<details className="background-library-upload background-admin-publish">
+    <summary>Publicar fondo para compradores · confirmación requerida</summary>
+    <div><strong>Recursos comerciales compartidos</strong>
+      <p>Solo materiales aprobados del Content Lab. Tus fondos privados del Studio nunca deben publicarse aquí.</p>
+      <label className="background-publish-category">Categoría del fondo
+        <select value={uploadCategory} onChange={e=>setUploadCategory(e.target.value)}>
+          {BACKGROUND_CATEGORIES.map(cat=><option key={cat.id} value={cat.label}>{cat.label}</option>)}
+        </select>
+      </label>
+      <button className="btn dark" type="button" disabled={busy} onClick={()=>publishFileRef.current?.click()}>
+        <Upload size={16}/>{busy?'Publicando…':'Seleccionar fondo aprobado para todos'}
+      </button>
+      <input ref={publishFileRef} hidden type="file" accept="image/png,image/jpeg,image/webp,image/heic" onChange={e=>void publish(e.target.files?.[0])}/>
+    </div>
+  </details>}
   {error&&<p role="alert">{error}</p>}
   {(filter==='mine'||own.length>0&&filter==='all')&&<section className="background-own"><h2>{isAdmin?'Fondos que subí':'Mis fondos privados'}</h2>
    <div className="background-library-grid own-backgrounds">{ownVisible.map(a=><article key={a.id}>
