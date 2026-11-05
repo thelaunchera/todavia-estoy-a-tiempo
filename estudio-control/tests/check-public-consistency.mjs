@@ -131,9 +131,9 @@ for(const [path,locale,canonical,homeHref] of [
  assert.ok(page.includes('class="wordmark" href="'+homeHref+'"'),path+' logo stays in the chosen language');
  assert.ok(page.includes('podcast-hero-rebalance-20261102.css?v=1'),path+' mobile hero styles load');
  assert.ok(page.includes('href="#escuchar"')&&page.includes('href="#regalo"')&&page.includes('href="#coleccion"')&&page.includes('href="#ayuda"'),path+' navigation stays relevant to the podcast');
- assert.ok(!/<a\\b[^>]*href="(?:clases\\/primera-landing|content-lab\\/)/i.test(page),path+' avoids duplicated class or Lab offers');
+ assert.ok(!/<a\b[^>]*href="(?:clases\/primera-landing|content-lab\/)/i.test(page),path+' avoids duplicated class or Lab offers');
  for(const id of ['guide-form','newsletter-form','help-form']) assert.ok(page.includes('id="'+id+'"'),path+' keeps form '+id);
- const hashes=[...page.matchAll(/<a\\b[^>]*href="#([^"]+)"/g)].map(match=>match[1]);
+ const hashes=[...page.matchAll(/<a\b[^>]*href="#([^"]+)"/g)].map(match=>match[1]);
  for(const anchor of hashes) assert.ok(page.includes('id="'+anchor+'"'),path+' valid in-page target #'+anchor);
 }
 console.log('QA OK: podcast-only menus, bilingual canonical metadata, mobile styling and linked forms.');
