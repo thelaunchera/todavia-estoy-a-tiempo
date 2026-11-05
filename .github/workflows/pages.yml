@@ -120,7 +120,9 @@ jobs:
           VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_PODCAST_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           cd estudio-control
-          npm install --no-audit --no-fund
+          # Browser build uses packaged binaries; skip optional Node-only onnxruntime
+          # postinstall downloads (which fail intermittently with upstream 504).
+          npm install --no-audit --no-fund --ignore-scripts
           ./node_modules/.bin/esbuild student-supabase.entry.js --bundle --platform=browser --format=esm --target=es2020 --minify --outfile=../alumnos/supabase-local.js
           node --check ../alumnos/supabase-local.js
           # Parse the classroom's complete dependency graph before deployment.
