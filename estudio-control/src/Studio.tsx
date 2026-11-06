@@ -3,6 +3,7 @@ import { MICRO_SCENE_SECTION } from './youtube/micro-production';
 import SeamlessEditor from './SeamlessEditor';
 import SupportInbox from './SupportInbox';
 import WebsiteInquiries from './WebsiteInquiries';
+import OperationsCenter, {type OperationsDestination} from './OperationsCenter';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
 import {PRIVATE_DEMO_KIT_SECTION} from './PrivateDemoKits';
@@ -66,6 +67,7 @@ import { editorialPlan } from './editorial-plan';
 type Kind = 'episodios' | 'tareas' | 'productos' | 'ideas';
 type Page =
   | 'inicio'
+  | 'operaciones'
   | 'episodios'
   | 'reels'
   | 'reels-clase'
@@ -187,6 +189,7 @@ const LOGO = SITE + 'assets/logo-podcast-04.svg';
 const COVER = SITE + 'assets/podcast-episodio-01-azul-v3.webp';
 const NAV = [
   { id: 'inicio', label: 'Inicio · mi agenda', icon: LayoutDashboard, group: 'MI CENTRO' },
+  { id: 'operaciones', label: 'The Launch Era · Operaciones', icon: ShoppingBag },
   { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Mis pendientes', icon: ListChecks },
@@ -216,6 +219,7 @@ const NAV = [
 ] as const;
 const LABELS: Record<Page, string> = {
   inicio: 'Mi agenda · Studio',
+  operaciones: 'The Launch Era · Operaciones',
   episodios: 'Podcast · capítulos y guiones',
   reels: 'Podcast · reels',
   'reels-clase': 'Clase · reels',
@@ -333,7 +337,7 @@ function App() {
   const [classPendingTarget, setClassPendingTarget] = useState<{kind:'lesson'|'weekly';id:string}|null>(null);
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'seamless' || section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
+    return section === 'operaciones' || section === 'seamless' || section === 'ventas' || section === 'links' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
@@ -760,7 +764,7 @@ function App() {
     if (p === 'tareas') void refresh();
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
     const nextUrl = new URL(window.location.href);
-    if (p==='seamless' || p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
+    if (p==='operaciones' || p==='seamless' || p==='ventas' || p==='links' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
     else nextUrl.searchParams.delete('seccion');
     window.history.replaceState(window.history.state, '', nextUrl.toString());
     if (!directPending) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1304,6 +1308,7 @@ function App() {
               <span className="eyebrow">
                 {page === 'inicio'
                   ? 'BIENVENIDA A TU ESPACIO'
+                  : page === 'operaciones' ? 'THE LAUNCH ERA / ADMINISTRACIÓN PRIVADA'
                   : page === 'youtube' ? 'YOUTUBE / SERIE ANIMADA'
                   : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'espera' || page === 'bonos' || page === 'club')
                     ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
@@ -1333,6 +1338,7 @@ function App() {
               </button>
             </div>
           )}
+          {page === 'operaciones' && <OperationsCenter onNavigate={(next:OperationsDestination)=>change(next)} />}
           {page === 'inicio' && (
             <>
               <section className="hero">
@@ -1355,6 +1361,9 @@ function App() {
                       Ver mis demos
                     </button>
                   </div>
+                  <button type="button" className="studio-ops-home-link" onClick={()=>change('operaciones')}>
+                    <ShoppingBag size={16}/> Abrir operaciones de The Launch Era <ExternalLink size={15}/>
+                  </button>
                 </div>
                 <div className="hero-cover">
                   <img src={COVER} alt="Portada del primer episodio" />
