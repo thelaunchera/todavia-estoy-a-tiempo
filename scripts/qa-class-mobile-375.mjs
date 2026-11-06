@@ -13,6 +13,13 @@ try {
   const page=await browser.newPage({viewport:{width,height:812},deviceScaleFactor:1,isMobile:true,hasTouch:true});
   await page.goto(origin+'/clases/primera-landing.html',{waitUntil:'networkidle',timeout:45000});
   await page.locator('.class-hero-intro h1').waitFor({state:'visible'});
+  // Inspect the actual design after selecting only essential cookies in this test context.
+  // Never bypass or remove the site's consent UI for real visitors.
+  const essential=page.getByRole('button',{name:'Solo necesarias'});
+  if(await essential.isVisible().catch(()=>false)){
+    await essential.click();
+    await page.waitForTimeout(180);
+  }
   await page.screenshot({path:'artifacts/class-mobile/hero-'+width+'.png',fullPage:false});
   const report=await page.evaluate(()=>{
    const selectors={
@@ -88,5 +95,31 @@ try {
   assert((await page.evaluate(()=>document.documentElement.scrollWidth))<=width+2,'After preview overflows mobile at '+width);
   await page.close();
  }
- console.log('PASS: Class landing 320,375,390,430px, no overlap or clipping, cinematic hero, readable CTA and launch price.');
+ // Screen-level regression coverage for the editorial offer cards and materials on larger displays.
+ for (const width of [768,1440]){
+  const page=await browser.newPage({viewport:{width,height:900},deviceScaleFactor:1});
+  await page.goto(origin+'/clases/primera-landing.html',{waitUntil:'networkidle',timeout:45000});
+  await page.locator('.class-hero-intro h1').waitFor({state:'visible'});
+  const essential=page.getByRole('button',{name:'Solo necesarias'});
+  if(await essential.isVisible().catch(()=>false))await essential.click();
+  const summary=await page.evaluate(()=>{
+   const cardEls=[...document.querySelectorAll('#recorrido .class-journey-card')];
+   const cards=cardEls.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,width:r.width,height:r.height}});
+   return {vw:innerWidth,sw:document.documentElement.scrollWidth,cardCount:cards.length,
+     cards,price:document.querySelector('.class-price-campaign .class-price-current strong')?.textContent?.trim(),
+     benefits:document.querySelectorAll('.tle-offer-benefits li').length,
+     form:!!document.getElementById('course-waitlist-form')};
+  });
+  assert(summary.sw<=width+2,'Horizontal overflow at '+width+': '+summary.sw);
+  assert.equal(summary.cardCount,3,'Three step cards required at '+width);
+  assert.equal(summary.benefits,3,'Three offer benefits required at '+width);
+  assert.equal(summary.price,'$9.99','Launch price must be accurate');
+  assert(summary.form,'Waitlist form must still exist');
+  for(const c of summary.cards)assert(c.width>180&&c.height>150&&c.x>=-2&&c.right<=width+2,'Clipped/empty card at '+width+': '+JSON.stringify(c));
+  if(width===1440)assert(summary.cards[0].x < summary.cards[1].x && summary.cards[1].x < summary.cards[2].x,'Desktop cards should be a true 3-column grid');
+  await page.screenshot({path:'artifacts/class-mobile/editorial-'+width+'.png',fullPage:true,animations:'disabled',timeout:30000});
+  console.log('EDITORIAL_CLASS_DESKTOP_QA '+JSON.stringify({width,scrollWidth:summary.sw,price:summary.price,cards:summary.cards}));
+  await page.close();
+ }
+ console.log('PASS: Class landing mobile 320/375/390/430 and responsive editorial cards 768/1440, no overflow, preserved waitlist.');
 } finally {await browser.close();}
