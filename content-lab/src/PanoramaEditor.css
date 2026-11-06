@@ -553,3 +553,59 @@
 .panorama-branding-gallery span{font-size:10px;color:#66717a}
 .panorama-discovery-categories{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:799px){.panorama-branding-gallery{max-height:34dvh}.panorama-branding-gallery button{min-height:144px}}
+
+/* Phone and tablet: editing tools belong to the artboard, never to the browser
+   bottom edge. Matches the Studio canvas/toolbar layout without sharing data.
+   This final override intentionally wins over older fixed/sticky mobile docks. */
+@media (max-width:920px){
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded){
+   padding:3px 0 8px!important;
+   grid-template-rows:auto auto auto!important;
+   align-content:start!important;
+   row-gap:5px!important;
+ }
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-body{
+   grid-column:1/-1!important;
+   grid-row:2!important;
+   position:relative!important;
+   top:auto!important;
+   bottom:auto!important;
+   z-index:1!important;
+   align-self:stretch;
+   margin:0!important;
+ }
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-primary-actions{
+   grid-column:1/-1!important;
+   grid-row:3!important;
+   order:initial!important;
+   position:relative!important;
+   top:auto!important;
+   bottom:auto!important;
+   left:auto!important;
+   right:auto!important;
+   transform:none!important;
+   display:flex!important;
+   align-self:stretch!important;
+   justify-self:stretch!important;
+   width:100%!important;
+   max-width:100%!important;
+   box-sizing:border-box!important;
+   margin:0!important;
+   padding:5px!important;
+   z-index:2!important;
+   box-shadow:0 3px 11px #19191915!important;
+   overflow-x:auto!important;
+   overflow-y:hidden!important;
+   overscroll-behavior-x:contain;
+   -webkit-overflow-scrolling:touch;
+ }
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded)>.panorama-primary-actions>button{
+   flex:0 0 76px!important;
+   min-width:76px!important;
+   min-height:53px!important;
+   white-space:nowrap!important;
+ }
+ .lab-carousel-editor-mode .factory-bc-workspace .panorama-editor:not(.expanded).layer-selected>.panorama-primary-actions{
+   display:flex!important;
+ }
+}
