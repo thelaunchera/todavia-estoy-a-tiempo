@@ -6,7 +6,7 @@ import {mareaDrive} from './marea-kit';
 import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-kit';
 import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalPrompts} from './lavender-kit';
 import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromptDocument, wokSocialRepo, wokSocialSite} from './wok-social-kit';
-import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewDrive, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
+import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
