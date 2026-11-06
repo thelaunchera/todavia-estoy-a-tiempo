@@ -33,7 +33,10 @@ test('Private brand media and shared stickers are both present in editors, with 
  assert.ok(app.includes('isAdmin={Boolean(aiWallet?.admin)}'));
  assert.ok(app.includes('onPublish={publishSharedSticker}'));
  assert.ok(gallery.includes("a.brandId===brandId||a.shared"));
- assert.ok(gallery.includes("isAdmin?await onPublish(item.file,item.group):await onUpload(item.file)"));
+ assert.ok(gallery.includes("classifyAdminDesignAsset(item.file,item.source,importKind)"));
+ assert.ok(gallery.includes("kind==='background'?await onPublishBackground"));
+ assert.ok(gallery.includes(":await onUpload(item.file)")); // Buyer uploads still stay private.
+ assert.ok(app.includes("onPublishBackground={publishSharedBackground}"));
  assert.ok(gallery.includes('SHA')===false); // checksum is enforced by server, not fake UI.
  assert.ok(gallery.includes('✓ Incluido'));
  assert.ok(gallery.includes("download(asset)"));

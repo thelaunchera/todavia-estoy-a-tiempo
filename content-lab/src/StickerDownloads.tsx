@@ -113,7 +113,17 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
    onDragOver={e=>{e.preventDefault();if(!running)setDragActive(true)}}
    onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setDragActive(false)}}
    onDrop={e=>{e.preventDefault();setDragActive(false);if(!running)void importFiles(Array.from(e.dataTransfer.files))}}>
-   <div><strong>{dragActive?'Suelta el archivo PNG o ZIP aquí 🎀':isAdmin?'Publicar colección para todos los compradores':'Tus propios stickers (opcional)'}</strong><p>{isAdmin?'Selecciona el paquete original completo una sola vez. Después estará disponible automáticamente para todos los compradores con acceso activo. Los duplicados exactos se descartan por contenido.':'La biblioteca compartida se actualiza automáticamente. También puedes añadir PNG privados de tu marca, sin modificar el catálogo compartido.'}</p></div><button type="button" className="btn dark" disabled={running} onClick={()=>fileRef.current?.click()}>{running?<LoaderCircle className="spin" size={15}/>:<Upload size={15}/>} {isAdmin?'Publicar PNG / ZIP':'Subir mis PNG'}</button><input type="file" ref={fileRef} hidden accept=".zip,image/png" multiple onChange={e=>void importFiles(Array.from(e.target.files||[]))}/></div>
+   <div><strong>{dragActive?'Suelta el archivo PNG o ZIP aquí 🎀':isAdmin?'Publicar colección para todos los compradores':'Tus propios stickers (opcional)'}</strong><p>{isAdmin?'Al subir un PNG o ZIP, los fondos se guardan en Fondos y los stickers en Stickers. Puedes elegir el destino; los compradores solo reciben recursos que publiques aquí.':'La biblioteca compartida se actualiza automáticamente. También puedes añadir PNG privados de tu marca, sin modificar el catálogo compartido.'}</p></div><button type="button" className="btn dark" disabled={running} onClick={()=>fileRef.current?.click()}>{running?<LoaderCircle className="spin" size={15}/>:<Upload size={15}/>} {isAdmin?'Publicar PNG / ZIP':'Subir mis PNG'}</button><input type="file" ref={fileRef} hidden accept=".zip,image/png" multiple onChange={e=>void importFiles(Array.from(e.target.files||[]))}/></div>
+  {isAdmin&&<div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap',margin:'9px 0'}}>
+   <label htmlFor="admin-library-import-kind" style={{fontSize:12,fontWeight:700}}>Dónde guardar los archivos</label>
+   <select id="admin-library-import-kind" value={importKind} disabled={running}
+    onChange={e=>setImportKind(e.target.value as ImportKind)}>
+    <option value="auto">Automático · identificar stickers y fondos</option>
+    <option value="sticker">Solo stickers</option>
+    <option value="background">Solo fondos</option>
+   </select>
+   <small>La detección automática respeta los archivos PNG individuales.</small>
+  </div>}
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-destination"><label htmlFor="sticker-use-where">Añadir sticker a</label><select id="sticker-use-where" value={destination} onChange={e=>setDestination(e.target.value as 'carousel'|'cover')}><option value="carousel">Carrusel (slide actual)</option><option value="cover">Post individual / cover</option></select><small>También puedes añadirlos directamente desde Brand Grid, Carousel Factory y el editor de posts.</small></div>
   <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
