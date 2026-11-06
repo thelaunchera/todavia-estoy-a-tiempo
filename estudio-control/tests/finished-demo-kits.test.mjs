@@ -128,8 +128,8 @@ test('Havana 19 has 13 individual image references, photo prompts and seven GitH
 
 test('WOK SOCIAL conserva 14 fotos individuales, 7 pasos y permisos de Aula privados',()=>{
  const kit=read('src/wok-social-kit.ts');
- const photoMatch=kit.match(/wokSocialPhotos: FinishedDemoPhoto\\[\\] = (\\[[\\s\\S]*?\\]);/);
- const stepMatch=kit.match(/wokSocialRebuildPrompts: DemoRebuildPrompt\\[\\] = (\\[[\\s\\S]*?\\]);/);
+ const photoMatch=kit.match(/wokSocialPhotos: FinishedDemoPhoto\[\] = (\[[\s\S]*?\]);/);
+ const stepMatch=kit.match(/wokSocialRebuildPrompts: DemoRebuildPrompt\[\] = (\[[\s\S]*?\]);/);
  assert.ok(photoMatch,'Faltan las fotos privadas de WOK SOCIAL');
  assert.ok(stepMatch,'Faltan los pasos de reconstrucción de WOK SOCIAL');
  const photos=JSON.parse(photoMatch[1]);
@@ -146,7 +146,7 @@ test('WOK SOCIAL conserva 14 fotos individuales, 7 pasos y permisos de Aula priv
   assert.ok(p.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/wok-social/assets/'));
  }
  for(const p of steps)assert.ok(p.title&&p.prompt&&p.say&&p.show);
- assert.match(kit,/drive\\.google\\.com\\/drive\\/folders\\/1HLcYvc7rrW8ncOACtxSkKknkVDjbXNcM/);
+ assert.match(kit,/drive\.google\.com\/drive\/folders\/1HLcYvc7rrW8ncOACtxSkKknkVDjbXNcM/);
  assert.match(kit,/wokSocialPromptDocument/);
  assert.match(demosSource,/ClassroomDemoPublication/);
 });
