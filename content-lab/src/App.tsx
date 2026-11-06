@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {draftFingerprint,writeDraftBackup,removeDraftBackup,newerUnsavedBackup,type LocalDraft} from './DraftRecovery';
 import { api, auth, image } from './platform/client';
+import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {sourceAwareScale,downloadLosslessPng} from './ExportQuality';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
@@ -462,7 +463,7 @@ function App() {
   },[]);
   const toast = (s: string) => {
     setNotice(s);
-    window.setTimeout(() => setNotice(''), 4500);
+    window.setTimeout(() => setNotice(''), CREATIVE_EDITOR_RULES.feedbackDurationMs);
   };
   const err = (e: unknown) => {
     const x = e as {
@@ -946,6 +947,35 @@ function App() {
     }).catch(err);
     return ()=>{cancelled=true};
   },[tab,account?.email]);
+  // Refresh shared catalogues after Studio uploads, without ever reading a buyer's private files.
+  useEffect(()=>{
+    if(!account||!['stickers','backgrounds','media','create','vertical','factory','grid'].includes(tab))return;
+    let active=true;
+    const refresh=()=>{
+      if(document.visibilityState==='hidden')return;
+      if(['stickers','media','create','vertical','factory','grid'].includes(tab)){
+        void api.get('/api/sticker-catalog').then(({data})=>{
+          if(active)setAssets(prev=>[
+            ...prev.filter(asset=>assetCategory(asset)!=='sticker'||!asset.shared),
+            ...(data as Asset[])
+          ]);
+        }).catch(()=>{});
+      }
+      if(['backgrounds','media','create','vertical','factory','grid'].includes(tab)){
+        void api.get('/api/background-catalog').then(({data})=>{
+          if(active)setAssets(prev=>[
+            ...prev.filter(asset=>!(asset.shared&&assetCategory(asset)==='background')),
+            ...(data as Asset[])
+          ]);
+        }).catch(()=>{});
+      }
+    };
+    const onFocus=()=>refresh();
+    const timer=window.setInterval(refresh,45_000);
+    window.addEventListener('focus',onFocus);
+    return()=>{active=false;window.clearInterval(timer);window.removeEventListener('focus',onFocus);};
+  },[tab,account?.email]);
+
   const deleteLibraryAsset=async(asset:Asset):Promise<void>=>{
     const category=assetCategory(asset);
     if(asset.shared&&!aiWallet?.admin)throw Error('Solo la administradora puede borrar recursos compartidos.');
@@ -993,7 +1023,7 @@ function App() {
   };
   const publishSharedSticker=async(file:File,stickerGroup:string):Promise<Asset|null>=>{
     if(!aiWallet?.admin)throw Error('Solo la administradora publica stickers para todos.');
-    if(!/[.]png$/i.test(file.name)||file.size>5000000)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
+    if(!/[.]png$/i.test(file.name)||file.size>CREATIVE_EDITOR_RULES.maxPublishedFileBytes)throw Error('El sticker debe ser PNG y medir menos de 5 MB.');
     const encoded=await new Promise<string>((resolve,reject)=>{
       const reader=new FileReader();
       reader.onload=()=>resolve(String(reader.result||'').split(',')[1]||'');

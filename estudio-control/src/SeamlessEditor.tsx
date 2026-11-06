@@ -9,6 +9,8 @@ import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
+import {useStudioLibrarySync} from './studio-library-sync';
+import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
@@ -19,7 +21,7 @@ import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,Sliders
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
-const defaults={count:5,background:'#FAF8F3',backgroundImages:{} as Record<number,string>,items:[] as Item[]};
+const defaults={count:5,background:CREATIVE_EDITOR_RULES.defaultCanvasColor,backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // Studio copies its own shared resources on deployment.
 const labUrl=(file:string)=>new URL('resources/'+file.replace(/^resources\//,''),document.baseURI).href;
 const resolveImageSource=(src:string)=>{
@@ -75,7 +77,7 @@ export default function SeamlessEditor(){
  const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
  const [message,setMessage]=useState('');
  // Keep feedback brief and non-blocking; new actions restart the two-second countdown.
- useEffect(()=>{if(!message)return;const timeout=window.setTimeout(()=>setMessage(''),2000);return()=>window.clearTimeout(timeout)},[message]);
+ useEffect(()=>{if(!message)return;const timeout=window.setTimeout(()=>setMessage(''),CREATIVE_EDITOR_RULES.feedbackDurationMs);return()=>window.clearTimeout(timeout)},[message]);
  const [busy,setBusy]=useState(false);
  const [backgroundProgress,setBackgroundProgress]=useState('');
  const [manualCutout,setManualCutout]=useState<{id:number;src:string;originalSrc:string;originalBackupId?:string}|null>(null);
@@ -102,7 +104,7 @@ export default function SeamlessEditor(){
   try{
    const images:File[]=[];let total=0;
    for(const file of files){
-    if(file.size>60_000_000)throw Error('Cada ZIP debe pesar menos de 60 MB.');
+    if(file.size>CREATIVE_EDITOR_RULES.maxStickerZipBytes)throw Error('Cada ZIP debe pesar menos de 60 MB.');
     if(/\.zip$/i.test(file.name)){
      const unpacked=unzipSync(new Uint8Array(await file.arrayBuffer()),{filter:entry=>{
       if(!/\.(png|jpe?g|webp)$/i.test(entry.name)||entry.name.includes('__MACOSX')||entry.name.split('/').pop()?.startsWith('.'))return false;
@@ -114,7 +116,7 @@ export default function SeamlessEditor(){
     }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){total+=file.size;images.push(file);}
    }
    if(!images.length)throw Error('Selecciona PNG, JPG, WEBP o un ZIP que contenga imágenes.');
-   if(images.length>100||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
+   if(images.length>CREATIVE_EDITOR_RULES.maxStickerImportCount||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
    const next=[...importedStickers];let added=0;
    for(const image of images){
     if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
@@ -134,6 +136,8 @@ export default function SeamlessEditor(){
  };
 
  const [libraryStatus,setLibraryStatus]=useState('');
+ const backgroundPublishInput=useRef<HTMLInputElement>(null);
+ const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus);
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
  const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
  useEffect(()=>{
@@ -901,6 +905,10 @@ export default function SeamlessEditor(){
       </button>)}
     </div>}
     {openPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
+     <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,gridColumn:'1 / -1'}}
+      disabled={publishingBackgrounds} onClick={()=>backgroundPublishInput.current?.click()}>
+      {publishingBackgrounds?'Publicando fondos…':'＋ Publicar fondos · Studio + Lab'}</button>
+     {backgroundStatus&&<small role="status" style={{gridColumn:'1 / -1'}}>{backgroundStatus}</small>
      {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}} onClick={()=>void addEditableBackground(doc.backgroundImages[slide])}>✎ Editar fondo de este slide</button>}
      {doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide)&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}}
        onClick={()=>{const layer=doc.items.find(it=>it.role==='background'&&it.backgroundSlide===slide);if(layer){setSelected(layer.id);setActiveInspector('size');setQuickPanel(null)}}}>✎ Seleccionar y agrandar fondo</button>}
@@ -920,8 +928,10 @@ export default function SeamlessEditor(){
       </button>)}
     </div>}
     {openPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
-      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Subir stickers PNG o ZIP'}</button>
-      <small>Se guardan en este dispositivo para tus próximos diseños.</small>
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Publicar stickers · Studio + Lab'}</button>
+      <small>Estos stickers se publican para los compradores del Lab. Las fotos y fondos subidos al lienzo son privados.</small>
+      {syncStatus&&<small role="status">{syncStatus}</small>}
+      {syncStatus.includes('pendientes')&&<button type="button" style={control} onClick={retry}>Reintentar sincronización</button>
       {stickerImportStatus&&<small role="status">{stickerImportStatus}</small>}
       <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
         onChange={e=>setStickerSearch(e.target.value)}/>
@@ -964,14 +974,15 @@ export default function SeamlessEditor(){
   <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
-    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Subir stickers</button>
+    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Publicar stickers · Studio + Lab</button>
     {wideScreen&&<button type="button" className="studio-sidebar-toggle" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(v=>!v)}} aria-expanded={!!openPanel}>{sidebarCollapsed?'Abrir biblioteca':'Ocultar biblioteca'}</button>}
     <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
     <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
     <button type="button" className="primary" onClick={()=>void downloadSlide(slide)} disabled={busy}>{busy?'Preparando…':'Exportar PNG'}</button>
    </div>
   </header>
-  <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Subir stickers PNG o ZIP" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
+  <input ref={backgroundPublishInput} type="file" multiple accept="image/png,image/jpeg,image/webp" aria-label="Publicar fondos compartidos" style={{display:'none'}} onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length)void publishBackgrounds(files);}}/>
+  <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Publicar stickers en Studio y Lab" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
   <input ref={photoInput} type="file" accept="image/*" onChange={onFile}
     style={{position:'absolute',width:1,height:1,opacity:0,pointerEvents:'none'}} aria-label="Elegir foto del dispositivo"/>
 

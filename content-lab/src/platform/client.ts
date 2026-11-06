@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import {CREATIVE_EDITOR_RULES} from '../../../creative-shared/editor-rules';
 import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
 import {clearActivity,hasExpiredActivity,lastActivity,recordActivity} from '../SessionActivity';
 import {findBundledDesignAsset,isBundledDesignAsset,bundledDesignAssets,bundledDesignAssetUrl} from '../BundledDesignAssets';
@@ -349,7 +350,7 @@ export const api={
       if(typeof payload?.content!=='string'||payload.content.length>7000000)
         throw Error('El archivo del fondo no es válido.');
       const bytes=Uint8Array.from(atob(payload.content),c=>c.charCodeAt(0));
-      if(bytes.length<200||bytes.length>5000000)throw Error('El fondo debe medir menos de 5 MB.');
+      if(bytes.length<200||bytes.length>CREATIVE_EDITOR_RULES.maxPublishedFileBytes)throw Error('El fondo debe medir menos de 5 MB.');
       const valid=mime==='image/png'?[137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n):
         mime==='image/jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:
         bytes[0]===82&&bytes[1]===73&&bytes[2]===70&&bytes[3]===70&&
@@ -389,7 +390,7 @@ export const api={
       const category=allowed.includes(payload.category)?payload.category:'Aesthetic';
       if(typeof payload.content!=='string'||payload.content.length>7000000)throw Error('El archivo no es un PNG válido.');
       const bytes=Uint8Array.from(atob(payload.content),c=>c.charCodeAt(0));
-      if(bytes.length<200||bytes.length>5000000||![137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n))
+      if(bytes.length<200||bytes.length>CREATIVE_EDITOR_RULES.maxPublishedFileBytes||![137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n))
         throw Error('Solo se admiten PNG originales de hasta 5 MB.');
       const digest=await crypto.subtle.digest('SHA-256',bytes);
       const sha256=Array.from(new Uint8Array(digest)).map(v=>v.toString(16).padStart(2,'0')).join('');

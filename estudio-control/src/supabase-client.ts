@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Upload } from 'tus-js-client';
+import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from './public-supabase-config';
 import {
   auth as localAuth, api as localApi, hasLocalVault,
@@ -630,16 +631,61 @@ export async function removeOldClassRecording(path:string):Promise<void>{
 
 
 export type StudioLabAsset={id:string;name:string;category:'sticker'|'background';url:string};
+
+/** Publish an owner-selected Studio library file to the shared Lab catalogue.
+ * Personal uploads made inside the canvas never call this function.
+ */
+export async function publishStudioLabAsset(file:File,kind:'sticker'|'background',displayName?:string):Promise<{id:string;duplicate:boolean}>{
+ if(!client)throw Error('Conexión no disponible.');
+ const who=await owner();
+ const {data:admin,error:roleError}=await client.from('content_lab_admins').select('user_id').eq('user_id',who.id).maybeSingle();
+ if(roleError||!admin)throw Error('Solo la administración del Content Lab puede publicar recursos.');
+ const mime=file.type;
+ if(kind==='sticker'&&mime!=='image/png')throw Error('Los stickers del catálogo deben ser PNG.');
+ if(kind==='background'&&!['image/png','image/jpeg','image/webp'].includes(mime))throw Error('Formato de fondo no compatible.');
+ if(file.size<=200||file.size>CREATIVE_EDITOR_RULES.maxPublishedFileBytes)throw Error('Máximo 5 MB por archivo publicado.');
+ const bytes=new Uint8Array(await file.arrayBuffer());
+ const png=[137,80,78,71,13,10,26,10].every((n,i)=>bytes[i]===n);
+ const jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255;
+ const webp=bytes[0]===82&&bytes[1]===73&&bytes[2]===70&&bytes[3]===70&&bytes[8]===87&&bytes[9]===69&&bytes[10]===66&&bytes[11]===80;
+ if(!((mime==='image/png'&&png)||(mime==='image/jpeg'&&jpg)||(mime==='image/webp'&&webp)))throw Error('El archivo de imagen no es válido.');
+ const digest=await crypto.subtle.digest('SHA-256',bytes);
+ const sha256=Array.from(new Uint8Array(digest)).map(n=>n.toString(16).padStart(2,'0')).join('');
+ const table=kind==='sticker'?'content_lab_sticker_catalog':'content_lab_background_catalog';
+ const {data:existing,error:lookupError}=await client.from(table).select('id,published').eq('sha256',sha256).maybeSingle();
+ if(lookupError)throw Error(lookupError.message);
+ if(existing){
+  if(!existing.published)throw Error('Existe un fondo no publicado con estos datos; mantenlo privado.');
+  return {id:existing.id,duplicate:true};
+ }
+ const name=String(displayName||file.name).replace(/\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ').trim().slice(0,120);
+ if(!name)throw Error('El recurso necesita un nombre.');
+ const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
+ const objectPath=(kind==='sticker'?'shared-stickers/':'shared-backgrounds/')+crypto.randomUUID()+'.'+ext;
+ const {error:storageError}=await client.storage.from('content-lab-private').upload(objectPath,bytes,{contentType:mime,upsert:false});
+ if(storageError)throw Error('No se pudo subir el recurso: '+storageError.message);
+ try{
+  const fields=kind==='sticker'
+    ? {created_by:who.id,path:objectPath,name,category:'Aesthetic',sha256,size_bytes:bytes.length,published:true}
+    : {created_by:who.id,path:objectPath,name,category:'Editoriales',mime,sha256,size_bytes:bytes.length,published:true};
+  const {data:record,error:saveError}=await client.from(table).insert(fields).select('id').single();
+  if(saveError||!record)throw Error(saveError?.message||'No se pudo confirmar la publicación.');
+  return {id:record.id,duplicate:false};
+ }catch(error){
+  await client.storage.from('content-lab-private').remove([objectPath]);
+  throw error;
+ }
+}
+
 export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
  if(!client)throw Error('Conexión de biblioteca no disponible.');
  const {data:{user},error:authError}=await client.auth.getUser();
  if(authError||!user)throw Error('Inicia sesión en Studio para abrir la biblioteca.');
  const result:StudioLabAsset[]=[];
  for(const [table,category] of [['content_lab_sticker_catalog','sticker'],['content_lab_background_catalog','background']] as const){
-  // Studio is owner-only. Keep unpublished personal backgrounds visible here;
-  // buyers still read ONLY published catalog rows through separate RLS policies.
+  // Only the published shared catalogue belongs in the Studio's public resource picker.
   const query=client.from(table).select('id,name,path');
-  const {data,error}=await (category==='background'?query:query.eq('published',true))
+  const {data,error}=await query.eq('published',true)
    .order('created_at',{ascending:true});
   if(error)throw Error('No se pudo consultar '+category+': '+error.message);
   const entries=(data||[]).filter(x=>Boolean(x.path));
