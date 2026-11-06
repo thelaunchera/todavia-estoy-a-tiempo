@@ -63,3 +63,9 @@
  .tle-ops-footer{font-size:.7rem}
 }
 @media(prefers-reduced-motion:reduce){.tle-ops-tile{transition:none}.tle-ops-tile:hover{transform:none}}
+
+/* Quiet, functional entry on the Studio dashboard; usable on iPhone. */
+.studio .hero .studio-ops-home-link{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px;padding:12px 15px;min-height:44px;border:1px solid rgba(220,235,245,.55);border-radius:12px;background:rgba(255,255,255,.08);font:700 12px/1.4 'DM Sans',Arial,sans-serif;color:#f5f9fa;text-align:left;max-width:100%}
+.studio .hero .studio-ops-home-link:hover{background:rgba(255,255,255,.17);border-color:#e4eff6}
+.studio .hero .studio-ops-home-link:focus-visible{outline:3px solid #F2D85B;outline-offset:3px}
+@media(max-width:480px){.studio .hero .studio-ops-home-link{width:100%;justify-content:center;font-size:11px;padding:11px 9px}}
