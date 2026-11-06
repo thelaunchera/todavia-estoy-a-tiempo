@@ -197,3 +197,171 @@ return `<aside class="ob-side">
   function heading(){
     const label={episodes:'EPISODE PRODUCTION',video:'REAL AI MOTION',voice:'CHARACTER VOICES',library:'ORIGINAL PHOTO LIBRARY',drive:'PRIVATE DRIVE'}[state.view];
     const title=state.view==='episodes'?currentEpisode().title:state.view==='video'?'AI video engines':state.view==='voice'?'Voice direction':state.view==='drive'?'Drive connection':'Production library';
+    return `<header class="ob-header"><div class="ob-heading"><span>${label} / SEASON ${String(currentEpisode().season).padStart(2,'0')}</span><h1>${safe(title)}</h1></div><div class="ob-heading-right"><small id="ob-save">Saved on iPad</small><button data-action="backup" class="ob-neutral">Export shot list</button><button data-action="old" class="ob-plain">Older editor ↗</button></div></header>`;
+  }
+  function slotPhoto(e,sc){
+    const k=mediaKey(e,sc,'photo'),image=getUrl(k);
+    return `<span class="ob-thumb">${image?`<img src="${image}" alt="Scene ${sc} imported photo"/>`:'<span>▧</span>'}</span>`;
+  }
+  function sceneStrip(){
+    const e=state.episode;
+    return `<section class="ob-scene-strip"><div class="ob-strip-head"><div><span class="ob-eyebrow">STORYBOARD</span><h2>10 scenes <small>· tap to edit</small></h2></div><label class="ob-import-batch">＋ Import 10 photos<input type="file" data-batch accept="image/*,.heic,.heif" multiple hidden/></label></div>
+    <div class="ob-scene-scroll">${Array.from({length:10},(_,i)=>i+1).map(s=>{
+      const pic=!!getAsset(mediaKey(e,s,'photo')),clip=!!getAsset(mediaKey(e,s,'clip'));
+      return `<button class="ob-scene-tile ${state.scene===s?'active':''}" data-scene="${s}" type="button">
+        <span class="ob-shot-number">SCENE ${String(s).padStart(2,'0')}</span>${slotPhoto(e,s)}
+        <span class="ob-shot-status">${pic?'Photo ready':'Photo pending'}<b>${clip?'● AI VIDEO':'○ No video'}</b></span></button>`;
+    }).join('')}</div><p class="ob-tip">Upload the photos once in a batch. Files named F01–F10 are placed in the matching scenes automatically. Your private Drive images cannot be accessed by this public web app without an authenticated connection.</p></section>`;
+  }
+  function assetBox(kind,title,accept){
+    const k=mediaKey(state.episode,state.scene,kind),file=getAsset(k),url=getUrl(k);
+    const player=url?(kind==='photo'?'<img class="ob-asset-preview" alt="Original photo" src="'+url+'"/>':'<video class="ob-asset-preview" controls playsinline preload="metadata" src="'+url+'"></video>'):'<div class="ob-asset-placeholder">'+(kind==='photo'?'▧':'▶')+'<span>'+ (kind==='photo'?'Photo not imported':'AI video not imported')+'</span></div>';
+    return `<div class="ob-assetbox"><div class="ob-asset-top"><b>${safe(title)}</b><span>${file?'READY':'PENDING'}</span></div>${player}
+    <div class="ob-asset-bottom"><small title="${safe(file?.name)}">${safe(file?.name||'No file yet')}</small><label class="ob-upload">${file?'Replace':'Upload'}<input type="file" accept="${safe(accept)}" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Delete media">×</button>':''}</div></div>`;
+  }
+  function audioBox(line){
+    const k=mediaKey(state.episode,state.scene,'audio',line.id),file=getAsset(k),url=getUrl(k);
+    return `<div class="ob-audio-row"><span class="ob-audio-icon">♫</span><div class="ob-audio-core"><b>Audio file · ${safe(line.character)}</b>${url?'<audio controls preload="metadata" src="'+url+'"></audio>':'<small>No recorded/generated voice yet</small>'}</div><label class="ob-upload">${file?'Replace':'Add audio'}<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Remove voice file">×</button>':''}</div>`;
+  }
+  function dialogueBox(line){
+ const config=state.voiceSettings[line.character]||(state.voiceSettings[line.character]={provider:'kokoro',voice:''});
+ const engine=voiceProviders.find(p=>p.id===config.provider)||voiceProviders.find(p=>p.id==='ttsmp3ai');
+ const template=voiceTemplates[line.character]||{instructions:'',voice:''};
+ const isTTS=engine.id==='ttsmp3ai';
+ return `<div class="ob-voice-line"><div class="ob-line-header"><label><select data-choose-speaker="${safe(line.id)}" aria-label="Voice character">${originalSpeakers.map(c=>'<option value="'+safe(c)+'" '+(c===line.character?'selected':'')+'>'+safe(c)+'</option>').join('')}</select><span>VOICE TRACK</span></label>
+ <span>${safe(engine.name)} · ${safe(config.voice||('Suggested: '+(template.voice||'Choose a voice')))}</span></div>
+ <textarea rows="3" data-dialogue="${safe(line.id)}" placeholder="Approved dialogue for ${safe(line.character)}">${safe(line.text)}</textarea>
+ <label class="ob-voice-delivery">Acting direction for this line (optional)<input type="text" data-line-delivery="${safe(line.id)}" placeholder="e.g., quietly skeptical, then surprised" value="${safe(line.delivery||'')}"/></label>
+ <div class="ob-line-actions"><button class="ob-neutral" type="button" data-copy="${safe(line.id)}">Copy dialogue</button>
+ <button class="ob-neutral" type="button" data-action="copy-voice-line" data-line="${safe(line.id)}">Copy voice + acting instructions</button>
+ <a href="${safe(isTTS?'https://ttsmp3.com/ai':engine.url)}" target="_blank" rel="noopener noreferrer" class="ob-black-button">Generate voice ↗</a></div>
+ ${audioBox(line)}</div>`;
+}
+
+  function sceneEditor(){
+    const n=note();
+    const original=canonicalShot(state.episode,state.scene);
+    return `<div class="ob-caveat"><strong>ORIGINAL STUDIO SCRIPT · 2-MINUTE CUT</strong><p>${safe(original?.beat||'Scene')} · ${safe(original?.frameId||'Frame pending')} · ${safe(original?.camera||'Original composition')}</p><small>Dialogue from the original Studio, separated into individual character voice tracks. Custom changes and local media are preserved.</small></div><div class="ob-two-cols"><section class="ob-sheet"><div class="ob-sheet-title"><div><span class="ob-eyebrow">SCENE ${String(state.scene).padStart(2,'0')} · VISUAL</span><h2>Image → moving video</h2></div><span class="ob-step">01</span></div>
+      <div class="ob-media-pair">${assetBox('photo','Original reference','image/*,.heic,.heif')}${assetBox('clip','AI-generated motion','video/*,.mp4,.webm,.mov')}</div>
+      <label class="ob-field-label">Master AI animation prompt · editable</label><textarea class="ob-notearea" data-field="motion" rows="9" placeholder="Describe the real movement you want: Nia reacts to Ruby, eyebrow raise, subtle hand gesture…">${safe(n.motion)}</textarea>
+      <div class="ob-inline-actions"><button class="ob-neutral" data-action="copy-prompt">Copy edited prompt</button><button class="ob-neutral" data-action="copy-master">Copy original master</button><button class="ob-black-button" data-view="video">Choose AI video engine ↗</button></div>
+      <div class="ob-duration-line"><label>Scene duration <input type="number" min="1" max="300" step="0.5" placeholder="Unverified" value="${safe(n.duration)}" data-field="duration"/></label><small>Seconds · not guessed from the old private Studio</small></div>
+      <label class="ob-field-label">Director's notes</label><textarea class="ob-notearea" rows="3" data-field="notes" placeholder="Camera, acting, sound design, continuity, costume…">${safe(n.notes)}</textarea>
+    </section><section class="ob-sheet"><div class="ob-sheet-title"><div><span class="ob-eyebrow">SCENE ${String(state.scene).padStart(2,'0')} · SOUND</span><h2>Voices & dialogue</h2></div><span class="ob-step">02</span></div>
+    <p class="ob-muted">Each scene has its own character dialogue and audio underneath. Use a consistent AI voice for every character.</p>
+    <div class="ob-lines">${n.dialogues.length?n.dialogues.map(dialogueBox).join(''):'<p class="ob-muted">Silent cinematic reaction in the original cut; no invented character dialogue.</p>'}</div><button class="ob-add-line" data-action="add-line">＋ Add dialogue turn</button></section></div>`;
+  }
+  function episodeView(){
+const e=currentEpisode();
+return `<div class="ob-ep-summary">
+ <div><span>SEASON ${String(e.season).padStart(2,'0')} · EPISODE ${String(e.number).padStart(2,'0')} · 10 SCENES</span>
+ <p><b>${photoCount(e.id)}/10 photos</b> · <b>${mediaCount(e.id)}/10 AI videos</b> · ${minutes(e.id)}</p>
+ <small class="ob-episode-source">${safe(e.source)}</small></div>
+ <span class="ob-auth-note">${e.season===2?'Original English script and AI motion prompts available; Season 2 images still pending.':'Original English dialogue and shot-specific animation prompts loaded from private Studio.'}</span>
+ </div>
+ ${e.season===2?`<div class="ob-season-title-editor"><label>Episode title (edit only if verified)</label><input type="text" data-season-title="${e.id}" value="${safe(e.title)}" maxlength="110"/></div>`:''}
+ <div class="ob-drive-quick-actions"><button class="ob-neutral" type="button" data-action="drive-sync">↻ Sync episode photos from Drive</button><button class="ob-plain" type="button" data-view="drive">Connect Drive / folders</button></div>
+ ${sceneStrip()}${sceneEditor()}`;
+}
+  function providerCard(p){
+    return `<article class="ob-provider"><div><span class="ob-provider-asterisk">✳</span><small>EXTERNAL PROVIDER</small></div><h3>${safe(p.name)}</h3><strong>${safe(p.free)}</strong><p>${safe(p.description)}</p><a class="ob-black-button" href="${safe(p.url)}" target="_blank" rel="noopener noreferrer">Open generator ↗</a></article>`;
+  }
+  function videoView(){return `<div class="ob-section-intro"><span class="ob-eyebrow">REAL MOVEMENT · NOT PHOTO SLIDESHOW</span><h2>Choose a free AI engine.</h2><p>The engines create new motion from your original photo. When one service exhausts its credits, use a different provider. The app does not bypass limits or create duplicate accounts.</p></div><div class="ob-provider-grid">${videoProviders.map(providerCard).join('')}</div><div class="ob-caveat">Hugging Face ZeroGPU's free daily GPU quota is shared across its Spaces. Google Flow and PixVerse have separate provider limits. Downloads are imported into each scene manually.</div><button class="ob-neutral ob-old-generator" data-action="old">Open the original embedded Wan generator ↗</button>`;}
+  function voiceView(){
+ const members=[...castCharacters,...guestCharacters];
+ for(const name of originalSpeakers) if(!members.some(p=>p.name===name)) members.push({name,role:'Original speaking role',trait:'Use original character voice and performance',avatar:0});
+ return `<div class="ob-section-intro"><span class="ob-eyebrow">OFF BRIEF / VOICE DIRECTION</span><h2>Give every character a voice identity.</h2>
+ <p>Each original character has an editable acting brief, a recommended AI voice, and a permanent voice setting. Copy the instructions to ttsMP3 AI <strong>Add Instructions</strong>, paste one dialogue line at a time, and import the resulting MP3 underneath its scene.</p></div>
+ <div class="ob-voice-explain"><b>AI Voices · 1,000 free characters/day at ttsMP3</b><span>Voice Instructions work in the <strong>AI Voices</strong> generator, not the regular Amazon Polly converter. Generated audio can be used on YouTube. External generation is manual; no secret API or credit bypass.</span><a href="https://ttsmp3.com/ai" target="_blank" rel="noopener noreferrer">Open ttsMP3 AI ↗</a></div>
+ <div class="ob-cast-grid ob-voice-grid">${members.map((person,i)=>{
+  const config=state.voiceSettings[person.name]||(state.voiceSettings[person.name]={provider:'kokoro',voice:''});
+  const def=voiceTemplates[person.name]||{voice:'',instructions:''};
+  const photo=person.name==='Ruby'?`<img class="ob-cast-reference" src="https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/characters/ruby.webp" alt="Ruby original reference"/>`:person.avatar>0?`<div class="ob-cast-reference" role="img" aria-label="${safe(person.name)} original reference" style="background-image:url('https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/season-2/cast-grid.webp');background-size:300% 300%;background-position:${((person.avatar-1)%3)*50}% ${Math.floor((person.avatar-1)/3)*50}%"></div>`:`<div class="ob-cast-icon">${safe(person.name[0])}</div>`;
+  return `${i===castCharacters.length?'<h3 class="ob-cast-divider">Guest speaking roles</h3>':''}<article class="ob-cast-card ob-voice-director-card">
+   ${photo}<div class="ob-voice-card-content"><div class="ob-voice-card-heading"><div><h3>${safe(person.name)}</h3><p>${safe(person.role)}</p></div><span class="ob-voice-recommendation">Suggested AI voice: <b>${safe(def.voice||'Choose')}</b></span></div>
+   <div class="ob-voice-options"><label>Voice provider<select data-voice-provider="${safe(person.name)}">${voiceProviders.map(p=>`<option value="${p.id}" ${p.id===config.provider?'selected':''}>${safe(p.name)}</option>`).join('')}</select></label>
+   <label>Permanent voice preset<input type="text" data-voice-name="${safe(person.name)}" placeholder="Save a voice name" value="${safe(config.voice||'')}"/></label></div>
+   <label class="ob-voice-instructions-label">Voice Instructions · identity / affect / tone / emotion / pronunciation<textarea data-voice-instructions="${safe(person.name)}" rows="8" spellcheck="false">${safe(config.instructions??def.instructions)}</textarea></label>
+   <div class="ob-voice-buttons"><button type="button" class="ob-neutral" data-action="voice-recommend" data-character="${safe(person.name)}">Use suggested AI voice</button>
+   <button type="button" class="ob-black-button" data-action="copy-voice-instructions" data-character="${safe(person.name)}">Copy Voice Instructions</button>
+   <a href="https://ttsmp3.com/ai" target="_blank" rel="noopener noreferrer" class="ob-neutral">Generate MP3 ↗</a></div>
+   </div></article>`;
+ }).join('')}</div>
+ <div class="ob-module-heading"><b>Other free voice generators</b><span>Provider quotas and available voices can change</span></div><div class="ob-provider-grid">${voiceProviders.map(providerCard).join('')}</div>`;
+}
+
+  function libraryView(){
+return `<div class="ob-section-intro"><span class="ob-eyebrow">ORIGINAL PHOTO LIBRARY · PRIVATE DRIVE</span><h2>Two seasons, one production hub</h2><p>Both seasons now have the original short-script dialogue and animation prompts for 160 production scene slots. Season 1 episodes 1–7 have original photos in private Drive; Season 1 episode 8 and Season 2 still images remain pending. No media was published automatically.</p></div>
+ <div class="ob-library-grid">${episodes.map(e=>`<button data-episode="${e.id}" class="ob-library-card">
+   <span>S${String(e.season).padStart(2,'0')} / E${String(e.number).padStart(2,'0')}</span>
+   <b>${safe(e.title)}</b><small>${safe(e.source)} · ${photoCount(e.id)}/10 imported</small><strong>Open episode ↗</strong></button>`).join('')}</div>`;
+}
+  function driveView(){
+return `<section class="ob-drive-panel"><div class="ob-eyebrow">GOOGLE DRIVE / AUTHORIZATION</div><h2>Import your original scenes</h2>
+ <div id="ob-drive-controls">Loading connection options…</div>
+ <p class="ob-drive-note">Only original F01–F10 files from the chosen private folder are imported. No image is made publicly accessible. Never paste passwords or client secrets here.</p></section>`;
+}
+  function render(){
+ if(!document.body.classList.contains('ob-production-active'))return;
+ workspace.innerHTML=`<div class="ob-app">${sideBar()}<main class="ob-main">${heading()}<div class="ob-body">${state.view==='episodes'?episodeView():state.view==='video'?videoView():state.view==='voice'?voiceView():state.view==='drive'?driveView():libraryView()}<p class="ob-notice" id="ob-notice" aria-live="polite">${safe(state.notice)}</p></div></main></div>`;
+ window.OBDrive?.paint();
+}
+  function updateFromForm(element){
+    const n=note();
+    if(element.dataset.field){n[element.dataset.field]=element.value;scheduleSave();}
+    if(element.dataset.dialogue){const line=n.dialogues.find(l=>l.id===element.dataset.dialogue);if(line){line.text=element.value;scheduleSave();}}
+  }
+  async function writeVoiceSettings(){
+    try{await transact('put',{id:'voice-defaults',type:'voices',value:state.voiceSettings});notice('Character voice settings saved on this iPad.');}
+    catch(error){notice('Could not save voice settings.');}
+  }
+  function copy(text){if(!text){notice('Add some text first.');return;}const finish=()=>notice('Text copied; paste it into the AI generator.');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(finish,()=>notice('Use long press to select and copy the text.'));else notice('Use long press to select and copy the text.');}
+  function backup(){
+    const doc={
+      series:'OFF BRIEF Seasons 1 and 2',createdAt:new Date().toISOString(),episodeTitles:episodes.map(e=>e.title),
+      warning:'This is a shot-list backup, NOT a backup of image/video/audio files.',
+      scenes:episodes.map(e=>({episode:e.id,title:e.title,shots:Array.from({length:10},(_,i)=>({scene:i+1,...note(e.id,i+1)}))}))
+    };
+    const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
+    const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download='OFF_BRIEF_S1_S2_scene_plan.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+    notice('Downloaded shot list (does not include media files).');
+  }
+  workspace.addEventListener('click',async(event)=>{
+    const action=event.target.closest('button,[data-view],a');
+    if(!action)return;
+    if(action.dataset.episode){state.episode=Number(action.dataset.episode);state.scene=1;state.view='episodes';render();window.scrollTo(0,0);if(window.OBDrive?.connected())window.OBDrive.sync(state.episode,true);return;}
+    if(action.dataset.scene){state.scene=Number(action.dataset.scene);render();return;}
+    if(action.dataset.view){state.view=action.dataset.view;render();window.scrollTo(0,0);return;}
+    if(action.dataset.remove){await deleteAsset(action.dataset.remove);return;}
+    if(action.dataset.copy){const line=note().dialogues.find(l=>l.id===action.dataset.copy);copy(line?.text||'');return;}
+    if(action.dataset.action==='copy-prompt'){copy(note().motion);return;}
+    if(action.dataset.action==='copy-master'){copy(masterAnimationPrompt(state.episode,state.scene));return;}
+    if(action.dataset.action==='copy-voice-instructions'){const character=action.dataset.character;const config=state.voiceSettings[character]||{};copy(config.instructions??voiceTemplates[character]?.instructions??'');return;}
+    if(action.dataset.action==='voice-recommend'){const character=action.dataset.character,rec=voiceTemplates[character];if(!rec)return;const profile=state.voiceSettings[character]||(state.voiceSettings[character]={});profile.provider='ttsmp3ai';profile.voice=rec.voice;await writeVoiceSettings();render();notice('Suggested voice selected for '+character+'. Listen to it before committing to the character.');return;}
+    if(action.dataset.action==='copy-voice-line'){const line=note().dialogues.find(l=>l.id===action.dataset.line);if(!line)return;const config=state.voiceSettings[line.character]||{};const instructions=(config.instructions??voiceTemplates[line.character]?.instructions??'')+(line.delivery?.trim()?'\nFor this line only: '+line.delivery.trim(): '');copy(instructions);return;}
+    if(action.dataset.action==='add-line'){
+      const n=note();n.dialogues.push({id:'line-'+Date.now().toString(36),character:'Narrator',text:''});scheduleSave();render();return;
+    }
+    if(action.dataset.action==='backup'){backup();return;}
+    if(action.dataset.action==='drive-sync'){if(window.OBDrive?.connected())await window.OBDrive.sync(state.episode,false);else{state.view='drive';render();}return;}
+    if(action.dataset.action==='old'){showProduction(false);return;}
+  });
+  workspace.addEventListener('input',event=>{
+    const target=event.target;
+    if(target.dataset.field||target.dataset.dialogue) updateFromForm(target);
+    if(target.dataset.voiceName){state.voiceSettings[target.dataset.voiceName].voice=target.value;clearTimeout(saveTimer);saveTimer=setTimeout(writeVoiceSettings,400);}
+    if(target.dataset.voiceInstructions){const who=target.dataset.voiceInstructions;const obj=state.voiceSettings[who]||(state.voiceSettings[who]={provider:'ttsmp3ai',voice:''});obj.instructions=target.value;clearTimeout(saveTimer);saveTimer=setTimeout(writeVoiceSettings,550);}
+    if(target.dataset.lineDelivery){const line=note().dialogues.find(l=>l.id===target.dataset.lineDelivery);if(line){line.delivery=target.value;scheduleSave();}}
+  });
+  workspace.addEventListener('change',async(event)=>{
+    const target=event.target;
+    if(target.dataset.chooseSpeaker){const line=note().dialogues.find(x=>x.id===target.dataset.chooseSpeaker);if(line){line.character=target.value;scheduleSave();render();}return;}
+    if(target.dataset.media){await saveAsset(target.dataset.media,target.files?.[0]);render();return;}
+    if(target.hasAttribute('data-batch')){await batchImport(target.files);render();return;}
+    if(target.dataset.voiceProvider){state.voiceSettings[target.dataset.voiceProvider].provider=target.value;await writeVoiceSettings();render();return;}
+    if(target.dataset.seasonTitle){const ep=episodes.find(e=>e.id===Number(target.dataset.seasonTitle));if(ep&&ep.season===2){ep.title=target.value;await transact('put',{id:'title-'+ep.id,type:'seasonTitle',episode:ep.id,value:ep.title});render();}return;}
+  });
+  window.addEventListener('beforeunload',()=>{Object.values(state.urls).forEach(url=>URL.revokeObjectURL(url));});
+  window.OBProduction={episodes,state,saveAsset,getAsset,mediaKey,render,notice,currentEpisode:()=>state.episode};
+  init();
+})();
