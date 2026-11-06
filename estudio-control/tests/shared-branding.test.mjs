@@ -1,0 +1,21 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../../',import.meta.url));
+const read=p=>readFileSync(root+p,'utf8');
+test('both carousel editors use the same private-data-safe branding assets',()=>{
+ const core=read('editor-core/branding-elements.ts');
+ const studio=read('estudio-control/src/SeamlessEditor.tsx');
+ const lab=read('content-lab/src/CarouselFactory.tsx');
+ const studioLibrary=read('estudio-control/src/BrandAssetLibrary.tsx');
+ const labLibrary=read('content-lab/src/PanoramaEditor.tsx');
+ assert.ok((core.match(/\{id:'[a-z]+'/g)||[]).length>=20);
+ for(const kind of ['Patrones','Papelería','Sellos','Ilustraciones','Packaging','Acentos'])assert.ok(core.includes(kind));
+ assert.match(studio,/onUniversal=\{addUniversalBrandingElement\}/);
+ assert.match(studioLibrary,/BRANDING_ELEMENTS/);
+ assert.match(lab,/brandingElementImages\(brand.color\)/);
+ assert.match(lab,/onAddBrandingElement=\{addSharedBrandingElement\}/);
+ assert.match(labLibrary,/BRANDING_ELEMENTS\.filter/);
+ assert.ok(!core.includes('localStorage')&&!core.includes('supabase'));
+});

@@ -3,12 +3,14 @@ import {GOLDEN_GRID_CAROUSEL_ASSETS,GOLDEN_GRID_CAROUSEL_DRIVE,type GoldenGridCa
 import {SOVA_CAROUSEL_ASSETS,SOVA_CAROUSEL_DRIVE,type SovaCarouselAsset} from './sova-carousel-assets';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
 import {STUDIO_SHAPES,studioShapeData,type StudioShape} from './studio-shapes';
-type Category='Formas'|'Asteriscos'|'Banners y cintas'|'Etiquetas'|'Papeles y washi'|'Acentos'|'Audio';
+import {BRANDING_ELEMENTS,brandingElementUrl,type BrandAsset} from '../../editor-core/branding-elements';
+type Category='Formas'|'Asteriscos'|'Banners y cintas'|'Etiquetas'|'Papeles y washi'|'Acentos'|'Audio'|'Patrones'|'Papelería'|'Sellos'|'Ilustraciones'|'Packaging';
 type Props={
   onGolden:(asset:GoldenGridCarouselAsset)=>void|Promise<void>;
   onSova:(asset:SovaCarouselAsset)=>void|Promise<void>;
   onEditorial:(asset:typeof EDITORIAL_STICKER_ASSETS[number])=>void|Promise<void>;
   onShape?:(shape:StudioShape)=>void|Promise<void>;
+  onUniversal?:(asset:BrandAsset)=>void|Promise<void>;
   compact?:boolean;
   onlyEditorial?:boolean;
 };
@@ -22,14 +24,15 @@ const category=(name:string):Category=>{
  if(/papel|washi/.test(n))return 'Papeles y washi';
  return 'Acentos';
 };
-const categories=['Todos','Formas','Asteriscos','Banners y cintas','Etiquetas','Papeles y washi','Acentos','Audio'] as const;
-export default function BrandAssetLibrary({onGolden,onSova,onEditorial,onShape,compact=false,onlyEditorial=false}:Props){
+const categories=['Todos','Patrones','Papelería','Sellos','Ilustraciones','Packaging','Formas','Asteriscos','Banners y cintas','Etiquetas','Papeles y washi','Acentos','Audio'] as const;
+export default function BrandAssetLibrary({onGolden,onSova,onEditorial,onShape,onUniversal,compact=false,onlyEditorial=false}:Props){
  const [kind,setKind]=useState<(typeof categories)[number]>('Todos');
  const [search,setSearch]=useState('');
  const assets=[
   ...(!onlyEditorial?GOLDEN_GRID_CAROUSEL_ASSETS:[]).map(asset=>({key:'golden-'+asset.id,brand:'golden' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/golden-grid/'+asset.file,document.baseURI).href,asset})),
   ...(!onlyEditorial?SOVA_CAROUSEL_ASSETS:[]).map(asset=>({key:'sova-'+asset.id,brand:'sova' as const,name:asset.name,category:category(asset.name),src:new URL('brand-kits/sova/'+asset.file,document.baseURI).href,asset})),
-  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href,asset}))
+  ...EDITORIAL_STICKER_ASSETS.map(asset=>({key:'editorial-'+asset.id,brand:'editorial' as const,name:asset.name,category:asset.category as Category,src:new URL('brand-kits/editorial-stickers/'+asset.file,document.baseURI).href,asset})),
+  ...(onUniversal?BRANDING_ELEMENTS:[]).map(asset=>({key:'universal-'+asset.id,brand:'universal' as const,name:asset.name,category:asset.category as Category,src:brandingElementUrl(asset),asset}))
  ];
  const filteredShapes=onShape&&(kind==='Todos'||kind==='Formas')?
    STUDIO_SHAPES.filter(a=>a.name.toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es'))):[];
@@ -37,7 +40,7 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,onShape,c
  return <div style={{display:'grid',gap:9}}>
   <input type="search" aria-label="Buscar elementos" placeholder="Buscar cintas, banners, asteriscos…" value={search} onChange={e=>setSearch(e.target.value)} style={{...control,minWidth:0,width:'100%',maxWidth:460,boxSizing:'border-box'}}/>
   {compact&&<div role="group" aria-label="Explorar categorías de elementos" style={{display:'flex',gap:6,overflowX:'auto',overscrollBehaviorX:'contain',paddingBottom:4}}>
-   {([['Todos','▦'],['Formas','◯'],['Asteriscos','✱'],['Banners y cintas','▰'],['Etiquetas','▱'],['Papeles y washi','▤'],['Acentos','✦'],['Audio','♫']] as const).map(([name,symbol])=><button key={name} type="button" aria-pressed={kind===name}
+   {([['Todos','▦'],['Patrones','▦'],['Papelería','▤'],['Sellos','◉'],['Ilustraciones','✎'],['Packaging','▱'],['Formas','◯'],['Asteriscos','✱'],['Banners y cintas','▰'],['Etiquetas','▱'],['Papeles y washi','▤'],['Acentos','✦'],['Audio','♫']] as const).map(([name,symbol])=><button key={name} type="button" aria-pressed={kind===name}
     onClick={()=>setKind(name)} style={{display:'grid',gap:5,placeItems:'center',flex:'0 0 86px',minWidth:86,minHeight:60,padding:'6px 3px',borderRadius:11,
       background:kind===name?'#F5E8A5':'#F0F2F3',border:'1px solid #d8e2e6',color:'#191919',fontFamily:'inherit'}}>
     <span aria-hidden="true" style={{fontSize:23,lineHeight:1}}>{symbol}</span><span style={{fontSize:10,fontWeight:750,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>{name==='Banners y cintas'?'Banners':name==='Papeles y washi'?'Papeles':name}</span>
@@ -58,7 +61,7 @@ export default function BrandAssetLibrary({onGolden,onSova,onEditorial,onShape,c
       <span className="studio-sticker-label" style={{fontSize:12,fontWeight:700,marginTop:7}}>{shape.name}</span>
      </button>)}
    {filtered.map(a=><button type="button" key={a.key} aria-label={'Añadir '+a.name+' al lienzo'}
-     onClick={()=>{if(a.brand==='golden')void onGolden(a.asset);else if(a.brand==='sova')void onSova(a.asset);else void onEditorial(a.asset)}}
+     onClick={()=>{if(a.brand==='golden')void onGolden(a.asset);else if(a.brand==='sova')void onSova(a.asset);else if(a.brand==='universal')void onUniversal?.(a.asset);else void onEditorial(a.asset)}}
      className="studio-element-card"
      style={{...control,display:'grid',gridTemplateRows:'132px auto',alignContent:'start',
        padding:8,minWidth:0,minHeight:174,textAlign:'center',overflow:'hidden',
