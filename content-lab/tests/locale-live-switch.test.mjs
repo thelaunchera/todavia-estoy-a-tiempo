@@ -11,7 +11,7 @@ test('Switching ES/EN updates the React header, new dashboard, shortcuts and mob
  assert.ok(dashboard.includes("const es=locale==='es'"));
  assert.ok(dashboard.includes("es?'¿Qué vamos a':'What shall we'"));
  assert.ok(dashboard.includes("es?'Crea algo nuevo':'Create something new'"));
- assert.ok(dashboard.includes("es?'Continúa diseñando':'Keep creating'"));
+ assert.ok(dashboard.includes("es?'Tus diseños recientes':'Your recent designs'"));
  assert.ok(dashboard.includes("es?'Todo en un solo lugar':'Everything in one place'"));
  assert.ok(dashboard.includes('cld-activity-stats'));
  assert.ok(dashboard.includes('cld-format-grid'));
