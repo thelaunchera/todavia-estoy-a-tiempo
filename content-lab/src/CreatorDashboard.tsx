@@ -80,12 +80,16 @@ export default function CreatorDashboard({
   {label:es?'Antes y después':'Before and after',angle:'Before / after',icon:Layers3},
   {label:es?'Algo cercano':'Something relatable',angle:'POV / Relatable',icon:Sparkles}
  ];
- return <div className="cld" id="lab-dashboard" aria-label={es?'Tu espacio creativo':'Your creative workspace'}>
+ return <div className={"cld"+(recent.length?" cld-has-recents":"")} id="lab-dashboard" aria-label={es?'Tu espacio creativo':'Your creative workspace'}>
   <section className="cld-intro">
    <div className="cld-intro-copy">
     <span className="cld-eyebrow"><span className="cld-eyebrow-dot"/> THE CONTENT LAB · WORKSPACE</span>
     <h1>{es?'¿Qué vamos a':'What shall we'} <em>{es?'crear?':'create?'}</em></h1>
     <p>{es?'Elige un formato, dale vida a tu idea y continúa donde lo dejaste.':'Choose a format, bring your idea to life, and pick up where you left off.'}</p>
+    <button type="button" className="cld-hero-action"
+      onClick={()=>recent.length?onEditPost(recent[0].post):onNewNormal()}>
+      <span>{recent.length?(es?'Continuar último diseño':'Continue last design'):(es?'Crear mi primer diseño':'Create my first design')}</span><ArrowRight size={17}/>
+    </button>
    </div>
    <button type="button" className="cld-brand-pill" onClick={onEditBrand} aria-label={es?'Editar mi marca':'Edit my brand'}>
     <span className="cld-brand-avatar" style={{backgroundColor:brand.color||'#F2D85B'}}>{brand.name?.slice(0,1).toUpperCase()}</span>

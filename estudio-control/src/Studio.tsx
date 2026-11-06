@@ -1338,22 +1338,22 @@ function App() {
               <section className="hero">
                 <div>
                   <span className="hero-kicker">
-                    <AudioLines size={16} strokeWidth={1.6} aria-hidden="true" /> UNA CONVERSACIÓN A LA VEZ
+                    <AudioLines size={16} strokeWidth={1.6} aria-hidden="true" /> TU ESPACIO CREATIVO PRIVADO
                   </span>
                   <h2>
                     Todo lo que estás creando, <em>en un mismo lugar.</em>
                   </h2>
                   <p>
-                    Un estudio para ordenar las ideas, cuidar cada estreno y
-                    mirar cómo crece este proyecto.
+                    Tus carruseles, demos, clases y podcast en un solo lugar.
+                    Abre tu próximo proyecto y continúa creando.
                   </p>
                   <div className="hero-actions">
-                    <button onClick={() => change('episodios')}>
-                      Organizar capítulos 
+                    <button onClick={() => change('seamless')}>
+                      Abrir Carousel Studio
                     </button>
-                    <a href={SITE} target="_blank" rel="noreferrer">
-                      Ver el podcast 
-                    </a>
+                    <button type="button" className="hero-secondary-action" onClick={() => change('demos')}>
+                      Ver mis demos
+                    </button>
                   </div>
                 </div>
                 <div className="hero-cover">

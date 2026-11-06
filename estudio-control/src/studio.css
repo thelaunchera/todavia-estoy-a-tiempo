@@ -2574,3 +2574,38 @@ a:focus-visible {
   .episode-website-fields{padding:12px;border-radius:14px}
   .episode-website-fields input,.episode-website-fields textarea{font-size:16px}
 }
+
+
+/* PRIVATE STUDIO HOME MOBILE REFINEMENT — 2026-11-06
+   Creative work first, concise hero, one-row activity summary on iPhone.
+   Studio data and access controls stay independent from the commercial Lab. */
+.studio .hero-actions button.hero-secondary-action{
+  background:transparent;color:#f4f6f5;border:1px solid #bfd2de80;
+}
+.studio .hero-actions button.hero-secondary-action:hover{
+  background:#ffffff18;
+}
+@media(max-width:720px){
+  .studio .hero{min-height:0;padding:23px 21px;border-radius:18px;gap:0;background:#18334b}
+  .studio .hero>div:first-child{max-width:100%;width:100%}
+  .studio .hero-kicker{font-size:9px;letter-spacing:1px}
+  .studio .hero h2{font-size:clamp(28px,8vw,37px);line-height:1.11;margin:12px 0 10px}
+  .studio .hero p{font-size:12px;line-height:1.55}
+  .studio .hero-actions{width:100%;margin-top:17px;gap:8px;flex-wrap:wrap}
+  .studio .hero-actions button{min-height:44px;justify-content:center;padding:10px 13px;line-height:1.3}
+  .studio .stats{
+    display:flex;gap:9px;overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;margin:13px -19px 17px;padding:1px 19px 8px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .studio .stats .stat{flex:0 0 165px;min-width:165px;padding:14px;scroll-snap-align:start}
+  .studio .stats .stat svg{margin-bottom:7px}
+  .studio .stats .stat strong{font-size:28px;line-height:1.25}
+  .studio .stats .stat p{line-height:1.35;margin-top:5px}
+  .studio .dashboard-panels{gap:11px;margin:10px 0}
+  .studio .dashboard-panels .panel{padding:18px;border-radius:14px}
+}
+@media(max-width:390px){
+  .studio .hero-actions{display:grid;grid-template-columns:1fr}
+  .studio .hero-actions button{width:100%}
+}
