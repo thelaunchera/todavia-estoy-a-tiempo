@@ -5,6 +5,7 @@ import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
 import {mareaDrive} from './marea-kit';
 import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-kit';
 import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalPrompts} from './lavender-kit';
+import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromptDocument, wokSocialRepo, wokSocialSite} from './wok-social-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -16,7 +17,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -25,6 +26,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'wok-social',
+    title:'WOK SOCIAL · Chinese Street Kitchen',
+    category:'Restaurante chino conceptual · noodles y hibachi',
+    description:'Demo editorial en inglés construido y publicado en GitHub Pages: fachada propia, noodles en primer plano, hibachi, personas, menú interactivo, galería y escenas del chef. Incluye 14 fotografías generadas individuales y siete lecciones para reconstruir la web.',
+    image:wokSocialPhotos[0].url,
+    url:wokSocialSite,
+    source:wokSocialRepo,
+    note:'Proyecto ficticio sin tienda física, pedidos, checkout, precios, reservas ni testimonios reales. Kit privado en Drive: 14 PNG originales, 14 WebP optimizados y documento de prompts de recreación. Las fotografías de IA no representan un restaurante físico. No compartir con el Aula sin autorización.',
+    kind:'other',
+    photos:wokSocialPhotos,
+    promptsFor:'wok-social',
+  },
  {
   id:'lavender-edit',
   title:'The Lavender Edit · Soft Beauty Editorial',
@@ -258,7 +272,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -282,6 +296,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='havana-19'&&<p><a href={havana19Drive} target="_blank" rel="noopener noreferrer">Abrir carpeta Havana 19 en Drive</a></p>}
        {d.id==='lavender-edit'&&<p><a href={lavenderDrive} target="_blank" rel="noopener noreferrer">Abrir las 8 fotografías de Lavanda en Drive</a> · <a href={lavenderOriginalPrompts} target="_blank" rel="noopener noreferrer">Prompts originales disponibles</a></p>}
+        {d.id==='wok-social'&&<p><a href={wokSocialDrive} target="_blank" rel="noopener noreferrer">Abrir 14 originales PNG + WebP en Drive</a> · <a href={wokSocialPromptDocument} target="_blank" rel="noopener noreferrer">Prompts y construcción</a></p>}
        {d.id==='marea-wigs-miami'&&<p><a href={mareaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        <small>{d.note}</small>
        <details className="finished-demo-kit">
