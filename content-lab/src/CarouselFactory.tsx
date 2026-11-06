@@ -1542,8 +1542,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-app-header-actions">
         <button type="button" className="btn ghost" onClick={saveLatest} disabled={saving}
           aria-label={saveState==='offline'?'Guardar carrusel · sin conexión':saveState==='saved'?'Carrusel guardado':'Guardar carrusel'}>
-          <Save size={16}/> {saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</button>
-        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy}><ImagePlus size={16}/> {busy?'Preparando…':'Exportar PNG'}</button>
+          <Save size={16}/> <span className="factory-action-label">{saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</span></button>
+        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy} aria-label={busy?'Preparando PNG':'Exportar slide actual como PNG'}><ImagePlus size={16}/> <span className="factory-action-label">{busy?'Preparando…':'Exportar PNG'}</span></button>
       </div>
     </div>
 
