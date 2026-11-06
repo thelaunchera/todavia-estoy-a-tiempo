@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -123,4 +123,30 @@ test('Havana 19 has 13 individual image references, photo prompts and seven GitH
  assert.match(demosSource,/photos:havana19Photos/);
  assert.match(demosSource,/'havana-19': havana19RebuildPrompts/);
  assert.match(kit,/drive\.google\.com\/drive\/folders\/1Qer6jt7_vn-om5Sm_r2bfgRlwS1L4Jw4/);
+});
+
+
+test('WOK SOCIAL conserva 14 fotos individuales, 7 pasos y permisos de Aula privados',()=>{
+ const kit=read('src/wok-social-kit.ts');
+ const photoMatch=kit.match(/wokSocialPhotos: FinishedDemoPhoto\\[\\] = (\\[[\\s\\S]*?\\]);/);
+ const stepMatch=kit.match(/wokSocialRebuildPrompts: DemoRebuildPrompt\\[\\] = (\\[[\\s\\S]*?\\]);/);
+ assert.ok(photoMatch,'Faltan las fotos privadas de WOK SOCIAL');
+ assert.ok(stepMatch,'Faltan los pasos de reconstrucción de WOK SOCIAL');
+ const photos=JSON.parse(photoMatch[1]);
+ const steps=JSON.parse(stepMatch[1]);
+ assert.equal(photos.length,14);
+ assert.equal(steps.length,7);
+ assert.equal(new Set(photos.map(p=>p.url)).size,14);
+ assert.equal(cards.filter(card=>card.id==='wok-social').length,1);
+ assert.match(demosSource,/photos:wokSocialPhotos/);
+ assert.match(demosSource,/promptsFor:'wok-social'/);
+ for(const p of photos){
+  assert.ok(p.title&&p.placement&&p.prompt.length>120);
+  assert.ok(p.prompt.includes('NO prompt original conservado'));
+  assert.ok(p.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/wok-social/assets/'));
+ }
+ for(const p of steps)assert.ok(p.title&&p.prompt&&p.say&&p.show);
+ assert.match(kit,/drive\\.google\\.com\\/drive\\/folders\\/1HLcYvc7rrW8ncOACtxSkKknkVDjbXNcM/);
+ assert.match(kit,/wokSocialPromptDocument/);
+ assert.match(demosSource,/ClassroomDemoPublication/);
 });
