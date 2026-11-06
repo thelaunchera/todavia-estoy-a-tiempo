@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import {
   LayoutDashboard, ShoppingBag, CreditCard, Mail, Gift, PanelsTopLeft,
-  ShieldCheck, Users, Globe2, ExternalLink, ArrowUpRight, ArrowLeft,
-  CalendarDays, Workflow, Link2, BookOpen, SearchCheck, LifeBuoy,
+  ShieldCheck, ExternalLink, ArrowUpRight, ArrowLeft,
 } from 'lucide-react';
 import './operations-center.css';
 
