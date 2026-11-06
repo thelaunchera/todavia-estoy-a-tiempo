@@ -97,7 +97,23 @@ export default function SeamlessEditor(){
  const [stickerImportStatus,setStickerImportStatus]=useState('');
  const stickerInput=useRef<HTMLInputElement>(null);
  const stickerImportReady=useRef(false);
- useEffect(()=>{let live=true;readEditorRecord<StudioLabAsset[]>('studio-imported-stickers-v1').then(items=>{if(live){setImportedStickers(items||[]);stickerImportReady.current=true;}}).catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo.');});return()=>{live=false;};},[]);
+ useEffect(()=>{let live=true;readEditorRecord<StudioLabAsset[]>('studio-imported-stickers-v1').then(items=>{if(live){const originals=items||[];setImportedStickers(originals);stickerImportReady.current=true;
+ void(async()=>{
+  const sorted=[...originals];let changed=false;
+  for(let index=0;index<sorted.length;index++){
+   const asset=sorted[index];
+   if(asset.category!=='sticker'||!asset.url.startsWith('data:image/'))continue;
+   try{
+    const blob=await(await fetch(asset.url)).blob();
+    const kind=await classifyAdminDesignAsset(new File([blob],asset.name+'.png',{type:blob.type}),asset.name);
+    if(kind==='background'){sorted[index]={...asset,category:'background'};changed=true;}
+   }catch{/* An unreadable legacy file is not replaced or deleted. */}
+  }
+  if(changed&&live){
+   await writeEditorRecord('studio-imported-stickers-v1',sorted);
+   setImportedStickers(sorted);
+  }
+ })().catch(()=>{});}}).catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo.');});return()=>{live=false;};},[]);
  const importStickers=async(files:File[])=>{
   if(!stickerImportReady.current){setStickerImportStatus('La biblioteca todavía está cargando. Vuelve a intentarlo.');return;}
   setImportingStickers(true);setStickerImportStatus('Importando stickers…');

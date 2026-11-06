@@ -660,6 +660,14 @@ export async function publishStudioLabAsset(file:File,kind:'sticker'|'background
  }
  const name=String(displayName||file.name).replace(/\.(png|jpe?g|webp)$/i,'').replace(/[_-]+/g,' ').trim().slice(0,120);
  if(!name)throw Error('El recurso necesita un nombre.');
+ if(kind==='background'){
+  // Avoid a second background card for a differently compressed copy of the same design.
+  const {data:sameName,error:nameError}=await client.from('content_lab_background_catalog')
+   .select('id').eq('name',name).eq('published',true).limit(1).maybeSingle();
+  if(nameError)throw Error('No se pudo revisar el catálogo de fondos: '+nameError.message);
+  if(sameName)return {id:sameName.id,duplicate:true};
+ }
+
  const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
  const objectPath=(kind==='sticker'?'shared-stickers/':'shared-backgrounds/')+crypto.randomUUID()+'.'+ext;
  const {error:storageError}=await client.storage.from('content-lab-private').upload(objectPath,bytes,{contentType:mime,upsert:false});
