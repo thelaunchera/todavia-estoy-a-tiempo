@@ -782,7 +782,7 @@ export default function SeamlessEditor(){
   setSelected(null);
   setMessage('Foto de fondo quitada del slide '+(slide+1)+'.');
  };
- const duplicateSelected=()=>{if(selected===null)return;const item=doc.items.find(it=>it.id===selected);if(!item)return;const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{...item,id,x:item.x+55,y:item.y+55}]}));setSelected(id);setMessage('Elemento duplicado. Puedes mover la copia.')};
+ const duplicateSelected=()=>{if(selected===null)return;const item=doc.items.find(it=>it.id===selected);if(!item||item.locked)return;const id=++nextId.current;setDoc(d=>({...d,items:[...d.items,{...item,id,locked:false,x:item.x+55,y:item.y+55}]}));setSelected(id);setMessage('Elemento duplicado. Puedes mover la copia.')};
  const reorderSelected=(position:'front'|'back'|'forward'|'backward')=>{if(selected===null)return;setDoc(d=>{const items=[...d.items];const index=items.findIndex(it=>it.id===selected);if(index<0)return d;const [item]=items.splice(index,1);const target=position==='front'?items.length:position==='back'?0:position==='forward'?Math.min(index+1,items.length):Math.max(index-1,0);items.splice(target,0,item);return {...d,items}})};
  const removePhotoBackground=async()=>{
   if(busy)return;
@@ -900,11 +900,12 @@ export default function SeamlessEditor(){
     {openPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape}/>}
     {openPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
-        style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}
+        style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis',borderColor:it.locked?'#c6b46a':undefined}}
         onClick={()=>{setSelected(it.id);goSlide(Math.max(0,Math.min(doc.count-1,it.role==='background'?(it.backgroundSlide??0):Math.floor(it.x/W))),true);setQuickPanel(null)}}>
          {it.kind==='image'&&it.src?<img src={it.src} loading="lazy" alt=""
            style={{display:'block',width:'100%',height:56,objectFit:'contain'}}/>:
            (it.text||'Sticker').slice(0,40)}
+         {it.locked&&<span style={{display:'block',fontSize:11,fontWeight:750,marginTop:4}}>🔒 Bloqueado · tocar para desbloquear</span>}
       </button>)}
     </div>}
     {openPanel==='fondos'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(96px,1fr))',gap:8}}>
@@ -996,7 +997,7 @@ export default function SeamlessEditor(){
     onPointerUp={up} onPointerCancel={e=>{touches.current.delete(e.pointerId);if(drag.current?.pointer===e.pointerId)drag.current=null;if(touches.current.size<2)pinch.current=null;if(swipe.current?.pointer===e.pointerId)swipe.current=null;if(pointerStart.current?.pointer===e.pointerId)pointerStart.current=null;lastTap.current=null;setDeleteArmedId(null)}}
     style={{display:'block',width:'100%',height:'auto',maxWidth:'none',touchAction:'none',cursor:'grab'}}
     aria-label="Lienzo continuo del carrusel: toca para seleccionar y mover; toca dos veces para mostrar la cruz de eliminar"/>
-   {current&&!quickPanel&&<div className="studio-canvas-mini-actions"
+   {current&&!current.locked&&!quickPanel&&<div className="studio-canvas-mini-actions"
   aria-label="Acciones rápidas del elemento seleccionado"
   style={{left:Math.max(10,Math.min(doc.count*slideWidthPx-196,(current.x+itemBounds(current).w/2)*viewportScale-96)),
     top:Math.max(4,current.y*viewportScale-58)}}>
@@ -1042,7 +1043,7 @@ export default function SeamlessEditor(){
    </div>
   </nav>
 
-  {current&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
+  {current&&!current.locked&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
   <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':activeInspector==='effects'?'Sombras':activeInspector==='color'?'Cambiar color':activeInspector==='size'?'Ajustar tamaño':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
   {activeInspector==='size'&&<div className="studio-app-range-row">
@@ -1189,8 +1190,11 @@ export default function SeamlessEditor(){
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
   </div>}
   {current&&<div className="studio-app-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
-    {current.shape&&<button type="button" aria-pressed={activeInspector==='shape'}
-      onClick={()=>setActiveInspector(v=>v==='shape'?null:'shape')}><Palette size={19}/><small>Color</small></button>}
+    <button type="button" aria-pressed={activeInspector==='color'} disabled={current.locked}
+      onClick={()=>setActiveInspector(v=>v==='color'?null:'color')} aria-label="Cambiar color del elemento"><Palette size={19}/><small>Color</small></button>
+    <button type="button" aria-pressed={!!current.locked} aria-label={current.locked?'Desbloquear posición del elemento':'Bloquear posición del elemento'}
+      onClick={()=>toggleLock(current.id)}><Lock size={19}/><small>{current.locked?'Desbloquear':'Bloquear'}</small></button>
+    {!current.locked&&<>
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='text'} onClick={()=>setActiveInspector(v=>v==='text'?null:'text')}><Type size={20}/><small>Texto</small></button>}
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
     <button type="button" aria-pressed={activeInspector==='opacity'} onClick={()=>setActiveInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
@@ -1199,6 +1203,7 @@ export default function SeamlessEditor(){
     <button type="button" aria-pressed={activeInspector==='rotate'} onClick={()=>setActiveInspector(v=>v==='rotate'?null:'rotate')}><span aria-hidden="true">↻</span><small>Girar</small></button>
     <button type="button" onClick={duplicateSelected}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
+    </>}
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
    </div>}
      <div className="studio-desktop-edit-toolbar" role="toolbar" aria-label="Herramientas avanzadas del editor de escritorio">
