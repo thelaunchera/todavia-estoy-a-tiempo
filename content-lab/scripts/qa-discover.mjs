@@ -18,6 +18,14 @@ try{
       await page.goto(origin+pathname,{waitUntil:'networkidle',timeout:45000});
       await page.locator('.offer-grid .offer').waitFor({state:'visible'});
       await page.evaluate(()=>document.fonts?.ready);
+      // The full-page screenshot can otherwise omit images below the initial mobile viewport
+      // despite a non-zero naturalWidth. Force paint and verify actual image visibility.
+      const editorImage=page.locator('.editor-showcase img');
+      await editorImage.evaluate(img=>img.decode());
+      await editorImage.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(220);
+      await page.evaluate(()=>window.scrollTo(0,0));
+      await page.waitForTimeout(100);
       const r=await page.evaluate(()=>{
         const box=(q)=>{const b=document.querySelector(q)?.getBoundingClientRect();return b?{x:b.x,y:b.y,width:b.width,height:b.height,right:b.right,bottom:b.bottom}:null};
         return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
