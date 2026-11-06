@@ -158,12 +158,38 @@ body.class-page-v2 #recorrido .class-journey-card h3{
 body.class-page-v2 #recorrido .class-journey-card p{
   color:#53606a!important;line-height:1.6!important;
 }
+/* Keep every journey photo fully visible in mobile Instagram browsers.
+   Natural image height avoids cutting off faces; the card footer already
+   carries the explanatory copy, so no overlay should cover the photo. */
 body.class-page-v2 #recorrido .class-journey-photo{
-  height:clamp(180px,18vw,235px)!important;border-radius:14px!important;
-  margin-top:auto!important;overflow:hidden!important;
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  margin:14px 0 15px!important;
+  padding:0!important;
+  border-radius:14px!important;
+  background:#fffefa!important;
+  overflow:hidden!important;
 }
-body.class-page-v2 #recorrido .class-journey-photo>img{
-  object-fit:cover!important;object-position:center!important;
+body.class-page-v2 #recorrido .class-journey-photo>img,
+body.class-page-v2 #recorrido .class-journey-card:hover .class-journey-photo>img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  transition:none!important;
+}
+body.class-page-v2 #recorrido .class-journey-photo::before,
+body.class-page-v2 #recorrido .class-journey-photo::after,
+body.class-page-v2 #recorrido .class-journey-photo figcaption{
+  display:none!important;
 }
 body.class-page-v2 #recorrido .class-journey-foot{
   border-top:1px solid #e3e6e7!important;padding-top:13px!important;
@@ -255,7 +281,7 @@ body.class-page-v2 #incluye button:focus-visible{
   body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card:nth-child(2){
     padding:22px!important;
   }
-  body.class-page-v2 #recorrido .class-journey-photo{height:230px!important}
+  body.class-page-v2 #recorrido .class-journey-photo{height:auto!important}
 }
 @media(max-width:650px){
   body.class-page-v2 .class-hero .class-price-inline.class-price-campaign{
@@ -264,7 +290,7 @@ body.class-page-v2 #incluye button:focus-visible{
   }
   body.class-page-v2 .tle-offer-benefits{grid-template-columns:1fr!important;gap:7px!important}
   body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions{margin-bottom:16px!important}
-  body.class-page-v2 #recorrido .class-journey-photo{height:190px!important}
+  body.class-page-v2 #recorrido .class-journey-photo{height:auto!important}
   body.class-page-v2 #incluye .class-materials-workbench{border-radius:18px!important;padding:12px!important}
   body.class-page-v2 #preguntas .class-faq details summary{padding:16px 47px 16px 16px!important}
   body.class-page-v2 #preguntas .class-faq details .class-faq-answer{padding:0 16px 16px!important}
