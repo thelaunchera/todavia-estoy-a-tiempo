@@ -188,6 +188,9 @@ jobs:
           test -s _podcast_pages/assets/freebies/november-website/02_coffee_planning.svg
           test -s _podcast_pages/assets/freebies/november-website/03_mobile_review.svg
           test -s _podcast_pages/freebies/november-website/access/index.html
+          test -s _podcast_pages/estudio/off-brief-video/index.html
+          test -s _podcast_pages/estudio/off-brief-video/src/main.js
+          test -s _podcast_pages/estudio/off-brief-video/src/production.js
           test -s _podcast_pages/estudio/index.html
           test -s _podcast_pages/estudio/manifest.webmanifest
           test -s _podcast_pages/clases/primera-landing.html

@@ -90,6 +90,8 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
       <div className="yt-hero-mark" aria-hidden="true">OFF<br/>BRIEF<span>01—08</span></div>
     </section>
 
+    <section className="yt-offbrief-maker-entry"><div><strong>OFF BRIEF · AI Video Maker</strong><p>Anima las fotos con IA, organiza los capítulos y prepara voces de los personajes desde tu iPad.</p></div><a href="./off-brief-video/" target="_blank" rel="noopener noreferrer"><Video size={17}/> Abrir Video Maker</a></section>
+
     <div className="yt-view-switch" role="tablist" aria-label="Biblioteca de YouTube">
       <button type="button" role="tab" aria-selected={tab === 'brief'} className={tab === 'brief' ? 'active' : ''} onClick={() => setTab('brief')}><BookOpen size={17}/> Brief completo</button>
       <button type="button" role="tab" aria-selected={tab === 'quick'} className={tab === 'quick' ? 'active' : ''} onClick={() => setTab('quick')}><Video size={17}/> Archivo · Versión corta de 3 fotos</button>

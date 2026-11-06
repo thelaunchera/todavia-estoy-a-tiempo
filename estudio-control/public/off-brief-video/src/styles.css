@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+
+
+:root {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: #1a1b1e;
+  background: #f5f3ec;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #84732c;
+  outline-offset: 2px;
+}
+#app {
+  min-height: 100vh;
+}
+.topbar {
+  height: 76px;
+  background: #fdfcf8;
+  border-bottom: 1px solid #e7e4dc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  gap: 12px;
+}
+.brandmark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.spark {
+  width: 36px;
+  height: 36px;
+  background: #f2d85b;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 27px;
+}
+.brandmark strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  letter-spacing: -1.1px;
+}
+.brandmark .dot {
+  color: #d5af1f;
+}
+.brandmark small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.65px;
+  color: #777874;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.top-actions {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.save-status {
+  font-size: 11px;
+  color: #8a8e89;
+  margin-right: 11px;
+}
+.primary,
+.outline {
+  padding: 12px 18px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.primary {
+  background: #191b1f;
+  border: 1px solid #191b1f;
+  color: #fff;
+}
+.primary:hover {
+  background: #363638;
+}
+.outline {
+  background: transparent;
+  color: #1a1b1e;
+  border: 1px solid #d4d3cd;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 245px minmax(340px, 1fr) 292px;
+  min-height: calc(100vh - 76px);
+}
+.sidebar {
+  background: #eeede7;
+  border-right: 1px solid #e0ddd4;
+  padding: 30px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.65px;
+  font-weight: 800;
+  color: #85877e;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.eyebrow .tiny {
+  font-size: 8px;
+  letter-spacing: 0.7px;
+  color: #a6a8a1;
+}
+.sidebar .eyebrow {
+  justify-content: space-between;
+  padding: 0 12px;
+}
+.sidebar h2,
+.inspector h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 21px;
+  letter-spacing: -0.7px;
+  font-weight: 600;
+  margin: 16px 12px 18px;
+}
+.add-project {
+  border: 1px dashed #c2bda9;
+  background: #f9f7ef;
+  color: #383933;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  margin-bottom: 25px;
+}
+.add-project span {
+  font-size: 21px;
+  color: #84722f;
+  line-height: 10px;
+}
+.project-list {
+  display: grid;
+  gap: 7px;
+}
+.project {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding: 10px 9px;
+  gap: 9px;
+  color: #282b29;
+}
+.project.is-current {
+  background: #fffef9;
+  border-color: #d2cec0;
+  box-shadow: 0 3px 16px #00000007;
+}
+.project-thumb {
+  width: 35px;
+  height: 35px;
+  background: #d6e3e6;
+  color: #606f73;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+.project-name {
+  display: flex;
