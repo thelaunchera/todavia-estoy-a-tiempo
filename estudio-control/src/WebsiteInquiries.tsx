@@ -54,7 +54,10 @@ export default function WebsiteInquiries({readOnly=false}:{readOnly?:boolean}) {
  return <section className="website-inquiries" aria-label="Inquiries de websites y automatizaciones">
   <div className="wi-header">
    <div><span className="wi-kicker">THE LAUNCH ERA · INQUIRIES</span><h2>Solicitudes de websites</h2><p>Desde los dos intakes oficiales, directamente al Studio. Esta bandeja no envía leads al Command Center.</p></div>
-   <button type="button" onClick={()=>void refresh()} disabled={busy} className="wi-refresh"><RefreshCw size={16}/>{busy?'Cargando…':'Actualizar'}</button>
+   <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10}}>
+    <a href="https://thelaunchera.com/website-delivery-admin/" target="_blank" rel="noopener noreferrer" className="wi-refresh"><ExternalLink size={16}/>Entregas y mensualidades</a>
+    <button type="button" onClick={()=>void refresh()} disabled={busy} className="wi-refresh"><RefreshCw size={16}/>{busy?'Cargando…':'Actualizar'}</button>
+   </div>
   </div>
   <div className="wi-stats"><div><span>Nuevas</span><strong>{ready?newCount:'—'}</strong></div><div><span>Recibidas (últimas 200)</span><strong>{ready?rows.length:'—'}</strong></div><div><span>En proceso</span><strong>{ready?rows.filter(x=>x.status==='in_progress').length:'—'}</strong></div></div>
   <div className="wi-toolbar">
