@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -149,4 +149,22 @@ test('WOK SOCIAL conserva 14 fotos individuales, 7 pasos y permisos de Aula priv
  assert.match(kit,/drive\.google\.com\/drive\/folders\/1HLcYvc7rrW8ncOACtxSkKknkVDjbXNcM/);
  assert.match(kit,/wokSocialPromptDocument/);
  assert.match(demosSource,/ClassroomDemoPublication/);
+});
+
+
+test('Seasonal Brew conserva diez originales, seis pasos, Drive y una sola ficha',()=>{
+ const kit=read('src/seasonal-brew-kit.ts');
+ const photoMatch=kit.match(/seasonalBrewPhotos:FinishedDemoPhoto\[\]=(\[[\s\S]*?\]);/);
+ const stepMatch=kit.match(/seasonalBrewRebuildPrompts:DemoRebuildPrompt\[\]=(\[[\s\S]*?\]);/);
+ assert.ok(photoMatch,'Falta la galería de Seasonal Brew');
+ assert.ok(stepMatch,'Faltan los pasos de Seasonal Brew');
+ const photos=JSON.parse(photoMatch[1]);
+ const steps=JSON.parse(stepMatch[1]);
+ assert.equal(photos.length,10);
+ assert.equal(new Set(photos.map(p=>p.url)).size,10);
+ assert.equal(steps.length,6);
+ assert.equal(cards.filter(card=>card.id==='seasonal-brew').length,1);
+ assert.ok(photos.every(p=>p.title&&p.prompt&&p.placement));
+ assert.match(kit,/1vrScp7azye4DKN-v_zn-xshacHpaOe2R/);
+ assert.match(demosSource,/promptsFor:'seasonal-brew'/);
 });
