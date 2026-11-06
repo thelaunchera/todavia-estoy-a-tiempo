@@ -28,6 +28,11 @@ jobs:
         working-directory: content-lab
       - name: Test public sales pages with a real browser
         run: |
+          # Mirror Vite's public/ asset layout when testing source pages locally.
+          ln -sfn public/descubre descubre
+          ln -sfn public/prompts prompts
+          ln -sfn public/favicon-32.png favicon-32.png
+          ln -sfn public/apple-touch-icon.png apple-touch-icon.png
           ( cd .. && python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/tle-discover-server.log 2>&1 ) &
           server_pid=$!
           trap 'kill $server_pid || true' EXIT
