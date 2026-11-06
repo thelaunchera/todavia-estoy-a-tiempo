@@ -57,7 +57,7 @@ export function useStudioLibrarySync(
   let active=true;
   const work=async()=>{
    try{
-    const synced=await readEditorRecord<Record<string,boolean>>(SYNC_KEY).catch(()=>({}))||{};
+    const synced:Record<string,boolean>=(await readEditorRecord<Record<string,boolean>>(SYNC_KEY).catch(()=>null))||{};
     const missing=imported.filter(item=>item.id.startsWith('studio-import-')&&!synced[item.id]);
     if(!missing.length)return;
     let added=0,duplicates=0;const errors:string[]=[];

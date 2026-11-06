@@ -21,7 +21,7 @@ import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,Sliders
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
-const defaults={count:5,background:CREATIVE_EDITOR_RULES.defaultCanvasColor,backgroundImages:{} as Record<number,string>,items:[] as Item[]};
+const defaults={count:5,background:String(CREATIVE_EDITOR_RULES.defaultCanvasColor),backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // Studio copies its own shared resources on deployment.
 const labUrl=(file:string)=>new URL('resources/'+file.replace(/^resources\//,''),document.baseURI).href;
 const resolveImageSource=(src:string)=>{

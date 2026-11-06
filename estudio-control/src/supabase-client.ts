@@ -665,10 +665,11 @@ export async function publishStudioLabAsset(file:File,kind:'sticker'|'background
  const {error:storageError}=await client.storage.from('content-lab-private').upload(objectPath,bytes,{contentType:mime,upsert:false});
  if(storageError)throw Error('No se pudo subir el recurso: '+storageError.message);
  try{
-  const fields=kind==='sticker'
-    ? {created_by:who.id,path:objectPath,name,category:'Aesthetic',sha256,size_bytes:bytes.length,published:true}
-    : {created_by:who.id,path:objectPath,name,category:'Editoriales',mime,sha256,size_bytes:bytes.length,published:true};
-  const {data:record,error:saveError}=await client.from(table).insert(fields).select('id').single();
+  const {data:record,error:saveError}=kind==='sticker'
+    ?await client.from('content_lab_sticker_catalog')
+      .insert({created_by:who.id,path:objectPath,name,category:'Aesthetic',sha256,size_bytes:bytes.length,published:true}).select('id').single()
+    :await client.from('content_lab_background_catalog')
+      .insert({created_by:who.id,path:objectPath,name,category:'Editoriales',mime,sha256,size_bytes:bytes.length,published:true}).select('id').single();
   if(saveError||!record)throw Error(saveError?.message||'No se pudo confirmar la publicación.');
   return {id:record.id,duplicate:false};
  }catch(error){
