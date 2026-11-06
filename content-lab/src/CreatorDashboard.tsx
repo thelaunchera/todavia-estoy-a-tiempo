@@ -86,10 +86,9 @@ export default function CreatorDashboard({
     <span className="cld-eyebrow"><span className="cld-eyebrow-dot"/> THE CONTENT LAB · WORKSPACE</span>
     <h1>{es?'¿Qué vamos a':'What shall we'} <em>{es?'crear?':'create?'}</em></h1>
     <p>{es?'Elige un formato, dale vida a tu idea y continúa donde lo dejaste.':'Choose a format, bring your idea to life, and pick up where you left off.'}</p>
-    <button type="button" className="cld-hero-action"
-      onClick={()=>recent.length?onEditPost(recent[0].post):onNewNormal()}>
-      <span>{recent.length?(es?'Continuar último diseño':'Continue last design'):(es?'Crear mi primer diseño':'Create my first design')}</span><ArrowRight size={17}/>
-    </button>
+    {recent.length===0&&<button type="button" className="cld-hero-action" onClick={onNewNormal}>
+      <span>{es?'Crear mi primer diseño':'Create my first design'}</span><ArrowRight size={17}/>
+    </button>}
    </div>
    <button type="button" className="cld-brand-pill" onClick={onEditBrand} aria-label={es?'Editar mi marca':'Edit my brand'}>
     <span className="cld-brand-avatar" style={{backgroundColor:brand.color||'#F2D85B'}}>{brand.name?.slice(0,1).toUpperCase()}</span>
@@ -98,7 +97,7 @@ export default function CreatorDashboard({
   </section>
   <section className="cld-create-section" id="lab-create-start">
    <div className="cld-section-heading">
-    <div><span className="cld-section-kicker">{es?'01 · EMPEZAR':'01 · START'}</span><h2>{es?'Crea algo nuevo':'Create something new'}</h2></div>
+    <div><span className="cld-section-kicker">{es?'EMPEZAR':'START HERE'}</span><h2>{es?'Crea algo nuevo':'Create something new'}</h2></div>
     <span className="cld-section-aside">{es?'Tu idea empieza aquí':'Your next idea starts here'}</span>
    </div>
    <div className="cld-format-grid">
@@ -114,7 +113,7 @@ export default function CreatorDashboard({
   </section>
   <section className="cld-recents-section" aria-label={es?'Creaciones recientes':'Recent designs'}>
    <div className="cld-section-heading">
-    <div><span className="cld-section-kicker">{es?'02 · TUS DISEÑOS':'02 · YOUR WORK'}</span><h2>{es?'Continúa diseñando':'Keep creating'}</h2></div>
+    <div><span className="cld-section-kicker">{es?'TUS PROYECTOS':'YOUR PROJECTS'}</span><h2>{es?'Tus diseños recientes':'Your recent designs'}</h2></div>
     <button type="button" className="cld-textlink" onClick={()=>onNavigate('posts')}>{es?'Ver proyectos':'View projects'}<ArrowRight size={16}/></button>
    </div>
    {recent.length>0?<div className="cld-project-grid">
@@ -136,7 +135,7 @@ export default function CreatorDashboard({
   </section>
   <section className="cld-resources-section">
    <div className="cld-section-heading">
-    <div><span className="cld-section-kicker">{es?'03 · TU WORKSPACE':'03 · YOUR WORKSPACE'}</span><h2>{es?'Todo en un solo lugar':'Everything in one place'}</h2></div>
+    <div><span className="cld-section-kicker">{es?'TU ESPACIO CREATIVO':'YOUR WORKSPACE'}</span><h2>{es?'Todo en un solo lugar':'Everything in one place'}</h2></div>
     <button type="button" className="cld-textlink" onClick={()=>onNavigate('media')}>{es?'Abrir biblioteca':'Open library'}<ArrowRight size={16}/></button>
    </div>
    <div className="cld-resource-grid">
