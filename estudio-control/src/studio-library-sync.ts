@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {loadStudioLabAssets,publishStudioLabAsset,type StudioLabAsset} from './supabase-client';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
+import {classifyAdminDesignAsset} from '../../creative-shared/design-asset-kind';
 
 /** Only admin library uploads may be shared. Photos added directly to a design
  * never pass through this hook and remain user-owned.
@@ -61,14 +62,15 @@ export function useStudioLibrarySync(
     const missing=imported.filter(item=>item.id.startsWith('studio-import-')&&!synced[item.id]);
     if(!missing.length)return;
     let added=0,duplicates=0;const errors:string[]=[];
-    setSyncStatus('Sincronizando '+missing.length+' stickers con el Lab…');
+    setSyncStatus('Organizando '+missing.length+' recursos en Stickers y Fondos del Lab…');
     for(const asset of missing){
      try{
       if(!asset.url.startsWith('data:image/'))throw Error('Archivo local no disponible.');
       const blob=await(await fetch(asset.url)).blob();
       const ext=blob.type==='image/webp'?'.webp':blob.type==='image/jpeg'?'.jpg':'.png';
       const input=new File([blob],asset.name+ext,{type:blob.type});
-      const result=await publishStudioLabAsset(await prepareFile(input,'sticker'),'sticker',asset.name);
+      const kind=asset.category==='background'?'background':await classifyAdminDesignAsset(input,asset.name);
+      const result=await publishStudioLabAsset(await prepareFile(input,kind),kind,asset.name);
       if(result.duplicate)duplicates++;else added++;
       synced[asset.id]=true;
       await writeEditorRecord(SYNC_KEY,synced);

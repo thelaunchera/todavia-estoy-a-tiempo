@@ -10,6 +10,7 @@ import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
 import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useStudioLibrarySync} from './studio-library-sync';
+import {classifyAdminDesignAsset} from '../../creative-shared/design-asset-kind';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {useEffect,useRef,useState} from 'react';
 import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLine} from './curved-text';
@@ -126,11 +127,11 @@ export default function SeamlessEditor(){
     if(next.some(item=>item.id===id))continue;
     const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(image);});
     await new Promise<void>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve();img.onerror=()=>reject(Error('Imagen dañada: '+image.name));img.src=url;});
-    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:'sticker',url});added++;
+    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:await classifyAdminDesignAsset(image,image.name),url});added++;
    }
    await writeEditorRecord('studio-imported-stickers-v1',next);
-   setImportedStickers(next);setStickerSearch('');setStickerCategory('Todos');setQuickPanel('stickers');setSidebarCollapsed(false);
-   setStickerImportStatus(added?`${added} stickers guardados en este dispositivo. Ya puedes añadirlos al lienzo.`:'Estos stickers ya estaban guardados.');
+   setImportedStickers(next);setStickerSearch('');setStickerCategory('Todos');setQuickPanel(next.some(item=>item.category==='background')?'fondos':'stickers');setSidebarCollapsed(false);
+   setStickerImportStatus(added?`${added} recursos organizados en Stickers y Fondos. Se publicarán en el Lab.`:'Estos recursos ya estaban guardados.');
   }catch(error){setStickerImportStatus(error instanceof Error?error.message:'No se pudieron importar los stickers.');}
   finally{setImportingStickers(false);}
  };
@@ -917,7 +918,7 @@ export default function SeamlessEditor(){
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
       </button>)}
-      {privateAssets.filter(asset=>asset.category==='background').map(asset=><button type="button" key={asset.id}
+      {[...importedStickers.filter(asset=>asset.category==='background'),...privateAssets.filter(asset=>asset.category==='background')].map(asset=><button type="button" key={asset.id}
         onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'))}}
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
@@ -928,7 +929,7 @@ export default function SeamlessEditor(){
       </button>)}
     </div>}
     {openPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
-      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Publicar stickers · Studio + Lab'}</button>
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Importar recursos · Studio + Lab'}</button>
       <small>Estos stickers se publican para los compradores del Lab. Las fotos y fondos subidos al lienzo son privados.</small>
       {syncStatus&&<small role="status">{syncStatus}</small>}
       {syncStatus.includes('pendientes')&&<button type="button" style={control} onClick={retry}>Reintentar sincronización</button>}
@@ -943,7 +944,7 @@ export default function SeamlessEditor(){
             onClick={()=>setStickerCategory(category)}>{category}</button>)}
       </div>
       <div className="studio-sticker-gallery">
-        {[...importedStickers.map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+        {[...importedStickers.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
           ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
@@ -974,7 +975,7 @@ export default function SeamlessEditor(){
   <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
-    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Publicar stickers · Studio + Lab</button>
+    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Importar recursos · Studio + Lab</button>
     {wideScreen&&<button type="button" className="studio-sidebar-toggle" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(v=>!v)}} aria-expanded={!!openPanel}>{sidebarCollapsed?'Abrir biblioteca':'Ocultar biblioteca'}</button>}
     <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
     <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
