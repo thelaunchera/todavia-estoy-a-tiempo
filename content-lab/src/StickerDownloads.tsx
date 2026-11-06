@@ -1,12 +1,14 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {Download,Search,Images,Upload,Check,LoaderCircle,Trash2} from 'lucide-react';
 import {unzip} from 'fflate';
+import {classifyAdminDesignAsset,type ImportKind} from '../../creative-shared/design-asset-kind';
 import {displayAssetName,assetCategory,type LibraryAsset} from './MediaAsset';
 import './StickerDownloads.css';
 
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onUpload:(file:File)=>Promise<LibraryAsset|null>;
  onPublish:(file:File,category:string)=>Promise<LibraryAsset|null>;
+ onPublishBackground:(file:File,category:string)=>Promise<LibraryAsset|null>;
  onDelete:(asset:LibraryAsset)=>Promise<void>;
  isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
 const groups=['Todos','Branding y Marketing','Inspiración','Avatares','Animales','Creación','Negocios','Matcha','Pilates','Ejercicios','Aesthetic'];
@@ -36,10 +38,11 @@ function StickerPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;lo
  },[asset.id,Boolean(src)]);
  return <div ref={ref} className="sticker-downloads-preview">{src?<img src={src} alt={displayAssetName(asset)} loading="lazy"/>:<span className="sticker-thumb-loading" aria-label="Cargando ilustración"><LoaderCircle size={18} className="spin"/></span>}</div>;
 }
-export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,onDelete,isAdmin,loadImage,onUse}:Props){
+export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,onPublishBackground,onDelete,isAdmin,loadImage,onUse}:Props){
  const fileRef=useRef<HTMLInputElement>(null);
  const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
  const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
+ const [importKind,setImportKind]=useState<ImportKind>('auto');
  const [destination,setDestination]=useState<'carousel'|'cover'>('carousel');
  const [dragActive,setDragActive]=useState(false);
  const files=useMemo(()=>assets.filter(a=>(a.brandId===brandId||a.shared)&&assetCategory(a)==='sticker'),[assets,brandId]);
@@ -48,10 +51,10 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
  const matches=useMemo(()=>files.filter(a=>(category==='Todos'||(a.shared?a.stickerGroup:groupOf(a.name))===category)&&displayAssetName(a).toLowerCase().includes(search.toLowerCase())),[files,category,search]);
  const importFiles=async(list:File[])=>{
   if(!list.length)return;
-  setRunning(true);let saved=0,duplicates=0,failed=0;
+  setRunning(true);let saved=0,duplicates=0,failed=0,backgrounds=0;
   try{
    const existing=new Set(files.filter(a=>!a.shared).map(a=>a.name.toLowerCase()));
-   const uploadList:{file:File;group:string}[]=[];
+   const uploadList:{file:File;group:string;source:string}[]=[];
    for(const file of list){
     if(/[.]zip$/i.test(file.name)){
      if(file.size>85000000)throw Error('El ZIP no puede superar 85 MB.');
@@ -64,12 +67,12 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
        const finalGroup=/pilates|reformer/i.test(basename)?'Pilates':group;
        if(!existing.has(basename.toLowerCase())){
          existing.add(basename.toLowerCase());
-         uploadList.push({file:new File([new Uint8Array(bytes)],basename,{type:'image/png'}),group:finalGroup});
+         uploadList.push({file:new File([new Uint8Array(bytes)],basename,{type:'image/png'}),group:finalGroup,source:name});
        }
      }
     }else if(file.type==='image/png'||/[.]png$/i.test(file.name)){
       if(!existing.has(file.name.toLowerCase())){
-       existing.add(file.name.toLowerCase());uploadList.push({file,group:groupOf(file.name)});
+       existing.add(file.name.toLowerCase());uploadList.push({file,group:groupOf(file.name),source:file.name});
       }
     }
    }
@@ -78,12 +81,13 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
      const item=uploadList[i];
      setProgress((isAdmin?'Publicando en la biblioteca compartida ':'Guardando stickers personales ')+(i+1)+' / '+uploadList.length);
      try{
-       const result=isAdmin?await onPublish(item.file,item.group):await onUpload(item.file);
+       const kind=isAdmin?await classifyAdminDesignAsset(item.file,item.source,importKind):'sticker';
+       const result=isAdmin?(kind==='background'?await onPublishBackground(item.file,'Editoriales'):await onPublish(item.file,item.group)):await onUpload(item.file);
        if(result?.shared&&result?.sha256&&files.some(a=>a.sha256===result.sha256))duplicates++;
-       else if(result)saved++;else failed++;
+       else if(result){saved++;if(kind==='background')backgrounds++;}else failed++;
      }catch(e){failed++;if(failed===1)setProgress('Revisando archivos: '+(e instanceof Error?e.message:String(e)))}
    }
-   setProgress((isAdmin?'Publicación terminada: ':'Importación terminada: ')+saved+' PNG nuevos'+(duplicates?' · '+duplicates+' duplicados omitidos':'')+(failed?' · '+failed+' no se pudieron guardar':'')+'. Sin créditos de IA.');
+   setProgress((isAdmin?'Bibliotecas organizadas: ':'Importación terminada: ')+saved+' PNG nuevos'+(backgrounds?' · '+backgrounds+' en Fondos':'')+(duplicates?' · '+duplicates+' duplicados omitidos':'')+(failed?' · '+failed+' no se pudieron guardar':'')+'. Sin créditos de IA.');
   }catch(e){setProgress('No se pudo importar: '+(e instanceof Error?e.message:String(e)))}
   finally{setRunning(false);if(fileRef.current)fileRef.current.value=''}
  };

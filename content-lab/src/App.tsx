@@ -1854,7 +1854,7 @@ function App() {
               )}
             </>
           )}
-          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onUpload={async file=>upload(file,'sticker',false,brand.id,true)} onDelete={deleteLibraryAsset} loadImage={imageLoad} onUse={(id,destination)=>{
+          {brand && tab === 'stickers' && <StickerDownloads brandId={brand.id} assets={library} images={images} isAdmin={Boolean(aiWallet?.admin)} onPublish={publishSharedSticker} onPublishBackground={publishSharedBackground} onUpload={async file=>upload(file,'sticker',false,brand.id,true)} onDelete={deleteLibraryAsset} loadImage={imageLoad} onUse={(id,destination)=>{
                     if(destination==='cover'){
                       setEditor(old=>{
                         const decor=readCoverDecor(old.designData);
