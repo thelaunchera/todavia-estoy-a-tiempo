@@ -1,0 +1,277 @@
+/* The Launch Era · Tu primera web con IA
+   2026-11-06 — Clear-offer editorial redesign inspired by the INFORMATION ARCHITECTURE
+   of a membership pricing page, not by copying another brand's visual identity.
+   Keep class content, waitlist workflow, bilingual pages and existing media intact.
+*/
+body.class-page-v2{
+  --tle-offer-ink:#191919;--tle-offer-muted:#586273;
+  --tle-offer-line:#dce1e4;--tle-offer-bg:#faf8f3;
+  --tle-offer-white:#fffefa;--tle-offer-yellow:#f2d85b;
+  --tle-offer-blue:#dce9f4;
+}
+body.class-page-v2 .class-hero{
+  background:#faf8f3!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-eyebrow{
+  color:#34536b!important;letter-spacing:.13em!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>h1{
+  color:#191919!important;letter-spacing:-.055em!important;
+  text-wrap:balance;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-lede{
+  color:#414b54!important;line-height:1.6!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-opportunity{
+  color:#263f58!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-audio-language-note{
+  color:#64717b!important;line-height:1.5!important;
+}
+
+/* The actual course has ONE purchase option; give it the importance that
+   three subscription cards have on the reference without inventing tiers. */
+body.class-page-v2 .class-hero .class-price-inline.class-price-campaign{
+  display:flex!important;flex-direction:column!important;gap:12px!important;
+  box-sizing:border-box!important;position:relative!important;
+  width:min(100%,650px)!important;max-width:650px!important;
+  min-width:0!important;height:auto!important;min-height:0!important;
+  padding:clamp(22px,3.2vw,34px)!important;
+  margin:clamp(23px,3.5vw,38px) 0 20px!important;
+  color:var(--tle-offer-ink)!important;background:#fffefa!important;
+  border:1px solid #dbe1e5!important;border-radius:24px!important;
+  box-shadow:0 12px 34px rgba(23,34,46,.06)!important;
+  transform:none!important;translate:none!important;overflow:visible!important;
+  text-align:left!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-campaign-pill{
+  display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;
+  width:max-content!important;max-width:100%!important;white-space:normal!important;
+  border:0!important;border-radius:999px!important;
+  background:#f2d85b!important;color:#1e2024!important;
+  padding:8px 13px!important;margin:0 0 5px!important;
+  letter-spacing:.045em!important;font-size:clamp(.66rem,1.05vw,.77rem)!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-price-current{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  gap:5px!important;margin:0!important;color:#191919!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-price-current strong{
+  font:700 clamp(3.8rem,7vw,5.8rem)/.96 var(--sans,Arial,sans-serif)!important;
+  letter-spacing:-.085em!important;color:#191919!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-price-label{
+  color:#66717a!important;font-size:clamp(.68rem,1vw,.77rem)!important;
+  letter-spacing:.075em!important;font-weight:750!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-price-regular{
+  display:flex!important;gap:8px!important;align-items:center!important;flex-wrap:wrap!important;
+  font-size:.87rem!important;color:#68717c!important;
+  margin:0!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-price-regular del{
+  color:#676b73!important;font-weight:600!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-campaign-divider{
+  display:none!important;
+}
+body.class-page-v2 .class-hero .class-price-inline .class-campaign-detail{
+  color:#5d6973!important;line-height:1.55!important;
+  font-size:.85rem!important;padding:0!important;margin:0!important;
+}
+body.class-page-v2 .tle-offer-benefits{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:11px!important;list-style:none!important;padding:18px 0 0!important;
+  margin:8px 0 0!important;border-top:1px solid #e5e7e8;
+}
+body.class-page-v2 .tle-offer-benefits li{
+  position:relative;padding-left:19px;line-height:1.35;
+  color:#2d3b48;font:650 clamp(.75rem,1.1vw,.84rem)/1.45 var(--sans,Arial,sans-serif);
+}
+body.class-page-v2 .tle-offer-benefits li::before{
+  content:"✓";position:absolute;left:0;top:0;color:#365c78;font-weight:900;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions{
+  width:min(100%,650px)!important;max-width:650px!important;
+  gap:12px!important;margin:0 0 12px!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions>a{
+  min-height:50px!important;border-radius:13px!important;
+  display:inline-flex!important;justify-content:center!important;
+  align-items:center!important;text-align:center!important;box-sizing:border-box!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions>.class-primary-button{
+  background:#191919!important;color:#fffefa!important;border:1px solid #191919!important;
+  box-shadow:none!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions>.class-campaign-notify-link{
+  background:transparent!important;border:1px solid #c9d3da!important;
+  color:#24435c!important;
+}
+body.class-page-v2 .class-hero .class-hero-chips{
+  display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+  margin-top:16px!important;
+}
+body.class-page-v2 .class-hero .class-hero-chips span{
+  background:#eaf0f4!important;color:#29435a!important;
+  border:1px solid #d5dfe5!important;border-radius:999px!important;
+  box-shadow:none!important;
+}
+
+/* The three-step route becomes a coherent set of three substantial cards. */
+body.class-page-v2 #recorrido{
+  background:#f4f5f3!important;padding-block:clamp(64px,6vw,90px)!important;
+}
+body.class-page-v2 #recorrido .class-section-head{
+  max-width:920px!important;text-align:left!important;margin-bottom:30px!important;
+}
+body.class-page-v2 #recorrido .class-section-head h2,
+body.class-page-v2 #incluye .class-materials-top h2,
+body.class-page-v2 #preguntas .class-section-head h2{
+  color:#191919!important;line-height:1.11!important;letter-spacing:-.045em!important;
+}
+body.class-page-v2 #recorrido .class-journey-grid{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:stretch!important;gap:clamp(12px,1.8vw,22px)!important;
+}
+body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card,
+body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card:nth-child(2){
+  position:relative!important;padding:clamp(20px,2.3vw,30px)!important;
+  background:#fffefa!important;color:#191919!important;
+  border:1px solid #dedfe0!important;border-radius:22px!important;
+  box-shadow:0 7px 20px rgba(31,45,56,.035)!important;min-width:0!important;
+}
+body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card:nth-child(2){
+  border:2px solid #ced9e2!important;
+  box-shadow:0 12px 26px rgba(31,62,83,.09)!important;
+}
+body.class-page-v2 #recorrido .class-journey-card[data-featured-label]::before{
+  content:attr(data-featured-label);
+  display:inline-flex;align-self:flex-start;position:static!important;
+  background:#f2d85b;color:#191919;font:750 .63rem/1.2 var(--sans,Arial,sans-serif);
+  letter-spacing:.06em;padding:7px 10px;border-radius:999px;margin-bottom:14px;
+}
+body.class-page-v2 #recorrido .class-journey-card h3{
+  color:#191919!important;font-size:clamp(1.5rem,2.4vw,2.25rem)!important;
+  line-height:1.12!important;
+}
+body.class-page-v2 #recorrido .class-journey-card p{
+  color:#53606a!important;line-height:1.6!important;
+}
+body.class-page-v2 #recorrido .class-journey-photo{
+  height:clamp(180px,18vw,235px)!important;border-radius:14px!important;
+  margin-top:auto!important;overflow:hidden!important;
+}
+body.class-page-v2 #recorrido .class-journey-photo>img{
+  object-fit:cover!important;object-position:center!important;
+}
+body.class-page-v2 #recorrido .class-journey-foot{
+  border-top:1px solid #e3e6e7!important;padding-top:13px!important;
+  color:#5d6973!important;
+}
+
+/* Make the included materials feel like a product, not a huge dashboard. */
+body.class-page-v2 #incluye{
+  background:#f0f3f4!important;padding-block:clamp(60px,6vw,90px)!important;
+}
+body.class-page-v2 #incluye .class-materials-workbench{
+  background:#fffefa!important;border:1px solid #dce2e5!important;
+  border-radius:24px!important;padding:clamp(14px,2vw,26px)!important;
+  box-shadow:0 9px 28px rgba(27,48,65,.045)!important;
+  overflow:hidden!important;
+}
+body.class-page-v2 #incluye .class-material-tabs{
+  background:#f3f5f5!important;border-radius:14px!important;padding:6px!important;gap:5px!important;
+}
+body.class-page-v2 #incluye .class-material-tab{
+  min-height:44px!important;border-radius:10px!important;
+}
+body.class-page-v2 #incluye .class-material-tab.is-active,
+body.class-page-v2 #incluye .class-material-tab[aria-selected="true"]{
+  color:#191919!important;background:#f2d85b!important;border-color:#f2d85b!important;
+  box-shadow:none!important;
+}
+
+/* Accordion: neutral, scannable rows, no gratuitous animations. */
+body.class-page-v2 #preguntas{
+  background:#faf8f3!important;padding-block:clamp(60px,6vw,90px)!important;
+}
+body.class-page-v2 #preguntas .class-faq{
+  display:grid!important;gap:10px!important;
+  width:100%!important;max-width:1000px!important;margin-inline:auto!important;
+}
+body.class-page-v2 #preguntas .class-faq details{
+  background:#fffefa!important;border:1px solid #dce1e4!important;
+  border-radius:16px!important;overflow:hidden!important;
+  box-shadow:none!important;
+}
+body.class-page-v2 #preguntas .class-faq details summary{
+  display:block!important;cursor:pointer!important;
+  min-height:55px!important;color:#20272b!important;
+  font-weight:650!important;padding:18px 58px 18px 20px!important;
+  font-size:clamp(.94rem,1.3vw,1.04rem)!important;line-height:1.4!important;
+}
+body.class-page-v2 #preguntas .class-faq details .class-faq-answer{
+  color:#53616d!important;padding:0 18px 15px!important;
+}
+body.class-page-v2 #preguntas .class-faq details .class-faq-answer p{
+  padding:0!important;margin:0!important;
+  font-size:.91rem!important;line-height:1.65!important;
+}
+
+/* Clean conversion section, preserve real email subscription mechanics. */
+body.class-page-v2 #lista-espera{
+  background:#17283b!important;padding-block:clamp(68px,7vw,102px)!important;
+}
+body.class-page-v2 #lista-espera .class-waitlist-grid{gap:clamp(24px,4vw,60px)!important}
+body.class-page-v2 #lista-espera .class-final-copy h2{
+  color:#fffefa!important;letter-spacing:-.045em!important;line-height:1.12!important;
+}
+body.class-page-v2 #lista-espera .class-final-copy>p{
+  color:#e4e8ed!important;line-height:1.6!important;
+}
+body.class-page-v2 #lista-espera .class-waitlist-form{
+  background:#fffefa!important;color:#191919!important;
+  border-radius:24px!important;border:1px solid #e2e3e5!important;
+  box-shadow:0 14px 35px rgba(0,0,0,.12)!important;
+  padding:clamp(22px,3vw,34px)!important;
+}
+body.class-page-v2 #lista-espera .class-waitlist-form .class-primary-button{
+  min-height:50px!important;border-radius:12px!important;
+  background:#191919!important;color:#fffefa!important;
+  box-shadow:none!important;
+}
+body.class-page-v2 #lista-espera input[type="email"]{
+  border-radius:10px!important;min-height:50px!important;
+}
+body.class-page-v2 #lista-espera :is(button,a,input):focus-visible,
+body.class-page-v2 #preguntas summary:focus-visible,
+body.class-page-v2 #incluye button:focus-visible{
+  outline:3px solid #c3a13a!important;outline-offset:3px!important;
+}
+@media(max-width:800px){
+  body.class-page-v2 #recorrido .class-journey-grid{grid-template-columns:1fr!important;max-width:650px!important;margin:0 auto!important}
+  body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card,
+  body.class-page-v2 #recorrido .class-journey-grid>.class-journey-card:nth-child(2){
+    padding:22px!important;
+  }
+  body.class-page-v2 #recorrido .class-journey-photo{height:230px!important}
+}
+@media(max-width:650px){
+  body.class-page-v2 .class-hero .class-price-inline.class-price-campaign{
+    width:100%!important;max-width:100%!important;border-radius:20px!important;
+    padding:22px!important;margin:20px 0 16px!important;
+  }
+  body.class-page-v2 .tle-offer-benefits{grid-template-columns:1fr!important;gap:7px!important}
+  body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions{margin-bottom:16px!important}
+  body.class-page-v2 #recorrido .class-journey-photo{height:190px!important}
+  body.class-page-v2 #incluye .class-materials-workbench{border-radius:18px!important;padding:12px!important}
+  body.class-page-v2 #preguntas .class-faq details summary{padding:16px 47px 16px 16px!important}
+  body.class-page-v2 #preguntas .class-faq details .class-faq-answer{padding:0 16px 16px!important}
+  body.class-page-v2 #lista-espera .class-waitlist-form{border-radius:19px!important;padding:22px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.class-page-v2 #recorrido .class-journey-card,
+  body.class-page-v2 #incluye .class-material-tab,
+  body.class-page-v2 #preguntas .class-faq details{animation:none!important;transition:none!important}
+}
