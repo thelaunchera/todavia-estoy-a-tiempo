@@ -908,7 +908,7 @@ export default function SeamlessEditor(){
      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750,gridColumn:'1 / -1'}}
       disabled={publishingBackgrounds} onClick={()=>backgroundPublishInput.current?.click()}>
       {publishingBackgrounds?'Publicando fondos…':'＋ Publicar fondos · Studio + Lab'}</button>
-     {backgroundStatus&&<small role="status" style={{gridColumn:'1 / -1'}}>{backgroundStatus}</small>}}
+     {backgroundStatus&&<small role="status" style={{gridColumn:'1 / -1'}}>{backgroundStatus}</small>}
      {doc.backgroundImages?.[slide]&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}} onClick={()=>void addEditableBackground(doc.backgroundImages[slide])}>✎ Editar fondo de este slide</button>}
      {doc.items.some(it=>it.role==='background'&&it.backgroundSlide===slide)&&<button type="button" style={{...control,gridColumn:'1 / -1',background:'#F2D85B',fontWeight:750}}
        onClick={()=>{const layer=doc.items.find(it=>it.role==='background'&&it.backgroundSlide===slide);if(layer){setSelected(layer.id);setActiveInspector('size');setQuickPanel(null)}}}>✎ Seleccionar y agrandar fondo</button>}
@@ -931,7 +931,7 @@ export default function SeamlessEditor(){
       <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Publicar stickers · Studio + Lab'}</button>
       <small>Estos stickers se publican para los compradores del Lab. Las fotos y fondos subidos al lienzo son privados.</small>
       {syncStatus&&<small role="status">{syncStatus}</small>}
-      {syncStatus.includes('pendientes')&&<button type="button" style={control} onClick={retry}>Reintentar sincronización</button>}}
+      {syncStatus.includes('pendientes')&&<button type="button" style={control} onClick={retry}>Reintentar sincronización</button>}
       {stickerImportStatus&&<small role="status">{stickerImportStatus}</small>}
       <input type="search" value={stickerSearch} aria-label="Buscar stickers" placeholder="Buscar animal, creadora, cinta, frase..."
         onChange={e=>setStickerSearch(e.target.value)}/>
