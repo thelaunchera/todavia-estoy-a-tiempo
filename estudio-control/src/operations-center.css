@@ -1,0 +1,65 @@
+/* The Launch Era — private operations hub.
+   Navigation only: customer/payment data remains in original authenticated modules.
+   Mobile-first and touch-friendly. */
+.tle-ops{--ops-ink:#191919;--ops-muted:#556775;--ops-paper:#FAF8F3;--ops-blue:#E7F0F5;--ops-yellow:#F2D85B;width:100%;max-width:1150px;margin:0 auto;padding:0 0 28px;color:var(--ops-ink)}
+.tle-ops-intro{display:flex;align-items:end;justify-content:space-between;gap:25px;padding:25px clamp(22px,3.5vw,42px);background:var(--ops-paper);border:1px solid #E2E5E5;border-radius:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.tle-ops-intro:before{position:absolute;content:"";height:5px;width:130px;left:clamp(22px,3.5vw,42px);top:0;background:var(--ops-yellow);border-radius:0 0 6px 6px}
+.tle-ops-intro>div:first-child{min-width:0;position:relative;z-index:1}
+.tle-ops-overline{display:inline-flex;align-items:center;gap:9px;color:#44627a;font-size:11px;font-weight:750;letter-spacing:.12em;line-height:1.5}
+.tle-ops-intro h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(2.1rem,4.1vw,3.85rem);line-height:1.04;letter-spacing:-.055em;margin:17px 0 14px;color:var(--ops-ink);text-wrap:balance}
+.tle-ops-intro h2 em{font-style:italic;color:#557D93}
+.tle-ops-intro p{max-width:660px;color:#596772;font-size:clamp(.88rem,1.2vw,1rem);line-height:1.75;margin:0}
+.tle-ops-mark{flex:none;align-self:center;font:800 clamp(55px,8vw,105px)/.8 Georgia,serif;letter-spacing:-.11em;color:#c9dce7;transform:rotate(-8deg);user-select:none}
+.tle-ops-mark span{color:var(--ops-yellow)}
+.tle-ops-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.tle-ops-tile{appearance:none;border:1px solid #DEE4E5;border-radius:19px;background:#fffefa;text-align:left;min-width:0;min-height:202px;padding:22px;display:flex;flex-direction:column;align-items:flex-start;cursor:pointer;transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;color:var(--ops-ink);box-shadow:0 9px 25px rgba(30,50,60,.025)}
+.tle-ops-tile:hover{transform:translateY(-2px);border-color:#B6CCD7;box-shadow:0 12px 25px rgba(20,36,48,.07)}
+.tle-ops-tile.selected{border-color:#497B98;background:#F4F8FA;box-shadow:inset 0 0 0 1px #497B98}
+.tle-ops-icon{background:#E6EFF3;border:1px solid #D4E3EB;border-radius:13px;width:43px;height:43px;display:grid;place-items:center;color:#3E6078;margin-bottom:16px}
+.tle-ops-tile:nth-child(2) .tle-ops-icon,.tle-ops-tile:nth-child(4) .tle-ops-icon{background:#F9F0CD;border-color:#F1E4AD;color:#755A14}
+.tle-ops-tile strong{font-family:inherit;font-size:clamp(.98rem,1.4vw,1.17rem);line-height:1.18;font-weight:760;letter-spacing:-.025em;color:var(--ops-ink);text-wrap:balance}
+.tle-ops-summary{display:block;font-size:.79rem;line-height:1.54;color:#66747B;margin-top:9px;max-width:25em}
+.tle-ops-card-action{display:inline-flex;align-items:center;gap:3px;margin-top:auto;padding-top:16px;color:#3F6882;font-size:.72rem;font-weight:750}
+.tle-ops-details{scroll-margin-top:30px;margin-top:18px;padding:clamp(20px,3vw,31px);border:1px solid #C8DCE7;border-radius:21px;background:#EFF6F9;box-shadow:0 14px 32px rgba(28,51,61,.055)}
+.tle-ops-detail-heading{display:flex;align-items:start;justify-content:space-between;gap:13px}
+.tle-ops-eyebrow{font-size:10px;line-height:1.5;letter-spacing:.12em;font-weight:750;color:#49738D}
+.tle-ops-detail-heading h3{color:var(--ops-ink);font:400 clamp(1.75rem,3vw,2.25rem)/1.13 Georgia,'Times New Roman',serif;letter-spacing:-.04em;margin:7px 0 11px}
+.tle-ops-close{border:1px solid #BFD0D8;border-radius:10px;background:#FFFEFB;display:inline-flex;align-items:center;gap:6px;min-height:39px;padding:7px 12px;color:#3B576A;font-size:.78rem;font-weight:680;white-space:nowrap}
+.tle-ops-details>p{max-width:800px;font-size:.88rem;line-height:1.65;color:#53636D;margin:0 0 19px}
+.tle-ops-links{display:flex;flex-wrap:wrap;gap:9px;align-items:stretch}
+.tle-ops-links a,.tle-ops-links button{display:inline-flex;align-items:center;justify-content:space-between;gap:11px;min-height:45px;padding:12px 14px;text-align:left;font:700 .8rem/1.3 inherit;border-radius:11px;cursor:pointer;min-width:0}
+.tle-ops-primary{background:#191919;border:1px solid #191919;color:#FFFEFA}
+.tle-ops-primary:hover{background:#354E5E}
+.tle-ops-secondary{background:#FFFEFC;border:1px solid #C7D7DE;color:#29485A}
+.tle-ops-secondary:hover{background:#E3EDF1}
+.tle-ops-schedule{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0 21px}
+.tle-ops-schedule>div{display:flex;gap:13px;align-items:center;border:1px solid #D4E2E9;border-radius:12px;background:#fffefa;padding:14px}
+.tle-ops-schedule>div>b{font:700 29px/1 Georgia,serif;letter-spacing:-.065em;color:#294F66;flex:none}
+.tle-ops-schedule>div>b small{font:650 9px/1.3 Arial,sans-serif;letter-spacing:.04em;color:#5F7280}
+.tle-ops-schedule>div>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tle-ops-schedule strong{font-size:.82rem;line-height:1.3;color:#263B4B}
+.tle-ops-schedule small{font-size:.73rem;line-height:1.5;color:#6B7881}
+.tle-ops-details p.tle-ops-footnote{font-size:.75rem;margin-top:17px;margin-bottom:0;color:#6F7B83}
+.tle-ops-footer{display:flex;align-items:center;gap:9px;margin:21px 5px 0;font-size:.74rem;line-height:1.5;color:#667780}
+.tle-ops button:focus-visible,.tle-ops a:focus-visible{outline:3px solid #467E9C;outline-offset:3px}
+@media(max-width:850px){.tle-ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tle-ops-mark{display:none}.tle-ops-intro{padding:24px}}
+@media(max-width:480px){
+ .tle-ops-intro{padding:24px 18px;margin-bottom:12px;border-radius:17px}
+ .tle-ops-overline{font-size:9px;letter-spacing:.075em}
+ .tle-ops-intro h2{font-size:2.28rem;margin-top:14px}
+ .tle-ops-intro p{font-size:.81rem;line-height:1.65}
+ .tle-ops-grid{gap:9px}
+ .tle-ops-tile{padding:15px 12px 13px;min-height:167px;border-radius:15px}
+ .tle-ops-icon{width:38px;height:38px;border-radius:11px;margin-bottom:12px}
+ .tle-ops-tile strong{font-size:.98rem;letter-spacing:-.025em}
+ .tle-ops-summary{font-size:.69rem;line-height:1.35;margin-top:7px}
+ .tle-ops-card-action{font-size:.65rem;padding-top:10px}
+ .tle-ops-details{padding:19px 14px;border-radius:16px}
+ .tle-ops-details h3{font-size:1.85rem}
+ .tle-ops-close{padding:7px 9px;font-size:.7rem}
+ .tle-ops-links{display:grid;grid-template-columns:1fr;gap:8px}
+ .tle-ops-links a,.tle-ops-links button{width:100%;font-size:.83rem}
+ .tle-ops-schedule{grid-template-columns:1fr;gap:8px}
+ .tle-ops-footer{font-size:.7rem}
+}
+@media(prefers-reduced-motion:reduce){.tle-ops-tile{transition:none}.tle-ops-tile:hover{transform:none}}
