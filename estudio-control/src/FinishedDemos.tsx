@@ -6,6 +6,7 @@ import {mareaDrive} from './marea-kit';
 import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-kit';
 import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalPrompts} from './lavender-kit';
 import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromptDocument, wokSocialRepo, wokSocialSite} from './wok-social-kit';
+import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewDrive, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -17,7 +18,7 @@ import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemo
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -26,6 +27,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'seasonal-brew',
+    title:'Seasonal Brew · Coffee Flavors',
+    category:'Cafetería conceptual · sabores de temporada',
+    description:'Demo editorial de cafetería en inglés: fachada, menú con seis sabores y filtros, interior acogedor, bebidas de temporada y galería de packaging. Diez fotografías originales individuales, logo aprobado y seis pasos para reconstruir el sitio.',
+    image:seasonalBrewPhotos[0].url,
+    url:seasonalBrewSite,
+    source:seasonalBrewRepo,
+    note:'Marca y local ficticios. El demo no acepta pedidos ni pagos reales, ni inventa dirección, horario, precios o reseñas. Kit privado en Drive: 10 fotografías PNG originales, WebP optimizados, logo, Brand Board, 6 pasos y prompts de recreación. No copiar este contenido al Content Lab ni al Aula.',
+    kind:'other',
+    photos:seasonalBrewPhotos,
+    promptsFor:'seasonal-brew',
+  },
   {
     id:'wok-social',
     title:'WOK SOCIAL · Chinese Street Kitchen',
