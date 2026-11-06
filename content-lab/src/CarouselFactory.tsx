@@ -25,7 +25,7 @@ import {overlayPanoramaPages,paintPanoramaLayers,reorderPanoramaLayers,type Laye
 import {photoDefault,stickerDefault,clampRect,clampPanoramaRect,normalizedPositions,paintCoverImage,layerCornerPixels,type TouchRect,type StickerPositions} from './TouchGeometry';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
 import {copyStickerToSlide,type StickerCopyResult} from './CarouselStickerCopy';
-import {BRANDING_ELEMENTS,brandingElementId,brandingElementImages} from '../../editor-core/branding-elements';
+import {brandingElementImages} from '../../editor-core/branding-elements';
 
 export type Brand = {
   id: string; name: string; handle: string; audience: string; voice: string;
@@ -514,6 +514,8 @@ export async function renderSavedCarouselCover(
 }
 
 export default function CarouselFactory({brand,post,assets,images:libraryImages,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
+  // Legacy-only image resolver: preserves previously saved canvas layers.
+  // The Nov 6 draft vector pack is intentionally absent from both creation libraries.
   const images=useMemo(()=>({...libraryImages,...brandingElementImages(brand.color)}),[libraryImages,brand.color]);
   const slides=useMemo(()=>parseSlides(post,brand),[post.designData,post.hook,post.slides,post.cta,post.assetId,brand.id]);
   const style=useMemo(()=>readCarouselDesign(post.designData||'').style,[post.designData]);
@@ -1136,22 +1138,6 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         {...promoteSource(source,source.rect),...patch}]});
     }else setArtStyle({panoramaLayers:(style.panoramaLayers||[]).map(layer=>layer.id===id?{...layer,...patch}:layer)});
   };
-  const addSharedBrandingElement=(elementId:string)=>{
-    const asset=BRANDING_ELEMENTS.find(entry=>entry.id===elementId);
-    if(!asset)return;
-    if((style.panoramaLayers||[]).length>=24)return notify('Máximo 24 capas en el panorama.');
-    const count=slides.length,page=Math.min(i,count-1),wallpaper=!!asset.wallpaper;
-    const fraction=Math.min(.85,asset.width/1080);
-    const rect=wallpaper?{x:page/count,y:0,w:1/count,h:1,angle:0,cornerRadius:0}
-      :{x:(page+.5-fraction/2)/count,y:.2,w:fraction/count,h:fraction*.8,angle:0};
-    const id='panorama-brand-'+crypto.randomUUID();
-    const layer:PanoramaLayer={id,assetId:brandingElementId(asset.id),name:asset.name,
-      kind:wallpaper?'photo':'sticker',page,rect:clampPanoramaRect(rect,.055/count),
-      ...(wallpaper?{role:'background' as const,placement:'behind-text' as const}:{placement:'front' as const})};
-    setArtStyle({panoramaLayers:[...(style.panoramaLayers||[]),layer]});
-    setFocusWallpaperId(id);
-    notify(wallpaper?'Patrón editable añadido. Ajústalo o bloquéalo.':'Elemento original añadido. Muévelo, gíralo y escálalo.');
-  };
   const addCanvasLayer=(kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>{
     // Repeated taps must edit the existing empty starter, not pile up text.
     if(kind==='text'){
@@ -1701,7 +1687,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       canUndo={historyVersion>=0&&pastHistory.current.length>0}
       canRedo={historyVersion>=0&&futureHistory.current.length>0}
       layers={panoramaLayers} assets={ownedAssets} images={images} loadImage={loadImage} brandId={brand.id}
-      onUploadToLibrary={uploadPanoramaLibrary} onRenameAsset={onRenameAsset} onAddBrandingElement={addSharedBrandingElement}
+      onUploadToLibrary={uploadPanoramaLibrary} onRenameAsset={onRenameAsset}
       onCommit={movePanoramaLayer} onAdd={addPanoramaAsset} onRemove={removePanoramaLayer}
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}

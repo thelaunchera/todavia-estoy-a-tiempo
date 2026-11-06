@@ -3,7 +3,6 @@ import BrandAssetLibrary from './BrandAssetLibrary';
 import ManualBackgroundEraser from './ManualBackgroundEraser';
 import {STUDIO_SHAPES,studioShapeData,type StudioShape} from './studio-shapes';
 import {EDITORIAL_STICKER_ASSETS} from './editorial-sticker-assets';
-import {brandingElementUrl,type BrandAsset} from '../../editor-core/branding-elements';
 import {type SovaCarouselAsset} from './sova-carousel-assets';
 import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
@@ -457,19 +456,6 @@ export default function SeamlessEditor(){
    setSelected(id);setQuickPanel(null);setMessage(asset.name+' añadido al lienzo. Puedes escalarlo con dos dedos.');
   }catch{setMessage('No se pudo cargar el sticker. Inténtalo nuevamente.')}
  };
- const addUniversalBrandingElement=async(asset:BrandAsset)=>{
-  const src=brandingElementUrl(asset);
-  try{
-   await loadImage(src);
-   const id=++nextId.current,wallpaper=!!asset.wallpaper;
-   const item:Item={id,kind:'image',src,x:slide*W+(wallpaper?0:Math.max(40,(W-asset.width)/2)),
-    y:wallpaper?0:Math.round(H*.2),width:asset.width,fontSize:100,color:'#191919',
-    ...(wallpaper?{role:'background' as const,backgroundSlide:slide}:{})};
-   setDoc(d=>({...d,items:wallpaper?[item,...d.items.filter(it=>!(it.role==='background'&&it.backgroundSlide===slide))]:[...d.items,item]}));
-   setSelected(id);setQuickPanel(null);setActiveInspector(wallpaper?'size':null);
-   setMessage(wallpaper?'Patrón editable añadido. Puedes moverlo, agrandarlo o bloquearlo.':'Elemento original añadido. Puedes moverlo, girarlo y escalarlo.');
-  }catch{setMessage('El elemento no se cargó. Tu proyecto sigue intacto.')}
- };
  const addShape=async(shape:StudioShape)=>{
    const color=STUDIO_SHAPES.find(item=>item.id===shape)?.color||'#F2D85B';
    const src=studioShapeData(shape,color);
@@ -895,7 +881,7 @@ export default function SeamlessEditor(){
          </button>)}
       </div>
      </div>}
-    {openPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape} onUniversal={addUniversalBrandingElement}/>}
+    {openPanel==='elementos'&&<BrandAssetLibrary compact onGolden={addGoldenGridAsset} onSova={addSovaAsset} onEditorial={addEditorialAsset} onShape={addShape}/>}
     {openPanel==='capas'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:7}}>
       {[...doc.items].reverse().map(it=><button type="button" key={it.id}
         style={{...control,minWidth:0,padding:7,fontSize:12,overflow:'hidden',textOverflow:'ellipsis'}}

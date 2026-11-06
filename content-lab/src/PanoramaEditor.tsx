@@ -7,7 +7,6 @@ import type { PanoramaLayer } from './PanoramaLayers';
 import { assetCategory, displayAssetName, cleanAssetName, type LibraryAsset } from './MediaAsset';
 import './PanoramaEditor.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
-import {BRANDING_ELEMENTS,brandingElementId} from '../../editor-core/branding-elements';
 
 type Point = {x: number; y: number};
 type Props = {
@@ -17,7 +16,6 @@ type Props = {
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
   onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
   onRenameAsset:(asset:LibraryAsset,name:string)=>Promise<void>;
-  onAddBrandingElement:(id:string)=>void;
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate: (id:string,patch:Partial<PanoramaLayer>)=>void;
   onAddLayer: (kind:'text'|'shape',shape?:PanoramaLayer['shape'])=>void;
@@ -36,7 +34,7 @@ type Props = {
   backgroundColor:string;onBackgroundColor:(color:string)=>void;onClearBackground:()=>void;
 };
 export default function PanoramaEditor({
-  preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset,onAddBrandingElement, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
+  preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
   canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,
 }: Props) {
@@ -45,7 +43,7 @@ export default function PanoramaEditor({
   // On phones, the fixed tool rail remains visible and panels open on demand.
   const [libraryOpen,setLibraryOpen]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(min-width:921px)').matches);
   const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('sticker');
-  const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'|'branding'>('stickers');
+  const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'>('stickers');
   const [selectedLayerId,setSelectedLayerId]=useState<string|null>(null);
   const [layersOpen,setLayersOpen]=useState(false);
   const [focusedLayerId,setFocusedLayerId]=useState('');
@@ -216,22 +214,16 @@ export default function PanoramaEditor({
 <div className="panorama-discovery-categories" role="group" aria-label="Explorar categorías de la biblioteca">
         <button type="button" aria-pressed={librarySection==='all'} onClick={()=>{setLibrarySection('all');setLibraryKind('all');setFilter('')}}><Shapes size={21}/><span>Todos</span></button>
         <button type="button" aria-pressed={librarySection==='shapes'} onClick={()=>setLibrarySection('shapes')}><Shapes size={21}/><span>Formas</span></button>
-        <button type="button" aria-pressed={librarySection==='branding'} onClick={()=>{setLibrarySection('branding');setFilter('')}}><Sticker size={21}/><span>Branding</span></button>
         <button type="button" aria-pressed={librarySection==='stickers'} onClick={()=>{setLibrarySection('stickers');setLibraryKind('sticker');setFilter('')}}><Sticker size={21}/><span>Stickers</span></button>
         <button type="button" aria-pressed={librarySection==='photos'} onClick={()=>{setLibrarySection('photos');setLibraryKind('photo');setFilter('')}}><ImagePlus size={21}/><span>Fotos</span></button>
       </div>
-      {librarySection!=='shapes'&&librarySection!=='branding'&&<p className="panorama-library-count" role="status">{available.length} elementos disponibles · {assets.filter(a=>a.shared&&assetCategory(a)==='sticker').length} stickers compartidos</p>}
+      {librarySection!=='shapes'&&<p className="panorama-library-count" role="status">{available.length} elementos disponibles · {assets.filter(a=>a.shared&&assetCategory(a)==='sticker').length} stickers compartidos</p>}
       {librarySection==='shapes'&&<div className="panorama-shape-gallery" aria-label="Formas editables">
         {([['Papel','paper'],['Cinta','tape'],['Marco','frame'],['Círculo','circle']] as const).map(([name,shape])=><button type="button" key={shape} onClick={()=>{addFromElements('shape',shape);setLibraryOpen(false)}}>
           <span className={'panorama-shape-preview shape-'+shape} aria-hidden="true"/><small>{name}</small>
         </button>)}
       </div>}
-      {librarySection==='branding'&&<div className="panorama-branding-gallery" aria-label="Elementos originales de branding">
-        {BRANDING_ELEMENTS.filter(item=>item.name.toLocaleLowerCase('es').includes(filter.trim().toLocaleLowerCase('es'))).map(item=><button type="button" key={item.id} onClick={()=>{onAddBrandingElement(item.id);setLibraryOpen(false);revealCanvas()}} aria-label={'Añadir '+item.name}>
-          <img src={images[brandingElementId(item.id)]} alt="" loading="lazy"/><small>{item.name}</small><span>{item.category}</span>
-        </button>)}
-      </div>}
-      {librarySection!=='shapes'&&librarySection!=='branding'&&<div className="panorama-assets" ref={libraryPaneRef} aria-label="Biblioteca de fotos, fondos y stickers">
+      {librarySection!=='shapes'&&<div className="panorama-assets" ref={libraryPaneRef} aria-label="Biblioteca de fotos, fondos y stickers">
         {available.map(asset=><article key={asset.id} className="panorama-asset">
           <button type="button" className="panorama-asset-drag"
             title={'Arrastrar '+displayAssetName(asset)}
@@ -281,7 +273,7 @@ export default function PanoramaEditor({
             </div>}
         </article>)}
       </div>}
-      {librarySection!=='shapes'&&librarySection!=='branding'&&!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
+      {librarySection!=='shapes'&&!available.length&&<p className="panorama-library-empty">No hay resultados. Sube tu primera imagen para empezar.</p>}
     </aside>;
   const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')+(selectedLayerId?' layer-selected':'')}
     aria-label="Lienzo panorámico editable">
