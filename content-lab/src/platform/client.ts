@@ -95,7 +95,14 @@ const update=async(name:string,id:string,payload:any)=>{
   const {id:discard,...original}=existing;
   return unwrap(out(await tab(name).update({payload:{...original,...payload},updated_at:new Date().toISOString()}).eq('id',id).select('id,payload').single()));
 };
-const remove=async(name:string,id:string)=>{out(await tab(name).delete().eq('id',id));return {deleted:true}};
+const remove=async(name:string,id:string)=>{
+ const me=await current();
+ // A zero-row DELETE is not success; expose expired permissions rather than hiding the item.
+ const {data,error}=await tab(name).delete().eq('id',id).eq('owner_id',me.id).select('id');
+ if(error)throw Error(error.message);
+ if(!data?.some(item=>item.id===id))throw Error('No se eliminó la publicación. Comprueba tu sesión y permisos; el diseño sigue guardado.');
+ return {deleted:true};
+};
 const base64=(blob:Blob)=>new Promise<string>((resolve,reject)=>{
   const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]||'');
   r.onerror=()=>reject(Error('No se pudo leer la foto.'));r.readAsDataURL(blob);
