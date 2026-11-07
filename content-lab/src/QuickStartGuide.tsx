@@ -36,15 +36,23 @@ export default function QuickStartGuide({scope,onCreate,locale='es',mode='editor
  const words=copy[locale];
  const key='content-lab:guide-dismissed:v2:'+mode+':'+encodeURIComponent(scope);
  const isDismissed=()=>{try{return localStorage.getItem(key)==='1'}catch{return false}};
- const [open,setOpen]=useState(!isDismissed());
+ const [open,setOpen]=useState(false);
  const [dismissed,setDismissed]=useState(isDismissed);
- useEffect(()=>{const closed=isDismissed();setDismissed(closed);setOpen(!closed)},[scope,mode]);
+ useEffect(()=>{setDismissed(isDismissed());setOpen(false)},[scope,mode]);
  const dismiss=()=>{try{localStorage.setItem(key,'1')}catch{}setDismissed(true);setOpen(false)};
- return <section className="lab-first-guide" aria-label={words.label}>
+ return <section className={'lab-first-guide'+(mode==='editor'?' lab-first-guide-editor':' lab-first-guide-home')} aria-label={words.label}>
   <button type="button" className="lab-first-guide-toggle" aria-expanded={open} onClick={()=>setOpen(value=>!value)}>
-   <BookOpen size={17}/> {words.label} <ChevronDown size={16}/>
+   <BookOpen size={16}/> <span>{locale==='es'?'Ayuda rápida':'Quick help'}</span>
+   {mode==='editor'&&<small>{locale==='es'?'Toca · mueve · descarga':'Tap · move · download'}</small>}
+   <ChevronDown size={16}/>
   </button>
   {open&&<div className="lab-first-guide-content">
+   {mode==='editor'?<div className="lab-first-guide-compact-help">
+     <p>{locale==='es'
+       ?'Toca un elemento para seleccionarlo. Arrástralo para moverlo. Usa las herramientas para editar y descarga tu PNG.'
+       :'Tap an element to select it. Drag to move. Edit with the tools and download your PNG.'}</p>
+     <button type="button" onClick={dismiss}><CheckCircle2 size={15}/>{locale==='es'?'Entendido':'Got it'}</button>
+   </div>:<>
    <div className="lab-first-guide-heading">
     <div><strong>{words.heading}</strong><p>{words.summary}</p></div>
     <button type="button" aria-label={words.hide} onClick={dismiss}><X size={16}/></button>
@@ -57,7 +65,7 @@ export default function QuickStartGuide({scope,onCreate,locale='es',mode='editor
     {mode==='home'&&<button type="button" onClick={()=>{dismiss();onCreate()}}>{words.start}</button>}
     <button type="button" onClick={dismiss}><CheckCircle2 size={16}/> {words.done}</button>
    </div>
+   </>}
   </div>}
-  {!open&&dismissed&&<span className="lab-first-guide-collapsed">{words.closed}</span>}
  </section>;
 }
