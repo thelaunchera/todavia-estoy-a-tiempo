@@ -544,17 +544,8 @@ body.aula-member .aula-entry{display:none!important}
  padding:23px;
  box-shadow:0 4px 0 #dce3e6,0 15px 30px rgba(21,43,65,.055);
 }
-.lesson-course-map::before{
- content:"";position:absolute;z-index:-1;right:18px;top:10px;
- width:75px;height:75px;border:1px solid #adc3d4;border-radius:54% 46% 65% 35%;
- transform:rotate(31deg);opacity:.6;pointer-events:none;
-}
-.lesson-course-map::after{
- content:"";position:absolute;z-index:-1;right:37px;top:23px;
- width:49px;height:49px;border:1px solid #adc3d4;border-radius:50%;
- transform:rotate(-17deg);opacity:.48;pointer-events:none;
-}
-.lesson-map-intro{position:relative;z-index:1;display:grid;gap:7px;margin-bottom:20px;padding-right:58px}
+/* Decorative rings removed: the approved stickers now provide the editorial accents. */
+.lesson-map-intro{position:relative;z-index:1;display:grid;gap:7px;margin-bottom:20px;padding-right:0}
 .lesson-map-intro strong{font:800 clamp(18px,4.6vw,22px)/1.22 'DM Sans',Arial,sans-serif;letter-spacing:-.025em;color:#233e55}
 .lesson-map-intro span{font:500 14px/1.5 'DM Sans',Arial,sans-serif;color:#526a7c}
 .lesson-map-grid{gap:17px;align-items:stretch}
@@ -575,11 +566,7 @@ body.aula-member .aula-entry{display:none!important}
  content:"";position:absolute;top:0;left:17px;width:55px;height:4px;
  background:var(--map-ink);opacity:.75;border-radius:0 0 5px 5px;
 }
-.lesson-map-step::after{
- content:"";position:absolute;right:-32px;bottom:-30px;width:99px;height:99px;
- border:1px solid var(--map-rule);border-radius:44%;transform:rotate(23deg);
- opacity:.35;pointer-events:none;
-}
+/* No decorative geometric circles on the stage cards. */
 .lesson-map-step[data-phase="define"]{--map-paper:#e2edf7;--map-ink:#294c68;--map-stamp:#c8dff0;--map-rule:#aac7db}
 .lesson-map-step[data-phase="create"]{--map-paper:#f5ebd7;--map-ink:#73512d;--map-stamp:#efddb7;--map-rule:#dcc7a6}
 .lesson-map-step[data-phase="build"]{--map-paper:#ece8f3;--map-ink:#514568;--map-stamp:#dfd5eb;--map-rule:#cdc0dd}
@@ -587,12 +574,14 @@ body.aula-member .aula-entry{display:none!important}
 .lesson-map-top{display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%}
 .lesson-map-step .lesson-map-index{font:700 13px/1.25 'DM Sans',Arial,sans-serif;letter-spacing:.09em;color:var(--map-ink)}
 .lesson-map-emblem{
- width:45px;height:45px;flex:0 0 45px;display:grid;place-items:center;
- color:var(--map-ink);background:var(--map-stamp);
- border:1px solid rgba(17,36,56,.09);border-radius:14px;
- transform:rotate(6deg);box-shadow:2px 3px 0 rgba(24,53,78,.1);
+ width:62px;height:62px;flex:0 0 62px;display:grid;place-items:center;
+ background:transparent;border:0;border-radius:0;box-shadow:none;
+ transform:none;overflow:visible;
 }
-.lesson-map-emblem svg{width:25px;height:25px;transform:rotate(-6deg)}
+.lesson-map-emblem img{
+ display:block;width:100%;height:100%;object-fit:contain;
+ filter:drop-shadow(1px 3px 2px rgba(33,52,69,.1));
+}
 .lesson-map-copy{display:grid;gap:7px;min-width:0;position:relative;z-index:1}
 .lesson-map-step .lesson-map-title{font:800 clamp(19px,4.7vw,23px)/1.17 'DM Sans',Arial,sans-serif;letter-spacing:-.025em;color:var(--map-ink)}
 .lesson-map-step .lesson-map-description{font:500 13px/1.45 'DM Sans',Arial,sans-serif;color:#3e4e59;max-width:23ch;overflow-wrap:break-word}
@@ -614,8 +603,7 @@ body.aula-member .aula-entry{display:none!important}
  .lesson-course-map{padding:19px 17px 22px;margin-bottom:23px}
  .lesson-map-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
  .lesson-map-step{padding:13px 12px;min-height:203px;gap:9px}
- .lesson-map-emblem{width:39px;height:39px;flex-basis:39px;border-radius:12px}
- .lesson-map-emblem svg{width:22px;height:22px}
+ .lesson-map-emblem{width:57px;height:57px;flex-basis:57px}
  .lesson-map-step .lesson-map-title{font-size:clamp(17px,4.3vw,21px)}
  .lesson-map-step .lesson-map-description{font-size:12px;line-height:1.45}
  .lesson-map-step .lesson-map-status{font-size:10px}
@@ -626,7 +614,7 @@ body.aula-member .aula-entry{display:none!important}
  .lesson-map-step{min-height:202px;padding:12px 10px}
  .lesson-map-step .lesson-map-title{font-size:17px}
  .lesson-map-step .lesson-map-description{font-size:11.5px}
- .lesson-map-emblem{width:35px;height:35px;flex-basis:35px}
+ .lesson-map-emblem{width:48px;height:48px;flex-basis:48px}
 }
 @media(prefers-reduced-motion:reduce){
  .lesson-map-step{transition:none}
@@ -635,5 +623,5 @@ body.aula-member .aula-entry{display:none!important}
 @media print{
  .lesson-course-map{box-shadow:none!important}
  .lesson-map-step{box-shadow:none!important;background:#fff!important}
- .lesson-map-emblem{box-shadow:none!important}
+ .lesson-map-emblem img{filter:none!important}
 }

@@ -148,7 +148,7 @@ test('editorial lesson cards have four themed illustrations and real progress wi
  assert.match(css,/EDITORIAL LEARNING CARDS/);
  assert.match(css,/lesson-map-step\[data-phase="review"\]/);
  assert.match(css,/prefers-reduced-motion:reduce/);
- assert.match(html,/curso\.css\?v=20261107-editorial-cards-v3/);
+ assert.match(html,/curso\.css\?v=20261107-approved-stickers-v4/);
 });
 
 // Source-level authorization boundary: the student-facing demo selector is only read-only.
@@ -184,4 +184,27 @@ test('owner class preview and regular students see only published demo prompts',
  assert.match(materials,/kit\.payload\.demos\.filter\(d=>d\.published!==false\)/);
  assert.doesNotMatch(materials,/kit\.payload\.demos\.filter\(d=>adminPreview\|\|d\.published!==false\)/);
  assert.match(editor,/setScene\(0\);setTabletCue\('screen'\);setLessonId\(id\)/);
+});
+
+test('approved emoji assets replace decorative circles in each class phase',async()=>{
+ const {readFileSync,existsSync}=await import('node:fs');
+ const js=readFileSync(new URL('./curso.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('./curso.css',import.meta.url),'utf8');
+ const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ const files={
+  define:'16_objetivo_rosa.png',
+  create:'17_idea_lila.png',
+  build:'18_creadora_laptop_lila.png',
+  review:'15_checklist_rosa.png'
+ };
+ for(const [phase,file] of Object.entries(files)){
+  assert.match(js,new RegExp(phase+":'"+file.replaceAll('.','\\.')+"'"));
+  assert.ok(existsSync(new URL('../content-lab/public/resources/premium-stickers-2026-11/'+file,import.meta.url)),file+' must already exist in the approved emoji library');
+ }
+ assert.match(js,/sticker\.src=approvedStickerBase\+approvedSticker\[phase\.id\]/);
+ assert.match(js,/sticker\.alt=''/);
+ assert.doesNotMatch(css,/\.lesson-map-step::after\s*\{/);
+ assert.doesNotMatch(css,/\.lesson-course-map::after\s*\{/);
+ assert.match(css,/\.lesson-map-emblem img\s*\{/);
+ assert.match(html,/curso\.js\?v=20261107-approved-stickers-v5/);
 });
