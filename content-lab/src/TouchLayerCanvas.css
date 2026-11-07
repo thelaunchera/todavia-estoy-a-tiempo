@@ -659,3 +659,10 @@
 @media(max-width:799px){.touch-editor-layer .touch-editor-corner-delete{
  width:34px;height:34px;min-width:34px;min-height:34px;font-size:24px
 }}
+
+
+/* Recolored sticker keeps the photo's exact alpha in the touch preview. */
+.touch-editor-sticker-tint{position:absolute;inset:0;display:block;width:100%;height:100%;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-position:center;mask-position:center;
+ -webkit-mask-size:contain;mask-size:contain;pointer-events:none}
