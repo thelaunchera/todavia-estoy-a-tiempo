@@ -529,18 +529,16 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
       </div>
     </div>}
-    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>Visualiza <em>tu grid.</em></h1><p>Organiza hasta nueve imágenes hechas fuera del Lab. Mira cómo quedarán juntas en Instagram.</p><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
+    <div className="bg-head"><div><div className="eyebrow">VISUAL CONTENT ENGINE · {brand.name.toUpperCase()}</div><h1>Tu <em>grid.</em></h1><div className="bg-language"><Check size={15}/> Idioma del contenido: <strong>{outputLanguage}</strong> · {brand.name}</div></div><div className="bg-3x3"><LayoutGrid size={29}/><strong>3 × 3</strong><small>BRAND FEED</small></div></div>
     {!initialSelection?.fromCalendar&&<section className="bg-express" aria-label="Preparar campañas antiguas">
       <div className="bg-express-heading"><div><span className="eyebrow">MODO FÁCIL · SIN CRÉDITOS</span>
-        <h2>Tu feed antes de publicar.</h2>
-        <p>Elige un producto y empieza tu cuadrícula. Crea imágenes en ChatGPT con nuestros prompts, súbelas a cada espacio y organiza su publicación.</p></div>
+        <h2>Nuevo grid · 9 posts</h2></div>
         <span className="bg-express-free">Gratis dentro del Lab</span>
       </div>
       <div className="bg-express-content">
         <label className="bg-express-photo">
           {images[sourceId]?<img src={images[sourceId]} alt="Foto original seleccionada"/>:<ImagePlus size={31}/>}
-          <span><strong>{uploading==='source'?'Subiendo foto…':images[sourceId]?'Cambiar foto':'1 · Sube una foto del producto'}</strong>
-            <small>Usaremos esta misma foto sin modificarla</small></span>
+          <span><strong>{uploading==='source'?'Subiendo…':images[sourceId]?'Cambiar foto':'Subir foto'}</strong></span>
           <input type="file" accept="image/*,.heic,.heif" aria-label="Subir foto principal para nueve posts" disabled={!!uploading} onChange={e=>{void upload(e.target.files?.[0],'source');e.target.value=''}}/>
         </label>
         <div className="bg-express-fields">
@@ -553,7 +551,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         </div>
         <button type="button" className="btn dark bg-express-create" onClick={createQuickNine} disabled={!sourceId||!quickProduct.trim()||!!busy||!!uploading}>
           {busy==='quick-nine'?<LoaderCircle size={17} className="spin"/>:<Sparkles size={17}/>}
-          Crear mi grid de 9 espacios <ArrowRight size={17}/>
+          Crear grid <ArrowRight size={17}/>
         </button>
       </div>
       <details className="bg-express-extras"><summary>¿Quieres añadir más dirección creativa? (opcional)</summary>
@@ -652,7 +650,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <div className="bg-compact-campaign-head">
             <div><span className="eyebrow">VISTA PREVIA · GRID 3 × 3</span>
               <h2>{grid.title}</h2>
-              <p>Vista real de tus nueve publicaciones. Toca cualquier casilla para subir o sustituir una foto.</p>
+              <p>Toca un post para editarlo.</p>
             </div>
             <span className="bg-compact-progress">{grid.posts.filter(p=>p.assetId).length}/9 imágenes cargadas</span>
           </div>
@@ -667,7 +665,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               <span className="bg-compact-tile-status">{p.assetId?'✓':'＋ '+(i+1)}</span>
             </button>)}
           </div>
-          <p className="bg-grid-preview-note">Así se verá aproximadamente tu grid. Las imágenes originales no se recortan ni se modifican.</p>
+          
           <div className="bg-grid-reorder"><span>Post {selected+1} de 9</span>
             <button type="button" disabled={selected===0} onClick={()=>movePost(-1)}>← Mover antes</button>
             <button type="button" disabled={selected===8} onClick={()=>movePost(1)}>Mover después →</button>
@@ -707,7 +705,7 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
               2 · Abrir ChatGPT <ArrowRight size={16}/>
             </a>
           </div>
-          <p className="bg-compact-help">En ChatGPT pega el prompt y adjunta tu foto original. Genera una sola imagen vertical 4:5, descárgala y súbela aquí.</p>
+          
           <label className="bg-result-upload bg-compact-import">
             <Upload size={20}/><span><strong>{uploading==='result'?'Importando…':'3 · Subir imagen creada'}</strong>
               <small>Se guarda en el post {selected+1}, sin reemplazar la foto original.</small></span>
