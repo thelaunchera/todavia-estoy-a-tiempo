@@ -1,13 +1,14 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {api} from './platform/client';
-import {ArrowLeft,ArrowRight,CalendarDays,Check,Clock3,ImageIcon,LayoutGrid,Plus,Save,Pencil} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CalendarDays,Check,Clock3,ImageIcon,LayoutGrid,Plus,Save,Pencil,Download,Trash2} from 'lucide-react';
 import {localDate,monthCells,plannedItems,validDate,validTime,contentKind,contentKindLabel,contentKindShort,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
 import './ContentCalendar.css';
 
 type Props={
  brand:{id:string;name:string};posts:CalendarPost[];images:Record<string,string>;focusDate?:string;
  onPostSaved:(post:CalendarPost)=>void;loadImage:(id:string)=>void;
- onNewPost:()=>void;onOpenGrid:()=>void;onEditItem:(item:PlannedItem)=>void;locale:'es'|'en';
+ onNewPost:()=>void;onOpenGrid:()=>void;onEditItem:(item:PlannedItem)=>void;
+ onDownloadItem:(item:PlannedItem)=>Promise<void>;onDeleteItem:(item:PlannedItem)=>Promise<boolean>;locale:'es'|'en';
  notify:(value:string)=>void;showError:(error:unknown)=>void;
 };
 const labels={
@@ -38,7 +39,7 @@ const dateLabel=(d:string,language:'es'|'en')=>{
  const [year,month,day]=d.split('-').map(Number);
  return new Intl.DateTimeFormat(language==='es'?'es-US':'en-US',{day:'numeric',month:'short',year:'numeric'}).format(new Date(year,month-1,day));
 };
-export default function ContentCalendar({brand,posts,images,focusDate,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,locale,notify,showError}:Props){
+export default function ContentCalendar({brand,posts,images,focusDate,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,onDownloadItem,onDeleteItem,locale,notify,showError}:Props){
  const lang=labels[locale],today=useMemo(()=>new Date(),[]);
  const [month,setMonth]=useState(()=>validDate(focusDate||'')?new Date(Number(focusDate!.slice(0,4)),Number(focusDate!.slice(5,7))-1,1):new Date(today.getFullYear(),today.getMonth(),1));
  const [selectedDay,setSelectedDay]=useState(()=>validDate(focusDate||'')?focusDate!:localDate(today));
@@ -47,6 +48,7 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false);
  const [key,setKey]=useState(''),[date,setDate]=useState(()=>validDate(focusDate||'')?focusDate!:localDate(today)),[time,setTime]=useState('09:00');
  const [loadError,setLoadError]=useState('');
+ const [actionBusy,setActionBusy]=useState('');
  useEffect(()=>{
   let mounted=true;
   setGrids([]);setKey('');setLoading(true);setLoadError('');
@@ -106,6 +108,34 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
  const chosen=options.find(p=>p.key===key);
  const currentEvent=events.find(p=>p.id===key);
  const openDesign=(item:PlannedItem)=>onEditItem(item);
+ const downloadProject=async(item:PlannedItem)=>{
+  if(actionBusy)return;
+  setActionBusy('download:'+item.id);
+  try{await onDownloadItem(item)}catch(e){showError(e)}
+  finally{setActionBusy('')}
+ };
+ const deleteProject=async(item:PlannedItem)=>{
+  if(actionBusy)return;
+  if(item.kind==='post'){
+   setActionBusy('delete:'+item.id);
+   try{if(await onDeleteItem(item)&&key===item.id)setKey('')}
+   catch(e){showError(e)}
+   finally{setActionBusy('')}
+   return;
+  }
+  // The grid remains intact: removing its date must not delete an entire nine-post campaign.
+  if(!window.confirm(locale==='es'?'¿Quitar esta publicación del calendario sin borrar su proyecto de 9 posts?':'Remove this tile from the calendar without deleting its nine-post project?'))return;
+  setActionBusy('delete:'+item.id);
+  try{
+   const g=grids.find(x=>x.id===item.gridId&&x.brandId===brand.id);
+   if(!g||item.tileIndex===undefined||!g.posts[item.tileIndex])throw Error('La publicación de esta campaña no está disponible.');
+   const updated=g.posts.map((p,i)=>i===item.tileIndex?{...p,scheduledDate:'',scheduledTime:''}:p);
+   const {data}=await api.put('/api/grids/'+g.id,{posts:updated});
+   setGrids(prev=>prev.map(x=>x.id===g.id?{...x,...data,posts:updated}:x));
+   if(key===item.id)setKey('');
+   notify(locale==='es'?'Retirado del calendario. El proyecto permanece en tu grid.':'Removed from calendar. Your grid project is still saved.');
+  }catch(e){showError(e)}finally{setActionBusy('')}
+ };
  const loadIds=useMemo(()=>[...new Set(events.filter(p=>p.assetId).map(p=>p.assetId))].filter(id=>!images[id]).slice(0,16),[events,images]);
  useEffect(()=>{for(const id of loadIds)loadImage(id)},[loadIds.join('|')]);
  const feed=current.slice().sort((a,b)=>(b.date+' '+b.time).localeCompare(a.date+' '+a.time));
@@ -142,18 +172,22 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
     <section className="lab-calendar-month" aria-label={formatMonth}>
      <div className="lab-calendar-weekdays">{weekdays[locale].map((w,i)=><span key={i}>{w}</span>)}</div>
      <div className="lab-calendar-days">
-      {cells.map((d,i)=>d?<button key={d} type="button"
-        aria-label={dateLabel(d,locale)+' · '+events.filter(p=>p.date===d).length+' posts'}
-        aria-pressed={selectedDay===d}
-        className={'lab-calendar-day '+(selectedDay===d?'selected ':'')+(d===localDate(today)?'today':'')}
-        onClick={()=>pickDay(d)}>
-        <span className="lab-calendar-day-number">{Number(d.slice(-2))}</span>
+      {cells.map((d,i)=>d?<div key={d}
+        role="group" aria-label={dateLabel(d,locale)+' · '+events.filter(p=>p.date===d).length+' posts'}
+        className={'lab-calendar-day '+(selectedDay===d?'selected ':'')+(d===localDate(today)?'today':'')}>
+        <button type="button" className="lab-calendar-day-pick" aria-pressed={selectedDay===d}
+          aria-label={(locale==='es'?'Ver publicaciones del ':'See posts on ')+dateLabel(d,locale)}
+          onClick={()=>pickDay(d)}>
+          <span className="lab-calendar-day-number">{Number(d.slice(-2))}</span>
+        </button>
         <span className="lab-calendar-day-events">{events.filter(p=>p.date===d).slice(0,2).map(p=>
-         <span className={'lab-calendar-pill '+contentKind(p.format)+' '+(p.status==='published'?'published':'')} key={p.id} title={contentKindLabel(p.format,locale)+' · '+p.title}>
-          <b className="lab-calendar-kind-short" aria-hidden="true">{contentKindShort(p.format)}</b><span className="lab-calendar-pill-clock">{p.time}</span> <span className="lab-calendar-pill-title">{p.title}</span></span>)}
+         <button type="button" className={'lab-calendar-pill '+contentKind(p.format)+' '+(p.status==='published'?'published':'')}
+           key={p.id} title={contentKindLabel(p.format,locale)+' · '+p.title}
+           aria-label={(locale==='es'?'Abrir publicación ':'Open post ')+p.title} onClick={()=>openDesign(p)}>
+          <b className="lab-calendar-kind-short" aria-hidden="true">{contentKindShort(p.format)}</b><span className="lab-calendar-pill-clock">{p.time}</span> <span className="lab-calendar-pill-title">{p.title}</span></button>)}
         </span>
-        {events.filter(p=>p.date===d).length>2&&<small className="lab-calendar-more">+{events.filter(p=>p.date===d).length-2}</small>}
-       </button>:<div aria-hidden="true" className="lab-calendar-blank" key={'blank-'+i}/>)}
+        {events.filter(p=>p.date===d).length>2&&<button type="button" className="lab-calendar-more" onClick={()=>pickDay(d)}>+{events.filter(p=>p.date===d).length-2}</button>}
+       </div>:<div aria-hidden="true" className="lab-calendar-blank" key={'blank-'+i}/>)}
      </div>
     </section>
     <section className="lab-calendar-agenda">
@@ -166,8 +200,14 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
       <span><strong>{p.title}</strong><small><Clock3 size={13}/>{p.time} · <b className={'lab-calendar-kind '+contentKind(p.format)}>{contentKindLabel(p.format,locale)}</b></small></span>
       <span className="lab-calendar-edit-label"><Pencil size={14}/>{locale==='es'?'Editar':'Edit'}</span>
      </button>
-     <button type="button" className="lab-calendar-reschedule" onClick={()=>choose(p.id)}>
-       <Clock3 size={13}/>{locale==='es'?'Cambiar fecha':'Change date'}</button>
+     <div className="lab-calendar-item-actions">
+       <button type="button" className="lab-calendar-project-download" disabled={!!actionBusy} onClick={()=>void downloadProject(p)}>
+         <Download size={14}/>{actionBusy==='download:'+p.id?'…':locale==='es'?'Descargar proyecto':'Download project'}</button>
+       <button type="button" className="lab-calendar-reschedule" onClick={()=>choose(p.id)}>
+         <Clock3 size={13}/>{locale==='es'?'Cambiar fecha':'Change date'}</button>
+       <button type="button" className="lab-calendar-project-delete" disabled={!!actionBusy} onClick={()=>void deleteProject(p)}>
+         <Trash2 size={14}/>{p.kind==='grid'?(locale==='es'?'Quitar del calendario':'Unschedule'):(locale==='es'?'Borrar publicación':'Delete post')}</button>
+     </div>
     </div>):<p className="lab-calendar-empty-day">{lang.empty}</p>}
      <div className="lab-calendar-day-add"><Plus size={15}/>{locale==='es'?'Elige un post abajo para asignarlo a este día.':'Choose a post below to assign it to this date.'}</div>
     </section>
