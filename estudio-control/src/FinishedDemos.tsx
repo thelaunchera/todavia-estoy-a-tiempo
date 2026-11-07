@@ -287,6 +287,16 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
      <p>Tu biblioteca reúne WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <div className="finished-demos-library-shortcut" aria-label="Enlace de la biblioteca pública de demos">
+       <div className="finished-demos-library-copy">
+         <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
+         <strong>Website of Websites</strong>
+         <p>Abre la biblioteca visual con todos los conceptos web desde un solo lugar.</p>
+       </div>
+       <a href="https://thelaunchera.com/demos/" target="_blank" rel="noopener noreferrer" aria-label="Abrir la nueva biblioteca pública de demos de The Launch Era">
+         Abrir biblioteca de demos
+       </a>
+     </div>
      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
