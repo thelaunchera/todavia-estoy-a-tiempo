@@ -12,7 +12,7 @@ const launch='2027-03-01';
 
 test('March landing is private until release and its original artwork precedes the signup form',()=>{
   const html=get('freebies/march-premium-app/index.html');
-  const cover='/assets/freebies/march-premium-app/cover.svg';
+  const cover='/assets/freebies/march-premium-app/cover-es.svg';
   assert.match(html,/name="robots" content="noindex,nofollow"/);
   assert.ok(html.includes('data-release-date="'+launch+'"'));
   assert.ok(html.includes('name="resource" value="'+resource+'"'));
