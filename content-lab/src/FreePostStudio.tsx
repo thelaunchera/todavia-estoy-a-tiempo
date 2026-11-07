@@ -377,6 +377,27 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     </details>
    </div>
   </div>
+  {vertical&&selectedLayer&&<div className="free-post-selected-actions" role="group" aria-label={plain('Selected element tools','Acciones del elemento seleccionado',locale)}>
+    <div className="free-post-selected-heading"><strong>{selectedLayer.name}</strong><span>{selectedLayer.locked?plain('Locked','Bloqueado',locale):plain('Selected','Seleccionado',locale)}</span></div>
+    <div className="free-post-selected-buttons">
+      <button type="button" onClick={()=>duplicateElement(selectedLayer.id)} title={plain('Duplicate element','Duplicar elemento',locale)}><Copy size={15}/>{plain('Duplicate','Duplicar',locale)}</button>
+      <button type="button" disabled={selectedLayer.locked} onClick={()=>reorder(selectedLayer.id,'back')} title={plain('Send to back','Enviar al fondo',locale)}>{plain('To back','Al fondo',locale)}</button>
+      <button type="button" disabled={selectedLayer.locked} onClick={()=>reorder(selectedLayer.id,'backward')} title={plain('Back one layer','Bajar una capa',locale)}>{plain('Back','Atrás',locale)}</button>
+      <button type="button" disabled={selectedLayer.locked} onClick={()=>reorder(selectedLayer.id,'forward')} title={plain('Forward one layer','Subir una capa',locale)}>{plain('Forward','Delante',locale)}</button>
+      <button type="button" disabled={selectedLayer.locked} onClick={()=>reorder(selectedLayer.id,'front')} title={plain('Bring to front','Traer al frente',locale)}>{plain('To front','Al frente',locale)}</button>
+      <button type="button" aria-pressed={!!selectedLayer.locked} onClick={()=>toggleLock(selectedLayer.id,!selectedLayer.locked)}>{selectedLayer.locked?<LockKeyholeOpen size={15}/>:<LockKeyhole size={15}/>}{selectedLayer.locked?plain('Unlock','Desbloquear',locale):plain('Lock','Bloquear',locale)}</button>
+    </div>
+    {(['text','shape','sticker'] as string[]).includes(selectedLayer.kind)&&<div className="free-post-selection-colors" role="group" aria-label={plain('Change element color','Cambiar color de elemento',locale)}>
+      <label>{plain('Color','Color',locale)} <input type="color" disabled={selectedLayer.locked} aria-label={plain('Element color','Color del elemento',locale)}
+        value={selectedLayer.kind==='sticker'?(selectedLayer.tint||'#191919'):(selectedLayer.color||'#191919')}
+        onChange={e=>updateLayer(selectedLayer.id,selectedLayer.kind==='sticker'?{tint:e.target.value}:{color:e.target.value})}/></label>
+      {[...new Set([brand.color||'#244B5B','#191919','#FAF8F3','#FFFFFF','#F2D85B','#BED8E9'].filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].map(hex=>
+        <button type="button" key={hex} disabled={selectedLayer.locked} aria-label={plain('Apply color','Aplicar color',locale)+' '+hex}
+          style={{backgroundColor:hex}} onClick={()=>updateLayer(selectedLayer.id,selectedLayer.kind==='sticker'?{tint:hex}:{color:hex})}/>)}
+      {selectedLayer.kind==='sticker'&&selectedLayer.tint&&<button type="button" className="free-post-color-reset" disabled={selectedLayer.locked}
+        onClick={()=>updateLayer(selectedLayer.id,{tint:''})}>{plain('Original colors','Colores originales',locale)}</button>}
+    </div>}
+  </div>}
   <input ref={photosRef} type="file" multiple accept="image/*,.heic,.heif" hidden
    onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';void uploadPhotos(files)}}/>
   <input ref={backgroundRef} type="file" accept="image/*,.heic,.heif" hidden
