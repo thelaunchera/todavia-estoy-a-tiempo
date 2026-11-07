@@ -24,6 +24,13 @@ test('Every control is wired, and the queue progresses only through explicit dem
   for(const expr of ['addEventListener("submit",join)','addEventListener("click",advance)','addEventListener("click",arrive)','addEventListener("click",leave)','addEventListener("click",switchLang)','position:4','active.position-1','active.position===0?"ready":"line"','active.arrived=true','localStorage.setItem(KEY','localStorage.removeItem(KEY'])
     assert.ok(js.includes(expr),'Missing behavior '+expr);
   assert.ok(js.includes('t("readyMessage")(active.name)'));
+  assert.ok(html.includes('id="open-join"'));
+  assert.ok(html.includes('id="join-panel" hidden'));
+  assert.ok(js.includes('ui.openJoin.addEventListener("click"'));
+  assert.ok(js.includes('ui.backHero.addEventListener("click"'));
+  assert.ok(html.includes('class="queue-map"'));
+  assert.ok(html.includes('class="queue-sheet"'));
+  assert.ok(html.includes('class="ready-illustration"'));
   assert.ok(js.includes('ui.confirmation.hidden=!active.arrived'));
   assert.ok(html.includes('Simulación interactiva. No es una fila real ni envía mensajes.'));
   assert.ok(!js.includes('fetch(')&&!js.includes('sendNotification('));
@@ -36,7 +43,8 @@ test('Separate visual system, accessible responsive controls, and reduced motion
   assert.ok(css.includes('@media(max-width:790px)'));
   assert.ok(css.includes('prefers-reduced-motion:reduce'));
   assert.ok(html.includes('<svg'));
-  assert.ok(!html.includes('<img'));
+  assert.ok(html.includes('<img src="./petal-street.svg"'));
+  assert.ok(existsSync(resolve(root,base+'petal-street.svg')));
   assert.ok(!html.includes('https://images.'));
 });
 
