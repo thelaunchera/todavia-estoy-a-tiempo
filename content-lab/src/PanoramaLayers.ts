@@ -34,7 +34,7 @@ export type PanoramaLayer = {
   name: string;
   kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
-  color?:string; outline?:boolean; shadow?:boolean;
+  color?:string; tint?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   placement?: LayerPlacement;
   /** Continuous draggable wallpaper, painted behind independent content. */
@@ -74,6 +74,7 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         shape:['paper','tape','circle','frame'].includes(String(item.shape))?item.shape as PanoramaLayer['shape']:'paper',
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
+      ...(item.kind==='sticker'&&/^#[0-9a-f]{6}$/i.test(String(item.tint))?{tint:String(item.tint)}:{}),
       ...(typeof item.opacity==='number'&&Number.isFinite(item.opacity)?{opacity:Math.max(0,Math.min(1,item.opacity))}:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
@@ -208,7 +209,18 @@ export async function paintPanoramaLayers(
     if((r.cornerRadius??0)>0){
      ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h));ctx.clip();
     }
-    ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
+    if(layer.kind==='sticker'&&layer.tint&&/^#[0-9a-f]{6}$/i.test(layer.tint)){
+     // Keep the source alpha unchanged while recoloring, in PNG export as in preview.
+     const temp=document.createElement('canvas');
+     temp.width=Math.max(1,Math.ceil(iw));temp.height=Math.max(1,Math.ceil(ih));
+     const ink=temp.getContext('2d');
+     if(!ink)throw Error('No se pudo preparar el color del sticker.');
+     ink.drawImage(img,0,0,temp.width,temp.height);
+     ink.globalCompositeOperation='source-in';ink.fillStyle=layer.tint;
+     ink.fillRect(0,0,temp.width,temp.height);
+     ctx.drawImage(temp,-iw/2,-ih/2,iw,ih);
+     temp.width=1;temp.height=1;
+    }else ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
    }
   }
   ctx.restore();
