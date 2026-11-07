@@ -17,7 +17,7 @@ import {ONE_PHOTO_NINE,onePhotoNinePrompt} from './OnePhotoNinePrompts';
 
 type Brand={id:string;name:string;handle:string;language:string;color:string;background:string;secondaryColor?:string;additionalColors?:string[];headingFont?:string;bodyFont?:string;logoAssetId?:string;referenceAssetId?:string;photoMood?:string;avoid?:string;audience:string;rules:string};
 type Asset={id:string;brandId:string;name:string;mime:string;category?:MediaCategory;displayName?:string;generated?:boolean;shared?:boolean;stickerGroup?:string};
-type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions;scheduledDate?:string;scheduledTime?:string;planningStatus?:'planned'|'published'};
+type Tile={headline:string;subtext:string;caption:string;scene:string;assetId:string;format?:string;index:number;layout?:VisualControls;design?:EditorialDesign;backgroundId?:FreeBackgroundId;backgroundImageId?:string;stickerIds?:string[];stickerPositions?:StickerPositions;scheduledDate?:string;scheduledTime?:string;scheduledTimeZone?:string;planningStatus?:'planned'|'published'};
 type Grid={id:string;brandId:string;sourceId:string;referenceId:string;kind:string;title:string;concept:string;brief:string;planningSource?:'ai'|'template';analysisStatus?:'vision'|'fallback';visualDescription?:string;posts:Tile[]};
 type Wallet={admin?:boolean;photo_remaining?:number;photo_today?:number;creative_remaining?:number;creative_today?:number;quota_day?:string};
 type Props={brand:Brand;assets:Asset[];images:Record<string,string>;isAdmin?:boolean;wallet?:Wallet|null;promptSelection?:{version:number;text:string;settings:PromptControls}|null;initialSelection?:{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean};onOpenPrompts?:()=>void;onOpenCalendar?:(date?:string)=>void;onOpenStickers?:()=>void;onUploadBackground:(file:File)=>Promise<Asset|null>;onUploadFile:(f:File,category?:MediaCategory)=>Promise<Asset|null>;locale?:'es'|'en';onNewAsset:(a:Asset,src:string)=>void;loadImage:(id:string)=>void;notify:(text:string)=>void;showError:(e:unknown)=>void};
@@ -637,9 +637,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
         <span>✎ Editando el post {selected+1} de tu calendario</span>
         <div className="bg-calendar-edit-date">
           <label>Día<input type="date" value={grid?.posts[selected]?.scheduledDate||''}
-            onChange={e=>update({scheduledDate:e.target.value,scheduledTime:grid?.posts[selected]?.scheduledTime||'09:00'})}/></label>
+            onChange={e=>update({scheduledDate:e.target.value,scheduledTime:grid?.posts[selected]?.scheduledTime||'09:00',scheduledTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'})}/></label>
           <label>Hora<input type="time" value={grid?.posts[selected]?.scheduledTime||'09:00'}
-            onChange={e=>update({scheduledTime:e.target.value})}/></label>
+            onChange={e=>update({scheduledTime:e.target.value,scheduledTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'})}/></label>
         </div>
         <button type="button" className="btn dark" disabled={!!busy||saveState==='saving'}
           onClick={()=>void saveAndReturnToCalendar()}>
@@ -690,9 +690,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
             <div className="bg-compact-plan-title"><CalendarDays size={17}/><strong>¿Cuándo quieres publicar este post?</strong></div>
             <div className="bg-compact-plan-fields">
               <label>Día<input type="date" value={tile?.scheduledDate||''}
-                onChange={e=>update({scheduledDate:e.target.value,scheduledTime:tile?.scheduledTime||'09:00'})}/></label>
+                onChange={e=>update({scheduledDate:e.target.value,scheduledTime:tile?.scheduledTime||'09:00',scheduledTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'})}/></label>
               <label>Hora<input type="time" value={tile?.scheduledTime||'09:00'}
-                onChange={e=>update({scheduledTime:e.target.value})}/></label>
+                onChange={e=>update({scheduledTime:e.target.value,scheduledTimeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'})}/></label>
             </div>
             <div className="bg-compact-plan-footer">
               <span>{tile?.scheduledDate?'✓ Día y hora en tu calendario (se guardan en este proyecto).':'Elige el día y la hora para añadirlo a tu calendario privado.'}</span>
