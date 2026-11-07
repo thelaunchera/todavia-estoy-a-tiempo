@@ -1,0 +1,137 @@
+/* Motion bridge · The Launch Era / private iPad lesson filming desk
+   Editorial 16:9 title card: no green emojis, generic shapes or circle textures.
+   Capturable with iPadOS screen recording; no video file is created automatically. */
+.class-interlude-overlay{
+ --ci-ink:#191919; --ci-paper:#FAF8F3; --ci-accent:#F2D85B;
+ position:fixed;inset:0;z-index:2147483000;
+ background:#141414;display:flex;align-items:center;justify-content:center;
+ overflow:hidden;outline:none;
+}
+.class-interlude-canvas{
+ width:min(100vw,177.7778vh);
+ width:min(100vw,177.7778dvh);
+ max-height:100vh;max-height:100dvh;
+ aspect-ratio:16/9;
+ position:relative;isolation:isolate;overflow:hidden;
+ display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+ padding:clamp(21px,3.3vw,58px) clamp(23px,5vw,88px);
+ background:var(--ci-paper);color:var(--ci-ink);
+ box-sizing:border-box;
+}
+.class-interlude-canvas[data-kind="concepto"]{--ci-paper:#E8F2F8;--ci-accent:#9CBFD7}
+.class-interlude-canvas[data-kind="demo"]{--ci-paper:#F5EBE6;--ci-accent:#A74E60}
+.class-interlude-canvas::before{
+ content:"";position:absolute;left:0;top:0;height:100%;width:clamp(8px,1.05vw,18px);
+ background:var(--ci-accent);z-index:1;
+}
+.class-interlude-header,.class-interlude-footer{
+ display:flex;align-items:center;justify-content:space-between;gap:18px;position:relative;z-index:3;
+ font:700 clamp(9px,1.2vw,14px)/1.35 'DM Sans','Prompt',Arial,sans-serif;
+ letter-spacing:.15em;text-transform:uppercase;
+}
+.class-interlude-header b,.class-interlude-footer b{font-weight:400;color:#8A8680;padding:0 5px}
+.class-interlude-header>span:last-child{font-weight:600;color:#615B54}
+.class-interlude-footer{align-self:end;padding-bottom:clamp(8px,1.2vw,22px)}
+.class-interlude-main{
+ align-self:center;justify-self:start;max-width:84%;position:relative;z-index:3;
+ display:flex;flex-direction:column;align-items:flex-start;
+ padding:clamp(7px,1.4vw,20px) 0;
+}
+.class-interlude-tag{
+ display:inline-flex;gap:.65em;align-items:center;
+ padding:clamp(8px,1.2vw,14px) clamp(11px,1.6vw,24px);
+ background:var(--ci-ink);color:var(--ci-paper);
+ font:800 clamp(10px,1.6vw,20px)/1 'DM Sans','Prompt',Arial,sans-serif;
+ letter-spacing:.18em;
+ animation:ci-label-in .62s cubic-bezier(.2,.78,.18,1) both .2s;
+}
+.class-interlude-tag strong{color:var(--ci-accent);font-weight:800}
+.class-interlude-rule{
+ margin-top:clamp(15px,2.2vw,34px);
+ height:2px;width:clamp(48px,6vw,106px);
+ background:var(--ci-ink);
+ transform-origin:left center;
+ animation:ci-rule .52s ease-out both .72s;
+}
+.class-interlude-kicker{
+ margin:clamp(13px,1.5vw,26px) 0 clamp(6px,.65vw,14px);
+ font:800 clamp(10px,1.45vw,16px)/1.3 'DM Sans','Prompt',Arial,sans-serif;
+ letter-spacing:.19em;
+ animation:ci-rise .62s ease-out both .84s;
+}
+.class-interlude-main h2{
+ margin:0;max-width:100%;color:var(--ci-ink);
+ font:400 clamp(25px,5.6vw,92px)/1.03 'DM Serif Display',Georgia,serif;
+ letter-spacing:-.047em;text-wrap:balance;overflow-wrap:break-word;
+ animation:ci-rise .76s cubic-bezier(.16,1,.3,1) both 1s;
+}
+.class-interlude-subtitle{
+ max-width:63ch;margin:clamp(8px,1.1vw,19px) 0 0;
+ color:#554F49;font:500 clamp(11px,1.45vw,18px)/1.5 'DM Sans','Prompt',Arial,sans-serif;
+ animation:ci-rise .7s ease both 1.25s;
+}
+.class-interlude-decor{
+ position:absolute;z-index:2;right:clamp(15px,4vw,75px);top:25%;
+ width:clamp(35px,9vw,160px);height:52%;
+ display:flex;align-items:flex-end;gap:clamp(3px,.6vw,11px);
+ transform:skew(-12deg);
+ pointer-events:none;
+}
+.class-interlude-decor span{
+ width:25%;height:85%;background:var(--ci-accent);
+ transform:scaleY(0);transform-origin:bottom;
+ animation:ci-stacks .55s ease-out both 1.08s;
+}
+.class-interlude-decor span:nth-child(2){height:64%;animation-delay:1.26s}
+.class-interlude-decor span:nth-child(3){height:42%;animation-delay:1.43s}
+.class-interlude-wipe{
+ position:absolute;inset:0;z-index:5;background:var(--ci-accent);
+ transform:translateX(-101%);
+ animation:ci-wipe .92s cubic-bezier(.62,0,.4,1) both;
+ pointer-events:none;
+}
+.class-interlude-progress{
+ position:absolute;bottom:0;left:0;right:0;height:clamp(5px,.7vw,10px);
+ background:#D5D1C9;z-index:4;overflow:hidden;
+}
+.class-interlude-progress span{
+ display:block;width:100%;height:100%;background:var(--ci-ink);
+ transform:scaleX(0);transform-origin:left center;
+ animation:ci-time 4.6s linear both;
+}
+.class-interlude-exit{
+ position:absolute;z-index:8;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));
+ border:1px solid #FFFFFF70;background:#191919B7;color:white;
+ border-radius:10px;padding:9px 13px;min-height:42px;
+ font:750 12px/1.2 'DM Sans',Arial,sans-serif;
+ cursor:pointer;opacity:0;animation:ci-show-exit .35s ease both 3.2s;
+}
+.class-interlude-exit:focus-visible{outline:3px solid #F2D85B;outline-offset:3px;opacity:1}
+.class-interlude-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@keyframes ci-wipe{
+ 0%{transform:translateX(-101%)}48%{transform:translateX(0)}100%{transform:translateX(102%)}
+}
+@keyframes ci-label-in{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ci-rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ci-rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ci-stacks{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes ci-time{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ci-show-exit{from{opacity:0}to{opacity:.92}}
+@media(max-width:700px){
+ .class-interlude-header,.class-interlude-footer{font-size:8px;letter-spacing:.09em}
+ .class-interlude-canvas{padding:17px 21px 21px}
+ .class-interlude-main{max-width:84%}
+ .class-interlude-tag{font-size:9px;padding:7px 9px}
+ .class-interlude-kicker{font-size:9px;margin:9px 0 6px}
+ .class-interlude-main h2{font-size:clamp(25px,5.6vw,43px)}
+ .class-interlude-subtitle{font-size:10px}
+ .class-interlude-decor{right:12px}
+ .class-interlude-rule{margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .class-interlude-overlay *{animation:none!important;transition:none!important}
+ .class-interlude-wipe{display:none}
+ .class-interlude-decor span{transform:scaleY(1)}
+ .class-interlude-progress span{transform:scaleX(1)}
+ .class-interlude-exit{opacity:1}
+}
