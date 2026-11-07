@@ -86,8 +86,14 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
    finally{setBusy(false)}
  };
  return <section className="vertical-studio">
-  <header className="vertical-intro"><span>CREATIVE STUDIO · 9:16</span>
-    <h1>{t.title}</h1><p>{t.hint}</p></header>
+  <header className="vertical-intro">
+    <h1>{locale==='es'?'Portada · 9:16':'Cover · 9:16'}</h1>
+    <button type="button" className="vertical-save" disabled={saving} onClick={onSave}>
+      <Save size={16}/>{saving?(locale==='es'?'Guardando…':'Saving…'):(locale==='es'?'Guardar':'Save')}
+    </button>
+  </header>
+  <details className="vertical-options-fold">
+   <summary>{locale==='es'?'Texto, video y estilos':'Text, video & styles'}</summary>
   <div className="vertical-workspace">
    <div className="vertical-controls">
     <div className="vertical-format" role="group" aria-label="Formato vertical">
@@ -107,7 +113,6 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
       <button onClick={()=>setEditorial('full')}>{t.full}</button>
       <button onClick={()=>setEditorial('dark')}>{t.dark}</button></div>
     </div>
-    <button type="button" className="vertical-save" disabled={saving} onClick={onSave}><Save size={17}/>{saving?'Guardando…':t.saved}</button>
    </div>
    {videoUrl&&<section className="vertical-video-panel">
      <strong>{t.videoOnly}</strong><small>{videoName}</small>
@@ -117,13 +122,14 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
      </div>
      <button type="button" disabled={busy} onClick={()=>void useFrame()}>
        <Download size={16}/>{busy?t.frameBusy:t.frame}</button>
-     <p>{t.videoHelp}</p>
+     <p>{locale==='es'?'Solo se usa el fotograma para la portada PNG.':'Only the frame is used for the PNG cover.'}</p>
    </section>}
   </div>
+  </details>
   <details className={'vertical-editor-details canvas-size-'+canvasSize} open={advanced} onToggle={e=>setAdvanced((e.currentTarget as HTMLDetailsElement).open)}>
-   <summary>{t.cover} · {t.edit}</summary>
+   <summary>{t.cover}</summary>
    <div className="vertical-canvas-sizing" role="group" aria-label={locale==='es'?'Tamaño del lienzo en pantalla':'On-screen canvas size'}>
-     <span>{locale==='es'?'Vista del lienzo':'Canvas view'} <small>· {locale==='es'?'el PNG conserva 1080 × 1920':'PNG stays 1080 × 1920'}</small></span>
+     <span>{locale==='es'?'Tamaño en pantalla':'Screen size'}</span>
      <div>{(['compact','comfortable','large'] as const).map(size=><button key={size} type="button"
        aria-pressed={canvasSize===size} onClick={()=>setCanvasSize(size)}>
        {size==='compact'?(locale==='es'?'Pequeño':'Small'):size==='comfortable'?(locale==='es'?'Cómodo':'Comfortable'):(locale==='es'?'Ampliar':'Enlarge')}
