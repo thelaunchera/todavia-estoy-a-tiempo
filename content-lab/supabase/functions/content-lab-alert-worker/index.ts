@@ -145,5 +145,5 @@ Deno.serve(async(req)=>{
   }
   return result(200,{ok:true,queued:enqueued||0,processed:(alerts||[]).length,delivery:counts,
     push_ready:!!secrets.vapid_public,email_ready:!!secrets.make_email_hook});
- }catch(e){console.error("Content Lab alert worker failure",e instanceof Error?e.message:"Unknown");return result(500,{ok:false,error:"Alert worker unavailable"})}
+ }catch(e){const reason=e instanceof Error?e.message:"Unknown";console.error("Content Lab alert worker failure",reason);return result(500,{ok:false,error:reason.slice(0,170)})}
 });
