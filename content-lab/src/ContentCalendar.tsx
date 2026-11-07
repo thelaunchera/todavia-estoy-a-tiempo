@@ -87,7 +87,7 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
    if(key.startsWith('post:')){
     const id=key.slice(5),item=posts.find(p=>p.brandId===brand.id&&p.id===id);
     if(!item)throw Error('Publicación no encontrada');
-    const update={...item,date:targetDate,time:targetTime,
+    const update={...item,date:targetDate,time:targetTime,timeZone:targetDate?(Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'):undefined,
      planningStatus:status||(item.planningStatus==='published'?'published':'planned')};
     const {data}=await api.put('/api/posts/'+id,update);onPostSaved(data as CalendarPost);
    }else{
@@ -95,7 +95,7 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
     if(!match)throw Error('Publicación no encontrada');
     const gid=match[1],index=Number(match[2]),g=grids.find(x=>x.id===gid&&x.brandId===brand.id);
     if(!g||!g.posts[index])throw Error('Esta campaña no está disponible');
-    const updated=g.posts.map((p,i)=>i===index?{...p,scheduledDate:targetDate,scheduledTime:targetTime,
+    const updated=g.posts.map((p,i)=>i===index?{...p,scheduledDate:targetDate,scheduledTime:targetTime,scheduledTimeZone:targetDate?(Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'):undefined,
       planningStatus:status||(p.planningStatus==='published'?'published':'planned')}:p);
     const {data}=await api.put('/api/grids/'+gid,{posts:updated});
     setGrids(prev=>prev.map(x=>x.id===gid?{...x,...data,posts:updated}:x));
