@@ -15,7 +15,7 @@ type Secrets={worker?:string;vapid_public?:string;vapid_private?:string;make_ema
 const clean=(s:unknown,n=120)=>String(s||"").replace(/[<>\\x00-\\x1f]/g,"").slice(0,n).trim();
 const htmlEscape=(s:unknown)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]||c));
 const matchToken=(a:string,b:string)=>{if(!a||!b||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
-const b64url=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"");
+const b64url=(bytes:Uint8Array)=>btoa(String.fromCharCode(...bytes)).split('+').join('-').split('/').join('_').replace(/=+$/,"");
 const result=(status:number,payload:Record<string,unknown>)=>Response.json(payload,{status,headers:{"Cache-Control":"no-store"}});
 const titleAndBody=(a:Alert,locale:"es"|"en")=>{
  const project=clean(a.project_title,85)||"tu diseño";
