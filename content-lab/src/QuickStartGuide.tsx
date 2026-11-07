@@ -35,11 +35,9 @@ export default function QuickStartGuide({scope,onCreate,locale='es',mode='editor
 }){
  const words=copy[locale];
  const key='content-lab:guide-dismissed:v2:'+mode+':'+encodeURIComponent(scope);
- const isDismissed=()=>{try{return localStorage.getItem(key)==='1'}catch{return false}};
  const [open,setOpen]=useState(false);
- const [dismissed,setDismissed]=useState(isDismissed);
- useEffect(()=>{setDismissed(isDismissed());setOpen(false)},[scope,mode]);
- const dismiss=()=>{try{localStorage.setItem(key,'1')}catch{}setDismissed(true);setOpen(false)};
+ useEffect(()=>{setOpen(false)},[scope,mode]);
+ const dismiss=()=>{try{localStorage.setItem(key,'1')}catch{}setOpen(false)};
  return <section className={'lab-first-guide'+(mode==='editor'?' lab-first-guide-editor':' lab-first-guide-home')} aria-label={words.label}>
   <button type="button" className="lab-first-guide-toggle" aria-expanded={open} onClick={()=>setOpen(value=>!value)}>
    <BookOpen size={16}/> <span>{locale==='es'?'Ayuda rápida':'Quick help'}</span>
@@ -60,7 +58,6 @@ export default function QuickStartGuide({scope,onCreate,locale='es',mode='editor
    <ol>{words.steps.map((step,i)=><li key={step[0]}>
     <span>{i+1}</span><div><strong>{step[0]}</strong><small>{step[1]}</small></div>
    </li>)}</ol>
-   {mode==='editor'&&<p className="lab-first-guide-editor-tip">{words.editor}</p>}
    <div className="lab-first-guide-actions">
     {mode==='home'&&<button type="button" onClick={()=>{dismiss();onCreate()}}>{words.start}</button>}
     <button type="button" onClick={dismiss}><CheckCircle2 size={16}/> {words.done}</button>
