@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
-import {recordingStarts, RECORDING_EXAMPLE} from './recording-starts';
+import {recordingStarts, RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText, UploadCloud } from 'lucide-react';
-import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
+import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_RECORDING_FOLDERS, CLASS_RECORDINGS_DRIVE, CLASS_AUDIO_DRIVE, CLASS_EXPORTS_DRIVE, CASA_BROWNIE_PHOTOS_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
 
 export type ClassEntry = {
@@ -281,16 +281,24 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
    </div>
    <div className="class-tablet-actions">
-    <a href="https://casa-brownie-taller-desde-cero-b37dq5.v2.appdeploy.ai/" target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir taller de Casa Brownie</a>
+    <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir demo oficial Casa Brownie</a>
     <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
    </div>
+   <nav className="class-tablet-drive-links" aria-label="Carpetas privadas para grabar y editar">
+    <a href={CLASS_RECORDING_FOLDERS[lesson.id]} target="_blank" rel="noopener noreferrer"><Film size={17}/> Carpeta del capítulo {lesson.id}</a>
+    <a href={CLASS_RECORDINGS_DRIVE} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> Todas las grabaciones</a>
+    <a href={CASA_BROWNIE_PHOTOS_DRIVE} target="_blank" rel="noopener noreferrer"><BookOpen size={16}/> Fotos originales</a>
+    <a href={CLASS_AUDIO_DRIVE} target="_blank" rel="noopener noreferrer"><Headphones size={16}/> Audios y subtítulos</a>
+    <a href={CLASS_EXPORTS_DRIVE} target="_blank" rel="noopener noreferrer"><CheckCircle2 size={16}/> Videos finales</a>
+   </nav>
    <details className="class-tablet-helper">
     <summary>Preparar esta escena en el iPad</summary>
     <div className="class-tablet-helper-body">
      <p><b>1.</b> Abre el taller y prepara las pestañas de este capítulo.</p>
      <ul>{recordingStart.tabs.map(item=><li key={item}>{item}</li>)}</ul>
      <p><b>2.</b> Desactiva las notificaciones. Abre el Centro de control del iPad y toca Grabación de pantalla. El Studio no puede iniciar la grabación por ti.</p>
-     <p><b>3.</b> Graba una escena por vez. Detén la grabación desde iPadOS, revisa el archivo y añade tu voz después si lo prefieres.</p>
+     <p><b>3.</b> Graba una escena por vez. Detén la grabación desde iPadOS y guarda cada toma con nombre <code>CLASE01_{lesson.id}_ESCENA_01.mov</code> en la carpeta Drive de este capítulo. Añade la voz después si lo prefieres.</p>
+     <p><b>4.</b> El botón «Subir video desde el iPad» guarda una copia en el almacenamiento privado del Studio, no en Drive. Los videos de más de 50 MB deben permanecer en Drive y registrarse mediante enlace privado.</p>
      <p><b>Termina cuando:</b> {recordingStart.finish}</p>
     </div>
    </details>

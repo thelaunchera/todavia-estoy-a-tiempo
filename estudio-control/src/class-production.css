@@ -283,3 +283,10 @@
 @media(max-width:900px){.class-room--tablet .class-area-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.class-room--tablet .class-area-nav button{font-size:11px;justify-content:center;padding:9px 6px;min-width:0}}
 @media(max-width:650px){.class-tablet-mode-switch{flex-direction:column;align-items:stretch}.class-tablet-mode-switch button{width:100%}.class-room--tablet .class-area-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.class-tablet-actions,.class-tablet-save-actions{grid-template-columns:1fr}.class-tablet-scene-top{font-size:10px;padding:14px 15px 0}.class-tablet-scene h4{margin:9px 15px 18px}.class-tablet-cue-switch{margin:0 15px 11px}.class-tablet-cue{margin:0 15px 12px;padding:17px;min-height:120px}.class-tablet-scene-nav{padding:0 15px 16px}.class-tablet-scene-nav button{min-width:96px;padding:10px}.class-tablet-head,.class-tablet-finish{padding:17px}}
 @media(prefers-reduced-motion:reduce){.class-tablet-scene,.class-tablet-head{scroll-behavior:auto}}
+
+/* iPad course recording: direct, verified Drive folders by chapter, separate from Studio's private upload storage. */
+.class-tablet-drive-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;min-width:0}
+.class-tablet-drive-links a{display:inline-flex;gap:9px;align-items:center;justify-content:flex-start;min-width:0;min-height:50px;border:1px solid #C9D8E1;background:#fffdfa;color:#24465e;border-radius:12px;padding:12px 13px;text-decoration:none;font:750 12px/1.4 'DM Sans',Arial,sans-serif}
+.class-tablet-drive-links a:first-child{grid-column:1/-1;background:#E3EEF5;border-color:#A7C4D7;font-size:14px}
+.class-tablet-drive-links a:focus-visible{outline:3px solid #D7A73A;outline-offset:3px}
+@media(max-width:550px){.class-tablet-drive-links{grid-template-columns:1fr}.class-tablet-drive-links a:first-child{grid-column:auto}}

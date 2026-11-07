@@ -14,6 +14,24 @@ export const CLASS_NOTION='https://app.notion.com/p/407a68f2ee6e818f9df0fa30f853
 export const CLASS_PLAN='https://app.notion.com/p/407a68f2ee6e81f4a273f7fe4be627d8';
 export const CLASS_STUDENT='https://app.notion.com/p/407a68f2ee6e81d69eacc3cf2c3e85a4';
 export const CLASS_DRIVE='https://drive.google.com/drive/folders/1sR_keLOjf3OuXdKKJ8TAYRwCPI9i5NQq';
+
+/** Drive organization for private screen recordings. Separate from the Casa Brownie photo-kit and student assets. */
+export const CLASS_RECORDINGS_DRIVE='https://drive.google.com/drive/folders/1vrsFSoZmZtzXSe4dajczuVsNk4g-m25B';
+export const CLASS_RECORDING_FOLDERS:Record<string,string>={
+ '00':'https://drive.google.com/drive/folders/1cs05UYe4aZtQfupWgJF_5d6RdCf61zAj',
+ '01':'https://drive.google.com/drive/folders/1mChMgz0OZM0N2s8aQoMQ8bsONYqXPyu8',
+ '02':'https://drive.google.com/drive/folders/1HAcHJQivpeVI-ZHyDKJu7pdwD-bemzxl',
+ '03':'https://drive.google.com/drive/folders/1zJI0ywoHOYSABXSle8paXyyUPvmIoejb',
+ '04':'https://drive.google.com/drive/folders/1CegLapYvp3N3IifOVH8pexDDykFUZenU',
+ '05':'https://drive.google.com/drive/folders/1VnnbpjG1JqYw_XUYXCnENcEMvVQuzw6x',
+ '06':'https://drive.google.com/drive/folders/1Aihth3EsbSrIonaPJSOHqQnd2T5JfKf7',
+ '07':'https://drive.google.com/drive/folders/1fSsAEWX_borVdCX9NuNW-TDEVV6-Idla',
+ '08':'https://drive.google.com/drive/folders/1tmFKWEOX_vQnsWE949_f8HL1MFd8KLA4'
+};
+export const CLASS_AUDIO_DRIVE='https://drive.google.com/drive/folders/1mITIt1tbwb9f8FXrrWOKWDngmj4PbQNQ';
+export const CLASS_EXPORTS_DRIVE='https://drive.google.com/drive/folders/1KXYcknvXc-9y26YgNqW37O4MgI1PEE_9';
+export const CASA_BROWNIE_PHOTOS_DRIVE='https://drive.google.com/drive/folders/1IuH4WbAu0vAwIucVekFELfmcLdYWRVda';
+
 export const CLASS_PROMPTS='https://podcast.thelaunchera.com/alumnos/#prompts';
 export const classStatusOptions=['pendiente','preparado','grabado','editando','aprobado'] as const;
 export const classLessons:ClassLesson[]=[

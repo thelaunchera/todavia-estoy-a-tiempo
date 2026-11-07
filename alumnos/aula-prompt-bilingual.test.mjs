@@ -208,3 +208,15 @@ test('approved emoji assets replace decorative circles in each class phase',asyn
  assert.match(css,/\.lesson-map-emblem img\s*\{/);
  assert.match(html,/curso\.js\?v=20261107-approved-stickers-v5/);
 });
+
+test('iPad recording desk links actual Drive chapter folders and its official demo',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const course=readFileSync(new URL('../estudio-control/src/class-course.ts',import.meta.url),'utf8');
+ const production=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
+ const recording=readFileSync(new URL('../estudio-control/src/recording-starts.ts',import.meta.url),'utf8');
+ for(let i=0;i<=8;i++)assert.match(course,new RegExp("'"+String(i).padStart(2,'0')+"':'https://drive\\.google\\.com/drive/folders/"));
+ assert.match(production,/CLASS_RECORDING_FOLDERS\[lesson\.id\]/);
+ assert.match(production,/href=\{OFFICIAL_DEMO_URL\}/);
+ assert.match(recording,/OFFICIAL_DEMO_URL = 'https:\/\/thelaunchera\.com\/demos\/casa-brownie\//);
+ assert.match(production,/almacenamiento privado del Studio, no en Drive/);
+});
