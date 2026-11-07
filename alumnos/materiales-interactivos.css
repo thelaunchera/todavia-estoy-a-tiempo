@@ -456,3 +456,6 @@
 #materiales-interactivos .mi-prompt-text{overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.65}
 @media(max-width:640px){#materiales-interactivos .mi-prompt-shelves{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#materiales-interactivos .mi-prompt-shelves button{min-height:54px;padding:11px 8px;font-size:12px}}
 @media(max-width:350px){#materiales-interactivos .mi-prompt-shelves button{font-size:11.5px;padding-inline:6px}}
+
+#materiales-interactivos .mi-prompt-to-lessons{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:13px;padding:10px 16px;border:1px solid #294b63;border-radius:999px;background:#fff;color:#23445b;font:750 13px/1.4 'DM Sans',Arial,sans-serif;cursor:pointer;touch-action:manipulation}
+#materiales-interactivos .mi-prompt-to-lessons:focus-visible{outline:3px solid #87aeca;outline-offset:3px}
