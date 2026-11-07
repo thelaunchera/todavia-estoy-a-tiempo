@@ -67,7 +67,7 @@
  .vertical-canvas-sizing{align-items:flex-start;flex-direction:column;gap:5px}
  .vertical-canvas-sizing>div{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
  .vertical-canvas-sizing button{padding:8px 4px}
- .vertical-studio .vertical-editor-details .free-post-tools{bottom:calc(9px + env(safe-area-inset-bottom))}
+ .vertical-studio .vertical-editor-details .free-post-tools{bottom:calc(73px + env(safe-area-inset-bottom))}
  .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-media,
  .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-background-panel,
  .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-layers{bottom:calc(72px + env(safe-area-inset-bottom))}
