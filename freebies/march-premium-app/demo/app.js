@@ -3,7 +3,7 @@ const KEY="tle_petal_line_demo_v1";
 const $=id=>document.getElementById(id);
 const ui={
   scroller:$("screen-scroll"),language:$("language"),name:$("visitor-name"),
-  form:$("join-form"),error:$("join-error"),join:$("join-button"),position:$("queue-position"),
+  form:$("join-form"),error:$("join-error"),join:$("join-button"),openJoin:$("open-join"),backHero:$("back-hero"),joinPanel:$("join-panel"),position:$("queue-position"),
   ahead:$("ahead-count"),ticketPurpose:$("ticket-purpose"),readyPurpose:$("ready-purpose"),
   lineHello:$("line-hello"),lineStatus:$("line-status"),readyMessage:$("ready-message"),
   advance:$("advance-button"),leave:$("leave-button"),arrived:$("arrived-button"),
@@ -13,6 +13,12 @@ const messages={
  es:{
   seriesTag:"SERIE CREATIVA DE MARZO",seriesNumber:"001 / DEMO ORIGINAL",seriesFooter:"DISEÑADO POR THE LAUNCH ERA · CONCEPTO ORIGINAL FICTICIO",
   editorialLabel:"UNA FLORISTERÍA, UNA EXPERIENCIA MEJOR",
+  heroSceneLabel:"UNA PEQUEÑA TIENDA CON GRANDES FLORES",
+  introCTA:"Guardar mi lugar",joinBack:"Volver",
+  joinStep:"PASO 01 / TU LUGAR EN LA FILA",joinHeading:"Tu turno <em>te espera.</em>",
+  joinIntro:"Dinos cómo llamarte y qué quieres preparar hoy.",
+  mapShop:"FLOWER BAR",mapYou:"TÚ ESTÁS AQUÍ",mapCaption:"MAPA ILUSTRATIVO · DEMO",
+  queueNumberLabel:"TU NÚMERO",readyBubble:"TUS FLORES TE ESPERAN",
   editorialHeading:"Las flores merecen <em>una buena espera.</em>",
   editorialBody:"Una fila virtual para un flower bar. Sin buscar el final de la fila ni perder tu lugar. Solo flores y un momento para disfrutar.",
   editorialTag:"FILA VIRTUAL / EXPERIENCIA POP-UP",
@@ -51,6 +57,12 @@ const messages={
  en:{
   seriesTag:"MARCH CREATIVE SERIES",seriesNumber:"001 / ORIGINAL DEMO",seriesFooter:"DESIGNED BY THE LAUNCH ERA · AN ORIGINAL FICTIONAL CONCEPT",
   editorialLabel:"ONE FLOWER BAR, A BETTER EXPERIENCE",
+  heroSceneLabel:"A SMALL SHOP WITH BIG FLOWERS",
+  introCTA:"Save my spot",joinBack:"Back",
+  joinStep:"STEP 01 / YOUR SPOT IN LINE",joinHeading:"Your spot <em>is waiting.</em>",
+  joinIntro:"Tell us your name and what you're stopping by for.",
+  mapShop:"FLOWER BAR",mapYou:"YOU ARE HERE",mapCaption:"ILLUSTRATED MAP · DEMO",
+  queueNumberLabel:"YOUR NUMBER",readyBubble:"YOUR FLOWERS ARE WAITING",
   editorialHeading:"Flowers are worth <em>waiting for.</em>",
   editorialBody:"A virtual line for a flower bar. No searching for the back of the line or losing your spot. Just flowers and a moment to enjoy.",
   editorialTag:"VIRTUAL QUEUE / POP-UP EXPERIENCE",
@@ -89,6 +101,7 @@ const messages={
 };
 let lang=new URLSearchParams(location.search).get("lang")==="en"?"en":"es";
 let active=null; // null | {name,purpose,position,arrived}
+let joinOpen=false;
 let toastTimer=0;
 let storageEnabled=true;
 const t=k=>messages[lang][k];
@@ -146,6 +159,9 @@ function currentStep(){
 }
 function render(){
   const stage=currentStep();
+  ui.joinPanel.hidden=!(stage==="start"&&joinOpen);
+  ui.openJoin.hidden=!(stage==="start"&&!joinOpen);
+  $("screen-start").classList.toggle("is-joining",stage==="start"&&joinOpen);
   for(const part of ["start","line","ready"])$("screen-"+part).hidden=part!==stage;
   const order=["start","line","ready"],at=order.indexOf(stage);
   document.querySelectorAll(".track-step").forEach(el=>{
@@ -178,6 +194,7 @@ function join(e){
   }
   ui.error.hidden=true;
   active={name:data.name,purpose:data.purpose,position:4,arrived:false};
+  joinOpen=false;
   persist();render();notice(t("joined"));
 }
 function advance(){
@@ -186,7 +203,7 @@ function advance(){
   persist();render();notice(t(active.position===0?"readyToast":"advanced"));
 }
 function leave(){
-  active=null;persist();ui.form.reset();ui.name.value="";
+  active=null;joinOpen=false;persist();ui.form.reset();ui.name.value="";
   render();notice(t("left"));
 }
 function arrive(){
@@ -196,6 +213,8 @@ function arrive(){
 function init(){
   load();applyLocale();
   ui.language.addEventListener("click",switchLang);
+  ui.openJoin.addEventListener("click",()=>{joinOpen=true;render();ui.name.focus()});
+  ui.backHero.addEventListener("click",()=>{joinOpen=false;render()});
   ui.form.addEventListener("submit",join);
   ui.name.addEventListener("input",()=>{ui.error.hidden=true});
   ui.advance.addEventListener("click",advance);
