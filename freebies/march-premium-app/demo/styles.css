@@ -99,6 +99,7 @@ body,button,input{font-family:"Plus Jakarta Sans",Arial,Helvetica,sans-serif}
 .editorial-stamp{margin-top:8px}
 .scene{margin:10px auto 0}
 .scene svg{transform:rotate(0deg)}
+.scene img{display:block;width:100%;height:auto;max-width:650px;object-fit:contain}
 .app{background:var(--porcelain);border-color:#493750;border-width:7px;border-radius:32px}
 .app-header{min-height:58px;flex-basis:58px;border:0;padding:0 20px;background:#FAF6F1}
 .brand{font-size:22px}
