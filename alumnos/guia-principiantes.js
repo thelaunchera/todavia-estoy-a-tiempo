@@ -5,10 +5,11 @@ function header(content,kicker,title,description){
  h.append(node('span','mi-eyebrow',kicker),node('h3',null,title),node('p',null,description));
  content.append(h);
 }
+const driveFolderPrompt="Voy a crear UNA web para [NOMBRE DEL NEGOCIO]. Con Google Drive conectado y autorizado, EJECUTA las acciones: primero busca una carpeta existente con ese nombre para no duplicar. Si no existe, CREA AHORA la carpeta principal. Dentro CREA o REUTILIZA ocho subcarpetas: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS. Guarda allí, cuando tengas permisos, todos los textos, fotos individuales, prompts y enlaces aprobados del proyecto, sin sobrescribir versiones anteriores. Verifica el resultado y dame los enlaces REALES de Drive a las carpetas. No quiero un plan ni instrucciones manuales. Si falta conectar el servicio o autorizar escritura, pídeme el permiso y explícame qué acción está bloqueada; no afirmes que creaste algo que no pudiste crear. No guardes contraseñas, datos bancarios ni datos privados de clientes. Yo te doy el nombre y apruebo; tú organizas y compruebas.";
 const folders=[
  ['00_IDEA','Qué ofrezco, para quién y el objetivo de mi web.'],
  ['01_TEXTOS','Titular, descripción, preguntas frecuentes y texto del botón.'],
- ['02_FOTOS','Guarda cada foto por separado; en Casa Brownie usamos hero estático, seis sabores y dos regalos.'],
+ ['02_FOTOS','La IA organiza las fotos individuales aprobadas: portada, productos y regalos.'],
  ['03_PROMPTS','Instrucciones de ChatGPT que dieron buen resultado.'],
  ['04_DISENO','Colores, letras y referencias aprobadas.'],
  ['05_WEB','Enlace público y versión revisada de mi página.'],
@@ -48,34 +49,30 @@ export function renderWebBasics(content,go){
  const actions=node('div','mi-actions');const next=node('button','mi-primary','Ordenar mi proyecto');next.type='button';next.addEventListener('click',()=>go('organizacion'));actions.append(next);content.append(actions);
 }
 export function renderProjectOrder(content){
- header(content,'ORGANIZA TUS ARCHIVOS','La carpeta de tu primera web.','Crea una carpeta con el nombre de tu negocio en Google Drive. Dentro guarda estas ocho partes y no pierdas tiempo buscando archivos.');
- content.append(node('p','mi-note','Trabaja en una sola web hasta terminarla y practicar el proceso completo. Así tendrás claras las fotos, los textos y los cambios de ese negocio. Después podrás empezar otra sin mezclar archivos.'));
+ header(content,'GOOGLE DRIVE + IA','ChatGPT crea las carpetas por ti.','Dile el nombre de tu negocio, conecta Google Drive y autoriza. La IA creará las carpetas reales, organizará tus recursos cuando tenga permiso y te dará los enlaces.');
+ content.append(node('p','mi-note','Este es el resultado que hará ChatGPT por ti; no necesitas crear manualmente estas ocho carpetas.'));
  const grid=node('div','mi-folder-grid');content.append(grid);
- for(const [title,description] of folders){const item=node('div','mi-folder-card');item.append(node('strong',null,title),node('span',null,description));grid.append(item);}
+ for(const [title,description] of folders){const card=node('div','mi-folder-card');card.append(node('strong',null,title),node('span',null,description));grid.append(card);}
  const rules=node('div','mi-structure-example');
- rules.append(node('strong',null,'Tres reglas sencillas'));
+ rules.append(node('strong',null,'Tu parte es aprobar. ChatGPT hace el trabajo.'));
  const list=node('ol');
- ['Una web a la vez: usa una sola carpeta principal y mantén allí únicamente los archivos de ese negocio.','Las imágenes que crees en ChatGPT deben ir a Drive → 02_FOTOS, no a tu galería personal. Pide enviarlas directamente si la conexión lo permite. Confirma que abran en Drive antes de borrar cualquier archivo temporal.','Las contraseñas, claves, documentos bancarios y datos de clientes no se guardan en carpetas compartidas.'].forEach(line=>{list.append(node('li',null,line));});
+ ['Autoriza Google Drive desde ChatGPT, incluyendo la creación y escritura de archivos.','Copia el único prompt. ChatGPT crea o reutiliza las carpetas y coloca los archivos aprobados cuando los tenga.','Abre los enlaces que ChatGPT entregue para verificar la creación real. Si el permiso no está disponible, debe decirlo, no fingir que terminó.'].forEach(s=>list.append(node('li',null,s)));
  rules.append(list);content.append(rules);
- const prompt='Voy a trabajar en UN SOLO proyecto por ahora: [NOMBRE DEL NEGOCIO]. Ayúdame a organizar su carpeta en Google Drive. Crea un plan de ocho carpetas: 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS. Explica qué va en cada una y cómo guardar versiones. Evita contraseñas y datos privados. Todo en español claro para alguien que nunca hizo una web.';
  const promptCard=node('div','mi-structure-prompt');
- promptCard.append(node('h4',null,'Instrucción lista para ChatGPT'),node('p',null,prompt));
- const button=node('button',null,'Copiar instrucción');button.type='button';
- const feedback=node('small',null,'');
- button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(prompt);feedback.textContent='Copiado. Ahora puedes pegarlo en ChatGPT.';}catch{feedback.textContent='Selecciona el texto de arriba y cópialo manualmente.';}});
- promptCard.append(button,feedback);content.append(promptCard);
- content.append(node('p','mi-note','Publica primero con la dirección gratuita que te dé AppDeploy. Comprar un dominio propio es una decisión posterior, no un requisito para terminar la clase.'));
- content.append(node('p','mi-note','Aprender a crear webs puede convertirse en un servicio de pago o ayudar a un negocio a conseguir consultas. Las ventas dependen de una oferta real, difusión y seguimiento; no aparecen automáticamente ni de un día para otro.'));
+ promptCard.append(node('h4',null,'Una instrucción: la IA crea tu Drive'),node('p',null,driveFolderPrompt));
+ const copy=node('button',null,'Copiar prompt · crear carpetas');copy.type='button';const feedback=node('small',null,'');
+ copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(driveFolderPrompt);feedback.textContent='Copiado. Pégalo en ChatGPT con Google Drive conectado.';}catch{feedback.textContent='Selecciona el texto y cópialo.';}});
+ promptCard.append(copy,feedback);content.append(promptCard);
+ content.append(node('p','mi-note','Nunca pongas contraseñas, claves ni datos de clientes en las carpetas compartidas. El resultado debe tener enlaces que abran, no solamente nombres de carpetas.'));
 }
-
 
 /* Ruta de ejecución del alumno: su negocio, no la reproducción literal de Casa Brownie. */
 export function renderStudentWebPath(content,go){
  header(content,'TU RUTA DE CREACIÓN','Dirige a ChatGPT: la IA construye tu web.','Casa Brownie es el ejemplo. Tú describes tu negocio, conectas las herramientas y apruebas. ChatGPT realiza las tareas con los conectores disponibles y autorizados; no necesitas programar ni montar la web manualmente.');
  const intro=node('div','mi-path-intro');
  intro.append(node('strong',null,'Tu objetivo: una página clara que puedas abrir desde tu teléfono y compartir con un enlace.'),node('p',null,'No necesitas programar ni comprar un dominio. Para esta primera web basta con una portada, información real, fotografías, un botón que funcione y un pie de página. Los pagos y automatizaciones son opcionales y se ven después.'));
- intro.append(node('p',null,'Orden de la clase: explica tu negocio → autoriza los conectores necesarios → pide a ChatGPT investigar y preparar textos, moodboard y fotografías → ChatGPT crea el primer mockup con AppDeploy y comparte la URL → le pides correcciones con capturas → ChatGPT coloca las fotos y comprueba lo verificable → apruebas la web. Solo si el negocio lo necesita, pide automatizaciones con Make u otros conectores. El video del hero pertenece a un bono separado y no está incluido en la construcción básica.'));
- intro.append(node('p',null,'Tu trabajo es explicar, conectar, aprobar y comprobar; el de ChatGPT es ejecutar con los conectores disponibles. Una web a la vez. Pide a ChatGPT que organice las imágenes en Google Drive → 02_FOTOS cuando el conector admita escritura. Si no puede, te indicará el paso manual mínimo. Verifica los archivos antes de borrar copias temporales. Ninguna conexión ni automatización se activa sin tu autorización.'));
+ intro.append(node('p',null,'Orden de la clase: describes tu negocio → autorizas Drive y AppDeploy → ChatGPT crea las carpetas REALES → investiga, redacta, genera y organiza fotos → construye la web → te entrega el enlace → corrige lo que apruebes. Si una conexión no permite una acción, ChatGPT debe explicarlo, no fingir que terminó. El video del hero es un bono separado.'));
+ intro.append(node('p',null,'Tu parte es explicar tu negocio, autorizar las herramientas y aprobar el resultado. La IA realiza el trabajo técnico y organiza tus archivos con los conectores disponibles. Ninguna conexión ni automatización se activa sin tu autorización.'));
  content.append(intro);
  const steps=[
   {title:'Define tu negocio y el objetivo de la página',time:'Módulos 00 y 01',
@@ -83,23 +80,23 @@ export function renderStudentWebPath(content,go){
    example:'Casa Brownie muestra sus brownies como ejemplo ficticio. Tu página puede ser de limpieza, ropa, postres, belleza o cualquier servicio real.',
    save:'Guarda tu ficha en 00_IDEA.',check:'Puedes explicar tu web en una sola frase.',
    prompt:'Voy a crear mi primera web para [NOMBRE DEL NEGOCIO]. Vendo u ofrezco [PRODUCTO O SERVICIO], ayudo a [TIPO DE CLIENTE] y quiero que el visitante [ACCIÓN PRINCIPAL]. Hazme cinco preguntas sencillas, una por una, para definir la estructura de una página. No inventes datos, precios ni reseñas.'},
-  {title:'Ordena tus archivos antes de diseñar',time:'Módulo 01',
-   actions:['Pide a ChatGPT que te muestre cómo conectar Google Drive. Autoriza el conector desde ChatGPT y revisa los permisos; después pídele que cree y organice las carpetas si tiene acceso de escritura.','Dile a ChatGPT el nombre del negocio y pídele que cree la carpeta principal mediante Google Drive; si el conector no permite crearla, sigue el paso manual que te indique.','Pide a ChatGPT que prepare las subcarpetas 00_IDEA, 01_TEXTOS, 02_FOTOS, 03_PROMPTS, 04_DISENO, 05_WEB, 06_PRUEBAS y 07_GASTOS usando el conector, cuando esté permitido.','Pide a ChatGPT que guarde las fotos en Google Drive → [NOMBRE DE TU WEB] → 02_FOTOS cuando el conector admita subir archivos. No hace falta enviarlas a la galería personal.','Si ChatGPT no puede subir una imagen mediante el conector, pídele instrucciones precisas para compartirla o subirla desde Archivos a Drive. Comprueba que se abre en Drive antes de borrar la copia temporal.'],
-   example:'En el video verás las carpetas de Casa Brownie; tú usa el nombre de tu propio proyecto.',
-   save:'Una carpeta principal en Drive con las ocho secciones y fotos subidas de ese negocio.',check:'Encuentras una foto en Drive, la abres y sabes exactamente a qué sección de tu web pertenece.',
-   prompt:'Ayúdame a preparar una lista muy sencilla de los archivos que necesito para la web de [NEGOCIO]. Separa textos, fotos, diseño y pruebas. Dime cómo nombrar cada archivo para encontrarlo desde mi teléfono.'},
-  {title:'Moodboard con los 8 Master Prompts gratuitos',time:'Módulo 02 · Primero la dirección visual',
+  {title:'ChatGPT crea tus carpetas en Drive',time:'Módulo 01 · Google Drive',
+    actions:['Dile a ChatGPT el nombre de tu negocio y autoriza Google Drive cuando te lo solicite.','Pega el único prompt de «Mi proyecto organizado». ChatGPT CREA o reutiliza las carpetas; tú no tienes que hacerlo manualmente.','Pide que coloque los recursos producidos dentro de la estructura con los permisos disponibles y te entregue enlaces de Drive.','Abre un enlace para comprobar. Si falta permiso, ChatGPT debe solicitarlo, sin declarar completado lo que no ejecutó.'],
+    example:'Casa Brownie es el proyecto de ejemplo. En tu propia carpeta la IA usa el nombre de TU marca.',
+    save:'ChatGPT crea las carpetas y devuelve sus enlaces reales.',check:'Los enlaces abren las ocho carpetas de tu negocio.',
+    prompt:driveFolderPrompt},
+   {title:'Moodboard con los 8 Master Prompts gratuitos',time:'Módulo 02 · Primero la dirección visual',
    actions:['Abre los 8 Master Prompts originales en el freebie gratuito de Content Lab. Si todavía no tienes acceso, usa el flujo de correo del freebie para obtenerlos.','Explora los ocho estilos: Asymmetric Editorial, Monumental Center, Type Behind Product, Side-Cropped Close-Up, Offset Negative Space, Diagonal Visual Flow, Vertical Editorial Stack y Magazine Column Split. Son composiciones, no ocho fotos obligatorias.','Elige dos estilos que tengan sentido para tu negocio. Con ChatGPT y tus referencias crea un moodboard con colores, tipografías, luz, materiales y encuadres.','Decide tres reglas que mantendrás en todas las fotografías y guárdalas. El moodboard orienta el diseño; no es la imagen que se pone entera en el hero.'],
    example:'Casa Brownie: Offset Negative Space puede orientar una portada con espacio para el texto, y Side-Cropped Close-Up puede destacar la textura de un brownie.',
    save:'Moodboard en 04_DISENO y estilos seleccionados en 03_PROMPTS.',check:'Sabes explicar cómo quieres que se vea tu marca antes de abrir AppDeploy.',
    prompt:'Estoy creando mi primera web para [NEGOCIO] dirigida a [CLIENTE]. Tengo acceso a los 8 Master Prompts gratuitos y he elegido [ESTILO 1] y [ESTILO 2] para mi dirección visual. Quiero un moodboard original que defina paleta de 3 colores, dos estilos tipográficos, iluminación, fondos, superficies y composición de la portada. Usa solo las referencias que adjunte y no inventes marca, fotos, etiquetas ni reseñas. Explica cómo esas decisiones servirán a la web, no solo a un post.'},
   {title:'Fotos principales a partir del moodboard',time:'Módulo 03 · Antes de AppDeploy',
-   actions:['Abre tu moodboard aprobado y la foto real del producto o servicio que quieras mostrar.','Prepara una fotografía principal para la portada, con espacio limpio donde luego pondremos el título; no necesitas usar los ocho estilos ni generar ocho imágenes.','Crea o selecciona fotografías individuales de los productos o servicios que aparecerán en tu web. Si usas ChatGPT, genera una imagen por solicitud y revisa realismo, textura y etiquetas.','Guarda cada foto individual en tu teléfono con nombre claro y en 02_FOTOS. Después pasamos a escribir los textos y construir la web.'],
+   actions:['Entrega a ChatGPT el moodboard y las referencias aprobadas.','Pídele a la IA que genere la fotografía del hero y las fotos individuales; tú solo revisas y apruebas.','ChatGPT debe guardar las fotos aprobadas en Drive → 02_FOTOS y entregarte sus enlaces si el conector permite subir archivos.'],
    example:'Casa Brownie: hero sin video, seis fotos de sabores y dos regalos; tu negocio solo necesita las fotos de sus propios productos o servicios.',
    save:'HERO_ESTATICO y fotos individuales en 02_FOTOS.',check:'Fotos coherentes con el moodboard, separadas, bien encuadradas y con permiso de uso.',
    prompt:'Con mi moodboard aprobado y una imagen de referencia adjunta, prepara UNA foto principal editorial para [NEGOCIO]. Tema: [PRODUCTO/SERVICIO]. Composición de mis 8 Master Prompts: [ESTILO ELEGIDO]. Luz: [LUZ]. Colores: [PALETA]. Fotografía realista, formato horizontal adaptable a móvil, producto fiel a su referencia y espacio libre para añadir el texto en el sitio después. No incluyas letras falsas ni logotipos inventados. Si falta la imagen necesaria, pídemela primero. Entrega una foto, no un collage.'},
   {title:'Escribe el contenido que verá el visitante',time:'Módulo 04',
-   actions:['Redacta un título de portada que comunique lo más importante de TU negocio: qué ofreces, a quién ayudas y por qué importa. El hero puede ser una foto estática con texto claro; el video del hero se enseña por separado como bono; no forma parte de la web básica.','Prepara una descripción corta, tus productos o servicios, cómo funciona, preguntas frecuentes y contacto.','Decide el texto del botón principal: Ver servicios, Explorar productos o Solicitar información.'],
+   actions:['Pide a ChatGPT que redacte el título, subtítulo, productos o servicios, FAQ y contacto a partir de tus datos reales.','Tú solo revisas y apruebas; la IA guarda los textos en Drive → 01_TEXTOS cuando tenga permisos.','Usa una fotografía estática en el hero. El video es un bono separado.'],
    example:'En Casa Brownie aparece «¿Qué llevo de regalo?». Para tu negocio el título debe hablarle a TU cliente.',
    save:'Pon cada texto aprobado en 01_TEXTOS.',check:'Ninguna frase promete algo que no puedas cumplir.',
    prompt:'Escribe los textos de una web de una página para [NEGOCIO], dirigida a [CLIENTE]. Usa SOLO estos datos confirmados: [DATOS]. Entrega: menú, título de portada, subtítulo breve, botón principal, servicios o productos, cómo funciona, FAQ y footer. Lenguaje claro y humano. Marca como PENDIENTE cualquier dato que falte.'},
