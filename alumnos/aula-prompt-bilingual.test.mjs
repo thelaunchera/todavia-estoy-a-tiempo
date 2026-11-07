@@ -78,3 +78,25 @@ test('creative packs keep every step together instead of classifying hero and mo
   assert.notEqual(promptPack({prompt_code:'demo_crumb_0',brand:'Crumb'},lang).id,promptPack({prompt_code:'demo_casa-brownie_0',brand:'Casa Brownie'},lang).id);
  }
 });
+
+test('course prompts group into seven bilingual learning stages without mixing creative packs or demo brands',async()=>{
+ const {promptPack,promptShelf}=await import('./prompt-guide.js');
+ const stages={
+  'course-01':['idea','cliente','estructura','m00_elige_proyecto','m01_diagnostico_propio'],
+  'course-02':['referencias','m02_moodboard'],
+  'course-03':['imagenes','m03_foto_individual'],
+  'course-04':['hero','copy','m04_textos_objetivo'],
+  'course-05':['construccion','formularios','m05_poner_fotos'],
+  'course-06':['movil','auditoria','mobile_1','m06_corrige_movil'],
+  'course-07':['pagos','m07_checkout','m08_publica']
+ };
+ for(const lang of ['es','en'])for(const [group,codes] of Object.entries(stages))for(const code of codes){
+  const item={prompt_code:code,title:'Learning prompt'};
+  assert.equal(promptPack(item,lang).id,group,code+' '+lang);
+  assert.equal(promptShelf(item),'route');
+  assert.ok(promptPack(item,lang).purpose.length>30);
+ }
+ for(const item of [{prompt_code:'typography_01'},{prompt_code:'freebie_1photo8_01'},{prompt_code:'december_1',title:'December Creative Pack · Hero'}])assert.equal(promptShelf(item),'creative');
+ for(const code of ['demo_crumb_0','demo-photo_crumb_0_1'])assert.equal(promptShelf({prompt_code:code,brand:'Crumb'}),'demos');
+ assert.equal(promptPack({prompt_code:'demo_crumb_0',brand:'Crumb'},'es').id,promptPack({prompt_code:'demo-photo_crumb_0_1',brand:'Crumb'},'es').id);
+});

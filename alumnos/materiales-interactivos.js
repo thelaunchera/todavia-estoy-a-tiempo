@@ -1,7 +1,7 @@
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-ai-first-v4';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
-import {promptGuide,promptPack} from './prompt-guide.js?v=20261105-packs-v1';
+import {promptGuide,promptPack,promptShelf} from './prompt-guide.js?v=20261107-class-library-v2';
 import {translateWorkbookBlocks,translateCheckItem} from './materials-english.js?v=20261102-v1';
 import {renderEnglishMaterialGuide} from './materials-guides-en.js?v=20261103-coherent-v5';
 /* Tu primera web con IA · Materiales activos de la clase
@@ -313,16 +313,23 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const fullCatalog=[...MODULE_PROMPTS,...fallback,...bonus,...EXAMPLE_PROMPTS].map(p=>{
    const code=p.prompt_code;
    const pack=promptPack(p,lang);
-   return {...p,group:pack.id,pack,englishTitle:englishTitle(code,p.title)};
+   return {...p,group:pack.id,shelf:promptShelf(p),pack,englishTitle:englishTitle(code,p.title)};
   });
   fullCatalog.sort((a,b)=>(a.position||0)-(b.position||0));
   const packs=new Map();
   for(const item of fullCatalog)if(!packs.has(item.group))packs.set(item.group,item.pack);
-  const filters=[['all',t('Todos los packs','All packs')],...[...packs].map(([id,pack])=>[id,pack.title])];
+  const shelfTabs=[
+   ['route',t('Mi clase','My course')],
+   ['creative',t('Packs creativos','Creative packs')],
+   ['demos',t('Demos por marca','Demos by brand')],
+   ['all',t('Buscar en todo','All prompts')]
+  ];
+  const packOrder=id=>id.startsWith('course-')?Number(id.slice(7)):id==='course'?8:20;
+  const orderedPacks=ids=>[...ids].sort((a,b)=>packOrder(a)-packOrder(b)||String(packs.get(a)?.title||'').localeCompare(String(packs.get(b)?.title||''),lang));
   const itinerary=el('div','mi-prompt-itinerary');
-  itinerary.innerHTML='<strong>'+t('¿Por dónde empiezo?','Where do I begin?')+'</strong><p>'+t(
-   'Empieza con el pack paso a paso para crear tu web. Cada pack creativo tiene su propia función y mantiene todos sus prompts juntos. Los demos se organizan por marca.',
-   'Start with the step-by-step pack to build your website. Each creative pack has its own purpose and keeps all its prompts together. Demos are organized by brand.'
+  itinerary.innerHTML='<strong>'+t('Tu ruta: 7 etapas, una web','Your route: 7 stages, one website')+'</strong><p>'+t(
+   'Sigue el orden de la clase: negocio → moodboard → fotos individuales → textos → primera web → revisión móvil → publicación. Los packs creativos y los demos están separados para que no te pierdas.',
+   'Follow the class: business → moodboard → individual photos → copy → first website → mobile review → launch. Creative packs and demos stay separate so you can focus.'
   )+'</p>';
   content.append(itinerary);
   const tools=el('div','mi-prompt-searchbar');
@@ -332,24 +339,21 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   label.append(input);
   const counter=el('p','mi-prompt-count');
   tools.append(label,counter);content.append(tools);
-  const chips=el('div','mi-prompt-categories');chips.setAttribute('role','group');chips.setAttribute('aria-label',t('Categorías de prompts','Prompt categories'));
+  const chips=el('div','mi-prompt-categories mi-prompt-shelves');chips.setAttribute('role','group');chips.setAttribute('aria-label',t('Secciones de la biblioteca','Prompt library sections'));
   const list=el('div','mi-prompt-list');
-  const more=el('button','mi-prompt-more',t('Mostrar más packs','Load more packs'));
+  const more=el('button','mi-prompt-more',t('Mostrar más categorías','Show more categories'));
   more.type='button';
   content.append(chips,list,more);
-  let active='all',limit=18,query='';
-  function matchesGroup(x){
-   if(active==='all')return true;
-   return x.group===active;
-  }
+  let active='route',limit=18,query='';
+  function matchesGroup(x){return active==='all'||x.shelf===active;}
   function renderChips(){
    chips.replaceChildren();
-   for(const [id,name] of filters){
-    if(id!=='all'&&!fullCatalog.some(x=>x.group===id))continue;
-    const n=id==='all'?packs.size:fullCatalog.filter(x=>x.group===id).length;
+   for(const [id,name] of shelfTabs){
+    if(id!=='all'&&!fullCatalog.some(x=>x.shelf===id))continue;
+    const n=fullCatalog.filter(x=>id==='all'||x.shelf===id).length;
     const b=el('button',null,name+' · '+n);b.type='button';
     b.setAttribute('aria-pressed',id===active?'true':'false');
-    b.addEventListener('click',()=>{active=id;limit=18;renderChips();draw();});
+    b.addEventListener('click',()=>{active=id;query='';input.value='';limit=18;renderChips();draw();});
     chips.append(b);
    }
   }
@@ -359,18 +363,18 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
     const searchable=[x.title,x.englishTitle,x.summary,x.body,x.brand||'',x.pack.title,x.pack.purpose].join(' ').toLowerCase();
     return matchesGroup(x)&&(!query||searchable.includes(query.toLowerCase()));
    });
-   const selectedPacks=[...new Set(found.map(x=>x.group))];
-   counter.textContent=selectedPacks.length+' '+t('packs disponibles','available packs');
+   const selectedPacks=orderedPacks(new Set(found.map(x=>x.group)));
+   counter.textContent=found.length+' '+t('prompts en ','prompts in ')+selectedPacks.length+' '+t('categorías','categories');
    for(const id of selectedPacks.slice(0,limit)){
     const pack=packs.get(id);
     const packCard=el('details','mi-prompt mi-prompt-pack');
     packCard.dataset.pack=id;
     const heading=el('summary');
-    heading.innerHTML='<span class="mi-prompt-number" style="font-size:12px">PACK</span><span class="mi-prompt-label"><strong>'+esc(pack.title)+'</strong><small><b>'+esc(t('Para qué sirve: ','Use it to: '))+'</b>'+esc(pack.purpose)+'</small></span><span class="mi-plus" aria-hidden="true">+</span>';
+    heading.innerHTML='<span class="mi-prompt-number" style="font-size:12px">'+esc(id.startsWith('course-')?id.slice(7):t('PACK','PACK'))+'</span><span class="mi-prompt-label"><strong>'+esc(pack.title)+'</strong><small><b>'+esc(t('Para qué sirve: ','Use it to: '))+'</b>'+esc(pack.purpose)+'</small></span><span class="mi-plus" aria-hidden="true">+</span>';
     const packBody=el('div','mi-prompt-body');
     packBody.append(el('p','mi-prompt-when',t('Cuándo usarlo: ','When to use it: ')+pack.when),el('p','mi-prompt-output',t('Qué obtendrás: ','What you will get: ')+pack.result));
     const children=el('div','mi-prompt-list');packBody.append(children);packCard.append(heading,packBody);list.append(packCard);
-    if(query)packCard.open=true;
+    if(query||(active==='route'&&id===selectedPacks[0]))packCard.open=true;
     for(const [i,item] of found.filter(x=>x.group===id).entries()){
 
     const original=localizedPrompt(item.prompt_code,item.body,lang,item.brand||'');
@@ -402,7 +406,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    more.hidden=selectedPacks.length<=limit;
    if(!found.length)list.append(el('p','mi-note',t('No encontré ese tema. Prueba con otra categoría o palabra.','No results. Try another category or word.')));
   }
-  input.addEventListener('input',()=>{query=input.value;limit=18;draw();});
+  input.addEventListener('input',()=>{query=input.value.trim();active=query?'all':'route';limit=18;renderChips();draw();});
   more.addEventListener('click',()=>{limit+=18;draw();});
   renderChips();draw();
  }

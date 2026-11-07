@@ -443,3 +443,16 @@
 #materiales-interactivos .mi-header{margin-bottom:20px}
 #materiales-interactivos .mi-section-head p{max-width:63ch;line-height:1.6}
 @media(max-width:600px){#materiales-interactivos .mi-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}#materiales-interactivos .mi-tabs button{min-height:50px;font-size:12px}#materiales-interactivos .mi-subtabs button{font-size:12px}}
+
+/* 2026-11-07 | Course prompt library: four accessible shelves, no tiny horizontal pack carousel. */
+#materiales-interactivos .mi-prompt-shelves{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:stretch;margin:18px 0 22px;overflow:visible}
+#materiales-interactivos .mi-prompt-shelves button{width:100%;min-width:0;min-height:54px;border:1px solid #cbd9e2;border-radius:13px;background:#fff;color:#24425b;font:700 12px/1.35 'DM Sans',Arial,sans-serif;white-space:normal;text-align:center;padding:11px 12px;box-shadow:none}
+#materiales-interactivos .mi-prompt-shelves button[aria-pressed="true"]{background:#203c54;border-color:#203c54;color:#fff}
+#materiales-interactivos .mi-prompt-shelves button:focus-visible{outline:3px solid #87aeca;outline-offset:3px}
+#materiales-interactivos .mi-prompt-count{font-size:13px;line-height:1.5;color:#50677a}
+#materiales-interactivos .mi-prompt-pack>summary .mi-prompt-label strong{font-weight:750;font-size:clamp(16px,3.8vw,19px);line-height:1.32}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-number{min-width:38px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:#eaf1f5;color:#244962}
+#materiales-interactivos .mi-prompt-pack[open]{border-color:#bccfd9}
+#materiales-interactivos .mi-prompt-text{overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.65}
+@media(max-width:640px){#materiales-interactivos .mi-prompt-shelves{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#materiales-interactivos .mi-prompt-shelves button{min-height:54px;padding:11px 8px;font-size:12px}}
+@media(max-width:350px){#materiales-interactivos .mi-prompt-shelves button{font-size:11.5px;padding-inline:6px}}

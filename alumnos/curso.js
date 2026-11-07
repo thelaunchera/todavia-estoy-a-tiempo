@@ -332,7 +332,7 @@ function refreshClassroomLanguage(){
   if(!adminPreview)bonusState();
   if(message?.dataset.sourceMessage)message.textContent=translateCourseMessage(message.dataset.sourceMessage,lang);
   if(courseHelpStatus?.dataset.sourceMessage)courseHelpStatus.textContent=translateCourseMessage(courseHelpStatus.dataset.sourceMessage,lang);
-  if(lessons.length)setProgressLabels();
+  if(lessons.length){setProgressLabels();renderCourseMap();}
   inspirationController?.setLanguage?.();
   maraController?.setLanguage?.();
   materialsController?.setLanguage?.();
@@ -564,6 +564,42 @@ function choose(i){
   button.setAttribute('aria-current',Number(button.dataset.index)===i?'step':'false');
  });
 }
+/* A four-phase overview helps beginners choose a lesson on a phone.
+   This reads approved lesson metadata; it does not unlock videos or bonuses. */
+function renderCourseMap(){
+ const root=$('lesson-course-map');if(!root)return;
+ root.replaceChildren();root.hidden=!lessons.length;
+ if(!lessons.length)return;
+ const lang=getClassroomLanguage();
+ const phases=[
+  {first:0,last:1,es:'01 · Define',en:'01 · Define',hintEs:'Tu negocio, cliente y objetivo',hintEn:'Your business, customer and goal'},
+  {first:2,last:3,es:'02 · Crea',en:'02 · Create',hintEs:'Marca, moodboard y fotos',hintEn:'Brand, moodboard and photos'},
+  {first:4,last:5,es:'03 · Construye',en:'03 · Build',hintEs:'Textos y primer enlace web',hintEn:'Copy and your first website link'},
+  {first:6,last:8,es:'04 · Revisa',en:'04 · Review',hintEs:'Móvil, publicación y comprobación',hintEn:'Mobile, launch and final checks'}
+ ];
+ const heading=document.createElement('div');heading.className='lesson-map-intro';
+ escapedText(heading,'strong',courseCopy('Tu ruta en 4 etapas','Your route in 4 stages',lang));
+ escapedText(heading,'span',courseCopy('Toca una etapa para ir a su primera lección.','Tap a stage to open its first lesson.',lang));
+ const grid=document.createElement('div');grid.className='lesson-map-grid';
+ for(const phase of phases){
+  const indexes=lessons.map((item,index)=>({item,index})).filter(({item})=>{
+   const code=Number(item.lesson_code);
+   return Number.isFinite(code)&&code>=phase.first&&code<=phase.last;
+  });
+  if(!indexes.length)continue;
+  const button=document.createElement('button');button.type='button';button.className='lesson-map-step';
+  const completed=indexes.filter(({item})=>done.has(item.lesson_code)).length;
+  const available=indexes.filter(({item})=>item.status==='ready'&&validVideoId(item.youtube_video_id)).length;
+  escapedText(button,'strong',lang==='en'?phase.en:phase.es);
+  escapedText(button,'span',lang==='en'?phase.hintEn:phase.hintEs);
+  escapedText(button,'small',completed+' / '+indexes.length+' '+courseCopy('lecciones completadas','lessons completed',lang)+(available===0?' · '+courseCopy('videos en preparación','videos in preparation',lang):''));
+  button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+courseCopy('Abrir primera lección','Open first lesson',lang));
+  button.addEventListener('click',()=>choose(indexes[0].index));
+  grid.append(button);
+ }
+ root.append(heading,grid);
+}
+
 function lessonsUI(){
  const group=$('lesson-buttons');group.replaceChildren();
  const picker=$('lesson-picker');
@@ -584,6 +620,7 @@ function lessonsUI(){
   }
  });
  setProgress();
+ renderCourseMap();
  // Continuar en la primera lección pendiente; si terminó todo, mostrar la última.
  const nextIndex=adminPreview?0:lessons.findIndex(item=>item.status==='ready'&&validVideoId(item.youtube_video_id)&&!done.has(item.lesson_code));
  choose(nextIndex<0?(lessons.some(item=>item.status==='ready'&&validVideoId(item.youtube_video_id))?lessons.length-1:0):nextIndex);

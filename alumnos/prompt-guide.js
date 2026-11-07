@@ -85,5 +85,26 @@ export function promptPack(item,language='es'){
  }
  const named=title.match(/^(.+?\b(?:pack|kit)\b[^·:]*?)(?:\s*[·:]\s*\d+|\s*[·:]\s*)/i);
  if(named){const name=named[1].trim();return pack('named:'+name.toLowerCase(),name,name,String(item.summary||'Trabajar la colección completa siguiendo sus instrucciones.'),String(item.summary||'Work through this collection using its instructions.'),'Al preparar el proyecto de esta colección.','When preparing this collection’s project.','Los resultados individuales del mismo pack.','The individual outputs of this pack.');}
+
+ // Learning route: organize existing private prompts by the actual class sequence.
+ // This groups references only; prompt text and access rules remain in Supabase.
+ const stage=(row)=>pack(...row);
+ if(['idea','cliente','estructura'].includes(code)||/^m0[01]_/.test(code))return stage(["course-01","01 · Define tu negocio","01 · Define your business","Aclarar la idea, el cliente y la acción principal de tu web.","Clarify your idea, customer and one main website action.","Antes de elegir colores o crear fotografías.","Before choosing colors or creating photographs.","Una oferta clara y un plan inicial de secciones.","A clear offer and an initial page outline."]);
+ if(code==='referencias'||/^m02_/.test(code))return stage(["course-02","02 · Moodboard y marca","02 · Moodboard & brand","Elegir referencias, colores y tipografías propios.","Choose original references, colors and typography.","Cuando ya sabes qué ofrece tu negocio.","Once you know what your business offers.","Una dirección visual coherente, sin copiar otras marcas.","A coherent visual direction without copying other brands."]);
+ if(code==='imagenes'||/^m03_/.test(code))return stage(["course-03","03 · Fotos de tu web","03 · Website photography","Planificar y crear fotografías individuales para cada sección.","Plan and create individual photos for each website section.","Después de aprobar la dirección visual.","After approving your visual direction.","Una foto hero y una pequeña galería lista para organizar en Drive.","A hero photo and small gallery ready to organize in Drive."]);
+ if(['hero','copy'].includes(code)||/^m04_/.test(code))return stage(["course-04","04 · Textos y portada","04 · Copy & hero","Escribir títulos, descripciones y un llamado a la acción claro.","Write headings, descriptions and one clear call to action.","Antes de construir el primer mockup.","Before building the first mockup.","Textos que explican qué vendes y qué hacer después.","Copy that explains what you offer and what to do next."]);
+ if(['construccion','formularios'].includes(code)||/^m05_/.test(code))return stage(["course-05","05 · Construye tu web","05 · Build your website","Pedir el primer diseño a la IA y colocar el contenido aprobado.","Ask AI for the first draft and add approved content.","Cuando tienes textos, estilo y fotos preparados.","Once your copy, style and photos are ready.","Un primer enlace de web funcional para revisar.","A first working website link to review."]);
+ if(['movil','auditoria'].includes(code)||/^m06_/.test(code)||/^mobile_[1-5]$/.test(code))return stage(["course-06","06 · Revisa en el móvil","06 · Review on mobile","Revisar lectura, fotografías, botones y navegación en el teléfono.","Review readability, photos, buttons and navigation on your phone.","Después de abrir la primera versión de tu web.","After opening the first version of your website.","Una lista de correcciones reales para el diseño móvil.","A concrete list of mobile improvements."]);
+ if(code==='pagos'||/^m0[78]_/.test(code))return stage(["course-07","07 · Publica y conecta","07 · Publish & connect","Preparar la publicación y revisar funciones opcionales sin inventar procesos.","Prepare launch and check optional features without inventing workflows.","Después de revisar y aprobar el diseño móvil.","After reviewing and approving the mobile design.","Una web publicada y enlaces comprobados; pagos solo si corresponden.","A published site and checked links; payments only if applicable."]);
+
  return pack('course','Tu primera web con IA · Pack paso a paso','Your First Website with AI · Step-by-step Pack','Pasar de una idea de negocio a una web: investigar, definir el estilo, crear fotos, escribir, construir y revisar.','Go from a business idea to a website: research, visual direction, photos, copy, building and review.','Desde el inicio de la clase; usa cada prompt cuando llegues a su paso.','From the start of class; use each prompt when you reach its step.','Un proyecto de web preparado, construido y revisado en el teléfono.','A website project planned, built and checked on a phone.');
+}
+
+/* Navigation only: approved packs never become public because of categorization. */
+export function promptShelf(item){
+ const code=String(item?.prompt_code||'');
+ if(/^demo(?:-photo)?_/.test(code))return 'demos';
+ const id=promptPack(item,'es').id;
+ if(id.startsWith('course-')||id==='course')return 'route';
+ return 'creative';
 }

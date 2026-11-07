@@ -515,3 +515,19 @@ body.aula-member .aula-entry{display:none!important}
 .aula-install-platform li::marker{font-weight:800;color:#667988}
 .aula-install-note{font:400 12px/1.6 'DM Sans',Arial,sans-serif;color:#596b75;margin:14px 0 0}
 @media(max-width:680px){.aula-install-guide{padding:17px 15px;margin-bottom:22px}.aula-install-platforms{grid-template-columns:minmax(0,1fr)}.aula-install-platform summary{min-height:50px}.aula-install-platform li{font-size:13px}}
+
+/* 2026-11-07 | Four-stage learning map, compact and thumb-friendly. */
+.lesson-course-map{margin:0 0 20px;padding:18px;border:1px solid #d8e2e8;border-radius:17px;background:#faf8f3}
+.lesson-course-map[hidden]{display:none!important}
+.lesson-map-intro{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px 18px;margin-bottom:13px}
+.lesson-map-intro strong{font:750 16px/1.35 'DM Sans',Arial,sans-serif;color:#203c54}
+.lesson-map-intro span{font:500 13px/1.5 'DM Sans',Arial,sans-serif;color:#526a7a}
+.lesson-map-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.lesson-map-step{width:100%;min-width:0;min-height:116px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:6px;border:1px solid #d6e0e6;border-radius:13px;background:white;color:#1c364b;padding:13px 12px;cursor:pointer;touch-action:manipulation}
+.lesson-map-step strong{font:800 14px/1.35 'DM Sans',Arial,sans-serif}
+.lesson-map-step span{font:500 12px/1.45 'DM Sans',Arial,sans-serif;color:#4c6374}
+.lesson-map-step small{font:700 11px/1.45 'DM Sans',Arial,sans-serif;color:#657f90;margin-top:auto}
+.lesson-map-step:focus-visible{outline:3px solid #86afc9;outline-offset:2px}
+@media(hover:hover){.lesson-map-step:hover{border-color:#7b9eb8;background:#f3f8fa}}
+@media(max-width:780px){.lesson-map-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lesson-course-map{padding:14px}.lesson-map-step{min-height:103px}}
+@media(max-width:360px){.lesson-map-step{padding:11px 9px}.lesson-map-step strong{font-size:13px}.lesson-map-step span{font-size:11.5px}}
