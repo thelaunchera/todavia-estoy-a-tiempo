@@ -243,3 +243,163 @@ button.student-catalog-program{cursor:pointer}
 .aula-home-dashboard .dashboard-setup-details>summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
 .aula-home-dashboard .dashboard-tools-heading p{line-height:1.6}
 @media(max-width:760px){.aula-home-dashboard .dashboard-hero{padding:24px 21px}.aula-home-dashboard .dashboard-hero-primary{width:100%}.aula-home-dashboard .dashboard-learning-steps>button{padding:13px}}
+
+
+/* Approved editorial assets · Home depth refinement · 2026-11-07.
+   Four existing, original stickers across a long page; no invented art, gradients or circle textures. */
+.aula-home-dashboard{
+ --tle-ink:#213C54;--tle-rule:#CBD8E0;--tle-cream:#FAF8F3;
+}
+.aula-home-dashboard .dashboard-hero{
+ position:relative;background:#223D52;color:#fff;
+ border:1px solid #395A70;border-radius:24px;
+ box-shadow:0 5px 0 #B3C4D0,0 20px 35px rgba(27,53,71,.13);
+ overflow:hidden;
+}
+.aula-home-dashboard .dashboard-hero::before,
+.aula-home-dashboard .dashboard-hero::after{display:none!important}
+.aula-home-dashboard .dashboard-hero-copy{position:relative;z-index:2}
+.aula-home-dashboard .dashboard-hero-approved-sticker{
+ position:absolute;z-index:1;right:22px;top:15px;
+ width:clamp(66px,8.8vw,100px);height:auto;
+ object-fit:contain;transform:rotate(7deg);pointer-events:none;
+ filter:drop-shadow(0 4px 3px rgba(10,24,36,.16));
+}
+.aula-home-dashboard .dashboard-hero-primary{
+ box-shadow:0 4px 0 rgba(121,93,23,.28);
+ border-radius:12px;
+}
+.aula-home-dashboard .dashboard-progress-card{
+ background:#FFFFFF14;border:1px solid #B4CBD28F;
+ box-shadow:inset 0 1px 0 #ffffff24;
+}
+.aula-home-dashboard .dashboard-next-card{
+ border:1px solid #DACCB7;background:#F5EBDC;
+ box-shadow:0 5px 0 #DAD2C4,0 12px 26px rgba(61,56,47,.08);
+ border-radius:21px;
+}
+.aula-home-dashboard .dashboard-learning-route{
+ background:#FAF8F3;border:1px solid #C9D8E1;
+ box-shadow:0 5px 0 #D3E0E6,0 17px 32px rgba(23,51,70,.085);
+ border-radius:22px;
+}
+.aula-home-dashboard .dashboard-learning-route .dashboard-announcements-header{
+ display:flex;align-items:center;gap:10px;min-height:87px;
+ padding-bottom:14px;border-bottom:1px solid #D2DFE4;
+}
+.aula-home-dashboard .dashboard-route-sticker{
+ width:clamp(62px,8vw,84px);height:auto;flex:0 0 auto;
+ object-fit:contain;filter:drop-shadow(0 3px 3px rgba(31,58,71,.13));
+ transform:rotate(-5deg);
+}
+.aula-home-dashboard .dashboard-learning-steps{gap:13px}
+.aula-home-dashboard .dashboard-learning-steps>button{
+ grid-template-columns:44px minmax(0,1fr);
+ background:#FFFFFF;
+ border:1px solid #C9D8E1;border-radius:15px;
+ min-height:83px;padding:15px;gap:5px 13px;
+ box-shadow:0 3px 0 #E2E6E7,0 6px 15px rgba(30,53,70,.06);
+ transition:transform .18s ease,box-shadow .18s ease;
+}
+.aula-home-dashboard .dashboard-learning-steps>button:nth-child(2){background:#F9F2E6;border-color:#E3D4BC}
+.aula-home-dashboard .dashboard-learning-steps>button:nth-child(3){background:#EDF1F8;border-color:#CFD9E7}
+.aula-home-dashboard .dashboard-learning-steps>button>span{
+ width:44px;height:44px;border-radius:12px;
+ color:#233F57;background:#DDEAF3;font-size:14px;font-weight:800;
+}
+.aula-home-dashboard .dashboard-learning-steps>button:nth-child(2)>span{background:#EDDCBC;color:#6E522C}
+.aula-home-dashboard .dashboard-learning-steps>button:nth-child(3)>span{background:#D5DEEE;color:#45556F}
+.aula-home-dashboard .dashboard-learning-steps strong{
+ font-size:clamp(14px,3.4vw,16px);font-weight:800;line-height:1.3;color:#213E55;
+}
+.aula-home-dashboard .dashboard-learning-steps small{
+ font-size:clamp(12px,3.2vw,13px);line-height:1.5;color:#4C6476;
+}
+.aula-home-dashboard .dashboard-tools{margin-top:29px}
+.aula-home-dashboard .dashboard-tools-heading{
+ position:relative;align-items:center;margin-bottom:18px;
+ gap:8px 15px;min-height:94px;
+}
+.aula-home-dashboard .dashboard-tools-heading>div{flex:1;min-width:0}
+.aula-home-dashboard .dashboard-tools-heading>p{flex-basis:100%;margin-top:-1px;font-size:14px}
+.aula-home-dashboard .dashboard-resources-sticker{
+ width:clamp(65px,9vw,90px);height:auto;object-fit:contain;
+ filter:drop-shadow(0 4px 3px #1f38402c);transform:rotate(4deg);
+ flex:0 0 auto;
+}
+.aula-home-dashboard .dashboard-tools-grid{gap:15px}
+.aula-home-dashboard .dashboard-tools-grid>.dashboard-tool{
+ position:relative;min-width:0;overflow:hidden;
+ border-radius:19px;border:1px solid #BFD4E1;
+ background:#EAF3F8;color:#223F55;
+ box-shadow:0 4px 0 #CBDCE5,0 11px 23px #1A42540F;
+ min-height:156px;gap:7px;padding:20px;
+}
+.aula-home-dashboard .dashboard-tools-grid>.dashboard-tool:nth-child(2){background:#F8EEDD;border-color:#E4D2B2;box-shadow:0 4px 0 #E4D9C7,0 11px 23px #1A42540F}
+.aula-home-dashboard .dashboard-tools-grid>.dashboard-tool:nth-child(3){background:#EEEAF5;border-color:#D5CBDF;box-shadow:0 4px 0 #DDD5E6,0 11px 23px #1A42540F}
+.aula-home-dashboard .dashboard-tools-grid>.dashboard-tool:nth-child(4){background:#F7EBEA;border-color:#E5CAC8;box-shadow:0 4px 0 #E5D2D0,0 11px 23px #1A42540F}
+.aula-home-dashboard .dashboard-tool strong{font-size:clamp(13px,3.4vw,15px);line-height:1.34;font-weight:800;color:#213D55}
+.aula-home-dashboard .dashboard-tool span:last-child{color:#435E70;font-size:12.5px;line-height:1.5}
+.aula-home-dashboard .dashboard-tool-icon{background:#FFFFFFA6;border:1px solid #FFFFFFB0;width:44px;height:44px;border-radius:13px;color:#284A62}
+.aula-home-dashboard .dashboard-tool-icon svg{width:22px;height:22px}
+.aula-home-dashboard .dashboard-setup{
+ position:relative;grid-template-columns:1fr;gap:17px;
+ overflow:hidden;background:#F7F3EB;
+ border:1px solid #D2D9DF;border-radius:22px;
+ padding:clamp(21px,3vw,30px);
+ box-shadow:0 5px 0 #DBE1E4,0 16px 30px rgba(22,50,70,.065);
+}
+.aula-home-dashboard .dashboard-setup-heading{position:relative;min-height:88px;padding-right:76px}
+.aula-home-dashboard .dashboard-setup-heading h2{font-size:clamp(26px,5.9vw,36px);line-height:1.14}
+.aula-home-dashboard .dashboard-setup-sticker{
+ position:absolute;top:0;right:0;width:70px;height:70px;object-fit:contain;
+ filter:drop-shadow(0 3px 3px #24354427);
+ transform:rotate(-4deg);pointer-events:none;
+}
+.aula-home-dashboard .dashboard-setup-details{
+ background:#FFFFFF;border:1px solid #C5D6E0;border-radius:14px;
+ box-shadow:0 3px 0 #DFE7EA;
+}
+.aula-home-dashboard .dashboard-setup-details summary{
+ color:#224661;font-size:14px;font-weight:800;min-height:65px;
+}
+.aula-home-dashboard .dashboard-setup-details[open] summary{background:#ECF3F7;border-bottom:1px solid #D1DEE5}
+.aula-home-dashboard .dashboard-hero :is(button,a):focus-visible,
+.aula-home-dashboard .dashboard-learning-route button:focus-visible,
+.aula-home-dashboard .dashboard-tools button:focus-visible,
+.aula-home-dashboard .dashboard-setup summary:focus-visible{
+ outline:3px solid #D6A638;outline-offset:3px;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+ .aula-home-dashboard .dashboard-learning-steps>button:hover,
+ .aula-home-dashboard .dashboard-tools-grid>.dashboard-tool:hover{
+  transform:translateY(-2px);box-shadow:0 7px 0 #C6D9E2,0 15px 25px #193F5219;
+ }
+}
+@media(max-width:750px){
+ .aula-home-dashboard .dashboard-hero{padding:24px 21px}
+ .aula-home-dashboard .dashboard-hero-approved-sticker{right:11px;top:12px;width:64px}
+ .aula-home-dashboard .dashboard-learning-route{padding:22px 18px}
+ .aula-home-dashboard .dashboard-learning-steps>button{padding:14px 13px}
+ .aula-home-dashboard .dashboard-tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+ .aula-home-dashboard .dashboard-tools-grid>.dashboard-tool{
+  min-height:158px;display:flex;flex-direction:column;align-items:flex-start;
+  padding:16px 13px;gap:7px;
+ }
+ .aula-home-dashboard .dashboard-tool-icon{width:39px;height:39px}
+ .aula-home-dashboard .dashboard-tool strong{font-size:13px}
+ .aula-home-dashboard .dashboard-tool span:last-child{font-size:11.5px}
+ .aula-home-dashboard .dashboard-tools-heading{align-items:center}
+ .aula-home-dashboard .dashboard-resources-sticker{width:70px}
+ .aula-home-dashboard .dashboard-setup-heading{padding-right:61px}
+ .aula-home-dashboard .dashboard-setup-sticker{width:58px;height:58px}
+}
+@media(max-width:360px){
+ .aula-home-dashboard .dashboard-tools-grid{gap:9px}
+ .aula-home-dashboard .dashboard-tools-grid>.dashboard-tool{padding:13px 10px;min-height:161px}
+ .aula-home-dashboard .dashboard-tools-grid>.dashboard-tool strong{font-size:12.5px}
+ .aula-home-dashboard .dashboard-tool span:last-child{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .aula-home-dashboard .dashboard-tool,.aula-home-dashboard .dashboard-learning-steps>button{transition:none!important}
+}

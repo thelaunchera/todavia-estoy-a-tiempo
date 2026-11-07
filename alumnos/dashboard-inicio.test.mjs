@@ -89,3 +89,20 @@ test('La pantalla de inicio y el aviso admin son distintos y la comprobación de
  assert.match(app,/entitlement\?\.status!=='active'/);
  assert.match(app,/item\.status==='ready'&&validVideoId/);
 });
+
+test('home uses approved stickers instead of random emojis while preserving dashboard actions',async()=>{
+ const {readFileSync,existsSync}=await import('node:fs');
+ const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('./dashboard-inicio.css',import.meta.url),'utf8');
+ const names=['17_idea_lila.png','16_objetivo_rosa.png','18_creadora_laptop_lila.png','15_checklist_rosa.png'];
+ for(const name of names){
+  assert.ok(existsSync(new URL('../content-lab/public/resources/premium-stickers-2026-11/'+name,import.meta.url)));
+  assert.ok(html.includes('../content-lab/resources/premium-stickers-2026-11/'+name));
+ }
+ assert.match(html,/data-aula-view="lecciones"/);
+ assert.match(html,/data-aula-view="prompts"/);
+ assert.match(html,/data-aula-view="materiales"/);
+ assert.match(html,/data-aula-view="comunidad"/);
+ assert.match(css,/Home depth refinement/);
+ assert.match(html,/dashboard-inicio\.css\?v=20261107-deep-home-v2/);
+});
