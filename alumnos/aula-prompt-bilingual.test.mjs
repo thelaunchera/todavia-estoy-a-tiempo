@@ -230,3 +230,13 @@ test('separate Casa Brownie practice folder is private and linked in tablet mode
  assert.match(prod,/class-tablet-folder-primary/);
  assert.match(prod,/class-tablet-drive-more/);
 });
+
+test('iPad preflight checklist persists in lesson notes and starts with practical chapter',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const prod=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
+ assert.match(prod,/matchMedia\?\.\('\(pointer: coarse\) and \(min-width: 650px\)'\)\.matches\)\?'01':'00'/);
+ assert.match(prod,/lesson\.prep\.map\(\(item,index\)=>/);
+ assert.match(prod,/checked\.includes\(index\)/);
+ assert.match(prod,/recordingStart\.savedPoint/);
+ assert.match(prod,/performance_notes:\[\.\.\.checked\]/);
+});

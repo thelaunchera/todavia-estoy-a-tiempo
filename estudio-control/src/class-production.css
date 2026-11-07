@@ -300,3 +300,11 @@
 .class-tablet-drive-more .class-tablet-drive-links{padding:12px}
 .class-tablet-drive-more .class-tablet-drive-links a:first-child{grid-column:auto;background:#fffdfa;border-color:#C9D8E1;font-size:12px}
 .class-tablet-drive-section :is(summary,a):focus-visible{outline:3px solid #D7A73A;outline-offset:3px}
+
+/* Thumb-sized preflight checkboxes; they are saved with the same private lesson record. */
+.class-tablet-helper-body h5{font:800 13px/1.35 'DM Sans',Arial,sans-serif;color:#294b63;margin:14px 0 10px}
+.class-tablet-prep-list{display:grid;gap:8px;margin:0 0 16px}
+.class-tablet-prep-check{min-height:47px;display:flex;align-items:flex-start;gap:11px;padding:11px;border:1px solid #d5e3ea;background:#f8fbfd;border-radius:10px;color:#304b5f;font:500 13px/1.5 'DM Sans',Arial,sans-serif}
+.class-tablet-prep-check input{flex:0 0 20px;width:20px;height:20px;margin:1px 0 0;accent-color:#315d7d}
+.class-tablet-prep-check:has(input:checked){background:#eef5ed;border-color:#b7d0b7}
+.class-tablet-prep-check:focus-within{outline:3px solid #e5b947;outline-offset:2px}

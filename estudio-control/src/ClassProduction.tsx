@@ -34,7 +34,7 @@ function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'
 const tabletFilmingOrder=[...classLessons.filter(x=>x.id!=='00'),...classLessons.filter(x=>x.id==='00')];
 
 export default function ClassProduction({entries,tasks,focusPending,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
- const [lessonId,setLessonId]=useState('00');
+ const [lessonId,setLessonId]=useState(()=>(typeof window!=='undefined'&&window.matchMedia?.('(pointer: coarse) and (min-width: 650px)').matches)?'01':'00');
  const focusedLessonOnce = useRef<string|null>(null);
  const filePicker=useRef<HTMLInputElement>(null);
  const targetChapter=useRef<string>('00');
@@ -302,6 +302,14 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <div className="class-tablet-helper-body">
      <p><b>1.</b> Abre el taller y prepara las pestañas de este capítulo.</p>
      <ul>{recordingStart.tabs.map(item=><li key={item}>{item}</li>)}</ul>
+     <h5>Antes de pulsar Grabar: {lesson.prep.length} comprobaciones</h5>
+     <div className="class-tablet-prep-list">
+      {lesson.prep.map((item,index)=><label key={index} className="class-tablet-prep-check">
+       <input type="checkbox" checked={checked.includes(index)} onChange={e=>setChecked(prev=>e.target.checked?[...prev,index]:prev.filter(n=>n!==index))}/>
+       <span>{item}</span>
+      </label>)}
+     </div>
+     <p><b>Guarda el punto de partida:</b> {recordingStart.savedPoint}</p>
      <p><b>2.</b> Desactiva las notificaciones. Abre el Centro de control del iPad y toca Grabación de pantalla. El Studio no puede iniciar la grabación por ti.</p>
      <p><b>3.</b> Graba una escena por vez. Detén la grabación desde iPadOS y guarda cada toma con nombre <code>CLASE01_{lesson.id}_ESCENA_01.mov</code> en la carpeta Drive de este capítulo. Añade la voz después si lo prefieres.</p>
      <p><b>4.</b> El botón «Subir video desde el iPad» guarda una copia en el almacenamiento privado del Studio, no en Drive. Los videos de más de 50 MB deben permanecer en Drive y registrarse mediante enlace privado.</p>
