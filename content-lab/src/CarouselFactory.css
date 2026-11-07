@@ -813,3 +813,31 @@
     margin-top:3px!important;
   }
 }
+
+
+/* App-first editors: labels and tools stay visible; lessons never crowd the canvas. */
+.factory-bc-workspace .factory-header-identity>p,
+.factory-bc-workspace .factory-step-intro>p,
+.factory-bc-workspace .factory-step-intro>.factory-step-eyebrow,
+.factory-bc-workspace .factory-style-title p,
+.factory-bc-workspace .factory-style-title .factory-step-eyebrow,
+.factory-bc-workspace .factory-step-footer>span,
+.factory-bc-workspace .factory-seamless-hint,
+.factory-bc-workspace .factory-blank-hint,
+.factory-bc-workspace .factory-inspiration-hint,
+.factory-bc-workspace .factory-mode-hint {display:none!important}
+.factory-bc-workspace .factory-step-intro{background:transparent!important;border:0!important;
+ border-radius:0!important;padding:3px 0 5px!important;margin:3px 0 5px!important}
+.factory-bc-workspace .factory-step-intro h2{font:750 clamp(16px,2.3vw,20px)/1.25 Prompt,Futura,Arial,sans-serif!important;
+ letter-spacing:-.035em;margin:0!important;color:#191919!important}
+.factory-bc-workspace .factory-style-title h2{font:750 clamp(16px,2.3vw,20px)/1.25 Prompt,Futura,Arial,sans-serif!important;
+ margin:0!important;letter-spacing:-.035em}
+.factory-bc-workspace .factory-style-title{gap:6px!important;align-items:center!important}
+.factory-bc-workspace .factory-step-footer{margin-top:8px!important}
+.factory-bc-workspace .factory-step-footer>.btn{min-height:41px!important}
+@media(max-width:920px){
+ .factory-bc-workspace .factory-step-intro{padding:1px 2px 4px!important;margin:1px 0 3px!important}
+ .factory-bc-workspace .factory-step-intro h2{font-size:15px!important}
+ .factory-bc-workspace .factory-style-title h2{font-size:15px!important}
+ .factory-bc-workspace .factory-step-footer{margin-top:6px!important}
+}
