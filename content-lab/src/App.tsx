@@ -16,7 +16,7 @@ import OneProductEightPrompts from './OneProductEightPrompts';
 import IdeaBank, {type Idea} from './IdeaBank';
 import './PromptStudio.css';
 import type {PromptControls} from './PromptEngine';
-import FreePostStudio from './FreePostStudio';
+import FreePostStudio,{exportFreePost} from './FreePostStudio';
 import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
@@ -402,6 +402,7 @@ function App() {
   const [current, setCurrent] = useState('');
   const [tab, setTab] = useState<Tab>('home');
   const [calendarEditId,setCalendarEditId]=useState('');
+  const [calendarDownloadId,setCalendarDownloadId]=useState('');
   const [calendarFocusDate,setCalendarFocusDate]=useState('');
   useEffect(()=>{if(waiting)return;return installLabLocale(loginLanguage)},[loginLanguage,account,waiting,tab]);
   const [menu, setMenu] = useState(false);
@@ -641,8 +642,9 @@ function App() {
     setAlternatives([]);
     navigate('create');
   };
-  const edit = (post: Post,fromCalendar=false) => {
+  const edit = (post: Post,fromCalendar=false,download=false) => {
     setCalendarEditId(fromCalendar?post.id||'':'');
+    setCalendarDownloadId(download&&post.format==='Carousel'?(post.id||''):'');
     editorSessionRef.current++;
     setCurrent(post.brandId);
     setEditor(inspectRecovery({ ...post }));
@@ -666,6 +668,41 @@ function App() {
     const saved=posts.find(p=>p.id===id&&p.brandId===brand.id);
     if(!saved){toast('No se encontró este diseño en tu cuenta.');return;}
     edit(saved,true);
+  };
+  const downloadCalendarProject=async(item:PlannedItem):Promise<void>=>{
+    if(!brand||item.brandId!==brand.id)throw Error('Este proyecto pertenece a otra marca.');
+    if(item.kind==='grid'){
+      if(!item.assetId)throw Error('Esta publicación del grid todavía no tiene un PNG. Abre el proyecto para añadir la imagen.');
+      const src=images[item.assetId]||await imageLoad(item.assetId);
+      if(!src)throw Error('No se pudo cargar la imagen original del grid.');
+      const img=new Image();img.src=src;await img.decode();
+      const c=document.createElement('canvas');
+      c.width=img.naturalWidth;c.height=img.naturalHeight;
+      const ctx=c.getContext('2d');if(!ctx)throw Error('No se pudo preparar la descarga.');
+      ctx.drawImage(img,0,0,c.width,c.height);
+      try{await downloadLosslessPng(c,(item.title||'grid-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,60))}
+      finally{c.width=1;c.height=1}
+      return;
+    }
+    const id=item.id.startsWith('post:')?item.id.slice(5):'';
+    const saved=posts.find(p=>p.id===id&&p.brandId===brand.id);
+    if(!saved)throw Error('No se encontró la publicación guardada.');
+    if(saved.format==='Carousel'){
+      edit(saved,true,true);
+      toast(loginLanguage==='es'?'Abre «Preparar mis PNG» para descargar los slides sin ZIP.':'Use “Prepare my PNGs” to download slides individually.');
+      return;
+    }
+    const decor=readCoverDecor(saved.designData);
+    const ids=[saved.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(l=>l.assetId)].filter(Boolean);
+    const sources:Record<string,string>={...images};
+    await Promise.all([...new Set(ids)].map(async imageId=>{
+      if(!sources[imageId]){
+        const loaded=await imageLoad(imageId);
+        if(loaded)sources[imageId]=loaded;
+      }
+    }));
+    await exportFreePost(saved,brand,sources);
+    toast(loginLanguage==='es'?'Proyecto descargado en PNG.':'Project downloaded as PNG.');
   };
   const save = async (candidate?:unknown, automatic=false) => {
     if(saveInFlightRef.current)return false;
@@ -802,14 +839,24 @@ function App() {
     window.addEventListener('pagehide',flush);
     return()=>window.removeEventListener('pagehide',flush);
   },[account?.email]);
-  const remove = async (p: Post) => {
-    if (!p.id || !window.confirm('¿Eliminar esta publicación?')) return;
+  const remove = async (p: Post):Promise<boolean> => {
+    if (!p.id || !window.confirm(loginLanguage==='es'
+      ?'¿Borrar esta publicación de forma permanente? No se puede deshacer.'
+      :'Permanently delete this post? This cannot be undone.')) return false;
     try {
       await api.delete('/api/posts/' + p.id);
       setPosts(prev => prev.filter(x => x.id !== p.id));
-      toast('Publicación eliminada.');
+      if(editorLatestRef.current.id===p.id){
+        editorSessionRef.current++;
+        setEditor(newPost(p.brandId));
+        setCalendarEditId('');
+        setCalendarDownloadId('');
+      }
+      toast(loginLanguage==='es'?'Publicación eliminada.':'Post deleted.');
+      return true;
     } catch (e) {
       err(e);
+      return false;
     }
   };
   const generate = async () => {
@@ -1525,6 +1572,13 @@ function App() {
           {brand && tab === 'calendar' && (
             <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
               focusDate={calendarFocusDate} onEditItem={openCalendarItem}
+              onDownloadItem={downloadCalendarProject}
+              onDeleteItem={async item=>{
+                const id=item.id.startsWith('post:')?item.id.slice(5):'';
+                const saved=posts.find(p=>p.id===id&&p.brandId===brand.id);
+                if(!saved)throw Error('No se encontró esta publicación guardada.');
+                return remove(saved);
+              }}
               loadImage={id=>{void imageLoad(id)}}
               onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
               onNewPost={()=>start()}
@@ -1534,6 +1588,7 @@ function App() {
           {brand && tab === 'factory' && (
             <CarouselFactory
               key={'carousel-session-'+editorSessionRef.current}
+              initialStep={calendarDownloadId===editor.id?'download':undefined}
               locale={loginLanguage}
               onStartNewCarousel={saveAndStartAnotherCarousel}
               onUploadPhoto={async file=>upload(file,'original',false)}
