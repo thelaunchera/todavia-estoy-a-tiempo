@@ -200,7 +200,8 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
     setGrid(saved);setSelected(index);setSourceId(saved.sourceId);
     setReferenceId(saved.referenceId);setKind(saved.kind);
     setDesignMode(saved.kind==='preserve'?'editorial':'photo');
-    setBrief(saved.brief);setExpandedEditor(false);
+    // An editorial tile needs the composed-poster exporter, not the compact raw-photo download.
+    setBrief(saved.brief);setExpandedEditor(Boolean(saved.posts[index]?.design));
     setDownloads([]);setReviewed(false);setSaveState('saved');
   },[initialSelection?.version,grids,brand.id]);
   useEffect(()=>{
