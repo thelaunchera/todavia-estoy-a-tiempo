@@ -150,3 +150,15 @@ test('editorial lesson cards have four themed illustrations and real progress wi
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(html,/curso\.css\?v=20261107-editorial-cards-v3/);
 });
+
+// Source-level authorization boundary: the student-facing demo selector is only read-only.
+test('owner student preview does not expose demo publish switches',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const inspire=readFileSync(new URL('./inspiracion.js',import.meta.url),'utf8');
+ const course=readFileSync(new URL('./curso.js',import.meta.url),'utf8');
+ assert.match(inspire,/if\(canManageDemos\)\{/);
+ assert.match(inspire,/visibleDemos=\(\)=>canManageDemos\?demos:demos\.filter/);
+ assert.doesNotMatch(inspire,/if\(adminPreview\)\{\s*const editor=/);
+ assert.match(course,/const MANAGE_DEMOS_REQUESTED=ADMIN_VIEW_REQUESTED && queryParams\.get\('gestionar_demos'\)==='1'/);
+ assert.match(course,/canManageDemos:adminPreview&&MANAGE_DEMOS_REQUESTED/);
+});

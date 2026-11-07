@@ -4,7 +4,7 @@ import {mountMateriales} from './materiales-interactivos.js?v=20261107-visual-le
 import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-command-center-v3';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-learning-clarity-v1';
-import {mountInspiracion} from './inspiracion.js?v=20261103-demo-inventory-v1';
+import {mountInspiracion} from './inspiracion.js?v=20261107-private-manager-v2';
 import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-ai-lessons-v2';
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
@@ -24,6 +24,9 @@ const $=id=>document.getElementById(id);
 const message=$('room-message'),login=$('login-panel'),noAccess=$('no-access'),course=$('class-content');
 const queryParams=new URL(location.href).searchParams;
 const ADMIN_VIEW_REQUESTED=queryParams.get('vista')==='admin';
+// A verified owner must explicitly open this private management mode; ownership alone
+// never makes student preview reveal demo publication switches.
+const MANAGE_DEMOS_REQUESTED=ADMIN_VIEW_REQUESTED && queryParams.get('gestionar_demos')==='1';
 const STUDIO_EMBEDDED_OWNER=ADMIN_VIEW_REQUESTED && queryParams.get('origen')==='studio'
   && window.parent!==window;
 let studioSessionReady=false;
@@ -162,7 +165,7 @@ function ensureInspiracion(force=false){
  loading.className='inspiration-loading';loading.setAttribute('role','status');
  loading.textContent=getClassroomLanguage()==='en'?'Loading finished demos…':'Cargando demos terminados…';
  root.replaceChildren(loading);
- const call=mountInspiracion(root,{db,courseId,adminPreview,getLanguage:getClassroomLanguage})
+ const call=mountInspiracion(root,{db,courseId,canManageDemos:adminPreview&&MANAGE_DEMOS_REQUESTED,getLanguage:getClassroomLanguage})
   .then(controller=>{
    if(!root.querySelector('.inspiration-heading')){
     inspirationController=null;

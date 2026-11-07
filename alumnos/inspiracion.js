@@ -60,7 +60,7 @@ function correctedDemoText(text,spec){
  }
  return value;
 }
-export async function mountInspiracion(root,{db,courseId,adminPreview=false,getLanguage=()=> 'es'}={}){
+export async function mountInspiracion(root,{db,courseId,canManageDemos=false,getLanguage=()=> 'es'}={}){
  if(!root)return null;
  root.innerHTML='<p class="inspiration-loading" role="status">'+(getLanguage()==='en'?'Loading projects…':'Cargando proyectos…')+'</p>';
  const [galleryResponse,workflowResponse,extrasResponse]=await Promise.all([
@@ -96,7 +96,7 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
   if(Array.isArray(d.prompts)&&d.prompts.length)return d.prompts;
   return Array.isArray(spec?.prompts)?spec.prompts:[];
  }
- const visibleDemos=()=>adminPreview?demos:demos.filter(d=>d.published!==false);
+ const visibleDemos=()=>canManageDemos?demos:demos.filter(d=>d.published!==false);
  const demoPrompts=d=>{const guideCase=guidePayload?.cases?.[d.id];return Array.isArray(d.prompts)&&d.prompts.length?d.prompts:(Array.isArray(guideCase?.extra_prompts)?guideCase.extra_prompts:[]);};
  let currentId=null,category='all',search='';
  const categoryNames={
@@ -121,7 +121,8 @@ export async function mountInspiracion(root,{db,courseId,adminPreview=false,getL
    '<label>'+enLabel('Buscar un negocio','Search by business',curLang())+
    '<input id="inspiration-search" type="search" value="'+esc(search)+'" placeholder="'+esc(enLabel('Brownie, boutique, yoga…','Brownie, boutique, yoga…',curLang()))+'"></label>';
   root.append(filter);
-  if(adminPreview){
+  // The student's gallery, including the owner's student preview, never renders publication controls.
+  if(canManageDemos){
    const editor=document.createElement('section');editor.className='inspiration-owner-editor';
    const heading=document.createElement('h3');heading.textContent=enLabel('Elegir demos visibles para alumnos','Choose demos students can see',curLang());
    const hint=document.createElement('p');hint.textContent=enLabel('Activa los proyectos que quieras enseñar. Los demás permanecen disponibles solo en tu vista del Studio.','Choose which projects students can see. Other projects stay visible only in your Studio preview.',curLang());

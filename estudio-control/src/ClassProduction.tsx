@@ -213,7 +213,8 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
     <div className="class-admin-room-actions">
       <button type="button" onClick={()=>setShowAdminRoom(!showAdminRoom)} aria-expanded={showAdminRoom} aria-controls="studio-classroom-preview"><MonitorPlay size={17}/>{showAdminRoom?'Cerrar vista del aula':'Ver el Centro de alumnos'}</button>
-      <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir pantalla completa <ExternalLink size={15}/></a>
+      <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Abrir vista del alumno <ExternalLink size={15}/></a>
+      <a href="../alumnos/?vista=admin&gestionar_demos=1" target="_blank" rel="noopener noreferrer"><ShieldCheck size={15}/> Gestionar demos visibles · solo propietaria</a>
     </div>
   </div>
   {showAdminRoom && <div id="studio-classroom-preview" className="class-admin-room-preview">
