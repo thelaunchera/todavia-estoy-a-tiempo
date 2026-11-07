@@ -585,7 +585,7 @@ body.aula-member .aula-entry{display:none!important}
 .lesson-map-step[data-phase="build"]{--map-paper:#ece8f3;--map-ink:#514568;--map-stamp:#dfd5eb;--map-rule:#cdc0dd}
 .lesson-map-step[data-phase="review"]{--map-paper:#f3e8e6;--map-ink:#77514e;--map-stamp:#ebd6d4;--map-rule:#debfbc}
 .lesson-map-top{display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%}
-.lesson-map-index{font:700 13px/1.25 'DM Sans',Arial,sans-serif;letter-spacing:.09em;color:var(--map-ink)}
+.lesson-map-step .lesson-map-index{font:700 13px/1.25 'DM Sans',Arial,sans-serif;letter-spacing:.09em;color:var(--map-ink)}
 .lesson-map-emblem{
  width:45px;height:45px;flex:0 0 45px;display:grid;place-items:center;
  color:var(--map-ink);background:var(--map-stamp);
@@ -594,13 +594,13 @@ body.aula-member .aula-entry{display:none!important}
 }
 .lesson-map-emblem svg{width:25px;height:25px;transform:rotate(-6deg)}
 .lesson-map-copy{display:grid;gap:7px;min-width:0;position:relative;z-index:1}
-.lesson-map-title{font:800 clamp(19px,4.7vw,23px)/1.17 'DM Sans',Arial,sans-serif;letter-spacing:-.025em;color:var(--map-ink)}
-.lesson-map-description{font:500 13px/1.45 'DM Sans',Arial,sans-serif;color:#3e4e59;max-width:23ch;overflow-wrap:break-word}
+.lesson-map-step .lesson-map-title{font:800 clamp(19px,4.7vw,23px)/1.17 'DM Sans',Arial,sans-serif;letter-spacing:-.025em;color:var(--map-ink)}
+.lesson-map-step .lesson-map-description{font:500 13px/1.45 'DM Sans',Arial,sans-serif;color:#3e4e59;max-width:23ch;overflow-wrap:break-word}
 .lesson-map-foot{display:grid;gap:8px;width:100%;margin-top:auto;position:relative;z-index:1}
-.lesson-map-progress-label{font:800 11px/1.35 'DM Sans',Arial,sans-serif;letter-spacing:.01em;color:var(--map-ink)}
+.lesson-map-step .lesson-map-progress-label{font:800 11px/1.35 'DM Sans',Arial,sans-serif;letter-spacing:.01em;color:var(--map-ink)}
 .lesson-map-progress{height:5px;width:100%;background:rgba(24,53,78,.14);border-radius:100px;overflow:hidden}
 .lesson-map-progress>span{display:block;height:100%;background:var(--map-ink);border-radius:100px}
-.lesson-map-status{
+.lesson-map-step .lesson-map-status{
  width:fit-content;max-width:100%;font:700 10px/1.35 'DM Sans',Arial,sans-serif;
  padding:5px 8px;border:1px solid rgba(27,49,69,.14);border-radius:7px;
  color:var(--map-ink);background:rgba(255,255,255,.55);
@@ -616,16 +616,16 @@ body.aula-member .aula-entry{display:none!important}
  .lesson-map-step{padding:13px 12px;min-height:203px;gap:9px}
  .lesson-map-emblem{width:39px;height:39px;flex-basis:39px;border-radius:12px}
  .lesson-map-emblem svg{width:22px;height:22px}
- .lesson-map-title{font-size:clamp(17px,4.3vw,21px)}
- .lesson-map-description{font-size:12px;line-height:1.45}
- .lesson-map-status{font-size:10px}
+ .lesson-map-step .lesson-map-title{font-size:clamp(17px,4.3vw,21px)}
+ .lesson-map-step .lesson-map-description{font-size:12px;line-height:1.45}
+ .lesson-map-step .lesson-map-status{font-size:10px}
 }
 @media(max-width:360px){
  .lesson-course-map{padding:15px 12px}
  .lesson-map-grid{gap:11px}
  .lesson-map-step{min-height:202px;padding:12px 10px}
- .lesson-map-title{font-size:17px}
- .lesson-map-description{font-size:11.5px}
+ .lesson-map-step .lesson-map-title{font-size:17px}
+ .lesson-map-step .lesson-map-description{font-size:11.5px}
  .lesson-map-emblem{width:35px;height:35px;flex-basis:35px}
 }
 @media(prefers-reduced-motion:reduce){
