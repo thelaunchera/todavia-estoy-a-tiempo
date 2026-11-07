@@ -24,10 +24,10 @@ test('Starting another saves latest draft first and refuses to discard unsaved w
   const fn=app.slice(start,end);
   assert.match(fn,/saveInFlightRef\.current/);
   assert.match(fn,/const draft=editorLatestRef\.current/);
-  assert.match(fn,/const saved=await save\(draft,true\)/);
+  assert.match(fn,/const saved=await save\(draft,false\)/);
   assert.match(fn,/if\(!saved\)/);
   assert.match(fn,/draftFingerprint\(editorLatestRef\.current\)!==fingerprint/);
-  assert.ok(fn.indexOf('startFactory()')>fn.indexOf('await save(draft,true)'));
+  assert.ok(fn.indexOf('startFactory()')>fn.indexOf('await save(draft,false)'));
   assert.match(app,/key=\{'carousel-session-'\+editorSessionRef\.current\}/);
   assert.match(app,/onStartNewCarousel=\{saveAndStartAnotherCarousel\}/);
   assert.match(factory,/onStartNewCarousel: \(\) => Promise<boolean>/);
