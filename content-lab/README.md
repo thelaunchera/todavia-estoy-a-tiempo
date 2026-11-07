@@ -9,6 +9,15 @@ Aplicación privada de contenido visual, alojada en GitHub Pages, en una carpeta
 - Comprar Content Lab — checkout activo en Make/Stripe ($10): https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z
 - Código: https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/content-lab
 
+## Regla de cobros — Stripe exclusivamente dentro de Make
+
+**Regla operativa de The Launch Era:** toda lectura, verificación y administración de Stripe para el Content Lab se realiza a través de los escenarios y la conexión Stripe LIVE existentes en **Make**. No crear integraciones paralelas, no usar una conexión Stripe separada para operar el comercio y no duplicar los webhooks o escenarios de compra.
+
+- Equipo Make: **My Team**. Escenario operativo **6850988**, «Content Lab — Stripe LIVE pago verificado → acceso y bienvenida». Valida la sesión pagada en Stripe LIVE antes de actualizar la membresía Supabase y luego envía el correo desde Resend; bloquea duplicados.
+- Checkout vigente: **$10 USD**, Payment Link **`plink_1UWek0CnlGzKRSIMd4nJJwko`**, https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z. El enlace público coincide exactamente con la URL devuelta por la ejecución de Make del 1 de noviembre de 2026, cuando figuraba `active=true`.
+- **Pendiente de validar antes de declarar el producto listo para vender:** una compra real controlada y el flujo completo Stripe → Make → Supabase → Resend → OTP → acceso desde iPhone. El escenario de compra no registra ejecuciones a fecha 7 de noviembre de 2026; no afirmar que ya se verificó la compra completa.
+- No ejecutar el escenario **6850963** («Reactivar checkout Stripe LIVE $10») como comprobación de lectura: contiene una operación POST que modifica el Payment Link. Sus registros históricos sí sirven para comprobar la última activación.
+
 ## Arquitectura (31 de octubre de 2026)
 
 - **Frontend:** React/Vite publicado desde GitHub Pages; código independiente del SDK de AppDeploy.
