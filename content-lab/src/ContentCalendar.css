@@ -162,3 +162,21 @@
  .lab-calendar-agenda-item .lab-calendar-edit-label{font-size:10px}
  .lab-calendar-reschedule{margin-left:6px;width:calc(100% - 12px);justify-content:center;min-height:36px}
 }
+
+/* Each scheduled item is a separate tap target, never the entire date cell. */
+.lab-calendar-day{cursor:default}
+.lab-calendar-day-pick{border:0;background:transparent;display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:27px;padding:0;cursor:pointer;color:inherit}
+.lab-calendar-day-pick:focus-visible,.lab-calendar-pill:focus-visible{outline:2px solid #286783;outline-offset:1px}
+.lab-calendar-day-events>.lab-calendar-pill{width:100%;border:0;cursor:pointer;font-family:inherit;text-align:left}
+.lab-calendar-day-events>.lab-calendar-pill:active{filter:brightness(.96)}
+.lab-calendar-more{align-self:flex-start;border:0;background:transparent;color:#315d78;font-weight:750;cursor:pointer;font-size:10px;padding:1px 4px}
+.lab-calendar-item-actions{display:flex;flex-wrap:wrap;gap:6px;padding:3px 2px 5px}
+.lab-calendar-item-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1 1 auto;
+ min-height:37px;padding:7px 9px;border:1px solid #d7e1e3;border-radius:8px;background:white;color:#315565;
+ font-size:11px;font-weight:750;cursor:pointer}
+.lab-calendar-item-actions .lab-calendar-project-download{background:#191919;color:#fff;border-color:#191919}
+.lab-calendar-item-actions .lab-calendar-project-delete{color:#933c45;background:#fff8f8;border-color:#eccdd0}
+.lab-calendar-item-actions button:disabled{opacity:.5;cursor:wait}
+@media(max-width:650px){.lab-calendar-day-pick{min-height:23px}.lab-calendar-day-events>.lab-calendar-pill{min-width:21px;min-height:21px}.lab-calendar-item-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lab-calendar-item-actions .lab-calendar-project-download{grid-column:1/-1}
+}
