@@ -460,9 +460,19 @@ main{padding-top:8px}
  .all-products{padding:10px 17px!important;line-height:1.5!important}
  .matcha-email-optin{padding-top:25px!important;padding-bottom:30px!important}
 }
+
+/* Matcha freebie: always-visible language switch on desktop and iPhone. */
+.editorial-nav .matcha-language-switch{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;margin-left:auto;padding:4px;border:1px solid #d9e2d1;border-radius:999px;background:#edf1e8}
+.editorial-nav .matcha-language-switch a{display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:36px;padding:8px 11px;border-radius:999px;color:#355239;background:transparent;text-decoration:none;font:800 12px/1 'DM Sans',Arial,sans-serif;letter-spacing:.04em}
+.editorial-nav .matcha-language-switch a[aria-current="page"]{background:#29451c;color:white;box-shadow:0 1px 4px #1c391a25}
+.editorial-nav .matcha-language-switch a:focus-visible{outline:3px solid #879e6a;outline-offset:3px}
+.editorial-nav nav{margin-left:14px}
+@media(max-width:780px){.editorial-nav .matcha-language-switch{margin-left:auto}.editorial-nav nav{display:none}}
+@media(max-width:370px){.editorial-nav{gap:7px;padding-inline:12px}.editorial-nav .matcha-language-switch a{min-width:40px;padding:8px}.editorial-nav .brand-link strong{font-size:20px}}
+
 </style><link rel="stylesheet" href="/editorial-attention-20261103.css?v=1">
 </head><body class="tle-prompts-freebie">
-<header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><nav aria-label="Navegación de esta página"><a href="./en/" lang="en" hreflang="en">English</a><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
+<header class="editorial-nav"><div class="brand-link" aria-label="Content Lab"><strong>content lab<i>.</i></strong><small>THE LAUNCH ERA</small></div><div class="matcha-language-switch" role="group" aria-label="Idioma de la página"><a href="/content-lab/prompts/" lang="es" hreflang="es" aria-current="page" aria-label="Español, idioma actual" title="Español">ES</a><a href="/content-lab/prompts/en/" lang="en" hreflang="en" aria-label="Change to English" title="English">EN</a></div><nav aria-label="Navegación de esta página"><a href="#como-funciona">Cómo funciona</a><a href="#recibir">Regalo gratis</a></nav></header>
 <main>
 <section class="editorial-hero hero-with-carousel" aria-labelledby="hero-title">
   <div class="hero-copy">
@@ -664,6 +674,7 @@ render();
      brand_name:document.getElementById('brandName').value.trim(),
      product_name:document.getElementById('product').value.trim(),
      marketing_opt_in:document.getElementById('matcha-marketing').checked,
+      language:'es',
      website:document.getElementById('matcha-website').value,
      started_at:startedAt
     })
