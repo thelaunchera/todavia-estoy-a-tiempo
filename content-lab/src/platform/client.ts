@@ -618,14 +618,20 @@ export const labNotificationApi={
   if(error||!data?.length)throw Error(error?.message||'No se guardó tu preferencia.');
  },
  enablePush:async():Promise<void>=>{
-  const user=await current();
-  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))
+  if(!window.isSecureContext||!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))
    throw Error('Este navegador no permite notificaciones push. En iPhone, agrega Content Lab a la pantalla de inicio y ábrelo desde allí.');
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const installed=window.matchMedia('(display-mode: standalone)').matches||
+    (navigator as Navigator&{standalone?:boolean}).standalone===true;
+  if(isIOS&&!installed)throw Error('En iPhone, agrega Content Lab a la pantalla de inicio y ábrelo desde allí para activar notificaciones.');
+  // iPhone requires this request during the direct button gesture: no network
+  // or service-worker await may precede Notification.requestPermission().
+  const permission=await Notification.requestPermission();
+  if(permission!=='granted')throw Error('Permiso de notificaciones no concedido. Puedes recibir avisos por correo.');
+  const user=await current();
   const {data:key,error:keyError}=await sb.rpc('content_lab_public_push_key');
   if(keyError||typeof key!=='string'||!key)throw Error('Las notificaciones push aún no están disponibles.');
   const registration=await navigator.serviceWorker.ready;
-  const permission=await Notification.requestPermission();
-  if(permission!=='granted')throw Error('Permiso de notificaciones no concedido. Puedes recibir avisos por correo.');
   const base64=key.replace(/-/g,'+').replace(/_/g,'/');
   const binary=atob(base64.padEnd(Math.ceil(base64.length/4)*4,'='));
   const keyBytes=new Uint8Array([...binary].map(c=>c.charCodeAt(0)));
