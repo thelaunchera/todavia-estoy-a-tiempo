@@ -721,7 +721,7 @@ export default function TouchLayerCanvas({
               className="touch-editor-corner-delete" aria-label={'Borrar '+layer.name}
               title={'Borrar '+layer.name} onPointerDown={e=>e.stopPropagation()}
               onPointerUp={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}}>×</button>}
-            {active && !cropping && !layer.locked && <div className="touch-editor-mini-actions" role="toolbar" aria-label="Acciones rápidas de la capa"
+            {active && !cropping && !layer.locked && pageCount===1 && <div className="touch-editor-mini-actions" role="toolbar" aria-label="Acciones rápidas de la capa"
                onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
                {onDuplicateLayer&&<button type="button" aria-label="Duplicar elemento" onClick={e=>{e.stopPropagation();onDuplicateLayer(layer.id)}}>⧉</button>}
                 {!onDuplicateLayer&&layer.kind==='text'&&onDuplicateText&&<button type="button" aria-label="Duplicar texto" onClick={e=>{e.stopPropagation();onDuplicateText(layer.id)}}>⧉</button>}
