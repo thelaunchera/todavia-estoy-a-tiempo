@@ -176,3 +176,12 @@ test('private iPad filming desk reuses existing chapter uploads, save and scenes
  assert.match(css,/class-room--tablet/);
  assert.match(css,/prefers-reduced-motion/);
 });
+
+test('owner class preview and regular students see only published demo prompts',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const materials=readFileSync(new URL('./materiales-interactivos.js',import.meta.url),'utf8');
+ const editor=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
+ assert.match(materials,/kit\.payload\.demos\.filter\(d=>d\.published!==false\)/);
+ assert.doesNotMatch(materials,/kit\.payload\.demos\.filter\(d=>adminPreview\|\|d\.published!==false\)/);
+ assert.match(editor,/setScene\(0\);setTabletCue\('screen'\);setLessonId\(id\)/);
+});

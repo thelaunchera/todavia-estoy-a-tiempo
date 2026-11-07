@@ -99,7 +99,8 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  },[lessonId,record?.id]);
  function choose(id:string){
    if(changed && !window.confirm('Tienes cambios sin guardar. ¿Cambiar de video y descartarlos?')) return;
-   setLessonId(id);setMode('scene');
+   // Reset immediately, before rendering the next lesson: some chapters have fewer scenes.
+   setScene(0);setTabletCue('screen');setLessonId(id);setMode('scene');
  }
  async function copy(text:string, key:string) {
    try { await navigator.clipboard.writeText(text);setCopied(key); }

@@ -64,7 +64,8 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   ]);
   if(!error&&Array.isArray(rows))MODULE_PROMPTS=rows;
   if(!kitError&&kit?.status==='ready'&&Array.isArray(kit?.payload?.demos)){
-   for(const d of kit.payload.demos.filter(d=>adminPreview||d.published!==false)){
+   // The owner's classroom preview must show the exact published demo selection, too.
+   for(const d of kit.payload.demos.filter(d=>d.published!==false)){
     for(const [i,p] of (Array.isArray(d.prompts)?d.prompts:[]).entries()){
      EXAMPLE_PROMPTS.push({prompt_code:'demo_'+d.id+'_'+i,title:p.title,
       summary:d.title+' · '+(p.step||''),body:p.body,category:'demo_'+(d.category||'services'),
