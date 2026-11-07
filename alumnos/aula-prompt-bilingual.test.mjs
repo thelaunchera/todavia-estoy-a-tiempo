@@ -112,3 +112,23 @@ test('lavender demo overrides seasonal pack name so the brand keeps all its phot
   assert.notEqual(first.id,promptPack({prompt_code:'december_1',title:'December Creative Pack · Lavender'},lang).id);
  }
 });
+
+// Source-level regression: distinct visual hierarchy without exposing private prompt bodies.
+test('visual levels: category, guidance and copyable prompt are distinct in the student UI',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {fileURLToPath}=await import('node:url');
+ const here=new URL('./',import.meta.url);
+ const js=readFileSync(fileURLToPath(new URL('materiales-interactivos.js',here)),'utf8');
+ const css=readFileSync(fileURLToPath(new URL('materiales-interactivos.css',here)),'utf8');
+ const html=readFileSync(fileURLToPath(new URL('index.html',here)),'utf8');
+ assert.match(js,/mi-pack-overview/);
+ assert.match(js,/mi-prompt-items-heading/);
+ assert.match(js,/mi-prompt-copy-panel/);
+ assert.match(js,/if\(query\)packCard\.open=true/);
+ assert.doesNotMatch(js,/active==='route'&&id===selectedPacks\[0\]/);
+ assert.match(css,/\.mi-prompt-pack>summary/);
+ assert.match(css,/\.mi-pack-overview\{/);
+ assert.match(css,/\.mi-prompt-pack \.mi-prompt-guide\{/);
+ assert.match(css,/\.mi-prompt-copy-panel \.mi-prompt-text\{/);
+ assert.match(html,/materiales-interactivos\.css\?v=20261107-visual-levels-v3/);
+});

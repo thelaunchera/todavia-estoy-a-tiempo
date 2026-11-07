@@ -378,9 +378,20 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
     const heading=el('summary');
     heading.innerHTML='<span class="mi-prompt-number" style="font-size:12px">'+esc(id.startsWith('course-')?id.slice(7):t('PACK','PACK'))+'</span><span class="mi-prompt-label"><strong>'+esc(pack.title)+'</strong><small><b>'+esc(t('Para qué sirve: ','Use it to: '))+'</b>'+esc(pack.purpose)+'</small></span><span class="mi-plus" aria-hidden="true">+</span>';
     const packBody=el('div','mi-prompt-body');
-    packBody.append(el('p','mi-prompt-when',t('Cuándo usarlo: ','When to use it: ')+pack.when),el('p','mi-prompt-output',t('Qué obtendrás: ','What you will get: ')+pack.result));
-    const children=el('div','mi-prompt-list');packBody.append(children);packCard.append(heading,packBody);list.append(packCard);
-    if(query||(active==='route'&&id===selectedPacks[0]))packCard.open=true;
+    const overview=el('section','mi-pack-overview');
+    overview.setAttribute('aria-label',t('Guía de esta categoría','Category guide'));
+    overview.append(
+     el('span','mi-pack-overview-tag',t('GUÍA DE LA ETAPA','STAGE GUIDE')),
+     el('p','mi-prompt-when',t('Cuándo usarlo: ','When to use it: ')+pack.when),
+     el('p','mi-prompt-output',t('Qué obtendrás: ','What you will get: ')+pack.result)
+    );
+    const itemCount=found.filter(x=>x.group===id).length;
+    const childrenLabel=el('h3','mi-prompt-items-heading',t('PROMPTS DE ESTA CATEGORÍA','PROMPTS IN THIS CATEGORY')+' · '+itemCount);
+    const children=el('div','mi-prompt-list');
+    packBody.append(overview,childrenLabel,children);
+    packCard.append(heading,packBody);list.append(packCard);
+    // Keep stages closed on first visit: opening seven similar text blocks overwhelms mobile readers.
+    if(query)packCard.open=true;
     for(const [i,item] of found.filter(x=>x.group===id).entries()){
 
     const original=localizedPrompt(item.prompt_code,item.body,lang,item.brand||'');
@@ -406,7 +417,9 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
     const copy=el('button','mi-copy',t('Copiar instrucciones','Copy instructions'));copy.type='button';
     const state=el('p','mi-copy-state');state.setAttribute('role','status');
     copy.addEventListener('click',()=>void copyPrompt(original,card));
-    body.append(guidance,instruction,paragraph,copy,state);card.append(summary,body);children.append(card);
+    const promptCopyPanel=el('div','mi-prompt-copy-panel');
+    promptCopyPanel.append(instruction,paragraph,copy,state);
+    body.append(guidance,promptCopyPanel);card.append(summary,body);children.append(card);
    }
    }
    more.hidden=selectedPacks.length<=limit;

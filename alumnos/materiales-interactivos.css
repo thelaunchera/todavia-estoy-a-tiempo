@@ -459,3 +459,214 @@
 
 #materiales-interactivos .mi-prompt-to-lessons{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:13px;padding:10px 16px;border:1px solid #294b63;border-radius:999px;background:#fff;color:#23445b;font:750 13px/1.4 'DM Sans',Arial,sans-serif;cursor:pointer;touch-action:manipulation}
 #materiales-interactivos .mi-prompt-to-lessons:focus-visible{outline:3px solid #87aeca;outline-offset:3px}
+
+/* 2026-11-07 | CLEAR VISUAL LEVELS for nested prompt cards.
+   Level 1 blue: the category; level 2 ivory: the individual prompt;
+   warm yellow: teaching notes; pale blue: the actual copyable prompt.
+   Scope to authenticated classroom materials; do not affect Lab/Studio. */
+#materiales-interactivos .mi-prompt-pack{
+ border:1.5px solid #b6ccd9;
+ border-radius:18px;
+ background:#f8fbfd;
+ box-shadow:0 6px 18px #203b510b;
+ overflow:hidden;
+}
+#materiales-interactivos .mi-prompt-pack>summary{
+ background:#dfeef7;
+ border-bottom:0;
+ gap:13px;
+ min-height:82px;
+ padding:18px 18px;
+}
+#materiales-interactivos .mi-prompt-pack>summary .mi-prompt-label strong{
+ color:#193b55;
+ font-size:clamp(17px,4.4vw,20px);
+ font-weight:800;
+ line-height:1.25;
+}
+#materiales-interactivos .mi-prompt-pack>summary .mi-prompt-label small{
+ color:#385a72;
+ font-size:13px;
+ line-height:1.48;
+}
+#materiales-interactivos .mi-prompt-pack>summary .mi-prompt-number{
+ background:#294b65;
+ color:#fff;
+ border-radius:11px;
+ font:800 13px/1.2 'DM Sans',Arial,sans-serif!important;
+}
+#materiales-interactivos .mi-prompt-pack[open]>summary{
+ border-bottom:1px solid #b6ccd9;
+ background:#d8eaf6;
+}
+#materiales-interactivos .mi-prompt-pack>.mi-prompt-body{
+ background:#fffefa;
+ border-top:0;
+ padding:17px 16px 20px;
+}
+#materiales-interactivos .mi-pack-overview{
+ padding:16px 18px;
+ background:#fff4d9;
+ border:1px solid #e9d39d;
+ border-left:4px solid #d5a639;
+ border-radius:13px;
+ margin:0 0 18px;
+ color:#372c1d;
+}
+#materiales-interactivos .mi-pack-overview-tag{
+ display:block;
+ color:#78561c;
+ font:800 11px/1.4 'DM Sans',Arial,sans-serif;
+ letter-spacing:.1em;
+ margin-bottom:10px;
+}
+#materiales-interactivos .mi-pack-overview p{
+ color:#403526;
+ font:500 14px/1.58 'DM Sans',Arial,sans-serif;
+ margin:0;
+}
+#materiales-interactivos .mi-pack-overview p+p{
+ margin-top:10px;
+ padding-top:10px;
+ border-top:1px solid #ead9b1;
+}
+#materiales-interactivos .mi-prompt-items-heading{
+ font:800 11px/1.4 'DM Sans',Arial,sans-serif;
+ letter-spacing:.1em;
+ color:#365b74;
+ margin:4px 0 12px;
+ text-transform:uppercase;
+}
+#materiales-interactivos .mi-prompt-pack>.mi-prompt-body>.mi-prompt-list{
+ gap:11px;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt{
+ background:#fff;
+ border:1px solid #cddde7;
+ border-radius:14px;
+ box-shadow:0 1px 0 #e8edf0;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary{
+ background:#fffdfa;
+ padding:16px;
+ min-height:75px;
+ gap:12px;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt[open]>summary{
+ background:#edf4fa;
+ border-bottom:1px solid #cadce8;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary .mi-prompt-number{
+ background:#f8e7a7;
+ color:#654b20;
+ font:700 17px/1.2 Georgia,serif;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary .mi-prompt-label strong{
+ font-size:clamp(15px,3.8vw,17px);
+ color:#263f55;
+ font-weight:800;
+ line-height:1.35;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary .mi-prompt-label small{
+ font-size:13px;
+ color:#546a7c;
+ line-height:1.52;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>.mi-prompt-body{
+ padding:15px;
+ border-top:0;
+ background:#fff;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-guide{
+ background:#fff2cf;
+ border:1px solid #ecd7a4;
+ border-radius:11px;
+ padding:13px 14px;
+ margin:0 0 17px;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-guide p{
+ color:#3a3123;
+ font-size:13px;
+ line-height:1.6;
+}
+#materiales-interactivos .mi-prompt-pack .mi-prompt-guide strong{
+ color:#624b19;
+ font-weight:800;
+}
+#materiales-interactivos .mi-prompt-copy-panel{
+ background:#f1f6fa;
+ border:1px solid #d1e1ec;
+ border-radius:12px;
+ padding:15px 14px;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-prompt-instruction{
+ color:#284e6b;
+ margin:0 0 12px;
+ letter-spacing:.1em;
+ font:800 11px/1.4 'DM Sans',Arial,sans-serif;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-prompt-instruction::before{
+ content:"";
+ display:inline-block;
+ width:7px;
+ height:7px;
+ border-radius:50%;
+ background:#e0b344;
+ margin-right:9px;
+ vertical-align:1px;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-prompt-text{
+ background:#fff;
+ border:1px solid #d4e0e8;
+ border-left:4px solid #315b79;
+ border-radius:8px;
+ color:#1e3346;
+ padding:15px;
+ margin:0 0 13px;
+ font-size:15px;
+ line-height:1.7;
+ overflow-wrap:anywhere;
+ white-space:pre-wrap;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-copy{
+ background:#294c67;
+ border:1px solid #294c67;
+ color:#fff;
+ border-radius:10px;
+ min-height:46px;
+ padding:11px 16px;
+ font:750 13px/1.3 'DM Sans',Arial,sans-serif;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-copy:focus-visible,
+#materiales-interactivos .mi-prompt-pack summary:focus-visible{
+ outline:3px solid #d6a533;
+ outline-offset:2px;
+}
+#materiales-interactivos .mi-prompt-copy-panel .mi-copy-state{
+ color:#334f65;
+ font-size:12px;
+}
+@media(max-width:600px){
+ #materiales-interactivos .mi-prompt-pack>summary{padding:16px 13px;gap:11px}
+ #materiales-interactivos .mi-prompt-pack>.mi-prompt-body{padding:14px 12px 18px}
+ #materiales-interactivos .mi-pack-overview{padding:14px}
+ #materiales-interactivos .mi-pack-overview p{font-size:14px;line-height:1.55}
+ #materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary{padding:14px 12px;gap:11px}
+ #materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>.mi-prompt-body{padding:12px}
+ #materiales-interactivos .mi-prompt-copy-panel{padding:12px}
+ #materiales-interactivos .mi-prompt-copy-panel .mi-copy{min-height:48px;width:100%}
+}
+@media print{
+ #materiales-interactivos .mi-prompt-pack,
+ #materiales-interactivos .mi-prompt-pack>summary,
+ #materiales-interactivos .mi-prompt-pack>.mi-prompt-body,
+ #materiales-interactivos .mi-pack-overview,
+ #materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt,
+ #materiales-interactivos .mi-prompt-pack .mi-prompt-list>.mi-prompt>summary,
+ #materiales-interactivos .mi-prompt-pack .mi-prompt-guide,
+ #materiales-interactivos .mi-prompt-copy-panel,
+ #materiales-interactivos .mi-prompt-copy-panel .mi-prompt-text{
+   background:#fff!important;color:#171717!important;
+   border-color:#bbb!important;box-shadow:none!important;
+ }
+}
