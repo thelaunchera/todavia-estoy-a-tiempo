@@ -672,16 +672,12 @@ function App() {
   const downloadCalendarProject=async(item:PlannedItem):Promise<void>=>{
     if(!brand||item.brandId!==brand.id)throw Error('Este proyecto pertenece a otra marca.');
     if(item.kind==='grid'){
-      if(!item.assetId)throw Error('Esta publicación del grid todavía no tiene un PNG. Abre el proyecto para añadir la imagen.');
-      const src=images[item.assetId]||await imageLoad(item.assetId);
-      if(!src)throw Error('No se pudo cargar la imagen original del grid.');
-      const img=new Image();img.src=src;await img.decode();
-      const c=document.createElement('canvas');
-      c.width=img.naturalWidth;c.height=img.naturalHeight;
-      const ctx=c.getContext('2d');if(!ctx)throw Error('No se pudo preparar la descarga.');
-      ctx.drawImage(img,0,0,c.width,c.height);
-      try{await downloadLosslessPng(c,(item.title||'grid-post').replace(/[^a-z0-9-_]/gi,'-').slice(0,60))}
-      finally{c.width=1;c.height=1}
+      // A grid tile can contain editorial typography, layers and effects.
+      // Exporting tile.assetId would download the raw photo, not the finished post.
+      openCalendarItem(item);
+      toast(loginLanguage==='es'
+        ?'Abre «Descargar PNG del post» en tu campaña para conservar el diseño completo.'
+        :'Use “Download post PNG” in the campaign editor to preserve the finished design.');
       return;
     }
     const id=item.id.startsWith('post:')?item.id.slice(5):'';
@@ -701,6 +697,10 @@ function App() {
         if(loaded)sources[imageId]=loaded;
       }
     }));
+    if(ids.some(imageId=>!sources[imageId]))
+      throw Error(loginLanguage==='es'
+        ?'Faltan imágenes de este proyecto. No se descargará un PNG incompleto. Revisa sus recursos en el editor.'
+        :'Some project images could not be loaded. An incomplete PNG will not be downloaded.');
     await exportFreePost(saved,brand,sources);
     toast(loginLanguage==='es'?'Proyecto descargado en PNG.':'Project downloaded as PNG.');
   };
@@ -846,9 +846,18 @@ function App() {
     try {
       await api.delete('/api/posts/' + p.id);
       setPosts(prev => prev.filter(x => x.id !== p.id));
+      // A deleted server record must never be resurrected from the device's
+      // stale draft recovery or the pagehide backup listener.
+      if(account?.email)removeDraftBackup(account.email,p);
       if(editorLatestRef.current.id===p.id){
         editorSessionRef.current++;
-        setEditor(newPost(p.brandId));
+        const next=newPost(p.brandId);
+        editorLatestRef.current=next;
+        lastSavedFingerprintRef.current=draftFingerprint(next);
+        lastAttemptFingerprintRef.current='';
+        setEditor(next);
+        setRecovery(null);
+        setDraftStatus('saved');
         setCalendarEditId('');
         setCalendarDownloadId('');
       }
