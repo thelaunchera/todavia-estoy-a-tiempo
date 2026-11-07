@@ -4,6 +4,16 @@ import {offBriefBrand,offBriefAssetSlots,offBriefSlogans,type BrandAssetSlot} fr
 import {loadYouTubeBrandVault,removeYouTubeBrandAsset,saveYouTubeBrandCopy,uploadYouTubeBrandAsset,type StudioBrandAsset} from './supabase-client';
 import './youtube-brand-kit.css';
 const groups=['Marca','Canal','Elementos','Portadas T1','Portadas T2'] as const;
+const VIDEO_DRIVE_KEY='video_bumper_drive_url';
+function normalizedDriveVideoUrl(value:string):string{
+ let url:URL;
+ try{url=new URL(value.trim())}catch{throw new Error('Pega el enlace completo del archivo de Google Drive.')}
+ if(url.protocol!=='https:'||url.hostname!=='drive.google.com')throw new Error('El enlace debe ser de drive.google.com.');
+ const match=url.pathname.match(/^\/file\/d\/([a-zA-Z0-9_-]{15,})(?:\/|$)/);
+ const id=match?.[1]||((url.pathname==='/open'||url.pathname==='/uc')?url.searchParams.get('id'):null);
+ if(!id||!/^[a-zA-Z0-9_-]{15,}$/.test(id))throw new Error('Copia el enlace de un archivo de video, no de una carpeta.');
+ return 'https://drive.google.com/file/d/'+id+'/view';
+}
 function getIcon(slot:BrandAssetSlot){return slot.kind==='video'?<Film size={24}/>:slot.kind==='audio'?<Volume2 size={24}/>:<ImagePlus size={24}/>;}
 function saveJson(name:string,data:unknown){
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
@@ -57,24 +67,45 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  const [error,setError]=useState('');
  const [openPrompts,setOpenPrompts]=useState<Record<string,boolean>>({});
  const [coverSeason,setCoverSeason]=useState(1);
+ const [driveDraft,setDriveDraft]=useState('');
  const reload=useCallback(async()=>{
   setLoading(true);setError('');
   try{const data=await loadYouTubeBrandVault();
    setFiles(Object.fromEntries(data.assets.map(a=>[a.asset_id,a])));
    setSavedCopy(Object.fromEntries(data.copies.map(t=>[t.copy_key,t.content])));
+   setDriveDraft(data.copies.find(t=>t.copy_key===VIDEO_DRIVE_KEY)?.content||'');
   }catch(e){setError(e instanceof Error?e.message:'No se pudo cargar la biblioteca.');}
   finally{setLoading(false)}
  },[]);
  useEffect(()=>{void reload()},[reload]);
- const done=useMemo(()=>offBriefAssetSlots.filter(x=>Boolean(files[x.id]||entries.some(entry=>entry.section==='youtube-storyboards-v1'&&entry.title==='OFF BRIEF brand: '+x.id&&Boolean(entry.art||entry.link)))).length,[files,entries]);
+ const done=useMemo(()=>offBriefAssetSlots.filter(x=>Boolean(files[x.id]||(x.id==='video_bumper'&&savedCopy[VIDEO_DRIVE_KEY])||entries.some(entry=>entry.section==='youtube-storyboards-v1'&&entry.title==='OFF BRIEF brand: '+x.id&&Boolean(entry.art||entry.link)))).length,[files,entries,savedCopy]);
  const copy=async(text:string,title:string)=>{
   try{await navigator.clipboard.writeText(text);setNotice(title+' copiado.');}
   catch{setNotice('No se pudo copiar; selecciona el texto manualmente.');}
  };
  const upload=async(slot:BrandAssetSlot,file:File)=>{
   setBusy(slot.id);setNotice('');setError('');
-  try{if(slot.id==='video_bumper')await checkBumperDuration(file,10);await uploadYouTubeBrandAsset(slot.id,file,slot.maxMb);await reload();setNotice(slot.title+' guardado en la biblioteca privada.');}
+  try{
+   if(slot.id==='video_bumper'){
+    if(file.size>slot.maxMb*1000000)throw new Error('Este video pesa '+(file.size/1000000).toFixed(1)+' MB. El Studio admite hasta '+slot.maxMb+' MB para subirlo directamente. Para un archivo mayor usa «Vincular video de Drive» debajo, sin comprimir el original.');
+    await checkBumperDuration(file,10);
+   }
+   await uploadYouTubeBrandAsset(slot.id,file,slot.maxMb);
+   await reload();
+   setNotice(slot.title+' guardado en la biblioteca privada.');
+  }
   catch(e){setError(e instanceof Error?e.message:'No se pudo guardar el archivo.');}
+  finally{setBusy('');}
+ };
+ const saveDriveVideo=async()=>{
+  setBusy('drive-video');setNotice('');setError('');
+  try{
+   const link=normalizedDriveVideoUrl(driveDraft);
+   await saveYouTubeBrandCopy(VIDEO_DRIVE_KEY,link);
+   setSavedCopy(old=>({...old,[VIDEO_DRIVE_KEY]:link}));
+   setDriveDraft(link);
+   setNotice('Enlace guardado en tu biblioteca privada. El video original sigue en Drive, sin compresión ni copia.');
+  }catch(e){setError(e instanceof Error?e.message:'No se pudo vincular el video de Drive.');}
   finally{setBusy('');}
  };
  const remove=async(slot:BrandAssetSlot)=>{
@@ -94,18 +125,19 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  const renderCard=(slot:BrandAssetSlot)=>{
   const asset=files[slot.id];
   const linked=entries.find(entry=>entry.section==='youtube-storyboards-v1' && entry.title==='OFF BRIEF brand: '+slot.id);
+  const driveLink=slot.id==='video_bumper'?(savedCopy[VIDEO_DRIVE_KEY]||''):'';
   const accept=slot.kind==='image'?'image/png,image/jpeg,image/webp':slot.kind==='video'?'video/mp4,video/webm,.mp4,.webm':'audio/mpeg,audio/wav,audio/x-wav';
   return <article key={slot.id} className="ob-kit-card">
    <div className="ob-kit-preview">
-    {asset?.url?showPreview(asset):linked?.art?<img src={linked.art} alt={slot.title} loading="lazy"/>:<div className="ob-kit-blank">{getIcon(slot)}<span>Pendiente de subir</span></div>}
-    <span className="ob-kit-state">{asset||linked?'Archivo guardado':'Sin archivo'}</span>
+    {asset?.url?showPreview(asset):linked?.art?<img src={linked.art} alt={slot.title} loading="lazy"/>:<div className="ob-kit-blank">{getIcon(slot)}<span>{driveLink?'Video original en Drive':'Pendiente de subir'}</span></div>}
+    <span className="ob-kit-state">{asset||linked?'Archivo guardado':driveLink?'Vinculado en Drive':'Sin archivo'}</span>
    </div>
    <div className="ob-kit-card-body">
     <h4>{slot.title}</h4>
     <p>{slot.details}</p>
     <p className="ob-kit-format">{slot.format} · límite {slot.maxMb} MB</p>
     {asset&&<p className="ob-kit-filename" title={asset.file_name}>{asset.file_name}</p>}
-    {slot.id==='video_bumper'&&<p className="ob-kit-file-help">En iPhone: «Subir archivo» → «Explorar» → Google Drive si está disponible en Archivos. Si no aparece, guarda primero el video de Drive en Archivos. Solo MP4/WEBM de hasta 10 segundos.</p>}
+    {slot.id==='video_bumper'&&<p className="ob-kit-file-help">MP4/WEBM de hasta 10 segundos. Para archivos de hasta 50 MB usa «Subir archivo». Si pesa más, guarda el enlace original de Drive aquí debajo sin reducir su calidad.</p>}
     <div className="ob-kit-actions">
      <label htmlFor={'offbrief-'+slot.id} className={'ob-kit-upload'+(busy===slot.id?' is-busy':'')}>
       <UploadCloud size={15}/>{busy===slot.id?'Guardando...':asset?'Reemplazar':'Subir archivo'}
@@ -116,6 +148,15 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
      {!asset&&linked?.link&&<a href={linked.link} target="_blank" rel="noopener noreferrer">Ver original en Drive</a>}
      {asset&&<button type="button" onClick={()=>void remove(slot)} disabled={busy===slot.id} aria-label={'Eliminar '+slot.title}><Trash2 size={15}/></button>}
     </div>
+    {slot.id==='video_bumper'&&<div className="ob-kit-drive-link">
+     <label htmlFor="ob-video-drive-link">Vincular video de Drive · sin límite de tamaño del Studio</label>
+     <p>Para archivos mayores de 50 MB. El video permanece en tu Drive y el Studio guarda únicamente el enlace privado. La duración prevista sigue siendo hasta 10 segundos.</p>
+     <div className="ob-kit-drive-controls">
+      <input id="ob-video-drive-link" type="url" inputMode="url" value={driveDraft} onChange={e=>setDriveDraft(e.target.value)} placeholder="https://drive.google.com/file/d/…/view" aria-label="Enlace del video original de Google Drive"/>
+      <button type="button" onClick={()=>void saveDriveVideo()} disabled={busy==='drive-video'||loading||!driveDraft.trim()}>{busy==='drive-video'?'Guardando...':'Guardar enlace de Drive'}</button>
+     </div>
+     {driveLink&&<a href={driveLink} target="_blank" rel="noopener noreferrer">Abrir video original en Drive</a>}
+    </div>}
     <button type="button" className="ob-kit-toggle" onClick={()=>setOpenPrompts(old=>({...old,[slot.id]:!old[slot.id]}))}>{openPrompts[slot.id]?'Ocultar':'Ver'} Master Prompt visual</button>
     {openPrompts[slot.id]&&<div className="ob-kit-prompt"><textarea readOnly rows={10} value={slot.prompt} aria-label={'Prompt de '+slot.title}/><button type="button" onClick={()=>void copy(slot.prompt,'Prompt de '+slot.title)}><Copy size={15}/> Copiar prompt</button></div>}
    </div>
