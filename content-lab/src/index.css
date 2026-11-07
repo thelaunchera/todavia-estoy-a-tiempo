@@ -1911,3 +1911,21 @@ input::placeholder {
  .lab-carousel-editor-mode .content[data-lab-tab="factory"]{padding:6px 8px calc(100px + env(safe-area-inset-bottom))!important}
  .lab-carousel-editor-mode .lab-factory-help{margin-top:12px}
 }
+
+
+/* Content Lab editors: one slim optional help bar, with the design in focus. */
+.content[data-lab-tab="create"] .pageheading{margin:2px 0 8px;padding:0;gap:8px;align-items:center}
+.content[data-lab-tab="create"] .pageheading h1{font:750 clamp(19px,3vw,27px)/1.2 Prompt,Futura,Arial,sans-serif;
+ letter-spacing:-.035em;margin:0}
+.content[data-lab-tab="create"] .pageheading .btn{min-height:38px;padding:7px 10px}
+.content[data-lab-tab="create"] .composer-direct-touch{margin-top:3px}
+.content[data-lab-tab="create"] .lab-post-details{margin-top:5px}
+.content[data-lab-tab="create"] .lab-post-details>summary{min-height:40px;padding:8px 11px;font-size:12px}
+.content[data-lab-tab="vertical"]>.lab-first-guide-editor,
+.content[data-lab-tab="create"]>.lab-first-guide-editor,
+.content[data-lab-tab="factory"]>.lab-first-guide-editor{margin:1px 0 5px}
+@media(max-width:700px){
+ .content[data-lab-tab="create"] .pageheading{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-between;gap:7px}
+ .content[data-lab-tab="create"] .pageheading h1{font-size:18px}
+ .content[data-lab-tab="create"] .pageheading .btn{min-height:36px;font-size:11px}
+}
