@@ -48,25 +48,26 @@ test('the help form, prompts and navigation include English UI translations',()=
  assert.match(s,/privacy\.textContent='Privacy policy'/);
 });
 
-test('Drive connection instructions and one-project guidance stay available in both classroom languages',()=>{
+test('Drive setup is executed by AI, shown in both classroom languages, and never misrepresented as a plan',()=>{
  const home=load('index.html');
  const translations=load('aula-textos-estaticos.js');
  const spanish=load('guia-principiantes.js');
  const english=load('materials-guides-en.js');
- assert.match(home,/Google Drive: conecta la app desde ChatGPT/);
+ assert.match(home,/ChatGPT que CREE o reutilice la carpeta/);
  assert.match(home,/Empieza con una sola web/);
- assert.match(translations,/Google Drive: save the photos and files for each website/);
- assert.match(translations,/In ChatGPT, open Settings/);
+ assert.match(home,/enlaces reales/);
+ assert.match(translations,/AI creates or reuses the project folder/);
+ assert.match(translations,/Google Drive: connect and authorize it in ChatGPT/);
  assert.match(translations,/Start with one website/);
- assert.match(spanish,/Trabaja en una sola web/);
- assert.match(spanish,/galería personal/);
+ assert.match(spanish,/driveFolderPrompt/);
+ assert.match(spanish,/CREA AHORA la carpeta principal/);
+ assert.match(spanish,/no afirmes que creaste algo que no pudiste crear/);
  assert.match(spanish,/02_FOTOS/);
  assert.match(english,/Work on ONE website at a time/);
- assert.match(english,/Settings → Plugins \(or Apps\)/);
- assert.match(english,/personal Photos gallery/);
+ assert.match(english,/LET CHATGPT CREATE THE FOLDERS/);
  assert.match(english,/02_PHOTOS/);
- assert.match(home,/directamente en Drive → 02_FOTOS/);
- assert.match(translations,/directly to Drive → 02_PHOTOS/);
+ assert.match(home,/pídele que la archive en Drive → 02_FOTOS/);
+ assert.match(translations,/ask the AI to save it to Drive → 02_PHOTOS/);
 });
 
 test('Notion command center bonus describes Metricool and GSC Wizard separately in both languages',()=>{
