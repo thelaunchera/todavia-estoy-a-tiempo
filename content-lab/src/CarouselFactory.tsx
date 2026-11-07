@@ -58,6 +58,7 @@ type Props = {
   onUploadPhoto:(file:File)=>Promise<Asset|null>;
   onUploadSticker:(file:File)=>Promise<Asset|null>;
   onRenameAsset:(asset:Asset,name:string)=>Promise<void>;
+  initialStep?:'canvas'|'download';
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
@@ -513,7 +514,7 @@ export async function renderSavedCarouselCover(
   }
 }
 
-export default function CarouselFactory({brand,post,assets,images:libraryImages,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker}:Props) {
+export default function CarouselFactory({brand,post,assets,images:libraryImages,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker,initialStep='canvas'}:Props) {
   // Legacy-only image resolver: preserves previously saved canvas layers.
   // The Nov 6 draft vector pack is intentionally absent from both creation libraries.
   const images=useMemo(()=>({...libraryImages,...brandingElementImages(brand.color)}),[libraryImages,brand.color]);
@@ -534,7 +535,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const [panoramaError,setPanoramaError]=useState('');
   const [previewRevision,setPreviewRevision]=useState(0);
   const [touchEdit,setTouchEdit]=useState(false);
-  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>('canvas');
+  const [studioTab,setStudioTab]=useState<'inspiration'|'canvas'|'style'|'slides'|'review'|'download'|'ai'>(initialStep);
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
   const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:1360px)').matches);
