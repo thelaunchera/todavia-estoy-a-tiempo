@@ -1,5 +1,5 @@
 import {renderCasaBrownieLivePreview} from './casa-brownie-live-preview.js?v=20261107-real-demo-v1';
-import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-ai-first-v4';
+import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261107-ai-drive-v1';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
 import {promptGuide,promptPack,promptShelf} from './prompt-guide.js?v=20261107-class-library-v2';
