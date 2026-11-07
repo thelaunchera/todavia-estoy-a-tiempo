@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {draftFingerprint,writeDraftBackup,removeDraftBackup,newerUnsavedBackup,type LocalDraft} from './DraftRecovery';
-import { api, auth, image } from './platform/client';
+import { api, auth, image,labNotificationApi,type LabAlert } from './platform/client';
+import LabNotifications from './LabNotifications';
+import SaveSuccessCelebration from './SaveSuccessCelebration';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {sourceAwareScale,downloadLosslessPng} from './ExportQuality';
 import heic2any from 'heic2any';
@@ -110,6 +112,8 @@ type Post = {
   date: string;
   time?: string;
   planningStatus?: string;
+  timeZone?:string;
+  isFinished?:boolean;
   updatedAt?: string;
   designData?: string;
 };
@@ -438,6 +442,8 @@ function App() {
   const [images, setImages] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
+  const [saveCelebration,setSaveCelebration]=useState<{id:number;format:string;title:string}|null>(null);
+  const lastAlertLinkRef=useRef('');
   const [query, setQuery] = useState('');
   const [gridPref,setGridPref]=useState<{version:number;brandId?:string;sourceId?:string;referenceId?:string;format?:string;openGridId?:string;openTileIndex?:number;fromCalendar?:boolean}>({version:0});
   const [backgroundPref,setBackgroundPref]=useState<{version:number;brandId?:string;id?:FreeBackgroundId;imageAssetId?:string}>({version:0});
@@ -710,7 +716,7 @@ function App() {
     const source:Post=possible&&typeof possible.title==='string'&&
       typeof possible.format==='string'&&typeof possible.brandId==='string'
       ? possible as Post:editor;
-    const draft={...source,title:source.title.trim()||source.hook.trim().slice(0,80)||
+    const draft={...source,isFinished:!automatic,title:source.title.trim()||source.hook.trim().slice(0,80)||
       (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
        source.format==='Story'?'Mi historia':'Mi publicación')};
     const session=editorSessionRef.current;
@@ -732,16 +738,16 @@ function App() {
         if(JSON.stringify(current)===snapshot)return data as Post;
         return {...current,id:data.id,updatedAt:data.updatedAt};
       });
-      lastSavedFingerprintRef.current=draftFingerprint(source);
+      lastSavedFingerprintRef.current=draftFingerprint(draft);
       lastAttemptFingerprintRef.current='';
       setDraftStatus('saved');
       if(account?.email&&draftFingerprint(editorLatestRef.current)===draftFingerprint(source)){
         removeDraftBackup(account.email,source);
         if(data?.id)removeDraftBackup(account.email,{...source,id:data.id});
       }
-      if(!automatic)toast(source.format==='Carousel'
-        ? 'Carrusel guardado ✓ Puedes seguir editando y guardarlo de nuevo.'
-        : 'Guardado en tu biblioteca ✓');
+      if(!automatic){
+        setSaveCelebration({id:Date.now(),format:source.format,title:draft.title});
+      }
       return true;
     } catch (e) {
       setDraftStatus('offline');
@@ -765,7 +771,7 @@ function App() {
     const fingerprint=draftFingerprint(draft);
     const session=editorSessionRef.current;
     // Wait for the server, not only a local auto-save or the PNG download.
-    const saved=await save(draft,true);
+    const saved=await save(draft,false);
     if(!saved){
       toast(loginLanguage==='es'
         ?'No se pudo guardar. Tu diseño sigue aquí; inténtalo de nuevo.'
@@ -924,7 +930,7 @@ function App() {
     // Save the final visual design and planning date together, from the editor.
     const latest=editorLatestRef.current;
     if(!latest.brandId)return false;
-    const ok=await save({...latest,date,time,planningStatus:'planned'});
+    const ok=await save({...latest,date,time,planningStatus:'planned',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'},true);
     if(ok){setCalendarEditId('');setCalendarFocusDate(date);toast('Guardado en el calendario. Se publicará manualmente.');navigate('calendar')}
     return ok;
   };
