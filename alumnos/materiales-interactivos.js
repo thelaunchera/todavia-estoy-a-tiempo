@@ -1,3 +1,4 @@
+import {renderCasaBrownieLivePreview} from './casa-brownie-live-preview.js?v=20261107-real-demo-v1';
 import {renderWebBasics,renderProjectOrder,renderStudentWebPath} from './guia-principiantes.js?v=20261103-ai-first-v4';
 import {renderMakeResources,renderSafetyResources,renderLegalResources,renderConnectorPrompts} from './recursos-avanzados.js';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
@@ -231,7 +232,7 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    const b=el('button',null,getLanguage()==='en'?({inicio:'Start here',funciona:'How my website works',pasos:'Build step by step',organizacion:'Organize my project',prompts:'Prompt library',mara:'My website guide',make:'Make free tier',conectores:'Connector instructions',seguridad:'Passwords and keys',legal:'Footer and legal pages',cuaderno:'My workbook',ejemplo:'Website example',revision:'Final checklist'}[child]||meta[1]):meta[1]);b.type='button';b.dataset.view=child;b.setAttribute('aria-current',child===view?'page':'false');b.addEventListener('click',()=>go(child));subtabs.append(b);
   }
   content.replaceChildren();
-  if(getLanguage()==='en'&&!['prompts','cuaderno','revision'].includes(view)){
+  if(getLanguage()==='en'&&!['prompts','cuaderno','revision','ejemplo'].includes(view)){
    renderEnglishMaterialGuide(content,view,go);
    translateCurrentMaterial();return;
   }
@@ -495,24 +496,35 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   }else actions.children[0].addEventListener('click',()=>void save());
   actions.children[1].addEventListener('click',printCurrentMaterial);
  }
- function renderExample(){
-  section('06 / EL MISMO EJEMPLO DE TODA LA CLASE','Así se ve una página que se entiende.','Seguimos con Casa Brownie, el concepto ficticio de brownies tradicionales. No se aceptan pedidos ni cobros: se trata de una web informativa.');
-  const guide=el('div','mi-demo-controls');guide.innerHTML='<div><button type="button" data-device="mobile">Ver en teléfono</button><button type="button" data-device="desktop" aria-pressed="true">Ver en computadora</button></div><p>Ejemplo visual · los botones no procesan pedidos</p>';content.append(guide);
-  const frame=el('div','mi-demo-screen desktop');frame.innerHTML='<div class="mi-demo-browser"><i></i><i></i><i></i><small>VISTA DE EJEMPLO</small></div><div class="mi-demo-site"><div class="mi-demo-menu"><span>CASA BROWNIE</span><span>Por encargo · Preguntas</span></div><div class="mi-demo-hero"><div><span>UNA IDEA PARA COMPARTIR</span><h4>Brownies tradicionales, una idea por descubrir.</h4><p>Te mostramos cómo podría verse una web para presentar brownies tradicionales. No se aceptan pedidos.</p><button type="button" class="mi-demo-cta">Conoce el proyecto</button></div><div class="mi-cookie-scene" aria-label="Ilustración editorial de brownies"><i></i><i></i><i></i></div></div><div class="mi-demo-details"><div><strong>¿Qué recibes?</strong><span>Una presentación ficticia con imágenes y textos claros.</span></div><div><strong>¿Cómo funciona?</strong><span>La persona conoce la idea, revisa fotos y detalles.</span></div></div></div>';content.append(frame);
-  const state=el('p','mi-demo-state','Este es un ejemplo visual: no se venden brownies.');content.append(state);
-  frame.querySelector('.mi-demo-cta').addEventListener('click',()=>state.textContent='El botón es informativo; este ejemplo no envía pedidos ni guarda datos.');
-  guide.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const mobile=b.dataset.device==='mobile';frame.classList.toggle('mobile',mobile);frame.classList.toggle('desktop',!mobile);guide.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));}));
-  const notes=el('div','mi-explain-list');content.append(notes);
-  const items=[
-   ['01','Primera pantalla','La persona identifica el producto, a quién va dirigido y qué debe hacer.'],
-   ['02','Fotos fieles','La imagen acompaña la oferta. No inventa ingredientes, tamaños ni resultados.'],
-   ['03','Detalles que responden dudas','Explica qué incluye, cómo se pide, disponibilidad y entrega.'],
-   ['04','Un botón con sentido','Debe llevar a una compra admitida, reserva o consulta que realmente funcione.'],
-   ['05','Prueba en el teléfono','Revisa textos, recortes, tamaños y el destino de cada botón.']
-  ];
-  for(const [n,t,d] of items){const card=el('details','mi-explain');card.innerHTML='<summary><span>'+n+'</span><strong>'+esc(t)+'</strong><b>+</b></summary><p>'+esc(d)+'</p>';notes.append(card);}
-  content.append(el('p','mi-note','Tu proyecto puede ser muy diferente de este ejemplo. Lo importante es que cada sección responda una pregunta real.'));
- }
+
+  function renderExample(){
+   const en=getLanguage()==='en';
+   section(en?'06 / REAL CLASS EXAMPLE':'06 / EL EJEMPLO REAL DE LA CLASE',
+    en?'Explore the real Casa Brownie website.':'Explora la web real de Casa Brownie.',
+    en?'Use the published training website with its approved photography, flavor cards, gifting section and working demo interactions. The core class uses the still-image hero; the video belongs to a separate bonus.'
+      :'Aquí está la página oficial publicada: sus fotografías aprobadas, seis sabores, regalos y botones de demostración. La clase principal usa el hero con foto estática; el video pertenece a un bono separado.');
+   renderCasaBrownieLivePreview(content,getLanguage());
+   const notes=el('div','mi-explain-list');content.append(notes);
+   const items=en?[
+    ['01','The actual hero','Review the approved Casa Brownie photo, clear headline and first action.'],
+    ['02','Real product photography','Explore six distinct brownie flavors rather than illustrative placeholders.'],
+    ['03','Gifting and information','Find the actual gift section, story, details and footer in the published site.'],
+    ['04','Honest demo actions','Test the existing buttons: the demo does not accept real orders or payments.'],
+    ['05','Responsive verification','Switch between a 390 px phone and 1280 px desktop viewport; open the live link for a full-size test.']
+   ]:[
+    ['01','La portada verdadera','Observa la fotografía aprobada de Casa Brownie, su título y su primer botón.'],
+    ['02','Fotografías reales del demo','Explora los seis sabores con sus fotos individuales aprobadas, sin ilustraciones falsas.'],
+    ['03','Regalos y contenido','Recorre el bloque de regalos, la historia, la información y el footer del sitio publicado.'],
+    ['04','Botones honestos','Prueba las acciones de la web: la demostración no recibe pedidos ni pagos reales.'],
+    ['05','Prueba responsive','Cambia entre 390 px para teléfono y 1280 px para escritorio; abre el enlace para probarlo a tamaño completo.']
+   ];
+   for(const [n,title,description] of items){
+    const card=el('details','mi-explain');
+    card.innerHTML='<summary><span>'+n+'</span><strong>'+esc(title)+'</strong><b>+</b></summary><p>'+esc(description)+'</p>';
+    notes.append(card);
+   }
+   content.append(el('p','mi-note',en?'Casa Brownie is the finished teaching example. Your own business should have its own real brand, images, and working contact path.':'Casa Brownie es el ejemplo terminado de la clase. Tu negocio tendrá su propia marca, fotografías y una vía de contacto funcional.'));
+  }
  function renderChecks(){
   if(getLanguage()==='en')section('05 / BEFORE YOU SHARE','Is your webpage ready?','Check each item after you actually test it. Leave incomplete items unchecked.');
   else section('05 / ANTES DE COMPARTIR','¿Está lista tu página?','Marca una casilla cuando hayas hecho la prueba. Si algo falta, déjalo pendiente y vuelve después.');
