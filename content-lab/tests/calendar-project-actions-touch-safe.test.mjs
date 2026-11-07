@@ -30,7 +30,7 @@ test('project download routes saved carousel to PNG step and keeps photo project
  assert.match(app,/edit\(saved,true,true\)/);
  assert.match(app,/initialStep=\{calendarDownloadId===editor\.id\?'download':undefined\}/);
  assert.match(carousel,/initialStep\?:'canvas'\|'download'/);
- assert.match(carousel,/\(initialStep\)/);
+ assert.match(carousel,/if\(initialStep==='download'\)setStudioTab\('download'\)/);
 });
 
 test('tap to select a carousel object cannot mount inline duplication under the finger',()=>{
