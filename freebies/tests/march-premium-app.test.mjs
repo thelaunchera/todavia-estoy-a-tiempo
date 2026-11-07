@@ -72,3 +72,41 @@ test('Original artwork requires no image generation credits and both language la
   assert.ok(lang.includes('FLUJO DE PANTALLAS'));
   assert.ok(lang.includes('SCREEN FLOW'));
 });
+
+test('March pages load in Spanish and can switch all visitor copy to English',()=>{
+ const landing=get('freebies/march-premium-app/index.html');
+ const access=get('freebies/march-premium-app/access/index.html');
+ for(const html of [landing,access]){
+  assert.ok(html.includes('<html lang="es">'),'Spanish must be the default language');
+  assert.ok(html.includes('id="language"'),'Both pages need a language switch');
+  assert.ok(html.includes('data-en='),'Bilingual strings are missing');
+  assert.ok(html.includes('data-es='),'Spanish strings are missing');
+  assert.ok(html.includes('lang==="es"')||html.includes('lang==="en"'));
+  assert.ok(html.includes('cover-es.svg'),'Spanish first-look artwork must be present');
+ }
+ assert.ok(landing.includes('>Próximamente</button>'));
+ assert.ok(landing.includes('data-en="Walkthrough video"'));
+ assert.ok(landing.includes('data-es="Video del recorrido"'));
+ assert.ok(landing.includes('data-en="01 / GET STARTED"'));
+ assert.ok(landing.includes('data-es="01 / COMIENZA"'));
+ assert.ok(access.includes('data-en="One clear promise"'));
+ assert.ok(access.includes('data-es="Una promesa clara"'));
+ assert.ok(access.includes('data-es="Revisión final:"'));
+ assert.ok(existsSync(resolve(root,'assets/freebies/march-premium-app/cover-es.svg')));
+});
+test('March keeps separate, original English and Spanish cover artwork',()=>{
+ const en=get('assets/freebies/march-premium-app/cover.svg');
+ const es=get('assets/freebies/march-premium-app/cover-es.svg');
+ assert.ok(en.includes('Design an app')&&en.includes('Capture.'));
+ assert.ok(es.includes('Diseña una app')&&es.includes('Captura.'));
+ assert.ok(es.includes('Enfoca.')&&es.includes('Termina.'));
+});
+test('Shared private library renders translated prompt titles without touching older packs',()=>{
+ const src=get('freebies/_shared/freebie-access.js');
+ assert.ok(src.includes('item.title_es||item.title'));
+ assert.ok(src.includes('editor.setAttribute("aria-label",displayTitle)'));
+ assert.ok(src.includes('lang==="es"?"EN":"ES"'));
+ assert.ok(src.includes('november_web_one_prompt_2026'));
+ assert.ok(src.includes('december_lavender_2026'));
+ assert.ok(src.includes('salt_line_january_2027'));
+});
