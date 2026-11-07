@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
+import ClassInterlude, {type ClassInterludeKind} from './ClassInterlude';
 import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
 import {recordingStarts, RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
@@ -32,6 +33,10 @@ function safeStatus(value?:string) {
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
 // Record practical lessons first; the welcome video is filmed at the end.
 const tabletFilmingOrder=[...classLessons.filter(x=>x.id!=='00'),...classLessons.filter(x=>x.id==='00')];
+type InterludeLaunch={
+ chapter:string; title:string; subtitle:string; stepNumber:number;
+ totalSteps:number; kind:ClassInterludeKind; advanceTo:number|null; fromLessonId:string;
+};
 
 export default function ClassProduction({entries,tasks,focusPending,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
  const [lessonId,setLessonId]=useState(()=>(typeof window!=='undefined'&&window.matchMedia?.('(pointer: coarse) and (min-width: 650px)').matches)?'01':'00');
@@ -59,6 +64,8 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
   return Boolean(window.matchMedia?.('(pointer: coarse) and (min-width: 650px)').matches);
  });
  const [tabletCue,setTabletCue]=useState<'screen'|'voice'>('screen');
+ const [interludeKind,setInterludeKind]=useState<ClassInterludeKind>('clase');
+ const [interlude,setInterlude]=useState<InterludeLaunch|null>(null);
  useEffect(()=>{try{window.localStorage.setItem('tle_class_tablet_filming_v1',tabletMode?'yes':'no');}catch{}},[tabletMode]);
  // A task card in Mis tareas opens the exact existing class workspace.
  useEffect(()=>{
@@ -95,12 +102,44 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  useEffect(()=>{
    setStatus(safeStatus(record?.status));setNotes(record?.notes||'');setUrl(record?.link||'');
    setChecked((record?.performance_notes||'').split(',').filter(Boolean).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length));
-   setNotice('');setScene(0);setCopied('');
+   setNotice('');setScene(0);setCopied('');setInterlude(null);
  },[lessonId,record?.id]);
  function choose(id:string){
    if(changed && !window.confirm('Tienes cambios sin guardar. ¿Cambiar de video y descartarlos?')) return;
    // Reset immediately, before rendering the next lesson: some chapters have fewer scenes.
-   setScene(0);setTabletCue('screen');setLessonId(id);setMode('scene');
+   setInterlude(null);setScene(0);setTabletCue('screen');setLessonId(id);setMode('scene');
+ }
+ function showInterlude(preview:boolean,forcedKind?:ClassInterludeKind){
+  const nextIndex=scene+1;
+  const nextBeat=lesson.beats[nextIndex];
+  const index=tabletFilmingOrder.findIndex(x=>x.id===lesson.id);
+  const following=index>=0?tabletFilmingOrder[index+1]:undefined;
+  const isDemo=forcedKind==='demo';
+  const title=isDemo?'Casa Brownie · Nuestra web de ejemplo':
+   nextBeat?nextBeat.label:following?following.title:'Tu web, lista para compartir';
+  const subtitle=isDemo?'Una demostración educativa. Sin compras ni pagos reales.':
+   nextBeat?(
+    nextBeat.show.length>116?nextBeat.show.slice(0,113).trimEnd()+'…':nextBeat.show
+   ):following?'Lo que viene en la siguiente clase, paso a paso.':
+   'Revisión final de lo que construimos.';
+  setInterlude({
+   chapter:isDemo?lesson.id:(nextBeat?lesson.id:following?.id||lesson.id),
+   title,subtitle,
+   stepNumber:isDemo?scene+1:(nextBeat?nextIndex+1:1),
+   totalSteps:nextBeat||isDemo?lesson.beats.length:(following?.beats.length||1),
+   kind:forcedKind||interludeKind,
+   advanceTo:!preview&&!isDemo&&nextBeat?nextIndex:null,
+   fromLessonId:lesson.id
+  });
+ }
+ function completeInterlude(){
+  const target=interlude;
+  setInterlude(null);
+  if(target && target.advanceTo!==null && target.fromLessonId===lesson.id){
+   setScene(target.advanceTo);
+   setTabletCue('screen');
+   setCopied('');
+  }
  }
  async function copy(text:string, key:string) {
    try { await navigator.clipboard.writeText(text);setCopied(key); }
@@ -277,9 +316,28 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <div className="class-tablet-scene-nav">
      <button type="button" disabled={scene===0} onClick={()=>{setScene(n=>Math.max(0,n-1));setCopied('');}}><span aria-hidden="true">‹</span> Anterior</button>
      <strong>{scene+1} / {lesson.beats.length}</strong>
-     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(n=>Math.min(lesson.beats.length-1,n+1));setCopied('');}}>Siguiente <span aria-hidden="true">›</span></button>
+     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente con animación <span aria-hidden="true">›</span></button>
     </div>
    </div>
+   <section className="class-tablet-interlude-setup" aria-labelledby="class-transition-title">
+    <div className="class-tablet-interlude-heading">
+     <span className="class-mini-heading">MINI PÁGINAS ANIMADAS</span>
+     <h4 id="class-transition-title">Una pausa bonita entre escenas.</h4>
+     <p>El título cambia automáticamente según lo que viene después. La tarjeta se muestra durante unos cuatro segundos y luego abre la escena siguiente.</p>
+    </div>
+    <div className="class-tablet-interlude-options">
+     <label>Rótulo de la transición
+      <select aria-label="Rótulo de la transición" value={interludeKind} onChange={e=>setInterludeKind(e.target.value as ClassInterludeKind)}>
+       <option value="clase">CLASE · 01</option>
+       <option value="concepto">CONCEPTO · 01</option>
+       <option value="demo">DEMO · 01</option>
+      </select>
+     </label>
+     <button type="button" onClick={()=>showInterlude(true)}><MonitorPlay size={18}/> Ver transición de la siguiente escena</button>
+     <button type="button" onClick={()=>showInterlude(true,'demo')}><Film size={17}/> Probar ejemplo DEMO</button>
+    </div>
+    <p className="class-tablet-interlude-tip"><ShieldCheck size={15}/> Es una mini página real del Studio para grabar en pantalla desde el iPad. No modifica la web de Casa Brownie ni genera un video automáticamente.</p>
+   </section>
    <div className="class-tablet-actions">
     <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir demo oficial Casa Brownie</a>
     <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
@@ -454,7 +512,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        <div className="class-scene-nav">
         <button type="button" disabled={scene===0} onClick={()=>{setScene(scene-1);setCopied('');}}> Anterior</button>
         <span>{scene+1} / {lesson.beats.length}</span>
-        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(scene+1);setCopied('');}}>Siguiente escena </button>
+        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente con transición </button>
        </div>
       </div> : <div className="class-overview-beats">{lesson.beats.map((beat,i)=><article key={i}><h5>{i+1}. {beat.label}</h5><b>Qué decir</b><p>{beat.say}</p><b>Qué enseñar</b><p>{beat.show}</p></article>)}</div>}
       <div className="class-copy-row class-prompt-actions">
@@ -516,5 +574,10 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
   </div>
   </>}
+  {interlude&&<ClassInterlude
+   chapter={interlude.chapter} title={interlude.title} subtitle={interlude.subtitle}
+   stepNumber={interlude.stepNumber} totalSteps={interlude.totalSteps}
+   kind={interlude.kind} onComplete={completeInterlude} onCancel={()=>setInterlude(null)}
+  />}
  </section>;
 }

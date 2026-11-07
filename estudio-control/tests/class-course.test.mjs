@@ -234,3 +234,26 @@ test('Studio muestra Casa Brownie sin video y con video como demos distintos',()
  assert.match(library,/Abrir versión con video/);
  assert.match(style,/finished-demo-variant-static|finished-demo-variant/);
 });
+
+test('class scene transition uses private full-frame mini page between teaching scenes',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const path=new URL('../src/',import.meta.url);
+ const production=readFileSync(new URL('ClassProduction.tsx',path),'utf8');
+ const interlude=readFileSync(new URL('ClassInterlude.tsx',path),'utf8');
+ const css=readFileSync(new URL('class-interlude.css',path),'utf8');
+ assert.match(production,/import ClassInterlude/);
+ assert.match(production,/Siguiente con animación/);
+ assert.match(production,/showInterlude\(false\)/);
+ assert.match(production,/showInterlude\(true,'demo'\)/);
+ assert.match(production,/advanceTo:!preview&&!isDemo&&nextBeat\?nextIndex:null/);
+ assert.match(production,/target\.fromLessonId===lesson\.id/);
+ assert.match(interlude,/createPortal/);
+ assert.match(interlude,/window\.setTimeout\(\(\)=>callbacks\.current\.onComplete\(\),4600\)/);
+ assert.match(interlude,/role="dialog"/);
+ assert.match(interlude,/aria-modal="true"/);
+ assert.match(interlude,/event\.key==='Escape'/);
+ assert.match(css,/aspect-ratio:16\/9/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(css,/ci-wipe/);
+ assert.doesNotMatch(css,/background:linear-gradient/);
+});
