@@ -100,3 +100,15 @@ test('course prompts group into seven bilingual learning stages without mixing c
  for(const code of ['demo_crumb_0','demo-photo_crumb_0_1'])assert.equal(promptShelf({prompt_code:code,brand:'Crumb'}),'demos');
  assert.equal(promptPack({prompt_code:'demo_crumb_0',brand:'Crumb'},'es').id,promptPack({prompt_code:'demo-photo_crumb_0_1',brand:'Crumb'},'es').id);
 });
+
+test('lavender demo overrides seasonal pack name so the brand keeps all its photos and build steps',async()=>{
+ const {promptPack,promptShelf}=await import('./prompt-guide.js');
+ for(const lang of ['es','en']){
+  const first=promptPack({prompt_code:'demo_lavender-edit_0',brand:'The Lavender Edit',title:'Hero photo'},lang);
+  const photo=promptPack({prompt_code:'demo-photo_lavender-edit_0_1',brand:'The Lavender Edit',title:'Portrait'},lang);
+  assert.equal(first.id,'demo:lavender-edit');
+  assert.equal(photo.id,first.id);
+  assert.equal(promptShelf({prompt_code:'demo_lavender-edit_0',brand:'The Lavender Edit'}),'demos');
+  assert.notEqual(first.id,promptPack({prompt_code:'december_1',title:'December Creative Pack · Lavender'},lang).id);
+ }
+});
