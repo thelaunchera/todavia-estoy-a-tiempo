@@ -41,7 +41,7 @@ test('only student-authenticated classroom screens explain named learning tools'
   for(const name of ['ChatGPT:','AppDeploy:','Google Drive:','Make, Gmail y Stripe:']) {
     assert.ok(classroom.includes(name),'Required student tool explanation: '+name);
   }
-  for(const translated of ['ChatGPT: organize','AppDeploy: turn','Google Drive: save','Make, Gmail, and Stripe:']) {
+  for(const translated of ['ChatGPT: you describe','AppDeploy: turn','Google Drive: connect and authorize','Make, Gmail, and Stripe:']) {
     assert.ok(classroomStatic.includes(translated),'Missing English classroom tool text: '+translated);
   }
   assert.match(classroomEnglish,/\.dashboard-setup-details > summary/);
