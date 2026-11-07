@@ -6,7 +6,8 @@ const resource=form.querySelector('[name="resource"]')?.value;
 const release=({
  november_web_one_prompt_2026:"2026-11-19",
  december_lavender_2026:"2026-12-01",
- salt_line_january_2027:"2027-01-02"
+ salt_line_january_2027:"2027-01-02",
+ march_premium_app_2027:"2027-03-01"
 })[resource]||form.dataset.releaseDate;
 if(!resource||!release)return;
 const submit=form.querySelector('[type="submit"]');if(!submit)return;
