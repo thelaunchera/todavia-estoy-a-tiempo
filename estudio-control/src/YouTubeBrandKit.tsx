@@ -10,6 +10,37 @@ function saveJson(name:string,data:unknown){
  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();
  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function checkBumperDuration(file:File,maxSeconds:number):Promise<void>{
+ return new Promise((resolve,reject)=>{
+  const video=document.createElement('video');
+  const url=URL.createObjectURL(file);
+  let completed=false;
+  let timer:number|undefined;
+  const finish=(error?:Error)=>{
+   if(completed)return;
+   completed=true;
+   if(timer!==undefined)window.clearTimeout(timer);
+   video.onloadedmetadata=null;
+   video.onerror=null;
+   video.removeAttribute('src');
+   video.load();
+   URL.revokeObjectURL(url);
+   if(error)reject(error);else resolve();
+  };
+  video.preload='metadata';
+  video.playsInline=true;
+  video.onloadedmetadata=()=>{
+   const seconds=video.duration;
+   if(!Number.isFinite(seconds)||seconds<=0)finish(new Error('No se pudo leer la duración del video. Usa un MP4 o WEBM válido.'));
+   else if(seconds>maxSeconds+0.1)finish(new Error('Este video dura '+Math.round(seconds*10)/10+' segundos. La animación del logo admite hasta '+maxSeconds+' segundos.'));
+   else finish();
+  };
+  video.onerror=()=>finish(new Error('No se pudo abrir el video. Comprueba que sea MP4 o WEBM.'));
+  timer=window.setTimeout(()=>finish(new Error('No se pudo comprobar la duración del video. Prueba con un MP4 optimizado para web.')),10000);
+  video.src=url;
+  video.load();
+ });
+}
 function showPreview(asset:StudioBrandAsset|undefined){
  if(!asset?.url)return null;
  if(asset.mime_type.startsWith('video/'))return <video src={asset.url} controls preload="metadata" playsInline/>;
@@ -42,7 +73,7 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  };
  const upload=async(slot:BrandAssetSlot,file:File)=>{
   setBusy(slot.id);setNotice('');setError('');
-  try{await uploadYouTubeBrandAsset(slot.id,file,slot.maxMb);await reload();setNotice(slot.title+' guardado en la biblioteca privada.');}
+  try{if(slot.id==='video_bumper')await checkBumperDuration(file,10);await uploadYouTubeBrandAsset(slot.id,file,slot.maxMb);await reload();setNotice(slot.title+' guardado en la biblioteca privada.');}
   catch(e){setError(e instanceof Error?e.message:'No se pudo guardar el archivo.');}
   finally{setBusy('');}
  };
@@ -63,7 +94,7 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  const renderCard=(slot:BrandAssetSlot)=>{
   const asset=files[slot.id];
   const linked=entries.find(entry=>entry.section==='youtube-storyboards-v1' && entry.title==='OFF BRIEF brand: '+slot.id);
-  const accept=slot.kind==='image'?'image/png,image/jpeg,image/webp':slot.kind==='video'?'video/mp4,video/webm':'audio/mpeg,audio/wav,audio/x-wav';
+  const accept=slot.kind==='image'?'image/png,image/jpeg,image/webp':slot.kind==='video'?'video/mp4,video/webm,.mp4,.webm':'audio/mpeg,audio/wav,audio/x-wav';
   return <article key={slot.id} className="ob-kit-card">
    <div className="ob-kit-preview">
     {asset?.url?showPreview(asset):linked?.art?<img src={linked.art} alt={slot.title} loading="lazy"/>:<div className="ob-kit-blank">{getIcon(slot)}<span>Pendiente de subir</span></div>}
@@ -74,6 +105,7 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
     <p>{slot.details}</p>
     <p className="ob-kit-format">{slot.format} · límite {slot.maxMb} MB</p>
     {asset&&<p className="ob-kit-filename" title={asset.file_name}>{asset.file_name}</p>}
+    {slot.id==='video_bumper'&&<p className="ob-kit-file-help">En iPhone: «Subir archivo» → «Explorar» → Google Drive si está disponible en Archivos. Si no aparece, guarda primero el video de Drive en Archivos. Solo MP4/WEBM de hasta 10 segundos.</p>}
     <div className="ob-kit-actions">
      <label htmlFor={'offbrief-'+slot.id} className={'ob-kit-upload'+(busy===slot.id?' is-busy':'')}>
       <UploadCloud size={15}/>{busy===slot.id?'Guardando...':asset?'Reemplazar':'Subir archivo'}
