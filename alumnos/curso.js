@@ -1,6 +1,6 @@
 import {supabaseUrl,supabasePublishableKey,courseId} from '../clases/course-config.js';
 import {courseCopy,translateCourseMessage} from './aula-mensajes.js?v=20261103-safari-restore-v1';
-import {mountMateriales} from './materiales-interactivos.js?v=20261107-visual-levels-v3';
+import {mountMateriales} from './materiales-interactivos.js?v=20261107-live-casa-v1';
 import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-command-center-v3';
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-learning-clarity-v1';
