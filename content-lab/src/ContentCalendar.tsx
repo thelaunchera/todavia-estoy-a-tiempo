@@ -202,7 +202,7 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
      </button>
      <div className="lab-calendar-item-actions">
        <button type="button" className="lab-calendar-project-download" disabled={!!actionBusy} onClick={()=>void downloadProject(p)}>
-         <Download size={14}/>{actionBusy==='download:'+p.id?'…':locale==='es'?'Descargar proyecto':'Download project'}</button>
+         <Download size={14}/>{actionBusy==='download:'+p.id?'…':p.kind==='grid'?(locale==='es'?'Abrir para descargar':'Open to download'):(locale==='es'?'Descargar proyecto':'Download project')}</button>
        <button type="button" className="lab-calendar-reschedule" onClick={()=>choose(p.id)}>
          <Clock3 size={13}/>{locale==='es'?'Cambiar fecha':'Change date'}</button>
        <button type="button" className="lab-calendar-project-delete" disabled={!!actionBusy} onClick={()=>void deleteProject(p)}>
