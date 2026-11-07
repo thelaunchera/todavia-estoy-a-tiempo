@@ -11,6 +11,7 @@ const ui={
 };
 const messages={
  es:{
+  seriesTag:"SERIE CREATIVA DE MARZO",seriesNumber:"001 / DEMO ORIGINAL",seriesFooter:"DISEÑADO POR THE LAUNCH ERA · CONCEPTO ORIGINAL FICTICIO",
   editorialLabel:"UNA FLORISTERÍA, UNA EXPERIENCIA MEJOR",
   editorialHeading:"Las flores merecen <em>una buena espera.</em>",
   editorialBody:"Una fila virtual para un flower bar. Sin buscar el final de la fila ni perder tu lugar. Solo flores y un momento para disfrutar.",
@@ -48,6 +49,7 @@ const messages={
   demoAria:"Progreso del recorrido",queueAria:"Tu posición en la fila"
  },
  en:{
+  seriesTag:"MARCH CREATIVE SERIES",seriesNumber:"001 / ORIGINAL DEMO",seriesFooter:"DESIGNED BY THE LAUNCH ERA · AN ORIGINAL FICTIONAL CONCEPT",
   editorialLabel:"ONE FLOWER BAR, A BETTER EXPERIENCE",
   editorialHeading:"Flowers are worth <em>waiting for.</em>",
   editorialBody:"A virtual line for a flower bar. No searching for the back of the line or losing your spot. Just flowers and a moment to enjoy.",
