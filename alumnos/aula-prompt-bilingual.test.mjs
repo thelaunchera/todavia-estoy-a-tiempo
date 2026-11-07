@@ -130,7 +130,21 @@ test('visual levels: category, guidance and copyable prompt are distinct in the 
  assert.match(css,/\.mi-pack-overview\{/);
  assert.match(css,/\.mi-prompt-pack \.mi-prompt-guide\{/);
  assert.match(css,/\.mi-prompt-copy-panel \.mi-prompt-text\{/);
- assert.match(html,/materiales-interactivos\.css\?v=20261107-visual-levels-v3/);
+ assert.match(html,/materiales-interactivos\.css\?v=20261107-live-casa-v1/);
+});
+
+// The classroom must show the real published site, not the illustrative brownie placeholders.
+test('Casa Brownie preview uses the official website and true mobile/desktop iframes',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const here=new URL('./',import.meta.url);
+ const materials=readFileSync(new URL('materiales-interactivos.js',here),'utf8');
+ const preview=readFileSync(new URL('casa-brownie-live-preview.js',here),'utf8');
+ assert.match(materials,/renderCasaBrownieLivePreview\(content,getLanguage\(\)\)/);
+ assert.doesNotMatch(materials,/mi-demo-site/);
+ assert.match(preview,/https:\/\/thelaunchera\.com\/demos\/casa-brownie\/\?etapa=sin-video/);
+ assert.match(preview,/siteWidth=mobile\?390:1280/);
+ assert.match(preview,/iframe\.src=url/);
+ assert.match(preview,/external\.href=url/);
 });
 
 // Visual route regression: keep four functional phase buttons, approved lessons and private progress intact.
