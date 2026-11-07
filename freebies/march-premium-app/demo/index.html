@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#24162E">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="description" content="DAYLINE, un mini demo interactivo y bilingüe para capturar una idea, decidir el siguiente paso y celebrar un resultado.">
+  <title>DAYLINE — Demo interactivo | The Launch Era</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <main class="stage">
+    <aside class="story" aria-label="Presentación editorial">
+      <div class="story-top"><span class="overline">THE LAUNCH ERA <span class="dot">●</span> THE MARCH EDIT</span><span class="story-number">01 / 03</span></div>
+      <div class="story-center">
+        <span class="story-tag" data-i18n="storyTag">UN CONCEPTO ORIGINAL, UNA EXPERIENCIA REAL</span>
+        <h1 class="story-heading" data-i18n="storyHeading">Tu próxima gran idea <em>empieza pequeña.</em></h1>
+        <p class="story-sub" data-i18n="storySub">Captúrala. Elige el siguiente paso. Celebra que lo hiciste. Tres momentos diseñados para sentirse como una app de verdad.</p>
+        <div class="story-art" aria-hidden="true">
+          <svg viewBox="0 0 580 355" role="presentation" focusable="false">
+            <rect x="8" y="20" width="560" height="304" rx="154" fill="#D7D0FE"/>
+            <path d="M-7 272C65 108 204 75 326 133c104 50 151 37 264-7" fill="none" stroke="#24162E" stroke-width="18" stroke-linecap="round"/>
+            <path d="M189 327c-40-36-41-98 0-143 41-45 110-50 160-10 53 42 53 120-3 159" fill="none" stroke="#FF8A57" stroke-width="54" stroke-linecap="round"/>
+            <circle cx="353" cy="67" r="35" fill="#24162E"/>
+            <circle cx="353" cy="67" r="10" fill="#FAF6F1"/>
+            <circle cx="145" cy="260" r="18" fill="#FAF6F1"/>
+          </svg>
+          <span class="art-caption">DAYLINE / FORM STUDY 001</span>
+        </div>
+        <div class="story-bottom">
+          <span class="story-chip">PLUM / TANGERINE / LILAC</span>
+          <span data-i18n="storyPrivate" class="story-private">Prototipo funcional · datos locales</span>
+        </div>
+      </div>
+      <p class="powered">POWERED BY THE LAUNCH ERA</p>
+    </aside>
+
+    <div class="device-frame">
+      <div class="device" id="dayline-app">
+        <header class="app-header">
+          <div class="app-brand" aria-label="DAYLINE">
+            <svg width="35" height="35" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect width="40" height="40" rx="12" fill="#24162E"/><path d="M11 29V11h7c7 0 11 3 11 9s-4 9-11 9h-7Z" fill="#FF8A57"/><circle cx="20" cy="20" r="4" fill="#24162E"/></svg>
+            <span>dayline<span class="brand-period">.</span></span>
+          </div>
+          <div class="header-actions">
+            <span class="device-demo" data-i18n="demoTag">DEMO</span>
+            <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Cambiar a inglés">EN</button>
+          </div>
+        </header>
+
+        <div class="screen-scroll" id="screen-scroll">
+          <div class="connection-note" id="connection-note" hidden role="status"></div>
+
+          <section class="screen" id="screen-capture" aria-labelledby="capture-heading">
+            <div class="screen-intro">
+              <span class="screen-count" data-i18n="captureCount">01 / CAPTURAR</span>
+              <h2 id="capture-heading" data-i18n="captureHeadline">Toda gran idea empieza con un <em>quizás.</em></h2>
+              <p class="intro-desc" data-i18n="captureDesc">No tienes que tenerlo todo resuelto. Solo necesitas un lugar donde empezar.</p>
+            </div>
+            <div class="capture-art" aria-hidden="true">
+              <div class="capture-disc"></div><div class="capture-ribbon"></div><div class="capture-orbit"></div>
+              <span>make it<br><i>happen.</i></span>
+              <div class="capture-star">✳</div>
+            </div>
+            <form id="idea-form" class="editor-form" novalidate>
+              <div class="form-head"><label for="idea-title" data-i18n="ideaTitleLabel">¿Qué tienes en mente?</label><span class="field-count" id="idea-count">0/80</span></div>
+              <input id="idea-title" name="idea_title" maxlength="80" minlength="3" required autocomplete="off" placeholder="Ej. Lanzar mi tienda online" data-placeholder-es="Ej. Lanzar mi tienda online" data-placeholder-en="E.g. Launch my online store">
+              <label class="secondary-label" for="idea-notes" data-i18n="ideaNoteLabel">Una nota para tu yo del futuro <span>(opcional)</span></label>
+              <textarea id="idea-notes" name="idea_notes" rows="2" maxlength="300" placeholder="¿Por qué te emociona esta idea?" data-placeholder-es="¿Por qué te emociona esta idea?" data-placeholder-en="Why does this idea excite you?"></textarea>
+              <p id="form-error" class="field-error" role="alert" hidden></p>
+              <button class="primary-action" id="save-idea" type="submit"><span data-i18n="captureAction">Guardar mi idea</span><span class="button-icon" aria-hidden="true">↗</span></button>
+              <button class="text-action" id="sample-btn" type="button" data-i18n="trySample">Probar con una idea de ejemplo</button>
+            </form>
+            <div class="saved-section" id="saved-section" hidden>
+              <div class="saved-heading"><h3 data-i18n="myIdeas">MIS IDEAS</h3><span id="saved-count">0</span></div>
+              <div id="project-list" class="project-list"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-focus" aria-labelledby="focus-heading" hidden>
+            <div class="screen-intro">
+              <span class="screen-count" data-i18n="focusCount">02 / ENFOCAR</span>
+              <h2 id="focus-heading" data-i18n="focusHeadline">Una cosa a la <em>vez.</em></h2>
+              <p class="intro-desc" data-i18n="focusDesc">Lo importante no es hacerlo todo. Es saber qué sigue.</p>
+            </div>
+            <div class="empty-state" id="focus-empty">
+              <div class="empty-glyph" aria-hidden="true">✳</div>
+              <h3 data-i18n="focusEmptyTitle">Primero, captura una idea.</h3>
+              <p data-i18n="focusEmptyBody">Dale un nombre y luego decide el primer paso.</p>
+              <button class="primary-action" type="button" data-go="capture" data-i18n="goCapture">Capturar una idea</button>
+            </div>
+            <div id="focus-active" hidden>
+              <article class="focus-ticket">
+                <div class="ticket-top"><span data-i18n="activeIdea">TU IDEA EN MARCHA</span><span class="ticket-icon" aria-hidden="true">✳</span></div>
+                <h3 id="focus-idea-title"></h3>
+                <p id="focus-idea-notes"></p>
+                <div class="progress-head"><span data-i18n="progressLabel">Tu progreso</span><strong id="progress-number">0%</strong></div>
+                <div class="progress-track" role="progressbar" id="progress-track" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tu progreso"><div id="progress-fill"></div></div>
+              </article>
+              <div class="steps-header">
+                <h3 data-i18n="nextSteps">LOS SIGUIENTES PASOS</h3>
+                <span id="steps-counter">0/0</span>
+              </div>
+              <p id="steps-empty" class="empty-hint" data-i18n="stepsEmpty">Una idea se mueve con un paso pequeño. Escribe el primero.</p>
+              <div class="steps-list" id="steps-list"></div>
+              <form id="step-form" class="step-form" novalidate>
+                <label for="step-input" data-i18n="stepLabel">¿Qué harás primero?</label>
+                <div class="step-input-row"><input id="step-input" name="step" maxlength="100" required placeholder="Ej. Diseñar la primera pantalla" data-placeholder-es="Ej. Diseñar la primera pantalla" data-placeholder-en="E.g. Design the first screen"><button type="submit" id="add-step" class="add-step" aria-label="Añadir paso" title="Añadir paso">+</button></div>
+                <p class="field-error" id="step-error" role="alert" hidden></p>
+              </form>
+              <p class="hint" data-i18n="finishHint">Marca el paso cuando esté listo. Puedes añadir más en cualquier momento.</p>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-done" aria-labelledby="done-heading" hidden>
+            <div class="screen-intro">
+              <span class="screen-count" data-i18n="doneCount">03 / TERMINAR</span>
+              <h2 id="done-heading" data-i18n="doneHeadline">Mira lo que <em>hiciste.</em></h2>
+              <p class="intro-desc" data-i18n="doneDesc">Una idea menos en tu cabeza. Un logro más en el mundo.</p>
+            </div>
+            <div class="empty-state" id="done-empty">
+              <div class="empty-glyph" aria-hidden="true">✷</div>
+              <h3 data-i18n="doneEmptyTitle">Tu momento llegará.</h3>
+              <p data-i18n="doneEmptyBody">Completa al menos un paso para celebrarlo aquí.</p>
+              <button class="primary-action" type="button" data-go="focus" data-i18n="goFocus">Volver a mis pasos</button>
+            </div>
+            <div id="done-active" hidden>
+              <div class="success-art" aria-hidden="true"><div class="success-ring"></div><div class="success-center">✓</div><span class="success-spark spark-a">✳</span><span class="success-spark spark-b">✦</span><span class="success-spark spark-c">✳</span></div>
+              <span class="celebration-label" data-i18n="completedLabel">HECHO POR TI. A TU MANERA.</span>
+              <h3 class="success-title" data-i18n="completedHeading">Lo hiciste <em>real.</em></h3>
+              <p id="completed-name" class="completed-name"></p>
+              <p class="completed-meta" id="completed-meta"></p>
+              <button class="primary-action" id="new-idea-btn" type="button"><span data-i18n="newIdeaAction">Empezar otra idea</span><span class="button-icon" aria-hidden="true">↗</span></button>
+            </div>
+          </section>
+        </div>
+
+        <div class="privacy-line" id="privacy-line" role="status"><span class="privacy-dot"></span><span data-i18n="localStorageNote">Este demo guarda tus ideas solo en este navegador.</span></div>
+
+        <nav class="bottom-nav" aria-label="Navegación de DAYLINE">
+          <button type="button" data-nav="capture" aria-current="page"><span class="nav-icon" aria-hidden="true">✎</span><span data-i18n="tabCapture">Capturar</span></button>
+          <button type="button" data-nav="focus"><span class="nav-icon" aria-hidden="true">◎</span><span data-i18n="tabFocus">Enfocar</span></button>
+          <button type="button" data-nav="done"><span class="nav-icon" aria-hidden="true">✳</span><span data-i18n="tabDone">Terminar</span></button>
+        </nav>
+        <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+        <dialog id="delete-dialog" aria-labelledby="delete-title">
+          <h3 id="delete-title" data-i18n="deleteTitle">¿Eliminar esta idea?</h3>
+          <p data-i18n="deleteDesc">La idea y sus pasos se borrarán de este navegador.</p>
+          <div class="dialog-actions"><button type="button" id="cancel-delete" class="secondary-button" data-i18n="cancel">Cancelar</button><button type="button" id="confirm-delete" class="danger-button" data-i18n="delete">Eliminar</button></div>
+        </dialog>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
