@@ -1,0 +1,50 @@
+/* Content Lab — one subtle bell; mobile-first private notification inbox. */
+.lab-alert-bell{position:relative;display:grid;place-items:center;flex:none;min-width:40px;min-height:40px;
+ border:1px solid #e4e5e1;border-radius:11px;background:#fff;color:#191919;cursor:pointer}
+.lab-alert-bell.active{border-color:#b89e37;background:#fffbea}
+.lab-alert-count{position:absolute;top:-5px;right:-6px;display:grid;place-items:center;min-width:19px;height:19px;
+ padding:0 4px;background:#191919;color:#fff;font:750 10px Prompt,Arial,sans-serif;border-radius:12px;border:2px solid #fff}
+@keyframes labBellRing{0%,100%{transform:rotate(0)}12%,42%{transform:rotate(16deg)}28%,60%{transform:rotate(-13deg)}}
+.lab-alert-bell.is-ringing>svg{animation:labBellRing .75s ease-in-out 2;transform-origin:top center}
+.lab-alert-layer{position:fixed;inset:0;z-index:3000;pointer-events:none}
+.lab-alert-backdrop{position:absolute;inset:0;border:0;background:rgba(14,23,26,.16);pointer-events:auto}
+.lab-alert-panel{position:absolute;right:max(10px,env(safe-area-inset-right));top:calc(57px + env(safe-area-inset-top));
+ display:flex;flex-direction:column;width:min(400px,calc(100vw - 20px));max-height:min(76dvh,680px);
+ background:#FAF8F3;border:1px solid #e5e4df;border-radius:17px;box-shadow:0 17px 75px #17262c33;
+ overflow:hidden;pointer-events:auto;color:#191919;font-family:Prompt,Futura,Arial,sans-serif}
+.lab-alert-panel>header{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:15px 17px 11px;
+ border-bottom:1px solid #e4e2da;background:#FAF8F3}
+.lab-alert-panel>header h2{font-size:19px;letter-spacing:-.04em;margin:2px 0 0}
+.lab-alert-kicker{font-size:9px;letter-spacing:.15em;color:#708084;font-weight:800}
+.lab-alert-panel>header button,.lab-alert-error button{display:grid;place-items:center;min-width:34px;min-height:34px;
+ background:#fff;border:1px solid #e3e5e1;border-radius:9px;color:#191919}
+.lab-alert-scroll{min-height:80px;max-height:43dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.lab-alert-item{display:flex;gap:10px;padding:14px 15px;background:white;border-bottom:1px solid #edece6}
+.lab-alert-item-icon{display:grid;place-items:center;flex:none;width:33px;height:33px;background:#F2D85B;border-radius:10px;color:#191919}
+.lab-alert-item-main{flex:1;min-width:0}
+.lab-alert-item-main>strong{font-size:13px}
+.lab-alert-item-main p{font-size:11px;line-height:1.45;color:#4b636a;margin:4px 0}
+.lab-alert-item-main>small{display:block;color:#738086;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+.lab-alert-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.lab-alert-actions button{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-height:35px;
+ font:700 11px Prompt,Arial,sans-serif;color:#304a51;background:#fff;border:1px solid #dce2e2;border-radius:9px;padding:6px 9px;cursor:pointer}
+.lab-alert-actions button.primary{background:#191919;color:#fff;border-color:#191919}
+.lab-alert-actions button:disabled{opacity:.55}
+.lab-alert-empty{display:grid;place-items:center;text-align:center;padding:26px 17px;gap:7px;background:#fff}
+.lab-alert-empty>svg{color:#2a566c}.lab-alert-empty strong{font-size:14px}
+.lab-alert-empty p{font-size:11px;color:#6a7a7c;margin:0}
+.lab-alert-error{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:8px 12px;
+ background:#fff3ee;color:#99453a;font-size:11px}
+.lab-alert-preferences{display:grid;gap:9px;padding:12px 15px 16px;border-top:1px solid #e3e4de;background:#FAF8F3}
+.lab-alert-preferences>strong{font-size:11px}
+.lab-alert-setting{display:flex;align-items:center;gap:8px;min-height:33px;font-size:11px;font-weight:600;color:#3c535b}
+.lab-alert-setting>span{flex:1}
+.lab-alert-setting input{width:19px;height:19px;accent-color:#191919;cursor:pointer}
+.lab-alert-preferences>small{font-size:10px;line-height:1.45;color:#61757a}
+@media(max-width:600px){
+ .lab-alert-panel{position:absolute;top:calc(49px + env(safe-area-inset-top));right:8px;
+  width:min(390px,calc(100vw - 16px));max-height:min(78dvh,700px)}
+ .lab-alert-scroll{max-height:39dvh}
+ .lab-alert-bell{min-width:38px;min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){.lab-alert-bell.is-ringing>svg{animation:none}}
