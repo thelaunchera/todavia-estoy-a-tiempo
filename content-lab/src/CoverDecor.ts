@@ -31,7 +31,7 @@ export function readCoverDecor(data?:string):CoverDecor{
        .map(([id,value])=>[id,Math.max(0,Math.min(1,value as number))])):undefined,
    stickerTints:p.stickerTints&&typeof p.stickerTints==='object'
      ?Object.fromEntries(Object.entries(p.stickerTints as Record<string,unknown>)
-       .filter(([id,value])=>id.length<150&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value)).slice(0,24)):undefined,
+       .filter(([id,value])=>id.length<150&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value)).slice(0,24).map(([id,value])=>[id,String(value)])):undefined,
    headlineRect:p.headlineRect&&typeof p.headlineRect==='object'?p.headlineRect:undefined,
    primaryPhotoRect:p.primaryPhotoRect&&typeof p.primaryPhotoRect==='object'?p.primaryPhotoRect:undefined,
    headlineStyle:p.headlineStyle&&typeof p.headlineStyle==='object'?{
