@@ -670,3 +670,30 @@
    border-color:#bbb!important;box-shadow:none!important;
  }
 }
+
+
+/* Live Casa Brownie teaching preview: the iframe is the actual published site. */
+.mi-live-demo{min-width:0;margin:18px 0 28px}
+.mi-live-note{font-size:13px;line-height:1.7;color:#37546a;background:#edf4f7;border:1px solid #d8e5ec;border-radius:14px;padding:15px 17px;margin:0 0 14px}
+.mi-live-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 13px}
+.mi-live-switcher{display:flex;gap:4px;border-radius:999px;padding:5px;background:#eaf1f5;min-width:0}
+.mi-live-switcher button{appearance:none;border:0;background:transparent;border-radius:999px;padding:11px 17px;min-height:44px;cursor:pointer;color:#4d6a7b;font-weight:750;font-size:12px;line-height:1.2}
+.mi-live-switcher button[aria-pressed=true]{background:#fffefa;box-shadow:0 3px 12px #223b521a;color:#23485e}
+.mi-live-open{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:99px;border:1px solid #c3d5df;padding:10px 16px;text-decoration:none;color:#244c65;background:#fffefa;font-size:12px;font-weight:750}
+.mi-live-open:hover,.mi-live-open:focus-visible{border-color:#5a819a;text-decoration:underline}
+.mi-live-frame{width:100%;margin:0;max-width:100%;padding:14px;overflow:hidden}
+.mi-live-viewport{position:relative;display:block;overflow:hidden;width:100%;min-width:0;border-radius:12px}
+.mi-live-stage{position:relative;overflow:hidden;max-width:100%;margin:0 auto;border:1px solid #d9d0c9;border-radius:8px;background:#fffaf2}
+.mi-live-iframe{position:absolute;display:block;top:0;left:0;border:0;background:#fffaf2;transform-origin:0 0;max-width:none!important;max-height:none!important}
+.mi-live-frame[data-device=desktop] .mi-live-stage{border-radius:5px}
+.mi-live-frame .mi-demo-browser{padding-bottom:12px}
+.mi-live-frame .mi-demo-browser small{font-size:10px}
+@media(max-width:540px){
+ .mi-live-toolbar{flex-direction:column;align-items:stretch}
+ .mi-live-switcher{width:100%}
+ .mi-live-switcher button{flex:1;padding:10px 8px}
+ .mi-live-open{width:100%}
+ .mi-live-frame{padding:9px}
+ .mi-live-note{font-size:12px;padding:13px 14px}
+}
+@media print{.mi-live-frame{display:none}.mi-live-open::after{content:' · thelaunchera.com/demos/casa-brownie/'}}
