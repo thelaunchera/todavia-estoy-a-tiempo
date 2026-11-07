@@ -458,7 +458,9 @@ export default function TouchLayerCanvas({
     if (selected === id) setSelected('');
   };
   const mobileContextControls=<>
-    {chosen&&onUpdate&&<div className={'touch-editor-context-dock'+(fullscreen?' is-fullscreen':'')} role="toolbar" aria-label="Editar elemento seleccionado">
+    {chosen&&onUpdate&&<div className={'touch-editor-context-dock'+(fullscreen?' is-fullscreen':'')} role="toolbar" aria-label="Editar elemento seleccionado"
+      onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
+      onPointerUp={e=>e.stopPropagation()} onPointerCancel={e=>e.stopPropagation()}>
           <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
           <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
           {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='curve'} onClick={()=>setContextInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
@@ -470,7 +472,9 @@ export default function TouchLayerCanvas({
           {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
           <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
         </div>}
-        {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento">
+        {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento"
+      onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
+      onPointerUp={e=>e.stopPropagation()} onPointerCancel={e=>e.stopPropagation()}>
           <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':'Posición'}</strong>
             <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
           {contextInspector==='opacity'&&<label className="touch-editor-context-range">
