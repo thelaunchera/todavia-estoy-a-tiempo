@@ -145,3 +145,33 @@
  .free-post-tools>button span{font-size:10px}
  .free-post-save-state{font-size:10px}
 }
+
+
+/* Reels and stories: concise layer controls immediately above a smaller artboard. */
+.vertical-studio .free-post-studio>.free-post-utility-bar{order:0}
+.vertical-studio .free-post-studio>.free-post-selected-actions{order:1}
+.vertical-studio .free-post-studio>.free-post-design-row{order:2}
+.vertical-studio .free-post-studio>.free-post-tools{order:3}
+.vertical-studio .free-post-studio>.free-post-under{order:4}
+.free-post-selected-actions{display:grid;gap:8px;width:100%;max-width:620px;margin:2px auto 4px;padding:9px 11px;
+ background:#fff;border:1px solid #dce5e4;border-radius:13px;box-shadow:0 2px 8px #152c3108;min-width:0}
+.free-post-selected-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#27434b}
+.free-post-selected-heading strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.free-post-selected-heading>span{font-size:10px;color:#647780;white-space:nowrap}
+.free-post-selected-buttons{display:flex;flex-wrap:wrap;gap:5px}
+.free-post-selected-buttons>button{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:35px;padding:7px 9px;
+ border:1px solid #d6e0df;border-radius:8px;background:#faf9f6;color:#293f44;font-size:11px;font-weight:750;cursor:pointer;touch-action:manipulation}
+.free-post-selected-buttons>button:disabled{opacity:.35;cursor:default}
+.free-post-selected-buttons>button[aria-pressed=true]{background:#eee9dc;color:#191919}
+.free-post-selection-colors{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1px solid #e9eeee;padding-top:8px}
+.free-post-selection-colors>label{display:inline-flex;gap:6px;align-items:center;font-size:11px;font-weight:750;color:#284751}
+.free-post-selection-colors input[type=color]{width:33px;height:33px;padding:2px;border:1px solid #cbd6d9;border-radius:8px;background:white}
+.free-post-selection-colors>button:not(.free-post-color-reset){width:29px;height:29px;border:1px solid #cbd6d9;border-radius:8px;box-shadow:inset 0 0 0 1px #fff8}
+.free-post-selection-colors>button.free-post-color-reset{min-height:33px;padding:6px 8px;border-radius:8px;
+ background:white;border:1px solid #d0dee3;color:#31576a;font-size:10px;font-weight:700}
+@media(max-width:600px){
+ .free-post-selected-actions{padding:8px 9px}
+ .free-post-selected-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .free-post-selected-buttons>button{min-width:0;min-height:38px;padding:5px 3px;font-size:10px}
+ .free-post-selection-colors{gap:6px}
+}
