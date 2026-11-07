@@ -1466,7 +1466,7 @@ function App() {
                 <Save size={16}/>{loginLanguage==='es'?'Guardar y volver al calendario':'Save and return to calendar'}
               </button>
             </div>}
-          {brand&&['vertical','create'].includes(tab)&&account?.email&&
+          {brand&&['factory','vertical','create'].includes(tab)&&account?.email&&
             <QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="editor"/>}
           {brand&&['factory','vertical','create'].includes(tab)&&<div className="lab-draft-safety">
             <span role="status" aria-live="polite">
@@ -1630,11 +1630,6 @@ function App() {
               saveState={draftStatus}
             />
           )}
-          {brand && tab === 'factory' && account?.email && (
-            <section className="lab-factory-help" aria-label={loginLanguage==='es'?'Ayuda de Carousel Factory':'Carousel Factory help'}>
-              <QuickStartGuide scope={account.email+':'+brand.id} onCreate={start} locale={loginLanguage} mode="editor"/>
-            </section>
-          )}
           {brand && tab === 'vertical' && (
             <VerticalStudio post={editor} brand={brand} assets={library} images={images}
               locale={loginLanguage} saving={busy==='save'} onSave={saveAndReturnToCalendar}
@@ -1648,13 +1643,7 @@ function App() {
             <>
               <div className="pageheading">
                 <div>
-                  <div className="eyebrow">
-                    CONTENT WORKSPACE / {brand.name.toUpperCase()}
-                  </div>
-                  <h1>
-                    {t("Content")} <em>composer.</em>
-                  </h1>
-                  <p>{t('Give it a purpose. Give it your voice. Make it yours.')}</p>
+                  <h1>{loginLanguage==='es'?'Editar post':'Edit post'} <em>4:5</em></h1>
                   {editor.format==='Carousel'&&<button className="btn dark" onClick={() => navigate('factory')}><Layers3 size={16} /> {loginLanguage==='es'?'Diseñar carrusel completo':'Design full carousel'}</button>}
                 </div>
                 <button className="btn ghost" onClick={() => start()}>
@@ -1697,7 +1686,7 @@ function App() {
                         </select>
                       </details>
                     </div>
-                    <p className="lab-ai-message">{loginLanguage==='es'?'Escribe con tu voz o empieza con una idea del banco. Puedes editar cada palabra.':'Write in your voice or start with an idea from the bank. You control every word.'}</p>
+
                     {false&&<button
                       className="btn dark wide"
                       disabled={busy === 'ai'}
@@ -1713,7 +1702,7 @@ function App() {
                         : (loginLanguage==='es'?'Crear con IA · 1 crédito':'Create with AI · 1 credit')}
                     </button>}
                     <button className="btn dark wide" type="button" onClick={()=>navigate('idea-bank')}><Lightbulb size={17}/>{loginLanguage==='es'?'Explorar banco de ideas + IA':'Browse AI idea bank'}</button>
-                    <small className="note">{loginLanguage==='es'?'Crea y descarga diseños PNG. Los prompts son para usarlos en herramientas externas como ChatGPT.':'Create and download PNG designs. Prompts are for use in external tools like ChatGPT.'}</small>
+
                     <button className="btn ghost wide" type="button" onClick={()=>setManualOpen(v=>!v)}>
                       {manualOpen?(loginLanguage==='es'?'Recoger editor':'Collapse editor'):(loginLanguage==='es'?'Editar todo manualmente':'Edit everything manually')}
                     </button>
