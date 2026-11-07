@@ -25,6 +25,15 @@
       "signup": "/freebies/january-salt-line/",
       "access": "/freebies/january-salt-line/access/",
       "status": "scheduled"
+    },
+    {
+      "resource": "march_premium_app_2027",
+      "name": "Design a Premium App with AI",
+      "date": "2027-03-01",
+      "signup": "/freebies/march-premium-app/",
+      "access": "/freebies/march-premium-app/access/",
+      "status": "scheduled",
+      "assets": "photo-and-video-pending"
     }
   ]
 }
