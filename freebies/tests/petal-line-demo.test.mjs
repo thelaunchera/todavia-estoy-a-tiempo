@@ -45,7 +45,7 @@ test('Both languages cover every visible component and transactional feedback',(
   const richKeys=[...html.matchAll(/data-t-html="([^"]+)"/g)].map(x=>x[1]);
   assert.ok(keys.length>=24);
   for(const key of [...keys,...richKeys]){
-    const occurrences=js.split(key+':').length-1;
+    const occurrences=js.split(key+':"').length-1;
     assert.equal(occurrences,2,'Missing ES or EN translation of '+key);
   }
   for(const key of ['joinError','joined','advanced','readyToast','left','confirmed','offline','storageWarning','purposeBouquet','purposePickup','namePlaceholder'])
