@@ -612,9 +612,10 @@ function renderCourseMap(){
   const track=document.createElement('div');track.className='lesson-map-progress';
   track.setAttribute('aria-hidden','true');
   const fill=document.createElement('span');fill.style.width=Math.round(100*completed/indexes.length)+'%';track.append(fill);
-  const status=el('span','lesson-map-status',
-   available===0?courseCopy('Videos en preparación','Videos in preparation',lang):
-   courseCopy('Abrir primera lección','Open first lesson',lang));
+  const status=document.createElement('span');
+  status.className='lesson-map-status';
+  status.textContent=available===0?courseCopy('Videos en preparación','Videos in preparation',lang):
+   courseCopy('Abrir primera lección','Open first lesson',lang);
   foot.append(track,status);
   button.append(top,copy,foot);
   button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+completed+' '+courseCopy('de','of',lang)+' '+indexes.length+' '+courseCopy('lecciones completadas.','lessons complete.',lang)+' '+courseCopy('Abrir primera lección','Open first lesson',lang));
