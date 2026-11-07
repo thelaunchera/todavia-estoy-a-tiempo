@@ -4,7 +4,7 @@ import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
 import {recordingStarts, RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText, UploadCloud } from 'lucide-react';
-import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_RECORDING_FOLDERS, CLASS_RECORDINGS_DRIVE, CLASS_AUDIO_DRIVE, CLASS_EXPORTS_DRIVE, CASA_BROWNIE_PHOTOS_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
+import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_RECORDING_FOLDERS, CLASS_RECORDINGS_DRIVE, CLASS_AUDIO_DRIVE, CLASS_EXPORTS_DRIVE, CASA_BROWNIE_PHOTOS_DRIVE, CLASS_EXERCISE_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
 
 export type ClassEntry = {
@@ -284,13 +284,19 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir demo oficial Casa Brownie</a>
     <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
    </div>
-   <nav className="class-tablet-drive-links" aria-label="Carpetas privadas para grabar y editar">
-    <a href={CLASS_RECORDING_FOLDERS[lesson.id]} target="_blank" rel="noopener noreferrer"><Film size={17}/> Carpeta del capítulo {lesson.id}</a>
-    <a href={CLASS_RECORDINGS_DRIVE} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> Todas las grabaciones</a>
-    <a href={CASA_BROWNIE_PHOTOS_DRIVE} target="_blank" rel="noopener noreferrer"><BookOpen size={16}/> Fotos originales</a>
-    <a href={CLASS_AUDIO_DRIVE} target="_blank" rel="noopener noreferrer"><Headphones size={16}/> Audios y subtítulos</a>
-    <a href={CLASS_EXPORTS_DRIVE} target="_blank" rel="noopener noreferrer"><CheckCircle2 size={16}/> Videos finales</a>
-   </nav>
+   <section className="class-tablet-drive-section" aria-label="Guardar las tomas del capítulo">
+    <a className="class-tablet-folder-primary" href={CLASS_RECORDING_FOLDERS[lesson.id]} target="_blank" rel="noopener noreferrer"><Film size={18}/> Abrir carpeta de tomas · Capítulo {lesson.id}</a>
+    <details className="class-tablet-drive-more">
+     <summary>Ver las demás carpetas de trabajo</summary>
+     <nav className="class-tablet-drive-links" aria-label="Carpetas privadas y materiales de grabación">
+      <a href={CLASS_RECORDINGS_DRIVE} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> Todas las grabaciones</a>
+      <a href={CLASS_EXERCISE_DRIVE} target="_blank" rel="noopener noreferrer"><FileText size={16}/> Práctica Casa Brownie · 8 carpetas</a>
+      <a href={CASA_BROWNIE_PHOTOS_DRIVE} target="_blank" rel="noopener noreferrer"><BookOpen size={16}/> Fotos originales del demo</a>
+      <a href={CLASS_AUDIO_DRIVE} target="_blank" rel="noopener noreferrer"><Headphones size={16}/> Audios y subtítulos</a>
+      <a href={CLASS_EXPORTS_DRIVE} target="_blank" rel="noopener noreferrer"><CheckCircle2 size={16}/> Videos finales aprobados</a>
+     </nav>
+    </details>
+   </section>
    <details className="class-tablet-helper">
     <summary>Preparar esta escena en el iPad</summary>
     <div className="class-tablet-helper-body">

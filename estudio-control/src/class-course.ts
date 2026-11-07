@@ -31,6 +31,8 @@ export const CLASS_RECORDING_FOLDERS:Record<string,string>={
 export const CLASS_AUDIO_DRIVE='https://drive.google.com/drive/folders/1mITIt1tbwb9f8FXrrWOKWDngmj4PbQNQ';
 export const CLASS_EXPORTS_DRIVE='https://drive.google.com/drive/folders/1KXYcknvXc-9y26YgNqW37O4MgI1PEE_9';
 export const CASA_BROWNIE_PHOTOS_DRIVE='https://drive.google.com/drive/folders/1IuH4WbAu0vAwIucVekFELfmcLdYWRVda';
+/** Separate, intentionally blank exercise workspace (8 subfolders) — never overwrite demo-approved photos. */
+export const CLASS_EXERCISE_DRIVE='https://drive.google.com/drive/folders/13EQAmX8sUGypQ9FQp_v1QI-nN2aCfwUB';
 
 export const CLASS_PROMPTS='https://podcast.thelaunchera.com/alumnos/#prompts';
 export const classStatusOptions=['pendiente','preparado','grabado','editando','aprobado'] as const;

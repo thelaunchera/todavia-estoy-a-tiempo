@@ -220,3 +220,13 @@ test('iPad recording desk links actual Drive chapter folders and its official de
  assert.match(recording,/OFFICIAL_DEMO_URL = 'https:\/\/thelaunchera\.com\/demos\/casa-brownie\//);
  assert.match(production,/almacenamiento privado del Studio, no en Drive/);
 });
+
+test('separate Casa Brownie practice folder is private and linked in tablet mode',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const course=readFileSync(new URL('../estudio-control/src/class-course.ts',import.meta.url),'utf8');
+ const prod=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
+ assert.match(course,/CLASS_EXERCISE_DRIVE='https:\/\/drive\.google\.com\/drive\/folders\/13EQAmX8sUGypQ9FQp_v1QI-nN2aCfwUB'/);
+ assert.match(prod,/href=\{CLASS_EXERCISE_DRIVE\}/);
+ assert.match(prod,/class-tablet-folder-primary/);
+ assert.match(prod,/class-tablet-drive-more/);
+});

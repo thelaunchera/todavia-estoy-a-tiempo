@@ -290,3 +290,13 @@
 .class-tablet-drive-links a:first-child{grid-column:1/-1;background:#E3EEF5;border-color:#A7C4D7;font-size:14px}
 .class-tablet-drive-links a:focus-visible{outline:3px solid #D7A73A;outline-offset:3px}
 @media(max-width:550px){.class-tablet-drive-links{grid-template-columns:1fr}.class-tablet-drive-links a:first-child{grid-column:auto}}
+
+/* Keep the one-tap current chapter folder visible; collapse less-frequent storage links. */
+.class-tablet-drive-section{display:grid;gap:8px;min-width:0}
+.class-tablet-folder-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:12px 15px;text-align:center;text-decoration:none;border:1px solid #A1BDD0;border-radius:12px;background:#E3EFF6;color:#234963;font:800 14px/1.4 'DM Sans',Arial,sans-serif;box-shadow:0 3px 0 #D1E0E9}
+.class-tablet-drive-more{overflow:hidden;border:1px solid #CFDEE6;border-radius:12px;background:#fff}
+.class-tablet-drive-more summary{min-height:45px;display:flex;align-items:center;cursor:pointer;padding:12px 15px;font:800 12px/1.45 'DM Sans',Arial,sans-serif;color:#365970}
+.class-tablet-drive-more[open] summary{background:#F6F9FB;border-bottom:1px solid #D6E1E8}
+.class-tablet-drive-more .class-tablet-drive-links{padding:12px}
+.class-tablet-drive-more .class-tablet-drive-links a:first-child{grid-column:auto;background:#fffdfa;border-color:#C9D8E1;font-size:12px}
+.class-tablet-drive-section :is(summary,a):focus-visible{outline:3px solid #D7A73A;outline-offset:3px}
