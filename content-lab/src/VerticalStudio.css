@@ -72,3 +72,40 @@
  .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-background-panel,
  .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-layers{bottom:calc(72px + env(safe-area-inset-bottom))}
 }
+
+
+/* App-first Reel/Story editor: show the canvas before optional setup. */
+.vertical-studio{display:flex;flex-direction:column;gap:5px}
+.vertical-intro{order:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0 5px}
+.vertical-intro h1{font:760 clamp(17px,2.8vw,23px)/1.2 Prompt,Futura,Arial,sans-serif;letter-spacing:-.03em;margin:0}
+.vertical-intro>.vertical-save{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;
+ min-height:39px;padding:8px 13px;border:0;border-radius:10px;background:#191919;color:#fff;font:750 12px Prompt,Futura,Arial,sans-serif;cursor:pointer}
+.vertical-intro>.vertical-save:disabled{opacity:.58}
+.vertical-editor-details{order:1;margin:1px 0 4px;padding:10px;border-radius:12px}
+.vertical-editor-details>summary{min-height:30px;display:flex;align-items:center;font-size:12px;list-style:none;cursor:pointer}
+.vertical-editor-details>summary::-webkit-details-marker{display:none}
+.vertical-editor-details>summary::after{content:'⌄';margin-left:auto;font-size:17px;font-weight:600;color:#65808c;transition:transform .16s}
+.vertical-editor-details:not([open])>summary::after{transform:rotate(-90deg)}
+.vertical-editor-details[open]>summary{margin-bottom:5px}
+.vertical-options-fold{order:2;min-width:0;margin:2px 0 7px;border:1px solid #e3e6e4;border-radius:11px;background:#fff;overflow:hidden}
+.vertical-options-fold>summary{display:flex;align-items:center;justify-content:space-between;min-height:39px;padding:9px 12px;cursor:pointer;list-style:none;font-size:12px;font-weight:750;color:#38515a}
+.vertical-options-fold>summary::-webkit-details-marker{display:none}
+.vertical-options-fold>summary::after{content:'+';font-size:17px;color:#607981}
+.vertical-options-fold[open]>summary::after{content:'−'}
+.vertical-options-fold .vertical-workspace{padding:4px 9px 11px;grid-template-columns:minmax(0,1fr) minmax(0,.8fr)}
+.vertical-options-fold .vertical-controls,.vertical-options-fold .vertical-video-panel{padding:10px;border-radius:10px;box-shadow:none}
+.vertical-options-fold .vertical-controls textarea{min-height:70px;line-height:1.35}
+.vertical-canvas-sizing{padding:5px 7px;margin-bottom:5px}
+.vertical-canvas-sizing>span{font-size:11px}
+@media(max-width:799px){
+ .vertical-studio{gap:3px;margin-bottom:calc(65px + env(safe-area-inset-bottom))}
+ .vertical-intro{padding:1px 1px 5px}
+ .vertical-intro h1{font-size:17px}
+ .vertical-intro>.vertical-save{min-height:39px;padding:7px 10px}
+ .vertical-editor-details{padding:7px;margin:1px 0 3px}
+ .vertical-editor-details>summary{min-height:25px}
+ .vertical-canvas-sizing{flex-direction:row;align-items:center;gap:6px;margin-bottom:3px;background:transparent;border:0;padding:0}
+ .vertical-canvas-sizing>div{width:auto;display:flex;gap:2px;padding:2px}
+ .vertical-canvas-sizing button{min-height:31px;padding:5px 7px;font-size:10px}
+ .vertical-options-fold .vertical-workspace{grid-template-columns:minmax(0,1fr);padding:5px 7px 9px}
+}
