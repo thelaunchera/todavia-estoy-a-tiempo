@@ -11,7 +11,7 @@ import type {StickerCopyResult} from './CarouselStickerCopy';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; lineHeight?:number; spacing?:number; curve?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
@@ -674,10 +674,12 @@ export default function TouchLayerCanvas({
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
+              {layer.kind==='sticker'&&layer.tint?<span className="touch-editor-sticker-tint" aria-hidden="true"
+                style={{backgroundColor:layer.tint,WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")'}}/>:
               <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
-              } : undefined}/>
+              } : undefined}/>}
             </div>}
             {layer.kind==='text'&&editingText===layer.id&&onUpdate&&(inlineTextTools||pageCount>1)&&active?
               <textarea ref={quickTextInput} className="touch-editor-oncanvas-text"
@@ -721,7 +723,8 @@ export default function TouchLayerCanvas({
               onPointerUp={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteLayer(layer.id)}}>×</button>}
             {active && !cropping && !layer.locked && <div className="touch-editor-mini-actions" role="toolbar" aria-label="Acciones rápidas de la capa"
                onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
-               {layer.kind==='text'&&onDuplicateText&&<button type="button" aria-label="Duplicar texto" onClick={e=>{e.stopPropagation();onDuplicateText(layer.id)}}>⧉</button>}
+               {onDuplicateLayer&&<button type="button" aria-label="Duplicar elemento" onClick={e=>{e.stopPropagation();onDuplicateLayer(layer.id)}}>⧉</button>}
+                {!onDuplicateLayer&&layer.kind==='text'&&onDuplicateText&&<button type="button" aria-label="Duplicar texto" onClick={e=>{e.stopPropagation();onDuplicateText(layer.id)}}>⧉</button>}
                <button type="button" aria-label="Girar quince grados" onClick={e=>{e.stopPropagation();onCommit(layer.kind,layer.id,{...getRect(layer),angle:((getRect(layer).angle||0)+15)%360})}}>↻</button>
 
                <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
@@ -920,7 +923,8 @@ export default function TouchLayerCanvas({
       {!cropping && <><label>Girar <input aria-label="Girar la capa" type="range" min="-180" max="180" step="1"
         value={selectedRect.angle || 0} onChange={e => commit({angle: Number(e.target.value)})}/></label>
         <button type="button" onClick={() => commit({angle: 0})}>Enderezar</button></>}
-      {chosen.kind==='text'&&onDuplicateText&&<button type="button" className="touch-editor-duplicate-text" onClick={()=>onDuplicateText(chosen.id)}><Copy size={15}/> Duplicar texto</button>}
+      {onDuplicateLayer&&<button type="button" className="touch-editor-duplicate-text" onClick={()=>onDuplicateLayer(chosen.id)}><Copy size={15}/> Duplicar elemento</button>}
+       {!onDuplicateLayer&&chosen.kind==='text'&&onDuplicateText&&<button type="button" className="touch-editor-duplicate-text" onClick={()=>onDuplicateText(chosen.id)}><Copy size={15}/> Duplicar texto</button>}
       {onReorder && <div className="touch-editor-order-controls" aria-label="Orden de capas">
         <span>Orden de capas</span>
         <button type="button" onClick={()=>onReorder(chosen.id,'backward')}>Un nivel atrás</button>
