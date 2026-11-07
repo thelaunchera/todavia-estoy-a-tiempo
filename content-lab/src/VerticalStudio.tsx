@@ -92,6 +92,20 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
       <Save size={16}/>{saving?(locale==='es'?'Guardando…':'Saving…'):(locale==='es'?'Guardar':'Save')}
     </button>
   </header>
+  <details className={'vertical-editor-details canvas-size-'+canvasSize} open={advanced} onToggle={e=>setAdvanced((e.currentTarget as HTMLDetailsElement).open)}>
+   <summary>{t.cover}</summary>
+   <div className="vertical-canvas-sizing" role="group" aria-label={locale==='es'?'Tamaño del lienzo en pantalla':'On-screen canvas size'}>
+     <span>{locale==='es'?'Tamaño en pantalla':'Screen size'}</span>
+     <div>{(['compact','comfortable','large'] as const).map(size=><button key={size} type="button"
+       aria-pressed={canvasSize===size} onClick={()=>setCanvasSize(size)}>
+       {size==='compact'?(locale==='es'?'Pequeño':'Small'):size==='comfortable'?(locale==='es'?'Cómodo':'Comfortable'):(locale==='es'?'Ampliar':'Enlarge')}
+     </button>)}</div>
+   </div>
+   <FreePostStudio post={post} brand={brand} assets={assets} images={images} locale={locale}
+     onChange={decor=>onChange({designData:writeCoverDecor(post.designData,decor)})}
+     onTitle={hook=>onChange({hook})} onUpload={onUploadPhoto} loadImage={loadImage}
+     onOpenStickers={onOpenStickers} onUploadBackground={onUploadBackground} notify={notify}/>
+  </details>
   <details className="vertical-options-fold">
    <summary>{locale==='es'?'Texto, video y estilos':'Text, video & styles'}</summary>
   <div className="vertical-workspace">
@@ -125,20 +139,6 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
      <p>{locale==='es'?'Solo se usa el fotograma para la portada PNG.':'Only the frame is used for the PNG cover.'}</p>
    </section>}
   </div>
-  </details>
-  <details className={'vertical-editor-details canvas-size-'+canvasSize} open={advanced} onToggle={e=>setAdvanced((e.currentTarget as HTMLDetailsElement).open)}>
-   <summary>{t.cover}</summary>
-   <div className="vertical-canvas-sizing" role="group" aria-label={locale==='es'?'Tamaño del lienzo en pantalla':'On-screen canvas size'}>
-     <span>{locale==='es'?'Tamaño en pantalla':'Screen size'}</span>
-     <div>{(['compact','comfortable','large'] as const).map(size=><button key={size} type="button"
-       aria-pressed={canvasSize===size} onClick={()=>setCanvasSize(size)}>
-       {size==='compact'?(locale==='es'?'Pequeño':'Small'):size==='comfortable'?(locale==='es'?'Cómodo':'Comfortable'):(locale==='es'?'Ampliar':'Enlarge')}
-     </button>)}</div>
-   </div>
-   <FreePostStudio post={post} brand={brand} assets={assets} images={images} locale={locale}
-     onChange={decor=>onChange({designData:writeCoverDecor(post.designData,decor)})}
-     onTitle={hook=>onChange({hook})} onUpload={onUploadPhoto} loadImage={loadImage}
-     onOpenStickers={onOpenStickers} onUploadBackground={onUploadBackground} notify={notify}/>
   </details>
  </section>;
 }
