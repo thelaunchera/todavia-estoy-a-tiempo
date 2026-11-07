@@ -140,6 +140,5 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
      onTitle={hook=>onChange({hook})} onUpload={onUploadPhoto} loadImage={loadImage}
      onOpenStickers={onOpenStickers} onUploadBackground={onUploadBackground} notify={notify}/>
   </details>
-  {!advanced&&<button type="button" className="vertical-open-editor" onClick={()=>setAdvanced(true)}>{t.cover}</button>}
  </section>;
 }
