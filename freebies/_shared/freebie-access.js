@@ -54,8 +54,9 @@ function render(){
  for(const item of items){
   const article=document.createElement("article");article.className="prompt-card";
   const number=document.createElement("span");number.className="number";number.textContent=item.id+" / "+String(items.length).padStart(2,"0");
-  const heading=document.createElement("h2");heading.textContent=item.title;
-  const editor=document.createElement("textarea");editor.rows=7;editor.value=item[lang]||item.en;editor.setAttribute("aria-label",item.title);editor.spellcheck=false;
+  const displayTitle=lang==="es"?(item.title_es||item.title):item.title;
+  const heading=document.createElement("h2");heading.textContent=displayTitle;
+  const editor=document.createElement("textarea");editor.rows=7;editor.value=item[lang]||item.en;editor.setAttribute("aria-label",displayTitle);editor.spellcheck=false;
   const btn=document.createElement("button");btn.type="button";btn.className="copy-btn";btn.textContent=copy[lang].copy;
   btn.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(editor.value);btn.textContent=copy[lang].copied;setTimeout(()=>btn.textContent=copy[lang].copy,1600)}catch{setText(copy[lang].error)}});
   article.append(number,heading,editor,btn);cards.append(article);
