@@ -1,0 +1,19 @@
+/* Light, joyful save confirmation; no blocking modal, no stock confetti. */
+.lab-save-celebration{position:fixed;z-index:3600;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));
+ transform:translateX(-50%);width:min(420px,calc(100vw - 24px));min-height:86px;
+ display:flex;align-items:center;gap:11px;padding:14px 14px 14px 16px;
+ border-radius:17px;border:1px solid #ded5a4;background:#FAF8F3;color:#191919;
+ box-shadow:0 12px 50px #141c202b;font-family:Prompt,Futura,Arial,sans-serif;
+ animation:lab-save-bloom .52s cubic-bezier(.18,.85,.26,1.18) both}
+@keyframes lab-save-bloom{from{opacity:0;transform:translate(-50%,23px) scale(.94)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.lab-save-mark{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:50%;
+ background:#F2D85B;color:#191919;animation:lab-save-pop .48s .08s both}
+@keyframes lab-save-pop{0%{transform:scale(.4) rotate(-23deg)}78%{transform:scale(1.1) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.lab-save-copy{display:grid;gap:3px;flex:1;min-width:0}
+.lab-save-copy strong{font-size:16px;line-height:1.2;letter-spacing:-.02em}
+.lab-save-copy span{font-size:11px;line-height:1.4;color:#52656b}
+.lab-save-celebration>button{border:0;background:transparent;color:#52656b;min-width:28px;min-height:34px;display:grid;place-items:center;align-self:start}
+.lab-save-stars{position:absolute;left:46px;top:0;color:#B79C27;display:flex;gap:20px;pointer-events:none;animation:lab-save-twinkle .7s .12s ease-out both}
+@keyframes lab-save-twinkle{0%{opacity:0;transform:translateY(14px) scale(.4)}55%{opacity:1}100%{opacity:1;transform:translateY(-11px) scale(1)}}
+@media(max-width:600px){.lab-save-celebration{bottom:calc(82px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.lab-save-celebration,.lab-save-mark,.lab-save-stars{animation:none}}
