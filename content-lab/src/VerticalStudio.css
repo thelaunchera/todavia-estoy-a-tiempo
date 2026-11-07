@@ -38,3 +38,37 @@
  overflow:hidden;font:700 clamp(18px,3vw,31px)/1.13 Georgia,serif;color:white;
  text-shadow:0 2px 8px #000b;overflow-wrap:break-word;white-space:pre-wrap}
 @media(max-width:700px){.vertical-video-overlay{font-size:clamp(19px,6vw,33px)}}
+
+/* Reel/Story artboard display size only. The exported image stays 1080×1920. */
+.vertical-canvas-sizing{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+ padding:8px 9px;margin-bottom:8px;background:#FAF8F3;border:1px solid #e1e4e0;border-radius:10px}
+.vertical-canvas-sizing>span{font-size:12px;font-weight:750;color:#263a42}
+.vertical-canvas-sizing small{font-size:10px;color:#6d7b80;font-weight:500}
+.vertical-canvas-sizing>div{display:flex;gap:4px;padding:3px;background:white;border:1px solid #e3e6e4;border-radius:9px}
+.vertical-canvas-sizing button{min-height:36px;padding:7px 10px;border:0;border-radius:7px;background:transparent;color:#47606a;font-size:11px;font-weight:750;cursor:pointer;touch-action:manipulation}
+.vertical-canvas-sizing button[aria-pressed=true]{background:#191919;color:#fff}
+.vertical-studio .vertical-editor-details .free-post-design-row>.touch-editor,
+.vertical-studio .vertical-editor-details .free-post-design-row>.cover-loading{
+ width:min(100%,310px);max-width:100%;margin-inline:auto;min-width:0}
+.vertical-studio .canvas-size-compact .free-post-design-row>.touch-editor,
+.vertical-studio .canvas-size-compact .free-post-design-row>.cover-loading{width:min(100%,230px)}
+.vertical-studio .canvas-size-large .free-post-design-row>.touch-editor,
+.vertical-studio .canvas-size-large .free-post-design-row>.cover-loading{width:min(100%,390px)}
+.vertical-studio .vertical-editor-details .touch-editor-scroll{overflow-x:visible;overflow-y:visible;padding:6px 3px 8px}
+.vertical-studio .vertical-editor-details .touch-editor-stage{border-radius:12px}
+.vertical-studio .vertical-editor-details .free-post-design-row{align-items:start}
+@media(max-width:799px){
+ .vertical-studio .canvas-size-comfortable .free-post-design-row>.touch-editor,
+ .vertical-studio .canvas-size-comfortable .free-post-design-row>.cover-loading{width:min(100%,29dvh,260px)}
+ .vertical-studio .canvas-size-compact .free-post-design-row>.touch-editor,
+ .vertical-studio .canvas-size-compact .free-post-design-row>.cover-loading{width:min(100%,23dvh,215px)}
+ .vertical-studio .canvas-size-large .free-post-design-row>.touch-editor,
+ .vertical-studio .canvas-size-large .free-post-design-row>.cover-loading{width:min(100%,36dvh,310px)}
+ .vertical-canvas-sizing{align-items:flex-start;flex-direction:column;gap:5px}
+ .vertical-canvas-sizing>div{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .vertical-canvas-sizing button{padding:8px 4px}
+ .vertical-studio .vertical-editor-details .free-post-tools{bottom:calc(9px + env(safe-area-inset-bottom))}
+ .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-media,
+ .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-background-panel,
+ .vertical-studio .vertical-editor-details .free-post-design-row>.free-post-layers{bottom:calc(72px + env(safe-area-inset-bottom))}
+}
