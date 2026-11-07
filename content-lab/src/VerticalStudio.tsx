@@ -34,6 +34,7 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
  const photoRef=useRef<HTMLInputElement>(null),videoRef=useRef<HTMLInputElement>(null),player=useRef<HTMLVideoElement>(null);
  const [videoUrl,setVideoUrl]=useState(''),[videoName,setVideoName]=useState(''),[busy,setBusy]=useState(false);
  const [advanced,setAdvanced]=useState(true);
+ const [canvasSize,setCanvasSize]=useState<'compact'|'comfortable'|'large'>('comfortable');
  useEffect(()=>()=>{if(videoUrl)URL.revokeObjectURL(videoUrl)},[videoUrl]);
  const setEditorial=(name:'light'|'full'|'dark')=>{
    const d=readCoverDecor(post.designData);
@@ -119,8 +120,15 @@ export default function VerticalStudio({post,brand,assets,images,locale,onChange
      <p>{t.videoHelp}</p>
    </section>}
   </div>
-  <details className="vertical-editor-details" open={advanced} onToggle={e=>setAdvanced((e.currentTarget as HTMLDetailsElement).open)}>
+  <details className={'vertical-editor-details canvas-size-'+canvasSize} open={advanced} onToggle={e=>setAdvanced((e.currentTarget as HTMLDetailsElement).open)}>
    <summary>{t.cover} · {t.edit}</summary>
+   <div className="vertical-canvas-sizing" role="group" aria-label={locale==='es'?'Tamaño del lienzo en pantalla':'On-screen canvas size'}>
+     <span>{locale==='es'?'Vista del lienzo':'Canvas view'} <small>· {locale==='es'?'el PNG conserva 1080 × 1920':'PNG stays 1080 × 1920'}</small></span>
+     <div>{(['compact','comfortable','large'] as const).map(size=><button key={size} type="button"
+       aria-pressed={canvasSize===size} onClick={()=>setCanvasSize(size)}>
+       {size==='compact'?(locale==='es'?'Pequeño':'Small'):size==='comfortable'?(locale==='es'?'Cómodo':'Comfortable'):(locale==='es'?'Ampliar':'Enlarge')}
+     </button>)}</div>
+   </div>
    <FreePostStudio post={post} brand={brand} assets={assets} images={images} locale={locale}
      onChange={decor=>onChange({designData:writeCoverDecor(post.designData,decor)})}
      onTitle={hook=>onChange({hook})} onUpload={onUploadPhoto} loadImage={loadImage}
