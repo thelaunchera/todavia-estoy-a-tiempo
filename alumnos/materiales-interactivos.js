@@ -310,7 +310,9 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
   const bonus=Array.isArray(EXTRAS.mobile_first_prompts)?EXTRAS.mobile_first_prompts
    .filter(x=>Array.isArray(x)&&x.length===3).map(([title,desc,body],i)=>({
     prompt_code:'mobile_'+(i+1),title,summary:desc,body,category:'mobile',position:500+i})):[];
-  const fullCatalog=[...MODULE_PROMPTS,...fallback,...bonus,...EXAMPLE_PROMPTS].map(p=>{
+  // Owner-assigned bonuses are only accessible from the gated bonus library, never from general prompt search.
+  const coursePromptRows=MODULE_PROMPTS.filter(p=>!/^bonus_/i.test(String(p.prompt_code||'')));
+  const fullCatalog=[...coursePromptRows,...fallback,...bonus,...EXAMPLE_PROMPTS].map(p=>{
    const code=p.prompt_code;
    const pack=promptPack(p,lang);
    return {...p,group:pack.id,shelf:promptShelf(p),pack,englishTitle:englishTitle(code,p.title)};
@@ -331,6 +333,10 @@ export async function mountMateriales(root,{db,user,courseId,adminPreview=false,
    'Sigue el orden de la clase: negocio → moodboard → fotos individuales → textos → primera web → revisión móvil → publicación. Los packs creativos y los demos están separados para que no te pierdas.',
    'Follow the class: business → moodboard → individual photos → copy → first website → mobile review → launch. Creative packs and demos stay separate so you can focus.'
   )+'</p>';
+  const openLessons=el('button','mi-prompt-to-lessons',t('Ver las 9 lecciones','View all 9 lessons'));
+  openLessons.type='button';
+  openLessons.addEventListener('click',()=>onGoLessons?.());
+  itinerary.append(openLessons);
   content.append(itinerary);
   const tools=el('div','mi-prompt-searchbar');
   const label=el('label',null,t('Buscar un prompt','Search prompts'));
