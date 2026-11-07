@@ -132,3 +132,21 @@ test('visual levels: category, guidance and copyable prompt are distinct in the 
  assert.match(css,/\.mi-prompt-copy-panel \.mi-prompt-text\{/);
  assert.match(html,/materiales-interactivos\.css\?v=20261107-visual-levels-v3/);
 });
+
+// Visual route regression: keep four functional phase buttons, approved lessons and private progress intact.
+test('editorial lesson cards have four themed illustrations and real progress without green emoji',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const here=new URL('./',import.meta.url);
+ const js=readFileSync(new URL('curso.js',here),'utf8');
+ const css=readFileSync(new URL('curso.css',here),'utf8');
+ const html=readFileSync(new URL('index.html',here),'utf8');
+ for(const id of ['define','create','build','review'])assert.match(js,new RegExp("id:'"+id+"'"));
+ assert.match(js,/button\.dataset\.phase=phase\.id/);
+ assert.match(js,/lesson-map-emblem/);
+ assert.match(js,/done\.has\(item\.lesson_code\)/);
+ assert.match(js,/button\.addEventListener\('click',\(\)=>choose\(indexes\[0\]\.index\)\)/);
+ assert.match(css,/EDITORIAL LEARNING CARDS/);
+ assert.match(css,/lesson-map-step\[data-phase="review"\]/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(html,/curso\.css\?v=20261107-editorial-cards-v3/);
+});

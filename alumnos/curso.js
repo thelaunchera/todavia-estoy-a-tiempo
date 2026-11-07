@@ -572,11 +572,18 @@ function renderCourseMap(){
  if(!lessons.length)return;
  const lang=getClassroomLanguage();
  const phases=[
-  {first:0,last:1,es:'01 · Define',en:'01 · Define',hintEs:'Tu negocio, cliente y objetivo',hintEn:'Your business, customer and goal'},
-  {first:2,last:3,es:'02 · Crea',en:'02 · Create',hintEs:'Marca, moodboard y fotos',hintEn:'Brand, moodboard and photos'},
-  {first:4,last:5,es:'03 · Construye',en:'03 · Build',hintEs:'Textos y primer enlace web',hintEn:'Copy and your first website link'},
-  {first:6,last:8,es:'04 · Revisa',en:'04 · Review',hintEs:'Móvil, publicación y comprobación',hintEn:'Mobile, launch and final checks'}
+  {id:'define',first:0,last:1,es:'01 · Define',en:'01 · Define',hintEs:'Tu negocio, cliente y objetivo',hintEn:'Your business, customer and goal'},
+  {id:'create',first:2,last:3,es:'02 · Crea',en:'02 · Create',hintEs:'Marca, moodboard y fotos',hintEn:'Brand, moodboard and photos'},
+  {id:'build',first:4,last:5,es:'03 · Construye',en:'03 · Build',hintEs:'Textos y primer enlace web',hintEn:'Copy and your first website link'},
+  {id:'review',first:6,last:8,es:'04 · Revisa',en:'04 · Review',hintEs:'Móvil, publicación y comprobación',hintEn:'Mobile, launch and final checks'}
  ];
+ // Decorative, accessible inline art: no downloaded images, no external icon packages.
+ const art={
+  define:'<path d="M5 18h14M8 14.5l1-7 7-2.5 2.5 2.5-2.5 7-7 1Z"/><circle cx="13" cy="10" r="1.5"/>',
+  create:'<circle cx="7" cy="8" r="3"/><rect x="12" y="4" width="8" height="8" rx="1.7"/><path d="m4 19 5-6 4 6m2-1 5-5"/>',
+  build:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 4v5M9 14h7m-7 3h4"/>',
+  review:'<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="m9.5 13 2 2 3.5-4M10 5.5h4"/>'
+ };
  const heading=document.createElement('div');heading.className='lesson-map-intro';
  escapedText(heading,'strong',courseCopy('Tu ruta en 4 etapas','Your route in 4 stages',lang));
  escapedText(heading,'span',courseCopy('Toca una etapa para ir a su primera lección.','Tap a stage to open its first lesson.',lang));
@@ -588,12 +595,29 @@ function renderCourseMap(){
   });
   if(!indexes.length)continue;
   const button=document.createElement('button');button.type='button';button.className='lesson-map-step';
+  button.dataset.phase=phase.id;
   const completed=indexes.filter(({item})=>done.has(item.lesson_code)).length;
   const available=indexes.filter(({item})=>item.status==='ready'&&validVideoId(item.youtube_video_id)).length;
-  escapedText(button,'strong',lang==='en'?phase.en:phase.es);
-  escapedText(button,'span',lang==='en'?phase.hintEn:phase.hintEs);
-  escapedText(button,'small',completed+' / '+indexes.length+' '+courseCopy('lecciones completadas','lessons completed',lang)+(available===0?' · '+courseCopy('videos en preparación','videos in preparation',lang):''));
-  button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+courseCopy('Abrir primera lección','Open first lesson',lang));
+  const top=document.createElement('div');top.className='lesson-map-top';
+  escapedText(top,'span',phase.es.slice(0,2),'lesson-map-index');
+  const motif=document.createElement('span');motif.className='lesson-map-emblem';
+  motif.setAttribute('aria-hidden','true');
+  motif.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+art[phase.id]+'</svg>';
+  top.append(motif);
+  const copy=document.createElement('div');copy.className='lesson-map-copy';
+  escapedText(copy,'strong',lang==='en'?phase.en.slice(5):phase.es.slice(5),'lesson-map-title');
+  escapedText(copy,'span',lang==='en'?phase.hintEn:phase.hintEs,'lesson-map-description');
+  const foot=document.createElement('div');foot.className='lesson-map-foot';
+  escapedText(foot,'span',completed+' / '+indexes.length+' '+courseCopy('lecciones','lessons',lang),'lesson-map-progress-label');
+  const track=document.createElement('div');track.className='lesson-map-progress';
+  track.setAttribute('aria-hidden','true');
+  const fill=document.createElement('span');fill.style.width=Math.round(100*completed/indexes.length)+'%';track.append(fill);
+  const status=el('span','lesson-map-status',
+   available===0?courseCopy('Videos en preparación','Videos in preparation',lang):
+   courseCopy('Abrir primera lección','Open first lesson',lang));
+  foot.append(track,status);
+  button.append(top,copy,foot);
+  button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+completed+' '+courseCopy('de','of',lang)+' '+indexes.length+' '+courseCopy('lecciones completadas.','lessons complete.',lang)+' '+courseCopy('Abrir primera lección','Open first lesson',lang));
   button.addEventListener('click',()=>choose(indexes[0].index));
   grid.append(button);
  }
