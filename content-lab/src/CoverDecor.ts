@@ -5,7 +5,7 @@ export type CoverDecor={
  backgroundId:FreeBackgroundId;backgroundImageId:string;stickerIds:string[];
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
- layerOrder?:string[];primaryPhotoOpacity?:number;stickerOpacities?:Record<string,number>;
+ layerOrder?:string[];primaryPhotoOpacity?:number;stickerOpacities?:Record<string,number>;stickerTints?:Record<string,string>;
  headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number,opacity?:number};
  color:string;gradient:string;headlineLocked?:boolean;primaryPhotoLocked?:boolean;lockedStickerIds?:string[];
 };
@@ -29,6 +29,9 @@ export function readCoverDecor(data?:string):CoverDecor{
      ?Object.fromEntries(Object.entries(p.stickerOpacities as Record<string,unknown>).filter(
        ([id,value])=>id.length<150&&typeof value==='number'&&Number.isFinite(value)).slice(0,24)
        .map(([id,value])=>[id,Math.max(0,Math.min(1,value as number))])):undefined,
+   stickerTints:p.stickerTints&&typeof p.stickerTints==='object'
+     ?Object.fromEntries(Object.entries(p.stickerTints as Record<string,unknown>)
+       .filter(([id,value])=>id.length<150&&typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value)).slice(0,24)):undefined,
    headlineRect:p.headlineRect&&typeof p.headlineRect==='object'?p.headlineRect:undefined,
    primaryPhotoRect:p.primaryPhotoRect&&typeof p.primaryPhotoRect==='object'?p.primaryPhotoRect:undefined,
    headlineStyle:p.headlineStyle&&typeof p.headlineStyle==='object'?{
