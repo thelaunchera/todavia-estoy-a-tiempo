@@ -71,23 +71,20 @@
         </div>
 
         <section class="screen" id="screen-start" aria-labelledby="start-title">
+          <div class="start-illustration" aria-hidden="true">
+            <img src="./petal-street.svg" width="980" height="640" alt="" loading="eager" decoding="async">
+            <span class="scene-label" data-t="heroSceneLabel">UN PEQUEÑO RINCÓN LLENO DE FLORES</span>
+          </div>
+          <div class="start-copy">
           <div class="eyebrow" data-t="startEyebrow">BIENVENIDO AL FLOWER BAR</div>
           <h2 class="hero-heading" id="start-title" data-t-html="startTitle">Less waiting.<br><em>More blooming.</em></h2>
           <p class="lead" data-t="startDescription">Apúntate a la fila virtual y disfruta mientras preparamos tu momento floral.</p>
 
-          <div class="bloom-art" aria-hidden="true">
-            <svg viewBox="0 0 360 180" role="presentation">
-              <rect width="360" height="180" rx="20" fill="#D7D0FE"/>
-              <path d="M180 171L181 93M181 136L134 109M181 121L223 89" fill="none" stroke="#315E4F" stroke-width="8" stroke-linecap="round"/>
-              <path d="M179 129C141 125 122 106 137 91C165 89 180 109 179 129M191 116C210 88 244 82 250 103C242 126 218 131 191 116" fill="#315E4F"/>
-              <g fill="#FF8A57" stroke="#24162E" stroke-width="3"><ellipse cx="180" cy="64" rx="28" ry="40"/><ellipse cx="180" cy="64" rx="28" ry="40" transform="rotate(60 180 64)"/><ellipse cx="180" cy="64" rx="28" ry="40" transform="rotate(-60 180 64)"/></g><circle cx="180" cy="64" r="12" fill="#24162E"/>
-              <path d="M128 139L226 139L204 174H151Z" fill="#FAF6F1" stroke="#24162E" stroke-width="3"/>
-              <path d="M281 27L288 13L295 27L309 34L295 41L288 55L281 41L267 34Z" fill="#24162E"/>
-              <circle cx="84" cy="64" r="12" fill="#FAF6F1"/><circle cx="298" cy="137" r="10" fill="#FF8A57"/>
-            </svg>
-            <span class="bloom-tag" data-t="bloomTag">YOUR BOUQUET, YOUR MOMENT</span>
+          <button class="main-btn intro-cta" type="button" id="open-join"><span data-t="introCTA">Guardar mi lugar</span><span aria-hidden="true">↗</span></button>
           </div>
-
+          <div class="join-panel" id="join-panel" hidden>
+            <button class="back-to-hero" type="button" id="back-hero"><span aria-hidden="true">←</span> <span data-t="joinBack">Volver</span></button>
+            <div class="join-panel-heading"><span class="eyebrow" data-t="joinStep">PASO 01 / RESERVA TU LUGAR</span><h3 data-t-html="joinHeading">Tu turno <em>te espera.</em></h3><p data-t="joinIntro">Dinos cómo llamarte y qué quieres preparar hoy.</p></div>
           <form id="join-form" novalidate>
             <label for="visitor-name" data-t="nameLabel">¿Cómo te llamas?</label>
             <input id="visitor-name" name="name" type="text" autocomplete="given-name" maxlength="40" placeholder="Tu nombre" required>
@@ -99,15 +96,38 @@
             <p class="field-error" id="join-error" role="alert" hidden></p>
             <button class="main-btn" id="join-button" type="submit"><span data-t="joinAction">Entrar en la fila</span><span aria-hidden="true">↗</span></button>
           </form>
+          </div>
         </section>
 
         <section class="screen" id="screen-line" aria-labelledby="line-title" hidden>
+          <div class="queue-map" aria-label="Mapa ilustrativo de un flower bar" role="img">
+            <svg viewBox="0 0 430 367" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="430" height="367" fill="#E7DFEC"/>
+              <path d="M-12 105H445M-20 277H453M94-10V380M298-10V390" stroke="#F9F6F3" stroke-width="65"/>
+              <path d="M-12 105H445M-20 277H453M94-10V380M298-10V390" stroke="#D0C7D5" stroke-width="2"/>
+              <rect x="137" y="151" width="117" height="86" rx="13" fill="#D7D0FE" stroke="#D4CAD9" stroke-width="3"/>
+              <rect x="353" y="144" width="96" height="99" rx="10" fill="#D7D0FE"/>
+              <rect x="130" y="-12" width="133" height="77" rx="12" fill="#E3D4E6"/>
+              <rect x="142" y="319" width="130" height="72" rx="12" fill="#D6D8D0"/>
+              <rect x="-42" y="144" width="104" height="95" rx="12" fill="#E0D2E4"/>
+              <rect x="334" y="-16" width="121" height="84" rx="10" fill="#DFD5E3"/>
+              <path d="M94 330V277H298V106H94V41" stroke="#FF8A57" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="7 12"/>
+              <circle cx="94" cy="327" r="20" fill="#24162E"/><circle cx="94" cy="327" r="7" fill="#FAF6F1"/>
+              <circle cx="298" cy="103" r="22" fill="#FF8A57" stroke="#24162E" stroke-width="3"/>
+              <path d="M298 86v36m-18-18h36" stroke="#24162E" stroke-width="5" stroke-linecap="round"/>
+              <g fill="#C0B2C4"><circle cx="163" cy="190" r="9"/><circle cx="223" cy="180" r="9"/><circle cx="200" cy="213" r="8"/></g>
+            </svg>
+            <div class="map-label map-shop"><span class="map-flower" aria-hidden="true">✳</span><span>PETAL LINE<br><small data-t="mapShop">FLOWER BAR</small></span></div>
+            <div class="map-label map-you"><span aria-hidden="true">●</span><span data-t="mapYou">TÚ ESTÁS AQUÍ</span></div>
+            <div class="map-caption" data-t="mapCaption">MAPA ILUSTRATIVO · DEMOSTRACIÓN</div>
+          </div>
+          <div class="queue-sheet">
           <div class="eyebrow" data-t="lineEyebrow">TU LUGAR ESTÁ GUARDADO</div>
           <h2 class="hero-heading" id="line-title" data-t-html="lineTitle">You're <em>in line.</em></h2>
           <p class="lead" id="line-hello"></p>
           <div class="queue-ticket" aria-label="Tu posición en la fila">
             <div class="ticket-header"><span data-t="virtualTicket">TURNO VIRTUAL</span><span>FLOWER BAR / POP-UP</span></div>
-            <div class="ticket-count"><span class="ticket-hash">#</span><strong id="queue-position">04</strong></div>
+            <div class="ticket-count"><span class="ticket-hash">#</span><strong id="queue-position" aria-live="polite">04</strong><span class="ticket-detail" data-t="queueNumberLabel">TU NÚMERO</span></div>
             <div class="ticket-rule"></div>
             <div class="ticket-meta">
               <div><span data-t="peopleAhead">Personas antes que tú</span><strong id="ahead-count">3</strong></div>
@@ -121,12 +141,14 @@
             <button class="main-btn" id="advance-button" type="button"><span data-t="advanceAction">Avanzar la fila</span><span aria-hidden="true">→</span></button>
           </div>
           <button type="button" class="text-btn" id="leave-button" data-t="leaveAction">Salir de la fila</button>
+          </div>
         </section>
 
         <section class="screen" id="screen-ready" aria-labelledby="ready-title" hidden>
           <div class="eyebrow" data-t="readyEyebrow">TU MOMENTO FLORECE</div>
           <div class="ready-illustration" aria-hidden="true">
-            <div class="flower-ring"></div><div class="ready-flower">✿</div><span class="spark spark-one">✧</span><span class="spark spark-two">✳</span><span class="spark spark-three">✦</span>
+            <img src="./petal-street.svg" width="980" height="640" alt="" loading="lazy" decoding="async">
+            <span class="ready-bubble" data-t="readyBubble">TUS FLORES TE ESPERAN</span>
           </div>
           <h2 class="hero-heading ready-heading" id="ready-title" data-t-html="readyTitle">It's your <em>turn!</em></h2>
           <p class="lead" id="ready-message"></p>
