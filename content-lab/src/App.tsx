@@ -675,6 +675,54 @@ function App() {
     if(!saved){toast('No se encontró este diseño en tu cuenta.');return;}
     edit(saved,true);
   };
+  const openLabAlert=(alert:LabAlert)=>{
+    const title=alert.project_title.slice(0,66);
+    const welcome=alert.kind==='unfinished'
+      ?(loginLanguage==='es'
+        ?'¡Qué alegría tenerte de vuelta! ✨ «'+title+'» te espera. ¡Sigamos creando!'
+        :'So happy you’re back! ✨ “'+title+'” is waiting. Let’s create!')
+      :(loginLanguage==='es'
+        ?'¡Volviste justo a tiempo! ⏰ Revisemos «'+title+'» antes de publicar.'
+        :'Perfect timing! ⏰ Let’s review “'+title+'” before you post.');
+    if(alert.source_type==='post'){
+      const saved=posts.find(post=>post.id===alert.source_id);
+      if(!saved){toast(loginLanguage==='es'?'El post ya no está disponible.':'This post is no longer available.');return}
+      edit(saved,true);
+    }else{
+      if(!alert.brand_id||alert.tile_index<0){
+        toast(loginLanguage==='es'?'No se encontró esta publicación del grid.':'Grid post not found.');return;
+      }
+      setCurrent(alert.brand_id);
+      setGridPref(prev=>({...prev,version:prev.version+1,brandId:alert.brand_id||'',
+        openGridId:alert.source_id,openTileIndex:alert.tile_index,fromCalendar:true}));
+      navigate('grid');
+    }
+    toast(welcome);
+  };
+  // A push/email link survives OTP login, then opens the owner's exact project.
+  useEffect(()=>{
+    if(!account?.email||waiting||!brands.length)return;
+    const url=new URL(window.location.href);
+    const id=url.searchParams.get('notification');
+    if(!id||id===lastAlertLinkRef.current)return;
+    lastAlertLinkRef.current=id;
+    let alive=true;
+    void labNotificationApi.get(id).then(async alert=>{
+      if(!alive)return;
+      if(alert){
+        if(!alert.read_at)await labNotificationApi.act(id,'read').catch(()=>false);
+        if(alive)openLabAlert(alert);
+      }
+    }).catch(()=>{}).finally(()=>{
+      if(!alive)return;
+      const currentUrl=new URL(window.location.href);
+      if(currentUrl.searchParams.get('notification')===id){
+        currentUrl.searchParams.delete('notification');
+        window.history.replaceState(null,'',currentUrl.pathname+currentUrl.search+currentUrl.hash);
+      }
+    });
+    return()=>{alive=false};
+  },[account?.email,waiting,brands.length,posts.length]);
   const downloadCalendarProject=async(item:PlannedItem):Promise<void>=>{
     if(!brand||item.brandId!==brand.id)throw Error('Este proyecto pertenece a otra marca.');
     if(item.kind==='grid'){
@@ -1442,6 +1490,7 @@ function App() {
             </strong>
           </div>
           <div>
+            <LabNotifications email={account.email||''} locale={loginLanguage} onOpen={openLabAlert} notify={toast}/>
             <div className="lab-site-locale" role="group" aria-label="Idioma del sitio / Site language">
               <button type="button" aria-pressed={loginLanguage==='es'}
                 className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')}>ES</button>
@@ -2197,6 +2246,7 @@ function App() {
         )}
         <nav aria-label="Content Lab · Información legal" style={{padding:'18px 20px',display:'flex',gap:18,flexWrap:'wrap',fontSize:12}}><a href="./terminos.html" target="_blank" rel="noopener noreferrer">Términos del Lab</a><a href="./privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a><a href="./reembolsos.html" target="_blank" rel="noopener noreferrer">Reembolsos</a></nav>
       </main>
+      <SaveSuccessCelebration event={saveCelebration} locale={loginLanguage} onDone={()=>setSaveCelebration(null)}/>
       {/* Keep the dock outside the scrolling main so Safari never re-anchors it
           when the page content or browser controls resize. */}
       {account && <nav className="lab-mobile-dock" aria-label={loginLanguage==='es'?'Navegación rápida de Content Lab':'Content Lab quick navigation'}>
