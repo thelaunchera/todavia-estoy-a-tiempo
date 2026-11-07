@@ -97,6 +97,7 @@ test('B+C Carousel Factory makes the first viewport a compact touch workspace',(
  assert.ok(css.includes('.factory-bc-workspace .factory-mobile-preview-trigger'));
  assert.ok(panorama.includes('panorama-expand-short'));
  assert.ok(panoCss.includes('B+C Carousel Factory artboard'));
- assert.ok(app.includes('className="lab-factory-help"'));
+ assert.ok(app.includes("['factory','vertical','create'].includes(tab)"));
+ assert.ok(css.includes('.factory-bc-workspace .factory-step-intro>p'));
  assert.ok(app.includes('saveState={draftStatus}'));
 });
