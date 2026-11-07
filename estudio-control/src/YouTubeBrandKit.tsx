@@ -68,6 +68,8 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  const [openPrompts,setOpenPrompts]=useState<Record<string,boolean>>({});
  const [coverSeason,setCoverSeason]=useState(1);
  const [driveDraft,setDriveDraft]=useState('');
+ const [driveError,setDriveError]=useState('');
+ const [fileErrors,setFileErrors]=useState<Record<string,string>>({});
  const reload=useCallback(async()=>{
   setLoading(true);setError('');
   try{const data=await loadYouTubeBrandVault();
@@ -85,6 +87,7 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
  };
  const upload=async(slot:BrandAssetSlot,file:File)=>{
   setBusy(slot.id);setNotice('');setError('');
+  setFileErrors(old=>({...old,[slot.id]:''}));
   try{
    if(slot.id==='video_bumper'){
     if(file.size>slot.maxMb*1000000)throw new Error('Este video pesa '+(file.size/1000000).toFixed(1)+' MB. El Studio admite hasta '+slot.maxMb+' MB para subirlo directamente. Para un archivo mayor usa «Vincular video de Drive» debajo, sin comprimir el original.');
@@ -93,19 +96,26 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
    await uploadYouTubeBrandAsset(slot.id,file,slot.maxMb);
    await reload();
    setNotice(slot.title+' guardado en la biblioteca privada.');
+   setFileErrors(old=>({...old,[slot.id]:''}));
   }
-  catch(e){setError(e instanceof Error?e.message:'No se pudo guardar el archivo.');}
+  catch(e){
+   const message=e instanceof Error?e.message:'No se pudo guardar el archivo.';
+   setError(message);setFileErrors(old=>({...old,[slot.id]:message}));
+  }
   finally{setBusy('');}
  };
  const saveDriveVideo=async()=>{
-  setBusy('drive-video');setNotice('');setError('');
+  setBusy('drive-video');setNotice('');setError('');setDriveError('');
   try{
    const link=normalizedDriveVideoUrl(driveDraft);
    await saveYouTubeBrandCopy(VIDEO_DRIVE_KEY,link);
    setSavedCopy(old=>({...old,[VIDEO_DRIVE_KEY]:link}));
    setDriveDraft(link);
    setNotice('Enlace guardado en tu biblioteca privada. El video original sigue en Drive, sin compresión ni copia.');
-  }catch(e){setError(e instanceof Error?e.message:'No se pudo vincular el video de Drive.');}
+  }catch(e){
+   const message=e instanceof Error?e.message:'No se pudo vincular el video de Drive.';
+   setError(message);setDriveError(message);
+  }
   finally{setBusy('');}
  };
  const remove=async(slot:BrandAssetSlot)=>{
@@ -148,13 +158,15 @@ export default function YouTubeBrandKit({entries}:{entries:{title:string;section
      {!asset&&linked?.link&&<a href={linked.link} target="_blank" rel="noopener noreferrer">Ver original en Drive</a>}
      {asset&&<button type="button" onClick={()=>void remove(slot)} disabled={busy===slot.id} aria-label={'Eliminar '+slot.title}><Trash2 size={15}/></button>}
     </div>
+    {fileErrors[slot.id]&&<p className="ob-kit-inline-error" role="alert">{fileErrors[slot.id]}</p>}
     {slot.id==='video_bumper'&&<div className="ob-kit-drive-link">
      <label htmlFor="ob-video-drive-link">Vincular video de Drive · sin límite de tamaño del Studio</label>
      <p>Para archivos mayores de 50 MB. El video permanece en tu Drive y el Studio guarda únicamente el enlace privado. La duración prevista sigue siendo hasta 10 segundos.</p>
      <div className="ob-kit-drive-controls">
-      <input id="ob-video-drive-link" type="url" inputMode="url" value={driveDraft} onChange={e=>setDriveDraft(e.target.value)} placeholder="https://drive.google.com/file/d/…/view" aria-label="Enlace del video original de Google Drive"/>
+      <input id="ob-video-drive-link" type="url" inputMode="url" value={driveDraft} onChange={e=>{setDriveDraft(e.target.value);setDriveError('');}} placeholder="https://drive.google.com/file/d/…/view" aria-label="Enlace del video original de Google Drive"/>
       <button type="button" onClick={()=>void saveDriveVideo()} disabled={busy==='drive-video'||loading||!driveDraft.trim()}>{busy==='drive-video'?'Guardando...':'Guardar enlace de Drive'}</button>
      </div>
+     {driveError&&<p className="ob-kit-inline-error" role="alert">{driveError}</p>}
      {driveLink&&<a href={driveLink} target="_blank" rel="noopener noreferrer">Abrir video original en Drive</a>}
     </div>}
     <button type="button" className="ob-kit-toggle" onClick={()=>setOpenPrompts(old=>({...old,[slot.id]:!old[slot.id]}))}>{openPrompts[slot.id]?'Ocultar':'Ver'} Master Prompt visual</button>
