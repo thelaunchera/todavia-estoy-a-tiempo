@@ -64,9 +64,9 @@ test('March is scheduled after February and hidden on the catalog until March 1 
 test('Original artwork requires no image generation credits and both language labels are present',()=>{
   const svg=get('assets/freebies/march-premium-app/cover.svg');
   assert.ok(svg.includes('<svg'));
-  assert.ok(svg.includes('Capture.'));
-  assert.ok(svg.includes('Focus.'));
-  assert.ok(svg.includes('Done.'));
+  assert.ok(svg.includes('JOIN THE LINE'));
+  assert.ok(svg.includes('YOUR SPOT'));
+  assert.ok(svg.includes("YOU'RE UP"));
   assert.ok(!svg.includes('<image'));
   const lang=get('freebies/_shared/freebie-access.js');
   assert.ok(lang.includes('FLUJO DE PANTALLAS'));
@@ -87,8 +87,8 @@ test('March pages load in Spanish and can switch all visitor copy to English',()
  assert.ok(landing.includes('>Próximamente</button>'));
  assert.ok(landing.includes('data-en="Walkthrough video"'));
  assert.ok(landing.includes('data-es="Video del recorrido"'));
- assert.ok(landing.includes('data-en="01 / GET STARTED"'));
- assert.ok(landing.includes('data-es="01 / COMIENZA"'));
+ assert.ok(landing.includes('data-en="01 / JOIN THE LINE"'));
+ assert.ok(landing.includes('data-es="01 / ENTRAR"'));
  assert.ok(access.includes('data-en="One clear promise"'));
  assert.ok(access.includes('data-es="Una promesa clara"'));
  assert.ok(access.includes('data-es="Revisión final:"'));
@@ -97,9 +97,9 @@ test('March pages load in Spanish and can switch all visitor copy to English',()
 test('March keeps separate, original English and Spanish cover artwork',()=>{
  const en=get('assets/freebies/march-premium-app/cover.svg');
  const es=get('assets/freebies/march-premium-app/cover-es.svg');
- assert.ok(en.includes('Design an app')&&en.includes('Capture.'));
- assert.ok(es.includes('Diseña una app')&&es.includes('Captura.'));
- assert.ok(es.includes('Enfoca.')&&es.includes('Termina.'));
+ assert.ok(en.includes('A beautiful way to wait.')&&en.includes('JOIN THE LINE'));
+ assert.ok(es.includes('Tu turno puede florecer.')&&es.includes('ENTRA EN LA FILA'));
+ assert.ok(es.includes('MI TURNO')&&es.includes('AHORA TE TOCA'));
 });
 test('Shared private library renders translated prompt titles without touching older packs',()=>{
  const src=get('freebies/_shared/freebie-access.js');
