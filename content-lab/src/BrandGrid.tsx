@@ -559,7 +559,9 @@ export default function BrandGrid({brand,assets,images,isAdmin=false,wallet,prom
           <textarea rows={2} value={quickNotes} maxLength={850} onChange={e=>setQuickNotes(e.target.value)} placeholder="Ej. luz de mañana, superficies naturales, sombra suave; mantener etiquetas exactas"/>
         </label>
       </details>
-      <p className="bg-express-tip"><Check size={15}/> El Lab no genera imágenes ni edita reels: aquí puedes visualizar tu cuadrícula, subir fotos terminadas y asignar día y hora.</p>
+      <details className="bg-editor-info"><summary>Sobre este editor</summary>
+        <p>Organiza imágenes terminadas y elige cuándo publicarlas. Las fotografías se crean fuera del Lab.</p>
+      </details>
     </section>}
     <div className="bg-layout"><div className="bg-column">
       {false&&<details className="bg-box bg-advanced-config"><summary>Herramientas avanzadas de propietaria · referencias, IA y dirección artística</summary>
