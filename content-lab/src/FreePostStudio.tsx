@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2,Shapes,Check,Clock3,AlertCircle} from 'lucide-react';
+import {ImagePlus,Type,Layers3,Upload,Download,Paintbrush,Undo2,Redo2,Shapes,Check,Clock3,AlertCircle,Copy,LockKeyhole,LockKeyholeOpen} from 'lucide-react';
 import {paintFreeBackground,type FreeBackgroundId} from './FreeDesignAssets';
 import {paintPanoramaLayers,panoramaFont,panoramaTextWeight,type PanoramaLayer,type LayerMove} from './PanoramaLayers';
 import {clampRect,clampFreePhotoRect,paintCoverImage,type TouchRect} from './TouchGeometry';
@@ -26,13 +26,13 @@ const plain=(en:string,es:string,locale:'es'|'en')=>locale==='es'?es:en;
 function uniqueId(){return 'free-'+crypto.randomUUID();}
 function legacyStickers(decor:CoverDecor):PanoramaLayer[]{
  return decor.stickerIds.filter(id=>!decor.layers.some(layer=>layer.assetId===id))
-  .map((id,n)=>({id:'legacy-sticker-'+id,assetId:id,name:'Sticker',kind:'sticker',locked:(decor.lockedStickerIds||[]).includes(id),
+  .map((id,n)=>({id:'legacy-sticker-'+id,assetId:id,name:'Sticker',kind:'sticker',locked:(decor.lockedStickerIds||[]).includes(id),tint:decor.stickerTints?.[id],
    opacity:decor.stickerOpacities?.[id]??1,
    rect:decor.stickerPositions[id]||{x:.1+(n*.19),y:.7,w:.18,h:.18}}));
 }
 export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLayer[]{
  const layers:PanoramaLayer[]=[];
- if(post.assetId&&post.assetId!==decor.backgroundImageId&&!decor.layers.some(layer=>layer.assetId===post.assetId))
+ if(post.assetId&&post.assetId!==decor.backgroundImageId)
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
    locked:decor.primaryPhotoLocked===true,opacity:decor.primaryPhotoOpacity??1,
    rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
@@ -122,8 +122,11 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
  const [future,setFuture]=useState<CoverDecor[]>([]);
  const [busy,setBusy]=useState(false);
  const [focusLayerId,setFocusLayerId]=useState('');
+ const [selectedLayerId,setSelectedLayerId]=useState<string|null>(null);
  const photosRef=useRef<HTMLInputElement>(null),backgroundRef=useRef<HTMLInputElement>(null);
  const layers=useMemo(()=>coverLayers(post,brand,decor),[post.designData,post.assetId,post.hook,post.title,brand.headingFont]);
+ const selectedLayer=layers.find(layer=>layer.id===selectedLayerId)||null;
+ const vertical=post.format==='Reel'||post.format==='Story';
  const needed=[post.assetId,decor.backgroundImageId,...decor.stickerIds,...decor.layers.map(l=>l.assetId)].filter(Boolean);
  useEffect(()=>{needed.forEach(id=>{if(!images[id])loadImage(id)})},[needed.join('|')]);
  useEffect(()=>{
@@ -232,6 +235,12 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    const asset=id.slice('legacy-sticker-'.length);
    if(typeof patch.opacity==='number')update({...decor,
      stickerOpacities:{...decor.stickerOpacities,[asset]:Math.max(0,Math.min(1,patch.opacity))}});
+   if(patch.tint!==undefined){
+    const tints={...decor.stickerTints};
+    if(/^#[0-9a-f]{6}$/i.test(patch.tint))tints[asset]=patch.tint;
+    else delete tints[asset];
+    update({...decor,stickerTints:tints});
+   }
    return;
   }
   if(id==='main-title'){
@@ -263,15 +272,21 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   }
   update({...decor,layers:decor.layers.map(l=>l.id===id?{...l,locked}:l)});
  };
- const duplicateText=(id:string)=>{
-  if(decor.layers.length>=22){notify('Máximo 22 elementos por post');return}
-  const original=layers.find(layer=>layer.id===id&&layer.kind==='text');
+ const duplicateElement=(id:string)=>{
+  if(decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
+  const original=layers.find(layer=>layer.id===id);
   if(!original)return;
-  const clone:PanoramaLayer={...original,id:uniqueId(),locked:false,
-   name:original.name+' · copia',rect:clampFreePhotoRect({...original.rect,x:original.rect.x+.025,y:original.rect.y+.025})};
-  update({...decor,layers:[...decor.layers,clone]});
-  notify('Texto duplicado conservando color, tipografía y tamaño.');
+  const cloneId=uniqueId();
+  const clone:PanoramaLayer={...original,id:cloneId,locked:false,role:undefined,
+    name:original.name+' · copia',
+    rect:clampFreePhotoRect({...original.rect,x:original.rect.x+.025,y:original.rect.y+.025})};
+  const ordered=layers.map(layer=>layer.id);
+  ordered.splice(ordered.indexOf(id)+1,0,cloneId);
+  update({...decor,layers:[...decor.layers,clone],layerOrder:ordered});
+  setFocusLayerId(cloneId);
+  notify(plain('Element duplicated','Elemento duplicado',locale));
  };
+ const duplicateText=(id:string)=>duplicateElement(id);
  const remove=(id:string)=>{
   if(layers.find(layer=>layer.id===id)?.locked)return;
   if(id==='main-title'){onTitle('');return}
@@ -370,7 +385,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   <div className="free-post-design-row">
  {!preview?<div className="cover-loading">{plain('Preparing canvas…','Preparando lienzo…',locale)}</div>:
    <TouchLayerCanvas preview={preview} layers={touchLayers} inlineTextTools focusLayerId={focusLayerId} ratio={1080/freePostDimensions(post.format).height} canvasHeight={freePostDimensions(post.format).height} onCommit={commit} onUpdate={updateLayer}
-     onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
+     onRemove={remove} onReorder={reorder} onToggleLock={toggleLock} onDuplicateText={duplicateText} onDuplicateLayer={duplicateElement} onSelectionChange={setSelectedLayerId} textPalette={[brand.color||'#244B5B',brand.background||'#FAF8F3','#191919','#FFFFFF','#F2D85B','#BED8E9']} onDropAsset={addAsset}
      onDropFiles={(files,point)=>{void uploadPhotos(files,point)}}/>}
   {mediaOpen&&<aside className="free-post-media" aria-label={plain('Photo and sticker picker','Selector de fotos y stickers',locale)}>
  <div className="free-post-media-top"><strong>{plain('Choose an element','Elige un elemento',locale)}</strong>
