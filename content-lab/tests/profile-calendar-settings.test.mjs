@@ -25,7 +25,7 @@ test('All editors can save finished design with a chosen date and hour into cale
  assert.ok(app.includes('<ScheduleFromEditor'));
  assert.ok(action.includes('type="date"'));
  assert.ok(action.includes('type="time"'));
- assert.ok(app.includes("save({...latest,date,time,planningStatus:'planned'})"));
+ assert.ok(app.includes("planningStatus:'planned',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'"));
  assert.ok(app.includes("if(ok){setCalendarEditId('');setCalendarFocusDate(date);toast('Guardado en el calendario."));
 });
 
