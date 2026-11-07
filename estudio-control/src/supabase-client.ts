@@ -956,8 +956,13 @@ export async function loadYouTubeBrandVault():Promise<{assets:StudioBrandAsset[]
 export async function uploadYouTubeBrandAsset(id:string,file:File,maxMb:number):Promise<void>{
  if(!client)throw new Error('El Studio no está conectado.');
  checkBrandAsset(id);
- const ext=allowedBrandTypes[file.type];
+ // Files selected from iOS Files / Google Drive may omit the MIME type.
+ const guessedMime:Record<string,string>={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',mp4:'video/mp4',webm:'video/webm',mp3:'audio/mpeg',wav:'audio/wav'};
+ const fileExtension=file.name.toLowerCase().split('.').pop()||'';
+ const mime=allowedBrandTypes[file.type]?file.type:(!file.type||file.type==='application/octet-stream')?(guessedMime[fileExtension]||''):'';
+ const ext=allowedBrandTypes[mime];
  if(!ext||file.size<=0)throw new Error('Archivo no válido. Usa PNG, JPG, WEBP, MP4, WEBM, MP3 o WAV.');
+ if(id==='video_bumper'&&!['video/mp4','video/webm'].includes(mime))throw new Error('Para la animación del logo, selecciona un MP4 o WEBM.');
  const limit=Math.min(Math.max(1,maxMb),50)*1000000;
  if(file.size>limit)throw new Error('El archivo supera el límite de '+maxMb+' MB para este elemento.');
  const who=await owner();
@@ -965,11 +970,11 @@ export async function uploadYouTubeBrandAsset(id:string,file:File,maxMb:number):
   .eq('user_id',who.id).eq('asset_id',id).maybeSingle();
  if(readError)throw new Error('No se pudo revisar la versión anterior.');
  const path=who.id+'/'+id+'/'+crypto.randomUUID()+'.'+ext;
- const {error:uploadError}=await client.storage.from(BRAND_BUCKET).upload(path,file,{contentType:file.type,cacheControl:'3600',upsert:false});
+ const {error:uploadError}=await client.storage.from(BRAND_BUCKET).upload(path,file,{contentType:mime,cacheControl:'3600',upsert:false});
  if(uploadError)throw new Error('No se pudo subir el archivo: '+uploadError.message);
  const {error:saveError}=await client.from('podcast_youtube_brand_assets').upsert({
    user_id:who.id,asset_id:id,object_path:path,file_name:(file.name||id+'.'+ext).slice(0,180),
-   mime_type:file.type,file_size:file.size,updated_at:new Date().toISOString()
+   mime_type:mime,file_size:file.size,updated_at:new Date().toISOString()
  },{onConflict:'user_id,asset_id'});
  if(saveError){
   await client.storage.from(BRAND_BUCKET).remove([path]);
