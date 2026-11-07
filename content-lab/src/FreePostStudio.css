@@ -175,3 +175,13 @@
  .free-post-selected-buttons>button{min-width:0;min-height:38px;padding:5px 3px;font-size:10px}
  .free-post-selection-colors{gap:6px}
 }
+
+
+/* In-app panels: actions first, no permanent coaching paragraphs. */
+.free-post-studio .free-post-media-hint{display:none}
+.free-post-studio .free-post-utility-bar{margin:2px 0 5px}
+.free-post-studio .free-post-selected-actions{box-shadow:none}
+@media(max-width:799px){
+ .free-post-studio .free-post-utility-bar{margin:0 0 4px}
+ .free-post-studio .free-post-selected-actions{margin-bottom:3px}
+}
