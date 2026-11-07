@@ -30,6 +30,8 @@ function safeStatus(value?:string) {
   return classStatusOptions.includes(value as typeof classStatusOptions[number]) ? value! : 'pendiente';
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
+// Record practical lessons first; the welcome video is filmed at the end.
+const tabletFilmingOrder=[...classLessons.filter(x=>x.id!=='00'),...classLessons.filter(x=>x.id==='00')];
 
 export default function ClassProduction({entries,tasks,focusPending,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
  const [lessonId,setLessonId]=useState('00');
@@ -51,6 +53,13 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  const [notice,setNotice]=useState('');
  const [copied,setCopied]=useState('');
  const [showAdminRoom,setShowAdminRoom]=useState(false);
+ const [tabletMode,setTabletMode]=useState<boolean>(()=>{
+  if(typeof window==='undefined')return false;
+  try{const stored=window.localStorage.getItem('tle_class_tablet_filming_v1');if(stored!==null)return stored==='yes';}catch{}
+  return Boolean(window.matchMedia?.('(pointer: coarse) and (min-width: 650px)').matches);
+ });
+ const [tabletCue,setTabletCue]=useState<'screen'|'voice'>('screen');
+ useEffect(()=>{try{window.localStorage.setItem('tle_class_tablet_filming_v1',tabletMode?'yes':'no');}catch{}},[tabletMode]);
  // A task card in Mis tareas opens the exact existing class workspace.
  useEffect(()=>{
    if(focusPending?.kind==='weekly') setArea('plan');
@@ -96,13 +105,14 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
    try { await navigator.clipboard.writeText(text);setCopied(key); }
    catch {setNotice('No se pudo copiar automáticamente. Selecciona el texto en pantalla para copiarlo.');}
  }
- async function save() {
+ async function save(statusOverride?:string) {
    if(!record){setNotice('No se encontró la ficha privada de este video. Actualiza el Estudio y prueba otra vez.');return;}
    if(!validVideoLink(url)){setNotice('El enlace de video debe comenzar con https://; puedes dejarlo vacío hasta grabar.');return;}
    setSaving(true);setNotice('');
    try {
-     await onSave(record,{status,notes,link:url.trim(),performance_notes:[...checked].sort((a,b)=>a-b).join(',')});
-     setNotice('Progreso guardado en tu Estudio privado.');
+     await onSave(record,{status:statusOverride||status,notes,link:url.trim(),performance_notes:[...checked].sort((a,b)=>a-b).join(',')});
+     if(statusOverride)setStatus(statusOverride);
+     setNotice('Progreso guardado en tu Estudio privado. No se publicó para los alumnos.');
    } catch(e) {setNotice(e instanceof Error?e.message:'No se pudo guardar.');}
    finally{setSaving(false);}
  }
@@ -151,7 +161,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
   `Prueba o entrega: ${lesson.exercise}`
  ].join('\n');
  const recordingGuide='Antes de grabar: cierra notificaciones y cuentas privadas; abre solo las pestañas del módulo; captura desde el teléfono con texto legible; conserva el formato nativo y usa 16:9 solo para montaje cuando no reduzca la lectura; graba cada escena por separado sin forzar una toma larga; captura clics reales; deja 2 segundos de aire al principio y al final; si te equivocas, repite esa escena, no todo el video; guarda el archivo con su número; después añade tu narración natural y revisa cada clic; valida primero una muestra de voz de 60–90 segundos. El ejemplo de brownies tradicionales es ficticio y no tiene cobros.';
- return <section className="class-room">
+ return <section className={"class-room"+(tabletMode&&area==='grabar'?" class-room--tablet":"")}>
   <header className="class-intro">
     <div>
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
@@ -172,6 +182,11 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
      <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><FileText size={16}/> 3. Materiales y herramientas</button>
     <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 4. Plan y lanzamiento</button>
   </nav>
+  <input ref={filePicker} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" className="class-recording-picker" tabIndex={-1} aria-label="Elegir grabación del capítulo" onChange={event=>void handleSelectedFile(event)}/>
+  {area==='grabar'&&<div className="class-tablet-mode-switch">
+   <div><span className="class-mini-heading">GRABACIÓN EN iPAD</span><p>{tabletMode?'Vista concentrada: un capítulo y una escena a la vez.':'Activa una pantalla más sencilla para filmar desde tu tablet.'}</p></div>
+   <button type="button" aria-pressed={tabletMode} onClick={()=>setTabletMode(v=>!v)}>{tabletMode?'Ver estudio completo':'Activar modo iPad'}</button>
+  </div>}
   {area==='alumno'&&<section className="class-student-route" aria-label="Ruta del alumno, vista de la profesora">
     <div className="class-student-route-heading">
      <span className="class-overline"><BookOpen size={16}/> VISTA DE PROFESORA · NO ES EL AULA PÚBLICA</span>
@@ -234,6 +249,69 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
   <ConnectorsLesson/>
   </div>}
   {area==='grabar'&&<>
+  {area==='grabar'&&tabletMode&&<section className="class-tablet-desk" aria-label="Modo iPad · grabación privada de la clase">
+   <header className="class-tablet-head">
+    <span className="class-overline"><Film size={17}/> TU MESA DE GRABACIÓN · PRIVADA</span>
+    <h3>Una escena a la vez.</h3>
+    <p>Empieza por el capítulo 01. Graba la bienvenida 00 al final. Nada se publica automáticamente.</p>
+    <label htmlFor="class-tablet-lesson">¿Qué capítulo vas a grabar?
+     <select id="class-tablet-lesson" value={lesson.id} onChange={e=>choose(e.target.value)}>
+      {tabletFilmingOrder.map(item=><option key={item.id} value={item.id}>{item.id} · {item.title}</option>)}
+     </select>
+    </label>
+   </header>
+   <div className="class-tablet-scene">
+    <div className="class-tablet-scene-top">
+     <span>ESCENA {scene+1} DE {lesson.beats.length}</span>
+     <span>CAPÍTULO {lesson.id} · {lesson.minutes} MIN DE VIDEO EDITADO APROX.</span>
+    </div>
+    <h4>{lesson.beats[scene].label}</h4>
+    <div className="class-tablet-cue-switch" role="group" aria-label="Elegir qué mirar durante la grabación">
+     <button type="button" className={tabletCue==='screen'?'active':''} aria-pressed={tabletCue==='screen'} onClick={()=>setTabletCue('screen')}><MonitorPlay size={17}/> Qué mostrar</button>
+     <button type="button" className={tabletCue==='voice'?'active':''} aria-pressed={tabletCue==='voice'} onClick={()=>setTabletCue('voice')}><Headphones size={17}/> Qué decir</button>
+    </div>
+    <div className="class-tablet-cue" aria-live="polite">
+     <p>{tabletCue==='screen'?lesson.beats[scene].show:lesson.beats[scene].say}</p>
+    </div>
+    <div className="class-tablet-scene-nav">
+     <button type="button" disabled={scene===0} onClick={()=>{setScene(n=>Math.max(0,n-1));setCopied('');}}><span aria-hidden="true">‹</span> Anterior</button>
+     <strong>{scene+1} / {lesson.beats.length}</strong>
+     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(n=>Math.min(lesson.beats.length-1,n+1));setCopied('');}}>Siguiente <span aria-hidden="true">›</span></button>
+    </div>
+   </div>
+   <div className="class-tablet-actions">
+    <a href="https://casa-brownie-taller-desde-cero-b37dq5.v2.appdeploy.ai/" target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir taller de Casa Brownie</a>
+    <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
+   </div>
+   <details className="class-tablet-helper">
+    <summary>Preparar esta escena en el iPad</summary>
+    <div className="class-tablet-helper-body">
+     <p><b>1.</b> Abre el taller y prepara las pestañas de este capítulo.</p>
+     <ul>{recordingStart.tabs.map(item=><li key={item}>{item}</li>)}</ul>
+     <p><b>2.</b> Desactiva las notificaciones. Abre el Centro de control del iPad y toca Grabación de pantalla. El Studio no puede iniciar la grabación por ti.</p>
+     <p><b>3.</b> Graba una escena por vez. Detén la grabación desde iPadOS, revisa el archivo y añade tu voz después si lo prefieres.</p>
+     <p><b>Termina cuando:</b> {recordingStart.finish}</p>
+    </div>
+   </details>
+   <section className="class-tablet-finish" aria-label="Guardar la grabación privada">
+    <div className="class-tablet-finish-head"><div><span className="class-mini-heading">GUARDA TU TOMA</span><h4>Capítulo {lesson.id} · {lesson.title}</h4></div><span className="class-tablet-private"><ShieldCheck size={15}/> Privado</span></div>
+    {record?.recording_path&&<button className="class-tablet-view-saved" type="button" onClick={()=>void viewRecording(record.recording_path!)}><CheckCircle2 size={16}/> Ver grabación guardada · {record.recording_name||lesson.id}</button>}
+    <button className="class-tablet-upload" type="button" disabled={!!uploadingId||!record} onClick={()=>startUpload(lesson.id)}><UploadCloud size={19}/>{uploadingId===lesson.id?'Subiendo '+uploadProgress+'%':record?.recording_path?'Cambiar archivo de video':'Subir video desde el iPad'}</button>
+    {uploadingId===lesson.id&&<div className="class-upload-progress" aria-label={'Subida '+uploadProgress+'%'}><div style={{width:uploadProgress+'%'}}/></div>}
+    <small className="class-tablet-limit">MP4, MOV o WEBM hasta 50 MB. Para grabaciones más largas, utiliza un enlace privado o No listado.</small>
+    <label className="class-tablet-field">Enlace al video (opcional)
+     <input type="url" inputMode="url" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://youtu.be/… o enlace privado"/>
+    </label>
+    <label className="class-tablet-field">Notas para repetir o editar
+     <textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Ej.: repetir escena 2, ajustar tamaño del texto…"/>
+    </label>
+    <div className="class-tablet-save-actions">
+     <button type="button" disabled={saving||!record} className="class-tablet-save" onClick={()=>void save('grabado')}><Check size={18}/>{saving?'Guardando…':'Marcar grabado y guardar'}</button>
+     <button type="button" disabled={saving||!record} className="class-tablet-save-alt" onClick={()=>void save()}><Save size={17}/> Guardar avance</button>
+    </div>
+    <p className="class-tablet-feedback" role="status">{uploadNotice||notice||'Las tomas y tus notas permanecen privadas hasta que apruebes la clase.'}</p>
+   </section>
+  </section>}
    <section className="class-reel-gate" aria-label="Reel de la clase después de la grabación">
     <div className="class-reel-gate-copy">
      <span className="class-mini-heading"><Film size={15}/> REEL DE LA CLASE · MATERIAL REAL</span>
@@ -263,7 +341,6 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
   <div id="class-filming-workspace" className="class-body">
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
-      <input ref={filePicker} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" className="class-recording-picker" tabIndex={-1} aria-label="Elegir grabación del capítulo" onChange={event=>void handleSelectedFile(event)}/>
       <p className="class-upload-hint">Sube la grabación original de cada capítulo. Privada · MP4, MOV o WEBM · hasta 50 MB por archivo.</p>
       {classLessons.map(item=>{
        const entry=records.find(x=>x.subtitle===item.id);

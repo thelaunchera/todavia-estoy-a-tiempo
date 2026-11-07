@@ -162,3 +162,17 @@ test('owner student preview does not expose demo publish switches',async()=>{
  assert.match(course,/const MANAGE_DEMOS_REQUESTED=ADMIN_VIEW_REQUESTED && queryParams\.get\('gestionar_demos'\)==='1'/);
  assert.match(course,/canManageDemos:adminPreview&&MANAGE_DEMOS_REQUESTED/);
 });
+
+test('private iPad filming desk reuses existing chapter uploads, save and scenes',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const t=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../estudio-control/src/class-production.css',import.meta.url),'utf8');
+ assert.match(t,/class-tablet-desk/);
+ assert.match(t,/tabletFilmingOrder/);
+ assert.match(t,/startUpload\(lesson\.id\)/);
+ assert.match(t,/onClick=\{\(\)=>void save\('grabado'\)\}/);
+ assert.match(t,/class-tablet-cue/);
+ assert.match(t,/window\.matchMedia/);
+ assert.match(css,/class-room--tablet/);
+ assert.match(css,/prefers-reduced-motion/);
+});
