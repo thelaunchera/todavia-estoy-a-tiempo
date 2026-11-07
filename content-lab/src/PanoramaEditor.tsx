@@ -159,6 +159,9 @@ export default function PanoramaEditor({
   };
   const dragStart=(e:React.PointerEvent,asset:LibraryAsset)=>{
     if(e.pointerType==='mouse')return;
+    // A fresh deliberate touch resets the suppression from the previous drag.
+    // Safari may synthesize a click well beyond 350ms after pointerup.
+    ignoreClick.current='';
     draggingRef.current={id:asset.id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,handled:false};
     e.currentTarget.setPointerCapture(e.pointerId);
     if(!images[asset.id])loadImage(asset.id);
@@ -175,8 +178,9 @@ export default function PanoramaEditor({
     if(!drag||drag.pointerId!==e.pointerId)return;
     draggingRef.current=null;setGhost(null);
     if(!drag.handled)return;
+    // Consume the synthetic click from this drag, irrespective of Safari delay.
+    // Never clear this by time: a new pointerdown or the click itself clears it.
     ignoreClick.current=drag.id;
-    window.setTimeout(()=>{if(ignoreClick.current===drag.id)ignoreClick.current=''},350);
     const stage=containerRef.current?.querySelector('.touch-editor-stage');
     if(!stage)return;
     const rect=stage.getBoundingClientRect();
