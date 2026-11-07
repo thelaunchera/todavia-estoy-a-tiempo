@@ -558,3 +558,108 @@ export const image={
     }finally{URL.revokeObjectURL(url)}
   }
 };
+
+
+/** Buyer-only reminders; all records stay under Supabase RLS / verified membership. */
+export type LabAlert={
+ id:string;kind:'unfinished'|'scheduled';source_type:'post'|'grid';source_id:string;
+ tile_index:number;brand_id:string|null;project_title:string;format:string;
+ scheduled_at:string|null;created_at:string;read_at:string|null;
+ snoozed_until:string|null;delivery_state:string;
+};
+export type LabAlertPrefs={
+ timezone:string;locale:'es'|'en';email_enabled:boolean;push_enabled:boolean;
+};
+export const labNotificationApi={
+ setup:async(locale:'es'|'en'):Promise<LabAlertPrefs>=>{
+  const user=await current();
+  const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  const table=sb.from('content_lab_alert_settings');
+  const {data:existing,error:checkError}=await table.select('timezone,locale,email_enabled,push_enabled').eq('owner_id',user.id).maybeSingle();
+  if(checkError)throw Error(checkError.message);
+  if(existing){
+   const {data,error}=await table.update({timezone,locale,updated_at:new Date().toISOString()}).eq('owner_id',user.id)
+     .select('timezone,locale,email_enabled,push_enabled').single();
+   if(error)throw Error(error.message);
+   return data as LabAlertPrefs;
+  }
+  const {data,error}=await table.upsert({owner_id:user.id,timezone,locale,email_enabled:true,push_enabled:false},{onConflict:'owner_id'})
+   .select('timezone,locale,email_enabled,push_enabled').single();
+  if(error)throw Error(error.message);
+  return data as LabAlertPrefs;
+ },
+ list:async():Promise<LabAlert[]>=>{
+  const user=await current();
+  const {data,error}=await sb.from('content_lab_alerts')
+   .select('id,kind,source_type,source_id,tile_index,brand_id,project_title,format,scheduled_at,created_at,read_at,snoozed_until,delivery_state')
+   .eq('owner_id',user.id).is('read_at',null).order('created_at',{ascending:false}).limit(50);
+  if(error)throw Error(error.message);
+  return (data||[]) as LabAlert[];
+ },
+ get:async(id:string):Promise<LabAlert|null>=>{
+  const user=await current();
+  if(!/^[a-f0-9-]{36}$/i.test(id))return null;
+  const {data,error}=await sb.from('content_lab_alerts')
+   .select('id,kind,source_type,source_id,tile_index,brand_id,project_title,format,scheduled_at,created_at,read_at,snoozed_until,delivery_state')
+   .eq('owner_id',user.id).eq('id',id).maybeSingle();
+  if(error)throw Error(error.message);
+  return (data||null) as LabAlert|null;
+ },
+ act:async(id:string,action:'read'|'snooze')=>{
+  await current();
+  const {data,error}=await sb.rpc('content_lab_act_on_alert',{p_id:id,p_action:action});
+  if(error)throw Error(error.message);
+  return Boolean(data);
+ },
+ setEmail:async(enabled:boolean):Promise<void>=>{
+  const user=await current();
+  const {data,error}=await sb.from('content_lab_alert_settings')
+   .update({email_enabled:enabled,updated_at:new Date().toISOString()}).eq('owner_id',user.id).select('owner_id');
+  if(error||!data?.length)throw Error(error?.message||'No se guardó tu preferencia.');
+ },
+ enablePush:async():Promise<void>=>{
+  const user=await current();
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))
+   throw Error('Este navegador no permite notificaciones push. En iPhone, agrega Content Lab a la pantalla de inicio y ábrelo desde allí.');
+  const {data:key,error:keyError}=await sb.rpc('content_lab_public_push_key');
+  if(keyError||typeof key!=='string'||!key)throw Error('Las notificaciones push aún no están disponibles.');
+  const registration=await navigator.serviceWorker.ready;
+  const permission=await Notification.requestPermission();
+  if(permission!=='granted')throw Error('Permiso de notificaciones no concedido. Puedes recibir avisos por correo.');
+  const base64=key.replace(/-/g,'+').replace(/_/g,'/');
+  const binary=atob(base64.padEnd(Math.ceil(base64.length/4)*4,'='));
+  const keyBytes=new Uint8Array([...binary].map(c=>c.charCodeAt(0)));
+  let subscription=await registration.pushManager.getSubscription();
+  if(!subscription)subscription=await registration.pushManager.subscribe({
+   userVisibleOnly:true,applicationServerKey:keyBytes
+  });
+  const json=subscription.toJSON();
+  if(!subscription.endpoint||!json.keys?.p256dh||!json.keys?.auth)
+   throw Error('No se pudo registrar este dispositivo.');
+  const {error}=await sb.from('content_lab_push_subscriptions').upsert({
+   owner_id:user.id,endpoint:subscription.endpoint,p256dh:json.keys.p256dh,
+   auth:json.keys.auth,device_name:/iPhone|iPad/i.test(navigator.userAgent)?'iPhone / iPad':'Content Lab',
+   updated_at:new Date().toISOString()
+  },{onConflict:'endpoint'});
+  if(error)throw Error(error.message);
+  const {error:prefError}=await sb.from('content_lab_alert_settings')
+   .update({push_enabled:true,updated_at:new Date().toISOString()}).eq('owner_id',user.id);
+  if(prefError)throw Error(prefError.message);
+ },
+ disablePush:async():Promise<void>=>{
+  const user=await current();
+  if('serviceWorker' in navigator){
+   const reg=await navigator.serviceWorker.ready;
+   const subscription=await reg.pushManager?.getSubscription();
+   if(subscription){
+    const {error}=await sb.from('content_lab_push_subscriptions').delete()
+     .eq('owner_id',user.id).eq('endpoint',subscription.endpoint);
+    if(error)throw Error(error.message);
+    await subscription.unsubscribe();
+   }
+  }
+  const {error}=await sb.from('content_lab_alert_settings')
+   .update({push_enabled:false,updated_at:new Date().toISOString()}).eq('owner_id',user.id);
+  if(error)throw Error(error.message);
+ }
+};
