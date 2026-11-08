@@ -533,3 +533,67 @@
  }
  .studio-carousel-editor-mode .top-label{display:none!important}
 }
+
+/* Project management stays reachable on iPhone even when advanced editor
+   sections are hidden to protect the fixed-height drawing canvas. */
+.studio-seamless-app .studio-projects-trigger{
+ display:grid;place-items:center;flex:0 0 40px;
+ width:40px;height:42px;padding:0;border:1px solid #d4ddd9;
+ border-radius:12px;background:#fff;color:#191919;cursor:pointer;
+}
+.studio-seamless-app .studio-projects-trigger:focus-visible,
+.studio-projects-backdrop button:focus-visible{
+ outline:3px solid #f2d85b;outline-offset:2px;
+}
+.studio-projects-backdrop{
+ position:fixed;inset:0;z-index:3000;
+ display:flex;align-items:center;justify-content:center;
+ padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+ box-sizing:border-box;background:rgba(25,25,25,.54);
+}
+.studio-projects-dialog{
+ width:min(100%,610px);max-height:min(80dvh,740px);
+ display:flex;flex-direction:column;gap:14px;overflow:hidden;
+ border:1px solid #e7e1d6;border-radius:22px;background:#faf8f3;
+ padding:18px;box-sizing:border-box;box-shadow:0 22px 65px #19191935;
+ color:#191919;font-family:inherit;
+}
+.studio-projects-dialog-head,.studio-projects-dialog-actions,
+.studio-projects-row-actions{
+ display:flex;align-items:center;gap:10px;
+}
+.studio-projects-dialog-head{justify-content:space-between}
+.studio-projects-dialog-head strong{font-size:20px}
+.studio-projects-dialog-head p{margin:4px 0 0;font-size:12px;color:#566369}
+.studio-projects-dialog button{
+ min-height:42px;padding:9px 13px;border:1px solid #d6dedc;
+ border-radius:12px;background:#fff;color:#191919;
+ font-family:inherit;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer;
+}
+.studio-projects-dialog button:disabled{opacity:.5;cursor:wait}
+.studio-projects-dialog-head button{display:grid;place-items:center;flex:0 0 42px;padding:8px}
+.studio-projects-dialog-actions button{flex:1 1 0}
+.studio-projects-dialog-actions .primary{background:#f2d85b;border-color:#dcc34b}
+.studio-projects-dialog-list{overflow:auto;min-height:0;display:grid;gap:9px;overscroll-behavior:contain}
+.studio-projects-row{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+ padding:12px;background:white;border:1px solid #e5e4dc;border-radius:14px;
+}
+.studio-projects-row>div:first-child{display:grid;gap:4px;min-width:130px}
+.studio-projects-row strong{font-size:14px;overflow-wrap:anywhere}
+.studio-projects-row small{font-size:12px;color:#687178}
+.studio-projects-row-actions{flex-wrap:wrap;gap:6px}
+.studio-projects-row-actions button{min-height:39px;padding:8px 10px}
+.studio-projects-row-actions button:last-child{color:#922f2f}
+.studio-projects-empty{font-size:13px;color:#60666a}
+@media(max-width:799px){
+ .studio-carousel-editor-mode .studio-app-topbar>.studio-projects-trigger{
+  width:34px;height:38px;flex-basis:34px;padding:0!important;
+  border-radius:10px;
+ }
+ .studio-projects-backdrop{align-items:flex-end;padding:8px 8px calc(9px + env(safe-area-inset-bottom))}
+ .studio-projects-dialog{width:100%;max-height:82dvh;padding:15px;border-radius:20px}
+ .studio-projects-row{align-items:flex-start}
+ .studio-projects-row-actions{width:100%}
+ .studio-projects-row-actions button{flex:1 1 80px}
+}
