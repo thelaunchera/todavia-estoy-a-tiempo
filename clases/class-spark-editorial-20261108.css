@@ -241,3 +241,158 @@ body.class-page-v2 .class-motion-ribbon :is(span,i) {
   .class-cinema-visual .class-creative-sticker,
   .class-cinema-visual .class-creative-type {animation:none!important;}
 }
+
+/* Mobile refinement after iPhone review (2026-11-08).
+   Show conversion action early; keep stage legible without obscuring the headline.
+   Large screens retain the approved layout. */
+@media (max-width:700px) {
+  body.class-page-v2 .class-hero .class-hero-intro>.class-eyebrow {
+    font-size:clamp(.60rem,2.7vw,.69rem)!important;
+    letter-spacing:.105em!important;
+    line-height:1.4!important;
+    margin:0 0 10px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro>.class-opportunity {
+    font-size:clamp(1.06rem,4.55vw,1.3rem)!important;
+    line-height:1.28!important;
+    margin:12px 0 0!important;
+    max-width:30ch!important;
+  }
+  /* Offer a next action BEFORE the showcase instead of hiding it below a long hero. */
+  body.class-page-v2 .class-hero .class-hero-intro>.class-hero-actions {
+    order:4!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:4px!important;
+    margin:18px 0 0!important;
+    width:100%!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions>.class-primary-button {
+    min-height:50px!important;
+    padding:12px 18px!important;
+    font-size:clamp(.85rem,3.7vw,.95rem)!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions>.class-campaign-notify-link {
+    min-height:32px!important;
+    padding:6px 6px!important;
+    font-size:clamp(.73rem,3vw,.82rem)!important;
+    font-weight:650!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    text-decoration:underline!important;
+    text-underline-offset:4px!important;
+    color:#1d3f8b!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro>.class-cinema-visual {
+    order:5!important;
+    height:clamp(318px,92vw,410px)!important;
+    margin:16px 0 0!important;
+    background:#1238F3!important;
+    border-radius:16px!important;
+  }
+  /* The letterforms now sit entirely ABOVE the photo, never half-hidden behind it. */
+  .class-cinema-visual .class-creative-type {
+    inset:21% auto auto 5%!important;
+    width:75%!important;
+    max-width:75%!important;
+    overflow:visible!important;
+    font-size:clamp(42px,12.5vw,59px)!important;
+    line-height:.80!important;
+    letter-spacing:-.095em!important;
+    white-space:nowrap!important;
+    color:#FFB4C9!important;
+  }
+  .class-cinema-visual .class-creative-type span+span {
+    margin-top:.12em!important;
+  }
+  .class-cinema-visual .class-cinema-film {
+    inset:45% 0 0 17%!important;
+    border-radius:90px 0 0 0!important;
+    box-shadow:-10px -5px 20px rgba(3,17,126,.13)!important;
+  }
+  .class-cinema-visual .class-cinema-film video {
+    object-position:center 49%!important;
+  }
+  .class-cinema-visual .class-cinema-kicker {
+    top:5%!important;
+    left:5%!important;
+    font-size:clamp(8px,2.4vw,10px)!important;
+    max-width:70%!important;
+    line-height:1.35!important;
+    letter-spacing:.12em!important;
+  }
+  .class-cinema-visual .class-creative-sticker {
+    top:5%!important;
+    right:4%!important;
+    width:clamp(58px,16vw,69px)!important;
+    padding:7px!important;
+    font-size:clamp(8px,2.4vw,10px)!important;
+    line-height:1.1!important;
+    transform:rotate(10deg)!important;
+    box-shadow:0 6px 16px rgba(8,16,112,.16)!important;
+  }
+  .class-cinema-visual .class-cinema-browser {
+    width:53%!important;
+    min-width:0!important;
+    right:5%!important;
+    bottom:11%!important;
+    border-width:2px!important;
+    border-radius:12px!important;
+    box-shadow:0 11px 25px rgba(3,12,83,.27)!important;
+  }
+  .class-cinema-visual .class-cinema-browser-top {
+    height:18px!important;
+    padding:0 7px!important;
+  }
+  .class-cinema-visual .class-cinema-browser-url {
+    font-size:8px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .class-cinema-visual .class-cinema-browser-photo {
+    height:48px!important;
+  }
+  .class-cinema-visual .class-cinema-browser-copy {
+    padding:8px 10px 10px!important;
+  }
+  .class-cinema-visual .class-cinema-browser-brand {
+    font-size:8px!important;
+    letter-spacing:.075em!important;
+  }
+  .class-cinema-visual .class-cinema-browser-title {
+    font-size:clamp(.85rem,3.5vw,1.05rem)!important;
+    line-height:1.11!important;
+    margin-top:4px!important;
+  }
+  .class-cinema-visual .class-cinema-browser-tap {
+    padding:7px 9px!important;
+    margin-top:7px!important;
+    font-size:clamp(8px,2.4vw,10px)!important;
+  }
+  .class-cinema-visual .class-cinema-footer {
+    left:5%!important;
+    bottom:3%!important;
+    right:5%!important;
+    font-size:8px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro>.class-lede {
+    order:6!important;
+    font-size:clamp(.91rem,3.9vw,1rem)!important;
+    line-height:1.55!important;
+    margin:18px 0 0!important;
+    max-width:48ch!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro>.class-price-inline {
+    order:7!important;
+  }
+}
+@media(max-width:370px) {
+  .class-cinema-visual .class-creative-type {
+    font-size:clamp(38px,12.2vw,44px)!important;
+  }
+  .class-cinema-visual .class-cinema-browser {
+    width:56%!important;
+  }
+}
