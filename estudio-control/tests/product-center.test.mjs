@@ -27,13 +27,13 @@ test('course stays blocked while Content Lab checkout is live with QA caveat',()
  assert.match(catalog,/Checkout y acceso de compradores cerrados/);
  assert.match(catalog,/Falta verificar compra y entrega completas/);
 });
-test('only approved public AppDeploy demos are listed and remain demo-only',()=>{
+test('approved public demo sources are current and remain demo-only',()=>{
  const approved = new Set([
-  'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/',
-  'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/'
+  'https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/'
  ]);
  const appdeployEntries = links.split('\n').filter(line=>/url:'https:\/\/[^']*appdeploy\.ai\//.test(line));
- assert.ok(appdeployEntries.length >= 2, 'Approved AppDeploy demos must be discoverable');
+ assert.ok(appdeployEntries.length >= 1, 'The one remaining approved AppDeploy concept must be discoverable');
+ assert.match(links,/key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https:\/\/thelaunchera\.com\/demos\/golden-grid\//,'Golden Grid must use the canonical GitHub Pages demo');
  for (const entry of appdeployEntries) {
   const url = entry.match(/url:'([^']+)'/)?.[1];
   assert.ok(approved.has(url), 'Unapproved AppDeploy destination: '+url);
