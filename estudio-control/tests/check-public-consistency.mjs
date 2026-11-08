@@ -40,7 +40,12 @@ for(const p of centerPages){
  const doc=read('centro/'+p);
  assert.ok(center.includes('href="./'+p+'"')||(p==='contacto.html'&&center.includes('href="../index.html#ayuda"')),'El Centro enlaza la política comercial o el formulario de ayuda '+p);
  assert.ok(doc.includes('href="../index.html#ayuda"'),'El documento enlaza al formulario oficial de ayuda '+p);
- assert.ok(doc.includes('Última actualización: 31 de octubre de 2026'),'Fecha real de la versión '+p);
+ const dateMatch=doc.match(/Última actualización:\s*(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (20\d{2})/i);
+ assert.ok(dateMatch,'Fecha pública válida de la versión '+p);
+ const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+ const [,day,month,year]=dateMatch;
+ const published=new Date(Date.UTC(Number(year),months.indexOf(month.toLowerCase()),Number(day)));
+ assert.ok(Number.isFinite(published.getTime()) && published.getUTCDate()===Number(day) && published.getTime()<=Date.now(),'Fecha real, válida y no futura de la versión '+p);
  assert.ok(doc.includes('href="../index.html#ayuda"'),'Navegación al formulario de soporte del negocio '+p);
  assert.ok(!doc.includes('sin reembolsos bajo ninguna circunstancia'),'No renunciar a derechos '+p);
 }
