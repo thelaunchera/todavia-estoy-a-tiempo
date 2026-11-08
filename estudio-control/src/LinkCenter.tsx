@@ -118,7 +118,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'school-class':'produccion','school-wait':'publicado',
   'school-havana-19':'demo','school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo','school-la-vie-in-pink':'demo',
   'school-aula':'produccion','school-club':'produccion','school-pdf':'produccion',
-  'lab-editor':'produccion','lab-prompts':'publicado','lab-brand-board':'publicado'
+  'lab-editor':'publicado','lab-prompts':'publicado','lab-brand-board':'publicado'
 };
 export const PUBLICATION_LABELS:Record<PublicationState,string> = {
   publicado:'Página publicada', demo:'Demo publicada', produccion:'En producción', revision:'Revisar antes de vender', interno:'Acceso interno'
