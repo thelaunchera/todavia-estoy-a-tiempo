@@ -3,7 +3,7 @@ import {
   LayoutDashboard, ShoppingBag, CreditCard, Mail, Gift, PanelsTopLeft,
   ShieldCheck, ExternalLink, ArrowUpRight, ArrowLeft,
 } from 'lucide-react';
-import BuyerCommandPreview from './BuyerCommandPreview';
+import BuyerCommandPreview, {type BuyerPreviewIndustry} from './BuyerCommandPreview';
 import { ReferenceBrowser, EmailCampaignBoard } from './StudioCreativeTools';
 import './operations-center.css';
 
@@ -93,6 +93,8 @@ const SCHEDULE = [
 export default function OperationsCenter({onNavigate}:{onNavigate:(page:OperationsDestination)=>void}) {
   const [selected,setSelected]=useState<CategoryId|null>(null);
   const [buyerPreviewOpen,setBuyerPreviewOpen]=useState(false);
+  const [buyerReviewIndustry,setBuyerReviewIndustry]=useState<BuyerPreviewIndustry>('restaurant');
+  const [buyerReviewLanguage,setBuyerReviewLanguage]=useState<'en'|'es'>('en');
   const [creativePanel,setCreativePanel]=useState<'references'|'campaign'|null>(null);
   const buyerPreviewRef=useRef<HTMLDivElement>(null);
   const detailsRef=useRef<HTMLElement>(null);
@@ -116,7 +118,7 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
       <div className="tle-ops-buyer-access-copy">
         <span>REVISIÓN DE EXPERIENCIA / COMPRADORES</span>
         <h3>El Command Center que reciben tus clientes.</h3>
-        <p>Revisa cómo se ve para restaurantes, limpieza, tiendas y servicios. Prueba solicitudes, precios y disponibilidad sin usar clientes reales.</p>
+        <p>Revisa una vista de ejemplo, sin controles de edición. Cada negocio recibe un Command Center propio cuando el website está terminado y la entrega está aprobada.</p>
       </div>
       <button type="button" aria-expanded={buyerPreviewOpen} aria-controls="tle-buyer-preview-panel" onClick={()=>{
         setBuyerPreviewOpen(v=>!v);
@@ -124,7 +126,28 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
       }}>{buyerPreviewOpen?'Cerrar vista de compradores':'Abrir vista de compradores'}<ArrowUpRight size={17}/></button>
     </section>
     {buyerPreviewOpen&&<div id="tle-buyer-preview-panel" ref={buyerPreviewRef} className="tle-ops-preview-panel">
-      <BuyerCommandPreview onClose={()=>setBuyerPreviewOpen(false)}/>
+      <details className="tle-ops-owner-preview-controls">
+        <summary>Herramientas de revisión · solo administración</summary>
+        <p>Estas opciones sirven únicamente para comprobar nuestros ejemplos. No forman parte del Command Center que recibe el comprador.</p>
+        <div className="tle-ops-owner-preview-fields">
+          <label>Ejemplo a revisar
+            <select value={buyerReviewIndustry} onChange={e=>setBuyerReviewIndustry(e.target.value as BuyerPreviewIndustry)}>
+              <option value="restaurant">Golden Grid · Restaurante</option>
+              <option value="cleaning">Evergreen Cleaning · Limpieza</option>
+              <option value="retail">SOVA · Tienda</option>
+              <option value="services">SOLUNA · Servicios</option>
+            </select>
+          </label>
+          <label>Idioma del ejemplo
+            <select value={buyerReviewLanguage} onChange={e=>setBuyerReviewLanguage(e.target.value as 'en'|'es')}>
+              <option value="en">Inglés</option>
+              <option value="es">Español</option>
+            </select>
+          </label>
+        </div>
+      </details>
+      <BuyerCommandPreview key={buyerReviewIndustry+'-'+buyerReviewLanguage} industry={buyerReviewIndustry}
+        lang={buyerReviewLanguage} onClose={()=>setBuyerPreviewOpen(false)}/>
     </div>}
     <div className="tle-ops-grid" aria-label="Centro de operaciones privado">
       {GROUPS.map(group=>{
