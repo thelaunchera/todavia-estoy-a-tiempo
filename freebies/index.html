@@ -339,6 +339,9 @@
         <a id="footer-class-link" href="/clases/primera-landing-en.html" data-en="The class" data-es="La clase">The class</a>
         <a id="footer-lab-link" href="/content-lab/descubre/en/">Content Lab</a>
         <a id="footer-privacy-link" href="/privacidad-en.html" data-en="Privacy" data-es="Privacidad">Privacy</a>
+        <a id="footer-terms-link" href="/terminos.html" data-en="Terms" data-es="Términos">Términos</a>
+        <a id="footer-refunds-link" href="/reembolsos.html" data-en="Refunds" data-es="Reembolsos">Reembolsos</a>
+        <a id="footer-cookies-link" href="/cookies.html" data-en="Cookies" data-es="Cookies">Cookies</a>
       </nav>
     </div>
   </footer>
@@ -416,6 +419,7 @@
         classLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/clases/primera-landing-en.html":"/clases/primera-landing.html"});
         labLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/content-lab/descubre/en/":"/content-lab/descubre/"});
         privacyLinks.forEach(id=>{document.getElementById(id).href=lang==="en"?"/privacidad-en.html":"/privacidad.html"});
+        [["footer-terms-link","terminos"],["footer-refunds-link","reembolsos"],["footer-cookies-link","cookies"]].forEach(([id,base])=>{document.getElementById(id).href="/"+base+(lang==="en"?"-en":"")+".html"});
         const carouselPreview=lang==="en"?"/assets/freebies/content-lab-carousels-editor-en.svg":"/assets/freebies/content-lab-carousels-editor-light.svg";
         const previewImage=document.getElementById("carousel-preview-image");
         const previewLink=document.getElementById("carousel-preview-link");
