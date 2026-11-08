@@ -4,6 +4,11 @@ import { api } from './supabase-client';
 import './link-center.css';
 
 export const LINK_CENTER_SECTION = 'studio-link-center-v1';
+// Keep the canonical Golden Grid link even when an older Studio record still
+// contains the retired AppDeploy demo URL. Never duplicate or overwrite records.
+const GOLDEN_GRID_CANONICAL_URL = 'https://thelaunchera.com/demos/golden-grid/';
+const GOLDEN_GRID_RETIRED_URL = 'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/';
+
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
 export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
@@ -30,7 +35,7 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:"studio-registro-20261105",title:"Registro de trabajo · 5 noviembre 2026",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/blob/main/estudio-control/registro/2026-11-05-trabajo-y-enlaces.md",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Índice interno de lo trabajado hoy: nuevos enlaces, freebies, Studio, Content Lab, demos, fotos y QA pendiente"},
   {key:"school-freebies-repo",title:"Freebie Library · Código y calendario",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/freebies",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Código fuente del catálogo y los tres freebies futuros; consulta técnica"},
   {key:'school-havana-19',title:'Havana 19 · Cuban Cuisine',url:'https://thelaunchera.com/demos/havana-19/',category:'escuela',visibility:'demo',description:'Restaurante cubano en Boston, hecho directo en GitHub con fotos individuales, historia y reserva de demostración'},
-  {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
+  {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://thelaunchera.com/demos/golden-grid/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
@@ -154,7 +159,7 @@ export function resolveStudioLinks(entries:StudioEntry[]):DisplayLink[]{
     const original=new Set(STUDIO_LINKS.map(x=>x.key));
     const basics:DisplayLink[]=STUDIO_LINKS.map(base=>{
       const changed=records.find(x=>x.config.key===base.key);
-      return changed ? {...base,title:changed.row.title,url:changed.config.url,category:changed.config.category,visibility:changed.config.visibility,description:changed.config.description||'',rowId:changed.row.id,hidden:changed.config.hidden} : base;
+      return changed ? {...base,title:changed.row.title,url:(base.key==='school-golden-grid' && changed.config.url===GOLDEN_GRID_RETIRED_URL ? GOLDEN_GRID_CANONICAL_URL : changed.config.url),category:changed.config.category,visibility:changed.config.visibility,description:changed.config.description||'',rowId:changed.row.id,hidden:changed.config.hidden} : base;
     });
     const extras:DisplayLink[]=records.filter(x=>!x.config.key || !original.has(x.config.key)).map(x=>({
       key:x.config.key||x.row.id,title:x.row.title,url:x.config.url,category:x.config.category,
