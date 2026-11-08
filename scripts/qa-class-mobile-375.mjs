@@ -56,9 +56,10 @@ try {
   assert(report.scrollWidth<=width+2,'Horizontal overflow at '+width);
   assert(e.header.bottom<=e.eyebrow.y+3,'Header overlays class hero at '+width);
   assert(e.logo.x>=0&&e.notify.x>=0&&e.notify.x+e.notify.width<=width+2,'Header clips actions at '+width);
-  // New offer-first editorial layout: pricing card precedes the CTA and Casa Brownie visual.
-  // Still enforce strict non-overlap across every rendered block.
-  const order=['eyebrow','title','benefit','lede','badge','price','regular','detail','cta','secondary','visual','availability','noticeText'];
+  // Campaign hero is visual-first on mobile: the bold Casa Brownie stage follows the
+  // headline, then the explanation, real offer and the waitlist CTA.
+  // Validate actual visual order and strict non-overlap at every mobile viewport.
+  const order=['eyebrow','title','benefit','visual','lede','badge','price','regular','detail','cta','secondary','availability','noticeText'];
   for(let i=1;i<order.length;i++){
    const before=e[order[i-1]],after=e[order[i]];
    assert(before?.height>0&&after?.height>0,'Missing section '+order[i-1]+' or '+order[i]+' at '+width);
