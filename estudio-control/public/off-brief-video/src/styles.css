@@ -884,3 +884,21 @@ select:focus-visible {
     margin-top: 20px;
   }
 }
+
+
+/* Two approved OFF BRIEF Drive sound masters, shown beside the editor's real music control. */
+.ob-official-sound-sources{border:1px solid #ddd7ca;background:#faf8f3;border-radius:13px;margin:12px 0;padding:0;overflow:hidden}
+.ob-official-sound-sources>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;font-size:12px;font-weight:800;color:#191919}
+.ob-official-sound-sources>summary::-webkit-details-marker{display:none}
+.ob-official-sound-sources>summary:after{content:'+';font-size:21px;font-weight:400;color:#555}
+.ob-official-sound-sources[open]>summary:after{content:'–'}
+.ob-official-sound-sources>summary small{font-weight:600;font-size:10px;color:#68645d;margin-left:auto}
+.ob-official-sound-items{padding:4px 11px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.ob-official-sound-items article{border:1px solid #e7e3da;background:white;border-radius:10px;padding:12px;min-width:0}
+.ob-official-sound-items strong,.ob-official-sound-items span{display:block}
+.ob-official-sound-items strong{font-size:12px;color:#191919}
+.ob-official-sound-items span{font-size:11px;line-height:1.45;color:#69665f;margin-top:5px}
+.ob-official-sound-items iframe{width:100%;height:135px;border:1px solid #e7e1d7;border-radius:8px;margin:11px 0 6px}
+.ob-official-sound-items a{display:inline-flex;align-items:center;justify-content:center;color:#191919;background:#f2d85b;border-radius:8px;text-decoration:none;padding:9px 10px;font-size:11px;font-weight:800;width:100%}
+.ob-official-sound-sources>p{font-size:10px;line-height:1.6;color:#5d5850;padding:6px 13px 14px;margin:0}
+@media(max-width:480px){.ob-official-sound-items{grid-template-columns:1fr}.ob-official-sound-items iframe{height:125px}}
