@@ -509,7 +509,7 @@ function App() {
     }).catch(()=>{
       if(cancelled)return;
       setVerifiedSales(null);setVerifiedOwnership(null);
-      setSalesError('No pudimos consultar las ventas verificadas. Revisa la conexión y vuelve a actualizar.');
+      setSalesError('No pudimos consultar los registros PDF. Revisa la conexión y vuelve a actualizar.');
     }).finally(()=>{if(!cancelled)setSalesRefreshing(false);});
     return()=>{cancelled=true;};
   },[page,account,salesRefreshKey]);
@@ -1808,14 +1808,14 @@ function App() {
           )}
           {page === 'ventas' && (
             <>
-              {head('Centro de ventas y productos','Todos los checkouts existentes, sus entregas y sus estados. Stripe se conecta por Make; aquí no se crean cobros nuevos.')}
+              {head('Centro de ventas y productos','Estado de productos digitales, enlaces de pago y entregas. Stripe se administra mediante Make; este panel no abre ni suspende cobros.')}
               <div className="commerce-hero">
                 <div><span className="eyebrow">REGISTRO PRIVADO · STRIPE A TRAVÉS DE MAKE</span>
                   <h2>{verifiedSales===null?'Sin cifras verificadas':verifiedSales.length+' movimientos PDF registrados'}</h2>
                   <p>Los importes vienen de los pagos PDF que Make registró en Supabase; no son el saldo completo de Stripe. El Lab, la clase y los servicios llevan controles de acceso o cobro separados.</p>
                   <div className="commerce-quick-actions">
                     <button type="button" onClick={()=>setSalesRefreshKey(n=>n+1)} disabled={salesRefreshing||!SUPABASE_ENABLED}>
-                      <RotateCcw size={16} className={salesRefreshing?'spinning':''}/> {salesRefreshing?'Comprobando…':'Actualizar ventas'}
+                      <RotateCcw size={16} className={salesRefreshing?'spinning':''}/> {salesRefreshing?'Comprobando…':'Actualizar registros PDF'}
                     </button>
                     <a href="../centro/" target="_blank" rel="noopener noreferrer"><ShoppingBag size={16}/> Ver Centro de productos ↗</a>
                   </div>
@@ -1828,16 +1828,16 @@ function App() {
                 <div><span>Pagos PDF confirmados</span><strong>{verifiedSales===null?'—':paidPdfSales.length}</strong><small>En el registro de Make/Supabase</small></div>
                 <div><span>Importe PDF registrado · USD</span><strong>{verifiedSales===null||paidUsdSales.length===0?'—':formatSaleAmount({amount_cents:pdfRevenueUsdCents,currency:'usd'} as VerifiedSale)}</strong><small>No es la facturación total de Stripe</small></div>
                 <div><span>Accesos de clase</span><strong>{verifiedOwnership===null?'—':activeClassCount}</strong><small>Independientes de las ventas PDF</small></div>
-                <div><span>Accesos de Content Lab</span><strong>{verifiedOwnership===null?'—':activeLabCount}</strong><small>Las ventas siguen pausadas por QA</small></div>
+                <div><span>Accesos de Content Lab</span><strong>{verifiedOwnership===null?'—':activeLabCount}</strong><small>Checkout $10 activo · entrega aún por comprobar</small></div>
               </div>
               <section className="commerce-catalog" aria-labelledby="commerce-catalog-title">
                 <div className="commerce-section-heading"><span className="eyebrow">CATÁLOGO COMERCIAL</span><h2 id="commerce-catalog-title">Productos y checkouts</h2>
-                  <p>Solo los enlaces de pago ya disponibles y comprobados aparecen como compra abierta. Los productos en preparación no cobran todavía.</p></div>
+                  <p>Un checkout activo puede tener pruebas de entrega pendientes. La clase sigue en prelanzamiento y no acepta compras todavía.</p></div>
                 <div className="commerce-cards">
                   <article className="commerce-product"><img src="../assets/clase-mostrar-web-2026.webp" alt="Imagen de la clase de creación web" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-closed">PRELANZAMIENTO · ACCESO CERRADO</span><h3>Tu primera web con IA</h3><p>Clase práctica y centro de alumnos. Compra y automatización todavía sin activar.</p><a href="../clases/primera-landing.html" target="_blank" rel="noopener noreferrer">Ver lista de espera ↗</a></div></article>
-                  <article className="commerce-product"><div className="commerce-lab-art" aria-hidden="true">content <em>lab.</em></div><div className="commerce-product-copy"><span className="commerce-tag is-closed">CHECKOUT $10 · PAUSADO POR QA</span><h3>Content Lab</h3><p>Producto y enlace de Stripe creados mediante Make; la automatización de acceso sigue inactiva.</p><a href="../content-lab/" target="_blank" rel="noopener noreferrer">Abrir mi Lab privado ↗</a></div></article>
-                  <article className="commerce-product"><img src="../assets/productos/editorial/diario-carta-20261027.webp" alt="Portada del diario No voy tarde" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $1.99</span><h3>No voy tarde</h3><p>Diario digital. Compra desde su página pública y entrega automatizada desde Make, pendiente de QA integral.</p><a href="../productos/no-voy-tarde.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
-                  <article className="commerce-product"><img src="../assets/productos/editorial/workbook-puerta-20261027.webp" alt="Portada del cuaderno Empezar de nuevo" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $3.99</span><h3>Empezar de nuevo</h3><p>Cuaderno digital. Compra desde su página pública y entrega verificada mediante Make.</p><a href="../productos/empezar-de-nuevo.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
+                  <article className="commerce-product"><div className="commerce-lab-art" aria-hidden="true">content <em>lab.</em></div><div className="commerce-product-copy"><span className="commerce-tag is-live">VENTA ACTIVA · $10</span><h3>Content Lab</h3><p>Checkout LIVE de $10 abierto. El flujo de acceso y bienvenida está activo en Make; falta comprobar una compra real completa y el primer ingreso desde iPhone.</p><a href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer">Ver checkout activo ↗</a><a href="../content-lab/" target="_blank" rel="noopener noreferrer">Abrir mi Lab privado ↗</a></div></article>
+                  <article className="commerce-product"><img src="../assets/productos/editorial/diario-carta-20261027.webp" alt="Portada del diario No voy tarde" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $1.99</span><h3>No voy tarde</h3><p>Diario digital con checkout publicado. El flujo de entrega por correo está activo en Make; falta validar una compra completa.</p><a href="../productos/no-voy-tarde.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
+                  <article className="commerce-product"><img src="../assets/productos/editorial/workbook-puerta-20261027.webp" alt="Portada del cuaderno Empezar de nuevo" loading="lazy"/><div className="commerce-product-copy"><span className="commerce-tag is-live">CHECKOUT VIGENTE · $3.99</span><h3>Empezar de nuevo</h3><p>Cuaderno digital con checkout publicado. El flujo de entrega por correo está activo en Make; falta validar una compra completa.</p><a href="../productos/empezar-de-nuevo.html" target="_blank" rel="noopener noreferrer">Ver página y checkout ↗</a></div></article>
                 </div>
               </section>
               <section className="commerce-operations" aria-labelledby="commerce-oper-title">
