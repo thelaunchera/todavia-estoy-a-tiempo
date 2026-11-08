@@ -56,10 +56,9 @@ try {
   assert(report.scrollWidth<=width+2,'Horizontal overflow at '+width);
   assert(e.header.bottom<=e.eyebrow.y+3,'Header overlays class hero at '+width);
   assert(e.logo.x>=0&&e.notify.x>=0&&e.notify.x+e.notify.width<=width+2,'Header clips actions at '+width);
-  // Campaign hero is visual-first on mobile: the bold Casa Brownie stage follows the
-  // headline, then the explanation, real offer and the waitlist CTA.
-  // Validate actual visual order and strict non-overlap at every mobile viewport.
-  const order=['eyebrow','title','benefit','visual','lede','badge','price','regular','detail','cta','secondary','availability','noticeText'];
+  // Keep the waitlist action visible BEFORE the colorful sample website hero.
+  // The explanatory copy and the existing launch offer follow the showcase.
+  const order=['eyebrow','title','benefit','cta','secondary','visual','lede','badge','price','regular','detail','availability','noticeText'];
   for(let i=1;i<order.length;i++){
    const before=e[order[i-1]],after=e[order[i]];
    assert(before?.height>0&&after?.height>0,'Missing section '+order[i-1]+' or '+order[i]+' at '+width);
@@ -67,6 +66,18 @@ try {
   }
   for(const key of order)assert(e[key].x>=-2&&e[key].x+e[key].width<=width+2,'Clipped '+key+' at '+width);
   assert(e.cta.height>=48,'CTA too small at '+width);
+  const creative=await page.evaluate(()=>{
+    const title=document.querySelector('.class-creative-type')?.getBoundingClientRect();
+    const photo=document.querySelector('.class-cinema-film')?.getBoundingClientRect();
+    const stage=document.querySelector('.class-cinema-visual')?.getBoundingClientRect();
+    return {typeBottom:title?.bottom??null,photoTop:photo?.top??null,
+      typeRight:title?.right??null,stageRight:stage?.right??null};
+  });
+  assert(creative.typeBottom!=null && creative.photoTop!=null,'Missing mobile campaign layers at '+width);
+  assert(creative.typeBottom<=creative.photoTop+12,
+    'Oversized campaign headline is hidden by the product photo at '+width+': '+JSON.stringify(creative));
+  assert(creative.typeRight<=creative.stageRight+2,
+    'Campaign text overflows mobile stage at '+width+': '+JSON.stringify(creative));
   // Result must reveal the official full-page demo, not a decorative mockup.
   const resultButton=page.locator('#de-idea-a-web [data-transform-to="100"]');
   await resultButton.scrollIntoViewIfNeeded();
