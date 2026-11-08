@@ -1,4 +1,4 @@
-/* Lightweight progressive motion: one-time reveals and small desktop parallax.
+/* Lightweight progressive motion: repeatable viewport reveals and small desktop parallax.
    Does not change navigation, forms, pricing, or the existing comparison widget. */
 (() => {
   const root = document.body;
@@ -18,9 +18,11 @@
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-motion-visible');
-        observer.unobserve(entry.target);
+        if (entry.isIntersecting || reduced.matches) {
+          entry.target.classList.add('is-motion-visible');
+        } else if (!entry.target.matches(':focus-within')) {
+          entry.target.classList.remove('is-motion-visible');
+        }
       });
     }, {rootMargin:'0px 0px -28px 0px',threshold:.08});
     scenes.forEach(element => observer.observe(element));
