@@ -225,3 +225,12 @@ h2{font-family:"TLE DM Serif",Georgia,serif;letter-spacing:-.052em}
  .hero-floating-card{transition:none!important}
  .hero-floating-card:hover{transform:rotate(-2deg)}
 }
+
+/* Desktop title readability: keep the portrait-over-type effect without obscuring GRATIS. */
+@media(min-width:901px){
+ html[lang="es"] .hero-kinetic-bottom{font-size:.70em;line-height:1.07;letter-spacing:-.06em}
+ html[lang="en"] .hero-kinetic-bottom{font-size:1em}
+}
+@media(min-width:651px) and (max-width:900px){
+ html[lang="es"] .hero-kinetic-bottom{font-size:.82em;line-height:1}
+}
