@@ -1275,8 +1275,11 @@ function App() {
               const current=area.pages.includes(page);
               return <section className={'studio-nav-area'+(current?' has-active':'')} key={area.id}>
                 <button type="button" className="studio-nav-area-trigger" aria-expanded={expanded}
-                  aria-controls={'studio-area-'+area.id}
-                  onClick={()=>setExpandedArea(expandedArea===area.id?null:area.id)}>
+                  aria-controls={expanded?'studio-area-'+area.id:undefined}
+                  onClick={()=>{
+                    if(navQuery.trim()){setNavQuery('');setExpandedArea(area.id);}
+                    else setExpandedArea(expandedArea===area.id?null:area.id);
+                  }}>
                   <span className="studio-nav-area-icon"><Icon size={18} aria-hidden="true"/></span>
                   <span className="studio-nav-area-label">{area.title}</span>
                   <ChevronDown size={16} aria-hidden="true" className={'studio-nav-chevron'+(expanded?' expanded':'')}/>
