@@ -462,7 +462,7 @@
       if (ratio >= .999) {
         footerCta.style.opacity = '1';
         footerCta.style.transform = 'none';
-        ctaObserver.disconnect();
+        // Continue observing so the same reveal reverses when scrolling upward.
       }
     }, { threshold: thresholds });
     ctaObserver.observe(footerCta);
@@ -472,9 +472,8 @@
   if (editorialFooter && 'IntersectionObserver' in window &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const footerObserver = new IntersectionObserver(entries => {
-      for (const entry of entries) if (entry.isIntersecting) {
-        editorialFooter.classList.add('is-visible');
-        footerObserver.disconnect();
+      for (const entry of entries) {
+        editorialFooter.classList.toggle('is-visible',entry.isIntersecting);
       }
     }, { threshold: 0.08 });
     editorialFooter.classList.add('footer-animate');
@@ -606,9 +605,9 @@
   if (!reducedMotion.matches && 'IntersectionObserver' in window) {
     const elements = [...document.querySelectorAll('.reveal')];
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) if (entry.isIntersecting) {
-        entry.target.classList.add('in-view');
-        observer.unobserve(entry.target);
+      for (const entry of entries) {
+        if(reducedMotion.matches || entry.isIntersecting)entry.target.classList.add('in-view');
+        else if(!entry.target.matches(':focus-within'))entry.target.classList.remove('in-view');
       }
     }, { threshold: .04, rootMargin: '0px 0px -12px 0px' });
     elements.forEach(el => observer.observe(el));
