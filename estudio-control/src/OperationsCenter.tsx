@@ -3,6 +3,7 @@ import {
   LayoutDashboard, ShoppingBag, CreditCard, Mail, Gift, PanelsTopLeft,
   ShieldCheck, ExternalLink, ArrowUpRight, ArrowLeft,
 } from 'lucide-react';
+import BuyerCommandPreview from './BuyerCommandPreview';
 import './operations-center.css';
 
 export type OperationsDestination =
@@ -90,6 +91,8 @@ const SCHEDULE = [
 
 export default function OperationsCenter({onNavigate}:{onNavigate:(page:OperationsDestination)=>void}) {
   const [selected,setSelected]=useState<CategoryId|null>(null);
+  const [buyerPreviewOpen,setBuyerPreviewOpen]=useState(false);
+  const buyerPreviewRef=useRef<HTMLDivElement>(null);
   const detailsRef=useRef<HTMLElement>(null);
   const current=GROUPS.find(x=>x.id===selected);
   const open=(id:CategoryId)=>{
@@ -105,6 +108,21 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
       </div>
       <div className="tle-ops-mark" aria-hidden="true">TLE<span>.</span></div>
     </header>
+    <section className="tle-ops-buyer-access" aria-label="Revisión de Command Center de compradores">
+      <div className="tle-ops-buyer-access-icon"><PanelsTopLeft size={26} strokeWidth={1.5} aria-hidden="true"/></div>
+      <div className="tle-ops-buyer-access-copy">
+        <span>REVISIÓN DE EXPERIENCIA / COMPRADORES</span>
+        <h3>El Command Center que reciben tus clientes.</h3>
+        <p>Revisa cómo se ve para restaurantes, limpieza, tiendas y servicios. Prueba solicitudes, precios y disponibilidad sin usar clientes reales.</p>
+      </div>
+      <button type="button" aria-expanded={buyerPreviewOpen} aria-controls="tle-buyer-preview-panel" onClick={()=>{
+        setBuyerPreviewOpen(v=>!v);
+        if(!buyerPreviewOpen)window.requestAnimationFrame(()=>window.setTimeout(()=>buyerPreviewRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),70));
+      }}>{buyerPreviewOpen?'Cerrar vista de compradores':'Abrir vista de compradores'}<ArrowUpRight size={17}/></button>
+    </section>
+    {buyerPreviewOpen&&<div id="tle-buyer-preview-panel" ref={buyerPreviewRef} className="tle-ops-preview-panel">
+      <BuyerCommandPreview onClose={()=>setBuyerPreviewOpen(false)}/>
+    </div>}
     <div className="tle-ops-grid" aria-label="Centro de operaciones privado">
       {GROUPS.map(group=>{
         const Icon=group.icon;
