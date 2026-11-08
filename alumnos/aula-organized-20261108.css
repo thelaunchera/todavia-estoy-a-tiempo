@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap');
+/* Aula / 08 Nov 2026: same editorial direction as Studio, without exposing admin
+   features or changing bilingual lessons, progress, storage, or payment logic.
+   Motion: one restrained fade-through on welcome + press-and-settle on actions. */
+body.aula-member{
+  --aula-paper:#FAF8F3;--aula-ink:#191919;--aula-yellow:#F2D85B;--aula-blue:#E8F0F5;
+  font-family:'Prompt',Futura,'Century Gothic',Arial,sans-serif;
+  background:#F9F9F6;color:#191919;
+}
+body.aula-member #aula-layout.room-grid,body.aula-member #aula-layout .aula-rail{
+  background:#FAF8F3;
+}
+body.aula-member .aula-rail-workspace{background:#E9F1F4;color:#3F647B;border:1px solid #DCE7EB;border-radius:11px;font-size:9px}
+body.aula-member .aula-nav-group{color:#78909E;letter-spacing:.13em;font:700 9px/1.4 'Prompt',Arial,sans-serif}
+body.aula-member #aula-layout .aula-rail .aula-side-link{font-family:'Prompt',Arial,sans-serif;border-radius:11px;min-height:45px}
+body.aula-member #aula-layout .aula-rail .aula-side-link[aria-current=true]{
+  background:#E6F0F4;color:#233D53;border-color:#BED7E0;font-weight:700;
+}
+body.aula-member #aula-layout .aula-rail .aula-side-link:hover{background:#ECF3F5}
+body.aula-member #aula-layout .aula-main-top{background:#FFFFFF;color:#191919;border-bottom-color:#E1E7E6}
+body.aula-member #aula-layout .aula-main-location{font-family:'Prompt',Arial,sans-serif}
+body.aula-member .aula-home-dashboard .dashboard-hero{
+  position:relative;isolation:isolate;
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(210px,.7fr);
+  align-items:center;gap:clamp(20px,3vw,34px);
+  background:#FAF8F3!important;color:#191919!important;border:1px solid #E2E4DF;
+  border-radius:24px;box-shadow:0 6px 0 #E9EBE6,0 20px 34px rgba(39,58,68,.055);
+  padding:clamp(25px,3.2vw,40px);
+  animation:aula-home-enter .32s ease-out both;
+}
+body.aula-member .aula-home-dashboard .dashboard-hero::before{
+  content:'';position:absolute;display:block!important;inset:auto;top:0;left:clamp(25px,3.2vw,40px);
+  width:92px;height:5px;background:#F2D85B;border-radius:0 0 5px 5px;
+}
+body.aula-member .aula-home-dashboard .dashboard-hero::after{display:none!important}
+body.aula-member .aula-home-dashboard .dashboard-hero-approved-sticker{
+  width:clamp(52px,6vw,74px);right:16px;top:13px;transform:rotate(7deg);opacity:.9;
+  pointer-events:none;filter:drop-shadow(0 3px 4px rgba(36,66,79,.1));
+}
+body.aula-member .aula-home-dashboard .dashboard-overline{
+  color:#557A8D;font-family:'Prompt',sans-serif;font-size:10px;letter-spacing:.12em;
+}
+body.aula-member .aula-home-dashboard .dashboard-overline::before{background:#829FAA}
+body.aula-member .aula-home-dashboard .dashboard-hero h1{
+  max-width:650px;color:#191919;font-family:Futura,'Prompt','Century Gothic',Arial,sans-serif;
+  font-weight:600;font-size:clamp(31px,3.75vw,49px);line-height:1.14;letter-spacing:-.045em;
+  margin:0 0 16px;text-wrap:balance;
+}
+body.aula-member .aula-home-dashboard .dashboard-hero h1 span{color:#4E7990}
+body.aula-member .aula-home-dashboard .dashboard-hero-copy>p:last-of-type{color:#526B7A;font-size:13px;line-height:1.75;max-width:520px}
+body.aula-member .aula-home-dashboard .dashboard-welcome-note{
+  color:#587383;border-top:1px solid #DDE5E6;letter-spacing:0;font-size:11px;
+  margin-top:19px;padding-top:14px;
+}
+body.aula-member .aula-home-dashboard .dashboard-welcome-note span{color:#587383}
+body.aula-member .aula-home-dashboard .dashboard-progress-card{
+  min-width:0;align-self:stretch;background:#E8F0F5;border:1px solid #D6E5ED;border-radius:18px;
+  box-shadow:none;padding:clamp(19px,2.6vw,29px);color:#233F52;
+}
+body.aula-member .aula-home-dashboard .dashboard-progress-heading{color:#53768B;font-size:10px;letter-spacing:.13em}
+body.aula-member .aula-home-dashboard .dashboard-progress-top span{color:#526F82}
+body.aula-member .aula-home-dashboard .dashboard-progress-top strong,
+body.aula-member .aula-home-dashboard .dashboard-progress-empty-title{color:#233F52;font-family:Futura,'Prompt',sans-serif;font-weight:600;letter-spacing:-.035em}
+body.aula-member .aula-home-dashboard .dashboard-progress-empty-desc,
+body.aula-member .aula-home-dashboard .dashboard-progress-card #progress-label{color:#567184}
+body.aula-member .aula-home-dashboard .dashboard-progress-card .track{background:#C8D9E1}
+body.aula-member .aula-home-dashboard .dashboard-progress-card .track>div{background:#4F829E}
+body.aula-member .aula-home-dashboard .dashboard-hero-primary{
+  color:#191919;background:#F2D85B;border:1px solid #F2D85B;
+  font-family:'Prompt',sans-serif;font-weight:700;min-height:46px;
+  border-radius:11px;box-shadow:0 4px 0 rgba(156,139,72,.20);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+body.aula-member .aula-home-dashboard .dashboard-hero-primary:hover{background:#F7E48B}
+body.aula-member .aula-home-dashboard :is(.dashboard-next-card,.dashboard-learning-route){
+  border-radius:20px;box-shadow:0 4px 0 #E8EBEA,0 14px 28px rgba(32,60,76,.055);
+}
+body.aula-member .aula-home-dashboard .dashboard-next-card{background:#FFFEFC;border-color:#E4E7E4}
+body.aula-member .aula-home-dashboard .dashboard-learning-route{background:#F2F6F7;border-color:#D8E5EA}
+body.aula-member .aula-home-dashboard :is(.dashboard-next-card h2,.dashboard-announcements-header h2,.dashboard-tools-heading h2,.dashboard-setup h2){
+  font-family:Futura,'Prompt','Century Gothic',Arial,sans-serif;
+  letter-spacing:-.035em;font-weight:600;color:#1D3D50;
+}
+body.aula-member .aula-home-dashboard .dashboard-next-action{border-radius:11px;background:#2E5B73}
+body.aula-member .aula-home-dashboard .dashboard-tool{
+  border-radius:15px;background:#fff;box-shadow:0 3px 0 #E6ECED;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+body.aula-member .aula-home-dashboard .dashboard-tool strong{font-family:'Prompt',sans-serif;font-weight:700}
+body.aula-member .aula-home-dashboard .dashboard-tool-icon{background:#E7F0F4;color:#3C6981}
+body.aula-member .aula-home-dashboard .dashboard-tool:active,
+body.aula-member .aula-home-dashboard .dashboard-hero-primary:active{transform:scale(.989)}
+body.aula-member :is(button,a,summary):focus-visible{outline:3px solid #7EAEC9;outline-offset:3px}
+@keyframes aula-home-enter{from{opacity:.78;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+ body.aula-member .aula-home-dashboard .dashboard-tool:hover{transform:translateY(-2px);border-color:#A9C9D7;box-shadow:0 5px 0 #E3EAEE,0 12px 24px rgba(39,73,90,.08)}
+ body.aula-member .aula-home-dashboard .dashboard-hero-primary:hover{transform:translateY(-2px)}
+}
+@media(max-width:960px){body.aula-member .aula-home-dashboard .dashboard-hero{grid-template-columns:1fr;gap:18px}}
+@media(max-width:750px){
+ body.aula-member .aula-home-dashboard .dashboard-hero{padding:25px 20px;border-radius:20px}
+ body.aula-member .aula-home-dashboard .dashboard-hero h1{font-size:clamp(30px,8vw,40px);padding-right:18px}
+ body.aula-member .aula-home-dashboard .dashboard-hero-approved-sticker{width:57px;right:11px;top:12px;opacity:.75}
+ body.aula-member .aula-home-dashboard .dashboard-progress-card{padding:17px}
+ body.aula-member .aula-home-dashboard .dashboard-hero-actions{width:100%}
+ body.aula-member .aula-home-dashboard .dashboard-hero-primary{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+ body.aula-member .aula-home-dashboard .dashboard-hero{animation:none!important}
+ body.aula-member .aula-home-dashboard .dashboard-tool,
+ body.aula-member .aula-home-dashboard .dashboard-hero-primary{transition:none!important;transform:none!important}
+}
