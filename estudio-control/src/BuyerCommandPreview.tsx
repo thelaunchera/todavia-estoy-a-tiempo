@@ -1,13 +1,13 @@
 import {useMemo,useState} from 'react';
-import {CalendarDays,Check,ExternalLink,Inbox,LayoutDashboard,Package,RotateCcw,Search,ShieldCheck,ShoppingBag,Users, X} from 'lucide-react';
+import {CalendarDays,Check,Inbox,LayoutDashboard,Package,Search,ShieldCheck,ShoppingBag,Users,X} from 'lucide-react';
 import './buyer-command-preview.css';
 
-type Industry='restaurant'|'cleaning'|'retail'|'services';
+export type BuyerPreviewIndustry='restaurant'|'cleaning'|'retail'|'services';
+type Industry=BuyerPreviewIndustry;
 type Panel='overview'|'inbox'|'calendar'|'catalog'|'customers';
 type Status='new'|'confirmed'|'done';
 type Request={id:number;customer:string;description:string;time:string;status:Status;contact:string};
 type Item={id:number;name:string;category:string;price:number;discount:number;available:boolean};
-type Device='phone'|'desktop';
 type Language='en'|'es';
 const brands:Record<Industry,{name:string;kind:string;requestLabel:string;dateLabel:string;cta:string;publicAction:string}>={
   restaurant:{name:'Golden Grid',kind:'Digital Menu & Reservations',requestLabel:'Table inquiries',dateLabel:'Reservations',cta:'Add table request',publicAction:'Request a table'},
@@ -61,86 +61,89 @@ function initialData():Record<Industry,{requests:Request[];items:Item[]}>{
  services:{requests:seeds.services.requests.map(x=>({...x})),items:seeds.services.items.map(x=>({...x}))},
  };
 }
-const industryLabels:Record<Industry,string>={restaurant:'Restaurante',cleaning:'Limpieza',retail:'Tienda',services:'Servicios'};
 const text={
- en:{title:'Buyer Command Center',preview:'OWNER REVIEW · SAMPLE DATA',device:'Screen',buyerType:'Business type',reset:'Reset samples',overview:'Overview',inbox:'Inbox',calendar:'Calendar',catalog:'Menu & Catalog',customers:'Customers',activity:'AT A GLANCE',new:'New requests',confirmed:'Confirmed',offers:'Active offers',active:'Available items',quick:'YOUR NEXT STEP',requests:'Recent requests',all:'Open inbox',manage:'Manage items',welcome:'Welcome back.',customerAction:'What customers see',email:'Email only · no SMS',noMessages:'Nothing here sends an email, confirms a real booking or charges a customer.',viewDetails:'View request',markConfirm:'Mark confirmed',markDone:'Complete',reopen:'Reopen',sample:'Fictional sample records',copy:'Make a sample request',edit:'Edit price',discount:'Discount',available:'Available',unavailable:'Sold out',published:'Catalog preview',reminder:'Email confirmation is prepared only after verified availability.',noRealAnalytics:'No revenue or best-seller charts without real orders.',back:'Close buyer view',customersLabel:'Sample customer list',requestTitle:'Requests & inquiries',calendarTitle:'Confirmed appointments',itemsTitle:'Edit prices & availability'},
- es:{title:'Command Center de compradores',preview:'REVISIÓN PRIVADA · DATOS FICTICIOS',device:'Pantalla',buyerType:'Tipo de negocio',reset:'Restablecer ejemplos',overview:'Resumen',inbox:'Solicitudes',calendar:'Calendario',catalog:'Menú y catálogo',customers:'Clientes',activity:'EN UN VISTAZO',new:'Solicitudes nuevas',confirmed:'Confirmadas',offers:'Descuentos activos',active:'Productos disponibles',quick:'TU PRÓXIMO PASO',requests:'Solicitudes recientes',all:'Abrir solicitudes',manage:'Editar artículos',welcome:'Bienvenido de nuevo.',customerAction:'Lo que ve el cliente',email:'Solo correo · sin SMS',noMessages:'Nada aquí envía correos reales, confirma una reserva ni cobra.',viewDetails:'Ver solicitud',markConfirm:'Marcar confirmada',markDone:'Completar',reopen:'Reabrir',sample:'Registros de ejemplo ficticios',copy:'Crear solicitud de prueba',edit:'Editar precio',discount:'Descuento',available:'Disponible',unavailable:'Agotado',published:'Vista de catálogo',reminder:'El correo de confirmación se prepara solo cuando se verifica disponibilidad.',noRealAnalytics:'No mostrar ingresos ni productos más vendidos sin ventas reales.',back:'Cerrar vista comprador',customersLabel:'Lista de clientes ficticios',requestTitle:'Solicitudes y consultas',calendarTitle:'Citas confirmadas',itemsTitle:'Editar precios y disponibilidad'}
+ en:{title:'Buyer Command Center',preview:'PRIVATE REVIEW · READ ONLY',overview:'Overview',inbox:'Inbox',calendar:'Calendar',catalog:'Menu & Catalog',customers:'Customers',activity:'AT A GLANCE',new:'New requests',confirmed:'Confirmed',offers:'Active offers',active:'Available items',quick:'YOUR NEXT STEP',requests:'Recent requests',all:'Open inbox',manage:'View catalog',welcome:'Welcome back.',email:'Email updates',noMessages:'Private example only. No real bookings, emails, payments or customer records.',available:'Available',unavailable:'Sold out',sample:'Sample records',reminder:'A booking is confirmed only after availability has been checked.',noRealAnalytics:'Live reporting is available only when verified activity exists.',back:'Close preview',customersLabel:'Sample customers',requestTitle:'Requests & inquiries',calendarTitle:'Confirmed appointments',itemsTitle:'Catalog & availability',handoff:'Each buyer receives their own Command Center only after their website is finished and delivery is approved.'},
+ es:{title:'Command Center del comprador',preview:'REVISIÓN PRIVADA · SOLO LECTURA',overview:'Resumen',inbox:'Solicitudes',calendar:'Calendario',catalog:'Menú y catálogo',customers:'Clientes',activity:'EN UN VISTAZO',new:'Solicitudes nuevas',confirmed:'Confirmadas',offers:'Descuentos activos',active:'Artículos disponibles',quick:'TU SIGUIENTE PASO',requests:'Solicitudes recientes',all:'Abrir solicitudes',manage:'Ver catálogo',welcome:'Bienvenido de nuevo.',email:'Actualizaciones por correo',noMessages:'Ejemplo privado. Sin reservas, correos, pagos ni datos de clientes reales.',available:'Disponible',unavailable:'Agotado',sample:'Registros de ejemplo',reminder:'Una reserva se confirma solamente después de verificar disponibilidad.',noRealAnalytics:'Los reportes reales aparecen cuando existen actividades verificadas.',back:'Cerrar vista',customersLabel:'Clientes de ejemplo',requestTitle:'Solicitudes y consultas',calendarTitle:'Citas confirmadas',itemsTitle:'Catálogo y disponibilidad',handoff:'Cada comprador recibe su propio Command Center cuando el website está terminado y la entrega ha sido aprobada.'}
 } as const;
+
 function money(amount:number){return '$'+amount.toFixed(2)}
-export default function BuyerCommandPreview({onClose}:{onClose:()=>void}){
- const [industry,setIndustry]=useState<Industry>('restaurant');
+export default function BuyerCommandPreview({onClose,industry='restaurant',lang='en'}:{
+ onClose:()=>void;industry?:BuyerPreviewIndustry;lang?:Language;
+}){
+ // Read-only, owner-accessible visual review only. No production records or edit mutations.
  const [panel,setPanel]=useState<Panel>('overview');
- const [device,setDevice]=useState<Device>('phone');
- const [lang,setLang]=useState<Language>('en');
- const [dataset,setDataset]=useState(initialData);
  const [selected,setSelected]=useState<number|null>(null);
  const [search,setSearch]=useState('');
- const [editingPrice,setEditingPrice]=useState<number|null>(null);
- const [draftPrice,setDraftPrice]=useState('');
- const [notice,setNotice]=useState('');
- const t=text[lang],brand=brands[industry],current=dataset[industry];
+ const demoData=useMemo(initialData,[]);
+ const t=text[lang],brand=brands[industry],current=demoData[industry];
  const newCount=current.requests.filter(r=>r.status==='new').length;
  const confirmed=current.requests.filter(r=>r.status==='confirmed').length;
  const offers=current.items.filter(p=>p.discount>0&&p.available).length;
  const available=current.items.filter(p=>p.available).length;
  const activeRequest=current.requests.find(r=>r.id===selected);
  const filtered=current.requests.filter(r=>(r.customer+' '+r.description).toLowerCase().includes(search.toLowerCase()));
- const customers=useMemo(()=>[...new Map(current.requests.map(r=>[r.customer,r])).values()], [current.requests]);
- const setData=(fn:(data:{requests:Request[];items:Item[]})=>{requests:Request[];items:Item[]})=>setDataset(old=>({...old,[industry]:fn(old[industry])}));
- const switchIndustry=(value:Industry)=>{setIndustry(value);setPanel('overview');setSelected(null);setSearch('');setEditingPrice(null);setNotice('')};
- const setRequestStatus=(id:number,status:Status)=>{
-  setData(d=>({...d,requests:d.requests.map(r=>r.id===id?{...r,status}:r)}));
-  setSelected(null);setNotice(lang==='es'?'Estado actualizado solo en la demostración.':'Demo status updated. No messages sent.');
- };
- const newRequest=()=>{
-  const next=Math.max(0,...current.requests.map(r=>r.id))+1;
-  setData(d=>({...d,requests:[{id:next,customer:'Sample Guest '+next,description:industry==='restaurant'?'Table for 2 · next Friday':industry==='retail'?'Product inquiry':industry==='cleaning'?'New cleaning estimate':'New appointment inquiry',time:'Just now',status:'new',contact:'Demo email'},...d.requests]}));
-  setPanel('inbox');setNotice(lang==='es'?'Solicitud ficticia añadida.':'Sample inquiry added.');
- };
- const toggleAvailability=(id:number)=>{setData(d=>({...d,items:d.items.map(p=>p.id===id?{...p,available:!p.available}:p)}));setNotice(lang==='es'?'Disponibilidad actualizada solo en esta vista.':'Sample availability changed.')};
- const editDiscount=(id:number,value:number)=>{if(!Number.isFinite(value)||value<0||value>90)return;setData(d=>({...d,items:d.items.map(p=>p.id===id?{...p,discount:value}:p)}));};
- const savePrice=(id:number)=>{const p=Number(draftPrice);if(!Number.isFinite(p)||p<0||p>100000)return;setData(d=>({...d,items:d.items.map(i=>i.id===id?{...i,price:Math.round(p*100)/100}:i)}));setEditingPrice(null);setNotice('Sample price updated. No public site changed.')};
+ const customers=useMemo(()=>[...new Map(current.requests.map(r=>[r.customer,r])).values()],[current.requests]);
  const stats=[{label:t.new,value:newCount},{label:t.confirmed,value:confirmed},{label:t.offers,value:offers},{label:t.active,value:available}];
  const tabs:[Panel,typeof LayoutDashboard][]=[['overview',LayoutDashboard],['inbox',Inbox],['calendar',CalendarDays],['catalog',Package],['customers',Users]];
- const labels:{[K in Panel]:string}={overview:t.overview,inbox:t.inbox,calendar:t.calendar,catalog:t.catalog,customers:t.customers};
- return <section className="tle-buyer-review" aria-label="Vista privada del Command Center de compradores">
+ const labels:Record<Panel,string>={overview:t.overview,inbox:t.inbox,calendar:t.calendar,catalog:t.catalog,customers:t.customers};
+ const go=(next:Panel)=>{setPanel(next);setSelected(null)};
+ const statusLabel=(status:Status)=>lang==='es'?({new:'Nueva',confirmed:'Confirmada',done:'Completada'}[status]):({new:'New',confirmed:'Confirmed',done:'Done'}[status]);
+ return <section className="tle-buyer-review" aria-label="Vista privada del Command Center, solo lectura">
   <div className="tle-buyer-review-head">
-   <div><span className="tle-buyer-review-kicker"><ShieldCheck size={15}/> THE LAUNCH ERA / OPERACIONES</span><h3>Vista de compradores. <em>Así de simple.</em></h3><p>Cambia de negocio y pantalla. Ajusta solicitudes, precios y descuentos de ejemplo sin tocar datos ni sistemas reales.</p></div>
+   <div>
+    <span className="tle-buyer-review-kicker"><ShieldCheck size={15}/> THE LAUNCH ERA / REVISIÓN INTERNA</span>
+    <h3>Así verá el cliente <em>su espacio.</em></h3>
+    <p>Una vista de ejemplo, sin editar precios, solicitudes ni cambiar de negocio. El Command Center de cada comprador se personaliza para su marca y se entrega con su website terminado.</p>
+   </div>
    <button type="button" onClick={onClose} className="tle-buyer-review-close"><X size={17}/>{t.back}</button>
   </div>
-  <div className="tle-buyer-review-bar">
-   <label>{t.buyerType}<select value={industry} onChange={e=>switchIndustry(e.target.value as Industry)}>{(Object.keys(industryLabels) as Industry[]).map(key=><option key={key} value={key}>{industryLabels[key]}</option>)}</select></label>
-   <div className="tle-buyer-review-devices" aria-label={t.device}><button type="button" aria-pressed={device==='phone'} onClick={()=>setDevice('phone')}>iPhone</button><button type="button" aria-pressed={device==='desktop'} onClick={()=>setDevice('desktop')}>Desktop</button></div>
-   <div className="tle-buyer-review-devices" aria-label="Language"><button type="button" aria-pressed={lang==='en'} onClick={()=>setLang('en')}>EN</button><button type="button" aria-pressed={lang==='es'} onClick={()=>setLang('es')}>ES</button></div>
-   <button type="button" className="tle-buyer-review-reset" onClick={()=>{setDataset(initialData());setPanel('overview');setSelected(null);setNotice('');setEditingPrice(null)}}><RotateCcw size={14}/>{t.reset}</button>
-  </div>
-  <div className={'tle-buyer-device-wrap '+(device==='phone'?'tle-buyer-phone':'tle-buyer-desktop')}>
+  <div className="tle-buyer-device-wrap tle-buyer-phone">
    <div className="tle-buyer-shell">
     <aside className="tle-buyer-sidebar">
-     <div className="tle-buyer-sidebar-brand"><span className="tle-buyer-mark">TLE<span>.</span></span><small>PRIVATE WORKSPACE</small><strong>{brand.name}</strong><small>{brand.kind}</small></div>
-     <nav className="tle-buyer-side-nav" aria-label="Buyer dashboard sections">{tabs.map(([id,Icon])=><button type="button" key={id} onClick={()=>{setPanel(id);setSelected(null)}} aria-current={panel===id?'page':undefined}><Icon size={17}/>{labels[id]}</button>)}</nav>
-     <div className="tle-buyer-sidebar-note">SIMULATED VIEW<br/>No real customer data.</div>
+     <div className="tle-buyer-sidebar-brand"><span className="tle-buyer-mark">TLE<span>.</span></span><small>BUSINESS WORKSPACE</small><strong>{brand.name}</strong><small>{brand.kind}</small></div>
+     <nav className="tle-buyer-side-nav" aria-label="Secciones del Command Center">
+      {tabs.map(([id,Icon])=><button type="button" key={id} onClick={()=>go(id)} aria-current={panel===id?'page':undefined}><Icon size={17}/>{labels[id]}</button>)}
+     </nav>
+     <div className="tle-buyer-sidebar-note">{t.noMessages}</div>
     </aside>
     <div className="tle-buyer-main">
-     <div className="tle-buyer-mobile-bar"><span className="tle-buyer-mark">TLE<span>.</span></span><div><strong>{brand.name}</strong><small>{brand.kind}</small></div><span className="tle-buyer-demo-chip">DEMO</span></div>
-     <header className="tle-buyer-inner-header"><div><span className="tle-buyer-inner-kicker">{t.preview}</span><h4>{panel==='overview'?t.welcome:labels[panel]}</h4><p>{panel==='overview'?brand.requestLabel+' · '+brand.dateLabel:brand.name}</p></div><button type="button" onClick={newRequest}>+ {brand.cta}</button></header>
-     {panel==='overview'&&<><div className="tle-buyer-metrics">{stats.map(s=><article key={s.label}><span>{s.label}</span><strong>{s.value}</strong></article>)}</div>
-      <section className="tle-buyer-focus"><span>{t.quick}</span><strong>{newCount?newCount+' '+brand.requestLabel.toLowerCase()+' need attention':'Everything is up to date.'}</strong><p>{brand.publicAction} · {t.email}</p><button type="button" onClick={()=>setPanel('inbox')}>{t.all}</button></section>
-      <div className="tle-buyer-section-title"><h5>{t.requests}</h5><button type="button" onClick={()=>setPanel('inbox')}>{t.all}</button></div>
-      <div className="tle-buyer-rows">{current.requests.slice(0,3).map(r=><button key={r.id} type="button" onClick={()=>{setPanel('inbox');setSelected(r.id)}}><span><b>{r.customer}</b><small>{r.description}</small></span><span className={'tle-buyer-status status-'+r.status}>{r.status==='new'?'New':r.status==='confirmed'?'Confirmed':'Done'}</span></button>)}</div>
-      <div className="tle-buyer-shortcuts"><button type="button" onClick={()=>setPanel('calendar')}><CalendarDays size={16}/>{t.calendar}</button><button type="button" onClick={()=>setPanel('catalog')}><Package size={16}/>{t.manage}</button><button type="button" onClick={()=>setPanel('customers')}><Users size={16}/>{t.customers}</button></div></>}
-     {panel==='inbox'&&<><div className="tle-buyer-section-title"><h5>{t.requestTitle}</h5><label className="tle-buyer-search"><Search size={15}/><input aria-label="Search sample inquiries" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)}/></label></div>
-       <div className="tle-buyer-rows">{filtered.length===0?<p className="tle-buyer-note">No matching sample requests.</p>:filtered.map(r=><button type="button" key={r.id} onClick={()=>setSelected(r.id)} aria-pressed={selected===r.id}><span><b>{r.customer}</b><small>{r.description}</small><small>{r.time}</small></span><span className={'tle-buyer-status status-'+r.status}>{r.status}</span></button>)}</div>
-       {activeRequest&&<div className="tle-buyer-detail"><div><h5>{activeRequest.customer}</h5><p>{activeRequest.description}</p><small>{t.sample} · {activeRequest.contact}</small></div><div className="tle-buyer-detail-buttons"><button type="button" onClick={()=>setRequestStatus(activeRequest.id,'confirmed')}><Check size={15}/>{t.markConfirm}</button><button type="button" onClick={()=>setRequestStatus(activeRequest.id,'done')}>{t.markDone}</button><button type="button" onClick={()=>setRequestStatus(activeRequest.id,'new')}>{t.reopen}</button></div><small>{t.reminder}</small></div>}</>}
-     {panel==='calendar'&&<><div className="tle-buyer-section-title"><h5>{t.calendarTitle}</h5><span>{t.sample}</span></div><div className="tle-buyer-rows">{current.requests.filter(r=>r.status==='confirmed').length===0?<p className="tle-buyer-note">No confirmed sample appointments yet.</p>:current.requests.filter(r=>r.status==='confirmed').map(r=><button type="button" key={r.id} onClick={()=>{setPanel('inbox');setSelected(r.id)}}><span><b>{r.customer}</b><small>{r.description}</small></span><span className="tle-buyer-status status-confirmed"><Check size={13}/> Confirmed</span></button>)}</div><p className="tle-buyer-note">{t.reminder} {t.noMessages}</p></>}
-     {panel==='catalog'&&<><div className="tle-buyer-section-title"><h5>{t.itemsTitle}</h5><span>{t.sample}</span></div><div className="tle-buyer-catalog">{current.items.map(p=><article key={p.id}><div className="tle-buyer-product-symbol"><ShoppingBag size={21}/></div><div className="tle-buyer-product-copy"><strong>{p.name}</strong><small>{p.category}</small><div className="tle-buyer-product-price">{money(p.price*(1-p.discount/100))}{p.discount>0&&<del>{money(p.price)}</del>}</div><div className="tle-buyer-product-editor">{editingPrice===p.id?<><input type="number" min="0" max="100000" step=".01" aria-label="Sample price" value={draftPrice} onChange={e=>setDraftPrice(e.target.value)}/><button type="button" onClick={()=>savePrice(p.id)}>{lang==='es'?'Guardar':'Save'}</button></>:<button type="button" onClick={()=>{setEditingPrice(p.id);setDraftPrice(String(p.price))}}>{t.edit}</button>}<label>{t.discount} <select aria-label={'Discount for '+p.name} value={p.discount} onChange={e=>editDiscount(p.id,Number(e.target.value))}>{[0,10,15,20,25].map(n=><option key={n} value={n}>{n}%</option>)}</select></label></div></div><button className={'tle-buyer-availability'+(p.available?'':' off')} onClick={()=>toggleAvailability(p.id)} type="button" aria-pressed={p.available}>{p.available?t.available:t.unavailable}</button></article>)}</div><div className="tle-buyer-note">{t.noRealAnalytics} {t.noMessages}</div></>}
-     {panel==='customers'&&<><div className="tle-buyer-section-title"><h5>{t.customersLabel}</h5><span>{t.sample}</span></div><div className="tle-buyer-rows">{customers.map(r=><button key={r.id} type="button" onClick={()=>{setPanel('inbox');setSelected(r.id)}}><span><b>{r.customer}</b><small>{r.description}</small></span><span className="tle-buyer-status status-confirmed">{r.contact}</span></button>)}</div></>}
-     {notice&&<p role="status" className="tle-buyer-inline-notice">{notice}</p>}
+     <div className="tle-buyer-mobile-bar"><span className="tle-buyer-mark">TLE<span>.</span></span><div><strong>{brand.name}</strong><small>{brand.kind}</small></div><span className="tle-buyer-demo-chip">{lang==='es'?'VISTA PREVIA':'PREVIEW'}</span></div>
+     <header className="tle-buyer-inner-header">
+      <div><span className="tle-buyer-inner-kicker">{t.preview}</span><h4>{panel==='overview'?t.welcome:labels[panel]}</h4><p>{panel==='overview'?brand.requestLabel+' · '+brand.dateLabel:brand.name}</p></div>
+     </header>
+     {panel==='overview'&&<>
+      <div className="tle-buyer-metrics">{stats.map(stat=><article key={stat.label}><span>{stat.label}</span><strong>{stat.value}</strong></article>)}</div>
+      <section className="tle-buyer-focus"><span>{t.quick}</span><strong>{newCount?newCount+' '+brand.requestLabel.toLowerCase()+' need attention':'Everything is up to date.'}</strong><p>{brand.publicAction} · {t.email}</p><button type="button" onClick={()=>go('inbox')}>{t.all}</button></section>
+      <div className="tle-buyer-section-title"><h5>{t.requests}</h5><button type="button" onClick={()=>go('inbox')}>{t.all}</button></div>
+      <div className="tle-buyer-rows">{current.requests.slice(0,3).map(req=><button key={req.id} type="button" onClick={()=>{setPanel('inbox');setSelected(req.id)}}><span><b>{req.customer}</b><small>{req.description}</small></span><span className={'tle-buyer-status status-'+req.status}>{statusLabel(req.status)}</span></button>)}</div>
+      <div className="tle-buyer-shortcuts"><button type="button" onClick={()=>go('calendar')}><CalendarDays size={16}/>{t.calendar}</button><button type="button" onClick={()=>go('catalog')}><Package size={16}/>{t.manage}</button><button type="button" onClick={()=>go('customers')}><Users size={16}/>{t.customers}</button></div>
+     </>}
+     {panel==='inbox'&&<>
+      <div className="tle-buyer-section-title"><h5>{t.requestTitle}</h5><label className="tle-buyer-search"><Search size={15}/><input aria-label={lang==='es'?'Buscar consultas de ejemplo':'Search sample inquiries'} placeholder={lang==='es'?'Buscar…':'Search…'} value={search} onChange={e=>setSearch(e.target.value)}/></label></div>
+      <div className="tle-buyer-rows">{!filtered.length?<p className="tle-buyer-note">{lang==='es'?'No hay solicitudes con esa búsqueda.':'No sample requests found.'}</p>:filtered.map(req=><button type="button" key={req.id} onClick={()=>setSelected(req.id)} aria-pressed={selected===req.id}><span><b>{req.customer}</b><small>{req.description}</small><small>{req.time}</small></span><span className={'tle-buyer-status status-'+req.status}>{statusLabel(req.status)}</span></button>)}</div>
+      {activeRequest&&<div className="tle-buyer-detail"><h5>{activeRequest.customer}</h5><p>{activeRequest.description}</p><small>{t.sample} · {activeRequest.contact}</small><p className="tle-buyer-readonly-note">{t.reminder}</p></div>}
+     </>}
+     {panel==='calendar'&&<>
+      <div className="tle-buyer-section-title"><h5>{t.calendarTitle}</h5><span>{t.sample}</span></div>
+      <div className="tle-buyer-rows">{!confirmed?<p className="tle-buyer-note">{lang==='es'?'Sin citas confirmadas de ejemplo.':'No confirmed sample appointments.'}</p>:current.requests.filter(req=>req.status==='confirmed').map(req=><button type="button" key={req.id} onClick={()=>{setPanel('inbox');setSelected(req.id)}}><span><b>{req.customer}</b><small>{req.description}</small></span><span className="tle-buyer-status status-confirmed"><Check size={13}/>{statusLabel(req.status)}</span></button>)}</div>
+      <p className="tle-buyer-note">{t.reminder}</p>
+     </>}
+     {panel==='catalog'&&<>
+      <div className="tle-buyer-section-title"><h5>{t.itemsTitle}</h5><span>{t.sample}</span></div>
+      <div className="tle-buyer-catalog">{current.items.map(item=><article key={item.id}><div className="tle-buyer-product-symbol"><ShoppingBag size={21}/></div><div className="tle-buyer-product-copy"><strong>{item.name}</strong><small>{item.category}</small><div className="tle-buyer-product-price">{money(item.price*(1-item.discount/100))}{item.discount>0&&<del>{money(item.price)}</del>}</div></div><span className={'tle-buyer-availability'+(item.available?'':' off')}>{item.available?t.available:t.unavailable}</span></article>)}</div>
+      <p className="tle-buyer-note">{t.noRealAnalytics}</p>
+     </>}
+     {panel==='customers'&&<>
+      <div className="tle-buyer-section-title"><h5>{t.customersLabel}</h5><span>{t.sample}</span></div>
+      <div className="tle-buyer-rows">{customers.map(req=><button type="button" key={req.id} onClick={()=>{setPanel('inbox');setSelected(req.id)}}><span><b>{req.customer}</b><small>{req.description}</small></span><span className="tle-buyer-status status-confirmed">{req.contact}</span></button>)}</div>
+     </>}
      <footer className="tle-buyer-inner-foot"><ShieldCheck size={13}/>{t.noMessages}</footer>
     </div>
-    <nav className="tle-buyer-bottom-nav" aria-label="Buyer mobile navigation">{tabs.map(([id,Icon])=><button type="button" key={id} aria-current={panel===id?'page':undefined} onClick={()=>{setPanel(id);setSelected(null)}}><Icon size={19}/><small>{labels[id]}</small></button>)}</nav>
+    <nav className="tle-buyer-bottom-nav" aria-label="Navegación móvil del Command Center">
+     {tabs.map(([id,Icon])=><button type="button" key={id} aria-current={panel===id?'page':undefined} onClick={()=>go(id)}><Icon size={19}/><small>{labels[id]}</small></button>)}
+    </nav>
    </div>
   </div>
-  <p className="tle-buyer-review-foot"><ShieldCheck size={15}/> Esta vista permite practicar sin usar registros de CB Depot ni de otros compradores. La app privada de producción y los correos reales permanecen separados. <a href="https://thelaunchera.com/command-center/" target="_blank" rel="noopener noreferrer">Abrir Command Center real <ExternalLink size={12}/></a></p>
+  <p className="tle-buyer-review-foot"><ShieldCheck size={15}/>{t.handoff}</p>
  </section>
 }
