@@ -180,3 +180,22 @@
 .finished-demos-library-shortcut>a{display:inline-flex;justify-content:center;align-items:center;text-align:center;min-height:48px;padding:12px 18px;background:#191919;color:#fff;border-radius:7px;text-decoration:none;font:700 12px/1.3 'DM Sans',Arial,sans-serif;white-space:nowrap}
 .finished-demos-library-shortcut>a:focus-visible{outline:3px solid #477ea2;outline-offset:3px}
 @media(max-width:700px){.finished-demos-library-shortcut{padding:20px;align-items:stretch;flex-direction:column;gap:15px}.finished-demos-library-shortcut>a{width:100%;white-space:normal}}
+
+
+/* Curated public portfolio visibility — separate from Aula publishing. */
+.finished-demo-website-control{width:100%;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:9px 12px;margin:12px 0 4px;padding:14px;border:1px solid #e1ddd3;border-radius:13px;background:#fbf8f0}
+.finished-demo-website-state{display:flex;align-items:center;gap:7px;font-size:11px;line-height:1.5;font-weight:700;color:#796954}
+.finished-demo-website-state:before{content:'';width:7px;height:7px;border-radius:50%;background:#c8b6a1;flex:none}
+.finished-demo-website-state.is-visible{color:#3f6556}
+.finished-demo-website-state.is-visible:before{background:#648a72}
+.finished-demo-website-control button,.finished-demo-website-summary button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:11px 15px;border:1px solid #191919;border-radius:10px;background:#191919;color:#fff;font-size:12px;line-height:1.3;font-weight:700;cursor:pointer}
+.finished-demo-website-control button:disabled,.finished-demo-website-summary button:disabled{opacity:.5;cursor:not-allowed}
+.finished-demo-website-control button:focus-visible,.finished-demo-website-summary button:focus-visible{outline:3px solid #477793;outline-offset:3px}
+.finished-demo-website-control small{width:100%;font-size:10px;color:#806f61}
+.finished-demo-website-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;margin:14px 0;border:1px solid #dfd7c7;border-radius:15px;background:#fffdf9}
+.finished-demo-website-summary>div{flex:1;min-width:230px;display:flex;flex-direction:column;gap:5px}
+.finished-demo-website-summary strong{font-size:13px;color:#253c47}
+.finished-demo-website-summary>div span{font-size:11px;line-height:1.6;color:#66737a}
+.finished-demo-website-count{font-size:11px;font-weight:750;white-space:nowrap;color:#3b5365}
+.finished-demo-website-summary>p{flex-basis:100%;margin:0;font-size:12px}
+@media(max-width:700px){.finished-demo-website-control{padding:13px}.finished-demo-website-control button{width:100%}.finished-demo-website-summary{align-items:stretch}.finished-demo-website-summary>div{min-width:100%}.finished-demo-website-summary button{width:100%}}
