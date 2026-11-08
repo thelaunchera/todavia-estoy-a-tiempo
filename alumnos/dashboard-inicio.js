@@ -25,11 +25,11 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
  $('dashboard-progress-empty').hidden=showProgress;
  $('dashboard-progress-shell').dataset.mode=showProgress?'progress':'waiting';
  write('student-greeting-message',pick(language,
-  'Vamos a crear una web, paso a paso. No necesitas resolverlo todo hoy.',
-  'We will build one website, step by step. You do not have to figure everything out today.'));
+  'Hoy empieza por tu idea. La IA puede ayudarte con los próximos pasos y tú decides cómo debe quedar.',
+  'Start with your idea. AI can help with the next steps, and you decide how it should look.'));
  write('dashboard-greeting-tip',pick(language,
-  'Trabaja en una sola web y guarda sus fotos en la misma carpeta.',
-  'Work on one website and keep its photos in one folder.'));
+  'Describe tu negocio. Autoriza los conectores que necesites y revisa cada resultado.',
+  'Describe your business. Authorize the connections you need and review each result.'));
  write('dashboard-progress-empty-title',pick(language,'Tu proyecto, a tu ritmo.','Your project, your pace.'));
  write('dashboard-progress-empty-desc',pick(language,
   'Puedes empezar con los prompts y la guía, aunque los videos sigan en preparación.',
