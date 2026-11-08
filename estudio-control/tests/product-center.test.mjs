@@ -49,3 +49,15 @@ test('Studio keeps podcast editable product records and route to product center'
  assert.match(studio,/product-admin-records/);
  assert.match(studio,/section === 'productos'/);
 });
+
+test('Studio sales and links agree with the live Content Lab checkout, with separate delivery QA',()=>{
+ assert.match(studio,/VENTA ACTIVA · \$10/);
+ assert.match(studio,/Checkout LIVE de \$10 abierto/);
+ assert.match(studio,/El flujo de acceso y bienvenida está activo en Make/);
+ assert.match(studio,/falta comprobar una compra real completa/);
+ assert.doesNotMatch(studio,/PAUSADO POR QA|Las ventas siguen pausadas por QA|la automatización de acceso sigue inactiva/i);
+ assert.match(links,/Editor privado: checkout \$10 activo/);
+ assert.doesNotMatch(links,/venta y acceso de compradores aún no abiertos/i);
+ assert.match(studio,/Cuaderno digital con checkout publicado/);
+ assert.doesNotMatch(studio,/entrega verificada mediante Make/i);
+});
