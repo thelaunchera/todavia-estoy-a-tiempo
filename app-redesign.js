@@ -246,10 +246,11 @@
   if (!prefersStillness.matches && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= .4 && !lineSeen.has(entry.target)) {
+        if (entry.isIntersecting && entry.intersectionRatio >= .4) {
           lineSeen.add(entry.target);
           entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
+        } else if (!entry.isIntersecting && !entry.target.matches(':focus-within')) {
+          entry.target.classList.remove('is-visible');
         }
       });
     }, { threshold: [.4, 1] });
