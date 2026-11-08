@@ -243,6 +243,14 @@ const STUDIO_AREAS: Array<{
   {id:'planning',title:'Planificación',description:'Agenda, calendario y pendientes',icon:CalendarDays,
    pages:['inicio','calendario','tareas','ajustes'],home:'calendario'},
 ];
+const STUDIO_AREA_EYEBROWS: Record<string,string> = {
+ operations:'NEGOCIO / OPERACIONES',
+ design:'DISEÑO / RECURSOS',
+ demos:'WEBSITES / DEMOS',
+ production:'CONTENIDO / PRODUCCIÓN',
+ education:'CLASE / PRODUCTOS',
+ planning:'MI STUDIO / PLANIFICACIÓN',
+};
 const LABELS: Record<Page, string> = {
   inicio: 'Mi Studio',
   operaciones: 'The Launch Era · Operaciones',
@@ -1366,12 +1374,8 @@ function App() {
             <div>
               <span className="eyebrow">
                 {page === 'inicio'
-                  ? 'BIENVENIDA A TU ESPACIO'
-                  : page === 'operaciones' ? 'THE LAUNCH ERA / ADMINISTRACIÓN PRIVADA'
-                  : page === 'youtube' ? 'YOUTUBE / SERIE ANIMADA'
-                  : (page === 'clases' || page === 'demos' || page === 'alumnos' || page === 'espera' || page === 'bonos' || page === 'club')
-                    ? 'FORMACIÓN / PRODUCCIÓN PRIVADA'
-                    : 'PODCAST / DIRECCIÓN EDITORIAL'}
+                  ? 'BIENVENIDA A MI STUDIO'
+                  : STUDIO_AREA_EYEBROWS[STUDIO_AREAS.find(area=>area.pages.includes(page))?.id || 'planning']}
               </span>
               <h1>{LABELS[page]}</h1>
             </div>
