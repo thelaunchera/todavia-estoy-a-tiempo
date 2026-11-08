@@ -17,7 +17,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync,unzipSync} from 'fflate';
-import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors} from 'lucide-react';
+import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
@@ -75,6 +75,7 @@ export default function SeamlessEditor(){
  useEffect(()=>{try{localStorage.setItem(PROJECT_NAME_KEY,projectName)}catch{}},[projectName]);
  useEffect(()=>{try{if(activeProjectId)localStorage.setItem(ACTIVE_PROJECT_KEY,activeProjectId);else localStorage.removeItem(ACTIVE_PROJECT_KEY)}catch{}},[activeProjectId]);
  const [projects,setProjects]=useState<{id:string;name:string;updated:string;doc:typeof defaults}[]>(()=>{try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'[]')}catch{return []}});
+ const [projectsOpen,setProjectsOpen]=useState(false);
  const [message,setMessage]=useState('');
  // Keep feedback brief and non-blocking; new actions restart the two-second countdown.
  useEffect(()=>{if(!message)return;const timeout=window.setTimeout(()=>setMessage(''),CREATIVE_EDITOR_RULES.feedbackDurationMs);return()=>window.clearTimeout(timeout)},[message]);
@@ -739,16 +740,30 @@ export default function SeamlessEditor(){
    return false;
   }
  };
- const startNewProject=async()=>{
-   if(busy){setMessage('Termina de procesar la foto antes de crear otro proyecto.');return;}
+ const startNewProject=async():Promise<boolean>=>{
+   if(busy){setMessage('Termina de procesar la foto antes de crear otro proyecto.');return false;}
    backgroundGeneration.current+=1;
    const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
-   if(hasWork&&!(await saveProject()))return;
+   if(hasWork&&!(await saveProject()))return false;
    replaceProjectDocument({...defaults,backgroundImages:{},items:[]});
    setProjectName('Mi carrusel nuevo');setActiveProjectId(null);setSlide(0);
    setSelected(null);setEditingText(null);setRecentlyDeleted(null);
    setActiveBrief(null);setQuickPanel(null);viewport.current?.scrollTo({left:0});
    setMessage(hasWork?'El carrusel anterior quedó guardado en Mis proyectos. Ya puedes crear uno nuevo.':'Nuevo carrusel vacío. Puedes empezar a diseñar.');
+   return true;
+ };
+ const openLibraryProject=async(p:(typeof projects)[number],duplicate=false)=>{
+  if(busy||!storageReady)return;
+  const hasWork=Boolean(activeProjectId||doc.items.length||Object.keys(doc.backgroundImages||{}).length||doc.count!==defaults.count||doc.background!==defaults.background);
+  if(hasWork&&!(await saveProject(true)))return;
+  backgroundGeneration.current+=1;
+  replaceProjectDocument(JSON.parse(JSON.stringify(p.doc)));
+  setProjectName(duplicate?p.name+' copia':p.name);
+  setActiveProjectId(duplicate?null:p.id);
+  setSlide(0);setSelected(null);setEditingText(null);
+  setActiveBrief(null);setRecentlyDeleted(null);setQuickPanel(null);
+  viewport.current?.scrollTo({left:0});setProjectsOpen(false);
+  setMessage(duplicate?'Copia abierta. Pulsa Guardar para conservarla.':'Proyecto «'+p.name+'» abierto para editar.');
  };
  const removeProject=async(id:string)=>{
   const project=projects.find(p=>p.id===id);
@@ -976,6 +991,7 @@ export default function SeamlessEditor(){
   </div>);
  return <section className={'studio-seamless-app '+(openPanel&&wideScreen?'has-wide-sidebar':'')} style={{maxWidth:1600,margin:'auto',color:'#191919'}}>
   <header className="studio-app-topbar" aria-label="Controles principales del carrusel">
+   <button type="button" className="studio-projects-trigger" onClick={()=>setProjectsOpen(true)} aria-label="Abrir Mis proyectos y crear un carrusel" title="Mis proyectos"><FolderOpen size={20} aria-hidden="true"/></button>
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
     <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Importar recursos · Studio + Lab</button>
@@ -985,6 +1001,30 @@ export default function SeamlessEditor(){
     <button type="button" className="primary" onClick={()=>void downloadSlide(slide)} disabled={busy}>{busy?'Preparando…':'Exportar PNG'}</button>
    </div>
   </header>
+  {projectsOpen&&createPortal(
+   <div className="studio-projects-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setProjectsOpen(false)}}>
+    <section className="studio-projects-dialog" role="dialog" aria-modal="true" aria-label="Mis proyectos de carrusel">
+     <header className="studio-projects-dialog-head">
+      <div><strong>Mis proyectos</strong><p>Guardados en este dispositivo · {projects.length} proyectos</p></div>
+      <button type="button" aria-label="Cerrar Mis proyectos" onClick={()=>setProjectsOpen(false)}><X size={21}/></button>
+     </header>
+     <div className="studio-projects-dialog-actions">
+      <button type="button" className="primary" disabled={busy||!storageReady} onClick={()=>void startNewProject().then(created=>{if(created)setProjectsOpen(false)})}>+ Nuevo proyecto</button>
+      <button type="button" disabled={busy||!storageReady} onClick={()=>void saveProject()}>Guardar actual</button>
+     </div>
+     <div className="studio-projects-dialog-list">
+      {projects.length===0?<p className="studio-projects-empty">Aún no tienes carruseles guardados. Crea uno nuevo para empezar.</p>:projects.map(p=>
+       <article key={p.id} className="studio-projects-row">
+        <div><strong>{p.name}</strong><small>{p.doc.count} slides · {p.updated}</small></div>
+        <div className="studio-projects-row-actions">
+         <button type="button" disabled={busy||!storageReady} onClick={()=>void openLibraryProject(p)}>Editar</button>
+         <button type="button" disabled={busy||!storageReady} onClick={()=>void openLibraryProject(p,true)}>Duplicar</button>
+         <button type="button" disabled={busy||!storageReady} onClick={()=>void removeProject(p.id)}>Eliminar</button>
+        </div>
+       </article>)}
+     </div>
+    </section>
+   </div>,document.body)}
   <input ref={backgroundPublishInput} type="file" multiple accept="image/png,image/jpeg,image/webp" aria-label="Publicar fondos compartidos" style={{display:'none'}} onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length)void publishBackgrounds(files);}}/>
   <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Publicar stickers en Studio y Lab" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
   <input ref={photoInput} type="file" accept="image/*" onChange={onFile}
