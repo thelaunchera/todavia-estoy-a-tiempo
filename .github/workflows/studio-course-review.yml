@@ -43,6 +43,8 @@ jobs:
       - name: Compilar Studio
         working-directory: estudio-control
         run: npm run build
+      - name: Verificar selección independiente de demos para Websites
+        run: node --test estudio-control/tests/website-demo-visibility.test.mjs
       - name: Comprobar estructura y guiones
         working-directory: estudio-control
         run: npm run test:classes

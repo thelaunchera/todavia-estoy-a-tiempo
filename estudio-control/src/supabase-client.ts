@@ -1007,3 +1007,26 @@ export async function saveYouTubeBrandCopy(key:string,content:string):Promise<vo
  },{onConflict:'user_id,copy_key'});
  if(error)throw new Error('No se pudo guardar el slogan: '+error.message);
 }
+
+
+/* Public website portfolio selection. Owner-only writes; RLS also checks
+   podcast_studio_admins.role='owner'. Only demo ID and visibility are public. */
+export type WebsiteDemoVisibilityRow={demo_id:string;visible:boolean};
+export async function getWebsiteDemoVisibility():Promise<WebsiteDemoVisibilityRow[]>{
+ if(!client)throw Error('El Studio no está conectado.');
+ await owner();
+ const {data,error}=await client.from('tle_website_demo_visibility')
+  .select('demo_id,visible').order('demo_id');
+ if(error)throw Error('No se pudo consultar la visibilidad pública de los demos.');
+ return (data||[]) as WebsiteDemoVisibilityRow[];
+}
+export async function setWebsiteDemoVisibility(demoId:string,visible:boolean):Promise<void>{
+ if(!client)throw Error('El Studio no está conectado.');
+ if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(demoId))throw Error('Este demo no tiene un identificador válido.');
+ await owner();
+ const {data,error}=await client.from('tle_website_demo_visibility')
+  .upsert({demo_id:demoId,visible,updated_at:new Date().toISOString()},{onConflict:'demo_id'})
+  .select('demo_id,visible').single();
+ if(error||!data||data.demo_id!==demoId||data.visible!==visible)
+  throw Error('No se pudo verificar el cambio de visibilidad. Reintenta sin salir del Studio.');
+}

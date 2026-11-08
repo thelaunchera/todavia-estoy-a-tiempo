@@ -15,6 +15,7 @@ import {ivoryBloomPhotos} from './ivory-bloom-photos';
 import {ivoryBloomRebuildPrompts} from './ivory-bloom-rebuild-prompts';
 import {additionalDemoPhotos, additionalDemoPrompts, mareaPhotos, mareaRebuildPrompts, type FinishedDemoPhoto} from './finished-demo-resources';
 import {ClassroomDemoPublication,ClassroomDemoPublishingSummary,useClassroomDemoPublishing} from './ClassroomDemoPublishing';
+import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoVisibility,websiteDemoId} from './WebsiteDemoVisibility';
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
@@ -278,6 +279,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
  const [copied,setCopied]=useState('');
  const [notice,setNotice]=useState('');
  const classroom=useClassroomDemoPublishing();
+ const website=useWebsiteDemoVisibility();
  async function copy(text:string,key:string,kind:'prompt'|'link'='prompt') {
    try {await navigator.clipboard.writeText(text);setCopied(key);setNotice(kind==='link'?'Enlace de la foto copiado.':'Prompt copiado.');}
    catch {setNotice('Selecciona el texto para copiarlo manualmente.');}
@@ -291,13 +293,14 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        <div className="finished-demos-library-copy">
          <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
          <strong>Website of Websites</strong>
-         <p>Abre la biblioteca visual con todos los conceptos web desde un solo lugar.</p>
+         <p>Abre el portafolio público y elige desde aquí cuáles demos aparecen. El Aula tiene controles separados.</p>
        </div>
        <a href="https://thelaunchera.com/demos/" target="_blank" rel="noopener noreferrer" aria-label="Abrir la nueva biblioteca pública de demos de The Launch Era">
          Abrir biblioteca de demos
        </a>
      </div>
-     <ClassroomDemoPublishingSummary control={classroom}/>
+     <WebsiteDemoVisibilitySummary control={website} ids={finishedDemos.filter(d=>d.kind!=='live').map(d=>websiteDemoId(d.id))}/>
+      <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
    <div className="finished-demos-grid">
@@ -307,7 +310,8 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
-       <ClassroomDemoPublication control={classroom} demo={{
+       <WebsiteDemoVisibilityButton control={website} id={d.id} title={d.title} isClient={d.kind==='live'}/>
+        <ClassroomDemoPublication control={classroom} demo={{
          id:d.id,title:d.title,category:d.category,description:d.description,
          image:d.image,url:d.url,note:d.note,kind:d.kind,photos:d.photos,
          steps:studioDemoPrompts[d.promptsFor]
