@@ -87,7 +87,7 @@ console.log('Validación de preventa, aula, consentimientos, rutas y acceso: OK'
 const newExperience=read('clases/experience.js');
 const newStyles=read('clases/clases.css');
 assert.match(classPage,/<h1 id="class-title">Tu primera web <em>con IA\.<\/em><\/h1>/,'Hero en español claro: Tu primera web con IA');
-assert.match(classPage,/esa idea que tienes guardada merece/i,'El hero parte de una idea real del alumno');
+assert.match(classPage,/¿Tienes una idea de negocio\?/i,'El hero parte de una pregunta real del alumno');
 assert.match(classPage,/Lista de espera abierta/,'Lista de espera sin compra habilitada');
 assert.match(classPage,/href="#lista-espera">Quiero estar en la lista/,'El CTA principal lleva a la lista sin checkout');
 const heroActionsMarkup=classPage.slice(classPage.indexOf('<div class="class-hero-actions"'),classPage.indexOf('</div>',classPage.indexOf('<div class="class-hero-actions"'))+6);
