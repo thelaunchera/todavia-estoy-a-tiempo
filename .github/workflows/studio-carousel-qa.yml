@@ -18,6 +18,9 @@ jobs:
       - name: Test brand carousels, restore guards and editorial plan
         working-directory: estudio-control
         run: npm run test:editorial-plan
+      - name: Validate Studio demo URLs and Golden Grid legacy link normalization
+        working-directory: estudio-control
+        run: node --test tests/link-center.test.mjs
       - name: Type-check private Studio
         working-directory: estudio-control
         run: npx tsc --noEmit --pretty false
