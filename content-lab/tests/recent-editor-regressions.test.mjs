@@ -76,7 +76,7 @@ test('opening, duplicating, creating, and preparing projects all start a separat
   visit(parse(studio));
   // The map callback also contains both event handlers; inspect the leaf handlers.
   const leafHandlers=openHandlers.filter(text=>!text.includes('projects.map')&&!text.includes('key={p.id}'));
-  assert.equal(leafHandlers.length,2);
+  assert.equal(leafHandlers.length,3,'Existing project handlers and the mobile library opener each reset history');
   for(const handler of leafHandlers)assert.match(handler,/replaceProjectDocument\(JSON.parse\(JSON.stringify\(p.doc\)\)\)/);
   assert.doesNotMatch(initializer(studio,'saveProject'),/replaceProjectDocument\(/,'Saving the same project retains undo');
 });
