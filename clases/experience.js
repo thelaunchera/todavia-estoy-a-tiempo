@@ -165,9 +165,11 @@
     root.dataset.motion = 'ready';
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
+        if (reducedMotion.matches || entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        } else if (!entry.target.matches(':focus-within')) {
+          entry.target.classList.remove('is-visible');
+        }
       });
     }, {rootMargin:'0px 0px -45px 0px', threshold:0.08});
     reveals.forEach(node => observer.observe(node));
