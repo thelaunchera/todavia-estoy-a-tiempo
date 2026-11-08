@@ -33,7 +33,9 @@ test('Recording mode hides all private and review-only links',()=>{
   assert.match(source,/readOnly \? 'Modo grabación: solo se muestran enlaces públicos y demos/);
 });
 test('Studio links keep published sources and approved AppDeploy demos have their published URLs',()=>{
-  assert.deepEqual(records.filter(x=>x.url.includes('appdeploy.ai')).map(x=>x.key),['school-golden-grid','school-la-vie-in-pink']);
+  assert.deepEqual(records.filter(x=>x.url.includes('appdeploy.ai')).map(x=>x.key),['school-la-vie-in-pink']);
+  assert.equal(records.find(x=>x.key==='school-golden-grid')?.url,'https://thelaunchera.com/demos/golden-grid/');
+  assert.match(source,/changed\.config\.url===GOLDEN_GRID_RETIRED_URL/,'Saved legacy Golden link must be normalized in the Studio view');
   assert.match(records.find(x=>x.key==='lab-editor')?.url||'',/podcast\.thelaunchera\.com\/content-lab\//);
   assert.match(records.find(x=>x.key==='lab-prompts')?.url||'',/\/content-lab\/prompts\//);
 });
@@ -58,7 +60,7 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
   const item=byKey[key];
   assert.ok(item,'Missing demo record '+key);
   assert.equal(item.visibility,'demo',key);
-  assert.ok(item.url.startsWith('https://thelaunchera.com/')||item.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/')||(key==='school-la-vie-in-pink'&&item.url==='https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/')||(key==='school-golden-grid'&&item.url==='https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/'),key);
+  assert.ok(item.url.startsWith('https://thelaunchera.com/')||item.url.startsWith('https://thelaunchera.github.io/demo-booking-landing-/')||(key==='school-la-vie-in-pink'&&item.url==='https://la-vie-in-pink-61dbk8.v2.appdeploy.ai/'),key);
  }
  assert.ok(keys.includes('school-havana-19'),'Havana 19 is included in current shortcuts');
  assert.ok(!keys.includes('tle-cb-depot'),'Real customer projects must not appear as fictional demos');
