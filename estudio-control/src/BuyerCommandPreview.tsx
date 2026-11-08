@@ -1,5 +1,5 @@
 import {useMemo,useState} from 'react';
-import {ArrowLeft,CalendarDays,Check,Clock3,ExternalLink,Inbox,LayoutDashboard,Package,RotateCcw,Search,ShieldCheck,ShoppingBag,Users, X} from 'lucide-react';
+import {CalendarDays,Check,ExternalLink,Inbox,LayoutDashboard,Package,RotateCcw,Search,ShieldCheck,ShoppingBag,Users, X} from 'lucide-react';
 import './buyer-command-preview.css';
 
 type Industry='restaurant'|'cleaning'|'retail'|'services';
@@ -7,7 +7,6 @@ type Panel='overview'|'inbox'|'calendar'|'catalog'|'customers';
 type Status='new'|'confirmed'|'done';
 type Request={id:number;customer:string;description:string;time:string;status:Status;contact:string};
 type Item={id:number;name:string;category:string;price:number;discount:number;available:boolean};
-type Sample={name:string;kind:string;requestLabel:string;dateLabel:string;cta:string;publicAction:string;requests:Request[];items:Item[]};
 type Device='phone'|'desktop';
 type Language='en'|'es';
 const brands:Record<Industry,{name:string;kind:string;requestLabel:string;dateLabel:string;cta:string;publicAction:string}>={
