@@ -4,6 +4,7 @@ import {
   ShieldCheck, ExternalLink, ArrowUpRight, ArrowLeft,
 } from 'lucide-react';
 import BuyerCommandPreview from './BuyerCommandPreview';
+import { ReferenceBrowser, EmailCampaignBoard } from './StudioCreativeTools';
 import './operations-center.css';
 
 export type OperationsDestination =
@@ -92,11 +93,13 @@ const SCHEDULE = [
 export default function OperationsCenter({onNavigate}:{onNavigate:(page:OperationsDestination)=>void}) {
   const [selected,setSelected]=useState<CategoryId|null>(null);
   const [buyerPreviewOpen,setBuyerPreviewOpen]=useState(false);
+  const [creativePanel,setCreativePanel]=useState<'references'|'campaign'|null>(null);
   const buyerPreviewRef=useRef<HTMLDivElement>(null);
   const detailsRef=useRef<HTMLElement>(null);
   const current=GROUPS.find(x=>x.id===selected);
   const open=(id:CategoryId)=>{
     setSelected(id);
+    setCreativePanel(null);
     window.requestAnimationFrame(()=>detailsRef.current?.scrollIntoView({behavior:'smooth',block:'nearest'}));
   };
   return <div className="tle-ops">
@@ -143,6 +146,20 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
       {current.id==='correos'&&<div className="tle-ops-schedule" aria-label="Calendario de comunicaciones">
         {SCHEDULE.map(x=><div key={x.date}><b>{x.date}<small> / MES</small></b><span><strong>{x.title}</strong><small>{x.description}</small></span></div>)}
       </div>}
+      {(current.id==='correos'||current.id==='demos')&&<>
+        <div className="tle-ops-creative-actions" aria-label="Herramientas creativas privadas">
+          <button type="button" aria-pressed={creativePanel==='references'}
+            onClick={()=>setCreativePanel(creativePanel==='references'?null:'references')}>
+            {creativePanel==='references'?'Cerrar biblioteca':'Explorar referencias de diseño'}
+          </button>
+          {current.id==='correos'&&<button type="button" aria-pressed={creativePanel==='campaign'}
+            onClick={()=>setCreativePanel(creativePanel==='campaign'?null:'campaign')}>
+            {creativePanel==='campaign'?'Cerrar editor':'Crear borrador visual de email'}
+          </button>}
+        </div>
+        {creativePanel==='references'&&<ReferenceBrowser key={current.id} initialKind={current.id==='correos'?'emails':'websites'}/>}
+        {current.id==='correos'&&creativePanel==='campaign'&&<EmailCampaignBoard/>}
+      </>}
       <div className="tle-ops-links">
         <button type="button" className="tle-ops-primary" onClick={()=>onNavigate(current.primary.page)}>
           {current.primary.label}<ArrowUpRight size={16}/>
@@ -150,7 +167,7 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
         {current.more.map(link=><button type="button" key={link.page} className="tle-ops-secondary" onClick={()=>onNavigate(link.page)}>{link.label}<ArrowUpRight size={15}/></button>)}
         {EXTERNAL_LINKS[current.id].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="tle-ops-secondary">{link.label}<ExternalLink size={15}/></a>)}
       </div>
-      {current.id==='correos'&&<p className="tle-ops-footnote">Estado: las bienvenidas son automáticas; las campañas editoriales del día 1 y 15 necesitan edición y aprobación. Revisa entregas y fallos en Resend.</p>}
+      {current.id==='correos'&&<p className="tle-ops-footnote">Make muestra activos los escenarios de bienvenida y compra. Las campañas visuales son borradores sin envío; revisa destinatarios, autorización, entregas y fallos en Resend antes de publicar.</p>}
       {current.id==='cobros'&&<p className="tle-ops-footnote">La administración de entregas requiere autorización de propietario. No confirma ninguna compra ni activa cobros al abrirla.</p>}
     </section>}
     <footer className="tle-ops-footer"><ShieldCheck size={15}/> Administración privada de The Launch Era · Ningún enlace público concede acceso al Studio.</footer>
