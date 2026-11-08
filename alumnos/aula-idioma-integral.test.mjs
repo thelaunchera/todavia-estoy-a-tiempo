@@ -91,11 +91,11 @@ test('learner-first navigation and in-page lesson picker are bilingual and acces
  assert.match(app,/option\.textContent=courseCopy\('Lección ','Lesson '/);
  assert.match(language,/\['#lesson-picker-shell label','Choose a lesson'\]/);
  assert.match(language,/\['#lesson-picker','aria-label','Choose a lesson from this course'\]/);
- for(const text of ['RECURSOS PARA PRACTICAR','COMPARTE Y SIGUE','CUANDO NECESITES MÁS']){
+ for(const text of ['RECURSOS PARA PRACTICAR','COMPARTE Y SIGUE','PARA SEGUIR AVANZANDO']){
   assert.ok(strings.includes('"'+text+'":'),text+' missing from the bilingual classroom');
  }
  assert.doesNotMatch(html,/class="dashboard-hero-secondary"/,'Avoid competing CTAs in the first screen');
- assert.match(html,/data-aula-view="materiales"><span>03<\/span><strong>Construye tu web<\/strong>/);
+ assert.match(html,/data-aula-view="materiales"><span>03<\/span><strong>Construye y comprueba<\/strong>/);
 });
 test('materials follow four progressive learning stages without hiding tool details',()=>{
  const source=load('materiales-interactivos.js');
