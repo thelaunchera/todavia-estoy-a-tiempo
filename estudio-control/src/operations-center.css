@@ -83,3 +83,14 @@
 .tle-ops-preview-panel{scroll-margin-top:24px;margin:19px 0 24px;padding:clamp(13px,2vw,23px);border:1px solid #cadbe4;border-radius:22px;background:#f2f7f9}
 @media(max-width:650px){.tle-ops-buyer-access{gap:13px;padding:20px 16px}.tle-ops-buyer-access-icon{width:44px;height:44px;border-radius:12px}.tle-ops-buyer-access-copy{min-width:calc(100% - 60px)}.tle-ops-buyer-access>button{width:100%}.tle-ops-preview-panel{padding:10px;border-radius:17px}}
 @media(prefers-reduced-motion:reduce){.tle-ops-buyer-access>button{transition:none}}
+
+
+/* Owner-only test selectors are deliberately outside the buyer's read-only preview.
+   Hidden by default; never part of the delivered customer Command Center. */
+.tle-ops-owner-preview-controls{border:1px solid #D8E4EA;background:#FAF8F3;border-radius:15px;padding:12px 16px;margin:14px 0 8px;color:#2E4D60}
+.tle-ops-owner-preview-controls>summary{cursor:pointer;font-size:12px;font-weight:750;min-height:36px;display:flex;align-items:center}
+.tle-ops-owner-preview-controls>summary:focus-visible{outline:3px solid #8AB7D0;outline-offset:3px}
+.tle-ops-owner-preview-controls p{font-size:12px;color:#536B78;line-height:1.6;margin:7px 0 12px}
+.tle-ops-owner-preview-fields{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 5px}
+.tle-ops-owner-preview-fields label{display:grid;gap:5px;flex:1 1 190px;min-width:0;font-size:11px;font-weight:750}
+.tle-ops-owner-preview-fields select{background:white;min-height:44px;border:1px solid #CFDDE4;border-radius:10px;font:inherit;font-size:12px;color:#191919;padding:8px 10px;width:100%;max-width:100%}
