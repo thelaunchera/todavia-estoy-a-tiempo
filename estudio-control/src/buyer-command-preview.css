@@ -42,3 +42,16 @@
 @media(max-width:730px){.tle-buyer-review-head{display:block}.tle-buyer-review-close{margin-top:14px}.tle-buyer-review-reset{margin-left:0}.tle-buyer-review-bar{padding:12px}.tle-buyer-review-head h3{font-size:38px}.tle-buyer-device-wrap{padding:8px}.tle-buyer-desktop .tle-buyer-shell{grid-template-columns:145px minmax(0,1fr)}.tle-buyer-desktop .tle-buyer-sidebar{padding:12px 8px}.tle-buyer-desktop .tle-buyer-side-nav button{font-size:10px;padding:10px 6px;gap:6px}.tle-buyer-desktop .tle-buyer-main{padding:14px}.tle-buyer-desktop .tle-buyer-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.tle-buyer-desktop .tle-buyer-inner-header{flex-direction:column}.tle-buyer-desktop .tle-buyer-shortcuts{grid-template-columns:1fr 1fr}}
 @media(max-width:510px){.tle-buyer-review-bar>label{flex:1;min-width:100%}.tle-buyer-review-devices{flex:1;justify-content:center}.tle-buyer-review-reset{width:100%;justify-content:center}.tle-buyer-phone .tle-buyer-shell{max-width:385px}.tle-buyer-desktop .tle-buyer-shell{grid-template-columns:100px minmax(0,1fr)}.tle-buyer-desktop .tle-buyer-sidebar-brand{padding:0}.tle-buyer-desktop .tle-buyer-sidebar-brand strong{font-size:13px}.tle-buyer-desktop .tle-buyer-side-nav button{font-size:9px}.tle-buyer-desktop .tle-buyer-inner-header h4{font-size:23px}.tle-buyer-desktop .tle-buyer-catalog article{grid-template-columns:32px 1fr}.tle-buyer-desktop .tle-buyer-availability{grid-column:2;justify-self:start}}
 @media(prefers-reduced-motion:reduce){.tle-buyer-review *{scroll-behavior:auto!important}}
+
+/* Client-facing preview is intentionally view-only until an approved handoff. */
+.tle-buyer-review .tle-buyer-availability{display:inline-flex;align-items:center;justify-content:center;cursor:default}
+.tle-buyer-review .tle-buyer-readonly-note{font-size:11px;color:#526E7D;border-top:1px solid #E0E9ED;margin-top:13px;padding-top:13px;line-height:1.65}
+.tle-buyer-review .tle-buyer-review-head p{max-width:760px}
+.tle-buyer-review .tle-buyer-review-foot{border:1px solid #DDE8EA;background:#FAF8F3;border-radius:13px;padding:14px;margin:14px 0 0}
+@media(max-width:430px){
+ .tle-buyer-review .tle-buyer-device-wrap{padding:5px;background:transparent;border-color:#E3E8EB;border-radius:20px}
+ .tle-buyer-review .tle-buyer-phone .tle-buyer-shell{border-width:2px;border-radius:20px;max-width:none}
+ .tle-buyer-review .tle-buyer-phone .tle-buyer-main{padding:15px 12px 91px}
+ .tle-buyer-review .tle-buyer-phone .tle-buyer-catalog article{grid-template-columns:31px minmax(0,1fr)}
+ .tle-buyer-review .tle-buyer-review-head h3{font-size:clamp(28px,8vw,38px)}
+}
