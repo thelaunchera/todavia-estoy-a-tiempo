@@ -22,6 +22,12 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { auth, api, getOwnerClassroomSession, SUPABASE_ENABLED, hasLocalVault, downloadEncryptedBackup, importEncryptedBackup, importLocalRecords, getThemeSongStats, getClassLaunchStats, getVerifiedSales, getVerifiedOwnership, uploadClassRecording, getClassRecordingUrl, removeOldClassRecording, type VerifiedOwnership, type VerifiedSale, type ClassLaunchStats, type AudioStats } from './supabase-client';
 import {
   LayoutDashboard,
+  Building2,
+  Palette,
+  Clapperboard,
+  GraduationCap,
+  ChevronDown,
+  Search,
   Mic2,
   CalendarDays,
   ShoppingBag,
@@ -61,6 +67,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import './studio.css';
+import './studio-navigation-20261108.css';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
 import { normalizeSpotifyEpisodeLink, validSpotifyEpisode, SPOTIFY_EPISODE_ERROR } from './spotify-links';
 import { editorialPlan } from './editorial-plan';
@@ -217,8 +224,27 @@ const NAV = [
   { id: 'seo', label: 'SEO y sitio web', icon: SearchCheck },
   { id: 'ajustes', label: 'Configuración', icon: Settings2 },
 ] as const;
+// Every existing Studio destination belongs to exactly one private workspace.
+// No routes, records, integrations or editor implementations are removed.
+const STUDIO_AREAS: Array<{
+  id:string;title:string;description:string;icon:typeof LayoutDashboard;
+  pages:Page[];home:Page;
+}> = [
+  {id:'operations',title:'The Launch Era · Operaciones',description:'Clientes, ventas, emails y automatizaciones',icon:Building2,
+   pages:['operaciones','ventas','inquiries','audiencia','soporte','flujos','seo'],home:'operaciones'},
+  {id:'design',title:'Diseño y recursos',description:'Carruseles, ideas, motion y Brand Kits',icon:Palette,
+   pages:['seamless','ideas','links'],home:'seamless'},
+  {id:'demos',title:'Demos y websites',description:'Proyectos, fotos, prompts y versiones',icon:Globe2,
+   pages:['demos'],home:'demos'},
+  {id:'production',title:'Producción de contenido',description:'Podcast, reels y YouTube',icon:Clapperboard,
+   pages:['episodios','reels','cancion','youtube','reels-clase','reels-lab'],home:'youtube'},
+  {id:'education',title:'Clases y productos',description:'Aula, freebies, bonos y estudiantes',icon:GraduationCap,
+   pages:['clases','alumnos','espera','bonos','freebies','club','productos'],home:'clases'},
+  {id:'planning',title:'Planificación',description:'Agenda, calendario y pendientes',icon:CalendarDays,
+   pages:['inicio','calendario','tareas','ajustes'],home:'calendario'},
+];
 const LABELS: Record<Page, string> = {
-  inicio: 'Mi agenda · Studio',
+  inicio: 'Mi Studio',
   operaciones: 'The Launch Era · Operaciones',
   episodios: 'Podcast · capítulos y guiones',
   reels: 'Podcast · reels',
@@ -342,6 +368,12 @@ function App() {
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
+  const [navQuery,setNavQuery]=useState('');
+  const [expandedArea,setExpandedArea]=useState<string|null>('planning');
+  useEffect(()=>{
+    const match=STUDIO_AREAS.find(area=>area.pages.includes(page));
+    if(match)setExpandedArea(match.id);
+  },[page]);
   // GitHub Pages can finish a deployment while an iPhone PWA keeps the old
   // JavaScript in memory. Never silently reload: the user may be editing a
   // carousel that has not yet completed its local autosave.
@@ -760,6 +792,7 @@ function App() {
   const change = (p: Page, directPending = false) => {
     setPage(p);
     setSearch('');
+    setNavQuery('');
     setMobileNav(false);
     if (p === 'tareas') void refresh();
     // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
@@ -1210,8 +1243,11 @@ function App() {
   return (
     <div className={'studio ' + (recording ? 'recording' : '') + (page === 'seamless' ? ' studio-carousel-editor-mode' : '')}>
       <aside className={'sidebar ' + (mobileNav ? 'open' : '')}>
-        <div className="brand">
-          <img src={LOGO} alt="Todavía estoy a tiempo" />
+        <div className="brand studio-brand-refined">
+          <button type="button" className="studio-wordmark" onClick={()=>change('inicio')} aria-label="Ir al inicio de Mi Studio">
+            <span className="studio-wordmark-monogram" aria-hidden="true">T<span>.</span></span>
+            <span><strong>THE LAUNCH ERA</strong><small>MI STUDIO</small></span>
+          </button>
           <button type="button" className="studio-aula-brand-link" onClick={openAulaPreview}
             aria-label="Vista privada del aula de alumnos" title="Ver aula">
             <BookOpen size={18} />
@@ -1221,29 +1257,49 @@ function App() {
           </button>
         </div>
         <div className="workspace">
-          <span className="pulse" /> ESTUDIO PRIVADO <b>01</b>
+          <span className="pulse" /> UN ESPACIO · TODO CONECTADO <b>PRIVADO</b>
         </div>
-        <nav aria-label="Secciones del estudio">
-          {NAV.map((it, i) => {
-            const Icon = it.icon;
-            return (
-              <div key={it.id}>
-                {'group' in it && (
-                  <div className={'group ' + (i === 0 ? 'first' : '')}>
-                    {it.group}
-                  </div>
-                )}
-                <button
-                  className={'nav-item ' + (page === it.id ? 'active' : '')}
-                  onClick={() => change(it.id)}
-                >
-                  <Icon size={18} />
-                  {it.label}
-                  {page === it.id && <span className="nav-mark" />}
+        <nav aria-label="Secciones del estudio" className="studio-area-nav">
+          <label className="studio-nav-search">
+            <Search size={16} aria-hidden="true" />
+            <input type="search" value={navQuery} onChange={event=>setNavQuery(event.target.value)}
+              placeholder="Buscar herramientas…" aria-label="Buscar herramientas del Studio" />
+          </label>
+          <div className="studio-nav-areas">
+            {STUDIO_AREAS.map(area=>{
+              const Icon=area.icon;
+              const found=NAV.filter(link=>area.pages.some(p=>p===link.id)&&
+                (!navQuery.trim()||(link.label+' '+area.title).toLocaleLowerCase('es').includes(navQuery.trim().toLocaleLowerCase('es'))));
+              if(!found.length)return null;
+              const expanded=Boolean(navQuery.trim())||expandedArea===area.id;
+              const current=area.pages.includes(page);
+              return <section className={'studio-nav-area'+(current?' has-active':'')} key={area.id}>
+                <button type="button" className="studio-nav-area-trigger" aria-expanded={expanded}
+                  aria-controls={'studio-area-'+area.id}
+                  onClick={()=>setExpandedArea(expandedArea===area.id?null:area.id)}>
+                  <span className="studio-nav-area-icon"><Icon size={18} aria-hidden="true"/></span>
+                  <span className="studio-nav-area-label">{area.title}</span>
+                  <ChevronDown size={16} aria-hidden="true" className={'studio-nav-chevron'+(expanded?' expanded':'')}/>
                 </button>
-              </div>
-            );
-          })}
+                {expanded&&<div id={'studio-area-'+area.id} className="studio-nav-area-items">
+                  {found.map(link=>{
+                    const LinkIcon=link.icon;
+                    return <button type="button" key={link.id}
+                      className={'nav-item'+(page===link.id?' active':'')}
+                      aria-current={page===link.id?'page':undefined}
+                      onClick={()=>change(link.id)}>
+                      <LinkIcon size={16} aria-hidden="true"/>
+                      <span>{link.label}</span>
+                      {page===link.id&&<span className="nav-mark" aria-hidden="true"/>}
+                    </button>;
+                  })}
+                </div>}
+              </section>;
+            })}
+            {navQuery.trim()&&!STUDIO_AREAS.some(area=>NAV.some(link=>area.pages.some(p=>p===link.id)&&
+              (link.label+' '+area.title).toLocaleLowerCase('es').includes(navQuery.trim().toLocaleLowerCase('es'))))&&
+              <p className="studio-nav-no-results">No hay herramientas con ese nombre.</p>}
+          </div>
         </nav>
         <div className="sidebar-foot">
           <span>
@@ -1341,35 +1397,42 @@ function App() {
           {page === 'operaciones' && <OperationsCenter onNavigate={(next:OperationsDestination)=>change(next)} />}
           {page === 'inicio' && (
             <>
-              <section className="hero">
-                <div>
-                  <span className="hero-kicker">
-                    <AudioLines size={16} strokeWidth={1.6} aria-hidden="true" /> TU ESPACIO CREATIVO PRIVADO
-                  </span>
-                  <h2>
-                    Todo lo que estás creando, <em>en un mismo lugar.</em>
-                  </h2>
-                  <p>
-                    Tus carruseles, demos, clases y podcast en un solo lugar.
-                    Abre tu próximo proyecto y continúa creando.
-                  </p>
+              <section className="hero studio-welcome-hero" aria-label="Bienvenida a Mi Studio">
+                <div className="studio-welcome-main">
+                  <span className="hero-kicker"><Sparkles size={16} aria-hidden="true"/> TU ESPACIO DE TRABAJO</span>
+                  <h2>Todo en su lugar. <em>Más espacio para crear.</em></h2>
+                  <p>Continúa donde lo dejaste. Tus proyectos y herramientas ahora están organizados por lo que necesitas hacer.</p>
                   <div className="hero-actions">
-                    <button onClick={() => change('seamless')}>
-                      Abrir Carousel Studio
-                    </button>
-                    <button type="button" className="hero-secondary-action" onClick={() => change('demos')}>
-                      Ver mis demos
-                    </button>
+                    <button type="button" onClick={()=>change('demos')}>Ver mis proyectos</button>
+                    <button type="button" className="hero-secondary-action" onClick={()=>change('seamless')}>Abrir Carousel Studio</button>
                   </div>
-                  <button type="button" className="studio-ops-home-link" onClick={()=>change('operaciones')}>
-                    <ShoppingBag size={16}/> Abrir operaciones de The Launch Era <ExternalLink size={15}/>
-                  </button>
                 </div>
-                <div className="hero-cover">
-                  <img src={COVER} alt="Portada del primer episodio" />
-                  <span>ESTUDIO · TEMPORADA 01</span>
+                <aside className="studio-welcome-aside" aria-label="Acceso a la operación del negocio">
+                  <span>EN UN SOLO ESPACIO</span>
+                  <strong>Ideas.<br/>Diseño.<br/><em>Acción.</em></strong>
+                  <button type="button" onClick={()=>change('operaciones')}>
+                    Ir a Operaciones <ExternalLink size={15} aria-hidden="true"/>
+                  </button>
+                </aside>
+              </section>
+              <section className="studio-hub" aria-label="Áreas de Mi Studio">
+                <header className="studio-hub-heading">
+                  <div><span>ORGANIZADO PARA CREAR</span><h2>¿Dónde continuamos?</h2></div>
+                  <p>Seis áreas. Las mismas herramientas, más fáciles de encontrar.</p>
+                </header>
+                <div className="studio-hub-grid">
+                  {STUDIO_AREAS.map(area=>{
+                    const Icon=area.icon;
+                    return <button type="button" className="studio-hub-card" key={area.id}
+                      onClick={()=>{setExpandedArea(area.id);change(area.home);}}>
+                      <span className="studio-hub-card-icon"><Icon size={22} aria-hidden="true"/></span>
+                      <span className="studio-hub-card-copy"><strong>{area.title}</strong><small>{area.description}</small></span>
+                    </button>;
+                  })}
                 </div>
               </section>
+              <details className="studio-home-overview">
+                <summary>Resumen y próximos pasos <ChevronDown size={18} aria-hidden="true"/></summary>
               <div className="stats">
                 <div className="stat">
                   <Mic2 size={20} />
@@ -1497,6 +1560,7 @@ function App() {
                 </div>
                 {taskRows}
               </section>
+              </details>
             </>
           )}
           {page === 'episodios' && (
