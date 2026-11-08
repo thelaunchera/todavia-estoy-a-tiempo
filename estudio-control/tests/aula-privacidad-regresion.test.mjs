@@ -176,7 +176,9 @@ test('Catálogo comercial independiente: ventas y productos permanecen en Centro
  assert.doesNotMatch(room,/id="learning-shelf-title"|id="learning-lab-status"/,'Aula sin tienda ni métricas de otros productos');
  assert.match(studio,/Centro de ventas y productos/,'La administración conserva el Centro de Productos');
  assert.match(studio,/getVerifiedSales\(\)/,'La propietaria supervisa sus ventas');
- assert.match(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No prometer compras de Lab activas');
+ assert.match(studio,/VENTA ACTIVA · \$10/,'El Studio muestra el checkout de Content Lab abierto');
+ assert.match(studio,/falta comprobar una compra real completa/,'No confundir venta activa con entrega probada');
+ assert.doesNotMatch(studio,/CHECKOUT \$10 · PAUSADO POR QA/,'No mostrar la venta como pausada');
  assert.match(service,/await owner\(\);[\s\S]*?client\.from\('podcast_sales'\)/,'Solo administradora lee ventas');
 });
 
