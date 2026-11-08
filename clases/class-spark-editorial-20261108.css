@@ -1,0 +1,243 @@
+/* The Launch Era | Class landing campaign visual | 2026-11-08
+   Inspired by oversized advertising typography + layered product imagery.
+   No new photography yet. Preserve live Casa Brownie footage, browser link,
+   $9.99 waitlist offer, all forms and both ES/EN pages. */
+body.class-page-v2 .class-hero {
+  background:#FAF8F3!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > h1 {
+  font-family:'Prompt','Futura','Arial Black',Arial,sans-serif!important;
+  font-size:clamp(3.5rem,5.65vw,6.2rem)!important;
+  font-weight:850!important;
+  line-height:.96!important;
+  letter-spacing:-.075em!important;
+  text-wrap:balance;
+  color:#191919!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > h1 em {
+  display:inline!important;
+  font-family:inherit!important;
+  font-style:normal!important;
+  font-weight:850!important;
+  color:#D52C7D!important;
+  letter-spacing:-.078em!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {
+  color:#243D78!important;
+  font-weight:800!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity em {
+  font-style:normal!important;
+  color:#1842C8!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > .class-primary-button {
+  background:#191919!important;
+  color:#FAF8F3!important;
+  border-color:#191919!important;
+  border-radius:999px!important;
+  box-shadow:0 10px 25px rgba(25,25,25,.14)!important;
+}
+body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions > .class-primary-button:hover {
+  background:#1436CD!important;
+  border-color:#1436CD!important;
+  transform:translateY(-2px);
+}
+body.class-page-v2 .class-hero .class-primary-button .class-inline-arrow {
+  display:none!important;
+}
+/* Replace the former photographic rectangle with a bright editorial stage.
+   Its same local/example video and live site preview remain in the scene. */
+body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+  min-height:690px!important;
+  border-radius:24px!important;
+  background:#1238F3!important;
+  box-shadow:0 22px 58px rgba(19,49,145,.17)!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+}
+.class-cinema-visual .class-creative-type {
+  position:absolute;
+  z-index:1;
+  inset:24% 2% auto 3%;
+  pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  color:#FFB4C9;
+  font-family:'Prompt','Futura','Arial Black',Arial,sans-serif;
+  font-weight:900;
+  font-size:clamp(5.1rem,8.7vw,9.8rem);
+  line-height:.77;
+  letter-spacing:-.105em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.class-cinema-visual .class-creative-type span + span { margin-top:.16em; }
+.class-cinema-visual .class-cinema-film {
+  z-index:2;
+  inset:23% 0 0 32%!important;
+  border-radius:170px 0 0 0!important;
+  overflow:hidden!important;
+  box-shadow:-24px 4px 50px rgba(5,19,123,.13);
+}
+.class-cinema-visual .class-cinema-film video {
+  object-position:center!important;
+  filter:saturate(1.08) contrast(1.03)!important;
+}
+.class-cinema-visual .class-cinema-tint {
+  background:linear-gradient(180deg,rgba(10,22,92,.04) 8%,rgba(12,26,114,.04) 47%,rgba(10,20,89,.54) 100%)!important;
+}
+.class-cinema-visual .class-cinema-kicker {
+  z-index:4!important;
+  top:6%!important;
+  left:5%!important;
+  color:#fff!important;
+  text-shadow:none!important;
+  letter-spacing:.17em!important;
+  font-weight:800!important;
+}
+.class-cinema-visual .class-creative-sticker {
+  position:absolute;
+  z-index:5;
+  top:5%;
+  right:5%;
+  width:clamp(82px,9.2vw,112px);
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#F2D85B;
+  color:#191919;
+  box-shadow:0 11px 25px rgba(8,16,112,.19);
+  transform:rotate(11deg);
+  text-align:center;
+  font:900 clamp(.57rem,.92vw,.73rem)/1.17 'Prompt',Arial,sans-serif;
+  letter-spacing:.025em;
+  padding:12px;
+  box-sizing:border-box;
+  pointer-events:none;
+}
+.class-cinema-visual .class-cinema-statement {
+  z-index:4!important;
+  top:auto!important;
+  bottom:21%!important;
+  left:5%!important;
+  max-width:46%!important;
+  font:800 clamp(1.65rem,3.1vw,2.8rem)/.97 'Prompt','Futura',Arial,sans-serif!important;
+  letter-spacing:-.063em!important;
+  text-shadow:0 4px 17px rgba(0,23,124,.22)!important;
+  color:white!important;
+}
+.class-cinema-visual .class-cinema-statement em {color:#FFF!important;font-style:normal!important}
+.class-cinema-visual .class-cinema-browser {
+  z-index:6!important;
+  right:5%!important;
+  bottom:12%!important;
+  width:min(55%,320px)!important;
+  border:5px solid #fff!important;
+  border-radius:18px!important;
+  box-shadow:0 23px 47px rgba(2,12,83,.3)!important;
+}
+.class-cinema-visual .class-cinema-browser-tap {
+  background:#191919!important;
+}
+.class-cinema-visual .class-cinema-footer {
+  z-index:5!important;
+  bottom:4%!important;
+  left:5%!important;
+  right:5%!important;
+  color:#fff!important;
+}
+.class-cinema-visual .class-cinema-footer-mark {
+  border-color:rgba(255,255,255,.5)!important;
+}
+body.class-page-v2 .class-motion-ribbon {
+  background:#1238F3!important;
+}
+body.class-page-v2 .class-motion-ribbon :is(span,i) {
+  color:#FFB4C9!important;
+}
+@media(max-width:1100px) and (min-width:701px) {
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+    min-height:570px!important;
+  }
+  .class-cinema-visual .class-creative-type {
+    font-size:clamp(4.2rem,8.5vw,7.5rem);
+  }
+  .class-cinema-visual .class-cinema-browser { width:60%!important; }
+  .class-cinema-visual .class-cinema-statement { max-width:43%!important;font-size:1.8rem!important; }
+}
+@media(max-width:700px) {
+  body.class-page-v2 .class-hero {
+    padding:24px 0 40px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {order:1!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {
+    order:2!important;
+    font-size:clamp(2.65rem,11.3vw,4.25rem)!important;
+    max-width:100%!important;
+    line-height:.98!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {order:3!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+    order:4!important;
+    height:clamp(335px,100vw,455px)!important;
+    min-height:0!important;
+    margin:18px 0 2px!important;
+    border-radius:15px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede {order:5!important;margin-top:19px!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-price-inline {
+    order:6!important;
+    margin-top:18px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {order:7!important;margin-top:14px!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-audio-language-note {order:8!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-chips {order:9!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-availability {order:10!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-notice {order:11!important;}
+  .class-cinema-visual .class-creative-type {
+    top:26%;
+    left:3%;
+    font-size:clamp(3.8rem,17.5vw,6.5rem);
+  }
+  .class-cinema-visual .class-cinema-film {
+    inset:23% 0 0 31%!important;
+    border-radius:105px 0 0 0!important;
+  }
+  .class-cinema-visual .class-cinema-kicker {
+    top:6%!important;left:5%!important;
+    max-width:55%!important;
+    font-size:9px!important;
+    line-height:1.35!important;
+  }
+  .class-cinema-visual .class-creative-sticker {
+    top:5%;right:5%;width:83px;
+    font-size:10px;
+  }
+  .class-cinema-visual .class-cinema-statement {display:none!important;}
+  .class-cinema-visual .class-cinema-browser {
+    width:53%!important; min-width:0!important;
+    bottom:13%!important; right:4%!important;
+    border-width:3px!important; border-radius:11px!important;
+  }
+  .class-cinema-visual .class-cinema-browser-title {font-size:clamp(.93rem,3.5vw,1.2rem)!important;}
+  .class-cinema-visual .class-cinema-footer {bottom:3%!important;font-size:8px!important;}
+  body.class-page-v2 .class-hero .class-hero-intro > .class-price-inline.class-price-campaign {
+    margin-top:20px!important;
+  }
+}
+@media(max-width:370px) {
+  .class-cinema-visual .class-creative-type {font-size:16.2vw;}
+  .class-cinema-visual .class-creative-sticker {width:72px;font-size:9px;}
+  .class-cinema-visual .class-cinema-browser {width:55%!important;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .class-cinema-visual .class-creative-sticker,
+  .class-cinema-visual .class-creative-type {animation:none!important;}
+}
