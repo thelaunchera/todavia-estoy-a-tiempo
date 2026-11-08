@@ -423,6 +423,20 @@
             <button class="outline music-button" type="button" data-action="add-music">${p.musicBlob ? 'Change track' : '＋ Add music'}</button>
             ${p.musicBlob ? `<label class="duration-line music-volume">Volume <b id="musicPercent">${p.musicVolume}%</b><input type="range" id="musicVolume" min="0" max="100" step="1" value="${p.musicVolume}"></label><button class="text-action" type="button" data-action="clear-music">Remove soundtrack</button>` : ''}
           </div>
+          <details class="ob-official-sound-sources">
+            <summary>♫ OFF BRIEF · Official sound library <small>2 originals</small></summary>
+            <div class="ob-official-sound-items">
+              <article><strong>Series Background</strong><span>2:33 · Background for the episode</span>
+                <iframe title="Listen to the original OFF BRIEF background" src="https://drive.google.com/file/d/1XN7ZuGi5s6LDs9toP25fLWWKCvxBDKca/preview" loading="lazy" allow="autoplay"></iframe>
+                <a href="https://drive.google.com/file/d/1XN7ZuGi5s6LDs9toP25fLWWKCvxBDKca/view" target="_blank" rel="noopener noreferrer">Open original in Drive</a>
+              </article>
+              <article><strong>Presentation Sound</strong><span>7.5s · Use with the official intro after the cold open</span>
+                <iframe title="Listen to the original OFF BRIEF presentation cue" src="https://drive.google.com/file/d/1H-VpQZIZHVfzcj6BqfYh6gEmUBaI4plV/preview" loading="lazy" allow="autoplay"></iframe>
+                <a href="https://drive.google.com/file/d/1H-VpQZIZHVfzcj6BqfYh6gEmUBaI4plV/view" target="_blank" rel="noopener noreferrer">Open original in Drive</a>
+              </article>
+            </div>
+            <p>These are the approved Drive masters. To place the background on this editor timeline, save it to Files, then choose Add music above. The presentation cue belongs after the cold open, not at the very start.</p>
+          </details>
           <div class="export-panel"><div class="eyebrow">06 / OUTPUT</div><label class="field"><span>Resolution</span><select id="quality"><option value="720" ${p.quality === '720' ? 'selected' : ''}>720p · iPad friendly</option><option value="1080" ${p.quality === '1080' ? 'selected' : ''}>1080p · high quality</option></select></label>
             <button class="primary full-width" data-action="export" type="button" ${recording ? 'disabled' : ''}>${recording ? 'Exporting…' : 'Export video ↗'}</button>
             <p class="fineprint">Video exports in real time. Keep Safari open and your iPad awake. MP4 where supported; otherwise WebM.</p>
