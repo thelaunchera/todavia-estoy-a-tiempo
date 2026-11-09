@@ -4,7 +4,7 @@ import { Check, Clock3, ExternalLink, Mail, Search, RefreshCw, X } from 'lucide-
 import './website-inquiries.css';
 
 const labels:Record<WebsiteInquiryStatus,string>={new:'Nueva',contacted:'Contactada',in_progress:'En proceso',closed:'Cerrada'};
-const packages:Record<string,string>={'website-basic':'Website · $15','website-ai-crm':'Website + IA + CRM · $25'};
+const packages:Record<string,string>={'website-basic':'Website + Command Center · $15','website-plus':'Website + Command Center avanzado · $25, pago único','website-ai-crm':'Plan anterior · IA + CRM · $25 + mensualidad'};
 const nextStatuses:WebsiteInquiryStatus[]=['new','contacted','in_progress','closed'];
 const formatDate=(date:string)=>new Intl.DateTimeFormat('es-US',{dateStyle:'medium',timeStyle:'short',timeZone:'America/New_York'}).format(new Date(date));
 
@@ -53,16 +53,16 @@ export default function WebsiteInquiries({readOnly=false}:{readOnly?:boolean}) {
  if(readOnly)return <section className="website-inquiries"><div className="wi-banner"><strong>Inquiries · modo grabación</strong><p>Los datos personales y formularios de clientes quedan ocultos mientras grabas.</p></div></section>;
  return <section className="website-inquiries" aria-label="Inquiries de websites y automatizaciones">
   <div className="wi-header">
-   <div><span className="wi-kicker">THE LAUNCH ERA · INQUIRIES</span><h2>Solicitudes de websites</h2><p>Desde los dos intakes oficiales, directamente al Studio. Esta bandeja no envía leads al Command Center.</p></div>
+   <div><span className="wi-kicker">THE LAUNCH ERA · INQUIRIES</span><h2>Solicitudes de websites</h2><p>Solicitudes verificadas de website nuevo o actualización de uno existente. Los paquetes actuales son de pago único ($15/$25); el agente de IA se solicita por separado. Los planes anteriores de IA + CRM conservan sus condiciones.</p></div>
    <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:10}}>
-    <a href="https://thelaunchera.com/website-delivery-admin/" target="_blank" rel="noopener noreferrer" className="wi-refresh"><ExternalLink size={16}/>Entregas y mensualidades</a>
+    <a href="https://thelaunchera.com/website-delivery-admin/" target="_blank" rel="noopener noreferrer" className="wi-refresh"><ExternalLink size={16}/>Entregas y pagos</a>
     <button type="button" onClick={()=>void refresh()} disabled={busy} className="wi-refresh"><RefreshCw size={16}/>{busy?'Cargando…':'Actualizar'}</button>
    </div>
   </div>
   <div className="wi-stats"><div><span>Nuevas</span><strong>{ready?newCount:'—'}</strong></div><div><span>Recibidas (últimas 200)</span><strong>{ready?rows.length:'—'}</strong></div><div><span>En proceso</span><strong>{ready?rows.filter(x=>x.status==='in_progress').length:'—'}</strong></div></div>
   <div className="wi-toolbar">
    <div className="wi-search"><Search size={17}/><input aria-label="Buscar solicitudes" placeholder="Nombre, negocio, correo, industria…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button aria-label="Borrar búsqueda" onClick={()=>setQuery('')}><X size={15}/></button>}</div>
-   <label>Filtrar <select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">Todas</option><option value="new">Nuevas</option><option value="contacted">Contactadas</option><option value="in_progress">En proceso</option><option value="closed">Cerradas</option><option value="website-basic">Paquete $15</option><option value="website-ai-crm">Paquete $25</option><option value="inquiry">Consultas</option><option value="intake">Intakes</option></select></label>
+   <label>Filtrar <select value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">Todas</option><option value="new">Nuevas</option><option value="contacted">Contactadas</option><option value="in_progress">En proceso</option><option value="closed">Cerradas</option><option value="website-basic">Website $15 · actual</option><option value="website-plus">Website $25 · pago único</option><option value="website-ai-crm">Plan anterior · IA + CRM</option><option value="inquiry">Consultas</option><option value="intake">Intakes</option></select></label>
   </div>
   {error&&<p role="alert" className="wi-error">{error} {ready&&'Se conservan los últimos datos consultados.'}</p>}
   {notice&&<p role="status" className="wi-notice">{notice}</p>}
@@ -82,7 +82,7 @@ export default function WebsiteInquiries({readOnly=false}:{readOnly?:boolean}) {
     <div className="wi-message"><span>Qué necesita</span><p>{row.goals}</p></div>
     {row.brand_notes&&<div className="wi-message"><span>Marca y estilo</span><p>{row.brand_notes}</p></div>}
     {row.automation_goals&&<div className="wi-message"><span>Automatización</span><p>{row.automation_goals}</p></div>}
-    {row.ai_brief&&<div className="wi-message"><span>Asistente IA</span><p>{row.ai_brief}</p></div>}
+    {row.ai_brief&&<div className="wi-message"><span>{row.package_slug==='website-ai-crm'?'Asistente de IA incluido (plan anterior)':'Interés de agente de IA · revisión y cotización aparte'}</span><p>{row.ai_brief}</p></div>}
     <label className="wi-private-note"><span>Notas privadas de seguimiento</span><textarea rows={3} maxLength={4000} value={noteDraft[row.id]??row.admin_notes??''} placeholder="Anota lo que falta, próxima llamada o decisión…" onChange={e=>setNoteDraft(prev=>({...prev,[row.id]:e.target.value}))}/></label>
     <div className="wi-actions"><label>Estado <select value={row.status} disabled={saving===row.id} onChange={e=>void save(row,e.target.value as WebsiteInquiryStatus)}>{nextStatuses.map(x=><option value={x} key={x}>{labels[x]}</option>)}</select></label><button type="button" onClick={()=>void save(row,row.status)} disabled={saving===row.id}><Check size={15}/>{saving===row.id?'Guardando…':'Guardar notas'}</button><a className="wi-email" href={'mailto:'+encodeURIComponent(row.email)+'?subject='+encodeURIComponent('The Launch Era · '+(packages[row.package_slug]||'Website')+' · '+row.business_name)}>Responder por correo</a></div>
     <p className="wi-warning">Cambiar el estado aquí no confirma el pago ni activa automatizaciones de clientes. Responder por correo abre tu aplicación de email; no envía un mensaje automáticamente.</p>
