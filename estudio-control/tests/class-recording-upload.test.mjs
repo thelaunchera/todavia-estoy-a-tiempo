@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
 const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-test('nine chapter upload controls in private production UI',()=>{
+test('four core video upload controls in private production UI',()=>{
  const ui=read('src/ClassProduction.tsx');
- assert.match(ui,/classLessons\.map\(item=>/);
+ assert.match(ui,/classLessons\.map\(\(item,index\)=>/);
+ assert.match(ui,/coreClassLessons as classLessons/);
  assert.match(ui,/class-module-upload/);
  assert.match(ui,/Subir video/);
  assert.match(ui,/Subir video de este capítulo/);
