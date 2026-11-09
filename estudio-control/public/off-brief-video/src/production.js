@@ -13,7 +13,7 @@ import {castCharacters,guestCharacters,seasonTwoTitles} from './season-two-cast.
     count: 10,
     source: original.season === 1
       ? 'Original two-minute English dialogue · ten official camera references'
-      : 'Original Season 2 dialogue · original image files pending',
+      : 'Original Season 2 dialogue · review/import episode images from Drive; remaining episode folders may be pending',
   }));
   const originalSpeakers = CANON_CAST;
 
@@ -190,7 +190,7 @@ return `<aside class="ob-side">
   <button data-view="drive" class="${state.view==='drive'?'current':''}">◈ <span>Connect Google Drive</span></button>
  </nav>
  ${[1,2].map(season=>`<section class="ob-season-group">
-  <div class="ob-menu-label">SEASON ${String(season).padStart(2,'0')} <span>${season===1?'IN PRODUCTION':'PHOTOS PENDING'}</span></div>
+  <div class="ob-menu-label">SEASON ${String(season).padStart(2,'0')} <span>${season===1?'IN PRODUCTION':'CHECK DRIVE IMAGES'}</span></div>
   <div class="ob-episode-buttons">${episodes.filter(e=>e.season===season).map(e=>`<button data-episode="${e.id}" class="${state.view==='episodes'&&state.episode===e.id?'current':''}">
    <span class="ob-ep-index">${String(e.number).padStart(2,'0')}</span><span class="ob-ep-name"><b>${safe(e.title)}</b><small>${photoCount(e.id)}/${e.season===2?8:10} photos · ${mediaCount(e.id)}/${e.season===2?8:10} AI clips</small></span></button>`).join('')}
   </div></section>`).join('')}
@@ -297,9 +297,9 @@ return `<div class="ob-ep-summary">
  <div class="ob-cast-grid ob-voice-grid">${members.map((person,i)=>{
   const config=state.voiceSettings[person.name]||(state.voiceSettings[person.name]={provider:'kokoro',voice:''});
   const def=voiceTemplates[person.name]||{voice:'',instructions:''};
-  const photo=person.name==='Ruby'?`<img class="ob-cast-reference" src="https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/characters/ruby.webp" alt="Ruby original reference"/>`:person.avatar>0?`<div class="ob-cast-reference" role="img" aria-label="${safe(person.name)} original reference" style="background-image:url('https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/season-2/cast-grid.webp');background-size:300% 300%;background-position:${((person.avatar-1)%3)*50}% ${Math.floor((person.avatar-1)/3)*50}%"></div>`:`<div class="ob-cast-icon">${safe(person.name[0])}</div>`;
+  const photo=['Ruby','Nia'].includes(person.name)?`<img class="ob-cast-reference" src="https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/characters/${person.name.toLowerCase()}.webp" alt="${safe(person.name)} original reference"/>`:person.avatar>0?`<div class="ob-cast-reference" role="img" aria-label="${safe(person.name)} original reference" style="background-image:url('https://raw.githubusercontent.com/thelaunchera/todavia-estoy-a-tiempo/main/estudio-control/public/youtube/season-2/cast-grid.webp');background-size:300% 300%;background-position:${((person.avatar-1)%3)*50}% ${Math.floor((person.avatar-1)/3)*50}%"></div>`:`<div class="ob-cast-icon">${safe(person.name[0])}</div>`;
   return `${i===castCharacters.length?'<h3 class="ob-cast-divider">Guest speaking roles</h3>':''}<article class="ob-cast-card ob-voice-director-card">
-   ${photo}<div class="ob-voice-card-content"><div class="ob-voice-card-heading"><div><h3>${safe(person.name)}</h3><p>${safe(person.role)}</p></div><span class="ob-voice-recommendation">Suggested AI voice: <b>${safe(def.voice||'Choose')}</b></span></div>
+   ${photo}<div class="ob-voice-card-content"><div class="ob-voice-card-heading"><div><h3>${safe(person.name)}</h3><p>${safe(person.role)}</p></div><span class="ob-voice-recommendation">${config.provider==='flow'?'Flow custom voice:':'Suggested AI voice:'} <b>${safe(config.provider==='flow'?(config.voice||'Create in Flow'):(def.voice||'Choose'))}</b></span></div>
    <div class="ob-voice-options"><label>Voice provider<select data-voice-provider="${safe(person.name)}">${voiceProviders.map(p=>`<option value="${p.id}" ${p.id===config.provider?'selected':''}>${safe(p.name)}</option>`).join('')}</select></label>
    <label>Permanent voice preset<input type="text" data-voice-name="${safe(person.name)}" placeholder="Save a voice name" value="${safe(config.voice||'')}"/></label></div>
    <label class="ob-voice-instructions-label">Voice Instructions · identity / affect / tone / emotion / pronunciation<textarea data-voice-instructions="${safe(person.name)}" rows="8" spellcheck="false">${safe(config.instructions??def.instructions)}</textarea></label>
