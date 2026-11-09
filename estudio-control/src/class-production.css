@@ -340,3 +340,27 @@
 .class-tablet-scene-nav button:last-child{max-width:42%;white-space:normal;text-wrap:balance}
 @media(max-width:820px){.class-tablet-interlude-options{grid-template-columns:1fr 1fr}.class-tablet-interlude-options label{grid-column:1/-1}}
 @media(max-width:540px){.class-tablet-interlude-options{grid-template-columns:1fr}.class-tablet-interlude-options label{grid-column:auto}.class-tablet-scene-nav button:last-child{font-size:11px;padding-inline:7px;min-width:115px}}
+
+/* 2026-11-09 · Four-video iPad course: concise, readable, mobile-first. */
+.class-core-recording-links,.class-core-tablet-links,.class-core-lesson-links{min-width:0}
+.class-core-recording-links{margin:0 0 15px;padding:18px;border:1px solid #d8e2e6;border-radius:16px;background:#FAF8F3}
+.class-core-recording-links>div{display:grid;gap:5px;margin-bottom:13px}
+.class-core-recording-links strong{font:750 14px/1.45 'DM Sans',Arial,sans-serif;color:#1a3346}
+.class-core-recording-links small{color:#576e7a;font-size:12px;line-height:1.5}
+.class-core-recording-links nav,.class-core-tablet-links,.class-core-lesson-links{display:flex;flex-wrap:wrap;gap:9px}
+.class-core-recording-links a,.class-core-tablet-links a,.class-core-lesson-links a{display:inline-flex;gap:6px;align-items:center;justify-content:center;min-height:43px;padding:10px 13px;border-radius:11px;background:#fff;border:1px solid #bdcfd8;color:#244963;text-decoration:none;font:700 12px/1.4 'DM Sans',Arial,sans-serif;overflow-wrap:anywhere}
+.class-core-recording-links a:hover,.class-core-tablet-links a:hover,.class-core-lesson-links a:hover{background:#edf4f6;border-color:#8fb3c4}
+.class-core-recording-links a:focus-visible,.class-core-tablet-links a:focus-visible,.class-core-lesson-links a:focus-visible{outline:3px solid #7ca6be;outline-offset:3px}
+.class-core-tablet-links{margin:12px 0 20px}
+.class-core-tablet-links a{background:#fff;flex:1 1 145px}
+.class-core-lesson-links{margin:13px 0 8px}
+.class-tablet-interlude-setup>summary{cursor:pointer;list-style:none;display:block}
+.class-tablet-interlude-setup>summary::-webkit-details-marker{display:none}
+.class-tablet-interlude-setup>summary::after{content:'+';float:right;font-size:23px;color:#45677c;margin-top:-44px}
+.class-tablet-interlude-setup[open]>summary::after{content:'−'}
+.class-tablet-interlude-setup:not([open])>*:not(summary){display:none!important}
+@media(max-width:650px){
+ .class-core-recording-links{padding:15px}
+ .class-core-recording-links nav,.class-core-tablet-links,.class-core-lesson-links{display:grid;grid-template-columns:1fr;gap:7px}
+ .class-core-recording-links a,.class-core-tablet-links a,.class-core-lesson-links a{width:100%;justify-content:flex-start}
+}
