@@ -230,7 +230,7 @@ test('iPad recording desk links actual Drive chapter folders and its official de
  const recording=readFileSync(new URL('../estudio-control/src/recording-starts.ts',import.meta.url),'utf8');
  for(let i=0;i<=8;i++)assert.match(course,new RegExp("'"+String(i).padStart(2,'0')+"':'https://drive\\.google\\.com/drive/folders/"));
  assert.match(production,/CLASS_RECORDING_FOLDERS\[lesson\.id\]/);
- assert.match(production,/href=\{OFFICIAL_DEMO_URL\}/);
+ assert.match(production,/href=\{OFFICIAL_DEMO_URL\+'\?etapa=sin-video'\}/);
  assert.match(recording,/OFFICIAL_DEMO_URL = 'https:\/\/thelaunchera\.com\/demos\/casa-brownie\//);
  assert.match(production,/almacenamiento privado del Studio, no en Drive/);
 });
@@ -248,7 +248,8 @@ test('separate Casa Brownie practice folder is private and linked in tablet mode
 test('iPad preflight checklist persists in lesson notes and starts with practical chapter',async()=>{
  const {readFileSync}=await import('node:fs');
  const prod=readFileSync(new URL('../estudio-control/src/ClassProduction.tsx',import.meta.url),'utf8');
- assert.match(prod,/matchMedia\?\.\('\(pointer: coarse\) and \(min-width: 650px\)'\)\.matches\)\?'01':'00'/);
+ assert.match(prod,/const \[lessonId,setLessonId\]=useState\('01'\)/);
+ assert.match(prod,/coreClassLessons as classLessons/);
  assert.match(prod,/lesson\.prep\.map\(\(item,index\)=>/);
  assert.match(prod,/checked\.includes\(index\)/);
  assert.match(prod,/recordingStart\.savedPoint/);
