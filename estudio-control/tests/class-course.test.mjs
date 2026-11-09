@@ -244,7 +244,7 @@ test('class scene transition uses private full-frame mini page between teaching 
  assert.match(production,/import ClassInterlude/);
  assert.match(production,/Siguiente escena/);
  assert.match(production,/<details className="class-tablet-interlude-setup"/);
- assert.match(production,/showInterlude\(false\)/);
+ assert.match(production,/setScene\(n=>Math\.min\(lesson\.beats\.length-1,n\+1\)\)/);
  assert.match(production,/showInterlude\(true,'demo'\)/);
  assert.match(production,/advanceTo:!preview&&!isDemo&&nextBeat\?nextIndex:null/);
  assert.match(production,/target\.fromLessonId===lesson\.id/);
