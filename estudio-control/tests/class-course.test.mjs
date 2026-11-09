@@ -279,3 +279,19 @@ test('plan activo: cuatro videos concisos, enlaces por video y preparación en i
  assert.match(weekly,/approved\}\/\{classLessons\.length\}/);
  assert.doesNotMatch(owner,/>9 videos</);
 });
+
+
+test('los botones privados de Drive abren subcarpetas reales y nunca la raíz',()=>{
+ const plan=readFileSync('src/class-core-plan.ts','utf8');
+ const studio=readFileSync('src/ClassProduction.tsx','utf8');
+ const expected={
+  '00_IDEA':'1I-xTVRF317lkgjFiOUvJbCNPK4jwjo1v',
+  '02_FOTOS':'1V2GnRT0KArsbGXjJreP1f2lGZHhx2PpP',
+  '06_PRUEBAS':'15d9z565bkRDePCygCBN5UW6FdhRJYH_k',
+  '05_WEB':'10J27A7P56TXQHGyN64bom7UTD4jpZF67'
+ };
+ for(const id of Object.values(expected))assert.ok(plan.includes('https://drive.google.com/drive/folders/'+id),'Falta carpeta: '+id);
+ assert.doesNotMatch(plan,/drive\.google\.com\/drive\/u\/0\/my-drive/);
+ assert.match(studio,/class-core-link-primary/);
+ assert.match(studio,/coreClassLinks\[lesson\.id as keyof typeof coreClassLinks\]/);
+});
