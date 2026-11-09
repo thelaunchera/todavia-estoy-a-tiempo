@@ -227,7 +227,7 @@ export async function getSupportMessages(): Promise<SupportMessage[]> {
 export type WebsiteInquiryStatus = 'new' | 'contacted' | 'in_progress' | 'closed';
 export type WebsiteInquiry = {
   id:string;submission_id:string;created_at:string;updated_at:string;
-  kind:'inquiry'|'intake';package_slug:'website-basic'|'website-ai-crm';
+  kind:'inquiry'|'intake';package_slug:'website-basic'|'website-plus'|'website-ai-crm';
   name:string;email:string;phone:string|null;business_name:string;industry:string;
   existing_website:string|null;preferred_email:string;customer_action:string;
   brand_notes:string|null;goals:string;automation_goals:string|null;
