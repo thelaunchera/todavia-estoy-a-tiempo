@@ -32,16 +32,16 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
   'You make the decisions and approve the result. With tools you authorize, AI can research, create and organize for you.'));
  write('dashboard-progress-empty-title',pick(language,'Tu proyecto, a tu ritmo.','Your project, your pace.'));
  write('dashboard-progress-empty-desc',pick(language,
-  'Puedes empezar con los prompts y la guía, aunque los videos sigan en preparación.',
-  'You can start with prompts and the guide while the videos are being prepared.'));
+  'Empieza con ChatGPT y revisa tus conexiones. Los videos aparecerán cuando estén grabados.',
+  'Start with ChatGPT and check your connections. Videos will appear when recorded.'));
  const allDone=ready.length>0&&completed===ready.length;
  let onAction;
  if(!ready.length){
   write('dashboard-next-kicker',pick(language,'TU PRIMER PASO','YOUR FIRST STEP'));
   write('dashboard-next-title',pick(language,'Aquí empieza tu primera web.','Your first website starts here.'));
   write('dashboard-next-description',pick(language,
-   '¿Qué ofreces, para quién y qué debe lograr tu web? Empieza por eso con ayuda de la IA.',
-   'What do you offer, who is it for, and what should your website do? Start there with AI.'));
+   'Primero abre ChatGPT y revisa las conexiones. Después sigue los cuatro videos.',
+   'Open ChatGPT and check your connections first. Then follow the four videos.'));
   write('dashboard-next-detail',pick(language,'Comienza por tu idea · Materiales disponibles','Start with your idea · Materials ready'));
   write('dashboard-next-action',pick(language,'Ver mis 4 videos','See my 4 videos'));
   onAction=()=>onView?.('lecciones');
@@ -74,7 +74,7 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
  list.replaceChildren();
  if(!ready.length){
   addNotice(list,pick(language,'VIDEOS','VIDEOS'),pick(language,'Los videos están en preparación','Videos are being prepared'),
-   pick(language,'Mientras tanto, los materiales, prompts y ejemplos se pueden consultar.','Meanwhile, you can review materials, prompts and examples.'));
+   pick(language,'Mientras tanto, puedes abrir ChatGPT y los enlaces de cada video.','Meanwhile, open ChatGPT and the links provided with each video.'));
  }else{
   addNotice(list,pick(language,'LECCIONES','LESSONS'),
     ready.length+' '+(ready.length===1?pick(language,'video disponible','video available'):pick(language,'videos disponibles','videos available')),
