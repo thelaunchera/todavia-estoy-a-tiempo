@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import PrivateDemoKits from './PrivateDemoKits';
 import {goldenGridPhotos, goldenGridRebuildPrompts, goldenGridDrive} from './golden-grid-kit';
 import {sovaPhotos, sovaRebuildPrompts, sovaDrive} from './sova-kit';
@@ -275,6 +275,77 @@ const finishedDemos:Demo[]=[
   promptsFor:'experience-cleaning',
  },
 ];
+
+/** Previews reuse each brand's existing hero media; no files are duplicated in Studio. */
+type HeroPreviewMedia = {video:string;poster?:string;tabletStatic?:boolean};
+const heroPreviewMedia:Record<string,HeroPreviewMedia>={
+  'seasonal-brew':{video:'https://thelaunchera.github.io/demo-booking-landing-/seasonal-brew/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/seasonal-brew/media/hero-motion-poster-hq.webp'},
+  'wok-social':{video:'https://thelaunchera.github.io/demo-booking-landing-/wok-social/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/wok-social/media/hero-motion-poster-hq.webp'},
+  'lavender-edit':{video:'https://thelaunchera.com/demos/lavender-edit/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/lavender-edit/media/hero-motion-poster-hq.webp'},
+  'havana-19':{video:'https://thelaunchera.com/demos/havana-19/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/havana-19/media/hero-motion-poster-hq.webp'},
+  'marea-wigs-miami':{video:'https://thelaunchera.com/demos/marea-wigs-miami/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/marea-wigs-miami/media/hero-motion-poster-hq.webp'},
+  'golden-grid':{video:'https://thelaunchera.com/demos/golden-grid/media/hero-approved-canva-20261108.mp4',poster:'https://thelaunchera.com/demos/golden-grid/media/hero-approved-canva-20261108-firstframe.webp',tabletStatic:true},
+  'casa-brownie':{video:'https://thelaunchera.com/demos/casa-brownie/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/casa-brownie/media/hero-motion-poster-hq.webp'},
+  'aftr':{video:'https://thelaunchera.com/demos/aftr/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/aftr/media/hero-motion-poster-hq.webp'},
+  'yummm':{video:'https://thelaunchera.github.io/demo-booking-landing-/yummm/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/yummm/media/hero-motion-poster-hq.webp'},
+  'soluna-yoga':{video:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/media/hero-motion-poster-hq.webp'},
+  'ivory-bloom':{video:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-poster-hq.webp'}
+};
+function FinishedDemoCover({demo}:{demo:Demo}){
+ const motion=heroPreviewMedia[demo.id];
+ const container=useRef<HTMLDivElement>(null);
+ const player=useRef<HTMLVideoElement>(null);
+ const [playing,setPlaying]=useState(false);
+ const [failed,setFailed]=useState(false);
+ useEffect(()=>{
+  if(!motion)return;
+  const host=container.current,video=player.current;
+  if(!host||!video)return;
+  let active=true,visible=false;
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Golden Grid remains photographic on tablets, as approved for the original hero.
+  const tablet=window.matchMedia('(min-width: 521px) and (max-width: 1399px)');
+  const saveData=Boolean((navigator as Navigator & {connection?:{saveData?:boolean}}).connection?.saveData);
+  const allowed=()=>!reduce.matches&&!saveData&&(!motion.tabletStatic||!tablet.matches);
+  const firstFrame=()=>{
+   if(!active||!visible||!allowed())return;
+   if('requestVideoFrameCallback' in video){
+    video.requestVideoFrameCallback(()=>{if(active&&visible&&allowed())setPlaying(true);});
+   }else setPlaying(true);
+  };
+  const update=()=>{
+   if(!active)return;
+   if(!visible||document.hidden||!allowed()){video.pause();setPlaying(false);return;}
+   if(!video.getAttribute('src')){video.src=motion.video;video.load();}
+   const result=video.play();
+   if(result)void result.catch(()=>{if(active)setPlaying(false);});
+  };
+  const fail=()=>{if(!active)return;setFailed(true);setPlaying(false);video.pause();video.removeAttribute('src');};
+  video.addEventListener('playing',firstFrame);
+  video.addEventListener('error',fail);
+  let observer:IntersectionObserver|undefined;
+  if('IntersectionObserver' in window){
+   observer=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting);update();},{rootMargin:'100px',threshold:0.08});
+   observer.observe(host);
+  }else{visible=true;update();}
+  document.addEventListener('visibilitychange',update);
+  reduce.addEventListener('change',update);
+  tablet.addEventListener('change',update);
+  return ()=>{active=false;observer?.disconnect();document.removeEventListener('visibilitychange',update);reduce.removeEventListener('change',update);tablet.removeEventListener('change',update);video.removeEventListener('playing',firstFrame);video.removeEventListener('error',fail);video.pause();video.removeAttribute('src');};
+ },[motion]);
+ return <div className="finished-demo-image" data-demo-id={demo.id} ref={container}>
+   <img src={motion?.poster||demo.image} loading="lazy" decoding="async" alt={'Vista de '+demo.title}
+    onError={event=>{if(event.currentTarget.src!==demo.image)event.currentTarget.src=demo.image;}}/>
+   {motion&&!failed&&<video ref={player} className={'finished-demo-cover-video'+(playing?' is-playing':'')}
+    muted loop playsInline preload="none" poster={motion.poster||demo.image} aria-hidden="true" tabIndex={-1}
+    disablePictureInPicture controls={false}/>}
+   <span className={'finished-demo-variant finished-demo-variant-'+demo.kind}>
+    {demo.kind==='static'?<Camera size={14}/>:demo.kind==='video'?<Film size={14}/>:null}
+    {demo.kind==='static'?'SIN VIDEO':demo.kind==='video'?'CON VIDEO':demo.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}
+   </span>
+ </div>;
+}
+
 export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>void;entries?:{id:string;title:string;section?:string;notes?:string}[]}){
  const [copied,setCopied]=useState('');
  const [notice,setNotice]=useState('');
@@ -305,7 +376,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
    <div className="finished-demos-grid">
    {finishedDemos.map(d=><article key={d.id} className="finished-demo-card">
-     <div className="finished-demo-image"><img src={d.image} loading="lazy" alt={'Vista de '+d.title}/><span className={'finished-demo-variant finished-demo-variant-'+d.kind}>{d.kind==='static'?<Camera size={14}/>:d.kind==='video'?<Film size={14}/>:null} {d.kind==='static'?'SIN VIDEO':d.kind==='video'?'CON VIDEO':d.kind==='live'?'PROYECTO REAL':'DEMO INTERACTIVO'}</span></div>
+     <FinishedDemoCover demo={d}/>
      <div className="finished-demo-body">
        <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
