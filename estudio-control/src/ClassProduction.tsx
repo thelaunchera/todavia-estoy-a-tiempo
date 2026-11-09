@@ -3,9 +3,10 @@ import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ClassInterlude, {type ClassInterludeKind} from './ClassInterlude';
 import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
-import {recordingStarts, RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
+import {RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
+import {coreClassLessons as classLessons,coreClassMinutes as classTotalMinutes,coreClassRecordingStarts as recordingStarts,coreClassLinks,coreClassIds} from './class-core-plan';
 import { Check, CheckCircle2, Clipboard, ExternalLink, BookOpen, Film, Headphones, Video, ShieldCheck, Save, MonitorPlay, ChevronDown, FileText, UploadCloud } from 'lucide-react';
-import { classLessons, classRecordingScript, classStatusOptions, classTotalMinutes, CLASS_DRIVE, CLASS_RECORDING_FOLDERS, CLASS_RECORDINGS_DRIVE, CLASS_AUDIO_DRIVE, CLASS_EXPORTS_DRIVE, CASA_BROWNIE_PHOTOS_DRIVE, CLASS_EXERCISE_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
+import { classRecordingScript, classStatusOptions, CLASS_DRIVE, CLASS_RECORDING_FOLDERS, CLASS_RECORDINGS_DRIVE, CLASS_AUDIO_DRIVE, CLASS_EXPORTS_DRIVE, CASA_BROWNIE_PHOTOS_DRIVE, CLASS_EXERCISE_DRIVE, CLASS_NOTION, CLASS_PLAN, CLASS_PROMPTS, CLASS_STUDENT, CLASS_SECTION } from './class-course';
 import './class-production.css';
 
 export type ClassEntry = {
@@ -31,18 +32,18 @@ function safeStatus(value?:string) {
   return classStatusOptions.includes(value as typeof classStatusOptions[number]) ? value! : 'pendiente';
 }
 function clipName(lessonId: string) { return 'CLASE01_'+lessonId+'_PANTALLA.mp4'; }
-// Record practical lessons first; the welcome video is filmed at the end.
-const tabletFilmingOrder=[...classLessons.filter(x=>x.id!=='00'),...classLessons.filter(x=>x.id==='00')];
+// Cuatro videos en el mismo orden del alumno.
+const tabletFilmingOrder=classLessons;
 type InterludeLaunch={
  chapter:string; title:string; subtitle:string; stepNumber:number;
  totalSteps:number; kind:ClassInterludeKind; advanceTo:number|null; fromLessonId:string;
 };
 
 export default function ClassProduction({entries,tasks,focusPending,onTaskToggle,launchStats,onSave,onUpload,onViewRecording}:Props) {
- const [lessonId,setLessonId]=useState(()=>(typeof window!=='undefined'&&window.matchMedia?.('(pointer: coarse) and (min-width: 650px)').matches)?'01':'00');
+ const [lessonId,setLessonId]=useState('01');
  const focusedLessonOnce = useRef<string|null>(null);
  const filePicker=useRef<HTMLInputElement>(null);
- const targetChapter=useRef<string>('00');
+ const targetChapter=useRef<string>('01');
  const [uploadingId,setUploadingId]=useState<string|null>(null);
  const [uploadProgress,setUploadProgress]=useState(0);
  const [uploadNotice,setUploadNotice]=useState('');
@@ -70,7 +71,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  // A task card in Mis tareas opens the exact existing class workspace.
  useEffect(()=>{
    if(focusPending?.kind==='weekly') setArea('plan');
-   if(focusPending?.kind==='lesson' && classLessons.some(x=>x.id===focusPending.id)){
+   if(focusPending?.kind==='lesson' && coreClassIds.some(id=>id===focusPending.id)){
      setArea('grabar');
      setLessonId(focusPending.id);
    }
@@ -91,10 +92,11 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  const records=useMemo(()=>entries.filter(x=>x.section===CLASS_SECTION),[entries]);
  const visualKit=entries.find(x=>x.section===CASA_BROWNIE_KIT_SECTION) as CasaBrownieKitEntry|undefined;
  const record=records.find(x=>x.subtitle===lesson.id);
- const done=records.filter(x=>x.status==='aprobado').length;
- const recorded=records.filter(x=>x.status==='grabado'||x.status==='editando'||x.status==='aprobado').length;
+ const activeRecords=records.filter(x=>coreClassIds.some(id=>id===x.subtitle));
+ const done=activeRecords.filter(x=>x.status==='aprobado').length;
+ const recorded=activeRecords.filter(x=>x.status==='grabado'||x.status==='editando'||x.status==='aprobado').length;
  // El reel de la clase requiere material real, no la bienvenida (00), que se graba al final.
- const classFootage=records.filter(x=>x.subtitle!=='00' && ['grabado','editando','aprobado'].includes(x.status||''));
+ const classFootage=activeRecords.filter(x=>['grabado','editando','aprobado'].includes(x.status||''));
  const hasClassFootage=classFootage.length>0;
  const originalStatus=safeStatus(record?.status);
  const originalChecked=(record?.performance_notes||'').split(',').filter(Boolean).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=0&&n<lesson.prep.length);
@@ -207,12 +209,12 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       <span className="class-overline"><Film size={15}/> TALLER · SALA PRIVADA DE PRODUCCIÓN</span>
       <h2>Tu primera web <em>con IA.</em></h2>
       <p><b>Este espacio es solo para ti.</b> Elige un capítulo, prepara lo que mostrarás, graba y guarda el video. Las instrucciones que reciben los alumnos se revisan por separado en «Ruta del alumno».</p>
-      <div className="class-intro-tags"><span>9 videos</span><span>{classTotalMinutes} min editados aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
+      <div className="class-intro-tags"><span>4 videos</span><span>{classTotalMinutes} min aprox.</span><span>Lanzamiento previsto: 3 dic 2026</span></div>
     </div>
     <div className="class-overview">
-      <strong>{done}<small> / 9</small></strong>
+      <strong>{done}<small> / {classLessons.length}</small></strong>
       <span>Videos aprobados</span>
-      <div className="class-progress-track" aria-label={done+' de 9 videos aprobados'}><div style={{width:(done/9*100)+'%'}}/></div>
+      <div className="class-progress-track" aria-label={done+' de '+classLessons.length+' videos aprobados'}><div style={{width:(done/classLessons.length*100)+'%'}}/></div>
       <small>{recorded} grabados o en edición</small>
     </div>
   </header>
@@ -236,7 +238,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       <a href="../alumnos/?vista=admin" target="_blank" rel="noopener noreferrer">Revisar Centro de alumnos <ExternalLink size={15}/></a>
       <button type="button" onClick={()=>setArea('grabar')}><Video size={15}/> Ir a mis guiones de grabación</button>
      </div>
-     <p className="class-student-route-location"><b>En el aula:</b> Materiales → Crea tu web → «Paso a paso: mi propia web». Allí están los ocho pasos, qué tocar, qué guardar, comprobaciones y prompts con espacios para adaptar a cada negocio.</p>
+     <p className="class-student-route-location"><b>En el aula:</b> ChatGPT y conectores necesarios primero. Después cuatro videos con descripción breve y enlaces. Los PDF y prompts largos quedan como recursos opcionales.</p>
     </div>
     <div className="class-student-route-list">
      {classLessons.map((chapter,index)=><details key={chapter.id} className="class-student-route-chapter" open={undefined}>
@@ -244,7 +246,10 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       <div>
        <p><b>Tu demostración:</b> {chapter.outcome}</p>
        <p><b>Actividad del estudiante:</b> {chapter.exercise}</p>
-       <p><b>Al grabar:</b> enseña dónde tocar y deja un resultado visible. Pausa para que completen el ejercicio con sus datos; no des por hecho que han conectado AppDeploy o publicado todavía.</p>
+       <p><b>Al grabar:</b> muestra la pantalla, explica en una frase y comprueba el resultado. No supongas que AppDeploy está conectado o que se publicó la web.</p>
+       <nav className="class-core-lesson-links" aria-label={'Enlaces del video '+(index+1)}>
+        {coreClassLinks[chapter.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+       </nav>
        <button type="button" onClick={()=>{choose(chapter.id);setArea('grabar');}}>Abrir guion privado del video {String(index+1).padStart(2,'0')}</button>
       </div>
      </details>)}
@@ -293,7 +298,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
    <header className="class-tablet-head">
     <span className="class-overline"><Film size={17}/> TU MESA DE GRABACIÓN · PRIVADA</span>
     <h3>Una escena a la vez.</h3>
-    <p>Empieza por el capítulo 01. Graba la bienvenida 00 al final. Nada se publica automáticamente.</p>
+    <p>Cuatro videos. Enseña el clic, di una frase y muestra el resultado. Nada se publica automáticamente.</p>
     <label htmlFor="class-tablet-lesson">¿Qué capítulo vas a grabar?
      <select id="class-tablet-lesson" value={lesson.id} onChange={e=>choose(e.target.value)}>
       {tabletFilmingOrder.map(item=><option key={item.id} value={item.id}>{item.id} · {item.title}</option>)}
@@ -303,7 +308,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
    <div className="class-tablet-scene">
     <div className="class-tablet-scene-top">
      <span>ESCENA {scene+1} DE {lesson.beats.length}</span>
-     <span>CAPÍTULO {lesson.id} · {lesson.minutes} MIN DE VIDEO EDITADO APROX.</span>
+     <span>VIDEO {classLessons.findIndex(x=>x.id===lesson.id)+1} DE 4 · {lesson.minutes} MIN APROX.</span>
     </div>
     <h4>{lesson.beats[scene].label}</h4>
     <div className="class-tablet-cue-switch" role="group" aria-label="Elegir qué mirar durante la grabación">
@@ -411,9 +416,9 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
    <section className="class-safety" aria-label="Recorrido definitivo de producción">
     <BookOpen size={19}/><div><b>Recorrido definitivo · Casa Brownie sin video</b>
     <p>Reconstruye en la práctica independiente el header, hero estático, banner, seis sabores, regalos, historia, entrega ilustrativa en Miami y footer. CRUMB queda como referencia adicional en Demos terminados. El video del hero se enseña solo en el bono.</p>
-    <p><b>Orden de grabación:</b> prueba de pantalla y voz de 60–90 segundos; lecciones 01–04; construcción 05A/05B; correcciones 06; prueba independiente Stripe + Make + Gmail 07; cierre 08; bienvenida 00 al final.</p>
-    <p><b>Antes de cada toma:</b> abre archivos y URLs reales, guarda el punto inicial y muestra un resultado al terminar. En 03 demuestra una foto y repite el método con los demás sabores; en 06 conserva dos errores auténticos con su antes/después. Registra el ensayo y su resultado en las notas de la ficha, sin marcarlo probado antes de hacerlo.</p>
-    <p><b>Cierre del alumno:</b> compartir URL, capturas y una pregunta en Proyectos del Club de Ideas; dudas técnicas en Ayuda. La revisión y la entrega del bono se comprueban antes de filmar el cierre, sin prometer plazos ni revisiones ilimitadas. Checkout y permisos siguen cerrados hasta QA.</p></div>
+    <p><b>Orden:</b> 1) ChatGPT y conectores, 2) crea con un prompt, 3) mejora con capturas, 4) publica y comprueba. Stripe, Make, Gmail y hero animado pasan a bonos opcionales.</p>
+    <p><b>Para grabar:</b> abre solo las herramientas del video, usa fotos aprobadas sin duplicarlas, guarda un antes/después real y marca probado solo lo que hayas comprobado.</p>
+    <p><b>Cierre:</b> URL real, portada móvil y CTA comprobado. Dudas en Ayuda; extras opcionales. No abrir checkout ni accesos antes del QA.</p></div>
    </section>
    <section className="class-start-here" aria-label="Punto de partida de grabación">
     <div className="class-start-here-copy"><span className="class-mini-heading">TU PUNTO DE PARTIDA · SOLO GRABACIÓN</span><h3>Casa Brownie · comienza desde cero.</h3><p>Esta es la app limpia para mostrar cada paso en pantalla. No abras el demo terminado para grabar la construcción; úsalo solo como referencia del resultado.</p></div>
@@ -440,8 +445,14 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       })}
     </aside>
     <div className="class-workspace">
+      <div className="class-core-recording-links">
+       <div><strong>Enlaces de este video</strong><small>Abre las herramientas y referencias. Comprueba los permisos de tus conectores antes de usarlos.</small></div>
+       <nav aria-label="Enlaces para grabar">
+        {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+       </nav>
+      </div>
       <div className="class-lesson-header">
-       <span className="class-mini-heading">VIDEO {Number(lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
+       <span className="class-mini-heading">VIDEO {classLessons.findIndex(x=>x.id===lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
        <h3>{lesson.title}</h3>
        <p>{lesson.outcome}</p>
        <p><strong>Ejemplo de toda la clase:</strong> {RECORDING_EXAMPLE}</p>
@@ -533,7 +544,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
          <p><b>Resultado:</b> {lesson.outcome}</p>
          <ol>{lesson.beats.map((beat,i)=><li key={i}><b>{beat.label}:</b> {beat.show}</li>)}</ol>
          <p><b>Actividad de cierre:</b> {lesson.exercise}</p>
-         <p><a href={CLASS_PLAN} target="_blank" rel="noopener noreferrer">Ver las nueve fichas completas en Notion <ExternalLink size={13}/></a></p>
+         <p><a href={CLASS_PLAN} target="_blank" rel="noopener noreferrer">Ver guía vigente de cuatro videos <ExternalLink size={13}/></a></p>
         </div>
        </details>
       </div>
@@ -565,10 +576,10 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        <div className="class-save-line"><button className="class-save-button" disabled={saving||!record} type="button" onClick={()=>void save()}><Save size={17}/>{saving?'Guardando…':changed?'Guardar progreso':'Guardar / confirmar'}</button><small role="status">{notice || (changed?'Hay cambios sin guardar':'Progreso sincronizado con el Estudio al guardar.')}</small></div>
       </div>
       <footer className="class-footer">
-       <span>Clase 01 · Archivo de producción privado · 9 videos · {classTotalMinutes} minutos objetivo</span>
+       <span>Clase 01 · Producción privada · {classLessons.length} videos · {classTotalMinutes} minutos aprox.</span>
        <div>
         <a href={CLASS_STUDENT} target="_blank" rel="noreferrer">Paquete del alumno <ExternalLink size={13}/></a>
-        {lesson.id!=='08'&&<button type="button" onClick={()=>choose(classLessons[Number(lesson.id)+1].id)}>Próximo video </button>}
+        {classLessons.findIndex(x=>x.id===lesson.id)<classLessons.length-1&&<button type="button" onClick={()=>choose(classLessons[classLessons.findIndex(x=>x.id===lesson.id)+1].id)}>Próximo video</button>}
        </div>
       </footer>
     </div>
