@@ -17,6 +17,13 @@ test('Website portfolio and Aula use independent controls',()=>{
  assert.match(controls,/isClient/);
  assert.match(gallery,/isClient=\{d.kind==='live'\}/);
 });
+test('Sneekiefs is present in the Website of Websites selector and summary',()=>{
+  assert.match(gallery,/id:'sneekiefs'/,'Sneekiefs source card must exist once');
+  assert.doesNotMatch(gallery,/d\.id!==['"]sneekiefs['"]/,'Sneekiefs must not be excluded from public visibility controls');
+  assert.match(gallery,/finishedDemos\.filter\(d=>d\.kind!=='live'\)\.map\(d=>websiteDemoId\(d\.id\)\)/,'All public demo IDs must count in the summary');
+  assert.match(gallery,/<WebsiteDemoVisibilityButton control=\{website\} id=\{d\.id\} title=\{d\.title\} isClient=\{d\.kind==='live'\}\/?>/,'Every demo card must render the existing Website toggle');
+  assert.match(api,/\.upsert\(\{demo_id:demoId,visible,updated_at:/,'The toggle must persist to the existing owner-only visibility table');
+});
 test('Public slug aliases preserve one Casa Brownie and the Ivory & Bloom route',()=>{
  assert.match(controls,/'casa-brownie-static':'casa-brownie'/);
  assert.match(controls,/'ivory-bloom':'ivory-and-bloom'/);
