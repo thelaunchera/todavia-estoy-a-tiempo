@@ -15,8 +15,8 @@ import StudentManager from './StudentManager';
 import WaitlistManager from './WaitlistManager';
 import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import ProductCenter from './ProductCenter';
-import { classLessons, CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
-import {coreClassIds} from './class-core-plan';
+import { CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
+import {coreClassLessons as classLessons} from './class-core-plan';
 import { REELS_SECTION } from './reels-plan';
 import { BRAND_REELS_SECTIONS } from './brand-reels-plan';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -771,7 +771,7 @@ function App() {
   );
   // Recording modules are already persisted as class production records in ideas;
   // do not create task copies or treat "grabado" as "aprobado".
-  const classRecordingItems = classLessons.filter(lesson=>coreClassIds.some(id=>id===lesson.id)).map(lesson => ({
+  const classRecordingItems = classLessons.map(lesson => ({
     lesson,
     record: items.ideas.find(x => x.section === CLASS_SECTION && x.subtitle === lesson.id)
   }));
@@ -1076,13 +1076,13 @@ function App() {
       {recordingActionRows.length > 0 && (
         <section className="task-calendar-feed" aria-label="Grabaciones pendientes de la clase">
           <div className="task-calendar-heading">
-            <strong>Grabación · Módulos de la clase ({recordingActionRows.length})</strong>
-            <small>Toca el módulo para abrir su ficha exacta, guion y progreso. Sin duplicar tareas.</small>
+            <strong>Grabación · Videos de la clase ({recordingActionRows.length})</strong>
+            <small>Abre el video, mira qué grabar y guarda tu progreso. Sin crear tareas nuevas.</small>
           </div>
           <div className="task-list task-destination-list">
-            {recordingActionRows.map(({lesson,record}) => (
+            {recordingActionRows.map(({lesson,record},index) => (
               <button type="button" key={lesson.id} className="task-destination" onClick={() => openClassPending('lesson',lesson.id)}>
-                <span className="task-episode-number">{lesson.id}</span>
+                <span className="task-episode-number">{String(index+1).padStart(2,'0')}</span>
                 <span className="task-destination-copy">
                   <b>{lesson.title}</b>
                   <small>Grabar clase · {record?.status || 'pendiente'} · Abrir ficha y guion</small>
@@ -1104,7 +1104,7 @@ function App() {
               <button type="button" key={x.id} className="task-destination" onClick={() => openClassPending('weekly',x.id)}>
                 <span className="task-episode-number"><BookOpen size={17}/></span>
                 <span className="task-destination-copy">
-                  <b>{x.title.replace(/^CLASE 01 · /,'')}</b>
+                  <b>{x.title.replace(/^CLASE 01 · /,'').replace(/Grabar 00–04/gi,'Grabar videos 1 y 2').replace(/Grabar 05–08/gi,'Grabar videos 3 y 4').replace(/nueve videos/gi,'cuatro videos')}</b>
                   <small>{formatDate(x.date)} · {x.status || 'pendiente'} · Abrir pendiente del plan</small>
                 </span>
                 <span className="task-destination-action">Abrir</span>
