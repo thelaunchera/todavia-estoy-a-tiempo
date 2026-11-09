@@ -36,7 +36,7 @@ const GROUPS: Category[] = [
     id: 'cobros', title: 'Cobros y entregas', icon: CreditCard,
     kicker: 'WEBSITE / PAGOS',
     description: 'Pagos confirmados y proyectos por entregar.',
-    details: 'Confirma el website terminado desde la administración protegida. La mensualidad de IA + CRM se cuenta desde la entrega, no desde el checkout.',
+    details: 'Gestiona las entregas de websites de $15 y $25, ambos con pago único. Solo los pedidos anteriores de IA + CRM conservan mensualidad según sus condiciones; se activa desde la entrega verificada.',
     primary: {label:'Ver solicitudes',page:'inquiries'},
     more: [{label:'Ingresos',page:'ventas'},{label:'Estado de automatizaciones',page:'flujos'}],
   },
