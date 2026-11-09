@@ -399,7 +399,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          Abrir biblioteca de demos
        </a>
      </div>
-     <WebsiteDemoVisibilitySummary control={website} ids={finishedDemos.filter(d=>d.kind!=='live'&&d.id!=='sneekiefs').map(d=>websiteDemoId(d.id))}/>
+     <WebsiteDemoVisibilitySummary control={website} ids={finishedDemos.filter(d=>d.kind!=='live').map(d=>websiteDemoId(d.id))}/>
       <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -410,7 +410,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
-       {d.id!=='sneekiefs'&&<WebsiteDemoVisibilityButton control={website} id={d.id} title={d.title} isClient={d.kind==='live'}/>}
+       <WebsiteDemoVisibilityButton control={website} id={d.id} title={d.title} isClient={d.kind==='live'}/>
         <ClassroomDemoPublication control={classroom} demo={{
          id:d.id,title:d.title,category:d.category,description:d.description,
          image:d.image,url:d.url,note:d.note,kind:d.kind,photos:d.photos,
