@@ -2609,3 +2609,10 @@ a:focus-visible {
   .studio .hero-actions{display:grid;grid-template-columns:1fr}
   .studio .hero-actions button{width:100%}
 }
+
+/* Private Studio footer legal navigation · responsive and touch accessible */
+.footer{flex-wrap:wrap;align-items:center;row-gap:12px;letter-spacing:.03em}
+.tle-studio-legal-nav{display:flex;flex-wrap:wrap;gap:4px 13px;justify-content:center;align-items:center}
+.tle-studio-legal-nav a{color:inherit;display:inline-flex;align-items:center;min-height:40px;text-underline-offset:3px;text-decoration:underline;font-size:11px;letter-spacing:normal}
+.tle-studio-legal-nav a:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
+@media(max-width:680px){.footer{justify-content:center;text-align:center;flex-direction:column;gap:4px;padding-bottom:max(18px,env(safe-area-inset-bottom,18px))}.tle-studio-legal-nav{gap:2px 11px}.tle-studio-legal-nav a{min-height:44px;font-size:12px}}
