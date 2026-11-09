@@ -187,12 +187,12 @@ test('FRESKA conserva un único demo, diez fotos originales y seis pasos de reco
  assert.match(demosSource,/freskaDrive/);
 });
 
-test('Sneekiefs uses the existing eight unique Drive campaign photos and four reconstructed steps in one private card',()=>{
+test('Sneekiefs reuses thirteen unique approved campaign photos and four reconstructed steps in one private card',()=>{
  const kit=read('src/sneekiefs-kit.ts');
  const photos=JSON.parse(kit.match(/sneekiefsPhotos:FinishedDemoPhoto\[\]=(\[[\s\S]*?\]);/)[1]);
  const steps=JSON.parse(kit.match(/sneekiefsRebuildPrompts:DemoRebuildPrompt\[\]=(\[[\s\S]*?\]);/)[1]);
- assert.equal(photos.length,8);
- assert.equal(new Set(photos.map(p=>p.url)).size,8);
+ assert.equal(photos.length,13);
+ assert.equal(new Set(photos.map(p=>p.url)).size,13);
  assert.equal(steps.length,4);
  assert.equal(cards.filter(c=>c.id==='sneekiefs').length,1);
  assert.ok(photos.every(p=>p.title&&p.placement&&p.prompt.includes('NO es el prompt original')&&p.url.startsWith('https://thelaunchera.com/demos/sneekiefs/assets/')));

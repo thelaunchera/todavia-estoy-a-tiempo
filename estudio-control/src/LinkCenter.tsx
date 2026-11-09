@@ -10,7 +10,7 @@ const GOLDEN_GRID_CANONICAL_URL = 'https://thelaunchera.com/demos/golden-grid/';
 const GOLDEN_GRID_RETIRED_URL = 'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/';
 
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid'] as const;
+export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','school-sneekiefs'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -36,6 +36,7 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:"school-freebies-repo",title:"Freebie Library · Código y calendario",url:"https://github.com/thelaunchera/todavia-estoy-a-tiempo/tree/main/freebies",category:"escuela" as Category,visibility:"interno" as Visibility,description:"Código fuente del catálogo y los tres freebies futuros; consulta técnica"},
   {key:'school-havana-19',title:'Havana 19 · Cuban Cuisine',url:'https://thelaunchera.com/demos/havana-19/',category:'escuela',visibility:'demo',description:'Restaurante cubano en Boston, hecho directo en GitHub con fotos individuales, historia y reserva de demostración'},
   {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://thelaunchera.com/demos/golden-grid/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
+  {key:'school-sneekiefs',title:'Sneekiefs · Sneakers Editorial',url:'https://thelaunchera.com/demos/sneekiefs/',category:'escuela',visibility:'demo',description:'Concept sneaker website bilingüe: campaña original de 13 fotos, catálogo de tres modelos, tallas US y carrito de muestra; sin pedidos ni pagos reales. Repositorio y Drive están registrados en Demos terminados.'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
