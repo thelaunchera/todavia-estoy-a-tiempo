@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska','sneekiefs'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska','sneekiefs','nail-room'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos|sneekiefsPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos|sneekiefsPhotos|nailRoomPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -204,4 +204,23 @@ test('Sneekiefs reuses thirteen unique approved campaign photos and four reconst
  assert.match(demosSource,/promptsFor:'sneekiefs'/);
  assert.match(demosSource,/sneekiefsDrive/);
  assert.ok(demosSource.includes('brand-board/?brand=sneekiefs'));
+});
+
+
+test('Nail Room preserves six approved original images, six reconstruction steps and independent publishing controls',()=>{
+ const kit=read('src/nail-room-kit.ts');
+ const photos=JSON.parse(kit.match(/nailRoomPhotos:FinishedDemoPhoto\[\]=(\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/nailRoomRebuildPrompts:DemoRebuildPrompt\[\]=(\[[\s\S]*?\]);/)[1]);
+ assert.equal(photos.length,6);
+ assert.equal(new Set(photos.map(p=>p.url)).size,6);
+ assert.equal(steps.length,6);
+ assert.equal(cards.filter(card=>card.id==='nail-room').length,1);
+ assert.match(demosSource,/photos:nailRoomPhotos/);
+ assert.match(demosSource,/'nail-room': nailRoomRebuildPrompts/);
+ assert.match(demosSource,/WebsiteDemoVisibilityButton/);
+ assert.match(demosSource,/ClassroomDemoPublication/);
+ assert.match(demosSource,/nailRoomDrive/);
+ assert.ok(photos.every(p=>p.url.includes('/nail-room/media/')&&p.prompt.includes('Prompt orientativo')));
+ assert.ok(!photos.some(p=>/burgundy|emerald/i.test(p.url)));
+ assert.ok(steps.every(p=>p.prompt&&p.say&&p.show));
 });
