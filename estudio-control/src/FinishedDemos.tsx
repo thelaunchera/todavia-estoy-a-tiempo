@@ -7,6 +7,7 @@ import {havana19Photos,havana19RebuildPrompts,havana19Drive} from './havana19-ki
 import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalPrompts} from './lavender-kit';
 import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromptDocument, wokSocialRepo, wokSocialSite} from './wok-social-kit';
 import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
+import {freskaPhotos, freskaRebuildPrompts, freskaDrive, freskaSite, freskaRepo} from './freska-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
@@ -19,7 +20,7 @@ import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoV
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -28,6 +29,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'freska',
+    title:'FRESKA · Colorful Beverage Campaign',
+    category:'Bebidas · soda y smoothies · website bilingüe',
+    description:'Campaña editorial de bebidas con azul eléctrico y rosa vibrante, hero fotográfico elegido por la propietaria, seis sabores, carrito ilustrativo, galería y selector EN/ES. Incluye diez imágenes individuales y seis pasos de reconstrucción.',
+    image:freskaPhotos[0].url,
+    url:freskaSite,
+    source:freskaRepo,
+    note:'FRESKA es un concepto ficticio, no recibe compras, correos ni pagos reales. La carpeta única en Drive conserva la imagen nueva aprobada y las fotos WebP. Los prompts del kit son instrucciones de recreación, no los prompts originales. No añadir al Aula ni al Content Lab sin autorización.',
+    kind:'other',
+    photos:freskaPhotos,
+    promptsFor:'freska',
+  },
   {
     id:'seasonal-brew',
     title:'Seasonal Brew · Coffee Flavors',
@@ -360,7 +374,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <div className="finished-demos-library-shortcut" aria-label="Enlace de la biblioteca pública de demos">
        <div className="finished-demos-library-copy">
          <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
@@ -392,6 +406,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.kind==='static'?'Abrir versión con foto':d.kind==='video'?'Abrir versión con video':d.kind==='live'?'Ver sitio del cliente':'Abrir demo'}</a>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
+       {d.id==='freska'&&<p><a href={freskaDrive} target="_blank" rel="noopener noreferrer">Abrir fotos y kit FRESKA en Drive</a></p>}
        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='havana-19'&&<p><a href={havana19Drive} target="_blank" rel="noopener noreferrer">Abrir carpeta Havana 19 en Drive</a></p>}
