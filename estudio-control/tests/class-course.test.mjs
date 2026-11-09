@@ -62,7 +62,7 @@ test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>
  assert.doesNotMatch(component,/api\.post|localStorage|sessionStorage/);
  assert.match(studio,/const generalTasks\s*=\s*tasks\.filter\(x => x\.section !== CLASS_TASK_SECTION\)/);
  assert.match(studio,/const classWeeklyTasks\s*=\s*tasks\.filter/);
- assert.match(studio,/const classRecordingItems\s*=\s*classLessons\.map/);
+ assert.match(studio,/const classRecordingItems\s*=\s*classLessons\.filter\(lesson=>coreClassIds\.some/);
  assert.match(studio,/openClassPending\('lesson',lesson\.id\)/);
  assert.match(studio,/openClassPending\('weekly',x\.id\)/);
  assert.match(studio,/focusPending=\{classPendingTarget\}/);
@@ -242,7 +242,8 @@ test('class scene transition uses private full-frame mini page between teaching 
  const interlude=readFileSync(new URL('ClassInterlude.tsx',path),'utf8');
  const css=readFileSync(new URL('class-interlude.css',path),'utf8');
  assert.match(production,/import ClassInterlude/);
- assert.match(production,/Siguiente con animación/);
+ assert.match(production,/Siguiente escena/);
+ assert.match(production,/<details className="class-tablet-interlude-setup"/);
  assert.match(production,/showInterlude\(false\)/);
  assert.match(production,/showInterlude\(true,'demo'\)/);
  assert.match(production,/advanceTo:!preview&&!isDemo&&nextBeat\?nextIndex:null/);
@@ -256,4 +257,24 @@ test('class scene transition uses private full-frame mini page between teaching 
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(css,/ci-wipe/);
  assert.doesNotMatch(css,/background:linear-gradient/);
+});
+
+test('plan activo: cuatro videos concisos, enlaces por video y preparación en iPad sin borrar legado',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const core=readFileSync(new URL('../src/class-core-plan.ts',import.meta.url),'utf8');
+ const student=readFileSync(new URL('../../alumnos/aula-video-plan.js',import.meta.url),'utf8');
+ const owner=readFileSync(new URL('../src/ClassProduction.tsx',import.meta.url),'utf8');
+ const weekly=readFileSync(new URL('../src/ClassWeeklyPlan.tsx',import.meta.url),'utf8');
+ assert.match(core,/coreClassIds=\['01','05','06','08'\]/);
+ assert.match(student,/CORE_LESSON_CODES=Object\.freeze\(\['01','05','06','08'\]\)/);
+ assert.match(core,/Google Drive/);
+ assert.match(core,/AppDeploy/);
+ assert.match(core,/classCoreRecordingStarts|coreClassRecordingStarts/);
+ assert.match(owner,/coreClassLessons as classLessons/);
+ assert.match(owner,/class-core-tablet-links/);
+ assert.match(owner,/class-core-lesson-links/);
+ assert.match(owner,/coreClassIds\.some/);
+ assert.match(weekly,/coreClassLessons as classLessons/);
+ assert.match(weekly,/approved\}\/\{classLessons\.length\}/);
+ assert.doesNotMatch(owner,/>9 videos</);
 });
