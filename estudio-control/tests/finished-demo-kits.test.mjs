@@ -189,8 +189,8 @@ test('FRESKA conserva un único demo, diez fotos originales y seis pasos de reco
 
 test('Sneekiefs uses the existing eight unique Drive campaign photos and four reconstructed steps in one private card',()=>{
  const kit=read('src/sneekiefs-kit.ts');
- const photos=JSON.parse(kit.match(/sneekiefsPhotos:FinishedDemoPhoto\\[\\]=(\\[[\\s\\S]*?\\]);/)[1]);
- const steps=JSON.parse(kit.match(/sneekiefsRebuildPrompts:DemoRebuildPrompt\\[\\]=(\\[[\\s\\S]*?\\]);/)[1]);
+ const photos=JSON.parse(kit.match(/sneekiefsPhotos:FinishedDemoPhoto\[\]=(\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/sneekiefsRebuildPrompts:DemoRebuildPrompt\[\]=(\[[\s\S]*?\]);/)[1]);
  assert.equal(photos.length,8);
  assert.equal(new Set(photos.map(p=>p.url)).size,8);
  assert.equal(steps.length,4);
@@ -203,5 +203,5 @@ test('Sneekiefs uses the existing eight unique Drive campaign photos and four re
  assert.match(demosSource,/photos:sneekiefsPhotos/);
  assert.match(demosSource,/promptsFor:'sneekiefs'/);
  assert.match(demosSource,/sneekiefsDrive/);
- assert.match(demosSource,/brand-board\\/\\?brand=sneekiefs/);
+ assert.ok(demosSource.includes('brand-board/?brand=sneekiefs'));
 });
