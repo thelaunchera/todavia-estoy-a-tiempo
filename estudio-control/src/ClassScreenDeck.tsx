@@ -15,7 +15,6 @@ function text(x:number,y:number,value:string,size:number,color:string,weight=500
 }
 function cardSvg(card:ScreenCard,lang:Lang){
  const t=card[lang],dark=card.kind==='cover'||card.kind==='outro';
- const bg=card.kind==='outro'?YELLOW:dark?INK:PAPER;
  const primary=dark?PAPER:INK;
  const secondary=dark?'#C4D6E5':MUTED;
  const number=String(classScreenCards.findIndex(c=>c.id===card.id)+1).padStart(2,'0');
@@ -51,7 +50,7 @@ function cardSvg(card:ScreenCard,lang:Lang){
    if(card.kind==='checklist'){
     art+=`<path d="M1009 ${y+44}l10 9 17-23" stroke="#1B3047" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
    }else art+=text(1023,y+52,String(j+1).padStart(2,'0'),21,INK,800,'text-anchor="middle"');
-   art+=text(1070,y+52,name.length>26?18:23,'#F7FAFF',700);
+   art+=text(1070,y+52,name,name.length>26?18:23,'#F7FAFF',700);
    if(isFlow&&detail)art+=text(1070,y+76,detail,16,'#B7D2E7',500);
   });
   art+=`</g>`;
@@ -78,7 +77,7 @@ function cardSvg(card:ScreenCard,lang:Lang){
  const lastY=y0+(title.length-1)*lineHeight;
  if(card.kind==='cover'||card.kind==='outro'||card.kind==='statement'){
    art+=`<rect x="107" y="${lastY+65}" width="106" height="9" rx="4.5" fill="${card.kind==='outro'?INK:YELLOW}"/>`;
-   art+=text(104,lastY+145,t.lead.length>62?20:25,secondary,500);
+   art+=text(104,lastY+145,t.lead,t.lead.length>62?20:25,secondary,500);
  }
  const footerText=lang==='es'?'APRENDER  /  CREAR  /  PUBLICAR':'LEARN  /  BUILD  /  PUBLISH';
  art+=text(104,851,footerText,17,primary,700,'letter-spacing="2.6"');
