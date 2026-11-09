@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {BookOpen, CalendarDays, Check, CheckCircle2, Circle, Clock3, ExternalLink, LockKeyhole, ShieldCheck, Video} from 'lucide-react';
-import {classLessons, CLASS_SECTION, CLASS_TASK_SECTION, CLASS_CHECKLIST} from './class-course';
+import {CLASS_SECTION, CLASS_TASK_SECTION, CLASS_CHECKLIST} from './class-course';
+import {coreClassLessons as classLessons} from './class-core-plan';
 import './class-weekly-plan.css';
 
 /** Utiliza las tareas ya guardadas en el Estudio, nunca crea copias al renderizar. */
@@ -20,9 +21,9 @@ type Props = {
 export const classWeeks=[
  {id:'w0',start:'2026-10-26',end:'2026-11-01',title:'Base y lista de espera',focus:'Comprobar la bienvenida antes de promocionar el registro.',phase:'PREPARACIÓN'},
  {id:'w1',start:'2026-11-02',end:'2026-11-08',title:'Ejemplo y primeros planos',focus:'Terminar el ejemplo visual y preparar las primeras grabaciones.',phase:'PRODUCCIÓN'},
- {id:'w2',start:'2026-11-09',end:'2026-11-15',title:'Primera mitad de los videos',focus:'Grabar 00–04 en sesiones cortas. Guardar avances en las fichas originales.',phase:'GRABACIÓN'},
- {id:'w3',start:'2026-11-16',end:'2026-11-22',title:'Segunda mitad de los videos',focus:'Grabar 05–08; pagos solo con un producto digital de prueba permitido.',phase:'GRABACIÓN'},
- {id:'w4',start:'2026-11-23',end:'2026-11-29',title:'Edición, materiales y pruebas',focus:'Aprobar los nueve videos, cerrar materiales y probar el aula antes de conectar ventas.',phase:'REVISIÓN'},
+ {id:'w2',start:'2026-11-09',end:'2026-11-15',title:'Primera mitad de los videos',focus:'Grabar video 1 (ChatGPT y conectores) y video 2 (construir la web). Guardar cada avance en su ficha original.',phase:'GRABACIÓN'},
+ {id:'w3',start:'2026-11-16',end:'2026-11-22',title:'Segunda mitad de los videos',focus:'Grabar video 3 (mejorar) y video 4 (publicar y comprobar). Los cobros son opcionales y quedan fuera de los cuatro videos.',phase:'GRABACIÓN'},
+ {id:'w4',start:'2026-11-23',end:'2026-11-29',title:'Edición, materiales y pruebas',focus:'Aprobar los cuatro videos, revisar enlaces y aula ES/EN antes de conectar ventas.',phase:'REVISIÓN'},
  {id:'w5',start:'2026-11-30',end:'2026-12-06',title:'Decisión de apertura',focus:'Solo comunicar y abrir compras cuando el recorrido completo tenga QA aprobado.',phase:'LANZAMIENTO'},
  {id:'w6',start:'2026-12-07',end:'2026-12-13',title:'Primer seguimiento',focus:'Revisar accesos, correos, primeras compras y dudas sin cambiar lo que ya funciona.',phase:'SEGUIMIENTO'}
 ] as const;
@@ -37,16 +38,28 @@ function shortDate(value:string){
  return new Date(value+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'});
 }
 function taskVideoProgress(title:string,lessons:ClassLessonRecord[]){
- const isEarly=title.includes('00–04');
- const isLate=title.includes('05–08');
- const isAll=title.includes('nueve videos');
+ const isEarly=/00–04|primera mitad/i.test(title);
+ const isLate=/05–08|segunda mitad/i.test(title);
+ const isAll=/nueve videos|todos los videos|cuatro videos/i.test(title);
  if(!isEarly&&!isLate&&!isAll)return '';
- const selected=classLessons.filter(l=>isAll||Number(l.id)<=(isEarly?4:8)&&Number(l.id)>=(isEarly?0:5));
+ const selected=classLessons.filter(l=>isAll||(isEarly?l.id==='01':l.id!=='01'));
  const finished=selected.filter(l=>{
-  const record=lessons.find(x=>x.section===CLASS_SECTION && x.subtitle===l.id);
+  const record=lessons.find(x=>x.section===CLASS_SECTION&&x.subtitle===l.id);
   return isAll?record?.status==='aprobado':['grabado','editando','aprobado'].includes(record?.status||'');
  }).length;
  return finished+'/'+selected.length+' videos '+(isAll?'aprobados':'grabados');
+}
+function displayClassTaskTitle(title:string){
+ return title.replace(/^CLASE 01 · /,'')
+  .replace(/Grabar 00–04/gi,'Grabar videos 1 y 2')
+  .replace(/Grabar 05–08/gi,'Grabar videos 3 y 4')
+  .replace(/nueve videos/gi,'cuatro videos')
+  .replace(/9 videos/gi,'4 videos');
+}
+function displayClassTaskSummary(summary:string){
+ return summary.replace(/00–04/g,'1 y 2').replace(/05–08/g,'3 y 4')
+  .replace(/nueve videos/gi,'cuatro videos')
+  .replace(/9 videos/gi,'4 videos');
 }
 
 export default function ClassWeeklyPlan({tasks,lessons,focusTaskId,onToggle}:Props){
@@ -99,13 +112,13 @@ export default function ClassWeeklyPlan({tasks,lessons,focusTaskId,onToggle}:Pro
    <div>
     <span className="weekly-plan-eyebrow"><CalendarDays size={15}/> TU PLAN SEMANAL · SOLO ESTUDIO</span>
     <h3>Una semana a la vez.</h3>
-    <p>Las mismas tareas que ya tienes guardadas, ahora ordenadas por fechas. Marca cada una cuando esté terminada: se sincroniza con el Estudio. Las fichas de los nueve videos siguen siendo el registro de sus grabaciones.</p>
+    <p>Las mismas tareas que ya tienes guardadas, ahora ordenadas por fechas. Marca cada una cuando esté terminada: se sincroniza con el Estudio. El curso principal utiliza cuatro fichas. Las grabaciones históricas permanecen archivadas sin duplicarlas.</p>
    </div>
    <div className="weekly-plan-totals" aria-label="Progreso del plan">
     <strong>{allDone}<span> / {unique.length}</span></strong>
     <small>tareas completadas</small>
     <div className="weekly-plan-meter"><span style={{width:unique.length?(allDone/unique.length*100)+'%':'0%'}}/></div>
-    <small>{approved}/9 videos aprobados</small>
+    <small>{approved}/{classLessons.length} videos aprobados</small>
    </div>
   </div>
   <div className="weekly-plan-weeks" aria-label="Elegir semana">
@@ -137,8 +150,8 @@ export default function ClassWeeklyPlan({tasks,lessons,focusTaskId,onToggle}:Pro
      return <article ref={t.id===focusTaskId?focusedRow:null} tabIndex={t.id===focusTaskId?-1:undefined} className={'weekly-plan-item'+(done?' is-done':'')+(t.id===focusTaskId?' is-focused':'')} key={t.id}>
       <button type="button" disabled={busy!==null} onClick={()=>void toggle(t)} className="weekly-plan-check" aria-label={(done?'Reabrir tarea: ':'Marcar completada: ')+t.title} aria-pressed={done}>{busy===t.id?<Clock3 size={18}/>:done?<Check size={18}/>:<Circle size={18}/>}</button>
       <div className="weekly-plan-item-main">
-       <div className="weekly-plan-item-row"><strong>{t.title.replace(/^CLASE 01 · /,'')}</strong><span>{t.date?shortDate(t.date):'Sin fecha'}</span></div>
-       {t.summary&&<p>{t.summary}</p>}
+       <div className="weekly-plan-item-row"><strong>{displayClassTaskTitle(t.title)}</strong><span>{t.date?shortDate(t.date):'Sin fecha'}</span></div>
+       {t.summary&&<p>{displayClassTaskSummary(t.summary)}</p>}
        {video&&<small className="weekly-plan-video"><Video size={13}/>{video} · <a href="#class-filming-workspace">Abrir fichas </a></small>}
        <small className="weekly-plan-item-state">{done?'Completado y guardado':t.status==='en curso'?'En curso':'Pendiente'}</small>
       </div>
