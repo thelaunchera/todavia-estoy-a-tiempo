@@ -225,6 +225,24 @@ return `<aside class="ob-side">
     const k=mediaKey(state.episode,state.scene,'audio',line.id),file=getAsset(k),url=getUrl(k);
     return `<div class="ob-audio-row"><span class="ob-audio-icon">♫</span><div class="ob-audio-core"><b>Audio file · ${safe(line.character)}</b>${url?'<audio controls preload="metadata" src="'+url+'"></audio>':'<small>No recorded/generated voice yet</small>'}</div><label class="ob-upload">${file?'Replace':'Add audio'}<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Remove voice file">×</button>':''}</div>`;
   }
+  function googleFlowSpeakingPrompt(line) {
+    const shot=canonicalShot(state.episode,state.scene);
+    const voice=state.voiceSettings[line.character]||{};
+    const template=voiceTemplates[line.character]||{};
+    return [
+      'OFF BRIEF | GOOGLE FLOW | SINGLE-SPEAKER TAKE',
+      'Episode: '+currentEpisode().title+' | Scene '+String(state.scene).padStart(2,'0'),
+      'In Google Flow choose Omni Flash > Video > Ingredients. Upload the approved original image for this exact scene. Under Add > Voices, select the SAVED custom voice "'+(voice.voice||'OFF BRIEF '+line.character)+'" and reference that selected @Voice.',
+      'ONLY '+line.character+' speaks during this take; all other visible characters stay silent.',
+      'Keep approved faces, hairstyles, skin tones, costumes, glasses, set, lighting and props unchanged. No character redesign.',
+      'Camera: '+(shot?.camera||'Match the original supplied image.')+'.',
+      'Action: '+(shot?.action||'Subtle natural expression.')+'. Motion: '+(shot?.motion||'Small believable gesture.')+'.',
+      'Voice character: '+(voice.instructions??template.instructions??'Natural conversational American English.').replace(/\s+/g,' ').trim(),
+      'Acting on this line: '+(line.delivery||'Conversational and character-faithful.'),
+      'Speak EXACTLY these English words: "'+line.text.trim()+'"',
+      'Animate correct mouth movement, eyes and hands. Do not invent dialogue, other speakers, captions, logos or music. Aim for a short 4–8-second take; split long lines into multiple takes without deleting words. Export 16:9 MP4 and import it into the same scene in OFF BRIEF Video Maker.'
+    ].join('\n\n');
+  }
   function dialogueBox(line){
  const config=state.voiceSettings[line.character]||(state.voiceSettings[line.character]={provider:'kokoro',voice:''});
  const engine=voiceProviders.find(p=>p.id===config.provider)||voiceProviders.find(p=>p.id==='ttsmp3ai');
@@ -235,7 +253,7 @@ return `<aside class="ob-side">
  <textarea rows="3" data-dialogue="${safe(line.id)}" placeholder="Approved dialogue for ${safe(line.character)}">${safe(line.text)}</textarea>
  <label class="ob-voice-delivery">Acting direction for this line (optional)<input type="text" data-line-delivery="${safe(line.id)}" placeholder="e.g., quietly skeptical, then surprised" value="${safe(line.delivery||'')}"/></label>
  <div class="ob-line-actions"><button class="ob-neutral" type="button" data-copy="${safe(line.id)}">Copy dialogue</button>
- <button class="ob-neutral" type="button" data-action="copy-voice-line" data-line="${safe(line.id)}">Copy voice + acting instructions</button>
+ <button class="ob-neutral" type="button" data-action="copy-voice-line" data-line="${safe(line.id)}">Copy voice + acting instructions</button><button class="ob-black-button" type="button" data-action="copy-flow-speaking" data-line="${safe(line.id)}">Copy Google Flow speaking prompt</button>
  <a href="${safe(isTTS?'https://ttsmp3.com/ai':engine.url)}" target="_blank" rel="noopener noreferrer" class="ob-black-button">Generate voice ↗</a></div>
  ${audioBox(line)}</div>`;
 }
@@ -246,7 +264,7 @@ return `<aside class="ob-side">
     return `<div class="ob-caveat"><strong>ORIGINAL STUDIO SCRIPT · 2-MINUTE CUT</strong><p>${safe(original?.beat||'Scene')} · ${safe(original?.frameId||'Frame pending')} · ${safe(original?.camera||'Original composition')}</p><small>Dialogue from the original Studio, separated into individual character voice tracks. Custom changes and local media are preserved.</small></div><div class="ob-two-cols"><section class="ob-sheet"><div class="ob-sheet-title"><div><span class="ob-eyebrow">SCENE ${String(state.scene).padStart(2,'0')} · VISUAL</span><h2>Image → moving video</h2></div><span class="ob-step">01</span></div>
       <div class="ob-media-pair">${assetBox('photo','Original reference','image/*,.heic,.heif')}${assetBox('clip','AI-generated motion','video/*,.mp4,.webm,.mov')}</div>
       <label class="ob-field-label">Master AI animation prompt · editable</label><textarea class="ob-notearea" data-field="motion" rows="9" placeholder="Describe the real movement you want: Nia reacts to Ruby, eyebrow raise, subtle hand gesture…">${safe(n.motion)}</textarea>
-      <div class="ob-inline-actions"><button class="ob-neutral" data-action="copy-prompt">Copy edited prompt</button><button class="ob-neutral" data-action="copy-master">Copy original master</button><button class="ob-black-button" data-view="video">Choose AI video engine ↗</button></div>
+      <div class="ob-inline-actions"><button class="ob-neutral" data-action="copy-prompt">Copy edited prompt</button><button class="ob-neutral" data-action="copy-master">Copy original master</button><button class="ob-neutral" data-action="copy-flow-silent">Copy silent Flow prompt</button><button class="ob-black-button" data-view="video">Choose AI video engine ↗</button></div>
       <div class="ob-duration-line"><label>Scene duration <input type="number" min="1" max="300" step="0.5" placeholder="Unverified" value="${safe(n.duration)}" data-field="duration"/></label><small>Seconds · not guessed from the old private Studio</small></div>
       <label class="ob-field-label">Director's notes</label><textarea class="ob-notearea" rows="3" data-field="notes" placeholder="Camera, acting, sound design, continuity, costume…">${safe(n.notes)}</textarea>
     </section><section class="ob-sheet"><div class="ob-sheet-title"><div><span class="ob-eyebrow">SCENE ${String(state.scene).padStart(2,'0')} · SOUND</span><h2>Voices & dialogue</h2></div><span class="ob-step">02</span></div>
@@ -263,18 +281,19 @@ return `<div class="ob-ep-summary">
  </div>
  ${e.season===2?`<div class="ob-season-title-editor"><label>Episode title (edit only if verified)</label><input type="text" data-season-title="${e.id}" value="${safe(e.title)}" maxlength="110"/></div>`:''}
  <div class="ob-drive-quick-actions"><button class="ob-neutral" type="button" data-action="drive-sync">↻ Sync episode photos from Drive</button><button class="ob-plain" type="button" data-view="drive">Connect Drive / folders</button></div>
+ <div class="ob-caveat ob-flow-start"><strong>GOOGLE FLOW · PRODUCTION WORKFLOW</strong><p>Use the approved F01–F10 images, one voice per speaking take, and return each downloaded MP4 to its matching scene. Keep the original intro for final editing after the cold open.</p><div class="ob-inline-actions"><a class="ob-black-button" href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener noreferrer">Open Google Flow ↗</a><button class="ob-neutral" type="button" data-view="voice">Set up character voices</button></div></div>
  ${sceneStrip()}${sceneEditor()}`;
 }
   function providerCard(p){
     return `<article class="ob-provider"><div><span class="ob-provider-asterisk">✳</span><small>EXTERNAL PROVIDER</small></div><h3>${safe(p.name)}</h3><strong>${safe(p.free)}</strong><p>${safe(p.description)}</p><a class="ob-black-button" href="${safe(p.url)}" target="_blank" rel="noopener noreferrer">Open generator ↗</a></article>`;
   }
-  function videoView(){return `<div class="ob-section-intro"><span class="ob-eyebrow">REAL MOVEMENT · NOT PHOTO SLIDESHOW</span><h2>Animate your approved scenes in Google Flow.</h2><p>Start with Google Flow, Omni Flash → Video → Ingredients. Upload the original scene photo, paste its prompt and use the saved one-speaker voice reference for talking shots. Import each result manually into this Studio. Other engines are optional alternatives.</p></div><div class="ob-provider-grid">${videoProviders.map(providerCard).join('')}</div><div class="ob-caveat">Hugging Face ZeroGPU's free daily GPU quota is shared across its Spaces. Google Flow and PixVerse have separate provider limits. Downloads are imported into each scene manually.</div><button class="ob-neutral ob-old-generator" data-action="old">Open the original embedded Wan generator ↗</button>`;}
+  function videoView(){return `<div class="ob-section-intro"><span class="ob-eyebrow">REAL MOVEMENT · NOT PHOTO SLIDESHOW</span><h2>Animate your approved scenes in Google Flow.</h2><p>Start with Google Flow, Omni Flash → Video → Ingredients. Upload the original scene photo, paste its prompt and use the saved one-speaker voice reference for talking shots. Import each result manually into this Studio. Other engines are optional alternatives.</p></div><div class="ob-provider-grid">${videoProviders.map(providerCard).join('')}</div><div class="ob-caveat">Google Flow has its own credit system. It does not automatically connect to this Studio; bring your approved photo into Flow and return the generated MP4 manually. Keep the original series intro for editing after the cold open.</div><button class="ob-neutral ob-old-generator" data-action="old">Open the original embedded Wan generator ↗</button>`;}
   function voiceView(){
  const members=[...castCharacters,...guestCharacters];
  for(const name of originalSpeakers) if(!members.some(p=>p.name===name)) members.push({name,role:'Original speaking role',trait:'Use original character voice and performance',avatar:0});
  return `<div class="ob-section-intro"><span class="ob-eyebrow">OFF BRIEF / VOICE DIRECTION</span><h2>Give every character a voice identity.</h2>
  <p>Create a named custom voice in Google Flow for each main character. Use Omni Flash → Add → Voices → Create New Voice; give it the name saved below, paste the acting instructions into Voice Performance, preview and save. Reuse the same voice reference in every talking shot.</p></div>
- <div class="ob-voice-explain"><b>AI Voices · 1,000 free characters/day at ttsMP3</b><span>Voice Instructions work in the <strong>AI Voices</strong> generator, not the regular Amazon Polly converter. Generated audio can be used on YouTube. External generation is manual; no secret API or credit bypass.</span><a href="https://ttsmp3.com/ai" target="_blank" rel="noopener noreferrer">Open ttsMP3 AI ↗</a></div>
+ <div class="ob-voice-explain"><b>Google Flow · Nia + Ruby</b><span>Create two saved custom voices in Flow: <strong>OFF BRIEF Nia</strong> and <strong>OFF BRIEF Ruby</strong>. A reference voice works with compatible Ingredients videos. The Studio only stores the voice name and acting brief, not Google voice assets.</span><button class="ob-black-button" type="button" data-action="select-flow-voices">Select Flow for Nia &amp; Ruby</button><a href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener noreferrer">Open Flow ↗</a></div>
  <div class="ob-cast-grid ob-voice-grid">${members.map((person,i)=>{
   const config=state.voiceSettings[person.name]||(state.voiceSettings[person.name]={provider:'kokoro',voice:''});
   const def=voiceTemplates[person.name]||{voice:'',instructions:''};
@@ -338,6 +357,30 @@ return `<section class="ob-drive-panel"><div class="ob-eyebrow">GOOGLE DRIVE / A
     if(action.dataset.copy){const line=note().dialogues.find(l=>l.id===action.dataset.copy);copy(line?.text||'');return;}
     if(action.dataset.action==='copy-prompt'){copy(note().motion);return;}
     if(action.dataset.action==='copy-master'){copy(masterAnimationPrompt(state.episode,state.scene));return;}
+    if(action.dataset.action==='copy-flow-speaking'){
+      const line=note().dialogues.find(l=>l.id===action.dataset.line);
+      if(line)copy(googleFlowSpeakingPrompt(line));return;
+    }
+    if(action.dataset.action==='copy-flow-silent'){
+      const shot=canonicalShot(state.episode,state.scene);
+      copy([
+        'OFF BRIEF | GOOGLE FLOW | SILENT IMAGE-TO-VIDEO TAKE',
+        'Choose Omni Flash > Video > Ingredients. Attach the exact existing approved F'+String(state.scene).padStart(2,'0')+' reference for this episode.',
+        'Maintain original faces, hair, costumes, props, lighting and environment exactly.',
+        'Camera: '+(shot?.camera||'match original reference'),
+        'Action: '+(shot?.action||'one believable gesture'),
+        'Motion: '+(shot?.motion||'natural blink and breathing'),
+        'No spoken words, music, subtitles or logos. Create a 4–8 second 16:9 clip and import it into this exact scene. For spoken dialogue use the speaking prompt on the character line.'
+      ].join('\n\n'));return;
+    }
+    if(action.dataset.action==='select-flow-voices'){
+      for(const who of ['Nia','Ruby']){
+        const setting=state.voiceSettings[who]||(state.voiceSettings[who]={});
+        setting.provider='flow';setting.voice='OFF BRIEF '+who;
+      }
+      await writeVoiceSettings();render();notice('Flow selected for Nia and Ruby; save both custom voices inside your Google account first.');return;
+    }
+
     if(action.dataset.action==='copy-voice-instructions'){const character=action.dataset.character;const config=state.voiceSettings[character]||{};copy(config.instructions??voiceTemplates[character]?.instructions??'');return;}
     if(action.dataset.action==='voice-recommend'){const character=action.dataset.character,rec=voiceTemplates[character];if(!rec)return;const profile=state.voiceSettings[character]||(state.voiceSettings[character]={});profile.provider=['Nia','Ruby'].includes(character)?'flow':'ttsmp3ai';profile.voice=['Nia','Ruby'].includes(character)?'OFF BRIEF '+character:rec.voice;await writeVoiceSettings();render();notice('Suggested voice selected for '+character+'. Listen to it before committing to the character.');return;}
     if(action.dataset.action==='copy-voice-line'){const line=note().dialogues.find(l=>l.id===action.dataset.line);if(!line)return;const config=state.voiceSettings[line.character]||{};const instructions=(config.instructions??voiceTemplates[line.character]?.instructions??'')+(line.delivery?.trim()?'\nFor this line only: '+line.delivery.trim(): '');copy(instructions);return;}
