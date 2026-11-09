@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -167,4 +167,22 @@ test('Seasonal Brew conserva diez originales, seis pasos, Drive y una sola ficha
  assert.ok(photos.every(p=>p.title&&p.prompt&&p.placement));
  assert.match(kit,/1vrScp7azye4DKN-v_zn-xshacHpaOe2R/);
  assert.match(demosSource,/promptsFor:'seasonal-brew'/);
+});
+
+
+test('FRESKA conserva un único demo, diez fotos originales y seis pasos de reconstrucción',()=>{
+ const kit=read('src/freska-kit.ts');
+ const photos=JSON.parse(kit.match(/freskaPhotos:FinishedDemoPhoto\[\]=(\[[\s\S]*?\]);/)[1]);
+ const steps=JSON.parse(kit.match(/freskaRebuildPrompts:DemoRebuildPrompt\[\]=(\[[\s\S]*?\]);/)[1]);
+ assert.equal(photos.length,10);
+ assert.equal(new Set(photos.map(p=>p.url)).size,10);
+ assert.equal(steps.length,6);
+ assert.equal(cards.filter(card=>card.id==='freska').length,1);
+ assert.ok(photos.every(p=>p.title&&p.placement&&p.prompt.includes('Instrucción reconstruida')&&p.url.startsWith('https://thelaunchera.com/demos/freska/media/')));
+ assert.ok(steps.every(step=>step.step&&step.title&&step.prompt&&step.say&&step.show));
+ assert.match(kit,/freska-hero-owner-approved-20261109\.jpg/);
+ assert.match(kit,/1r0TD1p12HWdhsum1EizJvrBTZ7waTQm7/);
+ assert.match(demosSource,/photos:freskaPhotos/);
+ assert.match(demosSource,/promptsFor:'freska'/);
+ assert.match(demosSource,/freskaDrive/);
 });
