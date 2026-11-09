@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska','sneekiefs'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos|sneekiefsPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');
@@ -185,4 +185,23 @@ test('FRESKA conserva un único demo, diez fotos originales y seis pasos de reco
  assert.match(demosSource,/photos:freskaPhotos/);
  assert.match(demosSource,/promptsFor:'freska'/);
  assert.match(demosSource,/freskaDrive/);
+});
+
+test('Sneekiefs uses the existing eight unique Drive campaign photos and four reconstructed steps in one private card',()=>{
+ const kit=read('src/sneekiefs-kit.ts');
+ const photos=JSON.parse(kit.match(/sneekiefsPhotos:FinishedDemoPhoto\\[\\]=(\\[[\\s\\S]*?\\]);/)[1]);
+ const steps=JSON.parse(kit.match(/sneekiefsRebuildPrompts:DemoRebuildPrompt\\[\\]=(\\[[\\s\\S]*?\\]);/)[1]);
+ assert.equal(photos.length,8);
+ assert.equal(new Set(photos.map(p=>p.url)).size,8);
+ assert.equal(steps.length,4);
+ assert.equal(cards.filter(c=>c.id==='sneekiefs').length,1);
+ assert.ok(photos.every(p=>p.title&&p.placement&&p.prompt.includes('NO es el prompt original')&&p.url.startsWith('https://thelaunchera.com/demos/sneekiefs/assets/')));
+ assert.ok(steps.every(step=>step.title&&step.step&&step.prompt&&step.say&&step.show));
+ assert.match(kit,/16UZbyKYJKMkOQXWozE2mUsXp2d4FFdOy/);
+ assert.match(kit,/#168DD2/);
+ assert.match(kit,/#D65A24/);
+ assert.match(demosSource,/photos:sneekiefsPhotos/);
+ assert.match(demosSource,/promptsFor:'sneekiefs'/);
+ assert.match(demosSource,/sneekiefsDrive/);
+ assert.match(demosSource,/brand-board\\/\\?brand=sneekiefs/);
 });
