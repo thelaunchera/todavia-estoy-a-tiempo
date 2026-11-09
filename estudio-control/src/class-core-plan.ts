@@ -5,24 +5,31 @@ import type {RecordingStart} from './recording-starts';
  * siguen intactos para no perder archivos, estados ni notas en el Studio. */
 export const coreClassIds=['01','05','06','08'] as const;
 export type CoreClassId=typeof coreClassIds[number];
-export const coreClassLinks:Record<CoreClassId,{label:string;url:string}[]>={
+/** Cada botón de Drive apunta a una carpeta real y verificada, nunca a «Mi unidad».
+ * Son carpetas PRIVADAS de producción: no se incluyen en el aula de compradores. */
+export const coreClassLinks:Record<CoreClassId,{label:string;url:string;primary?:boolean}[]>={
  '01':[
+  {label:'Drive · Casa Brownie → 00_IDEA',url:'https://drive.google.com/drive/folders/1I-xTVRF317lkgjFiOUvJbCNPK4jwjo1v',primary:true},
   {label:'Abrir ChatGPT',url:'https://chatgpt.com/'},
-  {label:'Abrir Google Drive',url:'https://drive.google.com/drive/u/0/my-drive'},
-  {label:'Revisar AppDeploy',url:'https://appdeploy.ai/pricing'}
+  {label:'AppDeploy · comprobar acceso',url:'https://appdeploy.ai/pricing'}
  ],
  '05':[
-  {label:'ChatGPT · construir',url:'https://chatgpt.com/'},
-  {label:'AppDeploy · acceso y créditos',url:'https://appdeploy.ai/pricing'},
+  {label:'Drive · Casa Brownie → 02_FOTOS',url:'https://drive.google.com/drive/folders/1V2GnRT0KArsbGXjJreP1f2lGZHhx2PpP',primary:true},
+  {label:'Hero y escenas originales',url:'https://drive.google.com/drive/folders/1qmFtPsU1_fYRhRwCZ3D6gQBmcYNM0U8V'},
+  {label:'Brownies y sabores originales',url:'https://drive.google.com/drive/folders/1rciZ-h9qiEGocZ9snfYZbbcA0wp21FJi'},
+  {label:'AppDeploy · construir',url:'https://appdeploy.ai/pricing'},
   {label:'Casa Brownie · referencia estática',url:'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video'}
  ],
  '06':[
+  {label:'Drive · Casa Brownie → 06_PRUEBAS',url:'https://drive.google.com/drive/folders/15d9z565bkRDePCygCBN5UW6FdhRJYH_k',primary:true},
   {label:'ChatGPT · corregir',url:'https://chatgpt.com/'},
-  {label:'Casa Brownie · comparar',url:'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video'}
+  {label:'Hero y escenas aprobadas',url:'https://drive.google.com/drive/folders/1qmFtPsU1_fYRhRwCZ3D6gQBmcYNM0U8V'}
  ],
  '08':[
-  {label:'ChatGPT · revisión final',url:'https://chatgpt.com/'},
-  {label:'Ver Casa Brownie sin video',url:'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video'}
+  {label:'Drive · Casa Brownie → 05_WEB',url:'https://drive.google.com/drive/folders/10J27A7P56TXQHGyN64bom7UTD4jpZF67',primary:true},
+  {label:'Drive · Casa Brownie → 06_PRUEBAS',url:'https://drive.google.com/drive/folders/15d9z565bkRDePCygCBN5UW6FdhRJYH_k'},
+  {label:'ChatGPT · revisar',url:'https://chatgpt.com/'},
+  {label:'Casa Brownie · comparar',url:'https://thelaunchera.com/demos/casa-brownie/?etapa=sin-video'}
  ]
 };
 
@@ -72,29 +79,29 @@ export const coreClassLessons:ClassLesson[]=[
 export const coreClassMinutes=coreClassLessons.reduce((total,lesson)=>total+lesson.minutes,0);
 export const coreClassRecordingStarts:Record<string,RecordingStart>={
  '01':{
-  tabs:['ChatGPT','Google Drive · carpeta Casa Brownie existente','Plugins · comprobar Drive y AppDeploy'],
-  actions:['Abre ChatGPT','Revisa permisos y disponibilidad real de Google Drive y AppDeploy','Copia el prompt corto y verifica el brief con fotos existentes'],
+  tabs:['ChatGPT','Drive · 04_CASA_BROWNIE_PRACTICA → 00_IDEA (botón directo)','Plugins · comprobar Google Drive y AppDeploy'],
+  actions:['Abre exactamente 00_IDEA en la práctica Casa Brownie (primer botón Drive)','Abre ChatGPT y comprueba las conexiones autorizadas','Copia el prompt corto y guarda el brief en la carpeta que ya existe, sin crear duplicados'],
   savedPoint:'Chat nuevo o conversación duplicable; materiales originales sin modificar.',
   finish:'Brief aprobado y conexiones disponibles comprobadas.',
   readyPrompt:ideaPrompt
  },
  '05':{
-  tabs:['ChatGPT + herramienta de construcción autorizada','Fotos existentes Casa Brownie','Demo estático solo como referencia'],
-  actions:['Abre un proyecto nuevo','Pega el prompt maestro completo','Comprueba portada, catálogo, footer y vista previa'],
+  tabs:['Drive · 04_CASA_BROWNIE_PRACTICA → 02_FOTOS','Drive · fotos originales 01 Hero y escenas + 02 Brownies y sabores','ChatGPT y AppDeploy conectados, si están disponibles'],
+  actions:['Abre 02_FOTOS de la práctica y las carpetas exactas del hero y sabores originales','Abre el proyecto independiente y pega el prompt maestro','Comprueba portada, catálogo, footer y vista previa sin modificar el demo oficial'],
   savedPoint:'Proyecto de práctica independiente, sin alterar el demo.',
   finish:'Primera versión y URL real si fue publicada.',
   readyPrompt:buildPrompt
  },
  '06':{
-  tabs:['Web de práctica','ChatGPT','Captura antes y foto aprobada'],
-  actions:['Muestra fallo real','Adjunta captura y pide un cambio específico','Verifica el antes/después en móvil'],
+  tabs:['Web de práctica','ChatGPT','Drive · 04_CASA_BROWNIE_PRACTICA → 06_PRUEBAS'],
+  actions:['Abre 06_PRUEBAS de la práctica; prepara allí la captura anterior','Adjunta una captura real a ChatGPT y pide solo un cambio','Verifica el antes/después en móvil y guarda la evidencia en 06_PRUEBAS'],
   savedPoint:'Captura anterior y enlace a la versión antes de cambiar.',
   finish:'Una corrección verificada.',
   readyPrompt:fixPrompt
  },
  '08':{
-  tabs:['URL pública real del proyecto','Vista móvil','ChatGPT · revisión de errores'],
-  actions:['Abre URL fuera del editor','Prueba navegación, fotos, CTA y footer','Guarda capturas y comparte solo si la web funciona'],
+  tabs:['Drive · 04_CASA_BROWNIE_PRACTICA → 05_WEB para el enlace','Drive · 04_CASA_BROWNIE_PRACTICA → 06_PRUEBAS para capturas','URL real y vista móvil'],
+  actions:['Abre 05_WEB de la práctica y prepara allí el enlace real, si existe','Abre URL fuera del editor y prueba navegación, fotos, CTA y footer','Guarda capturas en 06_PRUEBAS; comparte solo si la web realmente funciona'],
   savedPoint:'Enlace final y capturas antes de la prueba.',
   finish:'URL y prueba móvil documentadas; ningún pago ficticio activado.',
   readyPrompt:testPrompt
