@@ -25,6 +25,7 @@ const cats:Record<string,[string,string,string]>={
  'soluna':['wellness','Bienestar y yoga','Wellness & yoga'],
  'ivory-bloom':['food','Pastelería de bodas','Wedding cakes'],
  'la-vie-in-pink':['food','Pastelería europea y desayunos','European pâtisserie & breakfast'],
+ 'nail-room':['beauty','Uñas y belleza','Nails & beauty'],
  'cleaning':['services','Servicios de limpieza','Residential cleaning']
 };
 const english:Record<string,string>={
@@ -37,6 +38,7 @@ const english:Record<string,string>={
  'soluna':'Yoga studio concept with class sections, studio photography and example memberships.',
  'ivory-bloom':'Wedding cake atelier with original cake photos, an editorial gallery and example inquiries.',
  'la-vie-in-pink':'Bilingual European pâtisserie concept with gourmet croissants, breakfasts, pastry gifts, original imagery and a preview-only membership.',
+ 'nail-room':'Editorial nail studio demo with approved pink ombré imagery, interactive mood banner, four example treatments, full-screen photo inspiration and preview-only appointments.',
  'cleaning':'Cleaning company demo with an example booking journey and no real charges.'
 };
 function toEntry(d:PublishableDemo):ClassroomDemoEntry{
