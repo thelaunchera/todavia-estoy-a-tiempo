@@ -95,11 +95,12 @@ test('home uses approved stickers instead of random emojis while preserving dash
  const {readFileSync,existsSync}=await import('node:fs');
  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('./dashboard-inicio.css',import.meta.url),'utf8');
- const names=['17_idea_lila.png','16_objetivo_rosa.png','18_creadora_laptop_lila.png','15_checklist_rosa.png'];
+ const names=['17_idea_lila.png','16_objetivo_rosa.png','18_creadora_laptop_lila.png'];
  for(const name of names){
   assert.ok(existsSync(new URL('../content-lab/public/resources/premium-stickers-2026-11/'+name,import.meta.url)));
   assert.ok(html.includes('../content-lab/resources/premium-stickers-2026-11/'+name));
  }
+ assert.match(readFileSync(new URL('./curso.js',import.meta.url),'utf8'),/15_checklist_rosa\.png/,'Review-stage sticker remains in the reusable lesson map');
  assert.match(html,/data-aula-view="lecciones"/);
  assert.match(html,/data-aula-view="prompts"/);
  assert.match(html,/data-aula-view="materiales"/);
