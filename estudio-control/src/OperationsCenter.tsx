@@ -35,7 +35,7 @@ const GROUPS: Category[] = [
   {
     id: 'cobros', title: 'Cobros y entregas', icon: CreditCard,
     kicker: 'WEBSITE / PAGOS',
-    description: 'Pagos confirmados y proyectos por entregar.',
+    description: 'Websites nuevos, mejoras y entregas verificadas.',
     details: 'Gestiona las entregas de websites de $15 y $25, ambos con pago único. Solo los pedidos anteriores de IA + CRM conservan mensualidad según sus condiciones; se activa desde la entrega verificada.',
     primary: {label:'Ver solicitudes',page:'inquiries'},
     more: [{label:'Ingresos',page:'ventas'},{label:'Estado de automatizaciones',page:'flujos'}],
@@ -118,7 +118,7 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
       <div className="tle-ops-buyer-access-copy">
         <span>REVISIÓN DE EXPERIENCIA / COMPRADORES</span>
         <h3>El Command Center que reciben tus clientes.</h3>
-        <p>Revisa una vista de ejemplo, sin controles de edición. Cada negocio recibe un Command Center propio cuando el website está terminado y la entrega está aprobada.</p>
+        <p>Revisa una vista de ejemplo sin controles de edición. Los proyectos nuevos o renovados reciben su Command Center después de verificar el alcance, el acceso y la entrega. El agente de IA no está incluido automáticamente.</p>
       </div>
       <button type="button" aria-expanded={buyerPreviewOpen} aria-controls="tle-buyer-preview-panel" onClick={()=>{
         setBuyerPreviewOpen(v=>!v);
@@ -191,7 +191,7 @@ export default function OperationsCenter({onNavigate}:{onNavigate:(page:Operatio
         {EXTERNAL_LINKS[current.id].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" className="tle-ops-secondary">{link.label}<ExternalLink size={15}/></a>)}
       </div>
       {current.id==='correos'&&<p className="tle-ops-footnote">Make muestra activos los escenarios de bienvenida y compra. Las campañas visuales son borradores sin envío; revisa destinatarios, autorización, entregas y fallos en Resend antes de publicar.</p>}
-      {current.id==='cobros'&&<p className="tle-ops-footnote">La administración de entregas requiere autorización de propietario. No confirma ninguna compra ni activa cobros al abrirla.</p>}
+      {current.id==='cobros'&&<p className="tle-ops-footnote">La administración de entregas requiere autorización de propietario. Abrirla no confirma compras ni activa cobros. El nuevo paquete $25 es de pago único; los planes anteriores mantienen sus contratos.</p>}
     </section>}
     <footer className="tle-ops-footer"><ShieldCheck size={15}/> Administración privada de The Launch Era · Ningún enlace público concede acceso al Studio.</footer>
   </div>;

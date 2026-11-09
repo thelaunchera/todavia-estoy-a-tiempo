@@ -8,6 +8,8 @@ export type ProductInfo={
   state:PublicationState;price?:string;note:string;shareable:boolean
 };
 export const PRODUCTS_CATALOG:ProductInfo[]=[
+  {id:'website-basic-current',category:'thelaunchera',title:'Website + Command Center · $15',description:'Nuevo website o renovación puntual de una web existente, según acceso y alcance aprobado.',linkKey:'tle-website-basic-2026',sourceKey:'tle-home-code',state:'revision',price:'$15 · pago único',note:'Oferta pública EN/ES y checkout Stripe vía Make. Incluye un intake de compra verificada y opción independiente para solicitar agente IA; comprobar publicación y recorrido de compra antes de promocionarlo.',shareable:false},
+  {id:'website-plus-current',category:'thelaunchera',title:'Website + Command Center avanzado · $25',description:'Crear un website o actualizar secciones existentes con funciones avanzadas acordadas.',linkKey:'tle-website-ai-crm-2026',sourceKey:'tle-home-code',state:'revision',price:'$25 · pago único',note:'El agente IA NO está incluido y se solicita por separado sin activación ni cobro automático. El antiguo paquete IA+CRM es distinto: sus compradores conservan su contrato y mensualidad original.',shareable:false},
   {id:'booking',category:'thelaunchera',title:'Booking Automation + Command Center',description:'Organización de solicitudes y seguimiento para cleaning businesses.',linkKey:'tle-booking',sourceKey:'tle-home-code',state:'revision',note:'La presentación tiene referencia en el sitio. Confirmar checkout y precio actual antes de vender.',shareable:false},
   {id:'ai-booking',category:'thelaunchera',title:'AI Booking Assistant',description:'Asistente de IA para solicitudes y reservas.',linkKey:'tle-ai-booking',sourceKey:'tle-home-code',state:'revision',note:'Revisar precio, implementación y activación antes de compartir una oferta.',shareable:false},
   {id:'website-auto',category:'thelaunchera',title:'Website Automation',description:'Automatizaciones para capturar y atender solicitudes en websites.',linkKey:'tle-website-auto',sourceKey:'tle-home-code',state:'revision',note:'La ruta requiere validación comercial antes de enviarla.',shareable:false},
@@ -27,7 +29,7 @@ export const PRODUCTS_CATALOG:ProductInfo[]=[
   {id:'brand-board',category:'lab',title:'Brand Board Studio',description:'Editor de identidades demo: colores, fotos, tipografías y exportación.',linkKey:'lab-brand-board',sourceKey:'lab-brand-board-code',state:'interno',note:'Construido y publicado en GitHub Pages; herramienta de trabajo, no producto abierto a compradores.',shareable:false}
 ];
 const CATEGORIES:{id:Category;name:string;description:string}[]=[
-  {id:'thelaunchera',name:'The Launch Era',description:'Sistemas, servicios y herramientas para cleaning business owners'},
+  {id:'thelaunchera',name:'The Launch Era',description:'Websites, Command Center y experiencias digitales para diferentes negocios'},
   {id:'podcast',name:'Podcast',description:'Diarios, cuadernos y recursos de Todavía estoy a tiempo'},
   {id:'escuela',name:'Escuela',description:'Clase, aula y demos de aprendizaje'},
   {id:'lab',name:'Content Lab',description:'Herramientas de creación y bibliotecas'}

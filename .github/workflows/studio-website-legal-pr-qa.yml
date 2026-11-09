@@ -1,0 +1,52 @@
+name: Private Studio Website + Legal PR QA
+on:
+  pull_request:
+    paths:
+      - 'estudio-control/src/WebsiteInquiries.tsx'
+      - 'estudio-control/src/OperationsCenter.tsx'
+      - 'estudio-control/src/LinkCenter.tsx'
+      - 'estudio-control/src/ProductCenter.tsx'
+      - 'estudio-control/src/Studio.tsx'
+      - 'estudio-control/src/supabase-client.ts'
+      - 'estudio-control/src/studio.css'
+      - '.github/workflows/studio-website-legal-pr-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  studio-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify existing Studio links and products
+        working-directory: estudio-control
+        run: |
+          node --test tests/link-center.test.mjs tests/product-center.test.mjs
+      - name: Ensure no duplicated project keys or legacy billing confusion
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const read=p=>readFileSync(p,'utf8');
+          const x=read('estudio-control/src/WebsiteInquiries.tsx');
+          for(const key of ['website-basic','website-plus','website-ai-crm'])assert.ok(x.includes(key),'Missing '+key);
+          const links=read('estudio-control/src/LinkCenter.tsx');
+          assert.ok(links.includes('website-for-your-business/#website-plus'));
+          assert.ok(!links.includes('website-for-your-business/#website-ai-crm'));
+          const foot=read('estudio-control/src/Studio.tsx');
+          for(const name of ['privacy.html','terms.html','refunds.html','cookies.html','privacy-choices.html'])assert.ok(foot.includes(name));
+          const products=read('estudio-control/src/ProductCenter.tsx');
+          assert.ok(products.includes('website-plus-current')&&products.includes('website-basic-current'));
+          const types=read('estudio-control/src/supabase-client.ts');
+          assert.ok(types.includes("'website-plus'"));
+          console.log('PASS: existing Studio keys, package segregation, legal links');
+          JS
+      - name: Compile Studio without publishing or altering Content Lab
+        working-directory: estudio-control
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts
+          npm run build
