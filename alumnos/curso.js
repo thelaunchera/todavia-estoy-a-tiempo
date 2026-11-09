@@ -424,6 +424,7 @@ function updateDashboard(){
  renderAulaInicio({lessons,done,resources:courseResources,adminPreview,projectShared,
   language:getClassroomLanguage(),localizeLesson:item=>translationForLesson(item),onLesson:i=>choose(i),onView:setAulaView});
  applyClassroomLanguage();
+ localizeCoreClassroom(getClassroomLanguage());
 }
 function setProgressLabels(){
  const {total,completed}=progressStats();
@@ -676,6 +677,14 @@ function lessonsUI(){
  const nextIndex=adminPreview?0:lessons.findIndex(item=>item.status==='ready'&&validVideoId(item.youtube_video_id)&&!done.has(item.lesson_code));
  choose(nextIndex<0?(lessons.some(item=>item.status==='ready'&&validVideoId(item.youtube_video_id))?lessons.length-1:0):nextIndex);
 }
+document.querySelectorAll('[data-course-video-code]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const i=lessons.findIndex(item=>item.lesson_code===button.dataset.courseVideoCode);
+  if(i>=0)choose(i);
+  else setAulaView('lecciones');
+ });
+});
+
 async function refreshProductShelf(){
  const statusEl=$('learning-lab-status'),actionEl=$('learning-lab-action'),hint=$('learning-lab-hint');
  if(!statusEl||!actionEl||!hint||!user)return;
