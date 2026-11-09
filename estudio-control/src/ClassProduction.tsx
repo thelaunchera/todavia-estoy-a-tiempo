@@ -242,7 +242,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
     <div className="class-student-route-list">
      {classLessons.map((chapter,index)=><details key={chapter.id} className="class-student-route-chapter" open={undefined}>
-      <summary><span>{chapter.id}</span><strong>{chapter.title}</strong><small>{chapter.minutes} min</small><ChevronDown size={16}/></summary>
+      <summary><span>{String(index+1).padStart(2,'0')}</span><strong>{chapter.title}</strong><small>{chapter.minutes} min</small><ChevronDown size={16}/></summary>
       <div>
        <p><b>Tu demostración:</b> {chapter.outcome}</p>
        <p><b>Actividad del estudiante:</b> {chapter.exercise}</p>
@@ -304,7 +304,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </nav>
     <label htmlFor="class-tablet-lesson">¿Qué capítulo vas a grabar?
      <select id="class-tablet-lesson" value={lesson.id} onChange={e=>choose(e.target.value)}>
-      {tabletFilmingOrder.map(item=><option key={item.id} value={item.id}>{item.id} · {item.title}</option>)}
+      {tabletFilmingOrder.map((item,index)=><option key={item.id} value={item.id}>{String(index+1).padStart(2,'0')} · {item.title}</option>)}
      </select>
     </label>
    </header>
@@ -324,7 +324,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <div className="class-tablet-scene-nav">
      <button type="button" disabled={scene===0} onClick={()=>{setScene(n=>Math.max(0,n-1));setCopied('');}}><span aria-hidden="true">‹</span> Anterior</button>
      <strong>{scene+1} / {lesson.beats.length}</strong>
-     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente escena <span aria-hidden="true">›</span></button>
+     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(n=>Math.min(lesson.beats.length-1,n+1));setCopied('');}}>Siguiente escena <span aria-hidden="true">›</span></button>
     </div>
    </div>
    <details className="class-tablet-interlude-setup" aria-labelledby="class-transition-title">
@@ -351,7 +351,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
    </div>
    <section className="class-tablet-drive-section" aria-label="Guardar las tomas del capítulo">
-    <a className="class-tablet-folder-primary" href={CLASS_RECORDING_FOLDERS[lesson.id]} target="_blank" rel="noopener noreferrer"><Film size={18}/> Abrir carpeta de tomas · Capítulo {lesson.id}</a>
+    <a className="class-tablet-folder-primary" href={CLASS_RECORDING_FOLDERS[lesson.id]} target="_blank" rel="noopener noreferrer"><Film size={18}/> Abrir carpeta de tomas · Video {classLessons.findIndex(x=>x.id===lesson.id)+1}</a>
     <details className="class-tablet-drive-more">
      <summary>Ver las demás carpetas de trabajo</summary>
      <nav className="class-tablet-drive-links" aria-label="Carpetas privadas y materiales de grabación">
@@ -383,7 +383,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
    </details>
    <section className="class-tablet-finish" aria-label="Guardar la grabación privada">
-    <div className="class-tablet-finish-head"><div><span className="class-mini-heading">GUARDA TU TOMA</span><h4>Capítulo {lesson.id} · {lesson.title}</h4></div><span className="class-tablet-private"><ShieldCheck size={15}/> Privado</span></div>
+    <div className="class-tablet-finish-head"><div><span className="class-mini-heading">GUARDA TU TOMA</span><h4>Video {classLessons.findIndex(x=>x.id===lesson.id)+1} · {lesson.title}</h4></div><span className="class-tablet-private"><ShieldCheck size={15}/> Privado</span></div>
     {record?.recording_path&&<button className="class-tablet-view-saved" type="button" onClick={()=>void viewRecording(record.recording_path!)}><CheckCircle2 size={16}/> Ver grabación guardada · {record.recording_name||lesson.id}</button>}
     <button className="class-tablet-upload" type="button" disabled={!!uploadingId||!record} onClick={()=>startUpload(lesson.id)}><UploadCloud size={19}/>{uploadingId===lesson.id?'Subiendo '+uploadProgress+'%':record?.recording_path?'Cambiar archivo de video':'Subir video desde el iPad'}</button>
     {uploadingId===lesson.id&&<div className="class-upload-progress" aria-label={'Subida '+uploadProgress+'%'}><div style={{width:uploadProgress+'%'}}/></div>}
@@ -431,17 +431,17 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <aside className="class-module-list" aria-label="Elegir video">
       <p className="class-mini-heading">PLAN DE GRABACIÓN</p>
       <p className="class-upload-hint">Sube la grabación original de cada capítulo. Privada · MP4, MOV o WEBM · hasta 50 MB por archivo.</p>
-      {classLessons.map(item=>{
+      {classLessons.map((item,index)=>{
        const entry=records.find(x=>x.subtitle===item.id);
        const stage=safeStatus(entry?.status);
        return <div key={item.id} className="class-module-entry">
          <button type="button" className={'class-module '+(item.id===lesson.id?'selected':'')} onClick={()=>choose(item.id)} aria-current={item.id===lesson.id?'step':undefined}>
-          <span className="class-number">{item.id}</span>
+          <span className="class-number">{String(index+1).padStart(2,'0')}</span>
           <span className="class-module-main"><b>{item.title}</b><small>{item.minutes} min aprox. · {stage}{entry?.recording_path?' · archivo guardado':''}</small></span>
           {stage==='aprobado'&&<CheckCircle2 size={17}/>}
          </button>
          <button type="button" className="class-module-upload" disabled={!!uploadingId||!entry} onClick={()=>startUpload(item.id)}
-          aria-label={'Subir video del capítulo '+item.id+' · '+item.title}>
+          aria-label={'Subir video '+(index+1)+' · '+item.title}>
           <UploadCloud size={15}/>{uploadingId===item.id?'Subiendo '+uploadProgress+'%':entry?.recording_path?'Cambiar video':'Subir video'}
          </button>
        </div>;
@@ -526,7 +526,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        <div className="class-scene-nav">
         <button type="button" disabled={scene===0} onClick={()=>{setScene(scene-1);setCopied('');}}> Anterior</button>
         <span>{scene+1} / {lesson.beats.length}</span>
-        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente con transición </button>
+        <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>{setScene(n=>Math.min(lesson.beats.length-1,n+1));setCopied('');}}>Siguiente escena</button>
        </div>
       </div> : <div className="class-overview-beats">{lesson.beats.map((beat,i)=><article key={i}><h5>{i+1}. {beat.label}</h5><b>Qué decir</b><p>{beat.say}</p><b>Qué enseñar</b><p>{beat.show}</p></article>)}</div>}
       <div className="class-copy-row class-prompt-actions">
@@ -540,7 +540,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       </div>
       </details>
       <div className="class-production-state">
-       <div className="class-section-heading"><h4>Notas oficiales actualizadas · Capítulo {lesson.id}</h4><button type="button" onClick={()=>void copy(chapterNotes,'chapter-notes')}><Clipboard size={14}/>{copied==='chapter-notes'?'Notas copiadas':'Copiar notas'}</button></div>
+       <div className="class-section-heading"><h4>Notas del video {classLessons.findIndex(x=>x.id===lesson.id)+1}</h4><button type="button" onClick={()=>void copy(chapterNotes,'chapter-notes')}><Clipboard size={14}/>{copied==='chapter-notes'?'Notas copiadas':'Copiar notas'}</button></div>
        <p>Estas notas siguen el guion vigente y cambian con cada capítulo. Tus anotaciones personales se guardan aparte y no se sobrescriben.</p>
        <details className="class-extra class-start-details"><summary>Ver orden de escenas y pruebas del capítulo</summary>
         <div className="recording-start-card">
@@ -552,7 +552,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        </details>
       </div>
       <div className="class-upload-status" role="region" aria-label="Grabación privada del capítulo">
-        <div className="class-section-heading"><h4>Grabación del capítulo {lesson.id}</h4><span>Solo tú puedes verla</span></div>
+        <div className="class-section-heading"><h4>Grabación del video {classLessons.findIndex(x=>x.id===lesson.id)+1}</h4><span>Solo tú puedes verla</span></div>
         {record?.recording_path?
           <div className="class-upload-saved"><CheckCircle2 size={18}/><span>Archivo privado: <strong>{record.recording_name||'Grabación guardada'}</strong></span><button type="button" onClick={()=>void viewRecording(record.recording_path!)}>Revisar video</button></div>
           : <p>No has subido un video para este capítulo. Puedes grabarlo primero y añadirlo cuando esté listo.</p>}
