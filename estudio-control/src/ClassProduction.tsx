@@ -299,6 +299,9 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <span className="class-overline"><Film size={17}/> TU MESA DE GRABACIÓN · PRIVADA</span>
     <h3>Una escena a la vez.</h3>
     <p>Cuatro videos. Enseña el clic, di una frase y muestra el resultado. Nada se publica automáticamente.</p>
+    <nav className="class-core-tablet-links" aria-label="Enlaces de este video">
+     {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+    </nav>
     <label htmlFor="class-tablet-lesson">¿Qué capítulo vas a grabar?
      <select id="class-tablet-lesson" value={lesson.id} onChange={e=>choose(e.target.value)}>
       {tabletFilmingOrder.map(item=><option key={item.id} value={item.id}>{item.id} · {item.title}</option>)}
@@ -321,15 +324,15 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <div className="class-tablet-scene-nav">
      <button type="button" disabled={scene===0} onClick={()=>{setScene(n=>Math.max(0,n-1));setCopied('');}}><span aria-hidden="true">‹</span> Anterior</button>
      <strong>{scene+1} / {lesson.beats.length}</strong>
-     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente con animación <span aria-hidden="true">›</span></button>
+     <button type="button" disabled={scene===lesson.beats.length-1} onClick={()=>showInterlude(false)}>Siguiente escena <span aria-hidden="true">›</span></button>
     </div>
    </div>
-   <section className="class-tablet-interlude-setup" aria-labelledby="class-transition-title">
-    <div className="class-tablet-interlude-heading">
+   <details className="class-tablet-interlude-setup" aria-labelledby="class-transition-title">
+    <summary className="class-tablet-interlude-heading">
      <span className="class-mini-heading">MINI PÁGINAS ANIMADAS</span>
      <h4 id="class-transition-title">Una pausa bonita entre escenas.</h4>
-     <p>El título cambia automáticamente según lo que viene después. La tarjeta se muestra durante unos cuatro segundos y luego abre la escena siguiente.</p>
-    </div>
+     <p>Opcional: separadores bonitos entre escenas.</p>
+    </summary>
     <div className="class-tablet-interlude-options">
      <label>Rótulo de la transición
       <select aria-label="Rótulo de la transición" value={interludeKind} onChange={e=>setInterludeKind(e.target.value as ClassInterludeKind)}>
@@ -341,10 +344,10 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
      <button type="button" onClick={()=>showInterlude(true)}><MonitorPlay size={18}/> Ver transición de la siguiente escena</button>
      <button type="button" onClick={()=>showInterlude(true,'demo')}><Film size={17}/> Probar ejemplo DEMO</button>
     </div>
-    <p className="class-tablet-interlude-tip"><ShieldCheck size={15}/> Es una mini página real del Studio para grabar en pantalla desde el iPad. No modifica la web de Casa Brownie ni genera un video automáticamente.</p>
-   </section>
+    <p className="class-tablet-interlude-tip"><ShieldCheck size={15}/> Opcional. No modifica la web ni genera un video automáticamente.</p>
+   </details>
    <div className="class-tablet-actions">
-    <a href={OFFICIAL_DEMO_URL} target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Abrir demo oficial Casa Brownie</a>
+    <a href={OFFICIAL_DEMO_URL+'?etapa=sin-video'} target="_blank" rel="noopener noreferrer"><MonitorPlay size={18}/> Ver referencia con foto fija</a>
     <button type="button" onClick={()=>void copy(recordingStart.readyPrompt,'tablet-ready')}><Clipboard size={18}/>{copied==='tablet-ready'?'Prompt copiado':'Copiar prompt listo'}</button>
    </div>
    <section className="class-tablet-drive-section" aria-label="Guardar las tomas del capítulo">
