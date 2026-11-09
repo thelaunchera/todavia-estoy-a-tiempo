@@ -23,6 +23,8 @@ import {castCharacters,guestCharacters,seasonTwoTitles} from './season-two-cast.
     {id:'pixverse',name:'PixVerse',free:'30 créditos diarios para cuentas sin membresía',url:'https://app.pixverse.ai/',description:'Cuota independiente; el costo de cada clip varía por modelo y resolución.'}
   ];
   const voiceProviders = [
+    // OFF BRIEF FLOW CUSTOM VOICES
+    {id:'flow',name:'Google Flow · Omni Flash',free:'Custom voice references · Flow credits apply',url:'https://labs.google/fx/tools/flow',description:'Create and save the character voice in Flow, and select it as a voice Ingredient for one-speaker video takes. Export MP4 back to the Studio manually.'},
     {id:'ttsmp3ai',name:'ttsMP3 AI Voices',free:'1,000 caracteres / día',url:'https://ttsmp3.com/ai',description:'Supports Voice Instructions for consistent character delivery. MP3 files can be used commercially; manual access only.'},
     {id:'ttsmp3',name:'ttsMP3',free:'3,000 caracteres / día (voces normales)',url:'https://ttsmp3.com/',description:'MP3 para YouTube monetizado; el modo de voz IA tiene una cuota menor.'},
     {id:'ttsmaker',name:'TTSMaker',free:'Plan gratuito con límite semanal',url:'https://ttsmaker.com/',description:'Genera y descarga voz; revisa las condiciones de la voz elegida.'},
@@ -33,7 +35,7 @@ import {castCharacters,guestCharacters,seasonTwoTitles} from './season-two-cast.
   const state = {
     view:'episodes',episode:1,scene:1,
     records:{},assets:{},urls:{},notice:'',
-    voiceSettings:{Nia:{provider:'kokoro',voice:''},Ruby:{provider:'kokoro',voice:''},Narrator:{provider:'ttsmp3',voice:''}}
+    voiceSettings:{Nia:{provider:'flow',voice:'OFF BRIEF Nia'},Ruby:{provider:'flow',voice:'OFF BRIEF Ruby'},Narrator:{provider:'ttsmp3',voice:''}}
   };
   const base = document.getElementById('app');
   if(!base) return;
@@ -266,12 +268,12 @@ return `<div class="ob-ep-summary">
   function providerCard(p){
     return `<article class="ob-provider"><div><span class="ob-provider-asterisk">✳</span><small>EXTERNAL PROVIDER</small></div><h3>${safe(p.name)}</h3><strong>${safe(p.free)}</strong><p>${safe(p.description)}</p><a class="ob-black-button" href="${safe(p.url)}" target="_blank" rel="noopener noreferrer">Open generator ↗</a></article>`;
   }
-  function videoView(){return `<div class="ob-section-intro"><span class="ob-eyebrow">REAL MOVEMENT · NOT PHOTO SLIDESHOW</span><h2>Choose a free AI engine.</h2><p>The engines create new motion from your original photo. When one service exhausts its credits, use a different provider. The app does not bypass limits or create duplicate accounts.</p></div><div class="ob-provider-grid">${videoProviders.map(providerCard).join('')}</div><div class="ob-caveat">Hugging Face ZeroGPU's free daily GPU quota is shared across its Spaces. Google Flow and PixVerse have separate provider limits. Downloads are imported into each scene manually.</div><button class="ob-neutral ob-old-generator" data-action="old">Open the original embedded Wan generator ↗</button>`;}
+  function videoView(){return `<div class="ob-section-intro"><span class="ob-eyebrow">REAL MOVEMENT · NOT PHOTO SLIDESHOW</span><h2>Animate your approved scenes in Google Flow.</h2><p>Start with Google Flow, Omni Flash → Video → Ingredients. Upload the original scene photo, paste its prompt and use the saved one-speaker voice reference for talking shots. Import each result manually into this Studio. Other engines are optional alternatives.</p></div><div class="ob-provider-grid">${videoProviders.map(providerCard).join('')}</div><div class="ob-caveat">Hugging Face ZeroGPU's free daily GPU quota is shared across its Spaces. Google Flow and PixVerse have separate provider limits. Downloads are imported into each scene manually.</div><button class="ob-neutral ob-old-generator" data-action="old">Open the original embedded Wan generator ↗</button>`;}
   function voiceView(){
  const members=[...castCharacters,...guestCharacters];
  for(const name of originalSpeakers) if(!members.some(p=>p.name===name)) members.push({name,role:'Original speaking role',trait:'Use original character voice and performance',avatar:0});
  return `<div class="ob-section-intro"><span class="ob-eyebrow">OFF BRIEF / VOICE DIRECTION</span><h2>Give every character a voice identity.</h2>
- <p>Each original character has an editable acting brief, a recommended AI voice, and a permanent voice setting. Copy the instructions to ttsMP3 AI <strong>Add Instructions</strong>, paste one dialogue line at a time, and import the resulting MP3 underneath its scene.</p></div>
+ <p>Create a named custom voice in Google Flow for each main character. Use Omni Flash → Add → Voices → Create New Voice; give it the name saved below, paste the acting instructions into Voice Performance, preview and save. Reuse the same voice reference in every talking shot.</p></div>
  <div class="ob-voice-explain"><b>AI Voices · 1,000 free characters/day at ttsMP3</b><span>Voice Instructions work in the <strong>AI Voices</strong> generator, not the regular Amazon Polly converter. Generated audio can be used on YouTube. External generation is manual; no secret API or credit bypass.</span><a href="https://ttsmp3.com/ai" target="_blank" rel="noopener noreferrer">Open ttsMP3 AI ↗</a></div>
  <div class="ob-cast-grid ob-voice-grid">${members.map((person,i)=>{
   const config=state.voiceSettings[person.name]||(state.voiceSettings[person.name]={provider:'kokoro',voice:''});
@@ -284,10 +286,10 @@ return `<div class="ob-ep-summary">
    <label class="ob-voice-instructions-label">Voice Instructions · identity / affect / tone / emotion / pronunciation<textarea data-voice-instructions="${safe(person.name)}" rows="8" spellcheck="false">${safe(config.instructions??def.instructions)}</textarea></label>
    <div class="ob-voice-buttons"><button type="button" class="ob-neutral" data-action="voice-recommend" data-character="${safe(person.name)}">Use suggested AI voice</button>
    <button type="button" class="ob-black-button" data-action="copy-voice-instructions" data-character="${safe(person.name)}">Copy Voice Instructions</button>
-   <a href="https://ttsmp3.com/ai" target="_blank" rel="noopener noreferrer" class="ob-neutral">Generate MP3 ↗</a></div>
+   <a href="${safe((voiceProviders.find(p=>p.id===config.provider)||voiceProviders[0]).url)}" target="_blank" rel="noopener noreferrer" class="ob-neutral">Open voice tool ↗</a></div>
    </div></article>`;
  }).join('')}</div>
- <div class="ob-module-heading"><b>Other free voice generators</b><span>Provider quotas and available voices can change</span></div><div class="ob-provider-grid">${voiceProviders.map(providerCard).join('')}</div>`;
+ <div class="ob-module-heading"><b>Voice providers · Google Flow first</b><span>Provider quotas and available voices can change</span></div><div class="ob-provider-grid">${voiceProviders.map(providerCard).join('')}</div>`;
 }
 
   function libraryView(){
@@ -337,7 +339,7 @@ return `<section class="ob-drive-panel"><div class="ob-eyebrow">GOOGLE DRIVE / A
     if(action.dataset.action==='copy-prompt'){copy(note().motion);return;}
     if(action.dataset.action==='copy-master'){copy(masterAnimationPrompt(state.episode,state.scene));return;}
     if(action.dataset.action==='copy-voice-instructions'){const character=action.dataset.character;const config=state.voiceSettings[character]||{};copy(config.instructions??voiceTemplates[character]?.instructions??'');return;}
-    if(action.dataset.action==='voice-recommend'){const character=action.dataset.character,rec=voiceTemplates[character];if(!rec)return;const profile=state.voiceSettings[character]||(state.voiceSettings[character]={});profile.provider='ttsmp3ai';profile.voice=rec.voice;await writeVoiceSettings();render();notice('Suggested voice selected for '+character+'. Listen to it before committing to the character.');return;}
+    if(action.dataset.action==='voice-recommend'){const character=action.dataset.character,rec=voiceTemplates[character];if(!rec)return;const profile=state.voiceSettings[character]||(state.voiceSettings[character]={});profile.provider=['Nia','Ruby'].includes(character)?'flow':'ttsmp3ai';profile.voice=['Nia','Ruby'].includes(character)?'OFF BRIEF '+character:rec.voice;await writeVoiceSettings();render();notice('Suggested voice selected for '+character+'. Listen to it before committing to the character.');return;}
     if(action.dataset.action==='copy-voice-line'){const line=note().dialogues.find(l=>l.id===action.dataset.line);if(!line)return;const config=state.voiceSettings[line.character]||{};const instructions=(config.instructions??voiceTemplates[line.character]?.instructions??'')+(line.delivery?.trim()?'\nFor this line only: '+line.delivery.trim(): '');copy(instructions);return;}
     if(action.dataset.action==='add-line'){
       const n=note();n.dialogues.push({id:'line-'+Date.now().toString(36),character:'Narrator',text:''});scheduleSave();render();return;
