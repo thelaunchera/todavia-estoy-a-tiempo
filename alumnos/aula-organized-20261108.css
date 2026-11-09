@@ -148,3 +148,5 @@ body.aula-member :is(button,a,summary):focus-visible{outline:3px solid #7EAEC9;o
  .aula-fast-foot{font-size:11px}
  .lesson-links a{flex:1 1 100%}
 }
+
+.lesson-module-prompts[hidden]{display:none!important}
