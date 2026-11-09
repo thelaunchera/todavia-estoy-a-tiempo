@@ -112,7 +112,9 @@ import {castCharacters,guestCharacters,seasonTwoTitles} from './season-two-cast.
   function completed(episode,scene) {
     const n=note(episode,scene);
     const texts=n.dialogues.filter(l=>l.text.trim());
-    return Boolean(getAsset(mediaKey(episode,scene,'clip'))&&texts.length&&texts.every(l=>getAsset(mediaKey(episode,scene,'audio',l.id))));
+    const clipReady=Boolean(getAsset(mediaKey(episode,scene,'clip')));
+    const dialogueReady=texts.length===0||n.flowAudioVerified===true||texts.every(line=>Boolean(getAsset(mediaKey(episode,scene,'audio',line.id))));
+    return clipReady&&dialogueReady;
   }
   function minutes(episode){const list=Array.from({length:10},(_,i)=>note(episode,i+1).duration).filter(v=>v!==''&&Number(v)>0);return list.length?list.reduce((a,b)=>a+Number(b),0)+'s defined · '+(10-list.length)+' pending':'Durations not yet verified';}
   function notice(message){state.notice=message;const n=document.getElementById('ob-notice');if(n)n.textContent=message;}
@@ -144,11 +146,25 @@ import {castCharacters,guestCharacters,seasonTwoTitles} from './season-two-cast.
       await transact('put',{id:'media:'+key,type:'media',blob:file,name:file.name});
       if(state.urls[key]){URL.revokeObjectURL(state.urls[key]);delete state.urls[key];}
       state.assets[key]={blob:file,name:file.name};
+      if(key.split(':')[2]==='clip'){
+        const [ep,sc]=key.split(':').map(Number);
+        const record=note(ep,sc);record.flowAudioVerified=false;
+        await transact('put',{id:'note:'+sceneKey(ep,sc),type:'note',value:JSON.parse(JSON.stringify(record))});
+      }
     }catch(error){notice('Could not store '+file.name+'. Safari storage might be full.');}
   }
   async function deleteAsset(key){
     const data=getAsset(key);if(!data||!window.confirm('Remove '+data.name+' from the local scene?'))return;
-    try{await transact('delete','media:'+key);delete state.assets[key];if(state.urls[key]){URL.revokeObjectURL(state.urls[key]);delete state.urls[key];}render();}
+    try{
+      await transact('delete','media:'+key);delete state.assets[key];
+      if(state.urls[key]){URL.revokeObjectURL(state.urls[key]);delete state.urls[key];}
+      if(key.split(':')[2]==='clip'){
+        const [ep,sc]=key.split(':').map(Number);
+        const record=note(ep,sc);record.flowAudioVerified=false;
+        await transact('put',{id:'note:'+sceneKey(ep,sc),type:'note',value:JSON.parse(JSON.stringify(record))});
+      }
+      render();
+    }
     catch(error){notice('Unable to remove the file.');}
   }
   function photoNumber(filename){
@@ -223,7 +239,7 @@ return `<aside class="ob-side">
   }
   function audioBox(line){
     const k=mediaKey(state.episode,state.scene,'audio',line.id),file=getAsset(k),url=getUrl(k);
-    return `<div class="ob-audio-row"><span class="ob-audio-icon">♫</span><div class="ob-audio-core"><b>Audio file · ${safe(line.character)}</b>${url?'<audio controls preload="metadata" src="'+url+'"></audio>':'<small>No recorded/generated voice yet</small>'}</div><label class="ob-upload">${file?'Replace':'Add audio'}<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Remove voice file">×</button>':''}</div>`;
+    return `<div class="ob-audio-row"><span class="ob-audio-icon">♫</span><div class="ob-audio-core"><b>Audio file · ${safe(line.character)}</b>${url?'<audio controls preload="metadata" src="'+url+'"></audio>':'<small>No separate audio track; Flow MP4 may include dialogue</small>'}</div><label class="ob-upload">${file?'Replace':'Add audio'}<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Remove voice file">×</button>':''}</div>`;
   }
   function googleFlowSpeakingPrompt(line) {
     const shot=canonicalShot(state.episode,state.scene);
@@ -269,7 +285,9 @@ return `<aside class="ob-side">
       <label class="ob-field-label">Director's notes</label><textarea class="ob-notearea" rows="3" data-field="notes" placeholder="Camera, acting, sound design, continuity, costume…">${safe(n.notes)}</textarea>
     </section><section class="ob-sheet"><div class="ob-sheet-title"><div><span class="ob-eyebrow">SCENE ${String(state.scene).padStart(2,'0')} · SOUND</span><h2>Voices & dialogue</h2></div><span class="ob-step">02</span></div>
     <p class="ob-muted">Each scene has its own character dialogue and audio underneath. Use a consistent AI voice for every character.</p>
-    <div class="ob-lines">${n.dialogues.length?n.dialogues.map(dialogueBox).join(''):'<p class="ob-muted">Silent cinematic reaction in the original cut; no invented character dialogue.</p>'}</div><button class="ob-add-line" data-action="add-line">＋ Add dialogue turn</button></section></div>`;
+    <div class="ob-lines">${n.dialogues.length?n.dialogues.map(dialogueBox).join(''):'<p class="ob-muted">Silent cinematic reaction in the original cut; no invented character dialogue.</p>'}</div><button class="ob-add-line" data-action="add-line">＋ Add dialogue turn</button>
+    <label class="ob-flow-audio-qa" style="display:flex;gap:10px;align-items:start;margin-top:14px;font-size:12px;line-height:1.5"><input type="checkbox" data-flow-audio-confirm ${n.flowAudioVerified?'checked':''} style="flex-shrink:0;margin-top:3px"/><span>I verified every spoken English line in this Flow MP4, the correct voice and lip-sync. A separate MP3 is not required.</span></label>
+    <p class="ob-muted">This is a manual quality check, not automatic speech verification. Replacing or removing the MP4 resets approval.</p></section></div>`;
   }
   function episodeView(){
 const e=currentEpisode();
@@ -400,6 +418,11 @@ return `<section class="ob-drive-panel"><div class="ob-eyebrow">GOOGLE DRIVE / A
   });
   workspace.addEventListener('change',async(event)=>{
     const target=event.target;
+    if(target.hasAttribute('data-flow-audio-confirm')){
+      const record=note();record.flowAudioVerified=Boolean(target.checked);
+      scheduleSave();notice(record.flowAudioVerified?'Flow dialogue verified for this scene.':'Flow dialogue approval cleared.');
+      return;
+    }
     if(target.dataset.chooseSpeaker){const line=note().dialogues.find(x=>x.id===target.dataset.chooseSpeaker);if(line){line.character=target.value;scheduleSave();render();}return;}
     if(target.dataset.media){await saveAsset(target.dataset.media,target.files?.[0]);render();return;}
     if(target.hasAttribute('data-batch')){await batchImport(target.files);render();return;}
