@@ -43,8 +43,8 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
    '¿Qué ofreces, para quién y qué debe lograr tu web? Empieza por eso con ayuda de la IA.',
    'What do you offer, who is it for, and what should your website do? Start there with AI.'));
   write('dashboard-next-detail',pick(language,'Comienza por tu idea · Materiales disponibles','Start with your idea · Materials ready'));
-  write('dashboard-next-action',pick(language,'Abrir mis prompts','Open my prompts'));
-  onAction=()=>onView?.('prompts');
+  write('dashboard-next-action',pick(language,'Ver mis 4 videos','See my 4 videos'));
+  onAction=()=>onView?.('lecciones');
  }else if(pending){
   const index=ready.indexOf(pending),originalIndex=lessons.indexOf(pending);
   const translated=localizeLesson?.(pending)||pending;
@@ -68,7 +68,7 @@ export function renderAulaInicio({lessons=[],done=new Set(),resources=[],adminPr
  }
  next.onclick=onAction;
  if(hero){
-  hero.textContent=ready.length?pick(language,'Continuar mi clase','Continue my course'):pick(language,'Empezar con mis prompts','Start with my prompts');
+  hero.textContent=ready.length?pick(language,'Continuar mi clase','Continue my course'):pick(language,'Ver mis 4 videos','See my 4 videos');
   hero.onclick=onAction;
  }
  list.replaceChildren();
