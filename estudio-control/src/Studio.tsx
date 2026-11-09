@@ -2166,9 +2166,15 @@ function App() {
               </button>
             </>
           )}
-          <footer className="footer">
+          <footer className="footer" aria-label="Políticas y datos del Studio privado">
             <span>TODAVÍA ESTOY A TIEMPO · ESTUDIO 01</span>
-            <span>HECHO CON CALMA / 2026</span>
+            <nav className="tle-studio-legal-nav" aria-label="Políticas de The Launch Era">
+              <a href="https://thelaunchera.com/es/privacy.html" target="_blank" rel="noopener noreferrer">Privacidad</a>
+              <a href="https://thelaunchera.com/es/terms.html" target="_blank" rel="noopener noreferrer">Términos</a>
+              <a href="https://thelaunchera.com/es/refunds.html" target="_blank" rel="noopener noreferrer">Reembolsos</a>
+              <a href="https://thelaunchera.com/es/cookies.html" target="_blank" rel="noopener noreferrer">Cookies</a>
+              <a href="https://thelaunchera.com/es/privacy-choices.html" target="_blank" rel="noopener noreferrer">Tus datos</a>
+            </nav>
             <a href="https://thelaunchera.com/" target="_blank" rel="noopener noreferrer" style={{color:'inherit',textDecoration:'underline',textUnderlineOffset:3}}>Powered by The Launch Era</a>
           </footer>
         </main>
