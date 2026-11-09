@@ -16,6 +16,7 @@ import WaitlistManager from './WaitlistManager';
 import LinkCenter, { LINK_CENTER_SECTION } from './LinkCenter';
 import ProductCenter from './ProductCenter';
 import { classLessons, CLASS_SECTION, CLASS_TASK_SECTION } from './class-course';
+import {coreClassIds} from './class-core-plan';
 import { REELS_SECTION } from './reels-plan';
 import { BRAND_REELS_SECTIONS } from './brand-reels-plan';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -770,7 +771,7 @@ function App() {
   );
   // Recording modules are already persisted as class production records in ideas;
   // do not create task copies or treat "grabado" as "aprobado".
-  const classRecordingItems = classLessons.map(lesson => ({
+  const classRecordingItems = classLessons.filter(lesson=>coreClassIds.some(id=>id===lesson.id)).map(lesson => ({
     lesson,
     record: items.ideas.find(x => x.section === CLASS_SECTION && x.subtitle === lesson.id)
   }));
