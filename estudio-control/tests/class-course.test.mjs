@@ -62,7 +62,8 @@ test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>
  assert.doesNotMatch(component,/api\.post|localStorage|sessionStorage/);
  assert.match(studio,/const generalTasks\s*=\s*tasks\.filter\(x => x\.section !== CLASS_TASK_SECTION\)/);
  assert.match(studio,/const classWeeklyTasks\s*=\s*tasks\.filter/);
- assert.match(studio,/const classRecordingItems\s*=\s*classLessons\.filter\(lesson=>coreClassIds\.some/);
+ assert.match(studio,/import \{coreClassLessons as classLessons\} from '\.\/class-core-plan'/);
+ assert.match(studio,/const classRecordingItems\s*=\s*classLessons\.map/);
  assert.match(studio,/openClassPending\('lesson',lesson\.id\)/);
  assert.match(studio,/openClassPending\('weekly',x\.id\)/);
  assert.match(studio,/focusPending=\{classPendingTarget\}/);
