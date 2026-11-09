@@ -368,3 +368,17 @@
 /* Los destinos de Drive son carpetas concretas, no la raíz de Mi unidad. */
 .class-core-recording-links a.class-core-link-primary,.class-core-tablet-links a.class-core-link-primary,.class-core-lesson-links a.class-core-link-primary{background:#F2D85B;color:#191919;border-color:#D8BA3C;font-weight:800}
 .class-core-recording-links a.class-core-link-primary:hover,.class-core-tablet-links a.class-core-link-primary:hover,.class-core-lesson-links a.class-core-link-primary:hover{background:#EAD04E;color:#191919;border-color:#BA9A30}
+
+/* Four-video course · immediately available full-screen video cut cards. */
+.class-screen-rec-shortcuts,.class-screen-cut-actions,.class-screen-desktop-shortcut{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.class-screen-rec-shortcuts{margin:12px 0 18px}
+.class-screen-rec-shortcuts button,.class-screen-cut-actions button,.class-screen-desktop-shortcut button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:43px;padding:10px 13px;border:1px solid #B7CCD6;border-radius:11px;background:#FFF;color:#254A61;font:700 12px/1.3 Prompt,Arial,sans-serif;cursor:pointer}
+.class-screen-rec-shortcuts button:first-child,.class-screen-cut-actions button:first-of-type,.class-screen-desktop-shortcut button:first-of-type{background:#F2D85B;border-color:#F2D85B;color:#191919}
+.class-screen-cut-actions{background:#FAF8F3;border:1px solid #D8E4E7;border-radius:14px;padding:12px 15px;margin:17px 0 10px}
+.class-screen-cut-actions>div{flex:1 1 210px;display:grid;gap:4px}
+.class-screen-cut-actions strong{font:750 12px/1.4 Prompt,Arial,sans-serif;color:#263F52}
+.class-screen-cut-actions small{font:500 11px/1.5 Prompt,Arial,sans-serif;color:#5E7380}
+.class-screen-desktop-shortcut{padding:12px 15px;margin-bottom:14px;border:1px solid #D8E4E7;border-radius:13px;background:#FAF8F3}
+.class-screen-desktop-shortcut>span{display:flex;align-items:center;gap:7px;flex:1 1 190px;font:700 12px/1.4 Prompt,Arial,sans-serif}
+.class-screen-rec-shortcuts button:focus-visible,.class-screen-cut-actions button:focus-visible,.class-screen-desktop-shortcut button:focus-visible{outline:3px solid #79A6C0;outline-offset:3px}
+@media(max-width:690px){.class-screen-rec-shortcuts,.class-screen-cut-actions{display:grid;grid-template-columns:1fr}.class-screen-rec-shortcuts button,.class-screen-cut-actions button{width:100%}}
