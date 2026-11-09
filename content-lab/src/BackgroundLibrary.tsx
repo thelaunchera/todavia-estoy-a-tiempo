@@ -35,16 +35,8 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
  const shared=assets.filter(a=>assetCategory(a)==='background'&&a.shared);
  const sharedVisible=shared.filter(a=>
    displayAssetName(a).toLowerCase().includes(search.toLowerCase().trim()));
- const requestedPreviews=useRef(new Set<string>());
- useEffect(()=>{
-   // A large imported ZIP must still show every thumbnail after a reload.
-   [...own.slice(0,40),...shared.slice(0,40)].forEach(a=>{
-     if(!images[a.id]&&!requestedPreviews.current.has(a.id)){
-       requestedPreviews.current.add(a.id);
-       loadImage(a.id);
-     }
-   });
- },[assets,images,loadImage]);
+ // Images are fetched by AssetPreview's IntersectionObserver only when visible.
+ // No eager batch downloads of up to 80 original-sized private files on entry.
  const upload=async(file?:File)=>{
    if(!file)return;setBusy(true);setError('');
    try{const item=await onUpload(file,uploadCategory);if(item){loadImage(item.id);onDesign('brand',item.id)}}
