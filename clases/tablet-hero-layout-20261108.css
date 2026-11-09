@@ -1,0 +1,130 @@
+/* The Launch Era · Tu primera web con IA · tablet layout correction
+   2026-11-08. Fix the empty left column and mis-placed offer on iPad
+   while preserving the established mobile (<=700px) and desktop (>1100px)
+   designs, all links, the Casa Brownie media and the bilingual waitlist. */
+@media (min-width:701px) and (max-width:1100px) {
+  body.class-page-v2 .class-hero {
+    padding:clamp(28px,4vw,48px) 0 52px!important;
+  }
+  body.class-page-v2 .class-hero .shell.class-hero-grid {
+    display:block!important;
+    width:min(calc(100% - 56px),860px)!important;
+    max-width:860px!important;
+    margin-inline:auto!important;
+  }
+  /* Old grid-area names from the legacy tablet stylesheet created implicit,
+     over-sized tracks. A single editorial reading column avoids those gaps. */
+  body.class-page-v2 .class-hero .class-hero-intro {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    grid-template:none!important;
+    grid-template-rows:none!important;
+    row-gap:0!important;
+    column-gap:0!important;
+    width:100%!important;
+    padding:0!important;
+    margin:0!important;
+    max-width:none!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > * {
+    grid-area:auto!important;
+    grid-row:auto!important;
+    grid-column:auto!important;
+    position:relative;
+    min-width:0!important;
+    max-width:100%;
+    margin-inline:0!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-eyebrow {
+    order:1!important;
+    margin:0 0 8px!important;
+    font-size:.7rem!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > h1 {
+    order:2!important;
+    display:block!important;
+    max-width:15ch!important;
+    margin:0!important;
+    font-size:clamp(3.5rem,7.5vw,5.4rem)!important;
+    line-height:1.02!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-opportunity {
+    order:3!important;
+    margin:14px 0 0!important;
+    max-width:42ch!important;
+    font-size:clamp(1.2rem,2.5vw,1.55rem)!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-actions {
+    order:4!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:21px 0 0!important;
+    gap:12px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-actions > a {
+    min-height:50px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-cinema-visual {
+    order:5!important;
+    display:block!important;
+    align-self:stretch!important;
+    flex:none!important;
+    width:100%!important;
+    height:clamp(420px,60vw,535px)!important;
+    min-height:0!important;
+    max-height:535px!important;
+    margin:24px 0 0!important;
+    border-radius:22px!important;
+  }
+  .class-cinema-visual .class-creative-type {
+    inset:24% auto auto 4%!important;
+    font-size:clamp(4.5rem,9.5vw,7rem)!important;
+  }
+  .class-cinema-visual .class-cinema-film {
+    inset:25% 0 0 34%!important;
+  }
+  .class-cinema-visual .class-cinema-browser {
+    width:min(44%,310px)!important;
+    min-width:0!important;
+    right:5%!important;
+    bottom:12%!important;
+  }
+  .class-cinema-visual .class-cinema-statement {
+    max-width:40%!important;
+    font-size:clamp(1.6rem,3.3vw,2.15rem)!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-lede {
+    order:6!important;
+    width:100%!important;
+    max-width:66ch!important;
+    margin:24px 0 0!important;
+    font-size:1.02rem!important;
+    line-height:1.6!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-price-inline.class-price-campaign {
+    order:7!important;
+    width:min(100%,650px)!important;
+    max-width:650px!important;
+    margin:24px 0 8px!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-audio-language-note {
+    order:8!important;
+    max-width:66ch!important;
+    margin:16px 0 0!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-hero-chips {
+    order:9!important;
+    margin:16px 0 0!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-availability {
+    order:10!important;
+    margin:14px 0 0!important;
+  }
+  body.class-page-v2 .class-hero .class-hero-intro > .class-notice {
+    order:11!important;
+    margin:5px 0 0!important;
+  }
+}
