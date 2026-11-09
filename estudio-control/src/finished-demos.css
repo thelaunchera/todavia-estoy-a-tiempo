@@ -215,3 +215,10 @@
 @media (prefers-reduced-motion:reduce){
  .finished-demo-cover-video{display:none!important;transition:none}
 }
+
+/* Keep the original portrait Cleaning hero visible inside the Studio demo card. */
+.finished-demo-image[data-demo-id="experience-cleaning"]{background:#edeae3}
+.finished-demo-image[data-demo-id="experience-cleaning"]>img,
+.finished-demo-image[data-demo-id="experience-cleaning"] .finished-demo-cover-video{
+ object-fit:contain;object-position:center;
+}
