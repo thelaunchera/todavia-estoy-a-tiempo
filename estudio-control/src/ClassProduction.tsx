@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import ClassWeeklyPlan, {type ClassWeeklyTask} from './ClassWeeklyPlan';
 import ClassInterlude, {type ClassInterludeKind} from './ClassInterlude';
+import ClassScreenDeck from './ClassScreenDeck';
+import {cardForSceneCut,screenCardsForLesson} from './class-screen-cards';
 import ConnectorsLesson from './ConnectorsLesson';
 import CasaBrownieStudioKit,{CASA_BROWNIE_KIT_SECTION,type CasaBrownieKitEntry} from './CasaBrownieStudioKit';
 import {RECORDING_EXAMPLE,OFFICIAL_DEMO_URL} from './recording-starts';
@@ -47,7 +49,8 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
  const [uploadingId,setUploadingId]=useState<string|null>(null);
  const [uploadProgress,setUploadProgress]=useState(0);
  const [uploadNotice,setUploadNotice]=useState('');
- const [area,setArea]=useState<'grabar'|'alumno'|'recursos'|'plan'>('grabar');
+ const [area,setArea]=useState<'grabar'|'pantallas'|'alumno'|'recursos'|'plan'>('grabar');
+ const [openingCardId,setOpeningCardId]=useState<string|null>(null);
  const [scene,setScene]=useState(0);
  const [mode,setMode]=useState<'scene'|'overview'>('scene');
  const [voiceMode,setVoiceMode]=useState<'pistas'|'texto'>('pistas');
@@ -220,10 +223,12 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
   </header>
   <nav className="class-area-nav" aria-label="Organización de la clase">
     <button type="button" className={area==='grabar'?'active':''} aria-current={area==='grabar'?'page':undefined} onClick={()=>setArea('grabar')}><Video size={16}/> 1. Grabar clase</button>
-    <button type="button" className={area==='alumno'?'active':''} aria-current={area==='alumno'?'page':undefined} onClick={()=>setArea('alumno')}><BookOpen size={16}/> 2. Ruta del alumno</button>
-     <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><FileText size={16}/> 3. Materiales y herramientas</button>
-    <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 4. Plan y lanzamiento</button>
+    <button type="button" className={area==='pantallas'?'active':''} aria-current={area==='pantallas'?'page':undefined} onClick={()=>setArea('pantallas')}><MonitorPlay size={16}/> 2. Presentaciones para cortes</button>
+    <button type="button" className={area==='alumno'?'active':''} aria-current={area==='alumno'?'page':undefined} onClick={()=>setArea('alumno')}><BookOpen size={16}/> 3. Ruta del alumno</button>
+     <button type="button" className={area==='recursos'?'active':''} aria-current={area==='recursos'?'page':undefined} onClick={()=>setArea('recursos')}><FileText size={16}/> 4. Materiales y herramientas</button>
+    <button type="button" className={area==='plan'?'active':''} aria-current={area==='plan'?'page':undefined} onClick={()=>setArea('plan')}><Check size={16}/> 5. Plan y lanzamiento</button>
   </nav>
+  <ClassScreenDeck visible={area==='pantallas'} lessonId={lesson.id} openingId={openingCardId} onOpeningHandled={()=>setOpeningCardId(null)}/>
   <input ref={filePicker} type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" className="class-recording-picker" tabIndex={-1} aria-label="Elegir grabación del capítulo" onChange={event=>void handleSelectedFile(event)}/>
   {area==='grabar'&&<div className="class-tablet-mode-switch">
    <div><span className="class-mini-heading">GRABACIÓN EN iPAD</span><p>{tabletMode?'Vista concentrada: un capítulo y una escena a la vez.':'Activa una pantalla más sencilla para filmar desde tu tablet.'}</p></div>
@@ -299,6 +304,10 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <span className="class-overline"><Film size={17}/> TU MESA DE GRABACIÓN · PRIVADA</span>
     <h3>Una escena a la vez.</h3>
     <p>Cuatro videos. Enseña el clic, di una frase y muestra el resultado. Nada se publica automáticamente.</p>
+    <div className="class-screen-rec-shortcuts">
+     <button type="button" onClick={()=>setOpeningCardId(screenCardsForLesson(lesson.id)[0]?.id||null)}><MonitorPlay size={16}/> Mostrar portada</button>
+     <button type="button" onClick={()=>setArea('pantallas')}><Film size={16}/> Ver las cinco pantallas</button>
+    </div>
     <nav className="class-core-tablet-links" aria-label="Enlaces de este video">
      {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} className={link.primary?'class-core-link-primary':undefined} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
     </nav>
@@ -320,6 +329,11 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     </div>
     <div className="class-tablet-cue" aria-live="polite">
      <p>{tabletCue==='screen'?lesson.beats[scene].show:lesson.beats[scene].say}</p>
+    </div>
+    <div className="class-screen-cut-actions">
+     <div><strong>¿Vas a explicar algo sin dejar los datos en pantalla?</strong><small>Usa la tarjeta del corte o el checklist que ya está diseñado.</small></div>
+     <button type="button" onClick={()=>setOpeningCardId(cardForSceneCut(lesson.id,scene))}><MonitorPlay size={16}/> Tarjeta de este corte</button>
+     <button type="button" onClick={()=>setOpeningCardId(screenCardsForLesson(lesson.id).find(x=>x.kind==='checklist')?.id||null)}><CheckCircle2 size={16}/> Mostrar checklist</button>
     </div>
     <div className="class-tablet-scene-nav">
      <button type="button" disabled={scene===0} onClick={()=>{setScene(n=>Math.max(0,n-1));setCopied('');}}><span aria-hidden="true">‹</span> Anterior</button>
@@ -453,6 +467,11 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        <nav aria-label="Enlaces para grabar">
         {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} className={link.primary?'class-core-link-primary':undefined} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
        </nav>
+      </div>
+      <div className="class-screen-desktop-shortcut">
+       <span><MonitorPlay size={16}/> Pantallas listas para intercalar entre escenas</span>
+       <button type="button" onClick={()=>setOpeningCardId(cardForSceneCut(lesson.id,scene))}>Presentar este corte</button>
+       <button type="button" onClick={()=>setArea('pantallas')}>Ver todas</button>
       </div>
       <div className="class-lesson-header">
        <span className="class-mini-heading">VIDEO {classLessons.findIndex(x=>x.id===lesson.id)+1} / {classLessons.length} · META {lesson.minutes} MIN</span>
