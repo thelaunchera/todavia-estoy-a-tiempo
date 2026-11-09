@@ -248,7 +248,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
        <p><b>Actividad del estudiante:</b> {chapter.exercise}</p>
        <p><b>Al grabar:</b> muestra la pantalla, explica en una frase y comprueba el resultado. No supongas que AppDeploy está conectado o que se publicó la web.</p>
        <nav className="class-core-lesson-links" aria-label={'Enlaces del video '+(index+1)}>
-        {coreClassLinks[chapter.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+        {coreClassLinks[chapter.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} className={link.primary?'class-core-link-primary':undefined} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
        </nav>
        <button type="button" onClick={()=>{choose(chapter.id);setArea('grabar');}}>Abrir guion privado del video {String(index+1).padStart(2,'0')}</button>
       </div>
@@ -300,7 +300,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
     <h3>Una escena a la vez.</h3>
     <p>Cuatro videos. Enseña el clic, di una frase y muestra el resultado. Nada se publica automáticamente.</p>
     <nav className="class-core-tablet-links" aria-label="Enlaces de este video">
-     {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+     {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} className={link.primary?'class-core-link-primary':undefined} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
     </nav>
     <label htmlFor="class-tablet-lesson">¿Qué capítulo vas a grabar?
      <select id="class-tablet-lesson" value={lesson.id} onChange={e=>choose(e.target.value)}>
@@ -451,7 +451,7 @@ export default function ClassProduction({entries,tasks,focusPending,onTaskToggle
       <div className="class-core-recording-links">
        <div><strong>Enlaces de este video</strong><small>Abre las herramientas y referencias. Comprueba los permisos de tus conectores antes de usarlos.</small></div>
        <nav aria-label="Enlaces para grabar">
-        {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
+        {coreClassLinks[lesson.id as keyof typeof coreClassLinks].map(link=><a key={link.url} href={link.url} className={link.primary?'class-core-link-primary':undefined} target="_blank" rel="noopener noreferrer">{link.label} <ExternalLink size={13}/></a>)}
        </nav>
       </div>
       <div className="class-lesson-header">
