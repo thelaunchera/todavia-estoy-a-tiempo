@@ -18,7 +18,6 @@ function cardSvg(card:ScreenCard,lang:Lang){
  const bg=card.kind==='outro'?YELLOW:dark?INK:PAPER;
  const primary=dark&&card.kind!=='outro'?PAPER:INK;
  const secondary=dark&&card.kind!=='outro'?'#D1D4D0':MUTED;
- const accent=dark&&card.kind!=='outro'?YELLOW:INK;
  const number=String(classScreenCards.findIndex(c=>c.id===card.id)+1).padStart(2,'0');
  const video=String(['01','05','06','08'].indexOf(card.lessonId)+1).padStart(2,'0');
  let art=`<rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="${bg}"/>`;
