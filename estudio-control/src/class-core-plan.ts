@@ -70,7 +70,7 @@ export const coreClassLessons:ClassLesson[]=[
  prompt:testPrompt,exercise:'Guardar URL real y una captura móvil; comprobar el CTA y el footer.'}
 ];
 export const coreClassMinutes=coreClassLessons.reduce((total,lesson)=>total+lesson.minutes,0);
-export const coreClassRecordingStarts:Record<CoreClassId,RecordingStart>={
+export const coreClassRecordingStarts:Record<string,RecordingStart>={
  '01':{
   tabs:['ChatGPT','Google Drive · carpeta Casa Brownie existente','Plugins · comprobar Drive y AppDeploy'],
   actions:['Abre ChatGPT','Revisa permisos y disponibilidad real de Google Drive y AppDeploy','Copia el prompt corto y verifica el brief con fotos existentes'],
