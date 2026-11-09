@@ -35,16 +35,19 @@ test('English public class landing has English marketing and accessibility conte
 
 test('only student-authenticated classroom screens explain named learning tools', () => {
   const guard=classroom.indexOf('<section id="class-content" hidden>');
-  const toolSection=classroom.indexOf('<section class="dashboard-setup"');
+  const toolSection=classroom.indexOf('class="aula-fast-start"');
   assert.ok(guard>0 && toolSection>guard,'Tools live in the authenticated classroom UI');
   assert.doesNotMatch(classroom.slice(0,guard),/ChatGPT|AppDeploy|Google Drive|Make, Gmail y Stripe/);
-  for(const name of ['ChatGPT:','AppDeploy:','Google Drive:','Make, Gmail y Stripe:']) {
-    assert.ok(classroom.includes(name),'Required student tool explanation: '+name);
+  for(const name of ['ChatGPT','AppDeploy','Google Drive','Gmail, Make y Stripe son opcionales']) {
+    assert.ok(classroom.includes(name),'Required student tool: '+name);
   }
-  for(const translated of ['ChatGPT: you describe','AppDeploy: turn','Google Drive: connect and authorize','Make, Gmail, and Stripe:']) {
-    assert.ok(classroomStatic.includes(translated),'Missing English classroom tool text: '+translated);
+  assert.match(classroom,/data-class-en="ChatGPT and your connections"/);
+  assert.match(classroom,/data-class-en="Gmail, Make and Stripe are optional/);
+  assert.match(classroom,/Instalar un plugin no garantiza acceso gratis/);
+  assert.match(classroom,/data-course-video-code="01"/);
+  for(const translated of ['ChatGPT: you describe','Google Drive: connect and authorize']) {
+    assert.ok(classroomStatic.includes(translated),'Keep the detailed optional bilingual guide: '+translated);
   }
-  assert.match(classroomEnglish,/\.dashboard-setup-details > summary/);
 });
 
 test('English and Spanish classroom share clear captions and correct legal links', () => {
