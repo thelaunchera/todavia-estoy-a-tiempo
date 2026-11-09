@@ -241,6 +241,36 @@ return `<aside class="ob-side">
     const k=mediaKey(state.episode,state.scene,'audio',line.id),file=getAsset(k),url=getUrl(k);
     return `<div class="ob-audio-row"><span class="ob-audio-icon">♫</span><div class="ob-audio-core"><b>Audio file · ${safe(line.character)}</b>${url?'<audio controls preload="metadata" src="'+url+'"></audio>':'<small>No separate audio track; Flow MP4 may include dialogue</small>'}</div><label class="ob-upload">${file?'Replace':'Add audio'}<input type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" data-media="${safe(k)}" hidden/></label>${file?'<button class="ob-del" data-remove="'+safe(k)+'" aria-label="Remove voice file">×</button>':''}</div>`;
   }
+  function googleFlowAgentBrief() {
+    const ep=currentEpisode();
+    const scenes=Array.from({length:10},(_,i)=>canonicalShot(state.episode,i+1)).filter(Boolean);
+    const roster=['Nia','Ruby'].map(name=>{
+      const v=state.voiceSettings[name]||{},p=voiceTemplates[name]||{};
+      return '- '+name+' | saved custom voice name: OFF BRIEF '+name+' | '+(v.instructions??p.instructions??'Native American English, natural delivery.').replace(/\s+/g,' ').trim();
+    }).join('\n');
+    const scenePlan=scenes.map((shot,i)=>[
+      'F'+String(i+1).padStart(2,'0')+' | Original ID '+shot.frameId+' | '+shot.title,
+      'Beat: '+shot.beat,
+      'Camera: '+shot.camera,
+      'Location: '+shot.location,
+      'Action: '+shot.action,
+      'Motion: '+shot.motion,
+      'Exact English dialogue:',
+      ...(shot.dialogue.length?shot.dialogue.map(line=>line.character.toUpperCase()+': '+line.text):['(Silent reaction; no speech)'])
+    ].join('\n')).join('\n\n');
+    return [
+      'OFF BRIEF — GOOGLE FLOW AGENT PRODUCTION ORDER',
+      'Season '+ep.season+' Episode '+String(ep.number).padStart(2,'0')+' — '+ep.title,
+      'Use ONE existing or new project named OFF BRIEF S'+ep.season+'E'+String(ep.number).padStart(2,'0')+'; do not duplicate existing projects, images, voices or episodes.',
+      'Use the 10 original approved F01–F10 images that I provide. Ask for a specific missing F number before proceeding. NEVER invent or replace character photos. Preserve the two original adult 3D animated characters exactly: Nia has a long dark side braid, medium-deep warm skin, small gold hoops and approved blue blazer; Ruby has a copper curly updo, big round glasses and approved sage outfit. Preserve exact facial features, proportions, costumes, scene props and lighting. No generic avatars, identity changes, captions, extra limbs or logos.',
+      'Audio: use the same two original saved custom voices OFF BRIEF Nia and OFF BRIEF Ruby for every speaking take. Nia is calm, organized and wry; Ruby is bright, natural and funny, not shrill. One speaker per take, with the other silent. If the custom voices do not exist, help me create/save them in Flow first; never substitute a new voice silently. Voice direction:\n'+roster,
+      'Production: Use Omni Flash Video Ingredients, official image and saved @Voice for each speaking take. Animate a genuine 3D character performance with natural mouth movement, breathing, eyes and tiny gestures. Use several 4–8s takes as needed to preserve exact lines. Maintain scene order and camera continuity. Do not change, omit or invent dialogue.',
+      'COST RULE: I am using my existing Google Flow credits, including the free daily credits. Ask my approval before EVERY credit-consuming action. Do not exceed 50 credits in a day; do not make extra variants automatically. Start with only F01 720p as a proof of concept. Show the credit estimate and confirm it before generating. Do not proceed with F02–F10 until the pilot is approved.',
+      'ORIGINAL STORYBOARD, REFERENCE IDs AND APPROVED ENGLISH DIALOGUE:\n\n'+scenePlan,
+      'Organize each completed clip as OFF_BRIEF_S'+ep.season+'_E'+String(ep.number).padStart(2,'0')+'_F01_take01 and so on. Keep all existing stills and original assets. The approved OFF BRIEF intro is inserted AFTER the cold open in the FINAL edit; do not generate a new intro. Save clips in this Flow project. Do not publish anywhere.',
+      'FIRST ACTION ONLY: Check whether F01 reference image and both original custom voices are available. If not, request just the missing asset or voice. Present the first-shot generation plan and credit estimate for approval, without generating anything yet.'
+    ].join('\n\n');
+  }
   function googleFlowSpeakingPrompt(line) {
     const shot=canonicalShot(state.episode,state.scene);
     const voice=state.voiceSettings[line.character]||{};
@@ -299,7 +329,7 @@ return `<div class="ob-ep-summary">
  </div>
  ${e.season===2?`<div class="ob-season-title-editor"><label>Episode title (edit only if verified)</label><input type="text" data-season-title="${e.id}" value="${safe(e.title)}" maxlength="110"/></div>`:''}
  <div class="ob-drive-quick-actions"><button class="ob-neutral" type="button" data-action="drive-sync">↻ Sync episode photos from Drive</button><button class="ob-plain" type="button" data-view="drive">Connect Drive / folders</button></div>
- <div class="ob-caveat ob-flow-start"><strong>GOOGLE FLOW · PRODUCTION WORKFLOW</strong><p>Use the approved F01–F10 images, one voice per speaking take, and return each downloaded MP4 to its matching scene. Keep the original intro for final editing after the cold open.</p><div class="ob-inline-actions"><a class="ob-black-button" href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener noreferrer">Open Google Flow ↗</a><button class="ob-neutral" type="button" data-view="voice">Set up character voices</button></div></div>
+ <div class="ob-caveat ob-flow-start"><strong>GOOGLE FLOW AGENT · ONE PRODUCTION ORDER</strong><p>Official Google Flow Agent handles storyboarding and video generation using your existing Flow credits. Copy the complete episode order, open Agent, attach existing F01–F10 references and paste. Confirm before any credits are spent.</p><div class="ob-inline-actions"><button class="ob-black-button" type="button" data-action="copy-flow-agent-brief">Copy complete Flow Agent production brief</button><a class="ob-neutral" href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener noreferrer">Open Flow Agent ↗</a><button class="ob-neutral" type="button" data-view="voice">Nia + Ruby voice directions</button></div></div>
  ${sceneStrip()}${sceneEditor()}`;
 }
   function providerCard(p){
@@ -375,6 +405,7 @@ return `<section class="ob-drive-panel"><div class="ob-eyebrow">GOOGLE DRIVE / A
     if(action.dataset.copy){const line=note().dialogues.find(l=>l.id===action.dataset.copy);copy(line?.text||'');return;}
     if(action.dataset.action==='copy-prompt'){copy(note().motion);return;}
     if(action.dataset.action==='copy-master'){copy(masterAnimationPrompt(state.episode,state.scene));return;}
+    if(action.dataset.action==='copy-flow-agent-brief'){copy(googleFlowAgentBrief());return;}
     if(action.dataset.action==='copy-flow-speaking'){
       const line=note().dialogues.find(l=>l.id===action.dataset.line);
       if(line)copy(googleFlowSpeakingPrompt(line));return;
