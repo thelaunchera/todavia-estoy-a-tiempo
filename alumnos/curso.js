@@ -5,7 +5,9 @@ import {mountBonusLibrary} from './biblioteca-bonos.js?v=20261103-command-center
 import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typography-library-v1';
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261103-learning-clarity-v1';
 import {mountInspiracion} from './inspiracion.js?v=20261107-private-manager-v2';
-import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson} from './aula-i18n.js?v=20261103-ai-lessons-v2';
+import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson as originalLessonTranslation} from './aula-i18n.js?v=20261103-ai-lessons-v2';
+import {CORE_LESSON_CODES,coreLessonText,coreLessonLinks,localizeCoreClassroom} from './aula-video-plan.js?v=20261109-core4-v1';
+function translationForLesson(item,lang=getClassroomLanguage()){return coreLessonText(item,lang)||originalLessonTranslation(item,lang);}
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
 try{
@@ -328,6 +330,7 @@ function refreshClassroomLanguage(){
   if(lessons[selected]){
    $('lesson-title').textContent=translationForLesson(lessons[selected]).title;
    $('lesson-description').textContent=translationForLesson(lessons[selected]).description;
+   renderLessonLinks(lessons[selected]);
    renderLessonPrompts(lessons[selected]);
   }
   aulaTitle.textContent=(lang==='en'?aulaViewsEn:aulaViews)[currentAulaView];
@@ -342,6 +345,7 @@ function refreshClassroomLanguage(){
   bonusLibraryController?.setLanguage?.();
  }
  applyClassroomLanguage();
+ localizeCoreClassroom(lang);
 }
 bindClassroomLanguages(refreshClassroomLanguage);
 function validVideoId(id){return typeof id==='string' && /^[A-Za-z0-9_-]{11}$/.test(id);}
@@ -351,7 +355,7 @@ function progressStats(){
  return {total,completed,percent:total?Math.round(100*completed/total):0};
 }
 // Solo la clase completa y aprobada puede generar acceso al reto del bono.
-const REQUIRED_LESSON_COUNT=9;
+const REQUIRED_LESSON_COUNT=CORE_LESSON_CODES.length;
 async function refreshPersonalBonuses(){
  if(adminPreview||!user)return;
  const box=$('assigned-bonuses'),list=$('assigned-bonus-list');
@@ -503,11 +507,26 @@ if(captionPicker){
  });
 }
 
+function renderLessonLinks(item){
+ const root=$('lesson-links');if(!root)return;
+ root.replaceChildren();
+ const language=getClassroomLanguage();
+ const heading=document.createElement('strong');
+ heading.className='lesson-links-title';
+ heading.textContent=language==='en'?'Links for this video':'Enlaces para este video';
+ const row=document.createElement('div');row.className='lesson-links-row';
+ coreLessonLinks(item,language).forEach(link=>{
+  const a=document.createElement('a');a.href=link.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=link.label;
+  row.appendChild(a);
+ });
+ root.append(heading,row);
+ root.hidden=!row.children.length;
+}
 /* Prompts iniciales de cada módulo: contenido del alumno, nunca notas privadas del Studio. */
 function renderLessonPrompts(item){
  const panel=$('lesson-prompts-panel'),list=$('lesson-prompts-list');
  if(!panel||!list)return;
- list.replaceChildren();
+ list.replaceChildren();panel.open=false;
  const entries=modulePrompts.filter(prompt=>prompt.prompt_code.startsWith('m'+item.lesson_code+'_'));
  panel.hidden=!entries.length;
  entries.forEach((prompt,index)=>{
@@ -552,10 +571,11 @@ function choose(i){
  if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
   ?'Video coming soon. You can still practice with this lesson’s prompts.'
   :'El video estará disponible pronto. Mientras tanto, puedes practicar con sus prompts.';
- $('lesson-number').textContent='VIDEO '+item.lesson_code;
+ $('lesson-number').textContent='VIDEO '+String(i+1).padStart(2,'0');
  const localized=translationForLesson(item);
  $('lesson-title').textContent=localized.title;
  $('lesson-description').textContent=localized.description;
+ renderLessonLinks(item);
  renderLessonPrompts(item);
  $('lesson-done').checked=done.has(item.lesson_code);
  $('lesson-done').closest('label').hidden=adminPreview||item.status!=='ready'||!validVideoId(item.youtube_video_id);
@@ -575,10 +595,10 @@ function renderCourseMap(){
  if(!lessons.length)return;
  const lang=getClassroomLanguage();
  const phases=[
-  {id:'define',first:0,last:1,es:'01 · Define',en:'01 · Define',hintEs:'Tu negocio, cliente y objetivo',hintEn:'Your business, customer and goal'},
-  {id:'create',first:2,last:3,es:'02 · Crea',en:'02 · Create',hintEs:'Marca, moodboard y fotos',hintEn:'Brand, moodboard and photos'},
-  {id:'build',first:4,last:5,es:'03 · Construye',en:'03 · Build',hintEs:'Textos y primer enlace web',hintEn:'Copy and your first website link'},
-  {id:'review',first:6,last:8,es:'04 · Revisa',en:'04 · Review',hintEs:'Móvil, publicación y comprobación',hintEn:'Mobile, launch and final checks'}
+  {id:'define',code:'01',es:'01 · ChatGPT',en:'01 · ChatGPT',hintEs:'Tu idea y conexiones',hintEn:'Your idea and connections'},
+  {id:'create',code:'05',es:'02 · Construye',en:'02 · Build',hintEs:'La IA crea tu web',hintEn:'AI builds your website'},
+  {id:'build',code:'06',es:'03 · Mejora',en:'03 · Improve',hintEs:'Corrige textos, fotos y móvil',hintEn:'Fix copy, photos and mobile'},
+  {id:'review',code:'08',es:'04 · Publica',en:'04 · Publish',hintEs:'Abre y prueba tu enlace',hintEn:'Open and test your link'}
  ];
  // Reuse four approved emoji-style brand elements from the existing universal library.
  // These assets are already shipped with Content Lab; no generated or duplicated artwork.
@@ -594,10 +614,7 @@ function renderCourseMap(){
  escapedText(heading,'span',courseCopy('Toca una etapa para ir a su primera lección.','Tap a stage to open its first lesson.',lang));
  const grid=document.createElement('div');grid.className='lesson-map-grid';
  for(const phase of phases){
-  const indexes=lessons.map((item,index)=>({item,index})).filter(({item})=>{
-   const code=Number(item.lesson_code);
-   return Number.isFinite(code)&&code>=phase.first&&code<=phase.last;
-  });
+  const indexes=lessons.map((item,index)=>({item,index})).filter(({item})=>item.lesson_code===phase.code);
   if(!indexes.length)continue;
   const button=document.createElement('button');button.type='button';button.className='lesson-map-step';
   button.dataset.phase=phase.id;
@@ -617,7 +634,7 @@ function renderCourseMap(){
   escapedText(copy,'strong',lang==='en'?phase.en.slice(5):phase.es.slice(5),'lesson-map-title');
   escapedText(copy,'span',lang==='en'?phase.hintEn:phase.hintEs,'lesson-map-description');
   const foot=document.createElement('div');foot.className='lesson-map-foot';
-  escapedText(foot,'span',completed+' / '+indexes.length+' '+courseCopy('lecciones','lessons',lang),'lesson-map-progress-label');
+  escapedText(foot,'span',completed+' / '+indexes.length+' '+courseCopy('videos','videos',lang),'lesson-map-progress-label');
   const track=document.createElement('div');track.className='lesson-map-progress';
   track.setAttribute('aria-hidden','true');
   const fill=document.createElement('span');fill.style.width=Math.round(100*completed/indexes.length)+'%';track.append(fill);
@@ -627,7 +644,7 @@ function renderCourseMap(){
    courseCopy('Abrir primera lección','Open first lesson',lang);
   foot.append(track,status);
   button.append(top,copy,foot);
-  button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+completed+' '+courseCopy('de','of',lang)+' '+indexes.length+' '+courseCopy('lecciones completadas.','lessons complete.',lang)+' '+courseCopy('Abrir primera lección','Open first lesson',lang));
+  button.setAttribute('aria-label',(lang==='en'?phase.en:phase.es)+'. '+completed+' '+courseCopy('de','of',lang)+' '+indexes.length+' '+courseCopy('videos completados.','videos complete.',lang)+' '+courseCopy('Abrir primera lección','Open first lesson',lang));
   button.addEventListener('click',()=>choose(indexes[0].index));
   grid.append(button);
  }
@@ -643,7 +660,7 @@ function lessonsUI(){
  $('empty-lessons').hidden=true;
  lessons.forEach((item,i)=>{
   const button=document.createElement('button');button.type='button';button.dataset.index=String(i);
-  escapedText(button,'span',item.lesson_code,'index-no');
+  escapedText(button,'span',String(i+1).padStart(2,'0'),'index-no');
   escapedText(button,'span',translationForLesson(item).title,'index-title');
   button.addEventListener('click',()=>choose(i));group.appendChild(button);
   if(picker){
@@ -706,7 +723,8 @@ async function showCourse(email,asAdmin=false){
  modulePrompts=(mp.data||[]).filter(item=>item.status==='ready'||asAdmin);
  // Approved classroom outline is visible before recordings; a draft lesson
  // remains explicitly non-completable until its approved video is published.
- lessons=(l.data||[]).filter(item=>asAdmin||['draft','ready'].includes(item.status));
+ // Display only the four essential videos. Other historical course rows remain untouched.
+ lessons=CORE_LESSON_CODES.map(code=>(l.data||[]).find(item=>item.lesson_code===code&&(asAdmin||['draft','ready'].includes(item.status)))).filter(Boolean);
  done=new Set((p.data||[]).map(x=>x.lesson_code));
  courseResources=asAdmin?(r.data||[]):(r.data||[]).filter(item=>item.status==='ready');
  const generalResources=courseResources.filter(item=>!item.resource_code.startsWith('bonus_'));
