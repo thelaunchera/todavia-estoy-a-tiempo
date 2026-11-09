@@ -10,6 +10,7 @@ import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewRepo, season
 import {freskaPhotos, freskaRebuildPrompts, freskaDrive, freskaSite, freskaRepo} from './freska-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {sneekiefsPhotos,sneekiefsRebuildPrompts,sneekiefsDrive,sneekiefsSite,sneekiefsRepo} from './sneekiefs-kit';
+import {nailRoomPhotos,nailRoomRebuildPrompts,nailRoomDrive,nailRoomSite,nailRoomRepo} from './nail-room-kit';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
@@ -21,7 +22,7 @@ import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoV
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts, 'nail-room': nailRoomRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -30,6 +31,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'nail-room',
+    title:'Nail Room · Pink Editorial Nail Studio',
+    category:'Uñas y belleza · website de reservas interactivo',
+    description:'Demo editorial rosa con fotografía Pink Ombré aprobada en el hero, tarjetas glass, cuatro servicios y precios, galería ampliable, banner interactivo y formulario de cita de demostración. Incluye seis fotografías reutilizadas y guía privada de seis etapas.',
+    image:nailRoomPhotos[0].url,
+    url:nailRoomSite,
+    source:nailRoomRepo,
+    note:'Concepto ficticio. La reserva solo muestra una solicitud en el navegador; no envía correos, pagos ni citas reales. Fotografía principal: Beauty_Pink_Ombre_Nails. No se usan las fotos borgoña y verde esmeralda descartadas. 6 archivos media en el demo oficial, una sola carpeta en Drive. El Aula y el portafolio Websites tienen controles separados; no publicar automáticamente al Aula.',
+    kind:'other',
+    photos:nailRoomPhotos,
+    promptsFor:'nail-room',
+  },
   {
     id:'sneekiefs',
     title:'Sneekiefs · Sneakers Editorial',
@@ -388,7 +402,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Sneekiefs, FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Nail Room, Sneekiefs, FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <div className="finished-demos-library-shortcut" aria-label="Enlace de la biblioteca pública de demos">
        <div className="finished-demos-library-copy">
          <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
@@ -421,6 +435,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        {d.id==='freska'&&<p><a href={freskaDrive} target="_blank" rel="noopener noreferrer">Abrir fotos y kit FRESKA en Drive</a></p>}
+       {d.id==='nail-room'&&<p><a href={nailRoomDrive} target="_blank" rel="noopener noreferrer">Abrir las fotos de uñas aprobadas en Drive</a> · <a href="https://thelaunchera.com/brand-board/?brand=nail-room" target="_blank" rel="noopener noreferrer">Abrir Brand Board Nail Room</a></p>}
        {d.id==='sneekiefs'&&<p><a href={sneekiefsDrive} target="_blank" rel="noopener noreferrer">Abrir fotos originales de Sneekiefs en Drive</a> · <a href="https://thelaunchera.com/brand-board/?brand=sneekiefs" target="_blank" rel="noopener noreferrer">Abrir Brand Board Sneekiefs</a></p>}
         {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
