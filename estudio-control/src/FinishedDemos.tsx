@@ -289,7 +289,8 @@ const heroPreviewMedia:Record<string,HeroPreviewMedia>={
   'aftr':{video:'https://thelaunchera.com/demos/aftr/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/aftr/media/hero-motion-poster-hq.webp'},
   'yummm':{video:'https://thelaunchera.github.io/demo-booking-landing-/yummm/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/yummm/media/hero-motion-poster-hq.webp'},
   'soluna-yoga':{video:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.github.io/demo-booking-landing-/soluna-yoga/media/hero-motion-poster-hq.webp'},
-  'ivory-bloom':{video:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-poster-hq.webp'}
+  'ivory-bloom':{video:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-20261108.mp4',poster:'https://thelaunchera.com/demos/ivory-and-bloom/media/hero-motion-poster-hq.webp'},
+  'experience-cleaning':{video:'https://thelaunchera.com/experience-cleaning/media/cleaning-hero-20261108.mp4',poster:'https://thelaunchera.com/experience-cleaning/media/cleaning-hero-poster-20261108.jpg'}
 };
 function FinishedDemoCover({demo}:{demo:Demo}){
  const motion=heroPreviewMedia[demo.id];
