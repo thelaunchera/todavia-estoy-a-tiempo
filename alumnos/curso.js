@@ -570,8 +570,8 @@ function choose(i){
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
-  ?'Video coming soon. You can still practice with this lesson’s prompts.'
-  :'El video estará disponible pronto. Mientras tanto, puedes practicar con sus prompts.';
+  ?'Video coming soon. You can already open the links you need below.'
+  :'Video en preparación. Debajo están los enlaces que necesitarás.';
  $('lesson-number').textContent='VIDEO '+String(i+1).padStart(2,'0');
  const localized=translationForLesson(item);
  $('lesson-title').textContent=localized.title;
