@@ -8,7 +8,6 @@ export type ProductInfo={
   state:PublicationState;price?:string;note:string;shareable:boolean
 };
 export const PRODUCTS_CATALOG:ProductInfo[]=[
-  {id:'cleaning-app',category:'thelaunchera',title:'Cleaning App + Booking Page',description:'Clientes, bookings, quotes, invoices, jobs y seguimiento en una misma app.',linkKey:'tle-cleaning-app-new',sourceKey:'tle-app-code',state:'publicado',note:'GitHub Pages y CI verificados. El cliente usa Cash, Zelle o Check; la app no procesa tarjetas.',shareable:true},
   {id:'booking',category:'thelaunchera',title:'Booking Automation + Command Center',description:'Organización de solicitudes y seguimiento para cleaning businesses.',linkKey:'tle-booking',sourceKey:'tle-home-code',state:'revision',note:'La presentación tiene referencia en el sitio. Confirmar checkout y precio actual antes de vender.',shareable:false},
   {id:'ai-booking',category:'thelaunchera',title:'AI Booking Assistant',description:'Asistente de IA para solicitudes y reservas.',linkKey:'tle-ai-booking',sourceKey:'tle-home-code',state:'revision',note:'Revisar precio, implementación y activación antes de compartir una oferta.',shareable:false},
   {id:'website-auto',category:'thelaunchera',title:'Website Automation',description:'Automatizaciones para capturar y atender solicitudes en websites.',linkKey:'tle-website-auto',sourceKey:'tle-home-code',state:'revision',note:'La ruta requiere validación comercial antes de enviarla.',shareable:false},
