@@ -34,9 +34,9 @@ test('No muestra porcentajes ficticios antes de publicar los videos',()=>{
  assert.equal(node('dashboard-next-title').textContent,'Aquí empieza tu primera web.');
  assert.match(node('dashboard-notices').children[0].children[1].children[1].textContent,/preparación/);
  node('dashboard-next-action').onclick();
- assert.equal(opened,'prompts');
+ assert.equal(opened,'lecciones');
  node('dashboard-hero-continue').onclick();
- assert.equal(opened,'prompts');
+ assert.equal(opened,'lecciones');
 });
 test('No cuenta ni muestra como listo un borrador',()=>{
  let opened=-1;
@@ -78,7 +78,7 @@ test('English student experience and accurate class progress',()=>{
  assert.match(node('student-greeting-message').textContent,/Not sure where to start your website\? Tell AI/);
  assert.match(node('dashboard-greeting-tip').textContent,/With tools you authorize, AI can research/);
  node('dashboard-next-action').onclick();
- assert.equal(action,'prompts');
+ assert.equal(action,'lecciones');
 });
 test('La pantalla de inicio y el aviso admin son distintos y la comprobación de permisos sigue obligatoria',()=>{
  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
