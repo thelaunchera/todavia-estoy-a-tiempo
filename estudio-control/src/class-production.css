@@ -364,3 +364,7 @@
  .class-core-recording-links nav,.class-core-tablet-links,.class-core-lesson-links{display:grid;grid-template-columns:1fr;gap:7px}
  .class-core-recording-links a,.class-core-tablet-links a,.class-core-lesson-links a{width:100%;justify-content:flex-start}
 }
+
+/* Los destinos de Drive son carpetas concretas, no la raíz de Mi unidad. */
+.class-core-recording-links a.class-core-link-primary,.class-core-tablet-links a.class-core-link-primary,.class-core-lesson-links a.class-core-link-primary{background:#F2D85B;color:#191919;border-color:#D8BA3C;font-weight:800}
+.class-core-recording-links a.class-core-link-primary:hover,.class-core-tablet-links a.class-core-link-primary:hover,.class-core-lesson-links a.class-core-link-primary:hover{background:#EAD04E;color:#191919;border-color:#BA9A30}
