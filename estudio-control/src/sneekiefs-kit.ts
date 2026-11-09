@@ -63,13 +63,48 @@ export const sneekiefsPhotos:FinishedDemoPhoto[]=[
     "placement": "Catálogo · Sandstone Low",
     "url": "https://thelaunchera.com/demos/sneekiefs/assets/08-orange-sneaker.webp",
     "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage, sin cambiar la marca ni sus materiales. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24, marfil y azul marino. Realistic high-end product shot of a single bright sandstone-orange suede Sneekiefs low sneaker, cream textile and laces, warm tan outsole, against vivid burnt-orange studio backdrop with natural directional shadow, accurate footwear and proportions."
+  },
+  {
+    "key": "sneekiefs-09",
+    "title": "Sneekiefs · detalle editorial azul",
+    "placement": "Campaña ampliada · detalle azul",
+    "url": "https://thelaunchera.com/demos/sneekiefs/assets/editorial-closeup.webp",
+    "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage ni marcas nuevas. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24. Fotografía editorial macro de la zapatilla azul Sneekiefs con materiales reales, encuadre natural y textura fiel al archivo aprobado."
+  },
+  {
+    "key": "sneekiefs-10",
+    "title": "Sneekiefs · póster de detalles",
+    "placement": "Campaña ampliada · perfil del producto",
+    "url": "https://thelaunchera.com/demos/sneekiefs/assets/sneaker-features.webp",
+    "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage ni marcas nuevas. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24. Póster original Sneekiefs con sneaker azul y naranja y composición tipográfica editorial; conservar el arte aprobado sin rehacer textos."
+  },
+  {
+    "key": "sneekiefs-11",
+    "title": "Sneekiefs · Everyday Originals",
+    "placement": "Campaña ampliada · póster de colección",
+    "url": "https://thelaunchera.com/demos/sneekiefs/assets/everyday-poster.webp",
+    "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage ni marcas nuevas. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24. Imagen de campaña con Sneekiefs Everyday Originals y dirección de arte de estudio, sin añadir otras marcas ni modificar el material existente."
+  },
+  {
+    "key": "sneekiefs-12",
+    "title": "Sneekiefs · The Classic Line",
+    "placement": "Campaña ampliada · póster de clásicos",
+    "url": "https://thelaunchera.com/demos/sneekiefs/assets/classics-poster.webp",
+    "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage ni marcas nuevas. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24. Póster The Classic Line con zapatilla azul de gamuza, fotografía de producto y lettering original de Sneekiefs, sin recortar texto."
+  },
+  {
+    "key": "sneekiefs-13",
+    "title": "Sneekiefs · par azul sobre tela",
+    "placement": "Campaña ampliada · fotografía vertical",
+    "url": "https://thelaunchera.com/demos/sneekiefs/assets/blue-pair-closeup.webp",
+    "prompt": "Prompt orientativo de recreación (NO es el prompt original ni sustituye la fotografía aprobada). Una fotografía individual, sin collage ni marcas nuevas. Paleta Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24. Fotografía vertical de par de zapatillas azules Sneekiefs sobre tela azul, enfoque en textura de gamuza y cordones, materiales naturales."
   }
 ];
 export const sneekiefsRebuildPrompts:DemoRebuildPrompt[]=[
   {
     "title": "00 · Conectar fuentes reales",
     "step": "Drive + GitHub",
-    "prompt": "Abre la carpeta Sneekiefs — Website Campaign en Google Drive y localiza Web Optimized: ocho fotografías WebP ya existentes. Reutiliza esos archivos; no crees ni dupliques carpetas, y no regeneres fotos. Comprueba el repo oficial thelaunchera/the-launch-era-new-website-, directorio public/demos/sneekiefs/. La fuente de verdad es el demo y sus archivos originales, no los ejemplos temporales OFFCOURT.",
+    "prompt": "Abre la carpeta Sneekiefs — Website Campaign en Google Drive y localiza Web Optimized: ocho fotografías WebP existentes; localiza además las cinco imágenes de campaña ya optimizadas dentro del demo en GitHub. Reutiliza esos archivos; no crees ni dupliques carpetas, y no regeneres fotos. Comprueba el repo oficial thelaunchera/the-launch-era-new-website-, directorio public/demos/sneekiefs/. La fuente de verdad es el demo y sus archivos originales, no los ejemplos temporales OFFCOURT.",
     "say": "Primero identifico la marca y los recursos existentes. El nombre correcto es Sneekiefs y las fotos ya están optimizadas en su carpeta de Drive.",
     "show": "Abrir Drive > The Launch Era — Demo Photos > Sneekiefs — Website Campaign > Web Optimized; abrir el repositorio de Sneekiefs."
   },
@@ -90,7 +125,7 @@ export const sneekiefsRebuildPrompts:DemoRebuildPrompt[]=[
   {
     "title": "03 · Fotos editoriales y revisión final",
     "step": "QA móvil / desktop",
-    "prompt": "Conserva el hero y añade la campaña de modelo 06-model-campaign.webp, y la galería 03-detail-macro.webp, 04-street-motion.webp y 05-streetwear-flatlay.webp. No dupliques material ya utilizado. Verifica el sitio en 360/390 px, 768/820 px y desktop; corrige recortes, menús y fuentes sin modificar otros demos. Mantén un solo footer y el crédito Powered by The Launch Era. Revisa URL /demos/sneekiefs/ en GitHub Pages, no declares publicación hasta confirmarla.",
+    "prompt": "Conserva el hero y las fotografías 03-detail-macro.webp, 04-street-motion.webp, 05-streetwear-flatlay.webp y 06-model-campaign.webp. Verifica además la galería ampliada con 09-editorial-closeup.webp, 10-sneaker-features.webp, 11-everyday-poster.webp, 12-classics-poster.webp y 13-blue-pair-closeup.webp, siempre sin recortar textos ni duplicar fotos. No dupliques material ya utilizado. Verifica el sitio en 360/390 px, 768/820 px y desktop; corrige recortes, menús y fuentes sin modificar otros demos. Mantén un solo footer y el crédito Powered by The Launch Era. Revisa URL /demos/sneekiefs/ en GitHub Pages, no declares publicación hasta confirmarla.",
     "say": "Esta parte no es generar fotos nuevas: es colocar bien la campaña que ya tenemos y verificar que se vea profesional en todos los tamaños.",
     "show": "Mostrar portada móvil, productos, galería, enlace del demo, repositorio y carpeta original en Drive."
   }
