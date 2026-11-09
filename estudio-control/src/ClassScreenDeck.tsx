@@ -16,14 +16,49 @@ function text(x:number,y:number,value:string,size:number,color:string,weight=500
 function cardSvg(card:ScreenCard,lang:Lang){
  const t=card[lang],dark=card.kind==='cover'||card.kind==='outro';
  const bg=card.kind==='outro'?YELLOW:dark?INK:PAPER;
- const primary=dark&&card.kind!=='outro'?PAPER:INK;
- const secondary=dark&&card.kind!=='outro'?'#D1D4D0':MUTED;
+ const primary=dark?PAPER:INK;
+ const secondary=dark?'#C4D6E5':MUTED;
  const number=String(classScreenCards.findIndex(c=>c.id===card.id)+1).padStart(2,'0');
  const video=String(['01','05','06','08'].indexOf(card.lessonId)+1).padStart(2,'0');
- let art=`<rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="${bg}"/>`;
+ let art=`<defs>
+ <radialGradient id="orb" cx="28%" cy="19%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".12" stop-color="#AEDAFF"/><stop offset=".32" stop-color="#578CC9"/><stop offset=".59" stop-color="#16294E"/><stop offset=".8" stop-color="#7A9BD2"/><stop offset="1" stop-color="#0D152A"/></radialGradient>
+ <radialGradient id="aura"><stop offset="0" stop-color="#6EADE9" stop-opacity=".65"/><stop offset="1" stop-color="#6EADE9" stop-opacity="0"/></radialGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8EEFF" stop-opacity=".35"/><stop offset="1" stop-color="#284A81" stop-opacity=".05"/></linearGradient>
+ <filter id="orbshadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#080D1C" flood-opacity=".48"/></filter>
+ <pattern id="dotgrid" width="44" height="44" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="#7290AD" opacity=".35"/></pattern>
+ </defs><rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="${dark?'#10151F':card.kind==='checklist'?'#E5EEF5':PAPER}"/>
+ <rect x="0" y="0" width="1600" height="900" fill="url(#dotgrid)" opacity=".55"/>
+ <circle cx="1260" cy="425" r="435" fill="url(#aura)"/> `;
+ const cardIndex=classScreenCards.findIndex(c=>c.id===card.id);
+ const isOrb=card.kind==='cover'||card.kind==='outro'||card.kind==='statement';
+ const isFlow=card.kind==='three';
+ if(isOrb){
+  const ox=cardIndex%2?1250:1285,oy=cardIndex%3===0?405:445;
+  art+=`<g filter="url(#orbshadow)"><circle cx="${ox}" cy="${oy}" r="232" fill="url(#orb)"/>
+  <ellipse cx="${ox}" cy="${oy}" rx="300" ry="85" fill="none" stroke="#E9D57A" stroke-width="5" opacity=".85" transform="rotate(-28 ${ox} ${oy})"/>
+  <ellipse cx="${ox}" cy="${oy}" rx="277" ry="98" fill="none" stroke="#BDE3FF" stroke-width="2.5" opacity=".65" transform="rotate(43 ${ox} ${oy})"/>
+  <circle cx="${ox-150}" cy="${oy-116}" r="14" fill="#F2D85B"/><circle cx="${ox+193}" cy="${oy+132}" r="9" fill="#FFFFFF"/></g>`;
+ }else{
+  art+=`<g filter="url(#orbshadow)"><rect x="931" y="230" width="567" height="478" rx="29" fill="#142235" stroke="#668DBB" stroke-width="3"/>
+  <rect x="949" y="248" width="531" height="441" rx="19" fill="url(#glass)"/>
+  <rect x="949" y="248" width="531" height="64" rx="19" fill="#243851"/>
+  <circle cx="985" cy="280" r="9" fill="#F2D85B"/><circle cx="1013" cy="280" r="9" fill="#83C1E9"/><circle cx="1041" cy="280" r="9" fill="#B5CBD9"/>`;
+  const entries=(t.items||[]).slice(0,3);
+  entries.forEach((item,j)=>{
+   const y=344+j*106,[name,detail='']=item.split('|');
+   art+=`<rect x="978" y="${y}" width="468" height="86" rx="14" fill="${j===1?'#2C4765':'#23364F'}" stroke="#527699" stroke-width="1.5"/>
+   <rect x="997" y="${y+17}" width="53" height="52" rx="13" fill="${j===1?'#F2D85B':'#B4DDF7'}"/>`;
+   if(card.kind==='checklist'){
+    art+=`<path d="M1009 ${y+44}l10 9 17-23" stroke="#1B3047" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+   }else art+=text(1023,y+52,String(j+1).padStart(2,'0'),21,INK,800,'text-anchor="middle"');
+   art+=text(1070,y+52,name.length>26?18:23,'#F7FAFF',700);
+   if(isFlow&&detail)art+=text(1070,y+76,detail,16,'#B7D2E7',500);
+  });
+  art+=`</g>`;
+ }
  art+=`<rect x="0" y="0" width="1600" height="17" fill="${dark?YELLOW:BLUE}"/>`;
  if(dark){
-  art+=`<path d="M1120 40V845M1220 40V845M1320 40V845M1420 40V845" stroke="${card.kind==='outro'?INK:'#FFFFFF'}" stroke-opacity=".09" stroke-width="2"/>`;
+  art+=`<path d="M1000 40V845M1100 40V845M1200 40V845M1300 40V845" stroke="#FFFFFF" stroke-opacity=".07" stroke-width="2"/>`;
   art+=text(1190,750,video,310,card.kind==='outro'?INK:PAPER,800,'opacity=".08"');
  } else {
   art+=`<rect x="104" y="129" width="120" height="10" rx="5" fill="${YELLOW}"/>`;
@@ -31,49 +66,19 @@ function cardSvg(card:ScreenCard,lang:Lang){
  }
  art+=text(104,91,'THE LAUNCH ERA',23,primary,800,'letter-spacing="4"');
  art+=text(1496,91,lang==='es'?'TU PRIMERA WEB CON IA':'YOUR FIRST WEBSITE WITH AI',18,primary,600,'text-anchor="end" letter-spacing="2"');
- art+=text(104,194,t.label,22,dark&&card.kind!=='outro'?YELLOW:'#375771',800,'letter-spacing="3"');
+ art+=text(104,194,t.label,20,dark?YELLOW:'#375771',800,'letter-spacing="2"');
  const title=t.title;
  const first=Math.max(...title.map(x=>x.length));
- let fontSize=first>26?72:first>21?82:100;
- if(card.kind==='cover'||card.kind==='outro')fontSize=first>22?91:108;
- if(card.kind==='three'||card.kind==='checklist')fontSize=first>23?70:83;
+ let fontSize=first>26?60:first>21?67:82;
+ if(card.kind==='cover'||card.kind==='outro')fontSize=first>22?75:94;
+ if(card.kind==='three'||card.kind==='checklist')fontSize=first>23?61:74;
  let lineHeight=fontSize+29;
- const y0=card.kind==='three'||card.kind==='checklist'?330:card.kind==='steps'?330:card.kind==='statement'?380:385;
+ const y0=card.kind==='three'||card.kind==='checklist'?340:card.kind==='steps'?340:card.kind==='statement'?370:370;
  title.forEach((line,i)=>{art+=text(104,y0+i*lineHeight,line,fontSize,primary,800,'letter-spacing="-2"');});
  const lastY=y0+(title.length-1)*lineHeight;
  if(card.kind==='cover'||card.kind==='outro'||card.kind==='statement'){
    art+=`<rect x="107" y="${lastY+65}" width="106" height="9" rx="4.5" fill="${card.kind==='outro'?INK:YELLOW}"/>`;
-   art+=text(104,lastY+145,t.lead,card.kind==='cover'||card.kind==='outro'?31:29,secondary,500);
- }
- if(card.kind==='steps'){
-   art+=text(104,lastY+74,t.lead,28,secondary,500);
-   (t.items||[]).slice(0,3).forEach((s,i)=>{
-    const y=lastY+153+i*97;
-    art+=`<rect x="104" y="${y-54}" width="1392" height="78" rx="14" fill="#FFFFFF" stroke="#D8E0E3" stroke-width="2"/>`;
-    art+=`<rect x="104" y="${y-54}" width="82" height="78" rx="14" fill="${i===1?YELLOW:BLUE}"/>`;
-    art+=text(146,y-3,String(i+1).padStart(2,'0'),25,INK,800,'text-anchor="middle"');
-    art+=text(219,y-1,s,32,INK,650);
-   });
- }
- if(card.kind==='three'){
-   art+=text(104,lastY+73,t.lead,26,secondary,500);
-   (t.items||[]).slice(0,3).forEach((str,i)=>{
-    const [name,detail='']=str.split('|'),x=104+i*474;
-    art+=`<rect x="${x}" y="480" width="440" height="252" rx="19" fill="${i===1?BLUE:'#FFFFFF'}" stroke="#D3E0E5" stroke-width="2"/>`;
-    art+=`<rect x="${x+30}" y="513" width="68" height="8" rx="4" fill="${i===1?INK:YELLOW}"/>`;
-    const size=name.length>21?30:name.length>17?34:40;
-    art+=text(x+30,616,name,size,INK,800);
-    art+=text(x+30,680,detail,26,'#365263',550);
-   });
- }
- if(card.kind==='checklist'){
-   art+=text(104,lastY+75,t.lead,28,secondary,500);
-   (t.items||[]).slice(0,3).forEach((item,i)=>{
-    const y=lastY+163+i*102;
-    art+=`<rect x="105" y="${y-45}" width="54" height="54" rx="10" fill="#FFFFFF" stroke="#8298A5" stroke-width="3"/>`;
-    art+=text(194,y,item,33,INK,650);
-    art+=`<line x1="194" y1="${y+25}" x2="1496" y2="${y+25}" stroke="#D7E0E5" stroke-width="2"/>`;
-   });
+   art+=text(104,lastY+145,t.lead.length>62?20:25,secondary,500);
  }
  const footerText=lang==='es'?'APRENDER  /  CREAR  /  PUBLICAR':'LEARN  /  BUILD  /  PUBLISH';
  art+=text(104,851,footerText,17,primary,700,'letter-spacing="2.6"');
