@@ -9,6 +9,7 @@ import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromp
 import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
 import {freskaPhotos, freskaRebuildPrompts, freskaDrive, freskaSite, freskaRepo} from './freska-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
+import {sneekiefsPhotos,sneekiefsRebuildPrompts,sneekiefsDrive,sneekiefsSite,sneekiefsRepo} from './sneekiefs-kit';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
@@ -20,7 +21,7 @@ import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoV
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -29,6 +30,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'sneekiefs',
+    title:'Sneekiefs · Sneakers Editorial',
+    category:'Sneakers · Branding y tienda conceptual bilingüe',
+    description:'Website de sneakers con la campaña editorial original, colores Canyon Sky Blue #168DD2 y Sandstone Orange #D65A24, tres modelos de ejemplo, tallas US, filtros y carrito de demostración. Kit de 8 fotografías individuales WebP recuperadas de Drive y 4 pasos de reconstrucción.',
+    image:sneekiefsPhotos[6].url,
+    url:sneekiefsSite,
+    source:sneekiefsRepo,
+    note:'Demo conceptual, sin ventas, inventario ni pagos reales. Carpeta original Sneekiefs — Website Campaign en Drive (14 PNG y 8 WebP optimizadas). No duplicar fotografías ni confundir los prompts orientativos con los originales. El Brand Board corresponde a Sneekiefs, no a OFFCOURT. La publicación en el Aula y el portafolio público se controla por separado.',
+    kind:'other',
+    photos:sneekiefsPhotos,
+    promptsFor:'sneekiefs',
+  },
   {
     id:'freska',
     title:'FRESKA · Colorful Beverage Campaign',
@@ -374,7 +388,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Sneekiefs, FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <div className="finished-demos-library-shortcut" aria-label="Enlace de la biblioteca pública de demos">
        <div className="finished-demos-library-copy">
          <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
@@ -385,7 +399,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          Abrir biblioteca de demos
        </a>
      </div>
-     <WebsiteDemoVisibilitySummary control={website} ids={finishedDemos.filter(d=>d.kind!=='live').map(d=>websiteDemoId(d.id))}/>
+     <WebsiteDemoVisibilitySummary control={website} ids={finishedDemos.filter(d=>d.kind!=='live'&&d.id!=='sneekiefs').map(d=>websiteDemoId(d.id))}/>
       <ClassroomDemoPublishingSummary control={classroom}/>
    </div>
    <PrivateDemoKits entries={entries} publishedBrands={['sova']}/>
@@ -396,7 +410,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
        <span className="finished-demo-status">{d.kind==='live'?'Proyecto entregado':'Demo terminado'}</span>
        <h3>{d.title}</h3><p className="finished-demo-category">{d.category}</p>
        <p>{d.description}</p>
-       <WebsiteDemoVisibilityButton control={website} id={d.id} title={d.title} isClient={d.kind==='live'}/>
+       {d.id!=='sneekiefs'&&<WebsiteDemoVisibilityButton control={website} id={d.id} title={d.title} isClient={d.kind==='live'}/>}
         <ClassroomDemoPublication control={classroom} demo={{
          id:d.id,title:d.title,category:d.category,description:d.description,
          image:d.image,url:d.url,note:d.note,kind:d.kind,photos:d.photos,
@@ -407,7 +421,8 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        {d.id==='freska'&&<p><a href={freskaDrive} target="_blank" rel="noopener noreferrer">Abrir fotos y kit FRESKA en Drive</a></p>}
-       {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
+       {d.id==='sneekiefs'&&<p><a href={sneekiefsDrive} target="_blank" rel="noopener noreferrer">Abrir fotos originales de Sneekiefs en Drive</a> · <a href="https://thelaunchera.com/brand-board/?brand=sneekiefs" target="_blank" rel="noopener noreferrer">Abrir Brand Board Sneekiefs</a></p>}
+        {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='sova'&&<p><a href={sovaDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}
        {d.id==='havana-19'&&<p><a href={havana19Drive} target="_blank" rel="noopener noreferrer">Abrir carpeta Havana 19 en Drive</a></p>}
        {d.id==='lavender-edit'&&<p><a href={lavenderDrive} target="_blank" rel="noopener noreferrer">Abrir las 8 fotografías de Lavanda en Drive</a> · <a href={lavenderOriginalPrompts} target="_blank" rel="noopener noreferrer">Prompts originales disponibles</a></p>}
