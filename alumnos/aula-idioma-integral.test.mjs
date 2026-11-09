@@ -53,9 +53,11 @@ test('Drive setup is executed by AI, shown in both classroom languages, and neve
  const translations=load('aula-textos-estaticos.js');
  const spanish=load('guia-principiantes.js');
  const english=load('materials-guides-en.js');
- assert.match(home,/ChatGPT que CREE o reutilice la carpeta/);
- assert.match(home,/Empieza con una sola web/);
- assert.match(home,/enlaces reales/);
+ assert.match(home,/class="aula-fast-start"/);
+ assert.match(home,/data-class-es="ChatGPT y tus conexiones"/);
+ assert.match(home,/data-class-en="ChatGPT and your connections"/);
+ assert.match(home,/https:\/\/drive\.google\.com\/drive\/u\/0\/my-drive/);
+ assert.match(home,/Instalar un plugin no garantiza acceso gratis/);
  assert.match(translations,/AI creates or reuses the project folder/);
  assert.match(translations,/Google Drive: connect and authorize it in ChatGPT/);
  assert.match(translations,/Start with one website/);
@@ -66,7 +68,7 @@ test('Drive setup is executed by AI, shown in both classroom languages, and neve
  assert.match(english,/Work on ONE website at a time/);
  assert.match(english,/LET CHATGPT CREATE THE FOLDERS/);
  assert.match(english,/02_PHOTOS/);
- assert.match(home,/pídele que la archive en Drive → 02_FOTOS/);
+ assert.match(home,/Google Drive para tus fotos y archivos/);
  assert.match(translations,/ask the AI to save it to Drive → 02_PHOTOS/);
 });
 
@@ -95,7 +97,11 @@ test('learner-first navigation and in-page lesson picker are bilingual and acces
   assert.ok(strings.includes('"'+text+'":'),text+' missing from the bilingual classroom');
  }
  assert.doesNotMatch(html,/class="dashboard-hero-secondary"/,'Avoid competing CTAs in the first screen');
- assert.match(html,/data-aula-view="materiales"><span>03<\/span><strong>Construye y comprueba<\/strong>/);
+ for(const code of ['01','05','06','08'])assert.match(html,new RegExp('data-course-video-code="'+code+'"'));
+ assert.match(html,/id="lesson-links"/);
+ assert.match(html,/<details id="lesson-prompts-panel"/);
+ assert.match(app,/CORE_LESSON_CODES\.map\(code/);
+ assert.match(app,/renderLessonLinks\(item\)/);
 });
 test('materials follow four progressive learning stages without hiding tool details',()=>{
  const source=load('materiales-interactivos.js');
