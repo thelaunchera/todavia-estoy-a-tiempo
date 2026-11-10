@@ -43,8 +43,8 @@ test('Link Center lives inside the protected Studio and accepts deep links',()=>
   assert.match(studio,/import LinkCenter, \{ LINK_CENTER_SECTION \} from '\.\/LinkCenter'/);
   assert.match(studio,/page === 'links'/);
   assert.match(studio,/label: 'Centro de links'/);
-  assert.match(studio,/section === 'ventas' \|\| section === 'links'/);
-  assert.match(studio,/p==='ventas' \|\| p==='links'/);
+  assert.match(studio,/Object\.prototype\.hasOwnProperty\.call\(LABELS,section\)/);
+  assert.match(studio,/window\.history\.pushState\(\{tleStudioPage:p\}/);
   assert.match(studio,/x\.section !== LINK_CENTER_SECTION/);
   assert.match(source,/api\.(?:post|put|delete)\('\/api\/items\/ideas/);
 });
