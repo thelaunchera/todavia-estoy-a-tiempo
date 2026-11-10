@@ -5,7 +5,7 @@ export type CoverDecor={
  backgroundId:FreeBackgroundId;backgroundImageId:string;stickerIds:string[];
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
- layerOrder?:string[];primaryPhotoOpacity?:number;stickerOpacities?:Record<string,number>;stickerTints?:Record<string,string>;
+ layerOrder?:string[];primaryPhotoOpacity?:number;primaryPhotoTintColor?:string;primaryPhotoTintStrength?:number;stickerOpacities?:Record<string,number>;stickerTints?:Record<string,string>;
  headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number,opacity?:number};
  color:string;gradient:string;headlineLocked?:boolean;primaryPhotoLocked?:boolean;lockedStickerIds?:string[];
 };
@@ -25,6 +25,9 @@ export function readCoverDecor(data?:string):CoverDecor{
    layerOrder:Array.isArray(p.layerOrder)?[...new Set((p.layerOrder as unknown[]).filter((id):id is string=>typeof id==='string'&&id.length<180))].slice(0,32):undefined,
    primaryPhotoOpacity:typeof p.primaryPhotoOpacity==='number'&&Number.isFinite(p.primaryPhotoOpacity)
      ?Math.max(0,Math.min(1,p.primaryPhotoOpacity)):undefined,
+   primaryPhotoTintColor:/^#[0-9a-f]{6}$/i.test(String(p.primaryPhotoTintColor))?String(p.primaryPhotoTintColor):undefined,
+   primaryPhotoTintStrength:typeof p.primaryPhotoTintStrength==='number'&&Number.isFinite(p.primaryPhotoTintStrength)
+     ?Math.max(0,Math.min(1,p.primaryPhotoTintStrength)):undefined,
    stickerOpacities:p.stickerOpacities&&typeof p.stickerOpacities==='object'
      ?Object.fromEntries(Object.entries(p.stickerOpacities as Record<string,unknown>).filter(
        ([id,value])=>id.length<150&&typeof value==='number'&&Number.isFinite(value)).slice(0,24)
