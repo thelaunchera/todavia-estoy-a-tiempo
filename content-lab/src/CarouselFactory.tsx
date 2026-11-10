@@ -813,15 +813,20 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(!initialSticker?.version||initialSticker.brandId!==brand.id||!initialSticker.id||appliedStickerVersion.current===initialSticker.version)return;
     appliedStickerVersion.current=initialSticker.version;
     const id=initialSticker.id;
-    const next=slides.map((slide,i)=>i===0?{
-      ...slide,stickerIds:slide.stickerIds?.includes(id)?slide.stickerIds:
-        (slide.stickerIds||[]).length<3?[...(slide.stickerIds||[]),id]:slide.stickerIds
-    }:slide);
-    setAll(next);
+    const alreadyOnSlide=(slides[0]?.stickerIds||[]).includes(id);
+    const canAdd=!alreadyOnSlide&&(slides[0]?.stickerIds||[]).length<3;
+    if(canAdd){
+      // Save the new size explicitly so existing projects retain their old
+      // positions; a newly chosen sticker feels like a Studio asset.
+      const next=slides.map((part,n)=>n===0?{...part,
+        stickerIds:[...(part.stickerIds||[]),id],
+        stickerPositions:{...part.stickerPositions,[id]:{x:.55,y:.1,w:.4,h:.34,angle:-7}}}:part);
+      setAll(next);
+    }
     if(!images[id])loadImage(id);
-    notify((slides[0]?.stickerIds||[]).length>=3&&!slides[0].stickerIds?.includes(id)
-        ?'La portada ya tiene 3 stickers. Quita uno antes de añadir otro.'
-        :'Sticker original añadido a la portada. Se incluirá en el PNG exportado.');
+    notify(alreadyOnSlide?'Este sticker ya está en la portada.':
+      canAdd?'Sticker añadido a buen tamaño. Arrástralo o ajusta su tamaño.':
+      'La portada ya tiene 3 stickers. Quita uno antes de añadir otro.');
   },[initialSticker?.version,brand.id]);
   const appliedBackgroundVersion=useRef(0);
   useEffect(()=>{
@@ -1241,7 +1246,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       const kind=category==='sticker'?'sticker' as const:'photo' as const;
       const count=nextSlides.length;
       if((nextStyle.panoramaLayers||[]).length>=24){notify('Máximo 24 capas en el panorama.');break;}
-      const w=.2/count,h=.18;
+      // New stickers arrive at ~40% of one slide, like the Studio; photos keep their natural sizing.
+      const w=.4/count,h=.34;
       // Imported background images start as one 4:5 panel. Stretch the edge
       // across neighboring slide boundaries to make a genuine seamless split.
       const page=Math.min(count-1,Math.max(0,Math.floor(point.x*count)));
