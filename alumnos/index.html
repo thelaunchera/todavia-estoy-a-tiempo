@@ -169,7 +169,7 @@
       <section class="aula-fast-start" aria-labelledby="aula-fast-start-title">
         <p class="aula-fast-eyebrow" data-class-es="PRIMERO · EMPIEZA AQUÍ" data-class-en="FIRST · START HERE">PRIMERO · EMPIEZA AQUÍ</p>
         <h2 id="aula-fast-start-title" data-class-es="ChatGPT y tus conexiones" data-class-en="ChatGPT and your connections">ChatGPT y tus conexiones</h2>
-        <p class="aula-fast-lead" data-class-es="Abre ChatGPT. Conecta Google Drive para tus fotos y archivos. Comprueba si AppDeploy está disponible para crear tu web." data-class-en="Open ChatGPT. Connect Google Drive for your photos and files. Check whether AppDeploy is available to build your site.">Abre ChatGPT. Conecta Google Drive para tus fotos y archivos. Comprueba si AppDeploy está disponible para crear tu web.</p>
+        <p class="aula-fast-lead" data-class-es="Primero crea 8 fotos PNG individuales con un Master Prompt. Cuando estén listas, pídele a ChatGPT que las guarde en la carpeta personal de tu negocio en Drive. Después construye con AppDeploy usando esa carpeta." data-class-en="First create 8 individual PNG photos with one Master Prompt. Once ready, ask ChatGPT to save them in your own business folder on Drive. Then build with AppDeploy using that folder.">Primero crea 8 fotos PNG individuales con un Master Prompt. Cuando estén listas, pídele a ChatGPT que las guarde en la carpeta personal de tu negocio en Drive. Después construye con AppDeploy usando esa carpeta.</p>
         <nav class="aula-fast-links" aria-label="Herramientas de la clase">
           <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer"><span>01</span><strong>ChatGPT</strong><small data-class-es="Abre tu cuenta" data-class-en="Open your account">Abre tu cuenta</small></a>
           <a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" rel="noopener noreferrer"><span>02</span><strong>Google Drive</strong><small data-class-es="Tus fotos y archivos" data-class-en="Your photos and files">Tus fotos y archivos</small></a>
@@ -221,8 +221,8 @@
         <section class="dashboard-announcements dashboard-learning-route" aria-labelledby="dashboard-announcements-title">
           <div class="dashboard-announcements-header"><div><p data-class-es="TU CLASE EN 4 VIDEOS" data-class-en="YOUR COURSE IN 4 VIDEOS">TU CLASE EN 4 VIDEOS</p><h2 id="dashboard-announcements-title" data-class-es="Mira cómo se hace. Después hazlo tú." data-class-en="Watch how it works. Then try it yourself.">Mira cómo se hace. Después hazlo tú.</h2></div><img class="dashboard-route-sticker" src="../content-lab/resources/premium-stickers-2026-11/16_objetivo_rosa.png" alt="" aria-hidden="true" width="84" height="84" loading="lazy" decoding="async"></div>
           <div class="dashboard-learning-steps">
-           <button type="button" data-course-video-code="01"><span>01</span><strong data-class-es="Empieza con ChatGPT" data-class-en="Start with ChatGPT">Empieza con ChatGPT</strong><small data-class-es="Tu idea y conexiones." data-class-en="Your idea and connections.">Tu idea y conexiones.</small></button>
-           <button type="button" data-course-video-code="05"><span>02</span><strong data-class-es="Crea tu web" data-class-en="Build your website">Crea tu web</strong><small data-class-es="Un prompt, una primera versión." data-class-en="One prompt, a first draft.">Un prompt, una primera versión.</small></button>
+           <button type="button" data-course-video-code="01"><span>01</span><strong data-class-es="Crea tus 8 fotos" data-class-en="Create your 8 photos">Crea tus 8 fotos</strong><small data-class-es="Master Prompt + guardar en tu Drive." data-class-en="Master Prompt + save to your Drive.">Master Prompt + guardar en tu Drive.</small></button>
+           <button type="button" data-course-video-code="05"><span>02</span><strong data-class-es="Crea tu web" data-class-en="Build your website">Crea tu web</strong><small data-class-es="AppDeploy usa las fotos de tu Drive." data-class-en="AppDeploy uses your Drive photos.">AppDeploy usa las fotos de tu Drive.</small></button>
            <button type="button" data-course-video-code="06"><span>03</span><strong data-class-es="Mejora el diseño" data-class-en="Improve the design">Mejora el diseño</strong><small data-class-es="Corrige con capturas." data-class-en="Fix issues with screenshots.">Corrige con capturas.</small></button>
            <button type="button" data-course-video-code="08"><span>04</span><strong data-class-es="Publica y prueba" data-class-en="Publish and test">Publica y prueba</strong><small data-class-es="Comprueba el enlace real." data-class-en="Check the real link.">Comprueba el enlace real.</small></button>
           </div>
@@ -480,7 +480,7 @@ document.getElementById('aula-refresh')?.addEventListener('click',()=>{
 <script type="module">
 // Versioned on every release to prevent Safari from mixing outdated modules.
 const retryToken=new URL(location.href).searchParams.get('aula_retry');
-const classroomModule='./curso.js?v=20261109-core4-v2'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
+const classroomModule='./curso.js?v=20261110-photo-drive-web-v1'+(retryToken?'&retry='+encodeURIComponent(retryToken):'');
 import(classroomModule).catch(error=>{
  const msg=document.getElementById('room-message');
  if(msg){
