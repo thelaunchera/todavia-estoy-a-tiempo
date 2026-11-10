@@ -48,3 +48,54 @@
  .app-shell *,.app-shell *:before,.app-shell *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
  .app-shell .content[data-lab-tab],.app-shell .sticker-downloads-grid article,.app-shell .background-library-grid article{opacity:1!important;transform:none!important}
 }
+
+
+/* Creative Motion 2026-11-10: usability-first scroll, gallery and bottom-sheet treatment.
+   Do not transform the entire .content: fixed editor sheets must stay viewport-fixed. */
+@keyframes labPageFadeOnly{from{opacity:.76}to{opacity:1}}
+@keyframes labSheetReveal{from{opacity:.8;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.app-shell .content[data-lab-tab]{animation:labPageFadeOnly .24s ease-out}
+/* Snap only navigation/preview rails; never snap the drawing canvas or main document. */
+.app-shell .factory-slide-strip,
+.app-shell .fg-filterbar,
+.app-shell .sticker-downloads-filters{
+  scroll-snap-type:x proximity;scroll-padding-inline:10px;
+  overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+}
+.app-shell .factory-slide-strip > *,
+.app-shell .fg-filterbar > button,
+.app-shell .sticker-downloads-filters > button{scroll-snap-align:start}
+.app-shell .sidebar{overscroll-behavior-y:contain}
+.app-shell .sidebar nav{min-height:0}
+.app-shell .sidebar nav button:focus-visible,
+.app-shell .lab-mobile-dock button:focus-visible{
+  outline:3px solid #79ACC5;outline-offset:2px;
+}
+.app-shell .factory-thumbnail.selected,
+.app-shell .fg-card.selected{
+  border-color:#6A9CB4;box-shadow:0 0 0 2px #8CBCD233,0 10px 26px #203A4C14;
+}
+.app-shell .fg-card{
+  transition:box-shadow .3s cubic-bezier(.22,1,.36,1),
+    border-color .24s ease,transform .3s cubic-bezier(.22,1,.36,1);
+}
+.app-shell .factory-right{scroll-margin-top:88px}
+@media(min-width:921px){
+ .app-shell .factory-right{top:92px}
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .app-shell .fg-card:hover{transform:translateY(-4px);border-color:#BCD2DB;box-shadow:0 16px 34px #19364815}
+}
+@media(max-width:850px){
+ .app-shell .sidebar.open{box-shadow:12px 0 46px #172E3D2B}
+ .app-shell .sidebar nav button{min-height:44px}
+}
+@media(max-width:800px) and (prefers-reduced-motion:no-preference){
+ .app-shell .fg-detail{animation:labSheetReveal .28s cubic-bezier(.22,1,.36,1)}
+}
+@media(prefers-reduced-motion:reduce){
+ .app-shell .content[data-lab-tab],.app-shell .fg-detail{animation:none!important}
+ .app-shell .fg-card{transition:none!important;transform:none!important}
+ .app-shell .factory-slide-strip,.app-shell .fg-filterbar,
+ .app-shell .sticker-downloads-filters{scroll-behavior:auto!important}
+}

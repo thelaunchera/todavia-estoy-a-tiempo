@@ -336,3 +336,44 @@ body.aula-member [data-aula-view="catalogo"]{display:none!important}
 #aula-layout .aula-navigation .aula-side-link{min-height:46px;line-height:1.45}
 #aula-layout .aula-rail .lesson-index button{min-height:44px}
 @media(max-width:759px){#aula-layout .aula-navigation .aula-side-link{min-height:48px;font-size:14px}}
+
+
+/* Aula creative motion 2026-11-10 — focused on learning navigation, not lesson content. */
+#aula-layout .aula-navigation{
+  overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:#C9D9E0 transparent;
+}
+#aula-layout .aula-side-link,
+#aula-layout .aula-rail .lesson-index button{
+  transition:background-color .2s ease,border-color .2s ease,
+    color .2s ease,box-shadow .2s ease;
+}
+#aula-layout .aula-side-link[aria-current="page"],
+#aula-layout .aula-side-link.aula-selected{
+  box-shadow:inset 3px 0 #7AA5BB;
+}
+#aula-layout .aula-rail .lesson-index button.current{
+  box-shadow:inset 3px 0 #91B6C8;
+}
+#aula-layout .aula-panel .resource{
+  transition:border-color .22s ease,box-shadow .26s ease,
+    transform .26s cubic-bezier(.22,1,.36,1);
+}
+#aula-layout :is(.aula-side-link,.aula-rail .lesson-index button,.aula-primary-action,.aula-secondary-action):focus-visible{
+  outline:3px solid #77A6BE;outline-offset:3px;
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ #aula-layout .aula-panel .resource:hover{
+  transform:translateY(-3px);border-color:#BED4DF;box-shadow:0 14px 25px #23445B12;
+ }
+}
+@media(max-width:759px){
+ body.aula-member.aula-menu-open{overflow:hidden}
+ #aula-layout .aula-rail{overscroll-behavior-y:contain}
+ #aula-layout .aula-rail .lesson-index button,
+ #aula-layout .aula-navigation .aula-side-link{min-height:46px}
+}
+@media(prefers-reduced-motion:reduce){
+ #aula-layout .aula-side-link,#aula-layout .aula-rail .lesson-index button,
+ #aula-layout .aula-panel .resource{transition:none!important;transform:none!important}
+}
