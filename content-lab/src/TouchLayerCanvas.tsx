@@ -13,7 +13,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;page?:number;
+  placement?: 'behind-text' | 'front';role?:'background';backgroundFit?:'cover';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
@@ -681,7 +681,7 @@ export default function TouchLayerCanvas({
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
               {layer.kind==='sticker'&&layer.tint?<span className="touch-editor-sticker-tint" aria-hidden="true"
                 style={{backgroundColor:layer.tint,WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")'}}/>:
-              <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
+              <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:layer.backgroundFit==='cover'?'cover':'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>}
