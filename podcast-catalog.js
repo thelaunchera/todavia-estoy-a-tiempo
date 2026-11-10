@@ -48,7 +48,7 @@ window.PODCAST_EPISODES = Object.freeze([
     title: 'Vamos a ordenar esa idea que tienes en la cabeza',
     titleEn: "Let's make sense of the idea in your head",
     summary: 'Una idea puede sentirse clarísima en tu cabeza y volverse un enredo al explicarla. Ordenamos lo que sabes, lo que supones y lo que necesitas comprobar con personas reales.',
-    summaryEn: 'An idea can feel perfectly clear in your head, yet difficult to explain. Let's separate what you know, what you're assuming, and what you still need to test with real people.',
+    summaryEn: "An idea can feel perfectly clear in your head, yet difficult to explain. Let\'s separate what you know, what you\'re assuming, and what you still need to test with real people.",
     url: 'https://open.spotify.com/episode/6nfCQjlytWbagrYjTlugLi',
     art: 'https://image-cdn-ak.spotifycdn.com/image/ab67656300005f1f072aa562ec7dfa14451a2b5e',
     popupImage: 'https://image-cdn-ak.spotifycdn.com/image/ab67656300005f1f072aa562ec7dfa14451a2b5e',
