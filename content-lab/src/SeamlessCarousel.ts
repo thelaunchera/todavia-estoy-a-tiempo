@@ -69,7 +69,7 @@ export async function paintSeamlessTypography(
 
 /** Renders ONE continuous design first and then slices it on exact 1080px boundaries. */
 export async function drawSeamlessCanvas(pages:SeamlessPage[],brand:SeamlessBrand,images:Record<string,string>,opts:SeamlessOptions={}):Promise<HTMLCanvasElement>{
- if(pages.length<2||pages.length>10)throw Error('El carrusel seamless necesita entre 2 y 10 slides.');
+ if(pages.length<2||pages.length>12)throw Error('El carrusel seamless necesita entre 2 y 12 slides.');
  const total=pages.length,scale=Math.max(1,Math.min(4,opts.outputScale||1)),virtualWidth=total*W;
  const wide=document.createElement('canvas');wide.width=virtualWidth*scale;wide.height=H*scale;
  const ctx=wide.getContext('2d');if(!ctx)throw Error('No hay canvas para seamless.');

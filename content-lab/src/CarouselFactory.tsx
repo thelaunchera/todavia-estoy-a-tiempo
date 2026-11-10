@@ -63,7 +63,7 @@ type Props = {
   initialStep?:'canvas'|'download';
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
-const MAX_CAROUSEL_SLIDES=10;
+const MAX_CAROUSEL_SLIDES=12;
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
  if(!slide.assetId)return {...slide,layout};
@@ -859,7 +859,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     notify('Ritmo editorial aplicado: slides fotográficos, tipográficos y mixtos. Tus fotos y textos siguen editables.');
   };
   const duplicateSlide=()=>{
-    if(slides.length>=MAX_CAROUSEL_SLIDES){notify('Máximo diez slides por carrusel.');return;}
+    if(slides.length>=MAX_CAROUSEL_SLIDES){notify('Máximo 12 slides por carrusel.');return;}
     const insertAt=i+1,count=slides.length;
     const cloned:Slide={...slide,key:'slide-copy-'+crypto.randomUUID(),
       photoPosition:slide.photoPosition?{...slide.photoPosition}:undefined,
@@ -1311,7 +1311,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const splitDescription=()=>{
     const content=slide.description.trim();
     if(content.length<=210)return notify('Este texto cabe mejor en un solo slide.');
-    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Puedes usar hasta diez slides. Acorta el texto antes de dividir.');
+    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Puedes usar hasta 12 slides. Acorta el texto antes de dividir.');
     const splitPoint=content.lastIndexOf(' ',205);
     const position=splitPoint>95?splitPoint:205;
     const first=content.slice(0,position).trim(),rest=content.slice(position).trim();
@@ -1325,7 +1325,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     notify('Dividido en dos slides. Todo el texto se mantiene editable.');
   };
   const insert=()=>{
-    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Máximo diez slides por carrusel.');
+    if(slides.length>=MAX_CAROUSEL_SLIDES)return notify('Máximo 12 slides por carrusel.');
     const count=slides.length,at=i+1;
     const next:Slide={...makeSlide(count,''),key:'slide-'+crypto.randomUUID(),
       eyebrow:'',title:'',description:'',layout:'statement',
@@ -1663,7 +1663,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             </select>
           </label>
           <button type="button" onClick={insert} disabled={slides.length>=MAX_CAROUSEL_SLIDES}
-            aria-label="Añadir una nueva diapositiva después de la actual"><Plus size={17}/> <span className="factory-add-slide-text">Añadir slide</span></button>
+            aria-label="Añadir una nueva diapositiva después de la actual (máximo 12)"><Plus size={17}/> <span className="factory-add-slide-text">Añadir slide</span></button>
         </div>}
       <button type="button" className="factory-mobile-preview-trigger"
         aria-label={'Ver diseño actual, slide '+(i+1)+' de '+slides.length}

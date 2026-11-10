@@ -27,7 +27,7 @@ async function photoFromDataUrl(src:string):Promise<HTMLImageElement>{
 }
 export async function renderCarouselVideo(pages:string[],onProgress?:CarouselVideoProgress):Promise<CarouselVideo>{
  if(!carouselVideoAvailable())throw Error('Este navegador no permite grabar video del lienzo. Usa otro navegador o descarga tus PNG.');
- if(pages.length<1||pages.length>10)throw Error('El video necesita entre 1 y 10 slides.');
+ if(pages.length<1||pages.length>12)throw Error('El video necesita entre 1 y 12 slides.');
  const mime=supportedVideoMime();
  if(!mime)throw Error('No existe un formato de video compatible.');
  const photos=await Promise.all(pages.map(photoFromDataUrl));

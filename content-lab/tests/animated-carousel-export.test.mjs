@@ -16,7 +16,7 @@ test('animated export is browser-native, local and feature-gated',()=>{
  assert.doesNotMatch(source,/\bfetch\(|XMLHttpRequest|FormData|supabase|stripe|cloudflare/i);
 });
 test('video encoder is bounded and cleans streams on completion and failure',()=>{
- assert.match(source,/pages\.length>10/);
+ assert.match(source,/pages\.length>12/);
  assert.match(source,/requestAnimationFrame\(tick\)/);
  assert.match(source,/stream\.getTracks\(\)\.forEach\(track=>track\.stop\(\)\)/);
  assert.match(source,/canvas\.width=1;canvas\.height=1/);

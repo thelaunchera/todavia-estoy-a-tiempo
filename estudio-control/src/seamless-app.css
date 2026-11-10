@@ -611,3 +611,9 @@
 
 .studio-creative-preview-tools .studio-motion-download{flex:1 1 175px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;background:#191919;color:#fff;border-radius:12px;font:700 12px Prompt,Arial,sans-serif;text-decoration:none;text-align:center}
 .studio-motion-download:focus-visible{outline:3px solid #7AACC4;outline-offset:3px}
+
+/* Add a blank page beside the scrollable slide thumbnails, including on phones. */
+.studio-app-slide-tabs>button.studio-app-add-slide{border:1px dashed #cdb449;background:#fff9df;color:#191919;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.studio-app-slide-tabs>button.studio-app-add-slide>span:first-child{font-size:22px;line-height:1;font-weight:700}
+.studio-app-slide-tabs>button.studio-app-add-slide:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.studio-carousel-editor-mode .studio-app-slide-tabs>button.studio-app-add-slide>span:first-child{font-size:18px}}
