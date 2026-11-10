@@ -37,7 +37,7 @@ test('A full carousel slide duplicates with distinct key and retains independent
  const source=read('CarouselFactory.tsx');
  assert.ok(source.includes('const duplicateSlide=()=>'));
  assert.ok(source.includes('if(slides.length>=MAX_CAROUSEL_SLIDES)'));
- assert.ok(source.includes('const MAX_CAROUSEL_SLIDES=10;'));
+ assert.ok(source.includes('const MAX_CAROUSEL_SLIDES=12;'));
  assert.ok(source.includes('const insert=()=>'));
  assert.ok(source.includes('const mapped=(style.panoramaLayers||[]).map(layer=>'));
  assert.ok(source.includes("key:'slide-copy-'+crypto.randomUUID()"));
@@ -69,4 +69,17 @@ test('First-time guide and mobile touch protections are present and nonblocking'
  assert.ok(css.includes('@media(max-width:850px)'));
  assert.ok(touch.includes("interactionMode==='navigate'"));
  assert.ok(touch.includes('goToPage(index)'));
+});
+
+test('Both carousel editors support 12 editable slides without truncating saved content',()=>{
+ const lab=read('CarouselFactory.tsx');
+ const serializer=read('CarouselArtDirection.ts');
+ const renderer=read('SeamlessCarousel.ts');
+ const studio=readFileSync(new URL('../../estudio-control/src/SeamlessEditor.tsx',import.meta.url),'utf8');
+ assert.ok(lab.includes('const MAX_CAROUSEL_SLIDES=12;'));
+ assert.ok(serializer.includes('slides:slides.slice(0,12)'));
+ assert.ok(renderer.includes('pages.length>12'));
+ assert.ok(studio.includes('[2,3,4,5,6,7,8,9,10,11,12]'));
+ assert.ok(studio.includes('className="studio-app-add-slide"'));
+ assert.ok(studio.includes('count:Math.min(12,d.count+1)'));
 });
