@@ -158,7 +158,8 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   if(!images[assetId])loadImage(assetId);
   const sticker=assetCategory(asset)==='sticker';
   const id=uniqueId();setFocusLayerId(id);
-  const width=sticker?.19:.46,height=sticker?.18:.40;
+  // Larger initial sticker size, without modifying saved projects or photographs.
+  const width=sticker?.4:.46,height=sticker?.34:.40;
   setRecentMedia(old=>[assetId,...old.filter(value=>value!==assetId)].slice(0,12));
   update({...decor,layers:[...decor.layers,{id,assetId,
     name:displayAssetName(asset),kind:sticker?'sticker':'photo',
