@@ -228,6 +228,16 @@ jobs:
           test -s _podcast_pages/clases/countdown.js
           grep -q 'src="./assets/' _podcast_pages/estudio/index.html || grep -q 'src="/assets/' _podcast_pages/estudio/index.html
           echo 'Landing y Estudio presentes en el artefacto de Pages.'
+      - name: Auditar tamaño de publicación antes de subir a Pages
+        run: |
+          echo "Top-level package sizes:"
+          du -sh _podcast_pages/* | sort -h | tail -25
+          echo "Largest 30 published files:"
+          find _podcast_pages -type f -printf '%s %p\\n' | sort -nr | head -30
+          echo "Total uncompressed bytes:"
+          du -sb _podcast_pages
+          echo "File count:"
+          find _podcast_pages -type f | wc -l
       - name: Empaquetar sitio estático
         uses: actions/upload-pages-artifact@v4
         with:
