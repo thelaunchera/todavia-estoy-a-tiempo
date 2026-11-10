@@ -34,7 +34,7 @@ export type PanoramaLayer = {
   name: string;
   kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
-  color?:string; tint?:string; outline?:boolean; shadow?:boolean;
+  color?:string; tint?:string; tintColor?:string; tintStrength?:number; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
   frameStyle?:string;
   placement?: LayerPlacement;
@@ -80,6 +80,9 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       ...(item.kind==='photo'&&item.role!=='background'&&item.frameStyle==='polaroid'
         ?{frameStyle:'polaroid' as const}:{}),
       ...(item.kind==='sticker'&&/^#[0-9a-f]{6}$/i.test(String(item.tint))?{tint:String(item.tint)}:{}),
+      ...((item.kind==='sticker'||item.kind==='photo')&&/^#[0-9a-f]{6}$/i.test(String(item.tintColor))?{tintColor:String(item.tintColor)}:{}),
+      ...((item.kind==='sticker'||item.kind==='photo')&&typeof item.tintStrength==='number'&&Number.isFinite(item.tintStrength)
+        ?{tintStrength:Math.max(0,Math.min(1,item.tintStrength))}:{}),
       ...(typeof item.opacity==='number'&&Number.isFinite(item.opacity)?{opacity:Math.max(0,Math.min(1,item.opacity))}:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
       ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const,
@@ -200,16 +203,34 @@ export async function paintPanoramaLayers(
    const src=images[layer.assetId];
    if(!src)throw Error('Una foto del lienzo todavía está cargando. Espera antes de descargar.');
    const img=new Image();img.src=src;await img.decode();
+   const tint=/^#[0-9a-f]{6}$/i.test(layer.tintColor||'')?layer.tintColor:
+     layer.kind==='sticker'&&/^#[0-9a-f]{6}$/i.test(layer.tint||'')?layer.tint:undefined;
+   const strength=layer.tintColor?Math.max(0,Math.min(1,layer.tintStrength??.38)):layer.tint?1:0;
+   // Studio parity: source-atop affects opaque source pixels only; never mutate originals.
+   let colorBuffer:HTMLCanvasElement|null=null;
+   if(tint&&strength>0){
+     const scale=Math.min(1,4096/Math.max(img.naturalWidth,img.naturalHeight));
+     colorBuffer=document.createElement('canvas');
+     colorBuffer.width=Math.max(1,Math.round(img.naturalWidth*scale));
+     colorBuffer.height=Math.max(1,Math.round(img.naturalHeight*scale));
+     const ink=colorBuffer.getContext('2d');
+     if(!ink)throw Error('No se pudo preparar el color de este elemento.');
+     ink.drawImage(img,0,0,colorBuffer.width,colorBuffer.height);
+     ink.globalCompositeOperation='source-atop';ink.globalAlpha=strength;
+     ink.fillStyle=tint;ink.fillRect(0,0,colorBuffer.width,colorBuffer.height);
+   }
+   const painted=colorBuffer||img;
+   try{
    if(layer.kind==='photo'){
     if(layer.role==='background'){
      if(layer.backgroundFit==='cover'){
       // Match object-fit: cover for photographic wallpapers in the exported PNG.
       const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
       ctx.beginPath();ctx.rect(-w/2,-h/2,w,h);ctx.clip();
-      ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
+      ctx.drawImage(painted,-w/2+p.x,-h/2+p.y,p.width,p.height);
      }else{
       // Preserve legacy seamless decorative patterns without cropping ribbons.
-      ctx.drawImage(img,-w/2,-h/2,w,h);
+      ctx.drawImage(painted,-w/2,-h/2,w,h);
      }
     }else if(layer.frameStyle==='polaroid'){
      const {inset,bottom}=photoFrameMetrics(w,h,'polaroid');
@@ -224,12 +245,12 @@ export async function paintPanoramaLayers(
      if(innerW>0&&innerH>0){
        ctx.beginPath();ctx.rect(-w/2+inset,-h/2+inset,innerW,innerH);ctx.clip();
        const p=coverPlacement(img.naturalWidth,img.naturalHeight,innerW,innerH,r.crop);
-       ctx.drawImage(img,-w/2+inset+p.x,-h/2+inset+p.y,p.width,p.height);
+       ctx.drawImage(painted,-w/2+inset+p.x,-h/2+inset+p.y,p.width,p.height);
      }
     }else{
      ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h,6));ctx.clip();
      const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
-     ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
+     ctx.drawImage(painted,-w/2+p.x,-h/2+p.y,p.width,p.height);
     }
    }else{
     const scale=Math.min(w/img.naturalWidth,h/img.naturalHeight);
@@ -237,19 +258,9 @@ export async function paintPanoramaLayers(
     if((r.cornerRadius??0)>0){
      ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h));ctx.clip();
     }
-    if(layer.kind==='sticker'&&layer.tint&&/^#[0-9a-f]{6}$/i.test(layer.tint)){
-     // Keep the source alpha unchanged while recoloring, in PNG export as in preview.
-     const temp=document.createElement('canvas');
-     temp.width=Math.max(1,Math.ceil(iw));temp.height=Math.max(1,Math.ceil(ih));
-     const ink=temp.getContext('2d');
-     if(!ink)throw Error('No se pudo preparar el color del sticker.');
-     ink.drawImage(img,0,0,temp.width,temp.height);
-     ink.globalCompositeOperation='source-in';ink.fillStyle=layer.tint;
-     ink.fillRect(0,0,temp.width,temp.height);
-     ctx.drawImage(temp,-iw/2,-ih/2,iw,ih);
-     temp.width=1;temp.height=1;
-    }else ctx.drawImage(img,-iw/2,-ih/2,iw,ih);
+    ctx.drawImage(painted,-iw/2,-ih/2,iw,ih);
    }
+   }finally{if(colorBuffer){colorBuffer.width=1;colorBuffer.height=1;}}
   }
   ctx.restore();
  }

@@ -11,7 +11,7 @@ import type {StickerCopyResult} from './CarouselStickerCopy';
 
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
-  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; lineHeight?:number; spacing?:number; curve?:number;
+  text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; tintColor?:string; tintStrength?:number; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';role?:'background';backgroundFit?:'cover';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
@@ -50,7 +50,7 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
-  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|null>(null);
+  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|'color'|null>(null);
   // Preview opacity locally while dragging, avoiding full-canvas render and
   // autosave on every input event (especially costly in iPad/iPhone Safari).
   const [opacityPreview,setOpacityPreview]=useState<{id:string;value:number}|null>(null);
@@ -384,6 +384,46 @@ export default function TouchLayerCanvas({
     onKeyUp:finishOpacity,onBlur:finishOpacity,
   };
   const selectedRect = chosen ? getRect(chosen) : undefined;
+  const isImageColor=chosen?.kind==='sticker'||chosen?.kind==='photo';
+  const selectedColor=isImageColor?(chosen?.tintColor||chosen?.tint||'#B74670'):(chosen?.color||'#191919');
+  const selectedStrength=Math.round((chosen?.tintColor?(chosen.tintStrength??.38):chosen?.tint?1:.38)*100);
+  const applyColor=(hex:string)=>{
+    if(!chosen||!onUpdate||chosen.locked||!/^#[0-9a-f]{6}$/i.test(hex))return;
+    if(isImageColor)onUpdate(chosen.id,{tintColor:hex,tintStrength:chosen.tintColor?(chosen.tintStrength??.38):chosen.tint?1:.38,tint:undefined});
+    else onUpdate(chosen.id,{color:hex});
+  };
+  const applyColorStrength=(percent:number)=>{
+    if(!chosen||!onUpdate||chosen.locked||!isImageColor)return;
+    onUpdate(chosen.id,{tintColor:chosen.tintColor||chosen.tint||'#B74670',
+      tintStrength:Math.max(0,Math.min(1,percent/100)),tint:undefined});
+  };
+  const originalColor=()=>{
+    if(!chosen||!onUpdate||chosen.locked||!isImageColor)return;
+    onUpdate(chosen.id,{tintColor:undefined,tintStrength:undefined,tint:undefined});
+  };
+  const colorTools=chosen&&onUpdate?<div className="touch-editor-color-tools" role="group" aria-label="Cambiar color del elemento seleccionado">
+    <label className="touch-editor-color-picker">
+      {isImageColor?'Teñir elemento':'Color del elemento'}
+      <input type="color" aria-label={isImageColor?'Cambiar color del sticker o fotografía':'Cambiar color de texto o forma'}
+        disabled={!!chosen.locked} value={selectedColor} onChange={e=>applyColor(e.target.value)}/>
+    </label>
+    <div className="touch-editor-color-swatches" role="group" aria-label="Colores rápidos del elemento">
+      {[...new Set([...textPalette,'#B74670','#A05368','#F2D85B','#BED8E9','#191919','#FFFFFF']
+        .filter(hex=>/^#[0-9a-f]{6}$/i.test(hex)))].map(hex=>
+        <button type="button" key={hex} disabled={!!chosen.locked} aria-label={'Aplicar color '+hex}
+          aria-pressed={!!(isImageColor?chosen.tintColor||chosen.tint:chosen.color)&&selectedColor.toLowerCase()===hex.toLowerCase()}
+          onClick={()=>applyColor(hex)} style={{background:hex}}/>)}
+    </div>
+    {isImageColor&&<>
+      <label className="touch-editor-color-strength">Intensidad
+        <input type="range" min="0" max="100" step="1" aria-label="Intensidad del color del elemento"
+          disabled={!!chosen.locked} value={selectedStrength} onChange={e=>applyColorStrength(Number(e.target.value))}/>
+        <output>{selectedStrength}%</output>
+      </label>
+      <button type="button" className="touch-editor-color-reset" disabled={!!chosen.locked}
+        onClick={originalColor}>Color original</button>
+    </>}
+  </div>:null;
   useEffect(()=>{onSelectionChange?.(chosen?.id??null)},[chosen?.id,onSelectionChange]);
   const selectedCornerRadius = selectedRect?.cornerRadius ?? (chosen?.kind==='photo'&&selectedRect
     ? Math.round(100*photoFrameMetrics(selectedRect.w*1080*pageCount,selectedRect.h*canvasHeight,
@@ -463,6 +503,7 @@ export default function TouchLayerCanvas({
       onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
       onPointerUp={e=>e.stopPropagation()} onPointerCancel={e=>e.stopPropagation()}>
           <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
+          <button type="button" aria-pressed={contextInspector==='color'} onClick={()=>setContextInspector(v=>v==='color'?null:'color')}><span aria-hidden="true">◉</span><small>Color</small></button>
           <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
           {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='curve'} onClick={()=>setContextInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
           <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
@@ -476,8 +517,9 @@ export default function TouchLayerCanvas({
         {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento"
       onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
       onPointerUp={e=>e.stopPropagation()} onPointerCancel={e=>e.stopPropagation()}>
-          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':'Posición'}</strong>
+          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='color'?'Cambiar color':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':'Posición'}</strong>
             <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
+          {contextInspector==='color'&&colorTools}
           {contextInspector==='opacity'&&<label className="touch-editor-context-range">
             Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
             value={opacityPercent} onChange={e=>changeOpacity(chosen.id,Number(e.currentTarget.value))} {...opacitySliderEvents}/>
@@ -585,6 +627,7 @@ export default function TouchLayerCanvas({
           <output>{Math.round(selectedRect.w*100)}%</output>
         </label>
       </div>}
+    {chosen&&onUpdate&&<div className="touch-editor-color-desktop">{colorTools}</div>}
     <div ref={scrollArea} className="touch-editor-scroll" onScroll={syncPageFromScroll}
       style={{'--panorama-pages':pageCount} as React.CSSProperties}>
       <div ref={stage} className={'touch-editor-stage' + (dragOver ? ' drag-over' : '')}
@@ -679,12 +722,25 @@ export default function TouchLayerCanvas({
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
-              {layer.kind==='sticker'&&layer.tint?<span className="touch-editor-sticker-tint" aria-hidden="true"
-                style={{backgroundColor:layer.tint,WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")'}}/>:
               <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:layer.backgroundFit==='cover'?'cover':'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
-              } : undefined}/>}
+              } : undefined}/>
+              {((layer.tintColor&&/^#[0-9a-f]{6}$/i.test(layer.tintColor))||
+                (layer.kind==='sticker'&&layer.tint&&/^#[0-9a-f]{6}$/i.test(layer.tint)))&&
+                <span className="touch-editor-sticker-tint" aria-hidden="true"
+                  style={{backgroundColor:layer.tintColor||layer.tint,
+                    opacity:layer.tintColor?(layer.tintStrength??.38):1,
+                    WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")',
+                    ...(layer.kind==='photo'?{
+                      WebkitMaskSize:layer.role==='background'&&layer.backgroundFit!=='cover'?'100% 100%':'cover',
+                      maskSize:layer.role==='background'&&layer.backgroundFit!=='cover'?'100% 100%':'cover',
+                      WebkitMaskPosition:layer.role==='background'?'center':crop.x*100+'% '+crop.y*100+'%',
+                      maskPosition:layer.role==='background'?'center':crop.x*100+'% '+crop.y*100+'%',
+                      transform:layer.role==='background'?'none':'scale('+crop.zoom+')',
+                      transformOrigin:crop.x*100+'% '+crop.y*100+'%'
+                    }:{}),
+                  }}/>} 
             </div>}
             {layer.kind==='text'&&editingText===layer.id&&onUpdate&&(inlineTextTools||pageCount>1)&&active?
               <textarea ref={quickTextInput} className="touch-editor-oncanvas-text"

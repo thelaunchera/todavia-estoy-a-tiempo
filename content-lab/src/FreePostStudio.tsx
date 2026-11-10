@@ -36,6 +36,7 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
     !decor.layers.some(layer=>layer.role==='background'&&layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
    locked:decor.primaryPhotoLocked===true,opacity:decor.primaryPhotoOpacity??1,
+   tintColor:decor.primaryPhotoTintColor,tintStrength:decor.primaryPhotoTintStrength,
    rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
  const title=post.hook;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
@@ -230,11 +231,24 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     patch={...fitNewText(currentLayer,patch.text),...patch};
   }
   if(id==='main-photo'){
-   if(typeof patch.opacity==='number')update({...decor,primaryPhotoOpacity:Math.max(0,Math.min(1,patch.opacity))});
+   const effect:Partial<CoverDecor>={};
+   if(typeof patch.opacity==='number')effect.primaryPhotoOpacity=Math.max(0,Math.min(1,patch.opacity));
+   if('tintColor' in patch)effect.primaryPhotoTintColor=patch.tintColor;
+   if('tintStrength' in patch)effect.primaryPhotoTintStrength=patch.tintStrength;
+   if(Object.keys(effect).length)update({...decor,...effect});
    return;
   }
   if(id.startsWith('legacy-sticker-')){
    const asset=id.slice('legacy-sticker-'.length);
+   // Upgrade only the selected legacy sticker to a true editable layer.
+   // Reuse its ID and geometry; the asset stays private and is never duplicated.
+   if('tintColor' in patch||'tintStrength' in patch){
+    if(!currentLayer)return;
+    const edited:PanoramaLayer={...currentLayer,...patch,tint:undefined};
+    update({...decor,stickerIds:decor.stickerIds.filter(value=>value!==asset),
+      layers:[...decor.layers,edited]});
+    return;
+   }
    if(typeof patch.opacity==='number')update({...decor,
      stickerOpacities:{...decor.stickerOpacities,[asset]:Math.max(0,Math.min(1,patch.opacity))}});
    if(patch.tint!==undefined){
@@ -405,16 +419,24 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
       <button type="button" disabled={selectedLayer.locked} onClick={()=>reorder(selectedLayer.id,'front')} title={plain('Bring to front','Traer al frente',locale)}>{plain('To front','Al frente',locale)}</button>
       <button type="button" aria-pressed={!!selectedLayer.locked} onClick={()=>toggleLock(selectedLayer.id,!selectedLayer.locked)}>{selectedLayer.locked?<LockKeyholeOpen size={15}/>:<LockKeyhole size={15}/>}{selectedLayer.locked?plain('Unlock','Desbloquear',locale):plain('Lock','Bloquear',locale)}</button>
     </div>
-    {(['text','shape','sticker'] as string[]).includes(selectedLayer.kind)&&<div className="free-post-selection-colors" role="group" aria-label={plain('Change element color','Cambiar color de elemento',locale)}>
+    <div className="free-post-selection-colors" role="group" aria-label={plain('Change element color','Cambiar color de elemento',locale)}>
       <label>{plain('Color','Color',locale)} <input type="color" disabled={selectedLayer.locked} aria-label={plain('Element color','Color del elemento',locale)}
-        value={selectedLayer.kind==='sticker'?(selectedLayer.tint||'#191919'):(selectedLayer.color||'#191919')}
-        onChange={e=>updateLayer(selectedLayer.id,selectedLayer.kind==='sticker'?{tint:e.target.value}:{color:e.target.value})}/></label>
-      {[...new Set([brand.color||'#244B5B','#191919','#FAF8F3','#FFFFFF','#F2D85B','#BED8E9'].filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].map(hex=>
+        value={selectedLayer.kind==='photo'||selectedLayer.kind==='sticker'?(selectedLayer.tintColor||selectedLayer.tint||'#B74670'):(selectedLayer.color||'#191919')}
+        onChange={e=>updateLayer(selectedLayer.id,selectedLayer.kind==='photo'||selectedLayer.kind==='sticker'
+          ?{tintColor:e.target.value,tintStrength:selectedLayer.tintStrength??.38,tint:undefined}:{color:e.target.value})}/></label>
+      {[...new Set([brand.color||'#244B5B','#191919','#FAF8F3','#FFFFFF','#F2D85B','#BED8E9','#B74670'].filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].map(hex=>
         <button type="button" key={hex} disabled={selectedLayer.locked} aria-label={plain('Apply color','Aplicar color',locale)+' '+hex}
-          style={{backgroundColor:hex}} onClick={()=>updateLayer(selectedLayer.id,selectedLayer.kind==='sticker'?{tint:hex}:{color:hex})}/>)}
-      {selectedLayer.kind==='sticker'&&selectedLayer.tint&&<button type="button" className="free-post-color-reset" disabled={selectedLayer.locked}
-        onClick={()=>updateLayer(selectedLayer.id,{tint:''})}>{plain('Original colors','Colores originales',locale)}</button>}
-    </div>}
+          style={{backgroundColor:hex}} onClick={()=>updateLayer(selectedLayer.id,selectedLayer.kind==='photo'||selectedLayer.kind==='sticker'
+            ?{tintColor:hex,tintStrength:selectedLayer.tintStrength??.38,tint:undefined}:{color:hex})}/>)}
+      {(selectedLayer.kind==='photo'||selectedLayer.kind==='sticker')&&<>
+        <label className="free-post-color-strength">Intensidad <input type="range" min="0" max="100" step="1" disabled={selectedLayer.locked}
+          aria-label="Intensidad del color" value={Math.round((selectedLayer.tintColor?selectedLayer.tintStrength??.38:selectedLayer.tint?1:.38)*100)}
+          onChange={e=>updateLayer(selectedLayer.id,{tintColor:selectedLayer.tintColor||selectedLayer.tint||'#B74670',
+            tintStrength:Number(e.target.value)/100,tint:undefined})}/></label>
+        <button type="button" className="free-post-color-reset" disabled={selectedLayer.locked}
+          onClick={()=>updateLayer(selectedLayer.id,{tintColor:undefined,tintStrength:undefined,tint:undefined})}>{plain('Original colors','Colores originales',locale)}</button>
+      </>}
+    </div>
   </div>}
   <input ref={photosRef} type="file" multiple accept="image/*,.heic,.heif" hidden
    onChange={e=>{const files=[...(e.target.files||[])];e.target.value='';void uploadPhotos(files)}}/>

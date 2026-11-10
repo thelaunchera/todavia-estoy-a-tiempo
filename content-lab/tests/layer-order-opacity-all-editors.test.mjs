@@ -20,7 +20,7 @@ test('Native single post photos and old stickers keep opacity in PNG and selecti
  assert.match(post,/opacity:decor\.primaryPhotoOpacity\?\?1/);
  assert.match(post,/opacity:decor\.stickerOpacities\?\.\[id\]\?\?1/);
  assert.match(post,/stickerOpacities:\{\.\.\.decor\.stickerOpacities,/);
- assert.match(post,/primaryPhotoOpacity:Math\.max/);
+ assert.match(post,/effect\.primaryPhotoOpacity=Math\.max/);
  assert.match(decor,/primaryPhotoOpacity:/);
  assert.match(decor,/stickerOpacities:/);
  assert.match(post,/paintPanoramaLayers\(ctx,width,height,coverLayers/);
