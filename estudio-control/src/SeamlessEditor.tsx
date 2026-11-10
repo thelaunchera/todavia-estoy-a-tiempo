@@ -1363,6 +1363,10 @@ export default function SeamlessEditor(){
       style={{border:0,background:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.past.length} onClick={undoCanvas}><Undo2 size={19}/><small>Deshacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={19}/><small>Rehacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={busy||!storageReady} onClick={()=>void saveProject()}><FolderOpen size={19}/><small>Guardar</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={busy||!storageReady} onClick={()=>void downloadSlide(slide)}><ImagePlus size={19}/><small>PNG</small></button>
   </div>}
   {current&&<div className="studio-app-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
     <button type="button" aria-pressed={activeInspector==='color'} disabled={current.locked}
@@ -1377,6 +1381,8 @@ export default function SeamlessEditor(){
     <button type="button" aria-pressed={activeInspector==='position'} onClick={()=>setActiveInspector(v=>v==='position'?null:'position')}><span aria-hidden="true">▣</span><small>Posición</small></button>
     <button type="button" aria-pressed={activeInspector==='rotate'} onClick={()=>setActiveInspector(v=>v==='rotate'?null:'rotate')}><span aria-hidden="true">↻</span><small>Girar</small></button>
     <button type="button" onClick={duplicateSelected}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.past.length} onClick={undoCanvas}><Undo2 size={19}/><small>Deshacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={19}/><small>Rehacer</small></button>
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     </>}
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
