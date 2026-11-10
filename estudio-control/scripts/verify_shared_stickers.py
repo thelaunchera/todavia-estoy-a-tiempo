@@ -3,18 +3,20 @@
 
 Keeps damaged source files untouched for later restoration. The private Studio
 uses the generated allowlist to avoid showing an unusable sticker in its picker.
+Bundled files are published once under /content-lab/resources/ and referenced
+from the Studio without copying 140 MB of PNG files a second time.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path("content-lab/public")
 STUDIO = Path("_podcast_pages/estudio")
+PUBLISHED = Path("_podcast_pages/content-lab")
 CATALOGUE = Path("estudio-control/src/lab-assets.ts")
 
 
@@ -74,17 +76,16 @@ def main() -> None:
         file = asset["file"]
         ok, reason = is_valid(file, manifest.get(file))
         if ok:
-            dest = STUDIO / file
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(ROOT / file, dest)
+            dest = PUBLISHED / file
+            if not dest.is_file() or dest.stat().st_size != (ROOT / file).stat().st_size:
+                raise SystemExit("El PNG verificado no llegó a la biblioteca publicada: " + file)
             valid.append(file)
         else:
             invalid.append({"file": file, "reason": reason})
     if not valid:
         raise SystemExit("Ningún sticker se pudo verificar; no se publicará una biblioteca vacía.")
-    for file in valid:
-        if not (STUDIO / file).is_file():
-            raise SystemExit("El PNG verificado no llegó a la carpeta publicada: " + file)
+    # The Studio reads these verified paths from the same Pages artifact.
+    # Do not create duplicate _podcast_pages/estudio/resources/ copies.
     (STUDIO / "assets-health.json").write_text(
         json.dumps({"version": "2026-11-05-r3", "valid": valid, "unavailableCount": len(invalid)},
                    ensure_ascii=False, indent=2) + "\n",
