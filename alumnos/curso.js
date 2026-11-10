@@ -213,6 +213,68 @@ async function ensureMara(){
 }
 let currentAulaView='lecciones';
 const aulaViewHistory=[];
+const AULA_PLACE_TTL_MS=2*60*60*1000;
+const aulaScrollPosition={};
+let aulaBrowserSteps=0,aulaRestoring=false;
+const aulaPlaceKey=()=>user?.id?'tle:aula-last-place:v1:'+user.id:'';
+function readAulaPlace(){
+ const key=aulaPlaceKey();if(!key)return null;
+ try{
+  const value=JSON.parse(localStorage.getItem(key)||'null');
+  if(!value||!Number.isFinite(value.at)||value.at>Date.now()||
+     Date.now()-value.at>=AULA_PLACE_TTL_MS||!Object.hasOwn(aulaViews,value.view)){
+   localStorage.removeItem(key);return null;
+  }
+  return {
+    view:value.view,
+    lesson:Number.isInteger(value.lesson)?value.lesson:0,
+    history:Array.isArray(value.history)?value.history.filter(entry=>
+      typeof entry==='string'&&(Object.hasOwn(aulaViews,entry)||
+        /^lesson:\d{1,2}$/.test(entry))).slice(-12):[],
+    scroll:value.scroll&&typeof value.scroll==='object'?value.scroll:{}
+  };
+ }catch{return null;}
+}
+function rememberAulaPlace(){
+ const key=aulaPlaceKey();if(!key||course.hidden||aulaRestoring)return;
+ aulaScrollPosition[currentAulaView]=window.scrollY;
+ try{localStorage.setItem(key,JSON.stringify({
+   at:Date.now(),view:currentAulaView,history:aulaViewHistory.slice(-12),
+   lesson:selected,scroll:aulaScrollPosition
+ }));}catch{}
+}
+function clearAulaPlace(){
+ const key=aulaPlaceKey();if(key)try{localStorage.removeItem(key)}catch{}
+}
+function changeAulaBrowser(view,lesson=selected){
+ const state={...window.history.state,tleAulaView:view,tleAulaLesson:lesson};
+ window.history.pushState(state,'',window.location.href);aulaBrowserSteps++;
+}
+function backAulaPlace(){
+ if(document.body.classList.contains('aula-menu-open')){closeAulaMenu();return;}
+ if(!aulaViewHistory.length)return;
+ if(aulaBrowserSteps>0){window.history.back();return;}
+ const previous=aulaViewHistory.pop();
+ if(previous?.startsWith('lesson:'))choose(Number(previous.slice(7)),{track:false});
+ else if(previous)setAulaView(previous,{track:false});
+ rememberAulaPlace();
+}
+window.addEventListener('popstate',event=>{
+ if(course.hidden||!user)return;
+ const target=event.state?.tleAulaView;
+ if(!Object.hasOwn(aulaViews,target))return;
+ const old=currentAulaView;
+ const lesson=Number.isInteger(event.state?.tleAulaLesson)?event.state.tleAulaLesson:selected;
+ if(old!==target&&aulaViewHistory.at(-1)===target)aulaViewHistory.pop();
+ else if(old===target&&aulaViewHistory.at(-1)==='lesson:'+lesson)aulaViewHistory.pop();
+ aulaBrowserSteps=Math.max(0,aulaBrowserSteps-1);
+ if(target==='lecciones'&&lessons[lesson])choose(lesson,{track:false});
+ else setAulaView(target,{track:false,scroll:false,browser:false});
+ window.requestAnimationFrame(()=>window.scrollTo(0,aulaScrollPosition[target]||0));
+ rememberAulaPlace();
+});
+window.addEventListener('pagehide',rememberAulaPlace);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)rememberAulaPlace();});
 let aulaBackButton=null,aulaCloseButton=null;
 function ensureAulaNavigation(){
  const header=document.querySelector('#aula-layout .aula-main-top');
@@ -233,19 +295,13 @@ function ensureAulaNavigation(){
  aulaCloseButton.setAttribute('aria-label','Cerrar esta sección y volver al inicio del aula');
  aulaCloseButton.title='Cerrar sección';
  aulaCloseButton.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Cerrar</span>';
- aulaBackButton.addEventListener('click',()=>{
-  if(document.body.classList.contains('aula-menu-open')){closeAulaMenu();return;}
-  if(aulaViewHistory.length){
-   const previous=aulaViewHistory.pop();
-   setAulaView(previous,{track:false});
-  }else if(currentAulaView!=='inicio'){
-   setAulaView('inicio',{track:false});
-  }
- });
+ aulaBackButton.addEventListener('click',backAulaPlace);
  aulaCloseButton.addEventListener('click',()=>{
-  aulaViewHistory.length=0;
+  aulaViewHistory.length=0;aulaBrowserSteps=0;
   closeAulaMenu();
   setAulaView('inicio',{track:false});
+  window.history.replaceState({...window.history.state,tleAulaView:'inicio'},'',window.location.href);
+  rememberAulaPlace();
  });
  actions.append(aulaBackButton,aulaCloseButton);
  header.querySelector('.aula-main-location')?.insertAdjacentElement('afterend',actions);
@@ -269,13 +325,17 @@ function openAulaMenu(){
  const active=aulaSidebar.querySelector('.aula-side-link[aria-current="page"]');
  (active||aulaClose).focus({preventScroll:true});
 }
-function setAulaView(view,{scroll=true,track=true}={}){
+function setAulaView(view,{scroll=true,track=true,browser=true}={}){
  // El catálogo comercial pertenece al Centro de Productos, nunca al aula.
  if(view==='catalogo')view='lecciones';
  if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
- if(track&&view!==currentAulaView&&!course.hidden){
-  aulaViewHistory.push(currentAulaView);
-  if(aulaViewHistory.length>12)aulaViewHistory.shift();
+ if(view!==currentAulaView&&!course.hidden){
+  aulaScrollPosition[currentAulaView]=window.scrollY;
+  if(track&&!aulaRestoring){
+   aulaViewHistory.push(currentAulaView);
+   if(aulaViewHistory.length>12)aulaViewHistory.shift();
+   if(browser)changeAulaBrowser(view);
+  }
  }
  currentAulaView=view;
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
@@ -294,8 +354,9 @@ function setAulaView(view,{scroll=true,track=true}={}){
  updateAulaNavigation();
  closeAulaMenu();
  if(scroll&&document.body.classList.contains('aula-member')){
-  window.scrollTo({top:0,behavior:'auto'});
+  window.requestAnimationFrame(()=>window.scrollTo({top:aulaScrollPosition[view]||0,behavior:'auto'}));
  }
+ rememberAulaPlace();
 }
 document.querySelectorAll('[data-aula-view]').forEach(control=>{
  control.addEventListener('click',event=>{
@@ -311,10 +372,7 @@ document.addEventListener('keydown',event=>{
  if(document.body.classList.contains('aula-menu-open')){
   closeAulaMenu();aulaOpen.focus({preventScroll:true});return;
  }
- if(!course.hidden&&currentAulaView!=='inicio'){
-  aulaViewHistory.length=0;
-  setAulaView('inicio',{track:false});
- }
+ if(!course.hidden&&aulaViewHistory.length)backAulaPlace();
 });
 
 
@@ -561,12 +619,18 @@ function renderLessonPrompts(item){
  });
 }
 
-function choose(i){
+function choose(i,{track=true}={}){
+ if(!Number.isInteger(i)||i<0||i>=lessons.length)return;
+ if(track&&!aulaRestoring&&currentAulaView==='lecciones'&&!course.hidden&&i!==selected){
+  aulaViewHistory.push('lesson:'+selected);
+  if(aulaViewHistory.length>12)aulaViewHistory.shift();
+  changeAulaBrowser('lecciones',i);
+ }
  selected=i;
  const item=lessons[i];
  if(!item)return;
  if($('lesson-picker'))$('lesson-picker').value=String(i);
- setAulaView('lecciones');
+ setAulaView('lecciones',{track});
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
