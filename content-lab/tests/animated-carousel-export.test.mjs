@@ -12,7 +12,7 @@ test('animated export is browser-native, local and feature-gated',()=>{
  assert.match(source,/MediaRecorder\.isTypeSupported/);
  assert.match(source,/video\/mp4/);
  assert.match(source,/video\/webm/);
- assert.match(source,/data:image\\\//);
+ assert.match(source,/data:image/);
  assert.doesNotMatch(source,/\bfetch\(|XMLHttpRequest|FormData|supabase|stripe|cloudflare/i);
 });
 test('video encoder is bounded and cleans streams on completion and failure',()=>{
