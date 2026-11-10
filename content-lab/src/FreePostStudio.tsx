@@ -32,7 +32,8 @@ function legacyStickers(decor:CoverDecor):PanoramaLayer[]{
 }
 export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLayer[]{
  const layers:PanoramaLayer[]=[];
- if(post.assetId&&post.assetId!==decor.backgroundImageId)
+ if(post.assetId&&post.assetId!==decor.backgroundImageId&&
+    !decor.layers.some(layer=>layer.role==='background'&&layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
    locked:decor.primaryPhotoLocked===true,opacity:decor.primaryPhotoOpacity??1,
    rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
@@ -56,7 +57,8 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
  const known=defaultOrder.filter(layer=>rank.has(layer.id))
    .sort((a,b)=>rank.get(a.id)!-rank.get(b.id)!);
  const fresh=defaultOrder.filter(layer=>!rank.has(layer.id));
- return [...known,...fresh];
+ // Keep the wallpaper behind the saved creation order, even for older projects.
+ return [...known,...fresh].sort((a,b)=>Number(b.role==='background')-Number(a.role==='background'));
 }
 export const freePostDimensions=(format?:string)=>format==='Reel'||format==='Story'?{width:1080,height:1920}:{width:1080,height:1350};
 async function backdrop(ctx:CanvasRenderingContext2D,decor:CoverDecor,images:Record<string,string>,width:number,height:number){
@@ -330,10 +332,26 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
    if(additions.length){update({...decor,layers:[...decor.layers,...additions].slice(-22)});setFocusLayerId(additions[additions.length-1].id)};
   }finally{setBusy(false)}
  };
+ const editImageBackground=(assetId:string)=>{
+  if(!assetId)return;
+  if(!images[assetId])loadImage(assetId);
+  const existing=decor.layers.find(layer=>layer.role==='background');
+  if(!existing&&decor.layers.length>=22){notify(plain('Maximum 22 layers','Máximo 22 elementos por post',locale));return}
+  const id=existing?.id||uniqueId();
+  const wallpaper:PanoramaLayer={
+   ...(existing||{}),id,assetId,name:'Fondo editable',kind:'photo',
+   role:'background',placement:'behind-text',locked:false,
+   rect:existing?.rect||{x:0,y:0,w:1,h:1,angle:0,cornerRadius:0},
+  };
+  update({...decor,backgroundId:'brand',backgroundImageId:'',
+   layers:[wallpaper,...decor.layers.filter(layer=>layer.role!=='background')]});
+  setFocusLayerId(id);setBackgroundOpen(false);
+  notify(plain('Background ready to resize','Fondo listo: muévelo, pellizca o usa la esquina para agrandarlo.',locale));
+ };
  const chooseBackground=async(file?:File)=>{
   if(!file)return;setBusy(true);
   try{const asset=await onUploadBackground(file);
-   if(asset)update({...decor,backgroundImageId:asset.id,backgroundId:'brand'});}
+   if(asset)editImageBackground(asset.id);}
   finally{setBusy(false)}
  };
  const allowed=assets.filter(a=>assetCategory(a)!=='background');
@@ -459,7 +477,9 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
       <button type="button" onClick={()=>setBackgroundOpen(false)} aria-label={plain('Close background panel','Cerrar fondos',locale)}>×</button></div>
     <div className="free-post-background-shortcuts">
       <button type="button" onClick={()=>backgroundRef.current?.click()} disabled={busy}><Upload size={16}/>{plain('Upload background','Subir fondo',locale)}</button>
-      {post.assetId&&<button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:post.assetId})}>
+      {decor.backgroundImageId&&<button type="button" onClick={()=>editImageBackground(decor.backgroundImageId)}><ImagePlus size={16}/>{plain('Edit and resize background','Editar y agrandar fondo',locale)}</button>}
+      {decor.layers.some(layer=>layer.role==='background')&&<button type="button" onClick={()=>{const wallpaper=decor.layers.find(layer=>layer.role==='background');if(wallpaper){setFocusLayerId(wallpaper.id);setBackgroundOpen(false)}}}><ImagePlus size={16}/>{plain('Select editable background','Seleccionar fondo editable',locale)}</button>}
+      {post.assetId&&<button type="button" onClick={()=>editImageBackground(post.assetId)}>
        <ImagePlus size={16}/>{plain('Use my photo as background','Mi foto como fondo',locale)}</button>}
     </div>
     <div className="free-post-background-colors">
@@ -476,7 +496,13 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
       backgroundId={decor.backgroundId as FreeBackgroundId} backgroundImageId={decor.backgroundImageId}
       stickerIds={decor.stickerIds} assets={assets} images={images} loadImage={loadImage}
       onOpenLibrary={onOpenStickers} onUploadBackground={onUploadBackground}
-      onChange={next=>update({...decor,...next})}/>
+      onChange={next=>{
+        if(next.backgroundImageId){editImageBackground(next.backgroundImageId);return}
+        if(next.backgroundId&&next.backgroundId!=='brand'){
+          update({...decor,...next,layers:decor.layers.filter(layer=>layer.role!=='background')});return;
+        }
+        update({...decor,...next});
+      }}/>
    </div>}
   
  </div>
