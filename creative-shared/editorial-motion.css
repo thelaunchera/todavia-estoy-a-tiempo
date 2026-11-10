@@ -113,3 +113,83 @@
     .sidebar nav button,.lab-mobile-dock button
   ) { transition:none !important; animation:none !important; }
 }
+
+/* 2026-11-10 / Brand personality for CREATIVE HUBS ONLY.
+   Neither app's editor canvas, private files, exports nor sessions change.
+   Keeps the owner Studio and sold Content Lab independent. */
+.studio .studio-hub-heading h2 {
+  font-family:'Prompt','DM Sans',Arial,sans-serif;
+  font-size:clamp(34px,4.5vw,62px);
+  font-weight:700;line-height:1.07;letter-spacing:-.055em;
+  text-wrap:balance;
+}
+.studio .studio-hub-heading h2::after {
+  content:"";display:block;width:clamp(96px,13vw,165px);height:12px;
+  margin-top:13px;background-repeat:no-repeat;background-size:100% 100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 165 12'%3E%3Cpath d='M3 9 C25 2 52 10 77 5 S128 4 162 2' fill='none' stroke='%23F2D85B' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.studio .studio-hub-card {
+  background-color:#faf8f3;
+  border-color:#e4e0d6;
+  transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease;
+}
+.studio .studio-hub-card:nth-child(3n+2) {
+  background-color:#eff6fa;
+  border-color:#d4e6ed;
+}
+.studio .studio-hub-card:nth-child(3n) {
+  background-color:#fff8df;
+  border-color:#ece2b8;
+}
+.studio .studio-hub-card .studio-hub-card-copy strong {
+  font-family:'Prompt','DM Sans',Arial,sans-serif;
+  font-weight:700;letter-spacing:-.035em;text-wrap:balance;
+}
+.studio .studio-hub-card:focus-visible {
+  outline:3px solid #236783;
+  outline-offset:4px;
+}
+.studio .studio-nav-area-trigger[aria-expanded="true"] {
+  background-color:#fbf1be;
+  color:#191919;
+}
+.app-shell .sidebar nav button.active {
+  background-color:#fff6d0;
+  color:#191919;
+}
+.app-shell .content[data-lab-tab="formats"] .fg-card,
+.app-shell .content[data-lab-tab="media"] .ml-card {
+  border-color:#e6dfd1;
+  box-shadow:0 6px 22px rgba(25,25,25,.055);
+}
+.app-shell .content[data-lab-tab="formats"] .fg-card:nth-child(3n+2) {
+  background-color:#faf8f3;
+}
+.app-shell .content[data-lab-tab="formats"] .fg-card:nth-child(3n) {
+  border-color:#e4d88e;
+}
+.app-shell .content[data-lab-tab="formats"] .fg-card:focus-within,
+.app-shell .content[data-lab-tab="media"] .ml-card:focus-within {
+  outline:3px solid #2e7597;
+  outline-offset:3px;
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  .studio .studio-hub-card:hover {
+    background-color:#fff3b9;
+    border-color:#ddc56d;
+    box-shadow:0 10px 26px rgba(25,25,25,.08);
+  }
+}
+@media(max-width:760px) {
+  .studio .studio-hub-heading h2 {font-size:clamp(33px,9vw,51px);}
+}
+@media(forced-colors:active) {
+  .studio .studio-hub-card,
+  .app-shell .sidebar nav button.active {
+    border:1px solid CanvasText;
+    background:Canvas;color:CanvasText;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .studio .studio-hub-card {transition:none;}
+}
