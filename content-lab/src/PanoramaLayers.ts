@@ -40,6 +40,8 @@ export type PanoramaLayer = {
   placement?: LayerPlacement;
   /** Continuous draggable wallpaper, painted behind independent content. */
   role?:'background';
+  /** Preserve natural proportions for photographic wallpapers; legacy decorative patterns may stretch. */
+  backgroundFit?:'cover';
   locked?:boolean;
   opacity?:number;
   /** Owning slide in Normal mode; overflowing pixels are clipped, not reflowed. */
@@ -80,7 +82,8 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
       ...(item.kind==='sticker'&&/^#[0-9a-f]{6}$/i.test(String(item.tint))?{tint:String(item.tint)}:{}),
       ...(typeof item.opacity==='number'&&Number.isFinite(item.opacity)?{opacity:Math.max(0,Math.min(1,item.opacity))}:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
-      ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const}:{}),
+      ...(item.kind==='photo'&&item.role==='background'?{role:'background' as const,
+        ...(item.backgroundFit==='cover'?{backgroundFit:'cover' as const}:{})}:{}),
       ...(item.locked===true?{locked:true}:{}),
       ...(Number.isInteger(item.page)&&item.page>=0&&item.page<20?{page:item.page}:{}),
       rect: clampPanoramaRect(item.rect),
@@ -199,8 +202,15 @@ export async function paintPanoramaLayers(
    const img=new Image();img.src=src;await img.decode();
    if(layer.kind==='photo'){
     if(layer.role==='background'){
-     // Stretch the complete wallpaper; never crop ribbons near its edges.
-     ctx.drawImage(img,-w/2,-h/2,w,h);
+     if(layer.backgroundFit==='cover'){
+      // Match object-fit: cover for photographic wallpapers in the exported PNG.
+      const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
+      ctx.beginPath();ctx.rect(-w/2,-h/2,w,h);ctx.clip();
+      ctx.drawImage(img,-w/2+p.x,-h/2+p.y,p.width,p.height);
+     }else{
+      // Preserve legacy seamless decorative patterns without cropping ribbons.
+      ctx.drawImage(img,-w/2,-h/2,w,h);
+     }
     }else if(layer.frameStyle==='polaroid'){
      const {inset,bottom}=photoFrameMetrics(w,h,'polaroid');
      ctx.save();
