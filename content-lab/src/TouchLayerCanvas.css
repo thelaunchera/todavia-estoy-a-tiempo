@@ -734,15 +734,15 @@
 
 /* Natural rotation grip. Its center stays outside the art; exported PNGs never
    include editor controls. Pointer capture is handled by the parent layer. */
-.touch-editor .touch-editor-layer .touch-editor-rotate-handle{
+.touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay{
  position:absolute;left:50%;top:-37px;transform:translateX(-50%);z-index:42;
  display:grid;place-items:center;width:32px;height:32px;border-radius:50%;
  border:2px solid #fff;background:#191919;color:#fff;
  box-shadow:0 3px 12px #19191940;font:700 23px/1 Arial,sans-serif;
  cursor:grab;touch-action:none;user-select:none;pointer-events:auto;
 }
-.touch-editor .touch-editor-layer .touch-editor-rotate-handle:active{cursor:grabbing;background:#334d5a}
-.touch-editor .touch-editor-layer .touch-editor-rotate-handle::after{
+.touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay:active{cursor:grabbing;background:#334d5a}
+.touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay::after{
  content:'';position:absolute;top:100%;left:calc(50% - 1px);
  height:7px;border-left:2px solid #191919;pointer-events:none;
 }
@@ -756,7 +756,10 @@
  .touch-editor-context-dock>button:focus-visible{
   outline:2px solid #191919;outline-offset:-2px;
  }
- .touch-editor .touch-editor-layer .touch-editor-rotate-handle{
+ .touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay{
   width:34px;height:34px;top:-39px;
  }
 }
+
+.touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay{transform:translate(-50%,-50%);z-index:65;}
+.touch-editor .touch-editor-rotate-handle.touch-editor-rotation-overlay::after{display:none}
