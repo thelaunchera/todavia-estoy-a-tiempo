@@ -42,5 +42,19 @@ window.PODCAST_EPISODES = Object.freeze([
     popupHeadlineEn: 'Do I have to become an influencer just to share my work?',
     popupMessage: 'Si emprender empezó como un sueño tuyo, pero ahora sientes que debes grabar cada momento, esta conversación es para ti.',
     popupMessageEn: 'If you started something of your own but now feel pressured to film every moment, this conversation is for you.'
+  },
+  {
+    number: 4, published: true, date: '2026-11-10',
+    title: 'Vamos a ordenar esa idea que tienes en la cabeza',
+    titleEn: "Let's make sense of the idea in your head",
+    summary: 'Una idea puede sentirse clarísima en tu cabeza y volverse un enredo al explicarla. Ordenamos lo que sabes, lo que supones y lo que necesitas comprobar con personas reales.',
+    summaryEn: 'An idea can feel perfectly clear in your head, yet difficult to explain. Let's separate what you know, what you're assuming, and what you still need to test with real people.',
+    url: 'https://open.spotify.com/episode/6nfCQjlytWbagrYjTlugLi',
+    art: 'https://image-cdn-ak.spotifycdn.com/image/ab67656300005f1f072aa562ec7dfa14451a2b5e',
+    popupImage: 'https://image-cdn-ak.spotifycdn.com/image/ab67656300005f1f072aa562ec7dfa14451a2b5e',
+    popupHeadline: '¿Y si tu idea solo necesita una forma más clara de explicarse?',
+    popupHeadlineEn: 'What if your idea just needs a clearer way to explain it?',
+    popupMessage: 'Un capítulo para ordenar lo que sabes, reconocer lo que supones y dar un primer paso real.',
+    popupMessageEn: 'A conversation about what you know, what you assume, and how to take one real first step.'
   }
 ].map(episode => Object.freeze(episode)));
