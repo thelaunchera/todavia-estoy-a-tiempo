@@ -597,3 +597,14 @@
  .studio-projects-row-actions{width:100%}
  .studio-projects-row-actions button{flex:1 1 80px}
 }
+
+
+/* Opt-in motion tools under the Studio artboard. Never overlays the touch canvas. */
+.studio-creative-preview-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:2px 0 6px}
+.studio-creative-preview-tools button{min-height:44px;flex:1 1 185px;padding:10px 14px;border:1px solid #D2DEE3;border-radius:12px;background:#FFFCF7;color:#243E50;font:700 12px/1.4 Prompt,Arial,sans-serif}
+.studio-creative-preview-tools button:first-child{background:#E7F0F5;border-color:#BFD5E0}
+.studio-creative-preview-tools button:focus-visible{outline:3px solid #80ADC4;outline-offset:3px}
+.studio-creative-preview-tools button:disabled{opacity:.55;cursor:default}
+@media(hover:hover) and (pointer:fine){.studio-creative-preview-tools button:hover:not(:disabled){box-shadow:0 9px 20px #243F4C13}}
+@media(max-width:520px){.studio-creative-preview-tools{gap:6px}.studio-creative-preview-tools button{flex:1 1 140px;padding:9px 7px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.studio-creative-preview-tools button{transition:none!important}}
