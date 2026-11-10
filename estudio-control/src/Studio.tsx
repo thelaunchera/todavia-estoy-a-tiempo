@@ -70,6 +70,7 @@ import {
 import './studio.css';
 import './studio-navigation-20261108.css';
 import '../../creative-shared/editorial-motion.css';
+import {readNavigationPlace,writeNavigationPlace,clearNavigationPlace} from '../../creative-shared/NavigationMemory';
 import {keepActiveSidebarVisible, revealEditorialCards} from '../../creative-shared/editorial-motion';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
 import { normalizeSpotifyEpisodeLink, validSpotifyEpisode, SPOTIFY_EPISODE_ERROR } from './spotify-links';
@@ -374,12 +375,20 @@ function App() {
   const [classPendingTarget, setClassPendingTarget] = useState<{kind:'lesson'|'weekly';id:string}|null>(null);
   const [page, setPage] = useState<Page>(() => {
     const section = new URLSearchParams(window.location.search).get('seccion');
-    return section === 'seamless' || section === 'ventas' || section === 'links' || section === 'operaciones' || section === 'productos' || section === 'youtube' || section === 'demos' || section === 'reels-clase' || section === 'reels-lab' || section === 'freebies' || section === 'inquiries' ? section : 'inicio';
+    return section&&Object.prototype.hasOwnProperty.call(LABELS,section)?section as Page:'inicio';
   }),
     [recording, setRecording] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [search, setSearch] = useState('');
   const [navQuery,setNavQuery]=useState('');
+  const placeHistoryRef=useRef<Page[]>([]);
+  const placeScrollRef=useRef<Record<string,number>>({});
+  const placeOwnerRef=useRef('');
+  const placeReadyRef=useRef(false);
+  const [placeReady,setPlaceReady]=useState(false);
+  const placeBrowserStepsRef=useRef(0);
+  const pageRef=useRef<Page>(page);
+  pageRef.current=page;
   const [expandedArea,setExpandedArea]=useState<string|null>('planning');
   // Keep the chosen tool visible in long sidebars, including iPhone drawers.
   // Gallery cards animate on entry in either scroll direction; no canvas layers move.
@@ -751,6 +760,8 @@ function App() {
     } finally { setResetting(false); }
   }
   async function logout() {
+    clearNavigationPlace('studio',account?.email||'');
+    placeOwnerRef.current='';placeReadyRef.current=false;setPlaceReady(false);
     await auth.signOut();
     setAccount(null);
     setData(null);
@@ -812,18 +823,101 @@ function App() {
         .toLowerCase()
         .includes(search.toLowerCase())
     );
+  // Back traverses real section history; Close explicitly returns to Studio home.
+  const studioUrl=(p:Page)=>{
+    const url=new URL(window.location.href);
+    if(p==='inicio')url.searchParams.delete('seccion');
+    else url.searchParams.set('seccion',p);
+    return url.pathname+url.search+url.hash;
+  };
+  useEffect(()=>{
+    const owner=account?.email?.trim().toLowerCase()||'';
+    if(!owner||checking||denied)return;
+    if(placeOwnerRef.current===owner)return;
+    placeOwnerRef.current=owner;placeReadyRef.current=false;setPlaceReady(false);
+    placeBrowserStepsRef.current=0;
+    const external=new URLSearchParams(window.location.search).get('seccion');
+    const remembered=external?null:readNavigationPlace<Page>('studio',owner,Object.keys(LABELS) as Page[]);
+    if(remembered){
+      placeHistoryRef.current=[...remembered.stack];
+      placeScrollRef.current={...remembered.scroll};
+      pageRef.current=remembered.view;setPage(remembered.view);
+      const route=[...placeHistoryRef.current,remembered.view].slice(-26);
+      const start=route.shift()||'inicio';
+      window.history.replaceState({...window.history.state,tleStudioPage:start},'',studioUrl(start));
+      for(const item of route){
+        window.history.pushState({tleStudioPage:item},'',studioUrl(item));placeBrowserStepsRef.current++;
+      }
+      window.setTimeout(()=>window.scrollTo(0,placeScrollRef.current[remembered.view]||0),120);
+    }else window.history.replaceState({...window.history.state,tleStudioPage:pageRef.current},'',studioUrl(pageRef.current));
+    window.setTimeout(()=>{placeReadyRef.current=true;setPlaceReady(true);},0);
+  },[account?.email,checking,denied]);
+
+  useEffect(()=>{
+    const onPop=(event:PopStateEvent)=>{
+      if(!account?.email)return;
+      const fromState=event.state?.tleStudioPage;
+      const fromUrl=new URLSearchParams(window.location.search).get('seccion');
+      const next=(typeof fromState==='string'&&Object.prototype.hasOwnProperty.call(LABELS,fromState)
+        ?fromState:fromUrl&&Object.prototype.hasOwnProperty.call(LABELS,fromUrl)?fromUrl:'inicio') as Page;
+      const previous=pageRef.current;
+      if(next===previous)return;
+      placeScrollRef.current[previous]=window.scrollY;
+      if(placeHistoryRef.current.at(-1)===next)placeHistoryRef.current.pop();
+      else placeHistoryRef.current.push(previous);
+      placeBrowserStepsRef.current=Math.max(0,placeBrowserStepsRef.current-1);
+      pageRef.current=next;setPage(next);setMobileNav(false);
+      window.requestAnimationFrame(()=>window.scrollTo(0,placeScrollRef.current[next]||0));
+    };
+    window.addEventListener('popstate',onPop);
+    return()=>window.removeEventListener('popstate',onPop);
+  },[account?.email]);
+
+  useEffect(()=>{
+    const owner=account?.email?.trim().toLowerCase()||'';
+    if(!owner||!placeReady)return;
+    const remember=()=>{
+      placeScrollRef.current[pageRef.current]=window.scrollY;
+      writeNavigationPlace('studio',owner,{
+        view:pageRef.current,stack:placeHistoryRef.current,scroll:placeScrollRef.current
+      });
+    };
+    remember();
+    window.addEventListener('pagehide',remember);
+    document.addEventListener('visibilitychange',remember);
+    return()=>{
+      window.removeEventListener('pagehide',remember);
+      document.removeEventListener('visibilitychange',remember);
+    };
+  },[account?.email,page,placeReady]);
+
   const change = (p: Page, directPending = false) => {
-    setPage(p);
-    setSearch('');
-    setNavQuery('');
-    setMobileNav(false);
+    if(p!==pageRef.current){
+      placeScrollRef.current[pageRef.current]=window.scrollY;
+      placeHistoryRef.current=[...placeHistoryRef.current,pageRef.current].slice(-25);
+      window.history.pushState({tleStudioPage:p},'',studioUrl(p));
+      placeBrowserStepsRef.current++;
+    }
+    pageRef.current=p;setPage(p);
+    setSearch('');setNavQuery('');setMobileNav(false);
     if (p === 'tareas') void refresh();
-    // Permite abrir Ventas directamente desde un enlace sin exponer esta pantalla fuera del login.
-    const nextUrl = new URL(window.location.href);
-    if (p==='seamless' || p==='ventas' || p==='links' || p==='operaciones' || p==='productos' || p==='youtube' || p==='demos' || p==='freebies' || p==='inquiries') nextUrl.searchParams.set('seccion',p);
-    else nextUrl.searchParams.delete('seccion');
-    window.history.replaceState(window.history.state, '', nextUrl.toString());
-    if (!directPending) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!directPending) window.requestAnimationFrame(()=>window.scrollTo({top:placeScrollRef.current[p]||0,behavior:'auto'}));
+  };
+  const goStudioBack=()=>{
+    if(!placeHistoryRef.current.length)return;
+    if(placeBrowserStepsRef.current>0){window.history.back();return;}
+    const previous=placeHistoryRef.current.pop();
+    if(!previous)return;
+    placeScrollRef.current[pageRef.current]=window.scrollY;
+    pageRef.current=previous;setPage(previous);
+    window.history.replaceState({tleStudioPage:previous},'',studioUrl(previous));
+    window.requestAnimationFrame(()=>window.scrollTo(0,placeScrollRef.current[previous]||0));
+  };
+  const closeStudioSection=()=>{
+    placeHistoryRef.current=[];
+    pageRef.current='inicio';setPage('inicio');setMobileNav(false);
+    window.history.replaceState({tleStudioPage:'inicio'},'',studioUrl('inicio'));
+    window.scrollTo({top:0,behavior:'auto'});
   };
   const openClassPending = (kind: 'lesson'|'weekly', id: string) => {
     setClassPendingTarget({kind,id});
@@ -1354,7 +1448,12 @@ function App() {
       )}
       <div className="frame">
         <header className="topbar">
-          {page === 'seamless' && <button type="button" className="studio-editor-exit" onClick={() => change('inicio')} aria-label="Volver al Studio y salir del editor">← <span>Volver al Studio</span></button>}
+          {page!=='inicio'&&<div className="studio-section-route-actions">
+            <button type="button" className="studio-editor-exit" onClick={goStudioBack}
+              disabled={!placeHistoryRef.current.length} aria-label="Volver a la pantalla anterior">← <span>Atrás</span></button>
+            <button type="button" className="studio-section-close" onClick={closeStudioSection}
+              aria-label="Cerrar sección y volver al inicio del Studio">× <span>Cerrar</span></button>
+          </div>
           <button className="menu" onClick={() => setMobileNav(true)}>
             <Menu size={23} />
           </button>
