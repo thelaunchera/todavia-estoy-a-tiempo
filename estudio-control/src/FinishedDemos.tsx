@@ -11,6 +11,7 @@ import {freskaPhotos, freskaRebuildPrompts, freskaDrive, freskaSite, freskaRepo}
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {sneekiefsPhotos,sneekiefsRebuildPrompts,sneekiefsDrive,sneekiefsSite,sneekiefsRepo} from './sneekiefs-kit';
 import {nailRoomPhotos,nailRoomRebuildPrompts,nailRoomDrive,nailRoomSite,nailRoomRepo} from './nail-room-kit';
+import {velmoraPhotos,velmoraRebuildPrompts,velmoraSite,velmoraRepo} from './velmora-kit';
 import {demoRebuildPrompts} from './demo-rebuild-prompts';
 import {aftrRebuildPrompts} from './aftr-rebuild-prompts';
 import {solunaPhotos} from './soluna-photos';
@@ -22,7 +23,7 @@ import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoV
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts, 'nail-room': nailRoomRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts, 'nail-room': nailRoomRebuildPrompts, velmora: velmoraRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -31,6 +32,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'velmora',
+    title:'VELMORA · Makeup After Dark',
+    category:'Maquillaje y cosméticos · tienda online editorial',
+    description:'Demo de e-commerce rojo y negro con Ruby 08, cuatro productos, ocho pósteres de campaña, Shade Room, favoritos en página independiente, carrito con vuelo al icono y checkout de muestra. Incluye 13 fotografías de referencia y cuatro pasos de reconstrucción.',
+    image:velmoraPhotos[0].url,
+    url:velmoraSite,
+    source:velmoraRepo,
+    note:'Marca conceptual, no procesa cobros, no envía productos ni confirma pedidos reales. Online only · Worldwide shipping es mensaje de marca ilustrativo. Las fotografías se enlazan desde GitHub Pages, sin duplicarlas. Los prompts son orientativos, no los originales. Websites y Aula usan controles separados; no publicar al Aula automáticamente.',
+    kind:'other',
+    photos:velmoraPhotos,
+    promptsFor:'velmora',
+  },
   {
     id:'nail-room',
     title:'Nail Room · Pink Editorial Nail Studio',
