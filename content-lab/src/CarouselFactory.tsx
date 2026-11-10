@@ -7,7 +7,7 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy
 } from 'lucide-react';
 import './CarouselFactory.css';
-import CarouselReader from '../../creative-shared/CarouselReader';
+import CarouselReader from './CarouselReader';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
