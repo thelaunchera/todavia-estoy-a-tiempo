@@ -23,8 +23,8 @@ test('Static template gallery removed from post creation; layered full photo stu
  assert.ok(!app.includes('<CreativeCover'));
  assert.ok(!app.includes('cover-layout-chooser'));
  assert.ok(!app.includes('template-grid'));
- assert.ok(studio.includes('backgroundImageId:asset.id'));
- assert.ok(studio.includes('backgroundImageId:post.assetId'));
+ assert.ok(studio.includes('editImageBackground(asset.id)'));
+ assert.ok(studio.includes('editImageBackground(post.assetId)'));
  assert.ok(studio.includes("kind:'photo'"));
  assert.ok(studio.includes('onDropFiles='));
  assert.ok(studio.includes('onReorder={reorder}'));

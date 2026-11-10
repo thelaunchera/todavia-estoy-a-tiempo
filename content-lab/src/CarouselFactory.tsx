@@ -671,7 +671,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
     if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds,outputScale:pixelScale});
-    const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+    const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text');
     // Recompose only when an element is actually sent backward. The flat
     // preview otherwise stays on the existing fast rendering path.
     const all=await Promise.all(slides.map((part,n)=>drawSlide(part,n,slides.length,brand,images,style,hasBehind,pixelScale)));
@@ -922,33 +922,40 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     }
   };
   const extendCurrentBackground=()=>{
-    const oldWallpaper=(style.panoramaLayers||[]).find(layer=>layer.role==='background');
+    const pageStart=i/slides.length,pageEnd=(i+1)/slides.length;
+    const oldWallpaper=(style.panoramaLayers||[]).find(layer=>layer.role==='background'&&
+      (layer.page===i||(layer.rect.x<pageEnd&&layer.rect.x+layer.rect.w>pageStart)));
     if(oldWallpaper){
       if(!images[oldWallpaper.assetId])loadImage(oldWallpaper.assetId);
       setFocusWallpaperId(oldWallpaper.id);setStudioTab('canvas');
-      notify('Toca el tirador lateral del fondo para extenderlo por los cortes.');
+      notify('Fondo seleccionado: agrándalo desde la esquina o con dos dedos.');
       return;
     }
     const assetId=slide.backgroundImageId||(!style.perSlideBackgrounds?style.seamlessAssetId:'');
-    if(!assetId)return notify('Elige primero un fondo de imagen de la biblioteca para estirarlo entre slides.');
+    if(!assetId)return notify('Elige primero una imagen de fondo de la biblioteca.');
     if((style.panoramaLayers||[]).length>=24)return notify('El lienzo tiene el máximo de 24 capas.');
     if(!images[assetId])loadImage(assetId);
     const id='panorama-wallpaper-'+crypto.randomUUID();
     const layer:PanoramaLayer={
-      id,assetId,name:'Fondo continuo',kind:'photo',role:'background',
-      placement:'behind-text',
-      rect:{x:i/slides.length,y:0,w:Math.min(2,slides.length-i)/slides.length,h:1,angle:0,cornerRadius:0},
+      id,assetId,name:'Fondo editable · slide '+(i+1),kind:'photo',role:'background',backgroundFit:'cover',
+      placement:'behind-text',...(style.seamlessEnabled?{}:{page:i}),
+      rect:{x:pageStart,y:0,
+        w:(style.seamlessEnabled?Math.min(2,slides.length-i):1)/slides.length,
+        h:1,angle:0,cornerRadius:0},
     };
-    // Replace each identical tiled background; never move stickers or titles.
-    const nextSlides=slides.map(part=>part.backgroundImageId===assetId
-      ?{...part,backgroundId:'brand' as const,backgroundImageId:''}:part);
+    // In Normal only this slide changes; never turn a Normal carousel into Seamless.
+    // A globally tiled Seamless background is replaced across all slides.
+    const replaceAcrossSlides=style.seamlessEnabled&&!style.perSlideBackgrounds;
+    const nextSlides=slides.map((part,index)=>
+      (index===i||replaceAcrossSlides)&&part.backgroundImageId===assetId
+        ?{...part,backgroundId:'brand' as const,backgroundImageId:''}:part);
     setAll(nextSlides,normalizeCarouselStyle({
-      ...style,seamlessEnabled:true,perSlideBackgrounds:true,
-      seamlessBackgroundId:'brand',seamlessAssetId:'',
+      ...style,perSlideBackgrounds:true,
+      ...(style.seamlessEnabled?{seamlessBackgroundId:'brand' as const,seamlessAssetId:''}:{}),
       panoramaLayers:[...(style.panoramaLayers||[]),layer],
     }));
     setFocusWallpaperId(id);setStudioTab('canvas');
-    notify('Fondo continuo listo: usa el tirador azul o + Extender 1 slide.');
+    notify('Fondo editable: toca, arrastra o pellizca para ajustar el tamaño.');
   };
   // The palette's explicit clear action removes only image/wallpaper backgrounds;
   // it never destroys a buyer's photos, texts, stickers or private media.
@@ -1359,7 +1366,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             previewCtx.drawImage(wide,i*1080,0,1080,1350,0,0,page.width,page.height);}
           wide.width=1;return page;
         }
-        const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+        const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text');
         if(!touchEdit&&hasBehind){
           // Use the exact same stacking/rendering pipeline as individual PNGs.
           const pages=await renderAllSlides();

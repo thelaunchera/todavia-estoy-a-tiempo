@@ -516,9 +516,8 @@
 
 /* The DOM stacking order is the saved creation order, not the selected layer.
    A selected older photo cannot jump above newer text or stickers. */
-/* The wallpaper is a visual base, never a draggable hit target. The user can
-   still choose it from the layers inspector to adjust its settings. */
-.panorama-canvas .touch-editor-layer.is-background{pointer-events:none!important}
+/* Wallpapers stay behind content but are editable in Edit mode.
+   Locked backgrounds and Navigate mode disable hit-testing inline. */
 
 /* In fullscreen the mode switch remains in view during every vertical swipe.
    The native in-app browser buttons may cover the lower screen on iPhone. */

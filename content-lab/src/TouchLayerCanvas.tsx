@@ -13,7 +13,7 @@ export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; lineHeight?:number; spacing?:number; curve?:number;
   outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
-  placement?: 'behind-text' | 'front';role?:'background';locked?:boolean;opacity?:number;page?:number;
+  placement?: 'behind-text' | 'front';role?:'background';backgroundFit?:'cover';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
@@ -38,7 +38,7 @@ type Props = {
 };
 type Gesture = {
   id: string; start: TouchRect; startX: number; startY: number;
-  width: number; height: number; resize: boolean; crop: boolean;
+  width: number; height: number; resize: boolean; resizeAxis?: 'x' | 'both'; crop: boolean;
   overflowX: number; overflowY: number;
   scrollLeft: number;
   pinchDistance?: number; pinchCenter?: [number, number];
@@ -280,6 +280,7 @@ export default function TouchLayerCanvas({
       id: layer.id, start: rect, startX: e.clientX, startY: e.clientY,
       width: bounds.width, height: bounds.height,
       resize: !!(e.target as HTMLElement).closest('[data-resize-handle]'),
+      resizeAxis: (e.target as HTMLElement).closest('[data-resize-axis="x"]') ? 'x' : 'both',
       crop: cropping && selected === layer.id && layer.kind === 'photo' && layer.role!=='background',
       overflowX: Math.max(0, placement.width - frameW),
       overflowY: Math.max(0, placement.height - frameH),
@@ -320,9 +321,9 @@ export default function TouchLayerCanvas({
     } else {
       const dx = (e.clientX - g.startX+(scrollArea.current?.scrollLeft||0)-g.scrollLeft) / g.width, dy = (e.clientY - g.startY) / g.height;
       if (g.resize) {
-        if(layer.role==='background'){
-          // Horizontal resizing is independent of height and works in both directions.
-          update(g.id,{...g.start,w:Math.max(1/pageCount,Math.min(1-g.start.x,g.start.w+dx)),h:1,y:0});
+        if(layer.role==='background' && g.resizeAxis==='x'){
+          // The side handle extends a wallpaper across slide cuts without affecting its height.
+          update(g.id,{...g.start,w:Math.max(.055/pageCount,g.start.w+dx)});
         }else{
           const factor = Math.max(.4, Math.min(2.8, 1 + Math.max(dx, dy / ratio) / Math.max(.008, g.start.w)));
           update(g.id, {...g.start, w: g.start.w * factor, h:g.start.h*factor});
@@ -395,7 +396,7 @@ export default function TouchLayerCanvas({
   };
   /** Zoom the layer around its own center; position may extend beyond the artboard. */
   const resizeSelected=(factor:number)=>{
-    if(!chosen||!selectedRect||cropping)return;
+    if(!chosen||!selectedRect||cropping||chosen.locked)return;
     const width=Math.max(.055,Math.min(3,selectedRect.w*factor));
     const height=Math.max(.055,Math.min(3,selectedRect.h*factor));
     const next=clamp({...selectedRect,
@@ -571,9 +572,9 @@ export default function TouchLayerCanvas({
       <input id="touch-layer-opacity" type="range" min="0" max="100" step="1" aria-label="Opacidad de foto, sticker o elemento: 100 por ciento es visible" value={opacityPercent} onChange={e=>changeOpacity(chosen.id,Number(e.currentTarget.value))} {...opacitySliderEvents} style={{flex:1,minWidth:60,accentColor:'#191919'}}/>
       <output>{opacityPercent}%</output>
     </div>}
-    {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 && !inlineTextTools &&
+    {chosen?.kind==='photo' && selectedRect && !cropping && pageCount===1 && (!inlineTextTools||chosen.role==='background') &&
       <div className="touch-editor-size-toolbar" role="group" aria-label="Tamaño de la fotografía seleccionada">
-        <span className="touch-editor-size-label">Tamaño de foto</span>
+        <span className="touch-editor-size-label">{chosen.role==='background'?'Tamaño de fondo':'Tamaño de foto'}</span>
         <button type="button" onClick={()=>resizeSelected(.85)} aria-label="Reducir foto 15 por ciento">− Reducir</button>
         <button type="button" className="touch-editor-grow" onClick={()=>resizeSelected(1.2)}
           aria-label="Agrandar foto 20 por ciento">＋ Agrandar</button>
@@ -658,12 +659,12 @@ export default function TouchLayerCanvas({
             style={{left: rect.x * 100 + '%', top: rect.y * 100 + '%', width: rect.w * 100 + '%',
               height: rect.h * 100 + '%', transform: 'rotate(' + (rect.angle || 0) + 'deg)',
                clipPath:normalClip,zIndex:z,
-               pointerEvents:layer.locked||layer.role==='background'||pageCount>1&&interactionMode==='navigate'?'none':'auto'}}
+               pointerEvents:layer.locked||(pageCount>1&&interactionMode==='navigate')?'none':'auto'}}
             tabIndex={0} role="button" aria-label={(layer.locked?'Bloqueado: ':'Mover ')+layer.name} aria-pressed={active}
             onPointerDown={e => down(e, layer)} onPointerMove={e => move(e, layer)}
             onPointerUp={e => done(e, layer)} onPointerCancel={e => done(e, layer)}
             onDoubleClick={() => {
-              if(layer.kind==='photo'){setSelected(layer.id);setCropping(true);}
+              if(layer.kind==='photo'&&layer.role!=='background'){setSelected(layer.id);setCropping(true);}
               if(layer.kind==='text'&&onUpdate&&(inlineTextTools||pageCount>1)){setSelected(layer.id);setEditingText(layer.id);}
             }}
             onKeyDown={e => {
@@ -680,7 +681,7 @@ export default function TouchLayerCanvas({
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
               {layer.kind==='sticker'&&layer.tint?<span className="touch-editor-sticker-tint" aria-hidden="true"
                 style={{backgroundColor:layer.tint,WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")'}}/>:
-              <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
+              <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:layer.backgroundFit==='cover'?'cover':'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
               } : undefined}/>}
@@ -734,8 +735,8 @@ export default function TouchLayerCanvas({
                <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
             </div>}
             {active && <><span className="touch-editor-outline"/>
-              {!cropping&&!layer.locked && !inlineTextTools && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
-              {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
+              {!cropping&&!layer.locked && (!inlineTextTools||layer.role==='background') && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
+              {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle data-resize-axis="x" aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
         })}
         {inlineTextTools&&pageCount===1&&chosen&&!chosen.locked&&<div className="touch-canvas-actionbar" role="toolbar"
@@ -909,9 +910,9 @@ export default function TouchLayerCanvas({
           onChange={e=>onUpdate(chosen.id,{color:e.target.value})}/></label>
       </div>}
       {chosen.role==='background' && pageCount>1 && <div className="touch-editor-background-stretch-controls" role="group" aria-label="Estirar fondo a otras diapositivas">
-        <strong>🎀 Fondo continuo · arrastra el tirador lateral para llegar a otra slide</strong>
-        <button type="button" onClick={()=>commit({w:Math.min(1-selectedRect.x,selectedRect.w+1/pageCount),h:1,y:0})}>+ Extender 1 slide</button>
-        <button type="button" onClick={()=>commit({w:Math.max(1/pageCount,selectedRect.w-1/pageCount),h:1,y:0})}>− Reducir 1 slide</button>
+        <strong>Fondo editable · arrastra la esquina para agrandar o usa el tirador lateral para extender</strong>
+        <button type="button" onClick={()=>commit({w:selectedRect.w+1/pageCount})}>+ Extender 1 slide</button>
+        <button type="button" onClick={()=>commit({w:Math.max(1/pageCount,selectedRect.w-1/pageCount)})}>− Reducir 1 slide</button>
         <button type="button" onClick={()=>commit({x:0,y:0,w:1,h:1})}>Ocupar todo el carrusel</button>
         <small>La línea punteada marca el corte. El PNG conservará esa misma posición.</small>
       </div>}

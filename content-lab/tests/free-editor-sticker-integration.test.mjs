@@ -16,7 +16,8 @@ test('All three graphic editors preserve original sticker layers and custom back
  const app=read('src/App.tsx'),grid=read('src/BrandGrid.tsx'),car=read('src/CarouselFactory.tsx'),cover=read('src/FreePostStudio.tsx'),assets=read('src/FreeDecorControls.tsx');
  assert.ok(app.includes('<FreePostStudio'));
  assert.ok(cover.includes('<FreeDecorControls'));
- assert.ok(cover.includes('backgroundImageId:post.assetId'));
+ assert.ok(cover.includes('editImageBackground(post.assetId)'));
+ assert.ok(cover.includes("role:'background',backgroundFit:'cover'"));
  assert.ok(app.includes('writeCoverDecor'));
  assert.ok(grid.includes('onStickerChange='));
  assert.ok(grid.includes('onUploadBackground='));

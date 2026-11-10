@@ -323,6 +323,11 @@ export default function PanoramaEditor({
         onClick={()=>{openTool('photo');input.current?.click()}}>
         <Upload size={16}/> Subir imagen
       </button>
+      {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-edit-background"
+        onClick={()=>{onExtendBackground();setBackgroundOpen(false);revealCanvas()}}
+        aria-label="Editar y agrandar el fondo seleccionado">
+        ✎ Editar y agrandar fondo
+      </button>}
     </div>
     {layersOpen&&<div className="panorama-mobile-layer-panel" aria-label="Capas del carrusel">
       <strong>Selecciona una capa</strong>
