@@ -611,3 +611,43 @@
 
 .studio-creative-preview-tools .studio-motion-download{flex:1 1 175px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;background:#191919;color:#fff;border-radius:12px;font:700 12px Prompt,Arial,sans-serif;text-decoration:none;text-align:center}
 .studio-motion-download:focus-visible{outline:3px solid #7AACC4;outline-offset:3px}
+
+
+/* The object can be rotated by dragging its small on-canvas grip. All creation,
+   editing, save and undo actions remain in the swipeable bottom app dock. */
+.studio-app-mobile-tool{display:none!important}
+.studio-canvas-mini-actions [data-studio-rotate-grip]{
+ cursor:grab;touch-action:none;background:#191919;color:#fff;
+ border:2px solid #fff;box-shadow:0 2px 8px #19191942;
+}
+.studio-canvas-mini-actions [data-studio-rotate-grip]:active{
+ cursor:grabbing;background:#405d6b;color:#fff;
+}
+@media(max-width:799px){
+ .studio-carousel-editor-mode .studio-app-toolbar,
+ .studio-carousel-editor-mode .studio-app-context-dock{
+  background:#faf8f3!important;border-color:#dddeda!important;
+  border-radius:17px!important;overflow-x:auto!important;
+  overscroll-behavior-x:contain;scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar>button,
+ .studio-carousel-editor-mode .studio-app-context-dock>button{
+  scroll-snap-align:start;touch-action:manipulation;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar>button.studio-app-mobile-tool{
+  display:flex!important;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;min-height:53px;
+ }
+ .studio-carousel-editor-mode .studio-app-context-dock>button.studio-app-mobile-tool{
+  display:flex!important;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar>button:disabled,
+ .studio-carousel-editor-mode .studio-app-context-dock>button:disabled{
+  opacity:.42;cursor:not-allowed;
+ }
+ .studio-carousel-editor-mode .studio-app-toolbar>button:focus-visible,
+ .studio-carousel-editor-mode .studio-app-context-dock>button:focus-visible{
+  outline:2px solid #191919;outline-offset:-2px;
+ }
+}

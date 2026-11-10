@@ -855,3 +855,35 @@
 
 .factory-creative-actions .factory-motion-download{flex:1 1 175px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;background:#191919;color:#fff;border-radius:11px;font:700 12px 'DM Sans',Arial,sans-serif;text-decoration:none;text-align:center}
 .factory-motion-download:focus-visible{outline:3px solid #7AACC4;outline-offset:2px}
+
+
+/* Permanent one-row creative navigation on phones: the canvas stays available,
+   with the selected-object dock stacked directly above this app navigation. */
+@media(max-width:799px){
+ .factory-bc-workspace{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}
+ .factory-bc-workspace .factory-studio-tabs.factory-cata-nav{
+  position:fixed!important;left:8px!important;right:8px!important;
+  bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;
+  z-index:6015!important;display:flex!important;align-items:center!important;
+  gap:5px!important;box-sizing:border-box;width:auto!important;
+  margin:0 auto!important;padding:7px!important;
+  border:1px solid #d9dfe1!important;border-radius:17px!important;
+  background:#faf8f3!important;box-shadow:0 6px 25px #19191929!important;
+ }
+ .factory-bc-workspace .factory-studio-tabs .factory-step-rail{
+  display:flex!important;flex:1 1 auto!important;min-width:0!important;
+  flex-wrap:nowrap!important;overflow-x:auto!important;
+  scroll-snap-type:x proximity;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+ }
+ .factory-bc-workspace .factory-studio-tabs .factory-step-rail>button{
+  scroll-snap-align:start;min-height:48px!important;
+  touch-action:manipulation;
+ }
+ .factory-bc-workspace .factory-studio-tabs .factory-ia-entry{
+  min-height:48px!important;flex:0 0 auto!important;
+ }
+ .factory-bc-workspace .factory-studio-tabs button:focus-visible{
+  outline:2px solid #191919;outline-offset:-2px;
+ }
+}

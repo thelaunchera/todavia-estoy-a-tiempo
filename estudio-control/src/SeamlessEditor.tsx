@@ -205,7 +205,9 @@ export default function SeamlessEditor(){
  const textEditor=useRef<HTMLTextAreaElement>(null);
  const nextId=useRef(Date.now());
  const touches=useRef(new Map<number,{x:number;y:number}>());
- const pinch=useRef<{id:number;distance:number;size:number;x:number;y:number;w:number;h:number;cx:number;cy:number}|null>(null);
+ const pinch=useRef<{id:number;distance:number;size:number;x:number;y:number;w:number;h:number;cx:number;cy:number;angle:number;rotation:number}|null>(null);
+ const rotatePointer=useRef<{pointer:number;id:number;centerX:number;centerY:number;startAngle:number;rotation:number}|null>(null);
+ const rotatePointerMoved=useRef(false);
  const drag=useRef<{pointer:number;id:number;x:number;y:number;ox:number;oy:number;mode:'move'|'resize';startSize:number}|null>(null);
  const transformFrame=useRef<number|null>(null);
  const pendingTransform=useRef<{id:number;patch:Partial<Item>}|null>(null);
@@ -663,7 +665,9 @@ export default function SeamlessEditor(){
     const pending=pendingTransform.current?.id===it.id?pendingTransform.current.patch:null;
     pinch.current={id:it.id,distance:Math.max(1,Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)),
      size:it.kind==='image'?it.width:it.fontSize,x:pending?.x??it.x,y:pending?.y??it.y,
-     w:bounds.w,h:bounds.h,cx:(points[0].x+points[1].x)/2,cy:(points[0].y+points[1].y)/2};
+     w:bounds.w,h:bounds.h,cx:(points[0].x+points[1].x)/2,cy:(points[0].y+points[1].y)/2,
+     angle:Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x),
+     rotation:pending?.rotation??it.rotation??0};
     drag.current=null;swipe.current=null;layerGesture.current=true;swipeStart.current=null;
    }
    pointerStart.current=null;
@@ -720,10 +724,12 @@ export default function SeamlessEditor(){
     const isImage=it.kind==='image';
     const size=Math.max(isImage?80:24,Math.min(isImage?(it.role==='background'?doc.count*W*2:2400):800,Math.round(start.size*ratio)));
     const scale=size/start.size;
-    // Scale around the fingers' midpoint; leave rotation to the precise slider.
+    // Move, resize and rotate together, directly under two fingers.
     const w=(isImage||it.kind==='sticker')?start.w*scale:start.w,h=start.h*scale;
     const cx=(points[0].x+points[1].x)/2,cy=(points[0].y+points[1].y)/2;
+    const delta=(Math.atan2(points[1].y-points[0].y,points[1].x-points[0].x)-start.angle)*180/Math.PI;
     queueTransform(it.id,{...(isImage?{width:size}:{fontSize:size}),
+     rotation:((start.rotation+delta+540)%360)-180,
      x:Math.round(start.x+(start.w-w)/2+cx-start.cx),
      y:Math.round(start.y+(start.h-h)/2+cy-start.cy)});
    }
@@ -960,6 +966,33 @@ export default function SeamlessEditor(){
   }
  };
  const current=doc.items.find(it=>it.id===selected);
+ // The on-canvas rotate button doubles as a continuously draggable rotation grip.
+ // It leaves the editing toolbar available below the artboard.
+ const startRotatePointer=(e:React.PointerEvent<HTMLButtonElement>,item:Item)=>{
+  e.stopPropagation();
+  // Captured touchstart on the viewport must not become a slide swipe.
+  layerGesture.current=true;swipeStart.current=null;
+  const bounds=canvas.current?.getBoundingClientRect();if(!bounds)return;
+  const size=itemBounds(item),scale=bounds.width/width;
+  const centerX=bounds.left+(item.x+size.w/2)*scale;
+  const centerY=bounds.top+(item.y+size.h/2)*scale;
+  rotatePointer.current={pointer:e.pointerId,id:item.id,centerX,centerY,
+   startAngle:Math.atan2(e.clientY-centerY,e.clientX-centerX),rotation:item.rotation||0};
+  rotatePointerMoved.current=false;
+  e.currentTarget.setPointerCapture(e.pointerId);
+ };
+ const moveRotatePointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+  const g=rotatePointer.current;if(!g||g.pointer!==e.pointerId)return;
+  e.stopPropagation();
+  const delta=(Math.atan2(e.clientY-g.centerY,e.clientX-g.centerX)-g.startAngle)*180/Math.PI;
+  if(Math.abs(delta)>3)rotatePointerMoved.current=true;
+  queueTransform(g.id,{rotation:((g.rotation+delta+540)%360)-180});
+ };
+ const endRotatePointer=(e:React.PointerEvent<HTMLButtonElement>)=>{
+  if(rotatePointer.current?.pointer!==e.pointerId)return;
+  e.stopPropagation();rotatePointer.current=null;
+  try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{/* Pointer capture already ended. */}
+ };
  useEffect(()=>{setActiveInspector(null)},[selected]);
  const editOnCanvas=()=>{if(current?.kind==='text')setEditingText(current.id)};
 
@@ -1130,7 +1163,10 @@ export default function SeamlessEditor(){
   style={{left:Math.max(10,Math.min(doc.count*slideWidthPx-196,(current.x+itemBounds(current).w/2)*viewportScale-96)),
     top:Math.max(4,current.y*viewportScale-58)}}>
   <button type="button" aria-label="Duplicar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();duplicateSelected()}}>⧉</button>
-  <button type="button" aria-label="Girar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();update(current.id,{rotation:((current.rotation||0)+15)%360})}}>↻</button>
+  <button type="button" aria-label="Girar elemento arrastrando" data-studio-rotate-grip="true"
+   onPointerDown={e=>startRotatePointer(e,current)} onPointerMove={moveRotatePointer}
+   onPointerUp={endRotatePointer} onPointerCancel={endRotatePointer}
+   onClick={e=>{e.stopPropagation();if(!rotatePointerMoved.current)update(current.id,{rotation:((current.rotation||0)+15)%360});rotatePointerMoved.current=false}}>↻</button>
   <button type="button" aria-label="Borrar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();deleteElement(current.id)}}>×</button>
   <button type="button" aria-label="Deseleccionar elemento" onPointerDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setSelected(null)}}>✓</button>
  </div>}
@@ -1329,6 +1365,10 @@ export default function SeamlessEditor(){
       style={{border:0,background:quickPanel===(tool.label==='Fondo'?'fondos':tool.label.toLowerCase())?'#e9f3f5':'transparent',minHeight:49,
         display:'grid',placeItems:'center',borderRadius:10,padding:5,fontSize:12,fontWeight:750,color:'#234554',
         touchAction:'manipulation'}}><span aria-hidden="true">{tool.icon}</span><span>{tool.label}</span></button>)}
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.past.length} onClick={undoCanvas}><Undo2 size={19}/><small>Deshacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={19}/><small>Rehacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={busy||!storageReady} onClick={()=>void saveProject()}><FolderOpen size={19}/><small>Guardar</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={busy||!storageReady} onClick={()=>void downloadSlide(slide)}><ImagePlus size={19}/><small>PNG</small></button>
   </div>}
   {current&&<div className="studio-app-context-dock" role="toolbar" aria-label="Editar elemento seleccionado">
     <button type="button" aria-pressed={activeInspector==='color'} disabled={current.locked}
@@ -1343,6 +1383,8 @@ export default function SeamlessEditor(){
     <button type="button" aria-pressed={activeInspector==='position'} onClick={()=>setActiveInspector(v=>v==='position'?null:'position')}><span aria-hidden="true">▣</span><small>Posición</small></button>
     <button type="button" aria-pressed={activeInspector==='rotate'} onClick={()=>setActiveInspector(v=>v==='rotate'?null:'rotate')}><span aria-hidden="true">↻</span><small>Girar</small></button>
     <button type="button" onClick={duplicateSelected}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.past.length} onClick={undoCanvas}><Undo2 size={19}/><small>Deshacer</small></button>
+    <button type="button" className="studio-app-mobile-tool" disabled={!history.current.future.length} onClick={redoCanvas}><Redo2 size={19}/><small>Rehacer</small></button>
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     </>}
     <button type="button" className="studio-app-done" onClick={()=>{setSelected(null);setActiveInspector(null);setQuickPanel(null);setEditingText(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
