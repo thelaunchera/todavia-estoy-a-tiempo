@@ -68,7 +68,10 @@ test('Drive setup is executed by AI, shown in both classroom languages, and neve
  assert.match(english,/Work on ONE website at a time/);
  assert.match(english,/LET CHATGPT CREATE THE FOLDERS/);
  assert.match(english,/02_PHOTOS/);
- assert.match(home,/Google Drive para tus fotos y archivos/);
+ assert.match(home,/Tus fotos y archivos/);
+ assert.match(home,/Primero crea 8 fotos PNG individuales con un Master Prompt/);
+ assert.match(home,/pídele a ChatGPT que las guarde en la carpeta personal/);
+ assert.match(home,/Después construye con AppDeploy usando esa carpeta/);
  assert.match(translations,/ask the AI to save it to Drive → 02_PHOTOS/);
 });
 

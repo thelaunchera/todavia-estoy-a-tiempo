@@ -220,7 +220,7 @@ test('approved emoji assets replace decorative circles in each class phase',asyn
  assert.doesNotMatch(css,/\.lesson-map-step::after\s*\{/);
  assert.doesNotMatch(css,/\.lesson-course-map::after\s*\{/);
  assert.match(css,/\.lesson-map-emblem img\s*\{/);
- assert.match(html,/curso\.js\?v=20261109-core4-v2/);
+ assert.match(html,/curso\.js\?v=20261110-photo-drive-web-v1/);
 });
 
 test('iPad recording desk links actual Drive chapter folders and its official demo',async()=>{
