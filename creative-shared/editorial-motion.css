@@ -20,11 +20,11 @@
 }
 .app-shell .sidebar { scroll-padding-block: 18px; }
 .app-shell .sidebar nav button.active { box-shadow: inset 3px 0 0 #7aadc2; }
-.app-shell :where(.factory-slide-strip,.factory-swipe-rail,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
+.app-shell :where(.factory-slide-strip,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
   overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity; scroll-padding-inline: 10px;
 }
-.app-shell :where(.factory-thumbnail,.factory-swipe-page,.fg-filterbar>button,.free-decor-groups>button,.sticker-downloads-filters>button) {
+.app-shell :where(.factory-thumbnail,.fg-filterbar>button,.free-decor-groups>button,.sticker-downloads-filters>button) {
   scroll-snap-align: start;
 }
 .app-shell .factory-slide-strip { padding-inline: 3px 12px; }
@@ -58,7 +58,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .studio .tle-reveal-visible,.app-shell .tle-reveal-visible { animation: none !important; }
-  .app-shell :where(.factory-slide-strip,.factory-swipe-rail,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
+  .app-shell :where(.factory-slide-strip,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
     scroll-behavior: auto !important;
   }
 }
