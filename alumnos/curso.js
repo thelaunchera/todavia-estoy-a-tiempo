@@ -310,7 +310,7 @@ function ensureAulaNavigation(){
 function updateAulaNavigation(){
  if(!aulaBackButton||!aulaCloseButton)return;
  const isHome=currentAulaView==='inicio';
- aulaBackButton.hidden=isHome&&!aulaViewHistory.length;
+ aulaBackButton.hidden=!aulaViewHistory.length;
  aulaCloseButton.hidden=isHome;
 }
 function closeAulaMenu(){
@@ -825,6 +825,8 @@ async function showCourse(email,asAdmin=false){
    ? 'Vista privada abierta. Algunas guías o prompts no cargaron; las lecciones siguen disponibles.'
    : 'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.'
   : 'Acceso verificado.',true);
+ const storedAulaPlace=readAulaPlace();
+ aulaRestoring=true; // Bootstrapping lessons must never overwrite the remembered view.
  lessonsUI();
  aulaViewHistory.length=0;
  let refreshedSection='';
@@ -832,7 +834,34 @@ async function showCourse(email,asAdmin=false){
   bonusLibraryController=null;
   $('bonus-library-items')?.replaceChildren();
   const linkSection=location.hash.slice(1);
-  setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(['prompts','bonos'].includes(linkSection)?linkSection:'inicio'),{scroll:false,track:false});
+  const explicitlyOpened=Boolean(refreshedSection&&Object.hasOwn(aulaViews,refreshedSection))||
+    ['prompts','bonos'].includes(linkSection);
+  if(storedAulaPlace&&!explicitlyOpened){
+    Object.assign(aulaScrollPosition,storedAulaPlace.scroll);
+    aulaViewHistory.push(...storedAulaPlace.history);
+    if(lessons[storedAulaPlace.lesson])choose(storedAulaPlace.lesson,{track:false});
+  }
+  const initialView=refreshedSection&&Object.hasOwn(aulaViews,refreshedSection)?refreshedSection:
+    ['prompts','bonos'].includes(linkSection)?linkSection:storedAulaPlace?.view||'inicio';
+  setAulaView(initialView,{scroll:false,track:false});
+  // Build in-app browser history after sign-in, without changing lesson URLs.
+  const recent=storedAulaPlace&&!explicitlyOpened
+    ?[...aulaViewHistory,initialView].slice(-13):[initialView];
+  const first=recent.shift()||'inicio';
+  const firstView=first.startsWith('lesson:')?'lecciones':first;
+  window.history.replaceState({...window.history.state,tleAulaView:firstView,
+    tleAulaLesson:first.startsWith('lesson:')?Number(first.slice(7)):selected},'',window.location.href);
+  aulaBrowserSteps=0;
+  for(const entry of recent){
+    const view=entry.startsWith('lesson:')?'lecciones':entry;
+    const lesson=entry.startsWith('lesson:')?Number(entry.slice(7)):selected;
+    window.history.pushState({...window.history.state,tleAulaView:view,tleAulaLesson:lesson},'',window.location.href);
+    aulaBrowserSteps++;
+  }
+  aulaRestoring=false;
+  if(storedAulaPlace&&!explicitlyOpened)
+    window.setTimeout(()=>window.scrollTo({top:aulaScrollPosition[initialView]||0,behavior:'auto'}),160);
+  rememberAulaPlace();
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage,
@@ -1001,7 +1030,7 @@ window.setInterval(()=>{
 },30*1000);
 out.addEventListener('click',async()=>{
  if(adminPreview){location.assign('../estudio/');return;}
- clearRememberedStudent();await db.auth.signOut({scope:'local'});location.replace('./');
+ clearAulaPlace();clearRememberedStudent();await db.auth.signOut({scope:'local'});location.replace('./');
 });
 const courseHelpPanel=$('soporte-aula');
 const courseHelpForm=$('course-help-form');
