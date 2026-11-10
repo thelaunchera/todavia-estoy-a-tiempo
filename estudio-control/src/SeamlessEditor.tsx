@@ -24,13 +24,17 @@ import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:String(CREATIVE_EDITOR_RULES.defaultCanvasColor),backgroundImages:{} as Record<number,string>,items:[] as Item[]};
-// Studio copies its own shared resources on deployment.
-const labUrl=(file:string)=>new URL('resources/'+file.replace(/^resources\//,''),document.baseURI).href;
+// The private Studio and commercial Lab share only immutable, bundled images.
+// Publish each original once under /content-lab/resources/; projects and user data remain isolated.
+const labUrl=(file:string)=>new URL('/content-lab/resources/'+file.replace(/^resources\//,''),window.location.origin).href;
 const resolveImageSource=(src:string)=>{
- const marker='/content-lab/resources/';
- const index=src.indexOf(marker);
- // Keep images in previously saved carousels working after migration.
- if(index>=0&&(src.startsWith('/')||src.startsWith(window.location.origin)))return labUrl('resources/'+src.slice(index+marker.length).split('?')[0]);
+ // Preserve existing projects saved with the previous Studio-local resource URLs.
+ try{
+  const url=new URL(src,window.location.href);
+  if(url.origin!==window.location.origin)return src;
+  const match=url.pathname.match(/^\/(?:estudio|content-lab)\/resources\/(.+)$/);
+  if(match)return labUrl('resources/'+match[1]);
+ }catch{/* Keep data URLs, blob URLs and legacy user-owned images unchanged. */}
  return src;
 };
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
