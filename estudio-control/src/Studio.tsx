@@ -1453,7 +1453,7 @@ function App() {
               disabled={!placeHistoryRef.current.length} aria-label="Volver a la pantalla anterior">← <span>Atrás</span></button>
             <button type="button" className="studio-section-close" onClick={closeStudioSection}
               aria-label="Cerrar sección y volver al inicio del Studio">× <span>Cerrar</span></button>
-          </div>
+          </div>}
           <button className="menu" onClick={() => setMobileNav(true)}>
             <Menu size={23} />
           </button>
