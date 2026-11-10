@@ -36,6 +36,7 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
     !decor.layers.some(layer=>layer.role==='background'&&layer.assetId===post.assetId))
   layers.push({id:'main-photo',assetId:post.assetId,name:'Foto principal',kind:'photo',
    locked:decor.primaryPhotoLocked===true,opacity:decor.primaryPhotoOpacity??1,
+   tintColor:decor.primaryPhotoTintColor,tintStrength:decor.primaryPhotoTintStrength,
    rect:decor.primaryPhotoRect||{x:.16,y:.34,w:.68,h:.55}});
  const title=post.hook;
  if(title.trim())layers.push({id:'main-title',assetId:'',name:'Título',kind:'text',text:title,
@@ -230,11 +231,24 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     patch={...fitNewText(currentLayer,patch.text),...patch};
   }
   if(id==='main-photo'){
-   if(typeof patch.opacity==='number')update({...decor,primaryPhotoOpacity:Math.max(0,Math.min(1,patch.opacity))});
+   const effect:Partial<CoverDecor>={};
+   if(typeof patch.opacity==='number')effect.primaryPhotoOpacity=Math.max(0,Math.min(1,patch.opacity));
+   if('tintColor' in patch)effect.primaryPhotoTintColor=patch.tintColor;
+   if('tintStrength' in patch)effect.primaryPhotoTintStrength=patch.tintStrength;
+   if(Object.keys(effect).length)update({...decor,...effect});
    return;
   }
   if(id.startsWith('legacy-sticker-')){
    const asset=id.slice('legacy-sticker-'.length);
+   // Upgrade only the selected legacy sticker to a true editable layer.
+   // Reuse its ID and geometry; the asset stays private and is never duplicated.
+   if('tintColor' in patch||'tintStrength' in patch){
+    if(!currentLayer)return;
+    const edited:PanoramaLayer={...currentLayer,...patch,tint:undefined};
+    update({...decor,stickerIds:decor.stickerIds.filter(value=>value!==asset),
+      layers:[...decor.layers,edited]});
+    return;
+   }
    if(typeof patch.opacity==='number')update({...decor,
      stickerOpacities:{...decor.stickerOpacities,[asset]:Math.max(0,Math.min(1,patch.opacity))}});
    if(patch.tint!==undefined){
