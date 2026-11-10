@@ -36,7 +36,7 @@ export type PanoramaLayer = {
   text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
   color?:string; tint?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
-  frameStyle?:'polaroid';
+  frameStyle?:string;
   placement?: LayerPlacement;
   /** Continuous draggable wallpaper, painted behind independent content. */
   role?:'background';
