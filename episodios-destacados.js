@@ -31,6 +31,16 @@
       url: 'https://open.spotify.com/episode/5NtsF2XPSEZ2pTzBBQtw3c',
       art: 'assets/episodio-03-portada.webp',
       published: true
+    },
+    {
+      number: 4,
+      title: 'Vamos a ordenar esa idea que tienes en la cabeza',
+      titleEn: "Let's make sense of the idea in your head",
+      summary: 'Una idea puede sentirse clarísima en tu cabeza y volverse un enredo al explicarla. Ordenamos lo que sabes, lo que supones y lo que necesitas comprobar con personas reales.',
+      summaryEn: 'An idea can feel perfectly clear in your head, yet difficult to explain. Let's separate what you know, what you're assuming, and what you still need to test with real people.',
+      url: 'https://open.spotify.com/episode/6nfCQjlytWbagrYjTlugLi',
+      art: 'https://image-cdn-ak.spotifycdn.com/image/ab67656300005f1f072aa562ec7dfa14451a2b5e',
+      published: true
     }
   ];
   const spotifyEpisode = /^https:\/\/open\.spotify\.com\/episode\/[A-Za-z0-9]+(?:\?.*)?$/;
@@ -38,7 +48,7 @@
     Number.isInteger(e.number) && spotifyEpisode.test(e.url))
     .sort((a, b) => b.number - a.number);
   if (!published.length) return;
-  // Tres episodios visibles (03, 02, 01), siempre ordenados por estreno reciente.
+  // Tres episodios destacados visibles (04, 03, 02); el resto permanece en el archivo.
   const visible = published.slice(0, 3);
   const latest = visible[0];
   const previous = visible[1];
