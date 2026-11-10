@@ -42,7 +42,8 @@ test('Touch-first post and seamless editors use compact tools while retaining op
  assert.ok(post.includes('free-post-utility-bar'));
  assert.ok(post.includes('free-post-layers'));
  assert.ok(post.includes('saveState'));
- assert.ok(post.includes('backgroundImageId:post.assetId'));
+ assert.ok(post.includes('editImageBackground(post.assetId)'));
+ assert.ok(post.includes('Seleccionar fondo editable'));
  assert.ok(postCss.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
  assert.ok(postCss.includes('max-height:min(35dvh,340px)'));
  assert.ok(panorama.includes('panorama-primary-actions'));
