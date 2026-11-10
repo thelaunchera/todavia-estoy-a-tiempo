@@ -4,6 +4,7 @@ import { api, auth, image,labNotificationApi,type LabAlert } from './platform/cl
 import LabNotifications from './LabNotifications';
 import SaveSuccessCelebration from './SaveSuccessCelebration';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
+import {readNavigationPlace,writeNavigationPlace,clearNavigationPlace} from '../../creative-shared/NavigationMemory';
 import {sourceAwareScale,downloadLosslessPng} from './ExportQuality';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
@@ -407,6 +408,13 @@ function App() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [current, setCurrent] = useState('');
   const [tab, setTab] = useState<Tab>('home');
+  const navStackRef=useRef<Tab[]>([]);
+  const navScrollRef=useRef<Record<string,number>>({});
+  const navOwnerRef=useRef('');
+  const navReadyRef=useRef(false);
+  const navBrowserStepsRef=useRef(0);
+  const tabRef=useRef<Tab>('home');
+  tabRef.current=tab;
   const [calendarEditId,setCalendarEditId]=useState('');
   const [calendarDownloadId,setCalendarDownloadId]=useState('');
   const [calendarFocusDate,setCalendarFocusDate]=useState('');
@@ -575,6 +583,8 @@ function App() {
           setAccount(null);setAiWallet(null);setLoginStage('email');setLoginCode('');
           setPosts([]);setImages({});setAssets([]);setBrands([]);
           setCurrent('');setTab('home');
+          clearNavigationPlace('content-lab',account.email||'');
+          navReadyRef.current=false;navOwnerRef.current='';
           toast(loginLanguage==='es'
             ?'Pasaron 24 horas desde tu código. Solicita uno nuevo para continuar.'
             :'Your code is 24 hours old. Request a new code to continue.');
@@ -643,14 +653,117 @@ function App() {
         headlineStyle:{font:'serif',fontSize:88,color:'#191919',lineHeight:1.1,spacing:0}})}));
     navigate('vertical');
   };
+  // The last visited place is remembered per signed-in account for exactly two hours.
+  // A notification/deep link always takes priority over stored navigation state.
+  useEffect(()=>{
+    const owner=account?.email?.trim().toLowerCase()||'';
+    if(!owner||waiting)return;
+    if(navOwnerRef.current===owner)return;
+    navOwnerRef.current=owner;navReadyRef.current=false;navBrowserStepsRef.current=0;
+    const fromLink=new URL(window.location.href).searchParams.has('notification');
+    const place=fromLink?null:readNavigationPlace<Tab,{brandId?:string;editor?:Post}>('content-lab',owner,nav.map(n=>n.id));
+    if(place){
+      navStackRef.current=[...place.stack];
+      navScrollRef.current={...place.scroll};
+      if(place.context?.brandId&&brands.some(item=>item.id===place.context?.brandId))
+        setCurrent(place.context.brandId);
+      if(['factory','create','vertical'].includes(place.view)){
+        const saved=place.context?.editor;
+        if(saved&&typeof saved.brandId==='string'&&brands.some(item=>item.id===saved.brandId)&&
+           typeof saved.title==='string'&&typeof saved.format==='string'){
+          editorSessionRef.current++;
+          setEditor(inspectRecovery({...saved}));
+        }else if(place.view==='factory'||place.view==='vertical'||place.view==='create'){
+          // Never open an editor with a different account's or missing document.
+          place.view='home';
+        }
+      }
+      setTab(place.view);
+      // Seed browser history for reopened PWAs so the native Back gesture
+      // traverses the remembered route rather than leaving the app immediately.
+      const restored=[...navStackRef.current,place.view].slice(-26);
+      const first=restored.shift()||'home';
+      window.history.replaceState({...window.history.state,tleLabTab:first},'',window.location.href);
+      for(const view of restored){window.history.pushState({tleLabTab:view},'',window.location.href);navBrowserStepsRef.current++;}
+      window.setTimeout(()=>window.scrollTo(0,navScrollRef.current[place.view]||0),120);
+    }else{
+      window.history.replaceState({...window.history.state,tleLabTab:tabRef.current},'',window.location.href);
+    }
+    window.setTimeout(()=>{navReadyRef.current=true;},0);
+  },[account?.email,waiting,brands.length,posts.length]);
+
+  useEffect(()=>{
+    const receive=(event:PopStateEvent)=>{
+      const view=event.state?.tleLabTab;
+      if(!nav.some(item=>item.id===view)||!account?.email)return;
+      const old=tabRef.current;
+      if(view===old)return;
+      navScrollRef.current[old]=window.scrollY;
+      if(navStackRef.current.at(-1)===view)navStackRef.current.pop();
+      else navStackRef.current.push(old);
+      navBrowserStepsRef.current=Math.max(0,navBrowserStepsRef.current-1);
+      tabRef.current=view;setTab(view);setMenu(false);setSwitcher(false);
+      window.requestAnimationFrame(()=>window.scrollTo(0,navScrollRef.current[view]||0));
+    };
+    window.addEventListener('popstate',receive);
+    return()=>window.removeEventListener('popstate',receive);
+  },[account?.email]);
+
+  useEffect(()=>{
+    const owner=account?.email?.trim().toLowerCase();
+    if(!owner||!navReadyRef.current)return;
+    const remember=()=>{
+      navScrollRef.current[tabRef.current]=window.scrollY;
+      const editorTab=['factory','create','vertical'].includes(tabRef.current);
+      // Capture only a small draft snapshot. Private assets already live in the
+      // existing editor library, and no credentials are copied into localStorage.
+      const raw=editorTab?JSON.stringify(editor):'';
+      writeNavigationPlace('content-lab',owner,{
+        view:tabRef.current,stack:navStackRef.current,scroll:navScrollRef.current,
+        context:{brandId:current,editor:editorTab&&raw.length<180000?editor:undefined},
+      });
+    };
+    remember();
+    document.addEventListener('visibilitychange',remember);
+    window.addEventListener('pagehide',remember);
+    return()=>{
+      document.removeEventListener('visibilitychange',remember);
+      window.removeEventListener('pagehide',remember);
+    };
+  },[account?.email,tab,current,editor]);
+
+  const backOneView=()=>{
+    if(!navStackRef.current.length)return;
+    if(navBrowserStepsRef.current>0){window.history.back();return;}
+    const previous=navStackRef.current.pop();
+    if(!previous)return;
+    navScrollRef.current[tab]=window.scrollY;
+    tabRef.current=previous;setTab(previous);setMenu(false);setSwitcher(false);
+    window.history.replaceState({...window.history.state,tleLabTab:previous},'',window.location.href);
+    window.requestAnimationFrame(()=>window.scrollTo(0,navScrollRef.current[previous]||0));
+  };
+  const closeView=()=>{
+    navStackRef.current=[];
+    tabRef.current='home';setTab('home');setMenu(false);setSwitcher(false);
+    window.history.replaceState({...window.history.state,tleLabTab:'home'},'',window.location.href);
+    window.scrollTo({top:0,behavior:'auto'});
+  };
+
   const navigate = (id: Tab) => {
     // Leaving a calendar-origin edit must not reopen an old project later.
     if(!['factory','vertical','create'].includes(id))setCalendarEditId('');
     if(id!=='grid')setGridPref(prev=>prev.fromCalendar
       ?{...prev,fromCalendar:false,openGridId:undefined,openTileIndex:undefined}:prev);
-    setTab(id);
+    if(id!==tabRef.current){
+      navScrollRef.current[tabRef.current]=window.scrollY;
+      navStackRef.current=[...navStackRef.current,tabRef.current].slice(-25);
+      window.history.pushState({tleLabTab:id},'',window.location.href);
+      navBrowserStepsRef.current++;
+    }
+    tabRef.current=id;setTab(id);
     setMenu(false);
     setSwitcher(false);
+    window.requestAnimationFrame(()=>window.scrollTo(0,navScrollRef.current[id]||0));
   };
   const start = (angle = 'Pain point') => {
     if (!brand) return;
@@ -1476,7 +1589,11 @@ function App() {
           </div>
           <button
             className="signout"
-            onClick={() => auth.signOut().then(() => setAccount(null))}
+            onClick={() => {
+              clearNavigationPlace('content-lab',account.email||'');
+              navReadyRef.current=false;navOwnerRef.current='';
+              void auth.signOut().then(() => setAccount(null));
+            }}
           >
             <span className="person">{profilePhotoId&&images[profilePhotoId]
               ?<img className="lab-account-avatar" src={images[profilePhotoId]} alt=""/>
@@ -1491,7 +1608,15 @@ function App() {
       </aside>
       <main>
         <header className="top">
-          {tab === 'factory' && <button type="button" className="lab-carousel-editor-exit" onClick={() => navigate('home')} aria-label={loginLanguage==='es'?'Volver al Content Lab y salir del editor':'Back to Content Lab and exit editor'}><span aria-hidden="true">←</span> {loginLanguage==='es'?'Volver al Lab':'Back to Lab'}</button>}
+          {tab!=='home'&&<div className="lab-workspace-route-actions">
+            <button type="button" className="lab-carousel-editor-exit" onClick={backOneView}
+              disabled={!navStackRef.current.length}
+              aria-label={loginLanguage==='es'?'Volver a la pantalla anterior':'Previous screen'}>
+              <span aria-hidden="true">←</span> {loginLanguage==='es'?'Atrás':'Back'}
+            </button>
+            <button type="button" className="lab-workspace-close" onClick={closeView}
+              aria-label={loginLanguage==='es'?'Cerrar esta sección':'Close this section'}>× <span>{loginLanguage==='es'?'Cerrar':'Close'}</span></button>
+          </div>}
           <div>
             <button className="hamburger" type="button" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu(true)}>
               <Menu size={22} />
