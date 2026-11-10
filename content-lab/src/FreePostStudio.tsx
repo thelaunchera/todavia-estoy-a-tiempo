@@ -484,12 +484,16 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
     </div>
     <div className="free-post-background-colors">
      <label>{plain('Background color','Color de fondo',locale)} <input type="color" value={decor.color}
-      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',color:e.target.value})}/></label>
+      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',color:e.target.value,
+        layers:decor.layers.filter(layer=>layer.role!=='background')})}/></label>
      <label>{plain('Gradient','Degradado',locale)} <input type="checkbox" checked={!!decor.gradient}
-      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:e.target.checked?'#F5D8E7':''})}/></label>
+      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:e.target.checked?'#F5D8E7':'',
+        layers:decor.layers.filter(layer=>layer.role!=='background')})}/></label>
      {decor.gradient&&<label>{plain('Second color','Segundo color',locale)} <input type="color" value={decor.gradient}
-      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:e.target.value})}/></label>}
-     <button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:'',color:'#FFFFFF'})}>
+      onChange={e=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:e.target.value,
+        layers:decor.layers.filter(layer=>layer.role!=='background')})}/></label>}
+     <button type="button" onClick={()=>update({...decor,backgroundId:'brand',backgroundImageId:'',gradient:'',color:'#FFFFFF',
+        layers:decor.layers.filter(layer=>layer.role!=='background')})}>
       {plain('White background','Fondo blanco',locale)}</button>
     </div>
     <FreeDecorControls preferenceScope={brand.id} title={plain('Stickers and backgrounds','Stickers y fondos',locale)}
