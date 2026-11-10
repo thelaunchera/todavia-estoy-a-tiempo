@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import './CarouselFactory.css';
 import CarouselReader from './CarouselReader';
+import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
@@ -567,8 +568,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));
     downloadUrlsRef.current=[];
     setDownloads([]);
+    if(motionUrlRef.current){URL.revokeObjectURL(motionUrlRef.current);motionUrlRef.current=null;}
+    setMotionDownload(null);
   };
-  useEffect(()=>()=>{downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));downloadUrlsRef.current=[];},[]);
+  useEffect(()=>()=>{downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));downloadUrlsRef.current=[];
+    if(motionUrlRef.current)URL.revokeObjectURL(motionUrlRef.current);},[]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
   const [historyVersion,setHistoryVersion]=useState(0);
@@ -596,6 +600,10 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const [imageSubjectType,setImageSubjectType]=useState<'portrait'|'product'>('portrait');
   const [referenceReport,setReferenceReport]=useState('');
   const [overview,setOverview]=useState<string[]>([]);
+  const [motionBusy,setMotionBusy]=useState(false);
+  const [motionProgress,setMotionProgress]=useState('');
+  const [motionDownload,setMotionDownload]=useState<{url:string;name:string}|null>(null);
+  const motionUrlRef=useRef<string|null>(null);
   const [overviewError,setOverviewError]=useState('');
   const [overviewBusy,setOverviewBusy]=useState(false);
   const [busy,setBusy]=useState('');
@@ -1528,6 +1536,20 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       setBusy('');
     }
   };
+  const exportAnimatedCarousel=async()=>{
+    if(motionBusy||busy||overview.length!==slides.length||overview.some(src=>!src))return;
+    if(!carouselVideoAvailable()){notify('Este navegador no admite exportar video. Los PNG siguen disponibles.');return}
+    setMotionBusy(true);setMotionProgress('Preparando slides…');
+    try{
+      const video=await renderCarouselVideo(overview,(slide,total)=>setMotionProgress(slide+' / '+total));
+      if(motionUrlRef.current)URL.revokeObjectURL(motionUrlRef.current);
+      const url=URL.createObjectURL(video.blob);
+      motionUrlRef.current=url;
+      setMotionDownload({url,name:'carrusel-animado.'+video.extension});
+      notify('Video '+video.extension.toUpperCase()+' preparado. Toca Descargar video para guardarlo.');
+    }catch(error){showError(error)}
+    finally{setMotionBusy(false);setMotionProgress('')}
+  };
   const createAnotherCarousel=async()=>{
     if(creatingNewCarousel||saving||busy)return;
     setCreatingNewCarousel(true);
@@ -1550,6 +1572,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             setMobilePreviewOpen(false);setReaderOpen(true);
           }}>Vista revista · Page Curl / Polaroid</button>
           <button type="button" onClick={scatterExistingPhotos}>Ordenar 2–3 fotos Polaroid</button>
+          <button type="button" onClick={()=>void exportAnimatedCarousel()}
+            disabled={!carouselVideoAvailable()||!!busy||motionBusy||overview.length!==slides.length||overview.some(src=>!src)}>
+            {motionBusy?'Creando video '+motionProgress:'Crear video animado'}</button>
+          {motionDownload&&<a className="factory-motion-download" href={motionDownload.url}
+            download={motionDownload.name}>Descargar video · {motionDownload.name.split('.').pop()?.toUpperCase()}</a>}
         </div>
         {sheet&&<button type="button" className="factory-preview-edit" onClick={()=>{
           setMobilePreviewOpen(false);setStudioTab(style.seamlessEnabled?'canvas':'slides');
