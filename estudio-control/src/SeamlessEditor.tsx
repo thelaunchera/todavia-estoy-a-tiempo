@@ -970,6 +970,8 @@ export default function SeamlessEditor(){
  // It leaves the editing toolbar available below the artboard.
  const startRotatePointer=(e:React.PointerEvent<HTMLButtonElement>,item:Item)=>{
   e.stopPropagation();
+  // Captured touchstart on the viewport must not become a slide swipe.
+  layerGesture.current=true;swipeStart.current=null;
   const bounds=canvas.current?.getBoundingClientRect();if(!bounds)return;
   const size=itemBounds(item),scale=bounds.width/width;
   const centerX=bounds.left+(item.x+size.w/2)*scale;
