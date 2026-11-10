@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=(path)=>readFileSync(new URL(path,import.meta.url),'utf8');
-const reader=read('../../creative-shared/CarouselReader.tsx');
+const reader=read('../src/CarouselReader.tsx');
 const readerCss=read('../../creative-shared/CarouselReader.css');
 const lab=read('../src/CarouselFactory.tsx');
 const panorama=read('../src/PanoramaLayers.ts');
