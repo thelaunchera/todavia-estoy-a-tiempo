@@ -722,12 +722,25 @@ export default function TouchLayerCanvas({
               style={{borderRadius:radius(outerRadius,fw,fh),background:mode==='polaroid'?'#FFFCF7':layer.paper||'#FAF8F3',
                 boxShadow:mode==='soft-shadow'||mode==='polaroid'?'0 3px 9px #15262d38':undefined}}/>}
             {(layer.kind==='photo'||layer.kind==='sticker')&&<div className="touch-editor-image-window" style={{...photoWindow,opacity:visibleOpacity(layer)}}>
-              {layer.kind==='sticker'&&layer.tint?<span className="touch-editor-sticker-tint" aria-hidden="true"
-                style={{backgroundColor:layer.tint,WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")'}}/>:
               <img src={layer.src} alt="" draggable={false} style={layer.role==='background'?{objectFit:layer.backgroundFit==='cover'?'cover':'fill',objectPosition:'center',transform:'none'}:layer.kind === 'photo' ? {
                 objectPosition: crop.x * 100 + '% ' + crop.y * 100 + '%',
                 transform: 'scale(' + crop.zoom + ')', transformOrigin: crop.x * 100 + '% ' + crop.y * 100 + '%',
-              } : undefined}/>}
+              } : undefined}/>
+              {((layer.tintColor&&/^#[0-9a-f]{6}$/i.test(layer.tintColor))||
+                (layer.kind==='sticker'&&layer.tint&&/^#[0-9a-f]{6}$/i.test(layer.tint)))&&
+                <span className="touch-editor-sticker-tint" aria-hidden="true"
+                  style={{backgroundColor:layer.tintColor||layer.tint,
+                    opacity:layer.tintColor?(layer.tintStrength??.38):1,
+                    WebkitMaskImage:'url("'+layer.src+'")',maskImage:'url("'+layer.src+'")',
+                    ...(layer.kind==='photo'?{
+                      WebkitMaskSize:layer.role==='background'&&layer.backgroundFit!=='cover'?'100% 100%':'cover',
+                      maskSize:layer.role==='background'&&layer.backgroundFit!=='cover'?'100% 100%':'cover',
+                      WebkitMaskPosition:layer.role==='background'?'center':crop.x*100+'% '+crop.y*100+'%',
+                      maskPosition:layer.role==='background'?'center':crop.x*100+'% '+crop.y*100+'%',
+                      transform:layer.role==='background'?'none':'scale('+crop.zoom+')',
+                      transformOrigin:crop.x*100+'% '+crop.y*100+'%'
+                    }:{}),
+                  }}/>} 
             </div>}
             {layer.kind==='text'&&editingText===layer.id&&onUpdate&&(inlineTextTools||pageCount>1)&&active?
               <textarea ref={quickTextInput} className="touch-editor-oncanvas-text"
