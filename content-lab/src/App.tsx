@@ -700,7 +700,7 @@ function App() {
       const old=tabRef.current;
       if(view===old)return;
       navScrollRef.current[old]=window.scrollY;
-      if(navStackRef.current.at(-1)===view)navStackRef.current.pop();
+      if(navStackRef.current[navStackRef.current.length-1]===view)navStackRef.current.pop();
       else navStackRef.current.push(old);
       navBrowserStepsRef.current=Math.max(0,navBrowserStepsRef.current-1);
       tabRef.current=view;setTab(view);setMenu(false);setSwitcher(false);
