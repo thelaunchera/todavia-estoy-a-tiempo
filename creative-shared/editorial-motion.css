@@ -1,0 +1,64 @@
+/* The Launch Era: selected BrewedOps-style patterns rebuilt for our real navigation,
+   photo galleries and carousel previews. Scoped to avoid canvas transforms and exports. */
+@keyframes tleEditorialArrival {
+  from { opacity: .72; translate: 0 12px; }
+  to { opacity: 1; translate: 0 0; }
+}
+.studio .sidebar { height: 100vh; height: 100dvh; min-height: 0; }
+.studio .sidebar .studio-area-nav {
+  min-height: 0; overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
+  scroll-padding-block: 18px; scrollbar-width: thin;
+  scrollbar-color: #c4d4dd transparent;
+}
+.studio .studio-nav-area.has-active .studio-nav-area-trigger { background: #edf4f7; }
+.studio .studio-nav-area-items .nav-item.active {
+  box-shadow: inset 3px 0 0 #6796b1;
+}
+.studio :where(.finished-demo-photos-grid,.finished-demos-grid,.studio-hub-grid) {
+  scroll-padding-inline: 12px;
+}
+.app-shell .sidebar { scroll-padding-block: 18px; }
+.app-shell .sidebar nav button.active { box-shadow: inset 3px 0 0 #7aadc2; }
+.app-shell :where(.factory-slide-strip,.factory-swipe-rail,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity; scroll-padding-inline: 10px;
+}
+.app-shell :where(.factory-thumbnail,.factory-swipe-page,.fg-filterbar>button,.free-decor-groups>button,.sticker-downloads-filters>button) {
+  scroll-snap-align: start;
+}
+.app-shell .factory-slide-strip { padding-inline: 3px 12px; }
+.app-shell :where(.factory-thumbnail,.factory-add):focus-visible { outline: 3px solid #6eabc5; outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .studio .studio-nav-area-trigger,
+  .studio .studio-nav-area-items .nav-item,
+  .app-shell .sidebar nav button {
+    transition: background-color .22s ease, color .22s ease, box-shadow .22s ease;
+  }
+  .studio .tle-reveal-visible, .app-shell .tle-reveal-visible {
+    animation: tleEditorialArrival .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .studio .finished-demo-card,
+    .studio .studio-hub-card,
+    .app-shell .fg-card {
+      transition: box-shadow .25s ease, border-color .25s ease;
+    }
+    .studio .finished-demo-card:hover,
+    .studio .studio-hub-card:hover,
+    .app-shell .fg-card:hover {
+      box-shadow: 0 14px 34px #172d3d15;
+    }
+  }
+}
+@media (max-width: 850px) {
+  .app-shell .sidebar.open { box-shadow: 18px 0 50px #152e4024; }
+  .studio .sidebar.open { box-shadow: 18px 0 50px #152e4024; }
+  .app-shell .factory-slide-strip { scroll-snap-type: x mandatory; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio .tle-reveal-visible,.app-shell .tle-reveal-visible { animation: none !important; }
+  .app-shell :where(.factory-slide-strip,.factory-swipe-rail,.fg-filterbar,.free-decor-groups,.sticker-downloads-filters) {
+    scroll-behavior: auto !important;
+  }
+}
