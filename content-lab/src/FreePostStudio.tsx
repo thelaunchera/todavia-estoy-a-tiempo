@@ -340,7 +340,7 @@ export default function FreePostStudio({post,brand,assets,images,onChange,onTitl
   const id=existing?.id||uniqueId();
   const wallpaper:PanoramaLayer={
    ...(existing||{}),id,assetId,name:'Fondo editable',kind:'photo',
-   role:'background',placement:'behind-text',locked:false,
+   role:'background',backgroundFit:'cover',placement:'behind-text',locked:false,
    rect:existing?.rect||{x:0,y:0,w:1,h:1,angle:0,cornerRadius:0},
   };
   update({...decor,backgroundId:'brand',backgroundImageId:'',
