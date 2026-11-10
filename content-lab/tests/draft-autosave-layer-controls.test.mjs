@@ -83,3 +83,16 @@ test('Both carousel editors support 12 editable slides without truncating saved 
  assert.ok(studio.includes('className="studio-app-add-slide"'));
  assert.ok(studio.includes('count:Math.min(12,d.count+1)'));
 });
+
+test('12-slide panoramas keep the real image aspect ratio and allow video encoding',()=>{
+ const photoCropCode=read('PhotoCrop.ts');
+ const js=ts.transpileModule(photoCropCode,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ const module={exports:{}};
+ runInNewContext(js,{module,exports:module.exports,Math,Number});
+ const rect=module.exports.initialPanoramaPhotoRect(.75,12,{x:.5,y:.5});
+ const actualRatio=(rect.w*12*1080)/(rect.h*1350);
+ assert.ok(Math.abs(actualRatio-.75)<1e-6,'portrait photo frame matches original ratio at 12 slides');
+ const motion=readFileSync(new URL('../../creative-shared/CarouselMotionExport.ts',import.meta.url),'utf8');
+ assert.ok(motion.includes('pages.length>12'));
+ assert.ok(motion.includes('entre 1 y 12 slides'));
+});
