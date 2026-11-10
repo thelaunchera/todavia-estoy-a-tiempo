@@ -7,7 +7,8 @@ const css=readFileSync(new URL('../src/TouchLayerCanvas.css',import.meta.url),'u
 test('Panorama enters slide navigation mode instead of accidentally moving overlapping assets',()=>{
  assert.match(canvas,/useState<'navigate'\|'edit'>\(pageCount>1\?'navigate':'edit'\)/);
  assert.match(canvas,/pageCount>1&&interactionMode==='navigate'\)\|\|layer\.locked\)return;/);
- assert.match(canvas,/pointerEvents:layer\.locked\|\|layer\.role==='background'\|\|pageCount>1&&interactionMode==='navigate'/);
+ assert.match(canvas,/pointerEvents:layer\.locked\|\|\(pageCount>1&&interactionMode==='navigate'\)/);
+ assert.doesNotMatch(canvas,/pointerEvents:layer\.locked\|\|layer\.role==='background'/);
  assert.match(css,/\.touch-editor-navigation-mode \.touch-editor-layer\{/);
  assert.match(css,/pointer-events:none!important/);
 });
@@ -27,6 +28,6 @@ test('Overlapping objects can be explicitly selected and only the active one mov
  assert.match(canvas,/onClick=\{\(\)=>selectFromList\(layer\.id\)\}/);
  assert.match(canvas,/const z = layer\.role==='background'\?1:pageCount===1\?20\+layerIndex:/);
  assert.match(canvas,/layer\.placement==='behind-text'\?2\+\(layerIndex\/Math\.max\(1,layers\.length\)\):20\+layerIndex/);
- assert.match(canvas,/pointerEvents:layer\.locked\|\|layer\.role==='background'\|\|pageCount>1/);
+ assert.match(canvas,/pointerEvents:layer\.locked\|\|\(pageCount>1&&interactionMode==='navigate'\)/);
  assert.match(css,/\.touch-editor-quick-layers/);
 });
