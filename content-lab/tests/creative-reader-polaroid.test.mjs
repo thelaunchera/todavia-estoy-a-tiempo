@@ -4,11 +4,14 @@ import {readFileSync} from 'node:fs';
 const read=(path)=>readFileSync(new URL(path,import.meta.url),'utf8');
 const reader=read('../src/CarouselReader.tsx');
 const readerCss=read('../../creative-shared/CarouselReader.css');
+const studioReader=read('../../estudio-control/src/CarouselReader.tsx');
+
 const lab=read('../src/CarouselFactory.tsx');
 const panorama=read('../src/PanoramaLayers.ts');
 const studio=read('../../estudio-control/src/SeamlessEditor.tsx');
 
 test('shared magazine reader has an accessible, opt-in dialog and swipe plus arrow navigation',()=>{
+ assert.equal(reader,studioReader,'Studio y Lab deben conservar el mismo lector sin desincronizarse');
  assert.match(reader,/aria-modal="true"/);
  assert.match(reader,/onPointerUp=\{event=>/);
  assert.match(reader,/event\.key==='Escape'/);
@@ -26,7 +29,7 @@ test('Studio Polaroid lives in editable doc and the export painter',()=>{
  assert.match(studio,/openMagazine/);
 });
 test('Content Lab Polaroid is persisted, mirrored on preview, and exported',()=>{
- assert.match(panorama,/frameStyle\?:'polaroid'/);
+ assert.match(panorama,/frameStyle\?:string/);
  assert.match(panorama,/frameStyle:'polaroid' as const/);
  assert.match(panorama,/layer\.frameStyle==='polaroid'/);
  assert.match(panorama,/photoFrameMetrics\(w,h,'polaroid'\)/);
