@@ -62,3 +62,54 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* 2026-11-10 — Shared creative app usability refresh.
+   Shared presentation only: no canvas, layers, export, autosave or session edits. */
+:where(.studio,.app-shell) :where(
+  .sidebar nav button,.sidebar nav a,.studio-nav-area-trigger,
+  .studio-nav-area-items .nav-item,.lab-mobile-dock button
+) {
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+:where(.studio,.app-shell) :where(
+  .sidebar nav button,.sidebar nav a,.studio-nav-area-trigger,
+  .studio-nav-area-items .nav-item,.lab-mobile-dock button,
+  .studio-hub-card,.finished-demo-card
+):focus-visible {
+  outline:3px solid #2e7597;
+  outline-offset:3px;
+  position:relative;
+  z-index:1;
+}
+.studio .studio-nav-area-trigger[aria-expanded="true"],
+.app-shell .sidebar nav button[aria-current="page"] {
+  background-color:#e9f3f9;
+  color:#173f52;
+}
+.studio :where(.finished-demo-card,.studio-hub-card) :where(h2,h3),
+.app-shell :where(.fg-card,.ml-card) :where(h2,h3) {
+  text-wrap:balance;
+}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  .studio :where(.studio-nav-area-trigger,.studio-nav-area-items .nav-item):hover,
+  .app-shell .sidebar nav button:hover {
+    background-color:#eef5f9;
+  }
+  .studio :where(.studio-nav-area-trigger,.studio-nav-area-items .nav-item):active,
+  .app-shell .sidebar nav button:active {
+    background-color:#deecf4;
+  }
+}
+@media (max-width:850px) {
+  .app-shell .lab-mobile-dock button,
+  .studio .studio-nav-area-trigger {
+    min-height:44px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  :where(.studio,.app-shell) :where(
+    .studio-nav-area-trigger,.studio-nav-area-items .nav-item,
+    .sidebar nav button,.lab-mobile-dock button
+  ) { transition:none !important; animation:none !important; }
+}
