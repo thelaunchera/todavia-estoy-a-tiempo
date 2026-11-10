@@ -852,3 +852,6 @@
 @media(hover:hover) and (pointer:fine){.factory-creative-actions button:not(:disabled):hover{box-shadow:0 7px 20px #213E4A15}}
 @media(max-width:480px){.factory-creative-actions button{flex:1 1 100%;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.factory-creative-actions button{transition:none!important}}
+
+.factory-creative-actions .factory-motion-download{flex:1 1 175px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;background:#191919;color:#fff;border-radius:11px;font:700 12px 'DM Sans',Arial,sans-serif;text-decoration:none;text-align:center}
+.factory-motion-download:focus-visible{outline:3px solid #7AACC4;outline-offset:2px}
