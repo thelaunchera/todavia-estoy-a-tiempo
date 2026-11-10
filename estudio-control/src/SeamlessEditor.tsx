@@ -19,7 +19,8 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
+import CarouselReader from '../../creative-shared/CarouselReader';
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:String(CREATIVE_EDITOR_RULES.defaultCanvasColor),backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // Studio copies its own shared resources on deployment.
@@ -178,6 +179,9 @@ export default function SeamlessEditor(){
  const [slide,setSlide]=useState(0);
  const [canvasZoom,setCanvasZoom]=useState<75|100|125|150>(100);
  const thumbnailsRef=useRef<(HTMLCanvasElement|null)[]>([]);
+ const [readerOpen,setReaderOpen]=useState(false);
+ const [readerBusy,setReaderBusy]=useState(false);
+ const [readerPages,setReaderPages]=useState<string[]>([]);
  const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:900px)').matches);
  const [artboardSpace,setArtboardSpace]=useState(740);
  const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
@@ -354,6 +358,17 @@ export default function SeamlessEditor(){
      try{
        const im=await loadImage(it.src);
        const h=it.width*im.height/im.width;
+       // The same original image, frame and placement are painted to preview and PNG.
+       if(it.frameStyle==='polaroid'&&it.role!=='background'){
+         const pad=Math.max(12,it.width*.055);
+         const imageW=it.width-2*pad,imageH=imageW*im.height/im.width;
+         ctx.fillStyle='#FFFCF7';
+         ctx.fillRect(x,it.y,it.width,imageH+pad+it.width*.22);
+         ctx.shadowColor='transparent';ctx.shadowBlur=0;
+         ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+         ctx.drawImage(im,x+pad,it.y+pad,imageW,imageH);
+         ctx.restore();continue;
+       }
        const radius=Math.max(0,Math.min(it.radius||0,it.width/2,h/2));
        const strength=Math.max(0,Math.min(1,it.tintStrength??0.38));
        // Use an alpha-preserving offscreen layer for recoloring and rounded corners.
@@ -431,8 +446,45 @@ export default function SeamlessEditor(){
    };
    void render();return()=>{active=false};
  },[doc,selected,editingText,wideScreen,slideWidthPx]);
+ const openMagazine=async()=>{
+   if(readerBusy)return;
+   setReaderBusy(true);
+   const pages:string[]=[];
+   try{
+     for(let n=0;n<doc.count;n++){
+       const canvas=document.createElement('canvas');
+       canvas.width=324;canvas.height=405;
+       const ctx=canvas.getContext('2d');
+       if(!ctx)throw Error('Canvas');
+       await paint(ctx,.3,n*W,W);
+       pages.push(canvas.toDataURL('image/png'));
+       canvas.width=1;canvas.height=1;
+     }
+     setReaderPages(pages);setReaderOpen(true);
+   }catch{setMessage('No se pudo abrir la revista. Revisa si alguna fotografía sigue cargando.')}
+   finally{setReaderBusy(false)}
+ };
  const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
+ const applyPolaroidScatter=()=>{
+   const photos=doc.items.filter(it=>it.kind==='image'&&!it.shape&&!it.locked&&it.role!=='background'&&
+     Math.floor((it.x+it.width/2)/W)===slide);
+   if(photos.length<2){setMessage('Añade al menos dos fotografías al slide para una composición Polaroid.');return}
+   const chosen=photos.slice(-3);
+   const layouts=chosen.length===2
+     ?[{x:145,y:235,rotation:-8},{x:585,y:335,rotation:8}]
+     :[{x:80,y:235,rotation:-9},{x:365,y:350,rotation:8},{x:700,y:230,rotation:-5}];
+   const spots=new Map(chosen.map((it,n)=>[it.id,layouts[n]]));
+   setDoc(d=>({...d,items:d.items.map(it=>{
+     const spot=spots.get(it.id);return spot
+       ?{...it,x:slide*W+spot.x,y:spot.y,width:chosen.length===2?365:320,
+         rotation:spot.rotation,frameStyle:'polaroid' as const,
+         shadowEnabled:true,shadowColor:'#27353B44',shadowBlur:22,shadowOffsetX:0,shadowOffsetY:12}
+       :it;
+   })}));
+   setSelected(null);
+   setMessage('Fotos en composición Polaroid. Puedes mover, girar y deshacer cada cambio.');
+ };
  const addPrivateSticker=async(url:string)=>{
  try{
   await loadImage(url);
@@ -547,7 +599,10 @@ export default function SeamlessEditor(){
   const lines=it.kind==='text'?textLines(it):[];
   const lineHeight=it.fontSize*1.3+(it.kind==='text'?curvedTextExtraHeight(it.fontSize,it.width||900,it.curve||0,lines,it.letterSpacing||0):0);
   return {w:it.kind==='text'?Math.max(150,it.width||900):it.kind==='sticker'?it.fontSize:it.width,
-    h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:im?.width?it.width*im.height/im.width:it.width};
+    h:it.kind==='text'?lineHeight*Math.max(1,lines.length):it.kind==='sticker'?it.fontSize:
+      it.frameStyle==='polaroid'&&it.role!=='background'
+        ?(it.width-2*Math.max(12,it.width*.055))*(im?.width?im.height/im.width:1)+Math.max(12,it.width*.055)+it.width*.22
+        :im?.width?it.width*im.height/im.width:it.width};
  };
  const hit=(x:number,y:number)=>[...doc.items.filter(it=>it.role==='background'),...doc.items.filter(it=>it.role!=='background')].reverse().find(it=>{
     if(it.locked)return false;
@@ -1082,7 +1137,11 @@ export default function SeamlessEditor(){
       {[75,100,125,150].map(n=><option key={n} value={n}>{n}%</option>)}</select></label>
    </div>
   </nav>
-
+  <div className="studio-creative-preview-tools" role="group" aria-label="Efectos de carruseles">
+    <button type="button" onClick={()=>void openMagazine()} disabled={busy||readerBusy}>{readerBusy?'Preparando…':'Vista revista · Page Curl'}</button>
+    <button type="button" onClick={applyPolaroidScatter} disabled={busy}>Ordenar fotos · Polaroid</button>
+  </div>
+  {readerOpen&&<CarouselReader pages={readerPages} initialIndex={slide} title={projectName} onClose={()=>setReaderOpen(false)}/>}
   {current&&!current.locked&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
   <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':activeInspector==='effects'?'Sombras':activeInspector==='color'?'Cambiar color':activeInspector==='size'?'Ajustar tamaño':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
@@ -1093,6 +1152,10 @@ export default function SeamlessEditor(){
     <output>{current.kind==='image'?current.width:current.fontSize}px</output>
   </div>}
   {activeInspector==='effects'&&<div className="studio-app-effects-inspector">
+    {current.kind==='image'&&current.role!=='background'&&!current.shape&&
+      <label><input type="checkbox" checked={current.frameStyle==='polaroid'}
+        onChange={event=>update(current.id,{frameStyle:event.target.checked?'polaroid':undefined})}/>
+        Marco Polaroid (también en PNG)</label>}
     <label><input type="checkbox" checked={!!current.shadowEnabled} onChange={e=>update(current.id,{shadowEnabled:e.target.checked})}/> Activar sombra de la capa</label>
     <div className="studio-app-range-row"><label>Suavidad</label><input aria-label="Difuminado de sombra" type="range" min="0" max="120" value={current.shadowBlur??20}
      onChange={e=>update(current.id,{shadowBlur:Number(e.target.value),shadowEnabled:true})}/><output>{current.shadowBlur??20}px</output></div>
