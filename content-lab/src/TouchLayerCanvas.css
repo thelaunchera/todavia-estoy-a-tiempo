@@ -665,3 +665,48 @@
  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
  -webkit-mask-position:center;mask-position:center;
  -webkit-mask-size:contain;mask-size:contain;pointer-events:none}
+
+/* Studio-parity color tools: visible below opacity on iPad/desktop; in the
+   selected-element dock on iPhone. Never part of the exported image. */
+.touch-editor-color-desktop{display:block;min-width:0}
+.touch-editor-color-tools{
+  display:flex;align-items:center;flex-wrap:wrap;gap:9px 13px;min-width:0;
+  padding:9px 12px;margin:7px 0 10px;border:1px solid #cbd9dd;
+  border-radius:13px;background:#faf8f3;color:#191919;
+  box-shadow:0 3px 14px #142c3b13;font-size:12px;font-weight:750
+}
+.touch-editor-color-picker{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.touch-editor-color-picker input[type=color]{
+  width:44px;height:41px;min-width:44px;padding:3px;border:1px solid #becfd4;
+  border-radius:10px;background:#fff;cursor:pointer;touch-action:manipulation
+}
+.touch-editor-color-swatches{display:flex;align-items:center;gap:6px;overflow-x:auto;max-width:100%;padding:3px 0}
+.touch-editor-color-swatches button{
+  width:31px;height:31px;min-width:31px;min-height:31px;padding:0;flex:0 0 31px;
+  border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #a5b5b9;
+  cursor:pointer;touch-action:manipulation
+}
+.touch-editor-color-swatches button[aria-pressed=true]{
+  box-shadow:0 0 0 2px #191919,0 0 0 4px #fff
+}
+.touch-editor-color-strength{display:flex;align-items:center;gap:8px;flex:1 1 170px;min-width:130px}
+.touch-editor-color-strength input[type=range]{
+  flex:1;min-width:50px;min-height:44px;accent-color:#191919;touch-action:pan-y
+}
+.touch-editor-color-strength output{min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.touch-editor-color-reset{
+  min-height:41px;border:1px solid #a4bac3;border-radius:10px;background:#fff;
+  color:#191919;padding:8px 12px;font-size:12px;font-weight:800;
+  cursor:pointer;touch-action:manipulation
+}
+.touch-editor-color-tools button:disabled,.touch-editor-color-tools input:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:799px){
+  .touch-editor-color-desktop{display:none!important}
+  .touch-editor-context-inspector .touch-editor-color-tools{
+    border:0;box-shadow:none;background:transparent;margin:0;padding:0;
+    max-height:calc(32dvh - 65px);overflow-y:auto;overscroll-behavior:contain
+  }
+  .touch-editor-context-inspector .touch-editor-color-swatches{width:100%;order:2}
+  .touch-editor-context-inspector .touch-editor-color-strength{order:3;flex-basis:100%}
+  .touch-editor-context-inspector .touch-editor-color-reset{order:4;flex:1 1 auto}
+}
