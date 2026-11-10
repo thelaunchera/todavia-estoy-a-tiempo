@@ -41,7 +41,8 @@ type Gesture = {
   width: number; height: number; resize: boolean; resizeAxis?: 'x' | 'both'; crop: boolean;
   overflowX: number; overflowY: number;
   scrollLeft: number;
-  pinchDistance?: number; pinchCenter?: [number, number];
+  pinchDistance?: number; pinchCenter?: [number, number]; pinchAngle?: number;
+  rotate?: boolean; rotateCenter?: [number,number]; rotateStartAngle?: number;
 };
 export default function TouchLayerCanvas({
   preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
@@ -246,7 +247,8 @@ export default function TouchLayerCanvas({
     const [a,b]=[...pointers.current.values()];
     gesture.current={...active,start:getRect(source),
       pinchDistance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),
-      pinchCenter:[(a.x+b.x)/2,(a.y+b.y)/2],resize:false,crop:false};
+      pinchCenter:[(a.x+b.x)/2,(a.y+b.y)/2],
+      pinchAngle:Math.atan2(b.y-a.y,b.x-a.x),resize:false,crop:false,rotate:false};
     return true;
   };
   const down = (e: React.PointerEvent<HTMLDivElement>, layer: TouchLayer) => {
@@ -265,7 +267,8 @@ export default function TouchLayerCanvas({
       const [a, b] = [...pointers.current.values()];
       gesture.current = {...existing, start: getRect(layer),
         pinchDistance: Math.max(Math.hypot(a.x - b.x, a.y - b.y), 1),
-        pinchCenter: [(a.x + b.x) / 2, (a.y + b.y) / 2], resize: false};
+        pinchCenter: [(a.x + b.x) / 2, (a.y + b.y) / 2],
+        pinchAngle:Math.atan2(b.y-a.y,b.x-a.x),resize: false,rotate:false};
       return;
     }
     const rect = getRect(layer);
@@ -276,8 +279,12 @@ export default function TouchLayerCanvas({
     const frameH = rect.h * bounds.height-(metrics.inset+metrics.bottom)*pixelScale;
     const placement = coverPlacement(img?.naturalWidth || 1, img?.naturalHeight || 1,
       frameW, frameH, rect.crop);
+    const rotate=!!(e.target as HTMLElement).closest('[data-rotate-handle]');
+    const rotateCenter:[number,number]=[bounds.left+(rect.x+rect.w/2)*bounds.width,
+      bounds.top+(rect.y+rect.h/2)*bounds.height];
     gesture.current = {
       id: layer.id, start: rect, startX: e.clientX, startY: e.clientY,
+      rotate,rotateCenter,rotateStartAngle:rotate?Math.atan2(e.clientY-rotateCenter[1],e.clientX-rotateCenter[0]):undefined,
       width: bounds.width, height: bounds.height,
       resize: !!(e.target as HTMLElement).closest('[data-resize-handle]'),
       resizeAxis: (e.target as HTMLElement).closest('[data-resize-axis="x"]') ? 'x' : 'both',
@@ -299,7 +306,11 @@ export default function TouchLayerCanvas({
     }
     e.preventDefault();
     pointers.current.set(e.pointerId, {x: e.clientX, y: e.clientY});
-    if (pointers.current.size >= 2 && g.pinchDistance && g.pinchCenter) {
+    if (g.rotate && g.rotateCenter && g.rotateStartAngle!==undefined && pointers.current.size===1) {
+      const angle=Math.atan2(e.clientY-g.rotateCenter[1],e.clientX-g.rotateCenter[0]);
+      const delta=(angle-g.rotateStartAngle)*180/Math.PI;
+      update(g.id,{...g.start,angle:((g.start.angle||0)+delta+540)%360-180});
+    } else if (pointers.current.size >= 2 && g.pinchDistance && g.pinchCenter) {
       const [a, b] = [...pointers.current.values()];
       const scale = Math.max(.35, Math.min(3, Math.hypot(a.x - b.x, a.y - b.y) / g.pinchDistance));
       if (g.crop) {
@@ -307,7 +318,8 @@ export default function TouchLayerCanvas({
           zoom: normalizeCrop(g.start.crop).zoom * scale})});
       } else {
         const w = g.start.w * scale, h = g.start.h * scale;
-        update(g.id, {...g.start, w, h,
+        const delta=(Math.atan2(b.y-a.y,b.x-a.x)-(g.pinchAngle??0))*180/Math.PI;
+        update(g.id, {...g.start, w, h,angle:((g.start.angle||0)+delta+540)%360-180,
           x: g.start.x - (w - g.start.w) / 2 + ((a.x + b.x) / 2 - g.pinchCenter[0]) / g.width,
           y: g.start.y - (h - g.start.h) / 2 + ((a.y + b.y) / 2 - g.pinchCenter[1]) / g.height});
       }
@@ -344,7 +356,8 @@ export default function TouchLayerCanvas({
     if (pointers.current.size > 0 && g) {
       const remaining = [...pointers.current.values()][0];
       gesture.current = {...g, start: getRect(layer), startX: remaining.x, startY: remaining.y,
-        scrollLeft:scrollArea.current?.scrollLeft||0,pinchDistance: undefined, pinchCenter: undefined, resize: false};
+        scrollLeft:scrollArea.current?.scrollLeft||0,pinchDistance: undefined, pinchCenter: undefined,
+        pinchAngle:undefined,rotate:false,rotateCenter:undefined,rotateStartAngle:undefined,resize: false};
       return;
     }
     gesture.current = null;
@@ -791,6 +804,7 @@ export default function TouchLayerCanvas({
                <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
             </div>}
             {active && <><span className="touch-editor-outline"/>
+              {!cropping&&!layer.locked&&<span className="touch-editor-rotate-handle" data-rotate-handle title="Girar arrastrando" aria-hidden="true">↻</span>}
               {!cropping&&!layer.locked && (!inlineTextTools||layer.role==='background') && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle data-resize-axis="x" aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
