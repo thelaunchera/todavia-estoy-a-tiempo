@@ -1,5 +1,5 @@
 import { clampPanoramaRect, layerCornerPixels, type TouchRect } from './TouchGeometry';
-import { coverPlacement } from './PhotoCrop';
+import { coverPlacement,photoFrameMetrics } from './PhotoCrop';
 import {clampTextCurve,drawCurvedTextLine,curvedTextExtraHeight} from './CurvedText';
 export type LayerMove = 'backward' | 'forward' | 'back' | 'front';
 export type LayerPlacement = 'behind-text' | 'front';
@@ -36,6 +36,7 @@ export type PanoramaLayer = {
   text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
   color?:string; tint?:string; outline?:boolean; shadow?:boolean;
   shape?:'paper'|'tape'|'circle'|'frame';
+  frameStyle?:'polaroid';
   placement?: LayerPlacement;
   /** Continuous draggable wallpaper, painted behind independent content. */
   role?:'background';
@@ -74,6 +75,8 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         shape:['paper','tape','circle','frame'].includes(String(item.shape))?item.shape as PanoramaLayer['shape']:'paper',
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#F2E3CD',
       }:{}),
+      ...(item.kind==='photo'&&item.role!=='background'&&item.frameStyle==='polaroid'
+        ?{frameStyle:'polaroid' as const}:{}),
       ...(item.kind==='sticker'&&/^#[0-9a-f]{6}$/i.test(String(item.tint))?{tint:String(item.tint)}:{}),
       ...(typeof item.opacity==='number'&&Number.isFinite(item.opacity)?{opacity:Math.max(0,Math.min(1,item.opacity))}:{}),
       ...(item.placement === 'behind-text' || item.placement === 'front' ? {placement: item.placement as LayerPlacement} : {}),
@@ -198,6 +201,21 @@ export async function paintPanoramaLayers(
     if(layer.role==='background'){
      // Stretch the complete wallpaper; never crop ribbons near its edges.
      ctx.drawImage(img,-w/2,-h/2,w,h);
+    }else if(layer.frameStyle==='polaroid'){
+     const {inset,bottom}=photoFrameMetrics(w,h,'polaroid');
+     ctx.save();
+     ctx.shadowColor='rgba(21,38,45,.22)';
+     ctx.shadowBlur=Math.max(7,w*.045);
+     ctx.shadowOffsetY=Math.max(5,h*.02);
+     ctx.fillStyle='#FFFCF7';
+     ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,Math.max(2,w*.018));ctx.fill();
+     ctx.restore();
+     const innerW=w-2*inset,innerH=h-inset-bottom;
+     if(innerW>0&&innerH>0){
+       ctx.beginPath();ctx.rect(-w/2+inset,-h/2+inset,innerW,innerH);ctx.clip();
+       const p=coverPlacement(img.naturalWidth,img.naturalHeight,innerW,innerH,r.crop);
+       ctx.drawImage(img,-w/2+inset+p.x,-h/2+inset+p.y,p.width,p.height);
+     }
     }else{
      ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,layerCornerPixels(r,w,h,6));ctx.clip();
      const p=coverPlacement(img.naturalWidth,img.naturalHeight,w,h,r.crop);
