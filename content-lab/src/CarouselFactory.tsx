@@ -937,7 +937,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(!images[assetId])loadImage(assetId);
     const id='panorama-wallpaper-'+crypto.randomUUID();
     const layer:PanoramaLayer={
-      id,assetId,name:'Fondo editable · slide '+(i+1),kind:'photo',role:'background',
+      id,assetId,name:'Fondo editable · slide '+(i+1),kind:'photo',role:'background',backgroundFit:'cover',
       placement:'behind-text',...(style.seamlessEnabled?{}:{page:i}),
       rect:{x:pageStart,y:0,
         w:(style.seamlessEnabled?Math.min(2,slides.length-i):1)/slides.length,
