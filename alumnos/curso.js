@@ -213,6 +213,68 @@ async function ensureMara(){
 }
 let currentAulaView='lecciones';
 const aulaViewHistory=[];
+const AULA_PLACE_TTL_MS=2*60*60*1000;
+const aulaScrollPosition={};
+let aulaBrowserSteps=0,aulaRestoring=false;
+const aulaPlaceKey=()=>user?.id?'tle:aula-last-place:v1:'+user.id:'';
+function readAulaPlace(){
+ const key=aulaPlaceKey();if(!key)return null;
+ try{
+  const value=JSON.parse(localStorage.getItem(key)||'null');
+  if(!value||!Number.isFinite(value.at)||value.at>Date.now()||
+     Date.now()-value.at>=AULA_PLACE_TTL_MS||!Object.hasOwn(aulaViews,value.view)){
+   localStorage.removeItem(key);return null;
+  }
+  return {
+    view:value.view,
+    lesson:Number.isInteger(value.lesson)?value.lesson:0,
+    history:Array.isArray(value.history)?value.history.filter(entry=>
+      typeof entry==='string'&&(Object.hasOwn(aulaViews,entry)||
+        /^lesson:\d{1,2}$/.test(entry))).slice(-12):[],
+    scroll:value.scroll&&typeof value.scroll==='object'?value.scroll:{}
+  };
+ }catch{return null;}
+}
+function rememberAulaPlace(){
+ const key=aulaPlaceKey();if(!key||course.hidden||aulaRestoring)return;
+ aulaScrollPosition[currentAulaView]=window.scrollY;
+ try{localStorage.setItem(key,JSON.stringify({
+   at:Date.now(),view:currentAulaView,history:aulaViewHistory.slice(-12),
+   lesson:selected,scroll:aulaScrollPosition
+ }));}catch{}
+}
+function clearAulaPlace(){
+ const key=aulaPlaceKey();if(key)try{localStorage.removeItem(key)}catch{}
+}
+function changeAulaBrowser(view,lesson=selected){
+ const state={...window.history.state,tleAulaView:view,tleAulaLesson:lesson};
+ window.history.pushState(state,'',window.location.href);aulaBrowserSteps++;
+}
+function backAulaPlace(){
+ if(document.body.classList.contains('aula-menu-open')){closeAulaMenu();return;}
+ if(!aulaViewHistory.length)return;
+ if(aulaBrowserSteps>0){window.history.back();return;}
+ const previous=aulaViewHistory.pop();
+ if(previous?.startsWith('lesson:'))choose(Number(previous.slice(7)),{track:false});
+ else if(previous)setAulaView(previous,{track:false});
+ rememberAulaPlace();
+}
+window.addEventListener('popstate',event=>{
+ if(course.hidden||!user)return;
+ const target=event.state?.tleAulaView;
+ if(!Object.hasOwn(aulaViews,target))return;
+ const old=currentAulaView;
+ const lesson=Number.isInteger(event.state?.tleAulaLesson)?event.state.tleAulaLesson:selected;
+ if(old!==target&&aulaViewHistory.at(-1)===target)aulaViewHistory.pop();
+ else if(old===target&&aulaViewHistory.at(-1)==='lesson:'+lesson)aulaViewHistory.pop();
+ aulaBrowserSteps=Math.max(0,aulaBrowserSteps-1);
+ if(target==='lecciones'&&lessons[lesson])choose(lesson,{track:false});
+ else setAulaView(target,{track:false,scroll:false,browser:false});
+ window.requestAnimationFrame(()=>window.scrollTo(0,aulaScrollPosition[target]||0));
+ rememberAulaPlace();
+});
+window.addEventListener('pagehide',rememberAulaPlace);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)rememberAulaPlace();});
 let aulaBackButton=null,aulaCloseButton=null;
 function ensureAulaNavigation(){
  const header=document.querySelector('#aula-layout .aula-main-top');
@@ -233,19 +295,13 @@ function ensureAulaNavigation(){
  aulaCloseButton.setAttribute('aria-label','Cerrar esta sección y volver al inicio del aula');
  aulaCloseButton.title='Cerrar sección';
  aulaCloseButton.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg><span>Cerrar</span>';
- aulaBackButton.addEventListener('click',()=>{
-  if(document.body.classList.contains('aula-menu-open')){closeAulaMenu();return;}
-  if(aulaViewHistory.length){
-   const previous=aulaViewHistory.pop();
-   setAulaView(previous,{track:false});
-  }else if(currentAulaView!=='inicio'){
-   setAulaView('inicio',{track:false});
-  }
- });
+ aulaBackButton.addEventListener('click',backAulaPlace);
  aulaCloseButton.addEventListener('click',()=>{
-  aulaViewHistory.length=0;
+  aulaViewHistory.length=0;aulaBrowserSteps=0;
   closeAulaMenu();
   setAulaView('inicio',{track:false});
+  window.history.replaceState({...window.history.state,tleAulaView:'inicio'},'',window.location.href);
+  rememberAulaPlace();
  });
  actions.append(aulaBackButton,aulaCloseButton);
  header.querySelector('.aula-main-location')?.insertAdjacentElement('afterend',actions);
@@ -254,7 +310,7 @@ function ensureAulaNavigation(){
 function updateAulaNavigation(){
  if(!aulaBackButton||!aulaCloseButton)return;
  const isHome=currentAulaView==='inicio';
- aulaBackButton.hidden=isHome&&!aulaViewHistory.length;
+ aulaBackButton.hidden=!aulaViewHistory.length;
  aulaCloseButton.hidden=isHome;
 }
 function closeAulaMenu(){
@@ -269,13 +325,17 @@ function openAulaMenu(){
  const active=aulaSidebar.querySelector('.aula-side-link[aria-current="page"]');
  (active||aulaClose).focus({preventScroll:true});
 }
-function setAulaView(view,{scroll=true,track=true}={}){
+function setAulaView(view,{scroll=true,track=true,browser=true}={}){
  // El catálogo comercial pertenece al Centro de Productos, nunca al aula.
  if(view==='catalogo')view='lecciones';
  if(!Object.prototype.hasOwnProperty.call(aulaViews,view))return;
- if(track&&view!==currentAulaView&&!course.hidden){
-  aulaViewHistory.push(currentAulaView);
-  if(aulaViewHistory.length>12)aulaViewHistory.shift();
+ if(view!==currentAulaView&&!course.hidden){
+  aulaScrollPosition[currentAulaView]=window.scrollY;
+  if(track&&!aulaRestoring){
+   aulaViewHistory.push(currentAulaView);
+   if(aulaViewHistory.length>12)aulaViewHistory.shift();
+   if(browser)changeAulaBrowser(view);
+  }
  }
  currentAulaView=view;
  document.querySelectorAll('[data-aula-panel]').forEach(section=>{
@@ -294,8 +354,9 @@ function setAulaView(view,{scroll=true,track=true}={}){
  updateAulaNavigation();
  closeAulaMenu();
  if(scroll&&document.body.classList.contains('aula-member')){
-  window.scrollTo({top:0,behavior:'auto'});
+  window.requestAnimationFrame(()=>window.scrollTo({top:aulaScrollPosition[view]||0,behavior:'auto'}));
  }
+ rememberAulaPlace();
 }
 document.querySelectorAll('[data-aula-view]').forEach(control=>{
  control.addEventListener('click',event=>{
@@ -311,10 +372,7 @@ document.addEventListener('keydown',event=>{
  if(document.body.classList.contains('aula-menu-open')){
   closeAulaMenu();aulaOpen.focus({preventScroll:true});return;
  }
- if(!course.hidden&&currentAulaView!=='inicio'){
-  aulaViewHistory.length=0;
-  setAulaView('inicio',{track:false});
- }
+ if(!course.hidden&&aulaViewHistory.length)backAulaPlace();
 });
 
 
@@ -561,12 +619,18 @@ function renderLessonPrompts(item){
  });
 }
 
-function choose(i){
+function choose(i,{track=true}={}){
+ if(!Number.isInteger(i)||i<0||i>=lessons.length)return;
+ if(track&&!aulaRestoring&&currentAulaView==='lecciones'&&!course.hidden&&i!==selected){
+  aulaViewHistory.push('lesson:'+selected);
+  if(aulaViewHistory.length>12)aulaViewHistory.shift();
+  changeAulaBrowser('lecciones',i);
+ }
  selected=i;
  const item=lessons[i];
  if(!item)return;
  if($('lesson-picker'))$('lesson-picker').value=String(i);
- setAulaView('lecciones');
+ setAulaView('lecciones',{track});
  displayVideo(item);
  $('lesson-unavailable').hidden=!box.hidden;
  if(box.hidden)$('lesson-unavailable').textContent=getClassroomLanguage()==='en'
@@ -761,6 +825,8 @@ async function showCourse(email,asAdmin=false){
    ? 'Vista privada abierta. Algunas guías o prompts no cargaron; las lecciones siguen disponibles.'
    : 'Vista administrativa: borradores visibles solo para ti. Sin cambios al progreso de alumnos.'
   : 'Acceso verificado.',true);
+ const storedAulaPlace=readAulaPlace();
+ aulaRestoring=true; // Bootstrapping lessons must never overwrite the remembered view.
  lessonsUI();
  aulaViewHistory.length=0;
  let refreshedSection='';
@@ -768,7 +834,34 @@ async function showCourse(email,asAdmin=false){
   bonusLibraryController=null;
   $('bonus-library-items')?.replaceChildren();
   const linkSection=location.hash.slice(1);
-  setAulaView(refreshedSection&&Object.prototype.hasOwnProperty.call(aulaViews,refreshedSection)?refreshedSection:(['prompts','bonos'].includes(linkSection)?linkSection:'inicio'),{scroll:false,track:false});
+  const explicitlyOpened=Boolean(refreshedSection&&Object.hasOwn(aulaViews,refreshedSection))||
+    ['prompts','bonos'].includes(linkSection);
+  if(storedAulaPlace&&!explicitlyOpened){
+    Object.assign(aulaScrollPosition,storedAulaPlace.scroll);
+    aulaViewHistory.push(...storedAulaPlace.history);
+    if(lessons[storedAulaPlace.lesson])choose(storedAulaPlace.lesson,{track:false});
+  }
+  const initialView=refreshedSection&&Object.hasOwn(aulaViews,refreshedSection)?refreshedSection:
+    ['prompts','bonos'].includes(linkSection)?linkSection:storedAulaPlace?.view||'inicio';
+  setAulaView(initialView,{scroll:false,track:false});
+  // Build in-app browser history after sign-in, without changing lesson URLs.
+  const recent=storedAulaPlace&&!explicitlyOpened
+    ?[...aulaViewHistory,initialView].slice(-13):[initialView];
+  const first=recent.shift()||'inicio';
+  const firstView=first.startsWith('lesson:')?'lecciones':first;
+  window.history.replaceState({...window.history.state,tleAulaView:firstView,
+    tleAulaLesson:first.startsWith('lesson:')?Number(first.slice(7)):selected},'',window.location.href);
+  aulaBrowserSteps=0;
+  for(const entry of recent){
+    const view=entry.startsWith('lesson:')?'lecciones':entry;
+    const lesson=entry.startsWith('lesson:')?Number(entry.slice(7)):selected;
+    window.history.pushState({...window.history.state,tleAulaView:view,tleAulaLesson:lesson},'',window.location.href);
+    aulaBrowserSteps++;
+  }
+  aulaRestoring=false;
+  if(storedAulaPlace&&!explicitlyOpened)
+    window.setTimeout(()=>window.scrollTo({top:aulaScrollPosition[initialView]||0,behavior:'auto'}),160);
+  rememberAulaPlace();
  materialsController=null;
  void mountMateriales($('materiales-interactivos'),{
   db,user,courseId,adminPreview:asAdmin,getLanguage:getClassroomLanguage,
@@ -937,7 +1030,7 @@ window.setInterval(()=>{
 },30*1000);
 out.addEventListener('click',async()=>{
  if(adminPreview){location.assign('../estudio/');return;}
- clearRememberedStudent();await db.auth.signOut({scope:'local'});location.replace('./');
+ clearAulaPlace();clearRememberedStudent();await db.auth.signOut({scope:'local'});location.replace('./');
 });
 const courseHelpPanel=$('soporte-aula');
 const courseHelpForm=$('course-help-form');

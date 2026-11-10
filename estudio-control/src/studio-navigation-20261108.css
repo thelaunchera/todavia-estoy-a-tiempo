@@ -172,3 +172,21 @@
  .studio .studio-nav-area-trigger,.studio .studio-nav-area-items .nav-item{transition:none!important}
  .studio .finished-demo-card:hover{transform:none!important}
 }
+
+
+/* Back is history, Close explicitly exits the current Studio tool. */
+.studio .studio-section-route-actions{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto}
+.studio .studio-section-route-actions button{min-height:44px;border-radius:12px;white-space:nowrap}
+.studio .studio-section-close{
+ display:inline-flex;gap:7px;align-items:center;justify-content:center;
+ border:1px solid #D6DFE4;background:#FFFCF7;color:#191919;
+ padding:8px 12px;font:750 12px Prompt,Arial,sans-serif
+}
+.studio .studio-section-route-actions button:disabled{opacity:.35;cursor:default}
+.studio .studio-section-route-actions button:focus-visible{outline:3px solid #84AEC3;outline-offset:2px}
+@media(max-width:600px){
+ .studio .studio-section-route-actions{gap:4px}
+ .studio .studio-section-route-actions button{min-height:44px;min-width:43px;padding:8px 10px}
+ .studio .studio-section-route-actions button span{display:none}
+ .studio .topbar>.top-star{display:none}
+}

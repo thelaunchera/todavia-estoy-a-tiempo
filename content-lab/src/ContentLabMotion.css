@@ -99,3 +99,26 @@
  .app-shell .factory-slide-strip,.app-shell .fg-filterbar,
  .app-shell .sticker-downloads-filters{scroll-behavior:auto!important}
 }
+
+
+/* The Previous / Close controls never replace each other and stay tappable on iPhone. */
+.app-shell .top .lab-workspace-route-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto;min-width:0}
+.app-shell .top .lab-workspace-close{
+  display:inline-flex;gap:5px;align-items:center;justify-content:center;
+  min-height:44px;border:1px solid #D6DFE4;border-radius:12px;
+  background:#fff;color:#191919;padding:7px 11px;font:750 12px Prompt,Arial,sans-serif
+}
+.app-shell .top .lab-workspace-route-actions button:disabled{opacity:.35;cursor:default}
+.app-shell .top .lab-workspace-route-actions button:focus-visible{outline:3px solid #83AEC4;outline-offset:2px}
+@media(max-width:850px){
+ .app-shell .top>.lab-workspace-route-actions{flex:0 0 auto!important;gap:4px}
+ .app-shell .top>.lab-workspace-route-actions+div{flex:1 1 auto;min-width:0;overflow:hidden;display:flex;align-items:center}
+ .app-shell .top .lab-workspace-route-actions .lab-carousel-editor-exit,
+ .app-shell .top .lab-workspace-route-actions .lab-workspace-close{min-width:39px;min-height:44px;padding:7px 9px;font-size:12px}
+}
+@media(max-width:590px){
+ .app-shell .top>.lab-workspace-route-actions+div .eyebrow,
+ .app-shell .top>.lab-workspace-route-actions+div .slash{display:none}
+ .app-shell .top .lab-workspace-close span{display:none}
+ .app-shell .top>.lab-workspace-route-actions+div strong{font-size:11px}
+}

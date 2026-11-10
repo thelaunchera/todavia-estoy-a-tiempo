@@ -33,8 +33,8 @@ test('Carousel editor remains reachable and selected after a Studio page reload'
  const calendar=studio.indexOf("{ id: 'calendario'");
  assert.ok(first>=0&&carousel>first&&carousel<calendar);
  assert.equal(studio.match(/id: 'seamless', label:/g)?.length,1);
- assert.match(studio,/return section === 'seamless'/);
- assert.match(studio,/if \(p==='seamless' \|\| p==='ventas'/);
+ assert.match(studio,/Object\.prototype\.hasOwnProperty\.call\(LABELS,section\)/);
+ assert.match(studio,/window\.history\.pushState\(\{tleStudioPage:p\}/);
  assert.match(studio,/<SeamlessEditor \/>/);
 });
 

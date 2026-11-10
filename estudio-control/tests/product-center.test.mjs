@@ -47,7 +47,7 @@ test('Studio keeps podcast editable product records and route to product center'
  assert.match(studio,/label: 'Centro de productos'/);
  assert.match(studio,/<ProductCenter entries=\{items\.ideas\}/);
  assert.match(studio,/product-admin-records/);
- assert.match(studio,/section === 'productos'/);
+ assert.match(studio,/Object\.prototype\.hasOwnProperty\.call\(LABELS,section\)/);
 });
 
 test('Studio sales and links agree with the live Content Lab checkout, with separate delivery QA',()=>{
