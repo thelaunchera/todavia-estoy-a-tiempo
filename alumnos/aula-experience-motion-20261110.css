@@ -1,0 +1,46 @@
+/* Course navigation: scroll progress, responsive drawer and readable editorial motion.
+   Applied only to the authenticated classroom surfaces. */
+body.aula-member #aula-layout .aula-navigation {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-block: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #c3d4df transparent;
+}
+body.aula-member #aula-layout .aula-side-link[aria-current="page"],
+body.aula-member #aula-layout .aula-side-link.aula-selected {
+  box-shadow: inset 3px 0 0 #5286a5;
+}
+body.aula-member #aula-layout .aula-main-top { position: sticky; }
+body.aula-member #aula-layout .aula-main-top::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; height: 2px; width: 100%;
+  transform: scaleX(var(--aula-scroll-progress,0)); transform-origin: left center;
+  background: #5a8eaa; pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  body.aula-member #aula-layout .aula-main-top::after { transition: transform .12s linear; }
+  body.aula-member #aula-layout .aula-side-link {
+    transition: background-color .18s ease, color .18s ease, box-shadow .22s ease;
+  }
+  body.aula-member #aula-layout .aula-panel .resource,
+  body.aula-member #aula-layout .lesson-index button {
+    transition: border-color .22s ease, box-shadow .22s ease, background-color .22s ease;
+  }
+  @media (hover:hover) and (pointer:fine) {
+    body.aula-member #aula-layout .aula-panel .resource:hover {
+      box-shadow: 0 12px 25px #142b3f14;
+    }
+  }
+}
+@media (max-width: 759px) {
+  body.aula-member #aula-layout .aula-rail {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(16px,env(safe-area-inset-bottom));
+  }
+  body.aula-member #aula-layout .aula-menu-open,
+  body.aula-member #aula-layout .aula-rail-close { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.aula-member #aula-layout .aula-main-top::after { transition: none !important; }
+}
