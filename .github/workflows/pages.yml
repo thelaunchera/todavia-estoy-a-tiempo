@@ -174,6 +174,9 @@ jobs:
           python3 -m pip install --quiet pillow
           python3 estudio-control/scripts/verify_shared_stickers.py
           test -s _podcast_pages/estudio/assets-health.json
+          test -s _podcast_pages/content-lab/resources/editorial-2026-11/manifest.json
+          test ! -d _podcast_pages/estudio/resources
+          echo 'Biblioteca verificada: recursos compartidos publicados una sola vez.'
       - name: Verificar que se publican landing y Estudio
         run: |
           test -s _podcast_pages/index.html
@@ -233,7 +236,7 @@ jobs:
           echo "Top-level package sizes:"
           du -sh _podcast_pages/* | sort -h | tail -25
           echo "Largest 30 published files:"
-          find _podcast_pages -type f -printf '%s %p\\n' | sort -nr | head -30
+          find _podcast_pages -type f -printf '%s %p\n' | sort -nr | head -30
           echo "Total uncompressed bytes:"
           du -sb _podcast_pages
           echo "File count:"
