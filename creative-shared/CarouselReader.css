@@ -1,0 +1,38 @@
+/* Shared, non-destructive carousel reading mode — Studio / Content Lab */
+.tle-reader-backdrop{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:12px;background:#111820d9;backdrop-filter:blur(8px)}
+.tle-reader{box-sizing:border-box;color:#191919;background:#FAF8F3;border:1px solid #F0EDE7;border-radius:24px;width:min(100%,620px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;padding:clamp(13px,3vw,24px);font-family:Prompt,Futura,Arial,sans-serif;box-shadow:0 24px 90px #0005;outline:none}
+.tle-reader *{box-sizing:border-box}
+.tle-reader-header{display:flex;justify-content:space-between;gap:15px;align-items:start}
+.tle-reader-heading{display:grid;gap:5px;min-width:0}
+.tle-reader-heading small{font:700 10px/1.4 Prompt,Arial,sans-serif;letter-spacing:.1em;color:#647986}
+.tle-reader-heading strong{font-size:clamp(15px,3vw,22px);overflow-wrap:anywhere}
+.tle-reader button{font:700 12px Prompt,Arial,sans-serif;cursor:pointer;touch-action:manipulation}
+.tle-reader button:focus-visible{outline:3px solid #79A9C2;outline-offset:2px}
+.tle-reader-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #dbe0e2;border-radius:13px;background:white;color:#191919;font-size:27px!important}
+.tle-reader-switch{margin:16px 0 6px;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;border:1px solid #DCE5E8;border-radius:13px;background:#E9F0F4}
+.tle-reader-switch button{min-height:42px;border:0;border-radius:10px;background:transparent;color:#425966}
+.tle-reader-switch button.active{background:#fff;box-shadow:0 3px 11px #233e5117;color:#191919}
+.tle-reader-stage{position:relative;display:grid;place-items:center;min-height:0;aspect-ratio:1.1;overflow:hidden;isolation:isolate;touch-action:pan-y}
+.tle-reader-stage.mode-pages{perspective:1250px}
+.tle-reader-sheet{width:min(63%,290px);aspect-ratio:4/5;transform-origin:left center;box-shadow:0 20px 42px #1a22242d;background:#fff;overflow:hidden;border-radius:3px;backface-visibility:hidden}
+.tle-reader-sheet img,.tle-reader-polaroid img{display:block;width:100%;height:100%;object-fit:cover}
+.tle-reader-sheet.turn-next{animation:tle-reader-curl-next .38s cubic-bezier(.22,1,.36,1) both}
+.tle-reader-sheet.turn-previous{transform-origin:right center;animation:tle-reader-curl-back .38s cubic-bezier(.22,1,.36,1) both}
+@keyframes tle-reader-curl-next{from{opacity:.5;transform:rotateY(60deg) translateX(6px)}to{opacity:1;transform:rotateY(0)}}
+@keyframes tle-reader-curl-back{from{opacity:.5;transform:rotateY(-60deg) translateX(-6px)}to{opacity:1;transform:rotateY(0)}}
+.tle-reader-stack{position:relative;width:min(72%,300px);aspect-ratio:4/5}
+.tle-reader-polaroid{position:absolute;inset:0;background:#FFFCF7;padding:6% 6% 17%;box-shadow:0 13px 28px #1b2a3330;border:1px solid #fff;transition:transform .35s ease;overflow:hidden}
+.tle-reader-polaroid.front{z-index:3;transform:rotate(1deg);animation:tle-reader-arrive .35s cubic-bezier(.22,1,.36,1) both}
+.tle-reader-polaroid.behind-one{transform:rotate(-10deg) translate(-13%,0);z-index:1}
+.tle-reader-polaroid.behind-two{transform:rotate(9deg) translate(13%,-1%);z-index:2}
+.tle-reader-polaroid img{height:100%;object-fit:cover;background:#e5e9ed}
+.tle-reader-polaroid span{display:block;position:absolute;bottom:6%;left:7%;font-size:11px;letter-spacing:.06em;color:#525D61}
+@keyframes tle-reader-arrive{from{opacity:.7;transform:rotate(11deg) translateY(16px)}to{opacity:1;transform:rotate(1deg)}}
+.tle-reader-missing{display:grid;place-items:center;height:100%;min-height:250px;padding:20px;text-align:center;font-size:12px;color:#687B83;background:#F1F2F0}
+.tle-reader-footer{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tle-reader-footer button{min-height:44px;border:1px solid #CFD9DD;background:#fff;border-radius:12px;padding:9px 15px;color:#191919;display:flex;gap:7px;align-items:center}
+.tle-reader-footer button:disabled{opacity:.35;cursor:default}
+.tle-reader-footer>span{font-size:13px;font-weight:700;white-space:nowrap}
+.tle-reader-tip{margin:12px 0 0!important;text-align:center;font-size:10px!important;line-height:1.5;color:#657782}
+@media(max-width:480px){.tle-reader{border-radius:17px;padding:12px}.tle-reader-stage{aspect-ratio:.9}.tle-reader-sheet{width:min(78%,260px)}.tle-reader-stack{width:min(76%,250px)}.tle-reader-footer button{padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){.tle-reader *{animation:none!important;transition:none!important;scroll-behavior:auto!important}.tle-reader-sheet,.tle-reader-polaroid.front{transform:none!important}}

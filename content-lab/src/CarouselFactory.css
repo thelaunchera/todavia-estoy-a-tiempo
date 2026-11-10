@@ -841,3 +841,14 @@
  .factory-bc-workspace .factory-style-title h2{font-size:15px!important}
  .factory-bc-workspace .factory-step-footer{margin-top:6px!important}
 }
+
+
+/* Shared creative reader entry: intentional controls, no overlay on the canvas. */
+.factory-creative-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.factory-creative-actions button{flex:1 1 165px;min-height:44px;padding:10px 12px;border:1px solid #C9DCE4;border-radius:11px;background:#ECF4F7;color:#24495E;font:700 11px/1.5 'DM Sans',Arial,sans-serif}
+.factory-creative-actions button+button{background:#FFFCF7;border-color:#DFDAD0;color:#2C3F45}
+.factory-creative-actions button:focus-visible{outline:3px solid #7AACC4;outline-offset:2px}
+.factory-creative-actions button:disabled{opacity:.48;cursor:default}
+@media(hover:hover) and (pointer:fine){.factory-creative-actions button:not(:disabled):hover{box-shadow:0 7px 20px #213E4A15}}
+@media(max-width:480px){.factory-creative-actions button{flex:1 1 100%;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.factory-creative-actions button{transition:none!important}}

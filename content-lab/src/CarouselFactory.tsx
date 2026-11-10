@@ -7,6 +7,7 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy
 } from 'lucide-react';
 import './CarouselFactory.css';
+import CarouselReader from './CarouselReader';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
 import {SOCIAL_PLATFORMS,brandPalette,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
 import FreeDecorControls from './FreeDecorControls';
@@ -539,6 +540,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   useEffect(()=>{if(initialStep==='download')setStudioTab('download')},[initialStep]);
   // iPhone preview is a user-opened peek, never a permanent overlay on editing.
   const [mobilePreviewOpen,setMobilePreviewOpen]=useState(false);
+  const [readerOpen,setReaderOpen]=useState(false);
   const [mobileViewport,setMobileViewport]=useState(()=>typeof window!=='undefined'&&window.matchMedia('(max-width:1360px)').matches);
   useEffect(()=>{
     const query=window.matchMedia('(max-width:1360px)');
@@ -1025,6 +1027,28 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
     ...pageLayers,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
+  // An opt-in composition, using existing per-brand photo layers only.
+  // Nothing is invented, flattened or shared outside the buyer workspace.
+  const scatterExistingPhotos=()=>{
+    const available=(style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'&&layer.role!=='background'&&!layer.locked&&
+      (layer.page===i||Math.floor((layer.rect.x+layer.rect.w/2)*slides.length)===i));
+    if(available.length<2){notify('Añade dos fotografías a este lienzo antes de usar Polaroid Scatter.');return}
+    const chosen=available.slice(-3);
+    const places=chosen.length===2
+      ?[{x:.12,y:.19,w:.34,h:.49,angle:-9},{x:.55,y:.31,w:.34,h:.49,angle:8}]
+      :[{x:.06,y:.18,w:.31,h:.49,angle:-9},{x:.36,y:.31,w:.31,h:.49,angle:7},{x:.68,y:.20,w:.30,h:.49,angle:-5}];
+    const byId=new Map(chosen.map((layer,index)=>[layer.id,places[index]]));
+    const next=(style.panoramaLayers||[]).map(layer=>{
+      const spot=byId.get(layer.id);
+      if(!spot)return layer;
+      return {...layer,frameStyle:'polaroid' as const,placement:'front' as const,page:i,
+        rect:clampPanoramaRect({x:(i+spot.x)/slides.length,y:spot.y,
+          w:spot.w/slides.length,h:spot.h,angle:spot.angle,crop:layer.rect.crop})};
+    });
+    setArtStyle({panoramaLayers:next});
+    setStudioTab('canvas');
+    notify('Composición Polaroid aplicada. Mueve, gira o deshaz cada foto; se exporta en tus PNG.');
+  };
   const panoramaTextElements=slides.flatMap((part,n)=>[
     {field:'eyebrow' as const,name:'Etiqueta',value:part.eyebrow},
     {field:'title' as const,name:'Título',value:part.title},
@@ -1521,6 +1545,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           aria-label="Cerrar vista previa"><X size={18}/> Volver a editar</button>
         <div className="factory-section"><strong>{style.seamlessEnabled?'Vista seamless':'Vista del carrusel'}</strong><span>Slide {i+1}/{slides.length}</span></div>
         <div className="factory-live-preview-desktop">{renderSwipePreview()}</div>
+        <div className="factory-creative-actions">
+          <button type="button" disabled={overview.filter(Boolean).length!==slides.length} onClick={()=>{
+            setMobilePreviewOpen(false);setReaderOpen(true);
+          }}>Vista revista · Page Curl / Polaroid</button>
+          <button type="button" onClick={scatterExistingPhotos}>Ordenar 2–3 fotos Polaroid</button>
+        </div>
         {sheet&&<button type="button" className="factory-preview-edit" onClick={()=>{
           setMobilePreviewOpen(false);setStudioTab(style.seamlessEnabled?'canvas':'slides');
         }}>Editar slide {i+1} <ArrowRight size={17}/></button>}
@@ -1609,6 +1639,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         onClick={()=>setMobilePreviewOpen(false)} aria-label="Cerrar vista previa y volver a editar"/>
       {renderPreviewPanel(true)}
     </>,document.body)}
+    {readerOpen&&<CarouselReader pages={overview} initialIndex={i}
+       title={post.title||brand.name} locale={locale} onClose={()=>setReaderOpen(false)}/>}
     <div className="factory-persistent-layout">
       {!mobileViewport&&renderPreviewPanel(false)}
       <div className="factory-persistent-content">
