@@ -69,6 +69,8 @@ import {
 } from 'lucide-react';
 import './studio.css';
 import './studio-navigation-20261108.css';
+import '../../creative-shared/editorial-motion.css';
+import {keepActiveSidebarVisible, revealEditorialCards} from '../../creative-shared/editorial-motion';
 import { groupEpisodes, narrationBlocks, dialogueForAudience } from './episode-library';
 import { normalizeSpotifyEpisodeLink, validSpotifyEpisode, SPOTIFY_EPISODE_ERROR } from './spotify-links';
 import { editorialPlan } from './editorial-plan';
@@ -379,6 +381,18 @@ function App() {
     [search, setSearch] = useState('');
   const [navQuery,setNavQuery]=useState('');
   const [expandedArea,setExpandedArea]=useState<string|null>('planning');
+  // Keep the chosen tool visible in long sidebars, including iPhone drawers.
+  // Gallery cards animate on entry in either scroll direction; no canvas layers move.
+  useEffect(() => {
+    let stopReveal = () => {};
+    const frame = window.requestAnimationFrame(() => {
+      keepActiveSidebarVisible('.studio', '.studio-area-nav', '.nav-item.active');
+      if (page !== 'seamless') {
+        stopReveal = revealEditorialCards('.studio', '.studio-hub-card,.finished-demo-card,.finished-demo-photo-tile');
+      }
+    });
+    return () => { window.cancelAnimationFrame(frame); stopReveal(); };
+  }, [page, mobileNav, expandedArea]);
   useEffect(()=>{
     const match=STUDIO_AREAS.find(area=>area.pages.includes(page));
     if(match)setExpandedArea(match.id);

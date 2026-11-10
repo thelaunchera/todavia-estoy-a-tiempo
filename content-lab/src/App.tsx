@@ -35,6 +35,8 @@ import BackgroundLibrary from './BackgroundLibrary';
 import type {FreeBackgroundId} from './FreeDesignAssets';
 import {updateHiddenBackgrounds} from './BackgroundVisibility';
 import './ContentLabMotion.css';
+import '../../creative-shared/editorial-motion.css';
+import {keepActiveSidebarVisible, revealEditorialCards} from '../../creative-shared/editorial-motion';
 import FormatGallery from './FormatGallery';
 import {assetCategory,displayAssetName,type LibraryAsset,type MediaCategory} from './MediaAsset';
 import {SOCIAL_PLATFORMS,brandPalette,normalizeExtraColors,normalizeSocialAccounts,preferredPlatform,platformName,socialAccount,type SocialAccounts,type SocialPlatform} from './BrandIdentity';
@@ -411,6 +413,18 @@ function App() {
   useEffect(()=>{if(waiting)return;return installLabLocale(loginLanguage)},[loginLanguage,account,waiting,tab]);
   const [menu, setMenu] = useState(false);
   const [switcher, setSwitcher] = useState(false);
+  // Sidebar auto-scroll is contained inside the drawer, never the editor canvas.
+  // Gallery cards replay a light entrance when scrolled back into view.
+  useEffect(() => {
+    let stopReveal = () => {};
+    const frame = window.requestAnimationFrame(() => {
+      keepActiveSidebarVisible('.app-shell', '.sidebar', 'nav button.active');
+      if (tab === 'formats' || tab === 'media') {
+        stopReveal = revealEditorialCards('.app-shell', '.fg-card,.ml-card');
+      }
+    });
+    return () => { window.cancelAnimationFrame(frame); stopReveal(); };
+  }, [tab, menu]);
   // Prevent background page scrolling while the mobile drawer owns touch scroll.
   useEffect(() => {
     if (!menu) return;
