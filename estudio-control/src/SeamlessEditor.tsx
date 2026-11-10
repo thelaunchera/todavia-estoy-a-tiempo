@@ -20,6 +20,7 @@ import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
 import CarouselReader from './CarouselReader';
+import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:String(CREATIVE_EDITOR_RULES.defaultCanvasColor),backgroundImages:{} as Record<number,string>,items:[] as Item[]};
@@ -182,6 +183,12 @@ export default function SeamlessEditor(){
  const [readerOpen,setReaderOpen]=useState(false);
  const [readerBusy,setReaderBusy]=useState(false);
  const [readerPages,setReaderPages]=useState<string[]>([]);
+ const [motionBusy,setMotionBusy]=useState(false);
+ const [motionProgress,setMotionProgress]=useState('');
+ const [motionDownload,setMotionDownload]=useState<{url:string;name:string}|null>(null);
+ const motionUrlRef=useRef<string|null>(null);
+ useEffect(()=>()=>{if(motionUrlRef.current)URL.revokeObjectURL(motionUrlRef.current)},[]);
+ useEffect(()=>{if(motionUrlRef.current){URL.revokeObjectURL(motionUrlRef.current);motionUrlRef.current=null;setMotionDownload(null)}},[doc]);
  const [wideScreen,setWideScreen]=useState(()=>window.matchMedia('(min-width:900px)').matches);
  const [artboardSpace,setArtboardSpace]=useState(740);
  const slideWidthPx=(wideScreen?artboardSpace:300)*canvasZoom/100;
@@ -463,6 +470,28 @@ export default function SeamlessEditor(){
      setReaderPages(pages);setReaderOpen(true);
    }catch{setMessage('No se pudo abrir la revista. Revisa si alguna fotografía sigue cargando.')}
    finally{setReaderBusy(false)}
+ };
+ const exportMotionVideo=async()=>{
+   if(busy||motionBusy||!carouselVideoAvailable())return;
+   setMotionBusy(true);setMotionProgress('Preparando…');
+   const pages:string[]=[];
+   try{
+     for(let n=0;n<doc.count;n++){
+       const canvas=document.createElement('canvas');canvas.width=540;canvas.height=675;
+       const ctx=canvas.getContext('2d');
+       if(!ctx)throw Error('Canvas');
+       await paint(ctx,.5,n*W,W);
+       pages.push(canvas.toDataURL('image/png'));
+       canvas.width=1;canvas.height=1;
+     }
+     const video=await renderCarouselVideo(pages,(index,total)=>setMotionProgress(index+'/'+total));
+     if(motionUrlRef.current)URL.revokeObjectURL(motionUrlRef.current);
+     const url=URL.createObjectURL(video.blob);
+     motionUrlRef.current=url;
+     setMotionDownload({url,name:'mi-carrusel-animado.'+video.extension});
+     setMessage('Video '+video.extension.toUpperCase()+' preparado. Toca Descargar video para guardarlo.');
+   }catch(error){setMessage(error instanceof Error?error.message:'No se pudo crear el video animado.')}
+   finally{setMotionBusy(false);setMotionProgress('')}
  };
  const toggleLock=(id:number)=>{const item=doc.items.find(it=>it.id===id);if(!item)return;setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,locked:!it.locked}:it)}));setDeleteArmedId(null);lastTap.current=null;setSelected(null);setMessage(item.locked?'Elemento desbloqueado. Puedes moverlo.':'Elemento bloqueado. Puedes editar los objetos que están encima sin moverlo.');};
  const update=(id:number,patch:Partial<Item>)=>setDoc(d=>({...d,items:d.items.map(it=>it.id===id?{...it,...patch}:it)}));
@@ -1140,6 +1169,11 @@ export default function SeamlessEditor(){
   <div className="studio-creative-preview-tools" role="group" aria-label="Efectos de carruseles">
     <button type="button" onClick={()=>void openMagazine()} disabled={busy||readerBusy}>{readerBusy?'Preparando…':'Vista revista · Page Curl'}</button>
     <button type="button" onClick={applyPolaroidScatter} disabled={busy}>Ordenar fotos · Polaroid</button>
+    <button type="button" onClick={()=>void exportMotionVideo()}
+      disabled={busy||motionBusy||!carouselVideoAvailable()}>
+      {motionBusy?'Creando video '+motionProgress:'Crear video animado'}</button>
+    {motionDownload&&<a className="studio-motion-download" href={motionDownload.url}
+       download={motionDownload.name}>Descargar video · {motionDownload.name.split('.').pop()?.toUpperCase()}</a>}
   </div>
   {readerOpen&&<CarouselReader pages={readerPages} initialIndex={slide} title={projectName} onClose={()=>setReaderOpen(false)}/>}
   {current&&!current.locked&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
