@@ -863,7 +863,7 @@ function App() {
       const previous=pageRef.current;
       if(next===previous)return;
       placeScrollRef.current[previous]=window.scrollY;
-      if(placeHistoryRef.current.at(-1)===next)placeHistoryRef.current.pop();
+      if(placeHistoryRef.current[placeHistoryRef.current.length-1]===next)placeHistoryRef.current.pop();
       else placeHistoryRef.current.push(previous);
       placeBrowserStepsRef.current=Math.max(0,placeBrowserStepsRef.current-1);
       pageRef.current=next;setPage(next);setMobileNav(false);
