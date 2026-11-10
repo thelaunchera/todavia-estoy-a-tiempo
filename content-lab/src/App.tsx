@@ -412,6 +412,7 @@ function App() {
   const navScrollRef=useRef<Record<string,number>>({});
   const navOwnerRef=useRef('');
   const navReadyRef=useRef(false);
+  const [navReady,setNavReady]=useState(false);
   const navBrowserStepsRef=useRef(0);
   const tabRef=useRef<Tab>('home');
   tabRef.current=tab;
@@ -584,7 +585,7 @@ function App() {
           setPosts([]);setImages({});setAssets([]);setBrands([]);
           setCurrent('');setTab('home');
           clearNavigationPlace('content-lab',account.email||'');
-          navReadyRef.current=false;navOwnerRef.current='';
+          navReadyRef.current=false;setNavReady(false);navOwnerRef.current='';
           toast(loginLanguage==='es'
             ?'Pasaron 24 horas desde tu código. Solicita uno nuevo para continuar.'
             :'Your code is 24 hours old. Request a new code to continue.');
@@ -659,7 +660,7 @@ function App() {
     const owner=account?.email?.trim().toLowerCase()||'';
     if(!owner||waiting)return;
     if(navOwnerRef.current===owner)return;
-    navOwnerRef.current=owner;navReadyRef.current=false;navBrowserStepsRef.current=0;
+    navOwnerRef.current=owner;navReadyRef.current=false;setNavReady(false);navBrowserStepsRef.current=0;
     const fromLink=new URL(window.location.href).searchParams.has('notification');
     const place=fromLink?null:readNavigationPlace<Tab,{brandId?:string;editor?:Post}>('content-lab',owner,nav.map(n=>n.id));
     if(place){
@@ -689,7 +690,7 @@ function App() {
     }else{
       window.history.replaceState({...window.history.state,tleLabTab:tabRef.current},'',window.location.href);
     }
-    window.setTimeout(()=>{navReadyRef.current=true;},0);
+    window.setTimeout(()=>{navReadyRef.current=true;setNavReady(true);},0);
   },[account?.email,waiting,brands.length,posts.length]);
 
   useEffect(()=>{
@@ -711,7 +712,7 @@ function App() {
 
   useEffect(()=>{
     const owner=account?.email?.trim().toLowerCase();
-    if(!owner||!navReadyRef.current)return;
+    if(!owner||!navReady)return;
     const remember=()=>{
       navScrollRef.current[tabRef.current]=window.scrollY;
       const editorTab=['factory','create','vertical'].includes(tabRef.current);
@@ -730,7 +731,7 @@ function App() {
       document.removeEventListener('visibilitychange',remember);
       window.removeEventListener('pagehide',remember);
     };
-  },[account?.email,tab,current,editor]);
+  },[account?.email,tab,current,editor,navReady]);
 
   const backOneView=()=>{
     if(!navStackRef.current.length)return;
@@ -1591,7 +1592,7 @@ function App() {
             className="signout"
             onClick={() => {
               clearNavigationPlace('content-lab',account.email||'');
-              navReadyRef.current=false;navOwnerRef.current='';
+              navReadyRef.current=false;setNavReady(false);navOwnerRef.current='';
               void auth.signOut().then(() => setAccount(null));
             }}
           >
