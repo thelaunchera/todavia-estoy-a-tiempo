@@ -691,6 +691,16 @@ export default function SeamlessEditor(){
    const vp=viewport.current;
    if(vp)vp.scrollTo({left:next*(vp.scrollWidth/doc.count),behavior:'smooth'});
  };
+ const addBlankSlide=()=>{
+  if(doc.count>=12)return;
+  const next=doc.count;
+  setDoc(d=>({...d,count:Math.min(12,d.count+1)}));
+  setSlide(next);setSelected(null);setEditingText(null);setDeleteArmedId(null);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const vp=viewport.current;
+   if(vp)vp.scrollTo({left:next*(vp.scrollWidth/(next+1)),behavior:'smooth'});
+  }));
+ };
  const onViewportTouchStart=(e:React.TouchEvent<HTMLDivElement>)=>{
    if(e.touches.length!==1){swipeStart.current=null;return}
    layerGesture.current=false;
@@ -1162,6 +1172,9 @@ export default function SeamlessEditor(){
       className={slide===index?'is-active':''} onClick={()=>goSlide(index)}>
        <canvas className="studio-slide-preview" ref={node=>{thumbnailsRef.current[index]=node}} width={70} height={88} aria-hidden="true"/>
        <span>{index+1}</span></button>)}
+    <button type="button" className="studio-app-add-slide" aria-label="Añadir un slide (máximo 12)" title="Añadir slide · máximo 12" disabled={doc.count>=12} onClick={addBlankSlide}>
+     <span aria-hidden="true">+</span><span>Slide</span>
+    </button>
    </div>
    <div className="studio-app-zoom"><span>Slide {slide+1}/{doc.count}</span>
     <button type="button" onClick={()=>goSlide(Math.max(0,slide-1))} disabled={slide===0} aria-label="Slide anterior">‹</button>
@@ -1395,7 +1408,7 @@ export default function SeamlessEditor(){
   </details>
   {activeBrief&&<details open style={{border:'1px solid #D6D8DD',borderRadius:12,padding:12,marginBottom:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Guion activo · {activeBrief.title}</summary><p style={{fontSize:13}}><b>Dirección visual:</b> {activeBrief.direction}</p><p style={{fontSize:13}}><b>CTA:</b> {activeBrief.cta}</p><p style={{fontSize:12}}>Los textos están en las cuatro láminas y se pueden mover o editar. La portada requiere fotografía real.</p></details>}
   <details style={{marginBottom:12,border:'1px solid #ddd',borderRadius:14,padding:'10px 12px',background:'#FAF8F3'}}><summary style={{cursor:'pointer',fontWeight:700,padding:'6px 0'}}>Herramientas y botones · tocar para abrir o recoger</summary><div style={{display:'flex',flexWrap:'wrap',gap:10,marginTop:12,marginBottom:8,alignItems:'center'}}>
-   <label>Slides <select aria-label="Cantidad de slides" style={control} value={doc.count} onChange={e=>setDoc(d=>({...d,count:Number(e.target.value)}))}>{[2,3,4,5,6,7,8,9,10].map(n=><option key={n}>{n}</option>)}</select></label>
+   <label>Slides <select aria-label="Cantidad de slides" style={control} value={doc.count} onChange={e=>setDoc(d=>({...d,count:Number(e.target.value)}))}>{[2,3,4,5,6,7,8,9,10,11,12].map(n=><option key={n}>{n}</option>)}</select></label>
    <label>Fondo <input aria-label="Color de fondo" type="color" value={doc.background} onChange={e=>setDoc(d=>({...d,background:e.target.value}))}/></label>
    <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}><button style={{...control,background:'#F2D85B',fontWeight:700}} onClick={()=>addText('paragraph')}>+ Texto libre</button><button style={control} onClick={()=>addText('hook')}>+ Hook</button><button style={control} onClick={()=>addText('title')}>+ Título</button><button style={control} onClick={()=>addText('caption')}>+ Texto pequeño</button></div>
    <button style={control} type="button" onClick={()=>{replacePhotoId.current=null;photoInput.current?.click()}}>+ Abrir fotos</button>
