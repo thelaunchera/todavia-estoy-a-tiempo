@@ -6,7 +6,7 @@ import {englishTitle,localizedPrompt} from './prompt-english.js?v=20261103-typog
 import {renderAulaInicio} from './dashboard-inicio.js?v=20261109-core4-v2';
 import {mountInspiracion} from './inspiracion.js?v=20261107-private-manager-v2';
 import {getClassroomLanguage,bindClassroomLanguages,applyClassroomLanguage,translationForLesson as originalLessonTranslation} from './aula-i18n.js?v=20261103-ai-lessons-v2';
-import {CORE_LESSON_CODES,coreLessonText,coreLessonLinks,localizeCoreClassroom} from './aula-video-plan.js?v=20261109-core4-v1';
+import {CORE_LESSON_CODES,coreLessonText,coreLessonLinks,coreMasterPrompts,localizeCoreClassroom} from './aula-video-plan.js?v=20261110-photo-drive-web-v1';
 function translationForLesson(item,lang=getClassroomLanguage()){return coreLessonText(item,lang)||originalLessonTranslation(item,lang);}
 // A blocked CDN must not prevent the entire classroom module from starting.
 let supabaseModule;
@@ -586,7 +586,9 @@ function renderLessonPrompts(item){
  const panel=$('lesson-prompts-panel'),list=$('lesson-prompts-list');
  if(!panel||!list)return;
  list.replaceChildren();panel.open=false;
- const entries=modulePrompts.filter(prompt=>prompt.prompt_code.startsWith('m'+item.lesson_code+'_'));
+ const entries=['01','05'].includes(item.lesson_code)
+  ?coreMasterPrompts(item.lesson_code,getClassroomLanguage())
+  :modulePrompts.filter(prompt=>prompt.prompt_code.startsWith('m'+item.lesson_code+'_'));
  panel.hidden=!entries.length;
  entries.forEach((prompt,index)=>{
   const card=document.createElement('details');card.className='lesson-prompt-card';card.open=index===0;
@@ -594,9 +596,9 @@ function renderLessonPrompts(item){
   escapedText(summary,'span',String(index+1).padStart(2,'0'),'lesson-prompt-index');
   const heading=document.createElement('span');heading.className='lesson-prompt-heading';
   const isEnglish=getClassroomLanguage()==='en';
-  const textPrompt=localizedPrompt(prompt.prompt_code,prompt.body,getClassroomLanguage());
-  escapedText(heading,'strong',isEnglish?englishTitle(prompt.prompt_code,prompt.title):prompt.title);
-  escapedText(heading,'small',isEnglish?'Copy the prompt and personalize it with your business information.':prompt.summary||'Copia este prompt y adáptalo a tu negocio.');
+  const textPrompt=prompt.isCoreMaster?prompt.body:localizedPrompt(prompt.prompt_code,prompt.body,getClassroomLanguage());
+  escapedText(heading,'strong',prompt.isCoreMaster?prompt.title:(isEnglish?englishTitle(prompt.prompt_code,prompt.title):prompt.title));
+  escapedText(heading,'small',prompt.isCoreMaster?prompt.summary:(isEnglish?'Copy the prompt and personalize it with your business information.':prompt.summary||'Copia este prompt y adáptalo a tu negocio.'));
   summary.append(heading);
   const body=document.createElement('div');body.className='lesson-prompt-body';
   escapedText(body,'p',textPrompt,'lesson-prompt-text');
