@@ -221,7 +221,7 @@ export default function TouchLayerCanvas({
       const g=gesture.current,viewport=scrollArea.current;
       if(!g||!viewport)return;
       const point=[...pointers.current.values()][0];
-      if(pageCount>1&&point&&pointers.current.size===1&&!g.crop&&!g.resize&&Math.hypot(point.x-g.startX,point.y-g.startY)>4){
+      if(pageCount>1&&point&&pointers.current.size===1&&!g.crop&&!g.resize&&!g.rotate&&Math.hypot(point.x-g.startX,point.y-g.startY)>4){
         const bounds=viewport.getBoundingClientRect();
         if(point.y>=bounds.top&&point.y<=bounds.bottom){
           const direction=point.x<bounds.left+36?-1:point.x>bounds.right-36?1:0;
@@ -397,6 +397,18 @@ export default function TouchLayerCanvas({
     onKeyUp:finishOpacity,onBlur:finishOpacity,
   };
   const selectedRect = chosen ? getRect(chosen) : undefined;
+  // Place rotation control as a sibling of artwork, never inside Normal's
+  // clip-path. Keep it in the stage's touch-safe bounds at canvas edges.
+  const rotationGripPosition=selectedRect?(()=>{
+    const width=stage.current?.getBoundingClientRect().width||stageHeight/ratio;
+    const height=stageHeight;
+    const angle=(selectedRect.angle||0)*Math.PI/180;
+    const distance=selectedRect.h*height/2+22;
+    return {
+      left:Math.max(19,Math.min(width-19,(selectedRect.x+selectedRect.w/2)*width+Math.sin(angle)*distance)),
+      top:Math.max(19,Math.min(height-19,(selectedRect.y+selectedRect.h/2)*height-Math.cos(angle)*distance)),
+    };
+  })():null;
   const isImageColor=chosen?.kind==='sticker'||chosen?.kind==='photo';
   const selectedColor=isImageColor?(chosen?.tintColor||chosen?.tint||'#B74670'):(chosen?.color||'#191919');
   const selectedStrength=Math.round((chosen?.tintColor?(chosen.tintStrength??.38):chosen?.tint?1:.38)*100);
@@ -804,11 +816,21 @@ export default function TouchLayerCanvas({
                <button type="button" aria-label="Terminar selección" onClick={e=>{e.stopPropagation();setSelected('');setContextInspector(null)}}>✓</button>
             </div>}
             {active && <><span className="touch-editor-outline"/>
-              {!cropping&&!layer.locked&&<span className="touch-editor-rotate-handle" data-rotate-handle title="Girar arrastrando" aria-hidden="true">↻</span>}
               {!cropping&&!layer.locked && (!inlineTextTools||layer.role==='background') && <span className="touch-editor-resize" data-resize-handle aria-hidden="true"/>}
               {layer.role==='background'&&!layer.locked&&<span className="touch-editor-resize-wide" data-resize-handle data-resize-axis="x" aria-hidden="true" title="Estira el fondo hacia el siguiente slide"/>}</>}
           </div>;
         })}
+        {chosen&&selectedRect&&rotationGripPosition&&!chosen.locked&&!cropping&&<div
+          className="touch-editor-rotate-handle touch-editor-rotation-overlay" data-rotate-handle
+          role="button" tabIndex={0} aria-label={'Girar '+chosen.name+' arrastrando'}
+          title="Girar arrastrando" style={rotationGripPosition}
+          onPointerDown={e=>down(e,chosen)}
+          onPointerMove={e=>{move(e,chosen);e.stopPropagation()}}
+          onPointerUp={e=>done(e,chosen)} onPointerCancel={e=>done(e,chosen)}
+          onKeyDown={e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+            e.preventDefault();const rect=getRect(chosen);
+            onCommit(chosen.kind,chosen.id,{...rect,angle:((rect.angle||0)+(e.key==='ArrowLeft'?-1:1)+540)%360-180});
+          }}>↻</div>}
         {inlineTextTools&&pageCount===1&&chosen&&!chosen.locked&&<div className="touch-canvas-actionbar" role="toolbar"
           aria-label="Opciones del elemento seleccionado"
           onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()} onPointerUp={e=>e.stopPropagation()}>
