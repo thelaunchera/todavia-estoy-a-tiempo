@@ -958,6 +958,19 @@ $('login-form').addEventListener('submit',async e=>{
   }
  });
 });
+window.addEventListener('tle-aula-email-resend',async event=>{
+ if(event.detail?.mode!=='signup')return;
+ const address=String(event.detail.email||'').trim().toLowerCase();
+ if(!address||address!==$('register-email').value.trim().toLowerCase())return;
+ const feedback=$('aula-email-message');
+ try{
+  const {error}=await db.auth.resend({type:'signup',email:address});
+  if(error)throw error;
+  if(feedback)feedback.textContent='Si tu cuenta puede confirmarse, revisa tu correo para seguir con el acceso.';
+ }catch(e){
+  if(feedback)feedback.textContent='No pudimos reenviar el correo ahora. Inténtalo después del contador.';
+ }
+});
 $('register-form').addEventListener('submit',async event=>{
  event.preventDefault();const form=event.currentTarget;
  if($('register-password').value!==$('register-confirm').value){authNotice('Las contraseñas no coinciden. Inténtalo de nuevo.');return;}
