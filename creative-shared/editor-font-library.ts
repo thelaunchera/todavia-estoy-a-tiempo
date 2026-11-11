@@ -351,7 +351,8 @@ export function ensureEditorFont(key?:string,weight=700):Promise<void>{
       // Safari's canvas text renderer must observe the loaded face.
       const face='"'+choice.family.replace(/"/g,'')+'"';
       const safeWeight=[400,500,600,700,800,900].includes(weight)?weight:700;
-      void document.fonts?.load(safeWeight+' 32px '+face).catch(()=>{}).then(()=>resolve())??resolve();
+      if(document.fonts?.load)void document.fonts.load(safeWeight+' 32px '+face).then(()=>resolve()).catch(()=>resolve());
+      else resolve();
     };
     element.onload=finish;element.onerror=finish;
     document.head.appendChild(element);
