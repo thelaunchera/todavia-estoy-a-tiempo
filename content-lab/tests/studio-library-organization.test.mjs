@@ -57,7 +57,7 @@ test('Historical wallpaper misfilings appear in backgrounds without duplicating 
  assert.match(client,/backgroundGroup:legacyStickerBackgroundGroup\(item\.name\)/);
  const app=readFileSync(new URL('./App.tsx',root),'utf8');
  assert.match(app,/asset\.id\.startsWith\('shared-background-'\)/);
- assert.match(app,/sticker-catalog\/\+asset\.id\.slice\('shared-'\.length\)/);
+ assert.match(app,/sticker-catalog\/['\"]\+asset\.id\.slice\('shared-'\.length\)/);
 });
 
 test('Lab offers Studio-like collections, mobile lazy previews and a bounded grid',()=>{
