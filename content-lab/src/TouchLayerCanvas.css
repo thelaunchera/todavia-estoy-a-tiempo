@@ -730,3 +730,20 @@
     width:11px;height:11px
   }
 }
+
+
+/* Editorial outline typography: three real modes and touch-friendly controls. */
+.touch-editor-outline-settings{display:flex;flex-direction:column;gap:10px;width:100%;min-width:0;
+ padding:12px;border:1px solid #d5e2e4;border-radius:13px;background:#faf8f3}
+.touch-editor-outline-settings>strong{font-size:12px;color:#191919;letter-spacing:.01em}
+.touch-editor-outline-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.touch-editor-outline-modes button{min-width:0;min-height:44px;border:1px solid #cddbdc;
+ border-radius:10px;background:white;padding:7px 5px;color:#284653;font-size:11px;font-weight:750;
+ touch-action:manipulation;cursor:pointer}
+.touch-editor-outline-modes button[aria-pressed=true]{background:#f2d85b;border-color:#c9ac40;color:#191919}
+.touch-editor-outline-options{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.touch-editor-outline-options label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:1 1 180px;font-size:11px}
+.touch-editor-outline-options input[type=color]{width:44px;height:42px;border:1px solid #cddbdc;border-radius:9px;cursor:pointer}
+.touch-editor-outline-options input[type=range]{flex:1 1 110px;min-width:100px}
+.touch-editor-outline-options output{min-width:35px;font-weight:700;color:#191919}
+@media(max-width:390px){.touch-editor-outline-modes button{font-size:10px;padding:6px 3px}}
