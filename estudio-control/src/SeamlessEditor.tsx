@@ -1119,6 +1119,12 @@ export default function SeamlessEditor(){
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
+      {importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='background'&&!isPersonalCharacterAssetName(asset.name))
+        .map(asset=><div key={'organize-'+asset.id} style={{display:'flex',gap:5,alignItems:'center',flexWrap:'wrap',gridColumn:'1 / -1'}}>
+         <span style={{flex:'1 1 100px',fontSize:11}}>{asset.name}</span>
+         <button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void changeAssetCategory(asset.id,'sticker')}>Mover a Stickers</button>
+         {!approvedShareIds.includes(asset.id)&&<button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void approveShareToLab(asset.id)}>Compartir en Lab</button>}
+        </div>)}
       {LAB_ASSETS.filter(asset=>asset.category==='background'&&validBundledFiles?.has(asset.file)).map(asset=><button type="button" key={asset.id}
         onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
@@ -1163,6 +1169,29 @@ export default function SeamlessEditor(){
              <span className="studio-sticker-label">{asset.name}</span>
            </button>)}
       </div>
+      {stickerCategory==='Personajes privados'&&<section aria-label="Colección privada de personajes">
+       <small>Solo para tu Studio. Estos personajes no se comparten en el catálogo del Lab.</small>
+       <div className="studio-sticker-gallery">
+        {[...importedStickers.filter(asset=>isPersonalCharacterAssetName(asset.name)),...privateCharacters]
+          .filter((asset,index,all)=>all.findIndex(other=>other.name.toLowerCase()===asset.name.toLowerCase())===index)
+          .filter(asset=>asset.name.toLowerCase().includes(stickerSearch.trim().toLowerCase()))
+          .map(asset=><button type="button" key={asset.id} aria-label={'Añadir personaje privado '+asset.name}
+            onClick={()=>void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo abrir el personaje'))}>
+             <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
+             <span className="studio-sticker-label">{asset.name} · Privado</span>
+            </button>)}
+       </div>
+      </section>}
+      {stickerCategory==='Mis stickers'&&<section aria-label="Organizar recursos personales">
+       <strong style={{fontSize:12}}>Organizar mis stickers</strong>
+       {importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name))
+        .filter(asset=>asset.name.toLowerCase().includes(stickerSearch.trim().toLowerCase()))
+        .map(asset=><div key={asset.id} style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',margin:'5px 0'}}>
+         <span style={{flex:'1 1 115px',fontSize:11}}>{asset.name}</span>
+         <button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void changeAssetCategory(asset.id,'background')}>Mover a Fondos</button>
+         {!approvedShareIds.includes(asset.id)&&<button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void approveShareToLab(asset.id)}>Compartir en Lab</button>}
+        </div>)}
+      </section>}
       <details className="studio-sticker-symbols"><summary>Stickers de símbolos</summary>
         <div>{LAB_STICKERS.map((emoji,i)=><button type="button" key={i} aria-label={'Añadir símbolo '+emoji} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}>{emoji}</button>)}</div>
       </details>
