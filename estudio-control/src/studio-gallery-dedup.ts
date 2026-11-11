@@ -13,7 +13,7 @@ function normalizedName(name:string):string{
   .replace(/^0+(\d+)(?=\s)/,'$1').replace(/\s+/g,' ').trim();
 }
 export function dedupeStudioGallery<T extends StudioGalleryCard>(items:readonly T[]):T[]{
- const seenIds=new Set<string>(),seenHashes=new Set<string>(),seenNames=new Set<string>();
+ const seenIds=new Set<string>(),seenHashes=new Set<string>(),seenNames=new Map<string,string|null>();
  const result:T[]=[];
  for(const item of items){
   if(!item.id||!item.name||seenIds.has(item.id))continue;
@@ -23,8 +23,11 @@ export function dedupeStudioGallery<T extends StudioGalleryCard>(items:readonly 
   // A confirmed different hash can be a deliberate variant even with the same
   // title. If hashes are absent, repeated *exact labels* are one gallery card.
   if(hash&&seenHashes.has(hash))continue;
-  if(seenNames.has(byName))continue;
-  seenIds.add(item.id);seenNames.add(byName);if(hash)seenHashes.add(hash);
+  const priorHash=seenNames.get(byName);
+  if(seenNames.has(byName)&&(!hash||!priorHash||hash===priorHash))continue;
+  seenIds.add(item.id);
+  if(!seenNames.has(byName))seenNames.set(byName,hash);
+  if(hash)seenHashes.add(hash);
   result.push(item);
  }
  return result;
