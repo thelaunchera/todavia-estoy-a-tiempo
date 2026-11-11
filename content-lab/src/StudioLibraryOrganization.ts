@@ -35,10 +35,12 @@ type GroupableAsset={name:string;displayName?:string;stickerGroup?:string;shared
 export function stickerCollectionFor(asset:GroupableAsset):StickerCollection{
  const name=(asset.displayName||asset.name||'').toLocaleLowerCase('es');
  const group=(asset.stickerGroup||'').toLocaleLowerCase('es');
+ // Release collections with approved editorial phrases take precedence over loose keyword matching.
+ if(group==='inspiración'||group==='inspiracion')return 'Inspiración';
  if(/navidad|christmas|holiday|valent[ií]n|halloween|santa|snowman|cascabel|reyes magos|pascua/.test(name)||group==='temporadas')return 'Temporada';
  if(/lazo|bow|ribbon|moño|corbata de seda/.test(name))return 'Lazos';
  if(/cinta|tape|washi|bander[ií]n|banner|list[oó]n/.test(name))return 'Cintas';
- if(/estrella|stars?|destello|asterisco|sparkles?|rayos?|brillo estelar/.test(name))return 'Estrellas';
+ if(/estrella|\bstars?\b|destello|asterisco|sparkles?|rayos?|brillo estelar/.test(name))return 'Estrellas';
  if(/marco|frame|etiqueta|badge|sello|stamp|cup[oó]n|ticket|polaroid|clip|relicario/.test(name))return 'Marcos y etiquetas';
  if(/papel rasgado|torn paper|scrap|paper strip|papel troquelado|pincelada|paint stroke|subrayado|underline|nota adhesiva/.test(name))return 'Papeles y recortes';
  if(/brand|marketing|anal[ií]tica|business|logo|newsletter|planificador|planner|social|reels|content|creativo de negocios/.test(name)||group==='branding y marketing')return 'Branding';
