@@ -199,8 +199,8 @@ export default function PanoramaEditor({
     const stage=containerRef.current?.querySelector('.touch-editor-stage');
     const rect=stage?.getBoundingClientRect();
     const viewport=containerRef.current?.querySelector('.touch-editor-scroll')?.getBoundingClientRect();
-    if(rect&&viewport&&rect.width>0&&rect.height>0&&
-      e.clientX>=viewport.left&&e.clientX<=viewport.right&&
+    if(rect&&rect.width>0&&rect.height>0&&
+      viewport&&e.clientX>=viewport.left&&e.clientX<=viewport.right&&
       e.clientY>=viewport.top&&e.clientY<=viewport.bottom){
       const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
       if(x>=0&&x<=1&&y>=0&&y<=1){
