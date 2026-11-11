@@ -12,13 +12,15 @@ test('Buyer must verify a new OTP after 24 hours, even with continued activity',
  assert.ok(client.includes('activeBuyerExpiresAt=deadline'));
  assert.ok(client.includes('expiryReached(activeBuyerExpiresAt,now)'));
  assert.ok(client.includes('await endExpiredSession(activeUserId)'));
- assert.ok(client.includes("await endExpiredSession(user.id)"));
+ assert.ok(client.includes("await endExpiredSession(user.id,user.email)"));
+ assert.ok(client.includes("sessionStorage.setItem('content-lab:expired-email',email)"));
  assert.ok(client.includes('if(now-lastRecordedInteraction>=30000)'));
  assert.ok(app.includes("['pointerdown','touchstart','keydown','input','scroll']"));
  assert.ok(app.includes("document.visibilityState==='visible'"));
  assert.ok(app.includes('window.setInterval(logoutWhenIdle,30_000)'),'open app checks expiry');
  assert.ok(app.includes('window.clearInterval(expiryTimer)'));
- assert.ok(app.includes('Tus fotos y proyectos se conservan.'));
+ assert.ok(app.includes("setExpiredEmail(account.email||'')"));
+ assert.ok(read('src/AuthExperience.tsx').includes('Tus proyectos están guardados.'));
  assert.ok(migration.includes('auth.sessions'),'original OTP session, not JWT refresh time');
  assert.ok(migration.includes("interval '24 hours'"));
  assert.ok(migration.includes('alter policy "content lab buyer sees own purchase"'));
