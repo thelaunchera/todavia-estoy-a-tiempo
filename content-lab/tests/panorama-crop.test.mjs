@@ -13,10 +13,14 @@ function compile(name) {
   if (compiled.has(name)) return compiled.get(name);
   const target = join(temp, name + '.mjs');
   compiled.set(name, target);
-  const source = readFileSync(new URL('../src/' + name + '.ts', import.meta.url), 'utf8');
+  const source = readFileSync(name==='EditorFontLibrary'
+    ?new URL('../../creative-shared/editor-font-library.ts',import.meta.url)
+    :new URL('../src/' + name + '.ts', import.meta.url), 'utf8');
   const output = ts.transpileModule(source, {compilerOptions: {target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.ES2022}}).outputText.replace(/from ['"]\.\/([^'"]+)['"]/g,
-      (_, dependency) => 'from ' + JSON.stringify(pathToFileURL(compile(dependency)).href));
+      (_, dependency) => 'from ' + JSON.stringify(pathToFileURL(compile(dependency)).href))
+    .replace(/from ['"]\.\.\/\.\.\/creative-shared\/editor-font-library['"]/g,
+      'from '+JSON.stringify(pathToFileURL(compile('EditorFontLibrary')).href));
   writeFileSync(target, output);
   return target;
 }
