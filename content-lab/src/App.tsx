@@ -2299,7 +2299,7 @@ function App() {
                onChoose={format=>{setGridPref(p=>({version:p.version+1,brandId:brand.id,format}));navigate('grid')}}/>
            )}
            {tab==='settings'&&<AccountSettings email={account.email||''}
-             locale={loginLanguage}
+             locale={loginLanguage} onLanguage={chooseLanguage}
              avatarSrc={profilePhotoId?images[profilePhotoId]:undefined}
              onUpload={uploadProfilePhoto} onClear={clearProfilePhoto}
              onBrands={()=>navigate('brands')}/>}
