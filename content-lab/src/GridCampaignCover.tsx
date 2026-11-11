@@ -41,7 +41,7 @@ export default function GridCampaignCover({item,grid,brand,images,loadImage,loca
  const tile=item.tileIndex===undefined?undefined:grid.posts[item.tileIndex];
  const original=grid.sourceId||'';
  const required=tile?[tile.assetId||'',tile.backgroundImageId||'',
-  ...(tile.stickerIds||[]),...(original&&tile.design?[original]:[])]
+  ...(tile.stickerIds||[]),...(original&&(tile.design||(grid.kind==='preserve'&&!tile.assetId))?[original]:[])]
   .filter((id):id is string=>Boolean(id)):[];
  const available=required.every(id=>Boolean(images[id]));
  const hasVisual=Boolean(tile&&(tile.assetId||tile.design||(grid.kind==='preserve'&&original)));
