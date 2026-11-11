@@ -39,7 +39,7 @@ async function validSource(a:Alert,pref:Pref){
  if(error||!data)return false;
  const payload=data.payload||{};
  if(a.kind==="unfinished"){
-  return a.source_type==="post"&&Date.parse(data.updated_at)<=Date.parse(a.created_at)
+  return a.source_type==="post"&&Date.parse(data.updated_at)<=Date.now()-12*60*60*1000
    &&payload.isFinished!==true&&!["Ready","Published","Completed"].includes(payload.status);
  }
  const tile=a.source_type==="grid" ? (Array.isArray(payload.posts)?payload.posts[a.tile_index]:null) : payload;

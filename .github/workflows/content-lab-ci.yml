@@ -19,6 +19,23 @@ on:
 permissions:
   contents: read
 jobs:
+  notification-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install notification browser fixtures
+        run: npm install --no-save --no-audit --no-fund playwright@1.58.2
+        working-directory: content-lab
+      - name: Install Chromium
+        run: npx playwright install chromium
+        working-directory: content-lab
+      - name: Check one-off reminder actions on phone, tablet and desktop
+        run: node scripts/qa-unfinished-reminder.mjs
+        working-directory: content-lab
   verify:
     runs-on: ubuntu-latest
     steps:

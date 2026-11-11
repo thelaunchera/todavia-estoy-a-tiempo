@@ -96,8 +96,8 @@ export default function LabNotifications({email,locale,onOpen,notify}:Props){
        <div className="lab-alert-actions">
         <button type="button" className="primary" disabled={!!busy} onClick={()=>void action(alert,'open')}>
          {es?'Abrir proyecto':'Open project'}<ChevronRight size={15}/></button>
-        <button type="button" disabled={!!busy} onClick={()=>void action(alert,'snooze')}>
-         <Clock3 size={14}/>{es?'Posponer 1 h':'Snooze 1 h'}</button>
+        {alert.kind==='scheduled'&&<button type="button" disabled={!!busy} onClick={()=>void action(alert,'snooze')}>
+         <Clock3 size={14}/>{es?'Posponer 1 h':'Snooze 1 h'}</button>}
        </div>
       </div>
      </article>):<div className="lab-alert-empty"><Check size={22}/><strong>{es?'¡Todo al día!':'All caught up!'}</strong>
@@ -112,8 +112,8 @@ export default function LabNotifications({email,locale,onOpen,notify}:Props){
       {!installed&&/iPhone|iPad/i.test(navigator.userAgent)&&<small>{es?
         'Para recibir push en iPhone, añade Content Lab a la pantalla de inicio, abre la app y activa este interruptor.':
         'For iPhone push, add Content Lab to your Home Screen, open the app and enable this switch.'}</small>}
-      <small>{es?'Avisos de proyectos a las 6 h y de publicaciones 2 h antes. No publica por ti.':
-       'Project reminders after 6 hours; posting alerts 2 hours before. Posting remains manual.'}</small>
+      <small>{es?'Un solo aviso por post sin terminar, después de 12 h sin editar. Avisos de publicaciones 2 h antes. No publica por ti.':
+       'One reminder per unfinished post after 12 hours without edits; posting alerts 2 hours before. Posting remains manual.'}</small>
     </footer>
    </section>
   </div>,document.body)}

@@ -3,14 +3,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('Every buyer has private alerts and one reminder per saved revision',()=>{
+test('Original reminder schema preserves buyer privacy and server-only dispatch',()=>{
  const schema=read('supabase/migrations/20261107_lab_alerts_6h_2h_push.sql');
  assert.match(schema,/content_lab_alert_settings\(/);
  assert.match(schema,/content_lab_push_subscriptions\(/);
  assert.match(schema,/content_lab_alerts\(/);
  assert.match(schema,/enable row level security/);
  assert.match(schema,/unique\(owner_id,event_key\)/);
- assert.match(schema,/6 hours/);
  assert.match(schema,/interval '2 hours'/);
  assert.match(schema,/content_lab_alert_instant/);
  assert.match(schema,/content_lab_act_on_alert/);

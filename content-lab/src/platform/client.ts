@@ -592,7 +592,7 @@ export const labNotificationApi={
   const user=await current();
   const {data,error}=await sb.from('content_lab_alerts')
    .select('id,kind,source_type,source_id,tile_index,brand_id,project_title,format,scheduled_at,created_at,read_at,snoozed_until,delivery_state')
-   .eq('owner_id',user.id).is('read_at',null).order('created_at',{ascending:false}).limit(50);
+   .eq('owner_id',user.id).is('read_at',null).in('delivery_state',['email','push','in_app']).order('created_at',{ascending:false}).limit(50);
   if(error)throw Error(error.message);
   return (data||[]) as LabAlert[];
  },
