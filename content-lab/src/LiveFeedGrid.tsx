@@ -3,11 +3,13 @@ import {CalendarDays,Check,ChevronLeft,ChevronRight,Clock3,ImagePlus,LayoutGrid,
 import {api} from './platform/client';
 import {contentKind,contentKindLabel,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
 import {liveFeedState,liveFeedTiles} from './LiveFeedModel';
+import ProjectCover,{type CoverPost} from './ProjectCover';
+import type {Brand as CarouselBrand} from './CarouselFactory';
 import './LiveFeedGrid.css';
 
 type Props={
  refreshRevision:number;
- brand:{id:string;name:string};
+ brand:CarouselBrand;
  posts:CalendarPost[];
  images:Record<string,string>;
  locale:'es'|'en';
@@ -20,6 +22,37 @@ type Props={
  notify:(message:string)=>void;
  showError:(error:unknown)=>void;
 };
+/** The feed uses the saved composition (first carousel slide or finished post),
+ * not merely the optional raw photo asset. No writes or generated replacements. */
+type FeedPreviewProps={
+ item:PlannedItem;posts:CalendarPost[];brand:CarouselBrand;images:Record<string,string>;
+ loadImage:(id:string)=>void;locale:'es'|'en';compact?:boolean;
+};
+function FeedPostPreview({item,posts,brand,images,loadImage,locale,compact=false}:FeedPreviewProps){
+ const full=item.kind==='post'
+   ?posts.find(p=>p.id===item.id.slice(5)&&p.brandId===brand.id) as
+     (CalendarPost&Partial<CoverPost>)|undefined
+   :undefined;
+ if(full){
+   const savedCover:CoverPost={
+     id:full.id,brandId:full.brandId,title:full.title||item.title,
+     format:full.format||item.format,assetId:full.assetId||'',
+     hook:full.hook,slides:full.slides,cta:full.cta,
+     template:full.template,designData:full.designData,updatedAt:full.updatedAt,
+   };
+   const hasSavedVisual=Boolean(
+     savedCover.assetId||savedCover.designData?.trim()||
+     (savedCover.format==='Carousel'&&savedCover.slides?.trim())
+   );
+   if(hasSavedVisual)return <ProjectCover post={savedCover} brand={brand}
+     images={images} loadImage={loadImage} locale={locale}/>;
+ }
+ if(item.assetId&&images[item.assetId])
+   return <img src={images[item.assetId]} alt="" loading="lazy"/>;
+ return compact?<ImagePlus size={20}/>:<div className="lab-live-feed-missing">
+   <ImagePlus size={24}/><small>{locale==='es'?'Sin imagen guardada':'No saved image'}</small>
+ </div>;
+}
 const displayDate=(date:string,locale:'es'|'en')=>{
  const [year,month,day]=date.split('-').map(Number);
  return new Intl.DateTimeFormat(locale==='es'?'es-US':'en-US',{month:'short',day:'numeric'}).format(new Date(year,month-1,day));
@@ -130,8 +163,8 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
          aria-label={(es?'Editar ':'Edit ')+item.title}
          title={item.title+' · '+contentKindLabel(item.format,locale)+' · '+item.date}
          onClick={()=>onOpenEditor(item)}>
-         {item.assetId&&images[item.assetId]?<img src={images[item.assetId]} alt=""/>:
-           <div className="lab-live-feed-missing"><ImagePlus size={24}/><small>{es?'Sin imagen':'No image'}</small></div>}
+         <FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+           loadImage={loadImage} locale={locale}/>
          <span className="lab-live-feed-type">{contentKindLabel(item.format,locale)}</span>
          {pending&&<span className="lab-live-feed-tile-date">{displayDate(item.date,locale)}</span>}
        </button>;
@@ -150,8 +183,8 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
            'No pending posts. Add a design and a date in the calendar.'}</span></div>:
        <div className="lab-live-feed-rows">{timeline.upcoming.slice(0,12).map(item=>
          <article key={item.id} className="lab-live-feed-row">
-           <div className="lab-live-feed-small-thumb">{item.assetId&&images[item.assetId]?
-             <img src={images[item.assetId]} alt=""/>:<ImagePlus size={20}/>}</div>
+           <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+             loadImage={loadImage} locale={locale} compact/></div>
            <div className="lab-live-feed-row-info"><strong>{item.title}</strong>
              <span>{displayDate(item.date,locale)} · {item.time} · {contentKindLabel(item.format,locale)}</span></div>
            <div className="lab-live-feed-row-actions">
@@ -170,8 +203,8 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
        <span>{showHistory?'−':'＋'}</span></button>
      {showHistory&&<div className="lab-live-feed-rows">
        {timeline.published.slice().reverse().slice(0,25).map(item=><article key={item.id} className="lab-live-feed-row">
-         <div className="lab-live-feed-small-thumb">{item.assetId&&images[item.assetId]?
-           <img src={images[item.assetId]} alt=""/>:<ImagePlus size={20}/>}</div>
+         <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+           loadImage={loadImage} locale={locale} compact/></div>
          <div className="lab-live-feed-row-info"><strong>{item.title}</strong>
            <span>{displayDate(item.date,locale)} · {item.time} · {contentKindLabel(item.format,locale)}</span></div>
          <div className="lab-live-feed-row-actions">
