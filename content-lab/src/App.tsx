@@ -1897,7 +1897,7 @@ function App() {
               notify={toast}
               showError={err}
             /> : <LiveFeedGrid brand={brand} posts={posts} images={images} refreshRevision={gridRefreshRevision}
-                locale={loginLanguage} loadImage={id=>{void imageLoad(id)}}
+                locale={loginLanguage} loadImage={imageLoad}
                 onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
                 onOpenEditor={openCalendarItem}
                 onOpenCalendar={(date?:string)=>{if(validDate(date||''))setCalendarFocusDate(date!);navigate('calendar')}}
