@@ -6,6 +6,7 @@ import {liveFeedState,liveFeedTiles} from './LiveFeedModel';
 import './LiveFeedGrid.css';
 
 type Props={
+ refreshRevision:number;
  brand:{id:string;name:string};
  posts:CalendarPost[];
  images:Record<string,string>;
@@ -23,7 +24,7 @@ const displayDate=(date:string,locale:'es'|'en')=>{
  const [year,month,day]=date.split('-').map(Number);
  return new Intl.DateTimeFormat(locale==='es'?'es-US':'en-US',{month:'short',day:'numeric'}).format(new Date(year,month-1,day));
 };
-export default function LiveFeedGrid({brand,posts,images,locale,loadImage,
+export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refreshRevision,
  onPostSaved,onOpenEditor,onOpenCalendar,onOpenPrompts,onCreate,notify,showError}:Props){
  const es=locale==='es';
  const [grids,setGrids]=useState<CalendarGrid[]>([]);
@@ -39,7 +40,7 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,
      .catch(e=>{if(active){setLoadError(es?'No se pudieron cargar los proyectos anteriores.':'Could not load earlier projects.');showError(e)}})
      .finally(()=>{if(active)setLoading(false)});
    return()=>{active=false};
- },[brand.id]);
+ },[brand.id,refreshRevision]);
  const timeline=useMemo(()=>liveFeedState(posts,grids,brand.id),[posts,grids,brand.id]);
  const forward=Math.min(timeline.upcoming.length,9,advance);
  const tiles=useMemo(()=>liveFeedTiles(timeline.published,timeline.upcoming,mode,forward),
