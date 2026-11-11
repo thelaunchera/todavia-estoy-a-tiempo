@@ -44,3 +44,17 @@ test('refresh is visible, bilingual, keeps the current view, and protects unsave
  assert.match(appCss,/\.lab-refresh-control/);
  assert.match(appCss,/@media\(max-width:850px\)/);
 });
+
+test('Refresh re-fetches grid campaigns in calendar and feed without resetting selection',()=>{
+ const calendar=read('ContentCalendar.tsx');
+ const feed=read('LiveFeedGrid.tsx');
+ assert.match(app,/setGridRefreshRevision\(n=>n\+1\)/);
+ assert.match(app,/<LiveFeedGrid[^>]*refreshRevision=\{gridRefreshRevision\}/);
+ assert.match(app,/<ContentCalendar[^>]*refreshRevision=\{gridRefreshRevision\}/);
+ for(const view of [calendar,feed]){
+  assert.match(view,/refreshRevision:number/);
+  assert.match(view,/\[brand\.id,refreshRevision\]/);
+  assert.match(view,/api\.get\('\/api\/grids'\)/);
+ }
+ assert.match(calendar,/if\(refreshRevision===0\)\{setGrids\(\[\]\);setKey\(''\)\}/);
+});
