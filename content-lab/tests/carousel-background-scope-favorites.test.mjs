@@ -20,7 +20,8 @@ test('Seamless final PNG and live canvas use the exact same individual backgroun
  const src=read('CarouselFactory.tsx'),seamless=read('SeamlessCarousel.ts'),style=read('CarouselArtDirection.ts');
  // Includes the read-only first-slide project cover renderer as well as
  // the live artboard, preview and individual PNG export.
- assert.equal((src.match(/usePageBackgrounds:style\.perSlideBackgrounds/g)||[]).length,4);
+ assert.equal((src.match(/usePageBackgrounds:style\.perSlideBackgrounds/g)||[]).length,5);
+ assert.ok(src.includes('export async function renderSavedCarouselPages'));
  assert.ok(src.includes('export async function renderSavedCarouselCover'));
  assert.ok(style.includes('perSlideBackgrounds:v.perSlideBackgrounds===true'));
  assert.ok(style.includes('perSlideBackgrounds:boolean'));
