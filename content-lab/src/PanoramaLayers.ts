@@ -1,6 +1,7 @@
 import { clampPanoramaRect, layerCornerPixels, type TouchRect } from './TouchGeometry';
 import { coverPlacement,photoFrameMetrics } from './PhotoCrop';
 import {clampTextCurve,drawCurvedTextLine,curvedTextExtraHeight} from './CurvedText';
+import {editorFontFamily,ensureEditorFont} from '../../creative-shared/editor-font-library';
 export type LayerMove = 'backward' | 'forward' | 'back' | 'front';
 export type LayerPlacement = 'behind-text' | 'front';
 
@@ -119,20 +120,7 @@ function shapePaint(ctx:CanvasRenderingContext2D,shape:PanoramaLayer,w:number,h:
  }
  ctx.restore();
 }
-export function panoramaFont(font?:string){
- const fonts:Record<string,string>={
-  serif:'Georgia,serif',sans:'Arial,sans-serif',brand:'Georgia,serif',
-  prompt:'Prompt,Arial,sans-serif',futura:'Futura,Arial,sans-serif',
-  poster:'"Archivo Black",Impact,"Arial Black",Arial,sans-serif',
-  'dm serif display':'"DM Serif Display",Georgia,serif',
-  cormorant:'"Cormorant Garamond",Georgia,serif',
-  playfair:'"Playfair Display",Georgia,serif',
-  fraunces:'Fraunces,Georgia,serif',bodoni:'"Bodoni Moda",Georgia,serif',
-  libre:'"Libre Baskerville",Georgia,serif',outfit:'Outfit,Arial,sans-serif',
-  manrope:'Manrope,Arial,sans-serif',syne:'Syne,Arial,sans-serif',
-  space:'"Space Grotesk",Arial,sans-serif',caveat:'Caveat,cursive'};
- return fonts[font||'']||fonts.serif;
-}
+export function panoramaFont(font?:string){return editorFontFamily(font);}
 export function panoramaTextWeight(value:unknown):number{
  const n=Number(value);
  return [400,500,600,700,800,900].includes(n)?n:700;
@@ -198,7 +186,8 @@ export async function paintPanoramaLayers(
   ctx.globalAlpha=Math.max(0,Math.min(1,layer.opacity??1));ctx.translate((r.x+r.w/2)*width,(r.y+r.h/2)*height);
   ctx.rotate((r.angle||0)*Math.PI/180);
   if(layer.kind==='text'){
-    try{await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
+    try{await ensureEditorFont(layer.font,panoramaTextWeight(layer.fontWeight));
+      await document.fonts?.load(panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font));}
     catch{/* Offline fallback retains exported text. */}
     textPaint(ctx,layer,w,h);
    }

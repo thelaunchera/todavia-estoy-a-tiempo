@@ -1,5 +1,6 @@
 import {useEffect,useRef} from 'react';
 import {panoramaFont,panoramaTextWeight,textPaint,type PanoramaLayer} from './PanoramaLayers';
+import {ensureEditorFont} from '../../creative-shared/editor-font-library';
 
 /** Live curved text uses the same Canvas 2D painter as the exported PNG.
  * The source text stays editable as a layer; no image is saved to the project.
@@ -25,6 +26,7 @@ export default function CurvedTextPreview({layer,width,height}:{layer:PanoramaLa
    ctx.restore();
   };
   paint();
+  void ensureEditorFont(layer.font,panoramaTextWeight(layer.fontWeight)).then(paint).catch(()=>{});
   // Repaint after web fonts load, avoiding a fallback-font mismatch.
   const font=panoramaTextWeight(layer.fontWeight)+' '+(layer.fontSize||76)+'px '+panoramaFont(layer.font);
   if(typeof document!=='undefined'&&document.fonts?.load){

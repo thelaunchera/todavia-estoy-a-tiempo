@@ -19,6 +19,8 @@ import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {zipSync,unzipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
+import FontShelf from './FontShelf';
+import {EDITOR_FONTS,editorFontFamily,editorFontId,ensureEditorFont} from '../../creative-shared/editor-font-library';
 import CarouselReader from './CarouselReader';
 import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
 type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;outlineOnly?:boolean;outlineColor?:string;outlineWidth?:number;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
@@ -39,16 +41,9 @@ const resolveImageSource=(src:string)=>{
 };
 const LAB_BACKGROUNDS=[['Warm Ivory','#FAF8F3'],['Soft Blue','#DCECF4'],['Sage Studio','#E4EDE1'],['Butter Cream','#FFF4C4'],['Blush Paper','#FCE9EF'],['Dark Editorial','#22282C'],['Vintage Scrapbook','#F1E8D6'],['Peach Sunset','#F6C3AB'],['Lilac Haze','#E8DDF7'],['Coffee Club','#E5D2BB'],['Midnight Stars','#26313E']];
 const LAB_STICKERS=['🎀','🩷','✨','🌸','🌷','🌿','⭐','☕','🌙','🦋','🍒','📌','📎','📝','🧘🏽‍♀️','🏋🏽‍♀️','🍵','💪','👟'];
-const STUDIO_TEXT_FONTS:Record<string,string>={
- arial:'Arial,sans-serif',prompt:'Prompt,Arial,sans-serif',futura:'Futura,Arial,sans-serif',
- poster:'"Archivo Black",Impact,"Arial Black",sans-serif',
- playfair:'"Playfair Display",Georgia,serif',
- cormorant:'"Cormorant Garamond",Georgia,serif',
- outfit:'Outfit,Arial,sans-serif',
- manrope:'Manrope,Arial,sans-serif',
- syne:'Syne,Arial,sans-serif'
-};
-const studioTextFont=(font?:string)=>STUDIO_TEXT_FONTS[font||'']||STUDIO_TEXT_FONTS.arial;
+const STUDIO_TEXT_FONTS:Record<string,string>=Object.fromEntries(
+ EDITOR_FONTS.map(font=>[font.id,editorFontFamily(font.id)]));
+const studioTextFont=(font?:string)=>STUDIO_TEXT_FONTS[editorFontId(font)]||editorFontFamily(font,'Arial,sans-serif');
 export default function SeamlessEditor(){
  const [doc,setDoc]=useState<typeof defaults>(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults}});
  const [selected,setSelected]=useState<number|null>(null);
@@ -97,7 +92,7 @@ export default function SeamlessEditor(){
  const [stickerSearch,setStickerSearch]=useState('');
  const [stickerCategory,setStickerCategory]=useState('Todos');
  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
- const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|null>(null);
+ const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|'fonts'|'more'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
  const [importedStickers,setImportedStickers]=useState<StudioLabAsset[]>([]);
  const [importingStickers,setImportingStickers]=useState(false);
@@ -348,6 +343,7 @@ export default function SeamlessEditor(){
      ctx.textBaseline='top';
      ctx.fillText(it.text||'✨',x,it.y);
    }else if(it.kind==='text'){
+     await ensureEditorFont(it.fontFamily,it.fontWeight||700);
      ctx.fillStyle=it.color;
      ctx.font=(it.fontWeight||700)+' '+it.fontSize+'px '+studioTextFont(it.fontFamily);
      ctx.textBaseline='top';
@@ -1181,8 +1177,21 @@ export default function SeamlessEditor(){
   </div>
   {readerOpen&&<CarouselReader pages={readerPages} initialIndex={slide} title={projectName} onClose={()=>setReaderOpen(false)}/>}
   {current&&!current.locked&&activeInspector&&!quickPanel&&<div className="studio-app-inspector" role="group" aria-label="Ajustes del elemento seleccionado">
-  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='shape'?'Color de forma':activeInspector==='effects'?'Sombras':activeInspector==='color'?'Cambiar color':activeInspector==='size'?'Ajustar tamaño':'Posición'}</strong>
+  <div className="studio-app-inspector-heading"><strong>{activeInspector==='opacity'?'Transparencia':activeInspector==='rotate'?'Girar':activeInspector==='curve'?'Curvar texto':activeInspector==='text'?'Estilo de texto':activeInspector==='fonts'?'50 tipografías':activeInspector==='more'?'Todas las funciones':activeInspector==='shape'?'Color de forma':activeInspector==='effects'?'Sombras':activeInspector==='color'?'Cambiar color':activeInspector==='size'?'Ajustar tamaño':'Posición'}</strong>
    <button type="button" aria-label="Cerrar ajustes" onClick={()=>setActiveInspector(null)}>×</button></div>
+  {activeInspector==='fonts'&&current.kind==='text'&&<FontShelf value={current.fontFamily}
+    onSelect={font=>update(current.id,{fontFamily:font})}/>}
+  {activeInspector==='more'&&<div className="studio-app-position-inspector" role="group" aria-label="Todas las funciones del elemento">
+    <button type="button" onClick={()=>setActiveInspector('size')}>Ajustar tamaño</button>
+    <button type="button" onClick={()=>setActiveInspector('position')}>Capas y posición</button>
+    {current.kind==='text'&&<button type="button" onClick={()=>setActiveInspector('fonts')}>50 tipografías</button>}
+    {current.kind==='text'&&<button type="button" onClick={()=>setActiveInspector('text')}>Editar y efectos de texto</button>}
+    <button type="button" onClick={()=>update(current.id,{flipX:!current.flipX})}>Voltear horizontal</button>
+    <button type="button" onClick={()=>update(current.id,{flipY:!current.flipY})}>Voltear vertical</button>
+    <button type="button" onClick={()=>setActiveInspector('effects')}>Sombras</button>
+    <button type="button" onClick={duplicateSelected}>Duplicar</button>
+    <button type="button" onClick={()=>toggleLock(current.id)}>{current.locked?'Desbloquear':'Bloquear'}</button>
+  </div>}
   {activeInspector==='size'&&<div className="studio-app-range-row">
     <label>Tamaño</label><input type="range" aria-label="Ajustar tamaño del elemento" min={current.kind==='image'?50:current.kind==='sticker'?40:24}
      max={current.kind==='image'?(current.role==='background'?doc.count*W*2:2100):current.kind==='sticker'?800:260} step="2" value={current.kind==='image'?current.width:current.fontSize}
@@ -1190,6 +1199,25 @@ export default function SeamlessEditor(){
     <output>{current.kind==='image'?current.width:current.fontSize}px</output>
   </div>}
   {activeInspector==='effects'&&<div className="studio-app-effects-inspector">
+    {current.kind==='text'&&<div className="studio-outline-control" role="group" aria-label="Efectos de texto">
+      <strong>Efectos de letras</strong>
+      <div className="studio-app-position-row studio-outline-modes">
+        <button type="button" aria-pressed={!current.textOutline}
+          onClick={()=>update(current.id,{textOutline:false,outlineOnly:false})}>Normal</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:true,outlineColor:current.outlineColor||current.color||'#191919'})}>Outline</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:false})}>Relleno + borde</button>
+      </div>
+      {current.textOutline&&<>
+        <label>Color del contorno <input type="color" value={current.outlineColor||(current.outlineOnly?current.color:'#FFFFFF')}
+          onChange={event=>update(current.id,{outlineColor:event.target.value})}/></label>
+        <label>Grosor <input type="range" min="1" max="20" value={current.outlineWidth??4}
+          onChange={event=>update(current.id,{outlineWidth:Number(event.target.value)})}/><output>{current.outlineWidth??4}px</output></label>
+      </>}
+      <label><input type="checkbox" checked={!!current.textShadow}
+        onChange={event=>update(current.id,{textShadow:event.target.checked})}/>Sombra de letras</label>
+    </div>}
     {current.kind==='image'&&current.role!=='background'&&!current.shape&&
       <label><input type="checkbox" checked={current.frameStyle==='polaroid'}
         onChange={event=>update(current.id,{frameStyle:event.target.checked?'polaroid':undefined})}/>
@@ -1251,9 +1279,17 @@ export default function SeamlessEditor(){
       <button type="button" aria-pressed={(current.fontWeight||700)===900} onClick={()=>update(current.id,{fontWeight:(current.fontWeight||700)===900?400:900})}>Negrita</button>
     </div>
     <label>Tipografía <select value={current.fontFamily||'arial'} aria-label="Tipografía del texto"
-      onChange={e=>update(current.id,{fontFamily:e.target.value})}>
-      {Object.keys(STUDIO_TEXT_FONTS).map(name=><option value={name} key={name}>{name==='poster'?'Poster Extra Bold':name[0].toUpperCase()+name.slice(1)}</option>)}
+      onChange={e=>{void ensureEditorFont(e.target.value);update(current.id,{fontFamily:e.target.value})}}>
+      {current.fontFamily&&!EDITOR_FONTS.some(font=>font.id===current.fontFamily)&&
+        <option value={current.fontFamily}>{current.fontFamily}</option>}
+      {!current.fontFamily&&<option value="arial">Arial original</option>}
+      {(['Sans','Display','Serif','Script'] as const).map(group=>
+        <optgroup key={group} label={group}>
+          {EDITOR_FONTS.filter(font=>font.category===group).map(font=>
+            <option value={font.id} key={font.id}>{font.label}</option>)}
+        </optgroup>)}
     </select></label>
+    <FontShelf value={current.fontFamily} onSelect={font=>update(current.id,{fontFamily:font})}/>
     <div className="studio-app-range-row"><label htmlFor="studio-font-size">Tamaño</label>
       <input id="studio-font-size" type="range" min="20" max="240" step="2" value={current.fontSize}
        onChange={e=>update(current.id,{fontSize:Number(e.target.value)})}/><output>{current.fontSize}px</output>
@@ -1356,12 +1392,17 @@ export default function SeamlessEditor(){
     <button type="button" aria-pressed={!!current.locked} aria-label={current.locked?'Desbloquear posición del elemento':'Bloquear posición del elemento'}
       onClick={()=>toggleLock(current.id)}><Lock size={19}/><small>{current.locked?'Desbloquear':'Bloquear'}</small></button>
     {!current.locked&&<>
+    {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='fonts'}
+      onClick={()=>setActiveInspector(v=>v==='fonts'?null:'fonts')}><span aria-hidden="true">Aa</span><small>Fuentes</small></button>}
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='text'} onClick={()=>setActiveInspector(v=>v==='text'?null:'text')}><Type size={20}/><small>Texto</small></button>}
+    {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='effects'} onClick={()=>setActiveInspector(v=>v==='effects'?null:'effects')}><span aria-hidden="true">✧</span><small>Efectos</small></button>}
     {current.kind==='text'&&<button type="button" aria-pressed={activeInspector==='curve'} onClick={()=>setActiveInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
+    <button type="button" aria-pressed={activeInspector==='size'} onClick={()=>setActiveInspector(v=>v==='size'?null:'size')}><span aria-hidden="true">↔</span><small>Tamaño</small></button>
     <button type="button" aria-pressed={activeInspector==='opacity'} onClick={()=>setActiveInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
     <button type="button" aria-pressed={quickPanel==='capas'} onClick={()=>{setActiveInspector(null);setQuickPanel(v=>v==='capas'?null:'capas')}}><Layers3 size={20}/><small>Capas</small></button>
     <button type="button" aria-pressed={activeInspector==='position'} onClick={()=>setActiveInspector(v=>v==='position'?null:'position')}><span aria-hidden="true">▣</span><small>Posición</small></button>
     <button type="button" aria-pressed={activeInspector==='rotate'} onClick={()=>setActiveInspector(v=>v==='rotate'?null:'rotate')}><span aria-hidden="true">↻</span><small>Girar</small></button>
+    <button type="button" aria-pressed={activeInspector==='more'} onClick={()=>setActiveInspector(v=>v==='more'?null:'more')}><span aria-hidden="true">⋯</span><small>Todos</small></button>
     <button type="button" onClick={duplicateSelected}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>
     <button type="button" onClick={()=>deleteElement(current.id)}><span aria-hidden="true">×</span><small>Borrar</small></button>
     </>}
