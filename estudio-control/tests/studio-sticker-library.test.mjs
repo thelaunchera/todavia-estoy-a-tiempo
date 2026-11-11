@@ -51,7 +51,7 @@ test('Standalone gallery provides search, filters, private characters, backgroun
  assert.match(manager,/onDevice\(a\)&&a\.kind==='sticker'&&!isPersonal\(a\.name\)/);
  assert.match(manager,/a\.kind==='sticker'/);
  assert.match(manager,/loading="lazy"/);
- assert.match(manager,/visibleLimit\+48/);
+ assert.match(manager,/setVisibleLimit\(n=>n\+48\)/);
  assert.match(manager,/reader|zip|ZIP/i);
  assert.doesNotMatch(manager,/storage\.from\(.+\)\.remove\(/);
  assert.doesNotMatch(manager,/\\.delete\(/);
