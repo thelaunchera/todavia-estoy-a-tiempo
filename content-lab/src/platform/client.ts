@@ -25,7 +25,8 @@ const buyerDeadline=async():Promise<number>=>{
 };
 const expiryReached=(deadline:number,now=Date.now())=>
  !Number.isFinite(deadline)||deadline<=0||deadline<=now;
-const endExpiredSession=async(id:string)=>{
+const endExpiredSession=async(id:string,email?:string)=>{
+ if(email)try{sessionStorage.setItem('content-lab:expired-email',email)}catch{}
  clearActivity(id);
  activeUserId='';
  activeBuyerExpiresAt=null;
@@ -38,7 +39,7 @@ const current=async()=>{
  const {data:{user},error}=await sb.auth.getUser();
  if(error||!user)throw Error('Inicia sesión para continuar.');
  if(hasExpiredActivity(user.id)){
-  await endExpiredSession(user.id);
+  await endExpiredSession(user.id,user.email);
   throw Error('Solicita un código nuevo para continuar.');
  }
  const {data:admin,error:roleError}=await sb.from('content_lab_admins')
@@ -47,7 +48,7 @@ const current=async()=>{
  if(!admin){
   const deadline=await buyerDeadline();
   if(expiryReached(deadline)){
-   await endExpiredSession(user.id);
+   await endExpiredSession(user.id,user.email);
    throw Error('Tu código cumplió 24 horas. Solicita uno nuevo.');
   }
   activeBuyerExpiresAt=deadline;
@@ -171,7 +172,7 @@ export const auth={
     const {data:{user},error:userError}=await sb.auth.getUser();
     if(userError||!user){activeUserId='';activeBuyerExpiresAt=null;return null;}
     if(hasExpiredActivity(user.id)){
-      await endExpiredSession(user.id);
+      await endExpiredSession(user.id,user.email);
       return null;
     }
     const {data:admin,error:roleError}=await tab('admins').select('user_id').eq('user_id',user.id).maybeSingle();
@@ -185,7 +186,7 @@ export const auth={
     // Same exact server-derived OTP deadline used by RLS.
     const deadline=await buyerDeadline();
     if(expiryReached(deadline)){
-      await endExpiredSession(user.id);
+      await endExpiredSession(user.id,user.email);
       return null;
     }
     const {data:paid,error:membershipError}=await sb.from('content_lab_memberships')
@@ -259,6 +260,7 @@ export const auth={
     const id=activeUserId;
     activeUserId='';activeBuyerExpiresAt=null;
     if(id)clearActivity(id);
+    try{sessionStorage.removeItem('content-lab:expired-email')}catch{}
     out(await sb.auth.signOut());
   }
 };
