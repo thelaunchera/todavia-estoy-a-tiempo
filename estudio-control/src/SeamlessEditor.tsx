@@ -1199,6 +1199,25 @@ export default function SeamlessEditor(){
     <output>{current.kind==='image'?current.width:current.fontSize}px</output>
   </div>}
   {activeInspector==='effects'&&<div className="studio-app-effects-inspector">
+    {current.kind==='text'&&<div className="studio-outline-control" role="group" aria-label="Efectos de texto">
+      <strong>Efectos de letras</strong>
+      <div className="studio-app-position-row studio-outline-modes">
+        <button type="button" aria-pressed={!current.textOutline}
+          onClick={()=>update(current.id,{textOutline:false,outlineOnly:false})}>Normal</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:true,outlineColor:current.outlineColor||current.color||'#191919'})}>Outline</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:false})}>Relleno + borde</button>
+      </div>
+      {current.textOutline&&<>
+        <label>Color del contorno <input type="color" value={current.outlineColor||(current.outlineOnly?current.color:'#FFFFFF')}
+          onChange={event=>update(current.id,{outlineColor:event.target.value})}/></label>
+        <label>Grosor <input type="range" min="1" max="20" value={current.outlineWidth??4}
+          onChange={event=>update(current.id,{outlineWidth:Number(event.target.value)})}/><output>{current.outlineWidth??4}px</output></label>
+      </>}
+      <label><input type="checkbox" checked={!!current.textShadow}
+        onChange={event=>update(current.id,{textShadow:event.target.checked})}/>Sombra de letras</label>
+    </div>}
     {current.kind==='image'&&current.role!=='background'&&!current.shape&&
       <label><input type="checkbox" checked={current.frameStyle==='polaroid'}
         onChange={event=>update(current.id,{frameStyle:event.target.checked?'polaroid':undefined})}/>
