@@ -1,0 +1,75 @@
+/**
+ * One buyer-facing organisation scheme for general Studio / Content Lab art.
+ * Pure presentation logic: never publishes a private asset or changes its owner.
+ * The 9 historical full-frame wallpapers were mistakenly saved as stickers;
+ * preserve their existing IDs and Storage bytes while showing them in Fondos.
+ */
+export const LEGACY_BACKGROUND_STICKER_NAMES=new Set([
+ '10 red cream gingham',
+ '13 handmade oat paper',
+ '16 olive gingham weave',
+ '17 dusty pink crumpled paper',
+ '18 vintage cherry wallpaper',
+ '25 mini yellow gingham',
+ '27 soft blush handmade paper',
+ '28 hand drawn daisy wallpaper',
+ '28 marble gold veins',
+]);
+
+export function legacyStickerIsBackground(name:string):boolean{
+ return LEGACY_BACKGROUND_STICKER_NAMES.has(name.trim().toLocaleLowerCase('es'));
+}
+export function legacyStickerBackgroundGroup(name:string):string{
+ return /wallpaper|gingham/i.test(name)?'Editoriales':'Papel y texturas';
+}
+
+export const STICKER_COLLECTIONS=[
+ 'Todos','Mis stickers','Lazos','Cintas','Estrellas','Marcos y etiquetas',
+ 'Papeles y recortes','Branding','Flores y naturaleza','Animales','Avatares',
+ 'Temporada','Matcha','Pilates','Ejercicios','Inspiración','Negocios',
+ 'Objetos','Decorativos'
+] as const;
+export type StickerCollection=typeof STICKER_COLLECTIONS[number];
+
+type GroupableAsset={name:string;displayName?:string;stickerGroup?:string;shared?:boolean};
+
+/** Classify existing 400+ "Aesthetic" labels without changing database rows. */
+export function stickerCollectionFor(asset:GroupableAsset):StickerCollection{
+ const name=(asset.displayName||asset.name||'').toLocaleLowerCase('es');
+ const group=(asset.stickerGroup||'').toLocaleLowerCase('es');
+ if(/navidad|christmas|holiday|valent[ií]n|halloween|santa|snowman|cascabel|reyes magos|pascua/.test(name)||group==='temporadas')return 'Temporada';
+ if(/lazo|bow|ribbon|moño|corbata de seda/.test(name))return 'Lazos';
+ if(/cinta|tape|washi|bander[ií]n|banner|list[oó]n/.test(name))return 'Cintas';
+ if(/estrella|stars?|destello|asterisco|sparkles?|rayos?|brillo estelar/.test(name))return 'Estrellas';
+ if(/marco|frame|etiqueta|badge|sello|stamp|cup[oó]n|ticket|polaroid|clip|relicario/.test(name))return 'Marcos y etiquetas';
+ if(/papel rasgado|torn paper|scrap|paper strip|papel troquelado|pincelada|paint stroke|subrayado|underline|nota adhesiva/.test(name))return 'Papeles y recortes';
+ if(/brand|marketing|anal[ií]tica|business|logo|newsletter|planificador|planner|social|reels|content|creativo de negocios/.test(name)||group==='branding y marketing')return 'Branding';
+ if(/flor|flower|botanic|bot[aá]nic|hoja|leaf|daisy|rose|orqu[ií]dea|ramas|jard[ií]n/.test(name))return 'Flores y naturaleza';
+ if(/animal|perrit|perro|puppy|dog|gatit|gato|cat|lobo|wolf|conej|bunny|osito|bear|zorro|fox|mariposa|butterfly|pantera/.test(name)||group==='animales')return 'Animales';
+ if(/avatar|portrait|retrato|chica|girl|woman|creadora|creador|personaje|character|modelo|woman|fashion girl/.test(name)||group==='avatares')return 'Avatares';
+ if(/matcha|latte|tea|t[eé] verde|caf[eé]|coffee|croissant|taza|tumbler/.test(name)||group==='matcha')return 'Matcha';
+ if(/pilates|reformer|yoga|barre|stretch|magic circle/.test(name)||group==='pilates')return 'Pilates';
+ if(/workout|gym|fitness|exercise|ejercicio|squat|dumbbell|kettlebell|strength|running|zapatilla|sneaker/.test(name)||group==='ejercicios')return 'Ejercicios';
+ if(group==='inspiraci[oó]n'||/^(start where you are|small steps still count|keep going|progress over perfection|your pace is valid|make room for joy|trust your next step|create your own path|you can begin again|one day at a time|done is a brave start|your ideas matter|let it take time|choose yourself|more courage less doubt|you are becoming|a little progress daily|do it with heart|good things take practice|keep showing up)$/.test(name))return 'Inspiración';
+ if(group==='negocios')return 'Negocios';
+ if(/phone|iphone|camera|c[aá]mara|laptop|book|libro|perfume|labial|lipstick|zapato|shoe|bolso|bag|tote|sombrero|hat|notebook|aud[ií]fonos|headphone|florero|vela|candle|p[aá]gina|globo|pez|concha|pluma|anillo/.test(name))return 'Objetos';
+ return 'Decorativos';
+}
+
+/** Personal is always scoped to the authenticated account / selected brand. */
+export function visibleStickerCollections(assets:GroupableAsset[]):{label:StickerCollection;count:number}[]{
+ const counts=new Map<StickerCollection,number>();
+ const privateCount=assets.filter(item=>!item.shared).length;
+ counts.set('Todos',assets.length);
+ counts.set('Mis stickers',privateCount);
+ for(const item of assets){
+  const category=stickerCollectionFor(item);
+  counts.set(category,(counts.get(category)||0)+1);
+ }
+ return STICKER_COLLECTIONS.filter(label=>label==='Todos'||label==='Mis stickers'||(counts.get(label)||0)>0)
+  .map(label=>({label,count:counts.get(label)||0}));
+}
+
+export function matchesStickerCollection(asset:GroupableAsset,category:StickerCollection):boolean{
+ return category==='Todos'||category==='Mis stickers'?!asset.shared||category==='Todos':stickerCollectionFor(asset)===category;
+}
