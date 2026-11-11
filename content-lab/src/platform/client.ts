@@ -5,6 +5,7 @@ import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
 import {clearActivity,hasExpiredActivity,lastActivity,recordActivity} from '../SessionActivity';
 import {findBundledDesignAsset,isBundledDesignAsset,bundledDesignAssets,bundledDesignAssetUrl} from '../BundledDesignAssets';
 import {LEGACY_BACKGROUND_STICKER_ORIGINAL_NAMES,legacyStickerIsBackground,legacyStickerBackgroundGroup} from '../StudioLibraryOrganization';
+import {isPersonalCharacterAssetName} from '../../../estudio-control/src/studio-asset-organization';
 
 const url=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL||'');
 const key=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY||'');
@@ -389,6 +390,9 @@ export const api={
        .select('id,name,category,mime,size_bytes,sha256').eq('sha256',sha256).maybeSingle();
       if(lookupError)throw Error(lookupError.message);
       if(existing)return {data:{...backgroundRecord(existing),duplicate:true}};
+      // Never upload a byte-identical resource already included with the Lab.
+      const bundledBackground=(await includedCatalog('background')).find(a=>a.sha256===sha256);
+      if(bundledBackground)return {data:{...bundledBackground,duplicate:true}};
       const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
       const storagePath='shared-backgrounds/'+crypto.randomUUID()+'.'+ext;
       out(await sb.storage.from(bucket).upload(storagePath,bytes,{contentType:mime,upsert:false,cacheControl:'31536000'}));
@@ -413,6 +417,7 @@ export const api={
       if(!admin)throw Error('Solo la administradora puede publicar stickers para todos los compradores.');
       const name=String(payload.name||'').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,120);
       if(!name)throw Error('Sticker sin nombre.');
+      if(isPersonalCharacterAssetName(name))throw Error('Los personajes privados no se publican en el Content Lab.');
       const allowed=['Avatares','Matcha','Pilates','Ejercicios','Aesthetic'];
       const category=allowed.includes(payload.category)?payload.category:'Aesthetic';
       if(typeof payload.content!=='string'||payload.content.length>7000000)throw Error('El archivo no es un PNG válido.');
@@ -424,6 +429,8 @@ export const api={
       const {data:existing,error:lookupError}=await tab('sticker_catalog').select('id,name,category,size_bytes,sha256').eq('sha256',sha256).maybeSingle();
       if(lookupError)throw Error(lookupError.message);
       if(existing)return {data:{...stickerRecord(existing),duplicate:true}};
+      const bundledSticker=(await includedCatalog('sticker')).find(a=>a.sha256===sha256);
+      if(bundledSticker)return {data:{...bundledSticker,duplicate:true}};
       const storagePath='shared-stickers/'+crypto.randomUUID()+'.png';
       out(await sb.storage.from(bucket).upload(storagePath,bytes,{contentType:'image/png',upsert:false,cacheControl:'31536000'}));
       try{
