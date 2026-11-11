@@ -20,6 +20,7 @@ type Kind='sticker'|'background';
 type Source='local'|'private-character'|'catalog'|'bundled'|'editorial';
 type Entry={id:string;name:string;url:string;kind:Kind;source:Source;private:boolean;category?:string};
 import {dedupeStudioGallery} from './studio-gallery-dedup';
+import {friendlyStickerName} from '../../creative-shared/sticker-display-name';
 type View='Todos'|'Mis stickers'|'Personajes privados'|'Fondos'|'Content Lab'|'Favoritos';
 const views:View[]=['Todos','Mis stickers','Personajes privados','Fondos','Content Lab','Favoritos'];
 const FAVORITES_KEY='studio-sticker-favorites-v1';
@@ -70,7 +71,7 @@ async function downloadSticker(item:Entry):Promise<void>{
  const suffix=blob.type.includes('svg')?'.svg':blob.type.includes('webp')?'.webp':
   blob.type.includes('jpeg')?'.jpg':'.png';
  const url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download=(item.name.replace(/[^\p{L}\p{N}_-]+/gu,'-')||'sticker')+suffix;
+ a.href=url;a.download=(friendlyStickerName(item.name).replace(/[^\p{L}\p{N}_-]+/gu,'-')||'sticker')+suffix;
  document.body.appendChild(a);a.click();a.remove();
  window.setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
@@ -150,8 +151,8 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
  const matches=useMemo(()=>viewAssets.filter(a=>
   (view==='Fondos'||a.kind==='sticker')&&
   (category==='Todas'||stickerCollectionFor({name:a.name,stickerGroup:a.category})===category)&&
-  nameKey(a.name).includes(nameKey(query))
- ).sort((a,b)=>a.name.localeCompare(b.name,'es',{numeric:true})),[viewAssets,category,query]);
+  (nameKey(friendlyStickerName(a.name)).includes(nameKey(query))||nameKey(a.name).includes(nameKey(query)))
+ ).sort((a,b)=>friendlyStickerName(a.name).localeCompare(friendlyStickerName(b.name),'es',{numeric:true})),[viewAssets,category,query]);
  const shown=matches.slice(0,visibleLimit);
  const count=(tab:View)=>tab==='Todos'?dedupeStudioGallery(assets.filter(a=>a.kind==='sticker'&&!isPersonal(a.name))).length:tab==='Mis stickers'
   ?assets.filter(a=>a.private&&a.kind==='sticker'&&!isPersonal(a.name)).length
@@ -168,7 +169,7 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   const next={...overrides,[item.id]:target};
   try{
    await writeEditorRecord(STUDIO_CATEGORY_OVERRIDES,next);
-   setOverrides(next);setStatus(item.name+' se verá en '+(target==='background'?'Fondos':'Stickers')+' también dentro del carrusel.');
+   setOverrides(next);setStatus(friendlyStickerName(item.name)+' se verá en '+(target==='background'?'Fondos':'Stickers')+' también dentro del carrusel.');
   }catch{setStatus('No se pudo guardar la categoría. Ningún archivo se borró.');}
  };
  const toggleFavorite=async(item:Entry)=>{
@@ -185,7 +186,7 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   try{
    await writeEditorRecord(STUDIO_APPROVED_SHARES,next);
    setApproved(next);
-   setStatus('Se solicitó compartir '+item.name+'. Comprueba la confirmación de sincronización.');
+   setStatus('Se solicitó compartir '+friendlyStickerName(item.name)+'. Comprueba la confirmación de sincronización.');
   }catch{setStatus('No se pudo autorizar el recurso. Se mantiene privado.');}
  };
  const importFiles=async(files:File[])=>{
@@ -253,12 +254,12 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   {!loading&&(matches.length?<div className="standalone-stickers-grid">
    {shown.map(item=><article key={item.id} className="standalone-stickers-card">
     <div className="standalone-stickers-preview">
-     <img loading="lazy" src={item.url} alt={item.name}/>
+     <img loading="lazy" src={item.url} alt={friendlyStickerName(item.name)}/>
      <button type="button" className={'standalone-stickers-favorite'+(favorites.includes(item.id)?' active':'')}
-      aria-label={(favorites.includes(item.id)?'Quitar de Favoritos ':'Añadir a Favoritos ')+item.name}
+      aria-label={(favorites.includes(item.id)?'Quitar de Favoritos ':'Añadir a Favoritos ')+friendlyStickerName(item.name)}
       onClick={()=>void toggleFavorite(item)}><Star size={17} fill={favorites.includes(item.id)?'currentColor':'none'}/></button>
     </div>
-    <div className="standalone-stickers-card-details"><strong title={item.name}>{item.name}</strong>
+    <div className="standalone-stickers-card-details"><strong title={friendlyStickerName(item.name)}>{friendlyStickerName(item.name)}</strong>
      <small>{item.private?<><LockKeyhole size={12}/> {item.source==='editorial'?'Solo Studio':'Privado'}</>:<><Check size={12}/> Incluido en Lab</>}
       {item.kind==='background'?' · Fondo':isPersonal(item.name)?' · Personaje privado':' · '+stickerCollectionFor({name:item.name,stickerGroup:item.category})}</small>
     </div>
