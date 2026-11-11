@@ -28,3 +28,31 @@
 .lab-settings-avatar{width:68px;height:68px}
 .lab-settings-brand-link{flex-wrap:wrap}.lab-settings-brand-link button{width:100%;justify-content:center}
 }
+
+
+/* iOS-quality spring switches: real account preferences, 84px touch surface. */
+.lab-ios-settings-list{background:#fff;border:1px solid #E3E9E7;border-radius:20px;overflow:hidden;margin:14px 0}
+.lab-ios-settings-list h2{font-size:15px;font-weight:800;letter-spacing:-.02em;margin:0;padding:18px 19px 8px}
+.lab-ios-settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 19px;min-width:0}
+.lab-ios-settings-row+.lab-ios-settings-row{border-top:1px solid #EDF0EF}
+.lab-ios-settings-label{display:grid;gap:4px;min-width:0}
+.lab-ios-settings-label strong{font-size:13px;color:#233d46;line-height:1.35}
+.lab-ios-settings-label small{font-size:11px;color:#718893;line-height:1.5;max-width:40ch}
+.lab-ios-settings-switch{--lab-switch-accent:#F2D85B;position:relative;flex:0 0 84px;width:84px;height:46px;border:0;border-radius:999px;background:#D9E3E4;padding:0;box-shadow:inset 0 1px 2px #243e4714;cursor:pointer;transition:background-color .25s ease}
+.lab-ios-settings-switch[data-on="true"]{background:var(--lab-switch-accent)}
+.lab-ios-settings-knob{position:absolute;left:5px;top:5px;height:36px;width:36px;border-radius:50%;background:#fff;box-shadow:0 2px 7px #20333f30;border:1px solid #ffffffaa;transform:translateX(0);transition:transform 540ms cubic-bezier(.22,1.35,.42,1),width 210ms ease}
+.lab-ios-settings-switch[data-on="true"] .lab-ios-settings-knob{transform:translateX(38px)}
+.lab-ios-settings-switch:active .lab-ios-settings-knob{width:43px}
+.lab-ios-settings-switch[data-on="true"]:active .lab-ios-settings-knob{transform:translateX(31px)}
+.lab-ios-settings-switch:focus-visible{outline:3px solid #83aec1;outline-offset:4px}
+html[data-lab-motion="off"] .app-shell :is(.cld-format-card,.cld-project-card,.cld-resource-card,.lab-mobile-dock button,.sidebar button),
+html[data-lab-motion="off"] .app-shell :is(.lab-project-cover,.cld-format-illustration){animation:none!important;transition:none!important}
+html[data-lab-density="compact"] .app-shell .cld-format-grid,
+html[data-lab-density="compact"] .app-shell .cld-resource-grid,
+html[data-lab-density="compact"] .app-shell .cld-project-grid{gap:7px!important}
+html[data-lab-density="compact"] .app-shell .cld-format-card,
+html[data-lab-density="compact"] .app-shell .cld-resource-card,
+html[data-lab-density="compact"] .app-shell .cld-project-card{padding:9px!important}
+html[data-lab-density="compact"] .app-shell .cld-format-art{height:78px!important;min-height:78px!important}
+@media(max-width:560px){.lab-ios-settings-row{padding:13px 14px}.lab-ios-settings-list h2{padding:17px 14px 8px}}
+@media(prefers-reduced-motion:reduce){.lab-ios-settings-knob,.lab-ios-settings-switch{transition:none!important}}
