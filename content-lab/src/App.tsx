@@ -487,6 +487,7 @@ function App() {
   const [images, setImages] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
+  const [noticeKind,setNoticeKind]=useState<'success'|'error'>('success');
   const [saveCelebration,setSaveCelebration]=useState<{id:number;format:string;title:string}|null>(null);
   const lastAlertLinkRef=useRef('');
   const [query, setQuery] = useState('');
@@ -513,7 +514,8 @@ function App() {
       document.removeEventListener('keydown',closeOnEscape);
     };
   },[]);
-  const toast = (s: string) => {
+  const toast = (s: string,kind:'success'|'error'='success') => {
+    setNoticeKind(kind);
     setNotice(s);
     window.setTimeout(() => setNotice(''), CREATIVE_EDITOR_RULES.feedbackDurationMs);
   };
@@ -522,12 +524,11 @@ function App() {
       response?: { data?: { error?: string; message?: string } };
       message?: string;
     };
-    toast(
-      x.response?.data?.error ||
-        x.response?.data?.message ||
-        x.message ||
-        'No se pudo completar.'
-    );
+    const message=x.response?.data?.error||x.response?.data?.message||x.message||'No se pudo completar.';
+    const overloaded=/too many connections|connection pool|max_client_conn|too many clients|rate.limit/i.test(message);
+    toast(overloaded
+      ?(loginLanguage==='es'?'Las imágenes están temporalmente ocupadas. Toca «Reintentar imagen» en la foto pendiente.':'Images are temporarily unavailable. Tap “Retry image” on the missing photo.')
+      :message,'error');
   };
   const loginErrorMessage = (error: unknown): string => {
     if(error instanceof Error && error.message)return error.message;
@@ -1325,10 +1326,8 @@ function App() {
     await auth.setProfilePhotoAssetId('');setProfilePhotoId('');
   };
   useEffect(() => {
-    if (tab === 'media')
-      library.forEach(a => {
-        if (!images[a.id]) void imageLoad(a.id);
-      });
+    // The media gallery now owns viewport-triggered reads. Loading this whole
+    // array (including shared stickers) used to flood the Storage connection pool.
     // Load the opening row only. Remaining sticker thumbnails lazy-load in the
     // scroll viewport to keep iPad memory and network usage smooth.
     if (tab === 'stickers')
@@ -2294,6 +2293,7 @@ function App() {
   onDesign={(id,imageAssetId)=>{setBackgroundPref(p=>({version:p.version+1,brandId:brand.id,id,imageAssetId}));navigate('factory')}}/>}
           {brand && tab === 'media' && (
              <MediaLibrary brand={brand} assets={library} images={images} busy={busy==='upload'}
+               onLoadImage={imageLoad}
                onUpload={async(file,category)=>upload(file,category)}
                onUpdate={updated=>setAssets(prev=>prev.map(a=>a.id===updated.id?updated:a))}
                onDelete={async a=>{try{await api.delete('/api/assets/'+a.id);setAssets(prev=>prev.filter(x=>x.id!==a.id));toast('Imagen eliminada de esta marca.')}catch(e){err(e)}}}
@@ -2543,8 +2543,8 @@ function App() {
         />
 
         {notice && (
-          <div className="toast">
-            <Check size={18} />
+          <div className={'toast'+(noticeKind==='error'?' toast-error':'')} role={noticeKind==='error'?'alert':'status'}>
+            {noticeKind==='error'?<X size={18}/>:<Check size={18}/>} 
             {notice}
             <button onClick={() => setNotice('')}>
               <X size={15} />

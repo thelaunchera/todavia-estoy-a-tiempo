@@ -14,6 +14,50 @@ const sb=createClient(url||'https://not-configured.supabase.co',key||'missing-pu
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 const bucket='content-lab-private';
+// Private image reads are shared across concurrent requests and limited per tab.
+// A library with dozens of originals plus shared stickers must never open all
+// Storage downloads at once. In-flight deduplication is memory-only: no private
+// bytes or signed links are persisted beyond the existing React image state.
+const MAX_CONCURRENT_ASSET_READS=3;
+let activeAssetReads=0;
+const pendingAssetReads:Array<()=>void>=[];
+const inFlightAssetReads=new Map<string,Promise<{mime:string;content:string}>>();
+const retryableAssetError=(e:unknown):boolean=>{
+ const error=e as {message?:string;status?:number|string;statusCode?:number|string};
+ const status=Number(error?.statusCode??error?.status);
+ return [429,500,502,503,504].includes(status)||
+   /too many connections|connection pool|too many clients|max_client_conn|rate.limit|too many requests|temporarily unavailable|service unavailable|gateway timeout|connection timeout/i.test(String(error?.message||''));
+};
+const guardedAssetRead=(id:string,read:()=>Promise<{mime:string;content:string}>):Promise<{mime:string;content:string}>=>{
+ const existing=inFlightAssetReads.get(id);
+ if(existing)return existing;
+ const queued=new Promise<{mime:string;content:string}>((resolve,reject)=>{
+  const start=async()=>{
+   activeAssetReads++;
+   try{
+    for(let attempt=0;attempt<3;attempt++){
+     try{resolve(await read());return;}
+     catch(e){
+      if(attempt===2||!retryableAssetError(e)){reject(e);return;}
+      await new Promise(done=>setTimeout(done,350*(2**attempt)));
+     }
+    }
+   }finally{
+    activeAssetReads--;
+    pendingAssetReads.shift()?.();
+   }
+  };
+  if(activeAssetReads<MAX_CONCURRENT_ASSET_READS)void start();
+  else pendingAssetReads.push(()=>{void start();});
+ });
+ const tracked=queued.then(
+  value=>{inFlightAssetReads.delete(id);return value;},
+  error=>{inFlightAssetReads.delete(id);throw error;}
+ );
+ inFlightAssetReads.set(id,tracked);
+ return tracked;
+};
+
 let activeUserId='';
 let activeBuyerExpiresAt:number|null=null;
 let lastRecordedInteraction=0;
@@ -298,6 +342,7 @@ export const api={
     }
     if(path.startsWith('/api/assets/')){
       const id=decodeURIComponent(path.slice('/api/assets/'.length));
+      return {data:await guardedAssetRead(id,async()=>{
       const included=findBundledDesignAsset(id);
       if(included){
         if(!await auth.getUser())throw Error('Necesitas acceso activo al Content Lab.');
@@ -305,7 +350,7 @@ export const api={
         if(!response.ok)throw Error('No se pudo cargar el recurso incluido. Vuelve a intentarlo.');
         const file=await response.blob();
         if(file.size<200||!file.type.startsWith('image/'))throw Error('El recurso incluido no está disponible.');
-        return {data:{mime:included.mime,content:await base64(file)}};
+        return {mime:included.mime,content:await base64(file)};
       }
       if(id.startsWith('shared-background-')){
         const uid=id.slice('shared-background-'.length);
@@ -315,7 +360,7 @@ export const api={
         if(error)throw Error(error.message);
         if(!entry)throw Error('Fondo no disponible para esta cuenta.');
         const file=out(await sb.storage.from(bucket).download(entry.path));
-        return {data:{mime:entry.mime,content:await base64(file)}};
+        return {mime:entry.mime,content:await base64(file)};
       }
       if(id.startsWith('shared-')){
         const uid=id.slice(7);
@@ -324,11 +369,12 @@ export const api={
         if(error)throw Error(error.message);
         if(!entry)throw Error('Sticker no disponible para esta cuenta.');
         const file=out(await sb.storage.from(bucket).download(entry.path));
-        return {data:{mime:'image/png',content:await base64(file)}};
+        return {mime:'image/png',content:await base64(file)};
       }
       const asset=await read('assets',id);
       const file=out(await sb.storage.from(bucket).download(asset.path));
-      return {data:{mime:asset.mime,content:await base64(file)}};
+      return {mime:asset.mime,content:await base64(file)};
+      })};
     }
     throw Error('Ruta no disponible: '+path);
   },
