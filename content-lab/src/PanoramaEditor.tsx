@@ -157,6 +157,20 @@ export default function PanoramaEditor({
     catch(e){setLibraryFeedback(e instanceof Error?e.message:'No se pudo renombrar la imagen.')}
     finally{setRenaming(false)}
   };
+  // Touch taps must insert immediately. iPad Safari may suppress the synthetic
+  // click after pointer capture, and even a tiny finger movement is not a drag.
+  const addVisibleAsset=(id:string)=>{
+    const stage=containerRef.current?.querySelector<HTMLElement>('.touch-editor-stage');
+    const view=containerRef.current?.querySelector<HTMLElement>('.touch-editor-scroll');
+    const width=stage?.getBoundingClientRect().width||0;
+    const viewportCenter=view&&width>0?(view.scrollLeft+view.clientWidth/2)/width:
+      ((pageIndex??0)+.5)/Math.max(1,count);
+    // Normal mode always inserts on the selected slide, never on an offscreen page.
+    const x=seamless?viewportCenter:((pageIndex??0)+.5)/Math.max(1,count);
+    onAdd(id,{x:Math.min(.999,Math.max(.001,x)),y:.5});
+    setLibraryOpen(false);revealCanvas();
+    setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
+  };
   const dragStart=(e:React.PointerEvent,asset:LibraryAsset)=>{
     if(e.pointerType==='mouse')return;
     // A fresh deliberate touch resets the suppression from the previous drag.
@@ -177,21 +191,25 @@ export default function PanoramaEditor({
     const drag=draggingRef.current;
     if(!drag||drag.pointerId!==e.pointerId)return;
     draggingRef.current=null;setGhost(null);
-    if(!drag.handled)return;
-    // Consume the synthetic click from this drag, irrespective of Safari delay.
-    // Never clear this by time: a new pointerdown or the click itself clears it.
+    // We commit the tap on pointerup instead of waiting for Safari's unreliable click.
+    // A subsequent synthetic click is consumed, so one touch inserts exactly once.
     ignoreClick.current=drag.id;
+    const distance=Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY);
+    if(!drag.handled||distance<32){addVisibleAsset(drag.id);return;}
     const stage=containerRef.current?.querySelector('.touch-editor-stage');
-    if(!stage)return;
-    const rect=stage.getBoundingClientRect();
-    // Stage is the WHOLE horizontally scrollable panorama, including offscreen slides.
-    const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
+    const rect=stage?.getBoundingClientRect();
     const viewport=containerRef.current?.querySelector('.touch-editor-scroll')?.getBoundingClientRect();
-    if(viewport&&e.clientX>=viewport.left&&e.clientX<=viewport.right&&
-      e.clientY>=viewport.top&&e.clientY<=viewport.bottom&&
-      x>=0&&x<=1&&y>=0&&y<=1){
-      onAdd(drag.id,{x,y});setLibraryOpen(false);revealCanvas();setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
-    }else setLibraryFeedback('Suelta la imagen sobre el lienzo para colocarla.');
+    if(rect&&viewport&&rect.width>0&&rect.height>0&&
+      e.clientX>=viewport.left&&e.clientX<=viewport.right&&
+      e.clientY>=viewport.top&&e.clientY<=viewport.bottom){
+      const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
+      if(x>=0&&x<=1&&y>=0&&y<=1){
+        onAdd(drag.id,{x,y});setLibraryOpen(false);revealCanvas();
+        setLibraryFeedback('Elemento colocado. Arrástralo o estíralo desde el lienzo.');
+        return;
+      }
+    }
+    setLibraryFeedback('Para agregarlo, toca el + o arrástralo hasta el lienzo.');
   };
   const upload = async (files: File[], point: Point) => {
     if(!files.length)return;
@@ -245,12 +263,7 @@ export default function PanoramaEditor({
             onPointerCancel={()=>{draggingRef.current=null;setGhost(null)}}
             onClick={()=>{
               if(ignoreClick.current===asset.id){ignoreClick.current='';return}
-              const stage=containerRef.current?.querySelector('.touch-editor-stage');
-              const view=containerRef.current?.querySelector('.touch-editor-scroll');
-              const center=stage&&view?(view.scrollLeft+view.clientWidth/2)/stage.getBoundingClientRect().width:(.5/count);
-              onAdd(asset.id,{x:Math.min(.99,Math.max(.01,center)),y:.5});
-              setLibraryOpen(false);revealCanvas();
-              setLibraryFeedback('Elemento añadido. Tócalo para moverlo y cambiar su tamaño.');
+              addVisibleAsset(asset.id);
             }}>
             {images[asset.id]
               ?<img src={images[asset.id]} alt="" draggable={false}/>
