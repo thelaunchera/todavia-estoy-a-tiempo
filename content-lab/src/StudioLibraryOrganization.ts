@@ -4,17 +4,15 @@
  * The 9 historical full-frame wallpapers were mistakenly saved as stickers;
  * preserve their existing IDs and Storage bytes while showing them in Fondos.
  */
-export const LEGACY_BACKGROUND_STICKER_NAMES=new Set([
- '10 red cream gingham',
- '13 handmade oat paper',
- '16 olive gingham weave',
- '17 dusty pink crumpled paper',
- '18 vintage cherry wallpaper',
- '25 mini yellow gingham',
- '27 soft blush handmade paper',
- '28 hand drawn daisy wallpaper',
- '28 marble gold veins',
-]);
+export const LEGACY_BACKGROUND_STICKER_ORIGINAL_NAMES=[
+ '10 Red Cream Gingham','13 Handmade Oat Paper','16 Olive Gingham Weave',
+ '17 Dusty Pink Crumpled Paper','18 Vintage Cherry Wallpaper',
+ '25 Mini Yellow Gingham','27 Soft Blush Handmade Paper',
+ '28 Hand Drawn Daisy Wallpaper','28 marble gold veins'
+] as const;
+export const LEGACY_BACKGROUND_STICKER_NAMES=new Set<string>(
+ LEGACY_BACKGROUND_STICKER_ORIGINAL_NAMES.map(name=>name.toLocaleLowerCase('es'))
+);
 
 export function legacyStickerIsBackground(name:string):boolean{
  return LEGACY_BACKGROUND_STICKER_NAMES.has(name.trim().toLocaleLowerCase('es'));
@@ -71,5 +69,7 @@ export function visibleStickerCollections(assets:GroupableAsset[]):{label:Sticke
 }
 
 export function matchesStickerCollection(asset:GroupableAsset,category:StickerCollection):boolean{
- return category==='Todos'||category==='Mis stickers'?!asset.shared||category==='Todos':stickerCollectionFor(asset)===category;
+ if(category==='Todos')return true;
+ if(category==='Mis stickers')return !asset.shared;
+ return stickerCollectionFor(asset)===category;
 }
