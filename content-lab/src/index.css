@@ -1942,3 +1942,43 @@ input::placeholder {
 @media(max-width:355px){
  .app-shell .top .lab-refresh-control{width:33px;min-width:33px;min-height:36px}
 }
+
+
+/* My Posts: visible download actions and two clear saved-design collections.
+   A button lives outside the editor, with 44px targets on phone/tablet. */
+.lab-post-section-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+ max-width:620px;margin:0 0 19px;padding:5px;background:#F2F4F2;border:1px solid #E1E7E5;border-radius:17px}
+.lab-post-section-tabs>button{display:flex;justify-content:center;align-items:center;gap:9px;
+ min-width:0;min-height:47px;padding:9px 10px;border:1px solid transparent;border-radius:12px;
+ background:transparent;color:#495F64;font:750 13px/1.3 Prompt,Futura,Arial,sans-serif;cursor:pointer}
+.lab-post-section-tabs>button.selected{background:#FFFFFF;color:#191919;border-color:#DDE4E2;
+ box-shadow:0 3px 12px #20313814}
+.lab-post-section-tabs>button:focus-visible{outline:3px solid #3D7186;outline-offset:2px}
+.lab-post-tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;
+ min-height:24px;padding:0 6px;border-radius:20px;background:#EAF1F1;color:#254653;font-size:11px}
+.postcard .postbottom{gap:8px;flex-wrap:wrap}
+.postcard .postbottom small{font-size:11px;white-space:normal}
+.postcard .postbottom button{display:inline-flex;align-items:center;justify-content:center;
+ min-width:42px;min-height:44px;padding:9px;border-radius:11px;cursor:pointer}
+.postcard .postbottom button:focus-visible,.lab-post-download-slides a:focus-visible,
+.lab-post-move-status:focus-visible{outline:3px solid #3D7186;outline-offset:2px}
+.postcard .postbottom .lab-post-download{display:inline-flex;align-items:center;justify-content:center;
+ gap:8px;min-width:130px;padding:10px 15px;background:#191919;color:#FFFFFF;
+ border:1px solid #191919;border-radius:12px;font:700 12px/1.2 Prompt,Futura,Arial,sans-serif}
+.postcard .postbottom .lab-post-download:disabled{opacity:.65;cursor:wait}
+.lab-post-download-slides{padding:14px 0 8px}
+.lab-post-download-slides>strong{display:block;font-size:12px;color:#324F58;margin-bottom:9px}
+.lab-post-download-slides>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px}
+.lab-post-download-slides a{display:inline-flex;align-items:center;justify-content:center;
+ gap:6px;min-height:44px;border:1px solid #C7D8DD;border-radius:10px;
+ padding:8px 10px;color:#234A59;background:#ECF5F6;font-size:12px;font-weight:700;text-decoration:none}
+.lab-post-move-status{display:flex;align-items:center;justify-content:center;width:100%;min-height:42px;
+ margin-top:9px;padding:7px 10px;border:1px dashed #D4DFDF;border-radius:11px;background:#FAFBF9;
+ color:#425F68;font:650 11px/1.3 Prompt,Futura,Arial,sans-serif;cursor:pointer}
+@media(max-width:620px){
+ .lab-post-section-tabs{max-width:none}
+ .lab-post-section-tabs>button{font-size:12px;gap:6px}
+ .postcard .postbottom small{flex:0 0 100%;margin:0}
+ .postcard .postbottom .lab-post-download{flex:1;min-width:120px}
+ .postcard .postbottom button{min-width:44px;min-height:44px}
+}
