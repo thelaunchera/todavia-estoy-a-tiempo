@@ -18,6 +18,7 @@ import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeO
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {streamStickerZip} from './sticker-zip-import';
 import {isPersonalCharacterAssetName,isSafeGenericStudioSticker,isStudioBackgroundName,organizedStudioKind} from './studio-asset-organization';
+import {STICKER_COLLECTIONS,stickerCollectionFor} from '../../content-lab/src/StudioLibraryOrganization';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
@@ -1162,7 +1163,7 @@ export default function SeamlessEditor(){
       {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
       {unavailableBundledCount>0&&<small role="status">{unavailableBundledCount} recursos con archivos dañados están ocultos hasta recuperar los originales.</small>}
       <div className="studio-sticker-categories" role="group" aria-label="Filtrar stickers">
-       {['Todos','Mis stickers','Personajes privados','Lazos','Cintas','Estrellas','Branding','Decorativos','Temporada'].map(category=>
+       {['Todos','Mis stickers','Personajes privados',...STICKER_COLLECTIONS.filter(name=>name!=='Todos'&&name!=='Mis stickers')].map(category=>
          <button key={category} type="button" aria-pressed={stickerCategory===category}
             onClick={()=>setStickerCategory(category)}>{category}</button>)}
       </div>
@@ -1172,16 +1173,10 @@ export default function SeamlessEditor(){
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
           .filter(asset=>{
-            const name=asset.name.toLocaleLowerCase('es'),file=asset.file.toLocaleLowerCase('es');
             if(stickerCategory==='Mis stickers')return asset.key.startsWith('studio-import-');
              if(stickerCategory==='Personajes privados')return false;
              if(stickerCategory==='Todos')return true;
-            if(stickerCategory==='Lazos')return /lazo|bow|ribbon/.test(name);
-            if(stickerCategory==='Cintas')return /cinta|tape|washi/.test(name);
-            if(stickerCategory==='Estrellas')return /estrella|star|destello|asterisco/.test(name);
-            if(stickerCategory==='Branding')return /brand|marketing|planner|sello|logo|creativ|etiqueta|business/.test(name);
-            if(stickerCategory==='Temporada')return /holiday|navidad|valentin|nieve|christmas|heart|coraz|amor/.test(file+' '+name);
-            return !/holiday-stickers/.test(file);
+             return stickerCollectionFor({name:asset.name})===stickerCategory;
           })
            .map(asset=><button type="button" key={asset.key} aria-label={'Añadir sticker '+asset.name}
              onClick={()=>{if(asset.remote)void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir'));
