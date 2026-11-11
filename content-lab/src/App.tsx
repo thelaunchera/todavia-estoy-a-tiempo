@@ -928,6 +928,63 @@ function App() {
     await exportFreePost(saved,brand,sources);
     toast(loginLanguage==='es'?'Proyecto descargado en PNG.':'Project downloaded as PNG.');
   };
+  const changeSavedPostSection=async(p:Post)=>{
+    if(!p.id||changingPostId||saveInFlightRef.current)return;
+    const finished=!isFinishedPost(p);
+    setChangingPostId(p.id);
+    try{
+      const {data}=await api.put('/api/posts/'+p.id,collectionStatusPatch(finished));
+      setPosts(previous=>previous.map(item=>item.id===p.id?data as Post:item));
+      setPostSection(finished?'finished':'drafts');
+      toast(loginLanguage==='es'
+        ?finished?'Movido a Terminados.':'Movido a Borradores.'
+        :finished?'Moved to Finished.':'Moved to Drafts.');
+    }catch(e){err(e);}
+    finally{setChangingPostId('');}
+  };
+  // Each card uses the full saved renderer, never its low-res preview or raw
+  // source photo. Multi-slide carousels offer individual iPhone-safe PNG links.
+  const downloadSavedPost=async(p:Post)=>{
+    if(!p.id||downloadingPostId)return;
+    setDownloadingPostId(p.id);
+    const newlyPrepared:{name:string;url:string}[]=[];
+    try{
+      const ids=projectCoverAssetIds(p);
+      const sources:Record<string,string>={...images};
+      await Promise.all(ids.map(async id=>{
+        if(!sources[id]){const value=await imageLoad(id);if(value)sources[id]=value;}
+      }));
+      if(ids.some(id=>!sources[id]))throw Error(loginLanguage==='es'
+        ?'Faltan imágenes de este diseño. Abre el editor para revisar sus recursos.'
+        :'Some design images are missing. Open the editor to review the assets.');
+      if(p.format==='Carousel'){
+        const pages=await renderSavedCarouselPages(p,brand,sources);
+        try{
+          const slug=(p.title||'carrusel').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim()
+            .replace(/\s+/g,'-').toLowerCase()||'carrusel';
+          for(let n=0;n<pages.length;n++){
+            const canvas=pages[n];
+            const blob=await canvasToLosslessPng(canvas);
+            const name=slug+'-slide-'+String(n+1).padStart(2,'0')+'-'+canvas.width+'x'+canvas.height+'.png';
+            newlyPrepared.push({name,url:URL.createObjectURL(blob)});
+          }
+        }finally{pages.forEach(canvas=>{canvas.width=1;canvas.height=1;});}
+        preparedPostUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));
+        preparedPostUrlsRef.current=newlyPrepared.map(item=>item.url);
+        setPreparedPostDownloads({postId:p.id,files:newlyPrepared});
+        toast(loginLanguage==='es'
+          ?'Tus slides están listos. Descárgalos individualmente debajo del post.'
+          :'Your slides are ready. Download them individually below the post.');
+      }else{
+        await exportFreePost(p,brand,sources);
+        toast(loginLanguage==='es'?'Diseño descargado en PNG.':'Design downloaded as PNG.');
+      }
+    }catch(e){
+      newlyPrepared.forEach(item=>URL.revokeObjectURL(item.url));
+      err(e);
+    }finally{setDownloadingPostId('');}
+  };
+
   const save = async (candidate?:unknown, automatic=false) => {
     if(saveInFlightRef.current)return false;
     const possible=candidate&&typeof candidate==='object'?candidate as Partial<Post>:null;
