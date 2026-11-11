@@ -9,7 +9,9 @@ test('A late Save response cannot overwrite newer edits or a newly opened draft'
   assert.ok(app.includes('const snapshot=JSON.stringify(source)'));
   assert.ok(app.includes('editorSessionRef.current!==session'));
   assert.ok(app.includes('current.id!==source.id'));
-  assert.ok(app.includes('return {...current,id:data.id,updatedAt:data.updatedAt}'));
+  assert.ok(app.includes('return {...current,id:data.id,updatedAt:data.updatedAt,'));
+  assert.ok(app.includes('isFinished:automatic?finished:true'));
+  assert.ok(app.includes('status:current.status===source.status?draft.status:current.status'));
   assert.ok(app.includes('saveInFlightRef.current=true'));
 });
 
