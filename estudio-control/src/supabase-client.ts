@@ -630,6 +630,7 @@ export async function removeOldClassRecording(path:string):Promise<void>{
 }
 
 
+import {isPersonalCharacterAssetName} from './studio-asset-organization';
 export type StudioLabAsset={id:string;name:string;category:'sticker'|'background';url:string};
 
 /** Publish an owner-selected Studio library file to the shared Lab catalogue.
@@ -637,6 +638,7 @@ export type StudioLabAsset={id:string;name:string;category:'sticker'|'background
  */
 export async function publishStudioLabAsset(file:File,kind:'sticker'|'background',displayName?:string):Promise<{id:string;duplicate:boolean}>{
  if(!client)throw Error('Conexión no disponible.');
+ if(isPersonalCharacterAssetName(displayName||file.name))throw Error('Los personajes personales solo se guardan en el Studio privado.');
  const who=await owner();
  const {data:admin,error:roleError}=await client.from('content_lab_admins').select('user_id').eq('user_id',who.id).maybeSingle();
  if(roleError||!admin)throw Error('Solo la administración del Content Lab puede publicar recursos.');
@@ -707,6 +709,30 @@ export async function loadStudioLabAssets():Promise<StudioLabAsset[]>{
  }
  return result;
 }
+/** Owner-only signed URLs for unpublished character stickers, never buyer-facing. */
+export async function loadStudioPrivateCharacterAssets():Promise<StudioLabAsset[]>{
+ if(!client)throw Error('Conexión privada no disponible.');
+ const who=await owner();
+ const {data:admin,error:adminError}=await client.from('content_lab_admins')
+  .select('user_id').eq('user_id',who.id).maybeSingle();
+ if(adminError||!admin)throw Error('Solo la administración puede abrir personajes privados.');
+ const {data,error}=await client.from('content_lab_sticker_catalog')
+  .select('id,name,path').eq('created_by',who.id).eq('published',false).order('created_at',{ascending:false});
+ if(error)throw Error('No se pudo cargar la colección privada: '+error.message);
+ const entries=(data||[]).filter(item=>item.path&&isPersonalCharacterAssetName(item.name));
+ const results:StudioLabAsset[]=[];
+ for(let i=0;i<entries.length;i+=40){
+  const batch=entries.slice(i,i+40);
+  const {data:signed,error:signError}=await client.storage.from('content-lab-private')
+   .createSignedUrls(batch.map(item=>item.path),3600);
+  if(signError)throw Error('No se pudo abrir la colección privada: '+signError.message);
+  (signed||[]).forEach((signedAsset,index)=>{
+   if(signedAsset.signedUrl)results.push({id:batch[index].id,name:batch[index].name,category:'sticker',url:signedAsset.signedUrl});
+  });
+ }
+ return results;
+}
+
 export async function keepStudioLabImage(url:string):Promise<string>{
  const response=await fetch(url);
  if(!response.ok)throw Error('No se pudo descargar el recurso. Vuelve a abrir la biblioteca.');

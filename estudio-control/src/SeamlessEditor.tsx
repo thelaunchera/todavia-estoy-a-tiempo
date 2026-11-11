@@ -7,7 +7,7 @@ import {type SovaCarouselAsset} from './sova-carousel-assets';
 import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
-import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
+import {loadStudioLabAssets,loadStudioPrivateCharacterAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useStudioLibrarySync} from './studio-library-sync';
 import {classifyAdminDesignAsset} from '../../creative-shared/design-asset-kind';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
@@ -17,6 +17,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {streamStickerZip} from './sticker-zip-import';
+import {isPersonalCharacterAssetName,isStudioBackgroundName,organizedStudioKind} from './studio-asset-organization';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
@@ -95,6 +96,7 @@ export default function SeamlessEditor(){
  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|'fonts'|'more'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
+ const [privateCharacters,setPrivateCharacters]=useState<StudioLabAsset[]>([]);
  const [importedStickers,setImportedStickers]=useState<StudioLabAsset[]>([]);
  const [importingStickers,setImportingStickers]=useState(false);
  const [stickerImportStatus,setStickerImportStatus]=useState('');
@@ -106,6 +108,38 @@ export default function SeamlessEditor(){
  // The v1 library stays untouched so existing stickers are preserved.
  const STICKER_INDEX_V2='studio-imported-stickers-v2';
  const stickerBlobKey=(id:string)=>'studio-sticker-blob-v2:'+id;
+ const [assetOverrides,setAssetOverrides]=useState<Record<string,'sticker'|'background'>>({});
+ const [approvedShareIds,setApprovedShareIds]=useState<string[]>([]);
+ useEffect(()=>{
+  let live=true;
+  void Promise.all([
+   readEditorRecord<Record<string,'sticker'|'background'>>('studio-asset-category-overrides-v1'),
+   readEditorRecord<string[]>('studio-lab-approved-shares-v1')
+  ]).then(([categories,approved])=>{
+   if(!live)return;
+   setAssetOverrides(categories||{});
+   setApprovedShareIds(Array.isArray(approved)?approved:[]);
+  }).catch(()=>{});
+  return()=>{live=false};
+ },[]);
+ const changeAssetCategory=async(id:string,kind:'sticker'|'background')=>{
+  const next={...assetOverrides,[id]:kind};
+  try{await writeEditorRecord('studio-asset-category-overrides-v1',next);setAssetOverrides(next);
+   setStickerImportStatus('Recurso organizado en '+(kind==='background'?'Fondos':'Stickers')+' sin alterar su archivo original.');
+  }catch{setStickerImportStatus('No se pudo guardar la categoría. Inténtalo de nuevo.');}
+ };
+ const approveShareToLab=async(id:string)=>{
+  const asset=importedStickers.find(item=>item.id===id);
+  if(!asset)return;
+  if(isPersonalCharacterAssetName(asset.name)){setStickerImportStatus('Los personajes personales siempre permanecen privados.');return;}
+  if(approvedShareIds.includes(id))return;
+  const next=[...approvedShareIds,id];
+  try{await writeEditorRecord('studio-lab-approved-shares-v1',next);
+   setApprovedShareIds(next);
+   setStickerImportStatus('Compartiendo '+asset.name+' con el Lab. Revisa el resultado de sincronización.');
+  }catch{setStickerImportStatus('No se pudo guardar el permiso para compartir.');}
+ };
+
  useEffect(()=>{
   let live=true;
   const restore=async()=>{
@@ -206,7 +240,7 @@ export default function SeamlessEditor(){
    }
    setStickerImportStatus(errorMessage
     ?(added?added+' guardados. Importación detenida: ':'')+errorMessage
-    :added?added+' stickers guardados en Studio. Sincronización con el Lab en proceso.'
+    :added?added+' recursos guardados solo en Studio. Puedes compartir los no personales desde cada tarjeta.'
     :'Estos recursos ya estaban guardados.');
    stickerImportInFlight.current=false;
    setImportingStickers(false);
@@ -214,7 +248,7 @@ export default function SeamlessEditor(){
  };
  const [libraryStatus,setLibraryStatus]=useState('');
  const backgroundPublishInput=useRef<HTMLInputElement>(null);
- const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus);
+ const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus,approvedShareIds,assetOverrides);
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
  const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
  useEffect(()=>{
@@ -226,6 +260,7 @@ export default function SeamlessEditor(){
   return()=>{live=false;};
  },[]);
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
+ useEffect(()=>{let live=true;loadStudioPrivateCharacterAssets().then(items=>{if(live)setPrivateCharacters(items)}).catch(()=>{});return()=>{live=false}},[]);
  const canvas=useRef<HTMLCanvasElement>(null);
  const workspaceRef=useRef<HTMLDivElement>(null);
  const previousLayerCount=useRef<number|null>(null);
@@ -1079,19 +1114,25 @@ export default function SeamlessEditor(){
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
       </button>)}
-      {[...importedStickers.filter(asset=>asset.category==='background'),...privateAssets.filter(asset=>asset.category==='background')].map(asset=><button type="button" key={asset.id}
+      {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='background'&&!isPersonalCharacterAssetName(asset.name)),...privateAssets.filter(asset=>asset.category==='background'||(asset.category==='sticker'&&isStudioBackgroundName(asset.name)))].filter((asset,index,all)=>all.findIndex(other=>other.name.toLowerCase()===asset.name.toLowerCase())===index).map(asset=><button type="button" key={asset.id}
         onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'))}}
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
+      {importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='background'&&!isPersonalCharacterAssetName(asset.name))
+        .map(asset=><div key={'organize-'+asset.id} style={{display:'flex',gap:5,alignItems:'center',flexWrap:'wrap',gridColumn:'1 / -1'}}>
+         <span style={{flex:'1 1 100px',fontSize:11}}>{asset.name}</span>
+         <button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void changeAssetCategory(asset.id,'sticker')}>Mover a Stickers</button>
+         {!approvedShareIds.includes(asset.id)&&<button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void approveShareToLab(asset.id)}>Compartir en Lab</button>}
+        </div>)}
       {LAB_ASSETS.filter(asset=>asset.category==='background'&&validBundledFiles?.has(asset.file)).map(asset=><button type="button" key={asset.id}
         onClick={()=>void setLabBackground(asset.file)} style={{...control,padding:5,fontSize:11}}>
         <img src={labUrl(asset.file)} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
       </button>)}
     </div>}
     {openPanel==='stickers'&&<div className="studio-sticker-library" role="region" aria-label="Galería de stickers individuales">
-      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Importar recursos · Studio + Lab'}</button>
-      <small>Estos stickers se publican para los compradores del Lab. Las fotos y fondos subidos al lienzo son privados.</small>
+      <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>stickerInput.current?.click()}>{importingStickers?'Importando…':'＋ Importar a mi Studio'}</button>
+      <small>Los stickers que subes quedan privados. Comparte cada recurso con el Lab solo si lo eliges. Los personajes se quedan exclusivamente en Studio.</small>
       {syncStatus&&<small role="status">{syncStatus}</small>}
       {syncStatus.includes('pendientes')&&<button type="button" style={control} onClick={retry}>Reintentar sincronización</button>}
       {stickerImportStatus&&<small role="status">{stickerImportStatus}</small>}
@@ -1100,18 +1141,20 @@ export default function SeamlessEditor(){
       {validBundledFiles===null&&<small role="status">Verificando archivos PNG…</small>}
       {unavailableBundledCount>0&&<small role="status">{unavailableBundledCount} recursos con archivos dañados están ocultos hasta recuperar los originales.</small>}
       <div className="studio-sticker-categories" role="group" aria-label="Filtrar stickers">
-       {['Todos','Lazos','Cintas','Estrellas','Branding','Decorativos','Temporada'].map(category=>
+       {['Todos','Mis stickers','Personajes privados','Lazos','Cintas','Estrellas','Branding','Decorativos','Temporada'].map(category=>
          <button key={category} type="button" aria-pressed={stickerCategory===category}
             onClick={()=>setStickerCategory(category)}>{category}</button>)}
       </div>
       <div className="studio-sticker-gallery">
-        {[...importedStickers.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+        {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name)).map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker'&&!isStudioBackgroundName(asset.name)&&!isPersonalCharacterAssetName(asset.name)).map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
           ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
           .filter(asset=>{
             const name=asset.name.toLocaleLowerCase('es'),file=asset.file.toLocaleLowerCase('es');
-            if(stickerCategory==='Todos')return true;
+            if(stickerCategory==='Mis stickers')return asset.key.startsWith('studio-import-');
+             if(stickerCategory==='Personajes privados')return false;
+             if(stickerCategory==='Todos')return true;
             if(stickerCategory==='Lazos')return /lazo|bow|ribbon/.test(name);
             if(stickerCategory==='Cintas')return /cinta|tape|washi/.test(name);
             if(stickerCategory==='Estrellas')return /estrella|star|destello|asterisco/.test(name);
@@ -1126,6 +1169,29 @@ export default function SeamlessEditor(){
              <span className="studio-sticker-label">{asset.name}</span>
            </button>)}
       </div>
+      {stickerCategory==='Personajes privados'&&<section aria-label="Colección privada de personajes">
+       <small>Solo para tu Studio. Estos personajes no se comparten en el catálogo del Lab.</small>
+       <div className="studio-sticker-gallery">
+        {[...importedStickers.filter(asset=>isPersonalCharacterAssetName(asset.name)),...privateCharacters]
+          .filter((asset,index,all)=>all.findIndex(other=>other.name.toLowerCase()===asset.name.toLowerCase())===index)
+          .filter(asset=>asset.name.toLowerCase().includes(stickerSearch.trim().toLowerCase()))
+          .map(asset=><button type="button" key={asset.id} aria-label={'Añadir personaje privado '+asset.name}
+            onClick={()=>void keepStudioLabImage(asset.url).then(src=>addPrivateSticker(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo abrir el personaje'))}>
+             <span className="studio-sticker-thumb"><img src={asset.url} alt={asset.name} loading="lazy"/></span>
+             <span className="studio-sticker-label">{asset.name} · Privado</span>
+            </button>)}
+       </div>
+      </section>}
+      {stickerCategory==='Mis stickers'&&<section aria-label="Organizar recursos personales">
+       <strong style={{fontSize:12}}>Organizar mis stickers</strong>
+       {importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name))
+        .filter(asset=>asset.name.toLowerCase().includes(stickerSearch.trim().toLowerCase()))
+        .map(asset=><div key={asset.id} style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',margin:'5px 0'}}>
+         <span style={{flex:'1 1 115px',fontSize:11}}>{asset.name}</span>
+         <button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void changeAssetCategory(asset.id,'background')}>Mover a Fondos</button>
+         {!approvedShareIds.includes(asset.id)&&<button type="button" style={{...control,fontSize:10,padding:5}} onClick={()=>void approveShareToLab(asset.id)}>Compartir en Lab</button>}
+        </div>)}
+      </section>}
       <details className="studio-sticker-symbols"><summary>Stickers de símbolos</summary>
         <div>{LAB_STICKERS.map((emoji,i)=><button type="button" key={i} aria-label={'Añadir símbolo '+emoji} onClick={()=>{addSticker(emoji);setQuickPanel(null)}}>{emoji}</button>)}</div>
       </details>
@@ -1137,7 +1203,7 @@ export default function SeamlessEditor(){
    <button type="button" className="studio-projects-trigger" onClick={()=>setProjectsOpen(true)} aria-label="Abrir Mis proyectos y crear un carrusel" title="Mis proyectos"><FolderOpen size={20} aria-hidden="true"/></button>
    <label className="studio-app-name"><span>MI CARRUSEL</span><input aria-label="Nombre del proyecto" value={projectName} onChange={e=>setProjectName(e.target.value)}/></label>
    <div className="studio-app-actions">
-    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Importar recursos · Studio + Lab</button>
+    <button type="button" disabled={importingStickers} onClick={()=>{setQuickPanel('stickers');setSidebarCollapsed(false);stickerInput.current?.click()}}>Importar a mi Studio</button>
     {wideScreen&&<button type="button" className="studio-sidebar-toggle" onClick={()=>{setQuickPanel(null);setSidebarCollapsed(v=>!v)}} aria-expanded={!!openPanel}>{sidebarCollapsed?'Abrir biblioteca':'Ocultar biblioteca'}</button>}
     <small className="studio-app-save-state" role="status" aria-live="polite" title={saveStatus}>{saveStatus.startsWith('No se')?'Error al guardar':'Guardado automático'}</small>
     <button type="button" onClick={()=>void saveProject()} disabled={busy} aria-label="Guardar proyecto">Guardar</button>
@@ -1169,7 +1235,7 @@ export default function SeamlessEditor(){
     </section>
    </div>,document.body)}
   <input ref={backgroundPublishInput} type="file" multiple accept="image/png,image/jpeg,image/webp" aria-label="Publicar fondos compartidos" style={{display:'none'}} onChange={e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(files.length)void publishBackgrounds(files);}}/>
-  <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Publicar stickers en Studio y Lab" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
+  <input ref={stickerInput} type="file" multiple accept="image/png,image/jpeg,image/webp,.zip,application/zip" aria-label="Importar stickers privados a mi Studio" style={{display:'none'}} onChange={event=>{const files=Array.from(event.target.files||[]);event.target.value='';if(files.length)void importStickers(files);}}/>
   <input ref={photoInput} type="file" accept="image/*" onChange={onFile}
     style={{position:'absolute',width:1,height:1,opacity:0,pointerEvents:'none'}} aria-label="Elegir foto del dispositivo"/>
 

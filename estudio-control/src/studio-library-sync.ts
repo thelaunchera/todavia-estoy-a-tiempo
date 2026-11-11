@@ -3,6 +3,7 @@ import {loadStudioLabAssets,publishStudioLabAsset,type StudioLabAsset} from './s
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {classifyAdminDesignAsset} from '../../creative-shared/design-asset-kind';
+import {isPersonalCharacterAssetName} from './studio-asset-organization';
 
 /** Only admin library uploads may be shared. Photos added directly to a design
  * never pass through this hook and remain user-owned.
@@ -39,7 +40,9 @@ const SYNC_KEY='studio-lab-synced-library-stickers-v1';
 export function useStudioLibrarySync(
  imported:StudioLabAsset[],
  onLibraryChanged:(items:StudioLabAsset[])=>void,
- onLibraryError:(message:string)=>void
+ onLibraryError:(message:string)=>void,
+ approvedShareIds:string[],
+ categoryOverrides:Record<string,'sticker'|'background'>
 ){
  const [syncStatus,setSyncStatus]=useState('');
  const [backgroundStatus,setBackgroundStatus]=useState('');
@@ -59,7 +62,8 @@ export function useStudioLibrarySync(
   const work=async()=>{
    try{
     const synced:Record<string,boolean>=(await readEditorRecord<Record<string,boolean>>(SYNC_KEY).catch(()=>null))||{};
-    const missing=imported.filter(item=>item.id.startsWith('studio-import-')&&!synced[item.id]);
+    // Importing to the private Studio never opts a file into buyer sharing.
+    const missing=imported.filter(item=>approvedShareIds.includes(item.id)&&item.id.startsWith('studio-import-')&&!isPersonalCharacterAssetName(item.name)&&!synced[item.id]);
     if(!missing.length)return;
     let added=0,duplicates=0;const errors:string[]=[];
     setSyncStatus('Organizando '+missing.length+' recursos en Stickers y Fondos del Lab…');
@@ -69,7 +73,7 @@ export function useStudioLibrarySync(
       const blob=await(await fetch(asset.url)).blob();
       const ext=blob.type==='image/webp'?'.webp':blob.type==='image/jpeg'?'.jpg':'.png';
       const input=new File([blob],asset.name+ext,{type:blob.type});
-      const kind=asset.category==='background'?'background':await classifyAdminDesignAsset(input,asset.name);
+      const kind=categoryOverrides[asset.id]|| (asset.category==='background'?'background':await classifyAdminDesignAsset(input,asset.name));
       const result=await publishStudioLabAsset(await prepareFile(input,kind),kind,asset.name);
       if(result.duplicate)duplicates++;else added++;
       synced[asset.id]=true;
@@ -85,7 +89,7 @@ export function useStudioLibrarySync(
   };
   void work();
   return()=>{active=false};
- },[imported,cycle]);
+ },[imported,cycle,approvedShareIds,categoryOverrides]);
  const publishBackgrounds=async(files:File[])=>{
   if(!files.length)return;
   if(files.length>CREATIVE_EDITOR_RULES.maxStickerImportCount){
