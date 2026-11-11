@@ -383,6 +383,14 @@ function App() {
   const [loginLanguage, setLoginLanguage] = useState<'es'|'en'>(()=>{
     try{return localStorage.getItem('content-lab:language')==='en'?'en':'es'}catch{return 'es'}
   });
+  // Apply saved UI preferences on first render, not only after opening Settings.
+  useEffect(()=>{
+    const read=(key:string,fallback:string)=>{
+      try{return localStorage.getItem(key)||fallback}catch{return fallback}
+    };
+    document.documentElement.dataset.labMotion=read('content-lab:settings-motion','on')==='off'?'off':'on';
+    document.documentElement.dataset.labDensity=read('content-lab:settings-compact','off')==='on'?'compact':'comfortable';
+  },[]);
   const chooseLanguage=(next:'es'|'en')=>{
     setLoginLanguage(next);
     try{
