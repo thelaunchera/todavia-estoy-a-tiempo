@@ -945,7 +945,7 @@ function App() {
   // Each card uses the full saved renderer, never its low-res preview or raw
   // source photo. Multi-slide carousels offer individual iPhone-safe PNG links.
   const downloadSavedPost=async(p:Post)=>{
-    if(!p.id||downloadingPostId)return;
+    if(!brand||!p.id||downloadingPostId)return;
     setDownloadingPostId(p.id);
     const newlyPrepared:{name:string;url:string}[]=[];
     try{
