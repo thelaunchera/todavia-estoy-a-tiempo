@@ -101,7 +101,7 @@ export default function AuthExperience({
           <section className="lab-auth-recovery">
             <p className="lab-auth-kicker">{es ? 'TU ESPACIO SIGUE AQUÍ' : 'YOUR WORKSPACE IS HERE'}</p>
             <h1 id="lab-auth-heading">{es ? 'Tu sesión venció.' : 'Your session expired.'}</h1>
-            <p className="lab-auth-description">{es ? 'Tus proyectos están guardados. Verifica tu cuenta para continuar donde lo dejaste.' : 'Your projects are saved. Verify your account to pick up where you left off.'}</p>
+            <p className="lab-auth-description">{es ? 'Tus proyectos están guardados. Verifica tu cuenta para volver a tu espacio.' : 'Your projects are saved. Verify your account to return to your workspace.'}</p>
             <form onSubmit={event => { event.preventDefault(); onRequestCode(); }} className="lab-auth-form">
               <label htmlFor="lab-email">{es ? 'Mi cuenta' : 'My account'}</label>
               <input id="lab-email" type="email" autoComplete="email" value={email} readOnly required className="lab-auth-account-input" />
