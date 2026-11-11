@@ -16,7 +16,8 @@ import {clampTextCurve,clampLetterSpacing,curvedTextExtraHeight,drawCurvedTextLi
 import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
-import {zipSync,unzipSync} from 'fflate';
+import {streamStickerZip} from './sticker-zip-import';
+import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
 import FontShelf from './FontShelf';
@@ -118,37 +119,39 @@ export default function SeamlessEditor(){
  })().catch(()=>{});}}).catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo.');});return()=>{live=false;};},[]);
  const importStickers=async(files:File[])=>{
   if(!stickerImportReady.current){setStickerImportStatus('La biblioteca todavía está cargando. Vuelve a intentarlo.');return;}
-  setImportingStickers(true);setStickerImportStatus('Importando stickers…');
+  if(importingStickers)return;
+  setImportingStickers(true);setStickerImportStatus('Abriendo el paquete sin cerrar el Studio…');
   try{
-   const images:File[]=[];let total=0;
+   const next=[...importedStickers];let added=0,found=0,total=0;
+   const importImage=async(image:File)=>{
+    found++;total+=image.size;
+    if(found>CREATIVE_EDITOR_RULES.maxStickerImportCount||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
+    if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
+    setStickerImportStatus(`Preparando ${found}: ${image.name}`);
+    const hashBytes=await image.arrayBuffer();
+    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',hashBytes))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const id='studio-import-'+hash;
+    if(next.some(item=>item.id===id))return;
+    const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(image);});
+    await new Promise<void>((resolve,reject)=>{const img=new Image();img.onload=()=>{img.src='';resolve()};img.onerror=()=>reject(Error('Imagen dañada: '+image.name));img.src=url;});
+    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:await classifyAdminDesignAsset(image,image.name),url});added++;
+    await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
+   };
    for(const file of files){
     if(file.size>CREATIVE_EDITOR_RULES.maxStickerZipBytes)throw Error('Cada ZIP debe pesar menos de 60 MB.');
-    if(/\.zip$/i.test(file.name)){
-     const unpacked=unzipSync(new Uint8Array(await file.arrayBuffer()),{filter:entry=>{
-      if(!/\.(png|jpe?g|webp)$/i.test(entry.name)||entry.name.includes('__MACOSX')||entry.name.split('/').pop()?.startsWith('.'))return false;
-      total+=entry.originalSize;
-      if(entry.originalSize>18_000_000||total>120_000_000)throw Error('El ZIP contiene imágenes demasiado grandes.');
-      return true;
-     }});
-     for(const [name,bytes] of Object.entries(unpacked)){const mime=/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg';images.push(new File([bytes],name.split('/').pop()!,{type:mime}));}
-    }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){total+=file.size;images.push(file);}
+    if(/\.zip$/i.test(file.name)||/^(?:application\/(?:zip|x-zip-compressed))$/i.test(file.type)){
+     await streamStickerZip(file,{
+      maxImages:CREATIVE_EDITOR_RULES.maxStickerImportCount-found,
+      maxImageBytes:18_000_000,
+      maxUnpackedBytes:120_000_000-total,
+     },async image=>importImage(image));
+    }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){await importImage(file);}
    }
-   if(!images.length)throw Error('Selecciona PNG, JPG, WEBP o un ZIP que contenga imágenes.');
-   if(images.length>CREATIVE_EDITOR_RULES.maxStickerImportCount||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
-   const next=[...importedStickers];let added=0;
-   for(const image of images){
-    if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
-    const bytes=await image.arrayBuffer();
-    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('');
-    const id='studio-import-'+hash;
-    if(next.some(item=>item.id===id))continue;
-    const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(image);});
-    await new Promise<void>((resolve,reject)=>{const img=new Image();img.onload=()=>resolve();img.onerror=()=>reject(Error('Imagen dañada: '+image.name));img.src=url;});
-    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:await classifyAdminDesignAsset(image,image.name),url});added++;
-   }
+   if(!found)throw Error('Selecciona PNG, JPG, WEBP o un ZIP que contenga imágenes.');
+   setStickerImportStatus('Guardando la biblioteca…');
    await writeEditorRecord('studio-imported-stickers-v1',next);
    setImportedStickers(next);setStickerSearch('');setStickerCategory('Todos');setQuickPanel(next.some(item=>item.category==='background')?'fondos':'stickers');setSidebarCollapsed(false);
-   setStickerImportStatus(added?`${added} recursos organizados en Stickers y Fondos. Se publicarán en el Lab.`:'Estos recursos ya estaban guardados.');
+   setStickerImportStatus(added?`${added} recursos importados sin salir del Studio. Se publicarán en el Lab.`:'Estos recursos ya estaban guardados.');
   }catch(error){setStickerImportStatus(error instanceof Error?error.message:'No se pudieron importar los stickers.');}
   finally{setImportingStickers(false);}
  };
