@@ -148,6 +148,6 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
     </article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{category==='Mis stickers'?'Aún no has subido stickers privados en esta cuenta.':files.length?'No hay stickers en esta colección. Prueba otra categoría o búsqueda.':'Todavía no hay stickers publicados en el catálogo.'}</div>}
   {matches.length>visibleLimit&&<button type="button" className="sticker-load-more"
     onClick={()=>setVisibleLimit(limit=>limit+60)}>Ver más stickers · {Math.min(visibleLimit,matches.length)} de {matches.length}</button>}
-  <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
+  <p className="sticker-downloads-note">Encuentra tus elementos favoritos y añádelos directamente al diseño que estés creando.</p>
  </section>;
 }
