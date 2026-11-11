@@ -17,7 +17,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {streamStickerZip} from './sticker-zip-import';
-import {isPersonalCharacterAssetName,isStudioBackgroundName,organizedStudioKind} from './studio-asset-organization';
+import {isPersonalCharacterAssetName,isSafeGenericStudioSticker,isStudioBackgroundName,organizedStudioKind} from './studio-asset-organization';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
@@ -127,6 +127,27 @@ export default function SeamlessEditor(){
   try{await writeEditorRecord('studio-asset-category-overrides-v1',next);setAssetOverrides(next);
    setStickerImportStatus('Recurso organizado en '+(kind==='background'?'Fondos':'Stickers')+' sin alterar su archivo original.');
   }catch{setStickerImportStatus('No se pudo guardar la categoría. Inténtalo de nuevo.');}
+ };
+ // Resources saved on iPhone can only be inspected and shared from that device.
+ const shareMissingGeneralStickers=async()=>{
+  if(!stickerImportReady.current){setStickerImportStatus('La biblioteca local aún está cargando.');return;}
+  const eligible=importedStickers.filter(item=>
+   item.id.startsWith('studio-import-')&&
+   organizedStudioKind(item,assetOverrides)==='sticker'&&
+   isSafeGenericStudioSticker(item.name)&&
+   !approvedShareIds.includes(item.id));
+  if(!eligible.length){
+   setStickerImportStatus('No hay stickers generales pendientes en este dispositivo. Los personales siguen privados.');
+   return;
+  }
+  const next=[...new Set([...approvedShareIds,...eligible.map(item=>item.id)])];
+  try{
+   await writeEditorRecord('studio-lab-approved-shares-v1',next);
+   setApprovedShareIds(next);
+   setStickerImportStatus('Comprobando '+eligible.length+' stickers generales. Los duplicados se omiten; los personales no se comparten.');
+  }catch{
+   setStickerImportStatus('No se pudo iniciar la sincronización. No se compartió ningún recurso adicional.');
+  }
  };
  const approveShareToLab=async(id:string)=>{
   const asset=importedStickers.find(item=>item.id===id);
@@ -1182,6 +1203,13 @@ export default function SeamlessEditor(){
             </button>)}
        </div>
       </section>}
+      {stickerCategory==='Mis stickers'&&<div style={{padding:8,border:'1px solid #d9d4c7',borderRadius:10,display:'grid',gap:6}}>
+       <strong style={{fontSize:12}}>Comparar con Content Lab</strong>
+       <small>Detecta únicamente elementos decorativos genéricos pendientes en este iPhone. Los personajes, archivos personales, marcas, fondos y nombres ambiguos quedan excluidos. Los duplicados no se vuelven a publicar.</small>
+       <button type="button" style={{...control,background:'#F2D85B',fontWeight:750}} disabled={importingStickers} onClick={()=>void shareMissingGeneralStickers()}>
+        Compartir generales que falten en el Lab
+       </button>
+      </div>}
       {stickerCategory==='Mis stickers'&&<section aria-label="Organizar recursos personales">
        <strong style={{fontSize:12}}>Organizar mis stickers</strong>
        {importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name))
