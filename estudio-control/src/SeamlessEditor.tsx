@@ -248,7 +248,7 @@ export default function SeamlessEditor(){
  };
  const [libraryStatus,setLibraryStatus]=useState('');
  const backgroundPublishInput=useRef<HTMLInputElement>(null);
- const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus,approvedShareIds);
+ const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus,approvedShareIds,assetOverrides);
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
  const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
  useEffect(()=>{
