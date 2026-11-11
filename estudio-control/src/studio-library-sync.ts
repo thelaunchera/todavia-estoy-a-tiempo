@@ -41,7 +41,8 @@ export function useStudioLibrarySync(
  imported:StudioLabAsset[],
  onLibraryChanged:(items:StudioLabAsset[])=>void,
  onLibraryError:(message:string)=>void,
- approvedShareIds:string[]
+ approvedShareIds:string[],
+ categoryOverrides:Record<string,'sticker'|'background'>
 ){
  const [syncStatus,setSyncStatus]=useState('');
  const [backgroundStatus,setBackgroundStatus]=useState('');
@@ -72,7 +73,7 @@ export function useStudioLibrarySync(
       const blob=await(await fetch(asset.url)).blob();
       const ext=blob.type==='image/webp'?'.webp':blob.type==='image/jpeg'?'.jpg':'.png';
       const input=new File([blob],asset.name+ext,{type:blob.type});
-      const kind=asset.category==='background'?'background':await classifyAdminDesignAsset(input,asset.name);
+      const kind=categoryOverrides[asset.id]|| (asset.category==='background'?'background':await classifyAdminDesignAsset(input,asset.name));
       const result=await publishStudioLabAsset(await prepareFile(input,kind),kind,asset.name);
       if(result.duplicate)duplicates++;else added++;
       synced[asset.id]=true;
@@ -88,7 +89,7 @@ export function useStudioLibrarySync(
   };
   void work();
   return()=>{active=false};
- },[imported,cycle,approvedShareIds]);
+ },[imported,cycle,approvedShareIds,categoryOverrides]);
  const publishBackgrounds=async(files:File[])=>{
   if(!files.length)return;
   if(files.length>CREATIVE_EDITOR_RULES.maxStickerImportCount){
