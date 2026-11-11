@@ -1,0 +1,189 @@
+/* Content Lab: targeted iPhone home polish.
+   Existing logos, favicons, artwork, editors, saved projects and navigation stay untouched. */
+@media(max-width:850px){
+ .app-shell .top.lab-home-top{
+   position:sticky;top:0;z-index:3;
+   min-height:62px;height:62px;
+   padding:0 clamp(10px,3vw,14px);gap:7px;
+   background:#FAF8F3;
+   border-bottom:1px solid #E6E4DE;
+   box-shadow:0 3px 12px rgba(25,25,25,.035);
+   backdrop-filter:none;-webkit-backdrop-filter:none;
+   overflow:visible;
+ }
+ .app-shell .top.lab-home-top>div:first-child{
+   display:flex;align-items:center;flex:1 1 auto;gap:5px;
+   min-width:0;overflow:hidden;
+ }
+ .app-shell .top.lab-home-top>div:last-child{
+   display:flex;align-items:center;gap:5px;flex:0 0 auto;
+   margin-left:auto;min-width:0;flex-wrap:nowrap;
+ }
+ .app-shell .top.lab-home-top .hamburger{
+   display:grid;place-items:center;flex:0 0 38px;
+   width:38px;height:44px;padding:0;color:#191919;
+ }
+ .app-shell .top.lab-home-top .lab-current-page{
+   font:700 12px/1.2 Prompt,Arial,sans-serif;
+   color:#263941;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ }
+ .app-shell .top.lab-home-top .lab-site-locale{
+   flex:0 0 auto;gap:1px;padding:2px;border-radius:12px;background:#F1F4F2;
+ }
+ .app-shell .top.lab-home-top .lab-site-locale button{
+   min-width:28px;min-height:38px;border-radius:9px;font-size:10px;
+ }
+ .app-shell .top.lab-home-top .lab-refresh-control{
+   display:inline-flex;flex:0 0 40px;width:40px;min-width:40px;min-height:44px;
+   padding:0;border-radius:12px;
+ }
+ .app-shell .top.lab-home-top .lab-primary-create{
+   min-height:44px;padding:0 11px;border-radius:12px;font-size:11px;gap:4px;
+ }
+ .app-shell .lab-mobile-dock{
+   background:#fff;
+   -webkit-backdrop-filter:none;backdrop-filter:none;
+   border-top:1px solid #E3E7E5;
+   box-shadow:0 -5px 22px rgba(25,25,25,.045);
+ }
+ .app-shell .lab-mobile-dock button{
+   min-height:53px;min-width:0;line-height:1.15;
+   padding:6px 2px 5px;border-radius:12px;
+ }
+ .app-shell .lab-mobile-dock button span:last-child{
+   font-size:10px;font-weight:650;white-space:nowrap;
+ }
+ .content[data-lab-tab="home"]{
+   padding-bottom:max(120px,calc(env(safe-area-inset-bottom,0px) + 104px));
+ }
+}
+@media(max-width:660px){
+ .content[data-lab-tab="home"]{
+   padding-left:clamp(12px,3.5vw,16px);
+   padding-right:clamp(12px,3.5vw,16px);
+ }
+ .content[data-lab-tab="home"] .cld{
+   max-width:100%;min-width:0;
+ }
+ .content[data-lab-tab="home"] .cld-intro{
+   padding:10px 0 19px;border-bottom:1px solid #E5E2DA;
+ }
+ .content[data-lab-tab="home"] .cld-intro-copy p{font-size:12px;line-height:1.55}
+ .content[data-lab-tab="home"] .cld-create-section,
+ .content[data-lab-tab="home"] .cld-recents-section,
+ .content[data-lab-tab="home"] .cld-resources-section{margin-top:23px}
+ .content[data-lab-tab="home"] .cld-section-heading{
+   gap:8px;align-items:flex-end;
+ }
+ .content[data-lab-tab="home"] .cld-section-heading h2{
+   font-size:20px;line-height:1.2;letter-spacing:-.045em;
+ }
+ .content[data-lab-tab="home"] .cld-section-heading .cld-textlink{
+   font-size:11px;gap:3px;flex-shrink:0;padding:8px 0;
+ }
+ /* The actual saved artwork remains unchanged, but the thumbnail has a
+    stable frame and resume is a separate action, never over the design. */
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-grid{gap:8px}
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-card{
+   display:flex;flex-direction:row;align-items:center;gap:11px;
+   min-height:99px;padding:7px 11px 7px 7px;
+   position:relative;border:1px solid #E5E4DE;
+   border-radius:16px;background:#fff;
+   box-shadow:0 2px 7px rgba(25,25,25,.025);
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-cover{
+   flex:0 0 70px;width:70px;height:84px!important;aspect-ratio:auto!important;
+   border:1px solid #E8E6DE;border-radius:10px;
+   background:#F1F1EC;overflow:hidden;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-cover .lab-project-cover{
+   width:100%;height:100%;border-radius:inherit;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-copy{
+   display:grid;gap:5px;flex:1 1 auto;min-width:0;
+   padding:0;align-content:center;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-copy strong{
+   white-space:normal;overflow-wrap:anywhere;
+   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+   overflow:hidden;font-size:13px;line-height:1.4;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-copy small{
+   font-size:11px;line-height:1.4;color:#6C797C;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-cover-action{
+   position:static;display:grid;place-items:center;flex:0 0 31px;
+   width:31px;height:31px;margin-left:auto;
+   border:1px solid #E0E6E6;border-radius:50%;
+   background:#F7FAFA;color:#294651;
+ }
+ .content[data-lab-tab="home"] .cld-has-recents .cld-cover-action svg{
+   width:16px;height:16px;
+ }
+ /* Keep the existing illustrations; make format cards calm and aligned. */
+ .content[data-lab-tab="home"] .cld-format-grid{gap:10px}
+ .content[data-lab-tab="home"] .cld-format-card{
+   min-width:0;padding:9px;border-radius:15px;
+   border-color:#E8E6E0;box-shadow:0 2px 8px rgba(25,25,25,.025);
+ }
+ .content[data-lab-tab="home"] .cld-format-art{
+   height:91px;min-height:91px;margin-bottom:10px;border-radius:10px;
+ }
+ .content[data-lab-tab="home"] .cld-format-illustration{
+   width:min(76%,98px);height:84px;max-height:84px;
+ }
+ .content[data-lab-tab="home"] .cld-format-meta{font-size:9px;line-height:1.4}
+ .content[data-lab-tab="home"] .cld-format-name{
+   font-size:15px;line-height:1.3;margin-top:3px;gap:5px;
+ }
+ .content[data-lab-tab="home"] .cld-format-desc{
+   font-size:10px;line-height:1.45;margin-top:3px;
+ }
+ .content[data-lab-tab="home"] .cld-format-plus{
+   flex:0 0 28px;width:28px;height:28px;
+ }
+ /* Avoid doubled illustrations covering the resource titles on narrow screens. */
+ .content[data-lab-tab="home"] .cld-resource-grid{gap:10px}
+ .content[data-lab-tab="home"] .cld-resource-card{
+   display:flex;flex-direction:column;align-items:flex-start;
+   height:auto;min-height:126px;padding:13px;
+   gap:4px;border-radius:15px;border-color:#E6E4DF;
+ }
+ .content[data-lab-tab="home"] .cld-resource-card .cld-resource-feature{display:none}
+ .content[data-lab-tab="home"] .cld-resource-card .cld-resource-icon{
+   flex:0 0 auto;width:35px;height:35px;margin:0 0 3px;
+ }
+ .content[data-lab-tab="home"] .cld-resource-card strong{
+   max-width:100%;font-size:13px;line-height:1.25;
+   overflow-wrap:anywhere;
+ }
+ .content[data-lab-tab="home"] .cld-resource-card small{
+   max-width:100%;font-size:11px;line-height:1.45;
+   color:#59686B;overflow-wrap:anywhere;
+ }
+ .content[data-lab-tab="home"] .cld-bottom-panel{
+   margin-top:23px;gap:11px;
+ }
+ .content[data-lab-tab="home"] .cld-inspiration,
+ .content[data-lab-tab="home"] .cld-planning{
+   border-radius:16px;padding:17px;
+ }
+ .content[data-lab-tab="home"] .cld-inspiration-actions button{
+   min-height:44px;padding:10px 12px;
+ }
+}
+@media(max-width:360px){
+ .app-shell .top.lab-home-top{padding:0 9px;gap:3px}
+ .app-shell .top.lab-home-top>div:first-child{gap:0}
+ .app-shell .top.lab-home-top .lab-current-page{display:none}
+ .app-shell .top.lab-home-top>div:last-child{gap:3px}
+ .app-shell .top.lab-home-top .lab-site-locale button{min-width:26px}
+ .app-shell .top.lab-home-top .lab-primary-create{padding:0 8px}
+ .content[data-lab-tab="home"] .cld-resource-card{padding:11px}
+ .content[data-lab-tab="home"] .cld-has-recents .cld-project-card{gap:8px;padding-right:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .content[data-lab-tab="home"] .cld-project-card,
+ .content[data-lab-tab="home"] .cld-format-card,
+ .content[data-lab-tab="home"] .cld-resource-card{transition:none;animation:none}
+}

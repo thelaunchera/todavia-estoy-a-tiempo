@@ -38,6 +38,7 @@ import BackgroundLibrary from './BackgroundLibrary';
 import type {FreeBackgroundId} from './FreeDesignAssets';
 import {updateHiddenBackgrounds} from './BackgroundVisibility';
 import './ContentLabMotion.css';
+import './MobileHomePolish.css';
 import '../../creative-shared/editorial-motion.css';
 import {keepActiveSidebarVisible, revealEditorialCards} from '../../creative-shared/editorial-motion';
 import FormatGallery from './FormatGallery';
@@ -1733,7 +1734,7 @@ function App() {
         </div>
       </aside>
       <main>
-        <header className="top">
+        <header className={tab==='home'?'top lab-home-top':'top'}>
           {tab!=='home'&&<div className="lab-workspace-route-actions">
             <button type="button" className="lab-carousel-editor-exit" onClick={backOneView}
               disabled={!navStackRef.current.length}

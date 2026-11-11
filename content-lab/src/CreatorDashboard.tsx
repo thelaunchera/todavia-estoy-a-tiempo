@@ -65,7 +65,7 @@ export default function CreatorDashboard({
  return <div className={"cld"+(recent.length?" cld-has-recents":"")} id="lab-dashboard" aria-label={es?'Tu espacio creativo':'Your creative workspace'}>
   <section className="cld-intro">
    <div className="cld-intro-copy">
-    <span className="cld-eyebrow"><span className="cld-eyebrow-dot"/> THE CONTENT LAB · WORKSPACE</span>
+    <span className="cld-eyebrow"><span className="cld-eyebrow-dot"/> {es?'TU ESPACIO CREATIVO':'YOUR CREATIVE SPACE'}</span>
     <h1>{es?'¿Qué vamos a':'What shall we'} <em>{es?'crear?':'create?'}</em></h1>
     <p>{es?'Elige un formato, dale vida a tu idea y continúa donde lo dejaste.':'Choose a format, bring your idea to life, and pick up where you left off.'}</p>
     {recent.length===0&&<button type="button" className="cld-hero-action" onClick={onNewNormal}>
@@ -104,9 +104,9 @@ export default function CreatorDashboard({
      return <button type="button" key={post.id||'recent-'+index} className="cld-project-card" onClick={()=>onEditPost(post)} aria-label={(es?'Continuar ':'Continue ')+(post.title||formatLabel(post))}>
       <span className={'cld-project-cover cld-project-'+kind}>
        <ProjectCover post={post} brand={brand} images={images} loadImage={loadImage} locale={locale}/>
-       <span className="cld-cover-action"><ArrowRight size={17}/></span>
-      </span>
+       </span>
       <span className="cld-project-copy"><strong>{post.title||(es?'Sin título':'Untitled')}</strong><small>{formatLabel(post)} · {es?(post.status==='Ready'?'Listo':'En progreso'):(post.status==='Ready'?'Ready':'In progress')}</small></span>
+      <span className="cld-cover-action" aria-hidden="true"><ArrowRight size={17}/></span>
      </button>
     })}
    </div>:<div className="cld-empty-project">
