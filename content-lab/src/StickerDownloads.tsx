@@ -3,6 +3,7 @@ import {Download,Search,Images,Upload,Check,LoaderCircle,Trash2} from 'lucide-re
 import {unzip} from 'fflate';
 import {classifyAdminDesignAsset,type ImportKind} from '../../creative-shared/design-asset-kind';
 import {displayAssetName,assetCategory,type LibraryAsset} from './MediaAsset';
+import {visibleStickerCollections,matchesStickerCollection,stickerCollectionFor,type StickerCollection} from './StudioLibraryOrganization';
 import './StickerDownloads.css';
 
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
@@ -11,7 +12,6 @@ type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
  onPublishBackground:(file:File,category:string)=>Promise<LibraryAsset|null>;
  onDelete:(asset:LibraryAsset)=>Promise<void>;
  isAdmin:boolean;loadImage:(id:string)=>Promise<string|undefined>|void;onUse:(id:string,destination:'carousel'|'cover')=>void};
-const groups=['Todos','Branding y Marketing','Inspiración','Avatares','Animales','Creación','Negocios','Matcha','Pilates','Ejercicios','Aesthetic'];
 const groupOf=(name:string)=>{
  const n=name.toLowerCase();
  if(/avatar|character|girl|portrait/.test(n))return 'Avatares';
@@ -40,7 +40,8 @@ function StickerPreview({asset,src,loadImage}:{asset:LibraryAsset;src?:string;lo
 }
 export default function StickerDownloads({brandId,assets,images,onUpload,onPublish,onPublishBackground,onDelete,isAdmin,loadImage,onUse}:Props){
  const fileRef=useRef<HTMLInputElement>(null);
- const [category,setCategory]=useState('Todos'),[search,setSearch]=useState('');
+ const [category,setCategory]=useState<StickerCollection>('Todos'),[search,setSearch]=useState('');
+ const [visibleLimit,setVisibleLimit]=useState(60);
  const [progress,setProgress]=useState(''),[running,setRunning]=useState(false);
  const [importKind,setImportKind]=useState<ImportKind>('auto');
  const [destination,setDestination]=useState<'carousel'|'cover'>('carousel');
@@ -48,7 +49,13 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
  const files=useMemo(()=>assets.filter(a=>(a.brandId===brandId||a.shared)&&assetCategory(a)==='sticker'),[assets,brandId]);
  const publicCount=files.filter(a=>a.shared).length;
  const userCount=files.length-publicCount;
- const matches=useMemo(()=>files.filter(a=>(category==='Todos'||(a.shared?a.stickerGroup:groupOf(a.name))===category)&&displayAssetName(a).toLowerCase().includes(search.toLowerCase())),[files,category,search]);
+ const collections=useMemo(()=>visibleStickerCollections(files),[files]);
+ const matches=useMemo(()=>files
+  .filter(asset=>matchesStickerCollection(asset,category))
+  .filter(asset=>displayAssetName(asset).toLocaleLowerCase('es').includes(search.trim().toLocaleLowerCase('es')))
+  .sort((a,b)=>displayAssetName(a).localeCompare(displayAssetName(b),'es',{numeric:true})),
+  [files,category,search]);
+ const visibleMatches=matches.slice(0,visibleLimit);
  const importFiles=async(list:File[])=>{
   if(!list.length)return;
   setRunning(true);let saved=0,duplicates=0,failed=0,backgrounds=0;
@@ -108,7 +115,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   if(blobUrl)window.setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
  };
  return <section className="sticker-downloads" aria-label="Stickers PNG originales">
-  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Branding, marketing digital, avatares y recursos creativos para posts y carruseles continuos. Usa cada PNG transparente directamente en el editor.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
+  <div className="sticker-downloads-head"><div><span className="eyebrow">STICKER LIBRARY · INCLUIDA</span><h2>Stickers originales para tus diseños.</h2><p>Branding, marketing digital, avatares y recursos creativos para posts y carruseles continuos. Usa cada PNG transparente directamente en el editor.</p><p className="sticker-catalog-count">{publicCount} compartidos · {userCount} personales</p></div><div className="sticker-downloads-search"><Search size={15}/><input value={search} onChange={e=>{setSearch(e.target.value);setVisibleLimit(60)}} placeholder="Buscar sticker…" aria-label="Buscar sticker"/></div></div>
   <div className={'sticker-import-bar'+(dragActive?' drag-active':'')}
    onDragOver={e=>{e.preventDefault();if(!running)setDragActive(true)}}
    onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setDragActive(false)}}
@@ -126,12 +133,21 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
   </div>}
   {progress&&<p role="status" className="sticker-import-status"><Check size={14}/>{progress}</p>}
   <div className="sticker-destination"><label htmlFor="sticker-use-where">Añadir sticker a</label><select id="sticker-use-where" value={destination} onChange={e=>setDestination(e.target.value as 'carousel'|'cover')}><option value="carousel">Carrusel (slide actual)</option><option value="cover">Post individual / cover</option></select><small>También puedes añadirlos directamente desde Brand Grid, Carousel Factory y el editor de posts.</small></div>
-  <div className="sticker-downloads-filters" role="group" aria-label="Categorías de stickers">{groups.map(g=><button type="button" aria-pressed={category===g} className={category===g?'selected':''} key={g} onClick={()=>setCategory(g)}>{g}</button>)}</div>
-  {matches.length?<div className="sticker-downloads-grid">{matches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+(asset.stickerGroup||groupOf(asset.name)):'Privado · '+groupOf(asset.name)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" disabled={!images[asset.id]} onClick={()=>void download(asset)}><Download size={14}/> {images[asset.id]?'Descargar PNG':'Preparando PNG…'}</button>
+  <div className="sticker-collections-head"><strong>Colecciones</strong><span aria-live="polite">{matches.length} recursos {category==='Todos'?'disponibles':category==='Mis stickers'?'privados':'en '+category}</span></div>
+  <div className="sticker-downloads-filters" role="group" aria-label="Colecciones de stickers">
+   {collections.map(g=><button type="button" aria-pressed={category===g.label}
+    className={category===g.label?'selected':''} key={g.label}
+    onClick={()=>{setCategory(g.label);setVisibleLimit(60)}}>
+    {g.label}{g.label==='Mis stickers'&&' · Privados'} <span className="sticker-category-count">{g.count}</span>
+   </button>)}
+  </div>
+  {matches.length?<div className="sticker-downloads-grid">{visibleMatches.map(asset=><article key={asset.id}><StickerPreview asset={asset} src={images[asset.id]} loadImage={loadImage}/><strong>{displayAssetName(asset)}</strong><small>{asset.shared?'✓ Incluido · '+stickerCollectionFor(asset):'🔒 Solo mío · '+stickerCollectionFor(asset)}</small><button type="button" className="sticker-use-button" onClick={()=>onUse(asset.id,destination)}>Usar en mi diseño</button><button type="button" disabled={!images[asset.id]} onClick={()=>void download(asset)}><Download size={14}/> {images[asset.id]?'Descargar PNG':'Preparando PNG…'}</button>
     {(!asset.shared||isAdmin)&&<button type="button" className="sticker-delete-button"
       aria-label={'Eliminar sticker '+displayAssetName(asset)}
       onClick={()=>void onDelete(asset)}><Trash2 size={15}/> Eliminar</button>}
-    </article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{files.length?'No hay stickers en esta categoría.':'Todavía no hay stickers publicados en el catálogo. No mostramos ilustraciones falsas.'}</div>}
+    </article>)}</div>:<div className="sticker-downloads-empty"><Images size={22}/>{category==='Mis stickers'?'Aún no has subido stickers privados en esta cuenta.':files.length?'No hay stickers en esta colección. Prueba otra categoría o búsqueda.':'Todavía no hay stickers publicados en el catálogo.'}</div>}
+  {matches.length>visibleLimit&&<button type="button" className="sticker-load-more"
+    onClick={()=>setVisibleLimit(limit=>limit+60)}>Ver más stickers · {Math.min(visibleLimit,matches.length)} de {matches.length}</button>}
   <p className="sticker-downloads-note">Los stickers compartidos son de solo lectura para compradores. La administradora publica nuevos recursos una sola vez; el catálogo se distribuye automáticamente entre las cuentas autorizadas. Sin créditos IA.</p>
  </section>;
 }

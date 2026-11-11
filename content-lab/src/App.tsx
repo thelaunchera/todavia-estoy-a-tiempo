@@ -1375,9 +1375,13 @@ function App() {
     }
     const visibility=asset.shared?'de la biblioteca de TODOS los alumnos':'de tu biblioteca privada';
     if(!window.confirm('¿Eliminar definitivamente '+name+' '+visibility+'?\n\nSi lo usaste en un diseño guardado, podría dejar de verse. Esta acción no se puede deshacer.'))return;
+    // Legacy wallpapers remain in the sticker table but appear as backgrounds.
+    // Keep their original IDs for saved designs and route deletion to the
+    // actual catalogue rather than a nonexistent background row.
     const endpoint=asset.shared
-      ?category==='sticker'?'/api/sticker-catalog/'+asset.id.slice('shared-'.length)
-         :'/api/background-catalog/'+asset.id.slice('shared-background-'.length)
+      ?asset.id.startsWith('shared-background-')
+       ?'/api/background-catalog/'+asset.id.slice('shared-background-'.length)
+       :'/api/sticker-catalog/'+asset.id.slice('shared-'.length)
       :'/api/assets/'+asset.id;
     try{
       setBusy('delete-asset');

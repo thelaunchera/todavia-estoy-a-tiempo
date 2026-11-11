@@ -16,3 +16,16 @@
  padding:10px 7px;min-height:42px;border-radius:10px;font-size:11px;font-weight:750;margin-top:7px;cursor:pointer}
 .sticker-downloads-grid article .sticker-delete-button:hover{background:#ffebe9;border-color:#cf8d91}
 .sticker-downloads-grid article .sticker-delete-button:focus-visible{outline:3px solid #db7d82;outline-offset:2px}
+
+/* Studio-like collections: clear taxonomy, private separation, mobile-first. */
+.sticker-collections-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:20px;flex-wrap:wrap}
+.sticker-collections-head strong{color:#253c43;font-size:14px;font-weight:750}
+.sticker-collections-head span{font-size:11px;color:#718990;font-variant-numeric:tabular-nums}
+.sticker-downloads-filters{gap:8px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.sticker-downloads-filters button{min-height:39px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;scroll-snap-align:start;font-size:12px;font-weight:650}
+.sticker-downloads-filters button:focus-visible{outline:3px solid #82b3c9;outline-offset:3px}
+.sticker-category-count{display:inline-block;border-radius:10px;padding:2px 6px;background:#f1f4f2;color:#5b7376;font-size:10px;font-variant-numeric:tabular-nums}
+.sticker-downloads-filters button.selected .sticker-category-count{background:#ffffff23;color:#fff}
+.sticker-load-more{display:block;max-width:360px;width:100%;margin:20px auto 0;padding:13px 18px;border-radius:14px;border:1px solid #b9cdd1;background:#f3f8f8;color:#284952;font-size:12px;font-weight:750;cursor:pointer}
+.sticker-load-more:focus-visible{outline:3px solid #82b3c9;outline-offset:3px}
+@media(max-width:650px){.sticker-collections-head{margin-top:16px}.sticker-downloads-filters{padding:12px 1px 18px}.sticker-downloads-grid article button{min-height:40px}.sticker-downloads-filters button{min-height:42px}}
