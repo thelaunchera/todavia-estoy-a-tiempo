@@ -1284,8 +1284,6 @@ export default function SeamlessEditor(){
           <output>{current.outlineWidth??4}px</output></label>
       </div>}
     </div>
-    <div className="studio-app-position-row">
-    </div>
   </div>}
   {activeInspector==='shape'&&current.shape&&<div className="studio-app-font-inspector">
     <label>Color de la forma <input type="color" aria-label="Elegir color de la forma"
