@@ -4,6 +4,7 @@ import {CREATIVE_EDITOR_RULES} from '../../../creative-shared/editor-rules';
 import {FREE_BACKGROUNDS} from '../FreeDesignAssets';
 import {clearActivity,hasExpiredActivity,lastActivity,recordActivity} from '../SessionActivity';
 import {findBundledDesignAsset,isBundledDesignAsset,bundledDesignAssets,bundledDesignAssetUrl} from '../BundledDesignAssets';
+import {LEGACY_BACKGROUND_STICKER_ORIGINAL_NAMES,legacyStickerIsBackground,legacyStickerBackgroundGroup} from '../StudioLibraryOrganization';
 
 const url=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL||'');
 const key=String(import.meta.env.VITE_CONTENT_LAB_SUPABASE_PUBLISHABLE_KEY||'');
@@ -66,7 +67,9 @@ const sharedStickers=async()=>{
  const {data,error}=await tab('sticker_catalog')
   .select('id,name,category,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
  if(error)throw Error(error.message);
- return [...(data||[]).map(stickerRecord),...await includedCatalog('sticker')];
+ // Keep nine old full-frame papers out of the sticker gallery; their bytes
+ // and IDs remain unchanged for previously saved carousels.
+ return [...(data||[]).filter(item=>!legacyStickerIsBackground(item.name)).map(stickerRecord),...await includedCatalog('sticker')];
 };
 
 const backgroundRecord=(x:any)=>({
@@ -78,7 +81,23 @@ const sharedBackgrounds=async()=>{
  const {data,error}=await tab('background_catalog')
   .select('id,name,category,mime,size_bytes,sha256').eq('published',true).order('created_at',{ascending:true});
  if(error)throw Error(error.message);
- return [...(data||[]).map(backgroundRecord),...await includedCatalog('background')];
+ // Nine previously shared wallpaper PNGs still live under shared-stickers/.
+ // Render them as backgrounds without copying Storage objects or modifying IDs.
+ // A saved design can continue loading its original shared-<uuid> reference.
+ const {data:legacy,error:legacyError}=await tab('sticker_catalog')
+  .select('id,name,category,size_bytes,sha256')
+  .eq('published',true)
+  .in('name',[...LEGACY_BACKGROUND_STICKER_ORIGINAL_NAMES]);
+ if(legacyError)throw Error(legacyError.message);
+ const legacyBackgrounds=(legacy||[])
+  .filter(item=>legacyStickerIsBackground(item.name))
+  .map(item=>({
+   id:'shared-'+item.id,brandId:'shared',
+   name:item.name,displayName:item.name,mime:'image/png',category:'background',
+   shared:true,backgroundGroup:legacyStickerBackgroundGroup(item.name),
+   sizeBytes:item.size_bytes,sha256:item.sha256
+  }));
+ return [...(data||[]).map(backgroundRecord),...legacyBackgrounds,...await includedCatalog('background')];
 };
 const hiddenBackgrounds=async()=>{
  const {data,error}=await tab('hidden_backgrounds').select('id');
