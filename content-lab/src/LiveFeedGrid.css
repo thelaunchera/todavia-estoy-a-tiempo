@@ -79,3 +79,33 @@
 .lab-live-feed-row-actions button{font-size:10px;padding:7px 4px}
 .lab-live-feed-footer{display:grid}.lab-live-feed-footer button{width:100%}
 }
+
+/* Each feed tile shows the actual saved design preview. Keep the renderer's
+   original artwork untouched; square cropping is only for the Instagram view. */
+.lab-live-feed-tile>.lab-project-cover,
+.lab-live-feed-tile>.lab-feed-campaign-cover,
+.lab-live-feed-small-thumb>.lab-project-cover,
+.lab-live-feed-small-thumb>.lab-feed-campaign-cover{
+ display:flex;align-items:center;justify-content:center;
+ width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;
+ border-radius:inherit;background:#F1F1ED;
+}
+.lab-live-feed-tile .lab-project-cover>img,
+.lab-live-feed-tile .lab-feed-campaign-cover>img,
+.lab-live-feed-small-thumb .lab-project-cover>img,
+.lab-live-feed-small-thumb .lab-feed-campaign-cover>img{
+ width:100%;height:100%;display:block;object-fit:cover;
+}
+.lab-feed-campaign-fallback{display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:6px;width:100%;height:100%;
+ color:#8b9fa6;background:#EDF2F1}
+.lab-feed-campaign-fallback small{
+ font-size:10px;line-height:1.3;text-align:center;max-width:95%;
+}
+.lab-live-feed-tile .lab-project-cover-placeholder small{
+ font-size:10px;line-height:1.3;
+}
+.lab-live-feed-tile .lab-live-feed-type,
+.lab-live-feed-tile .lab-live-feed-tile-date{
+ z-index:1;
+}
