@@ -9,7 +9,8 @@ export type StickerZipLimits={
 export type StickerZipResult={count:number;totalBytes:number};
 
 const IMAGE_FILE=/\.(png|jpe?g|webp)$/i;
-const INPUT_CHUNK_BYTES=256*1024;
+// Small chunks bound peak inflate memory before a single-item consumer can run on iOS.
+const INPUT_CHUNK_BYTES=32*1024;
 
 const cleanEntryName=(path:string)=>path.split('/').pop()?.trim()||'';
 const imageMime=(name:string)=>/\.png$/i.test(name)?'image/png':/\.webp$/i.test(name)?'image/webp':'image/jpeg';
