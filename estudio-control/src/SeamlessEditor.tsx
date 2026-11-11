@@ -7,7 +7,7 @@ import {type SovaCarouselAsset} from './sova-carousel-assets';
 import {type GoldenGridCarouselAsset} from './golden-grid-carousel-assets';
 import {LAB_ASSETS} from './lab-assets';
 import {EDITORIAL_DRAFTS,type EditorialDraft} from './editorial-drafts';
-import {loadStudioLabAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
+import {loadStudioLabAssets,loadStudioPrivateCharacterAssets,keepStudioLabImage,type StudioLabAsset} from './supabase-client';
 import {useStudioLibrarySync} from './studio-library-sync';
 import {classifyAdminDesignAsset} from '../../creative-shared/design-asset-kind';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
@@ -17,6 +17,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {streamStickerZip} from './sticker-zip-import';
+import {isPersonalCharacterAssetName,organizedStudioKind} from './studio-asset-organization';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
@@ -95,6 +96,7 @@ export default function SeamlessEditor(){
  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);
  const [activeInspector,setActiveInspector]=useState<'opacity'|'rotate'|'position'|'curve'|'text'|'shape'|'size'|'effects'|'color'|'fonts'|'more'|null>(null);
  const [privateAssets,setPrivateAssets]=useState<StudioLabAsset[]>([]);
+ const [privateCharacters,setPrivateCharacters]=useState<StudioLabAsset[]>([]);
  const [importedStickers,setImportedStickers]=useState<StudioLabAsset[]>([]);
  const [importingStickers,setImportingStickers]=useState(false);
  const [stickerImportStatus,setStickerImportStatus]=useState('');
@@ -106,6 +108,38 @@ export default function SeamlessEditor(){
  // The v1 library stays untouched so existing stickers are preserved.
  const STICKER_INDEX_V2='studio-imported-stickers-v2';
  const stickerBlobKey=(id:string)=>'studio-sticker-blob-v2:'+id;
+ const [assetOverrides,setAssetOverrides]=useState<Record<string,'sticker'|'background'>>({});
+ const [approvedShareIds,setApprovedShareIds]=useState<string[]>([]);
+ useEffect(()=>{
+  let live=true;
+  void Promise.all([
+   readEditorRecord<Record<string,'sticker'|'background'>>('studio-asset-category-overrides-v1'),
+   readEditorRecord<string[]>('studio-lab-approved-shares-v1')
+  ]).then(([categories,approved])=>{
+   if(!live)return;
+   setAssetOverrides(categories||{});
+   setApprovedShareIds(Array.isArray(approved)?approved:[]);
+  }).catch(()=>{});
+  return()=>{live=false};
+ },[]);
+ const changeAssetCategory=async(id:string,kind:'sticker'|'background')=>{
+  const next={...assetOverrides,[id]:kind};
+  try{await writeEditorRecord('studio-asset-category-overrides-v1',next);setAssetOverrides(next);
+   setStickerImportStatus('Recurso organizado en '+(kind==='background'?'Fondos':'Stickers')+' sin alterar su archivo original.');
+  }catch{setStickerImportStatus('No se pudo guardar la categoría. Inténtalo de nuevo.');}
+ };
+ const approveShareToLab=async(id:string)=>{
+  const asset=importedStickers.find(item=>item.id===id);
+  if(!asset)return;
+  if(isPersonalCharacterAssetName(asset.name)){setStickerImportStatus('Los personajes personales siempre permanecen privados.');return;}
+  if(approvedShareIds.includes(id))return;
+  const next=[...approvedShareIds,id];
+  try{await writeEditorRecord('studio-lab-approved-shares-v1',next);
+   setApprovedShareIds(next);
+   setStickerImportStatus('Compartiendo '+asset.name+' con el Lab. Revisa el resultado de sincronización.');
+  }catch{setStickerImportStatus('No se pudo guardar el permiso para compartir.');}
+ };
+
  useEffect(()=>{
   let live=true;
   const restore=async()=>{
@@ -206,7 +240,7 @@ export default function SeamlessEditor(){
    }
    setStickerImportStatus(errorMessage
     ?(added?added+' guardados. Importación detenida: ':'')+errorMessage
-    :added?added+' stickers guardados en Studio. Sincronización con el Lab en proceso.'
+    :added?added+' recursos guardados solo en Studio. Puedes compartir los no personales desde cada tarjeta.'
     :'Estos recursos ya estaban guardados.');
    stickerImportInFlight.current=false;
    setImportingStickers(false);
@@ -214,7 +248,7 @@ export default function SeamlessEditor(){
  };
  const [libraryStatus,setLibraryStatus]=useState('');
  const backgroundPublishInput=useRef<HTMLInputElement>(null);
- const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus);
+ const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus,approvedShareIds);
  const [validBundledFiles,setValidBundledFiles]=useState<Set<string>|null>(null);
  const [unavailableBundledCount,setUnavailableBundledCount]=useState(0);
  useEffect(()=>{
@@ -226,6 +260,7 @@ export default function SeamlessEditor(){
   return()=>{live=false;};
  },[]);
  useEffect(()=>{let live=true;setLibraryStatus('Cargando biblioteca privada…');loadStudioLabAssets().then(items=>{if(live){setPrivateAssets(items);setLibraryStatus(items.length?'':'No se encontraron archivos accesibles con esta cuenta.')}}).catch(err=>{if(live)setLibraryStatus(err instanceof Error?err.message:'No se pudo cargar la biblioteca.')});return()=>{live=false}},[]);
+ useEffect(()=>{let live=true;loadStudioPrivateCharacterAssets().then(items=>{if(live)setPrivateCharacters(items)}).catch(()=>{});return()=>{live=false}},[]);
  const canvas=useRef<HTMLCanvasElement>(null);
  const workspaceRef=useRef<HTMLDivElement>(null);
  const previousLayerCount=useRef<number|null>(null);
