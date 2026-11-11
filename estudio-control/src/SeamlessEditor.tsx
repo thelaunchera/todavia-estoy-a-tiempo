@@ -17,7 +17,7 @@ import {isLayerDoubleTap,isStationaryTap,type LayerTap} from './double-tap';
 import {cutoutSolidBackground,originalBlobFromSource,restoreOriginalPhoto,storeOriginalPhoto} from './photo-background';
 import {readEditorRecord,writeEditorRecord} from './seamless-persistence';
 import {streamStickerZip} from './sticker-zip-import';
-import {isPersonalCharacterAssetName,organizedStudioKind} from './studio-asset-organization';
+import {isPersonalCharacterAssetName,isStudioBackgroundName,organizedStudioKind} from './studio-asset-organization';
 import {zipSync} from 'fflate';
 import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,SlidersHorizontal,RotateCw,FlipHorizontal,FlipVertical,Paintbrush,Trash2,Undo2,Redo2,Copy,Lock,Sun,Scissors,FolderOpen,X} from 'lucide-react';
 import './seamless-app.css';
@@ -1114,7 +1114,7 @@ export default function SeamlessEditor(){
         style={{...control,fontSize:11,minHeight:80,padding:6}}>
         <span style={{display:'block',height:42,background:color,borderRadius:7,border:'1px solid #ddd'}}/>{name}
       </button>)}
-      {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='background'&&!isPersonalCharacterAssetName(asset.name)),...privateAssets.filter(asset=>asset.category==='background')].filter((asset,index,all)=>all.findIndex(other=>other.name.toLowerCase()===asset.name.toLowerCase())===index).map(asset=><button type="button" key={asset.id}
+      {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='background'&&!isPersonalCharacterAssetName(asset.name)),...privateAssets.filter(asset=>asset.category==='background'||(asset.category==='sticker'&&isStudioBackgroundName(asset.name)))].filter((asset,index,all)=>all.findIndex(other=>other.name.toLowerCase()===asset.name.toLowerCase())===index).map(asset=><button type="button" key={asset.id}
         onClick={()=>{void keepStudioLabImage(asset.url).then(src=>setPrivateBackground(src)).catch(err=>setLibraryStatus(err instanceof Error?err.message:'No se pudo añadir el fondo'))}}
         style={{...control,padding:5,fontSize:11}}>
         <img src={asset.url} loading="lazy" alt="" style={{display:'block',width:'100%',height:58,objectFit:'contain'}}/>{asset.name}
@@ -1146,7 +1146,7 @@ export default function SeamlessEditor(){
             onClick={()=>setStickerCategory(category)}>{category}</button>)}
       </div>
       <div className="studio-sticker-gallery">
-        {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name)).map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker').map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
+        {[...importedStickers.filter(asset=>organizedStudioKind(asset,assetOverrides)==='sticker'&&!isPersonalCharacterAssetName(asset.name)).map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),...privateAssets.filter(asset=>asset.category==='sticker'&&!isStudioBackgroundName(asset.name)&&!isPersonalCharacterAssetName(asset.name)).map(asset=>({key:asset.id,name:asset.name,url:asset.url,file:'',remote:true})),
           ...LAB_ASSETS.filter(asset=>asset.category==='sticker'&&validBundledFiles?.has(asset.file)).map(asset=>({key:asset.id,name:asset.name,url:labUrl(asset.file),file:asset.file,remote:false}))]
            .filter((asset,index,all)=>all.findIndex(other=>other.name.toLocaleLowerCase('es')===asset.name.toLocaleLowerCase('es'))===index)
            .filter(asset=>asset.name.toLocaleLowerCase('es').includes(stickerSearch.trim().toLocaleLowerCase('es')))
