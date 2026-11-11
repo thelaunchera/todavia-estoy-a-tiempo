@@ -100,62 +100,118 @@ export default function SeamlessEditor(){
  const [stickerImportStatus,setStickerImportStatus]=useState('');
  const stickerInput=useRef<HTMLInputElement>(null);
  const stickerImportReady=useRef(false);
- useEffect(()=>{let live=true;readEditorRecord<StudioLabAsset[]>('studio-imported-stickers-v1').then(items=>{if(live){const originals=items||[];setImportedStickers(originals);stickerImportReady.current=true;
- void(async()=>{
-  const sorted=[...originals];let changed=false;
-  for(let index=0;index<sorted.length;index++){
-   const asset=sorted[index];
-   if(asset.category!=='sticker'||!asset.url.startsWith('data:image/'))continue;
-   try{
-    const blob=await(await fetch(asset.url)).blob();
-    const kind=await classifyAdminDesignAsset(new File([blob],asset.name+'.png',{type:blob.type}),asset.name);
-    if(kind==='background'){sorted[index]={...asset,category:'background'};changed=true;}
-   }catch{/* An unreadable legacy file is not replaced or deleted. */}
-  }
-  if(changed&&live){
-   await writeEditorRecord('studio-imported-stickers-v1',sorted);
-   setImportedStickers(sorted);
-  }
- })().catch(()=>{});}}).catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo.');});return()=>{live=false;};},[]);
+ const stickerImportInFlight=useRef(false);
+ const stickerObjectUrls=useRef<string[]>([]);
+ // New uploads: individual Files in IndexedDB, not one huge Base64 array.
+ // The v1 library stays untouched so existing stickers are preserved.
+ const STICKER_INDEX_V2='studio-imported-stickers-v2';
+ const stickerBlobKey=(id:string)=>'studio-sticker-blob-v2:'+id;
+ useEffect(()=>{
+  let live=true;
+  const restore=async()=>{
+   const [legacy,saved]=await Promise.all([
+    readEditorRecord<StudioLabAsset[]>('studio-imported-stickers-v1'),
+    readEditorRecord<StudioLabAsset[]>(STICKER_INDEX_V2)
+   ]);
+   const originals=Array.isArray(legacy)?legacy:[];
+   const restored:StudioLabAsset[]=[];
+   let unavailable=0;
+   for(const asset of Array.isArray(saved)?saved:[]){
+    if(!asset?.id||asset.url!=='studio-blob:'+asset.id)continue;
+    // Reopening the library requires neither decoding nor base64 conversion.
+    const image=await readEditorRecord<Blob>(stickerBlobKey(asset.id)).catch(()=>null);
+    if(!image){unavailable++;continue;}
+    const url=URL.createObjectURL(image);
+    if(!live){URL.revokeObjectURL(url);return;}
+    stickerObjectUrls.current.push(url);
+    restored.push({...asset,url});
+   }
+   if(!live)return;
+   const ids=new Set(originals.map(asset=>asset.id));
+   setImportedStickers([...originals,...restored.filter(asset=>!ids.has(asset.id))]);
+   stickerImportReady.current=true;
+   if(unavailable)setStickerImportStatus(unavailable+' recursos guardados no se pudieron abrir. Los demás siguen disponibles.');
+   // Do not eagerly decode every legacy Base64 asset on iPhone startup.
+  };
+  void restore().catch(()=>{if(live)setStickerImportStatus('No se pudo abrir la biblioteca guardada en este dispositivo. No se borró ningún archivo.');});
+  return()=>{live=false;stickerImportReady.current=false;stickerObjectUrls.current.forEach(url=>URL.revokeObjectURL(url));stickerObjectUrls.current=[];};
+ },[]);
  const importStickers=async(files:File[])=>{
   if(!stickerImportReady.current){setStickerImportStatus('La biblioteca todavía está cargando. Vuelve a intentarlo.');return;}
-  if(importingStickers)return;
-  setImportingStickers(true);setStickerImportStatus('Abriendo el paquete sin cerrar el Studio…');
+  if(stickerImportInFlight.current)return;
+  stickerImportInFlight.current=true;
+  setImportingStickers(true);
+  setStickerImportStatus('Abriendo el ZIP sin cerrar el Studio…');
+  const staged:StudioLabAsset[]=[];
+  let added=0,found=0,total=0;
+  let errorMessage='';
   try{
-   const next=[...importedStickers];let added=0,found=0,total=0;
-   const importImage=async(image:File)=>{
-    found++;total+=image.size;
-    if(found>CREATIVE_EDITOR_RULES.maxStickerImportCount||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
-    if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
-    setStickerImportStatus(`Preparando ${found}: ${image.name}`);
-    const hashBytes=await image.arrayBuffer();
-    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',hashBytes))).map(b=>b.toString(16).padStart(2,'0')).join('');
-    const id='studio-import-'+hash;
-    if(next.some(item=>item.id===id))return;
-    const url=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('No se pudo leer la imagen.'));reader.readAsDataURL(image);});
-    await new Promise<void>((resolve,reject)=>{const img=new Image();img.onload=()=>{img.src='';resolve()};img.onerror=()=>reject(Error('Imagen dañada: '+image.name));img.src=url;});
-    next.push({id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),category:await classifyAdminDesignAsset(image,image.name),url});added++;
-    await new Promise<void>(resolve=>requestAnimationFrame(()=>resolve()));
-   };
+   const index=(await readEditorRecord<StudioLabAsset[]>(STICKER_INDEX_V2))||[];
+   if(!Array.isArray(index))throw Error('No se pudo leer el índice de stickers. Ningún archivo anterior se ha borrado.');
+   const seen=new Set(importedStickers.map(item=>item.id));
    for(const file of files){
     if(file.size>CREATIVE_EDITOR_RULES.maxStickerZipBytes)throw Error('Cada ZIP debe pesar menos de 60 MB.');
+    const importImage=async(image:File)=>{
+     found++;total+=image.size;
+     if(found>CREATIVE_EDITOR_RULES.maxStickerImportCount||total>120_000_000)throw Error('Importa hasta 100 imágenes y 120 MB por tanda.');
+     if(image.size>18_000_000)throw Error('Cada imagen debe pesar menos de 18 MB.');
+     setStickerImportStatus('Guardando sticker '+found+': '+image.name);
+     const digest=await crypto.subtle.digest('SHA-256',await image.arrayBuffer());
+     const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+     const id='studio-import-'+hash;
+     if(seen.has(id))return;
+     const kind=await classifyAdminDesignAsset(image,image.name);
+     const asset:StudioLabAsset={
+      id,name:image.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' '),
+      category:kind,url:'studio-blob:'+id
+     };
+     // Per-image commits survive a later corrupt ZIP entry or quota failure.
+     try{
+      await writeEditorRecord(stickerBlobKey(id),image);
+      await writeEditorRecord(STICKER_INDEX_V2,[...index,asset]);
+     }catch(error){
+      if(error instanceof DOMException&&error.name==='QuotaExceededError')
+       throw Error('El iPhone no tiene espacio suficiente para estos stickers. Los anteriores están guardados.');
+      throw error;
+     }
+     index.push(asset);
+     seen.add(id);
+     const url=URL.createObjectURL(image);
+     stickerObjectUrls.current.push(url);
+     staged.push({...asset,url});
+     added++;
+     // Release the current archive chunk before handling the next picture.
+     await new Promise<void>(resolve=>setTimeout(resolve,0));
+    };
     if(/\.zip$/i.test(file.name)||/^(?:application\/(?:zip|x-zip-compressed))$/i.test(file.type)){
      await streamStickerZip(file,{
       maxImages:CREATIVE_EDITOR_RULES.maxStickerImportCount-found,
       maxImageBytes:18_000_000,
-      maxUnpackedBytes:120_000_000-total,
-     },async image=>importImage(image));
-    }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){await importImage(file);}
+      maxUnpackedBytes:120_000_000-total
+     },importImage);
+    }else if(/\.(png|jpe?g|webp)$/i.test(file.name)){
+     await importImage(file);
+    }
    }
    if(!found)throw Error('Selecciona PNG, JPG, WEBP o un ZIP que contenga imágenes.');
-   setStickerImportStatus('Guardando la biblioteca…');
-   await writeEditorRecord('studio-imported-stickers-v1',next);
-   setImportedStickers(next);setStickerSearch('');setStickerCategory('Todos');setQuickPanel(next.some(item=>item.category==='background')?'fondos':'stickers');setSidebarCollapsed(false);
-   setStickerImportStatus(added?`${added} recursos importados sin salir del Studio. Se publicarán en el Lab.`:'Estos recursos ya estaban guardados.');
-  }catch(error){setStickerImportStatus(error instanceof Error?error.message:'No se pudieron importar los stickers.');}
-  finally{setImportingStickers(false);}
+  }catch(error){
+   errorMessage=error instanceof Error?error.message:'No se pudieron importar todos los stickers.';
+  }finally{
+   if(staged.length){
+    setImportedStickers(current=>[...current,...staged.filter(asset=>!current.some(item=>item.id===asset.id))]);
+    setStickerSearch('');
+    setStickerCategory('Todos');
+    setQuickPanel(staged.some(item=>item.category==='background')?'fondos':'stickers');
+    setSidebarCollapsed(false);
+   }
+   setStickerImportStatus(errorMessage
+    ?(added?added+' guardados. Importación detenida: ':'')+errorMessage
+    :added?added+' stickers guardados en Studio. Sincronización con el Lab en proceso.'
+    :'Estos recursos ya estaban guardados.');
+   stickerImportInFlight.current=false;
+   setImportingStickers(false);
+  }
  };
-
  const [libraryStatus,setLibraryStatus]=useState('');
  const backgroundPublishInput=useRef<HTMLInputElement>(null);
  const {syncStatus,backgroundStatus,publishingBackgrounds,publishBackgrounds,retry}=useStudioLibrarySync(importedStickers,setPrivateAssets,setLibraryStatus);

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {zipSync,strToU8} from 'fflate';
+import {readFileSync} from 'node:fs';
 import {streamStickerZip} from '../src/sticker-zip-import.ts';
 
 const limits={maxImages:100,maxImageBytes:18_000_000,maxUnpackedBytes:120_000_000};
@@ -45,4 +46,41 @@ test('ZIP import rejects oversized expanded files without taking down the page',
   streamStickerZip(asZip(entries),{...limits,maxImageBytes:1024},async()=>{}),
   /mayor de 18 MB/
  );
+});
+
+
+test('30-sticker ZIP stays sequential and completes across small input chunks',async()=>{
+ const entries=Object.fromEntries(Array.from({length:30},(_,i)=>[
+  'pack/'+String(i+1).padStart(2,'0')+'.png',
+  Uint8Array.from({length:300_000},(_,n)=>(n*17+i*31)%251)
+ ]));
+ let processing=0,peak=0;
+ const names=[];
+ const result=await streamStickerZip(asZip(entries),limits,async(file,index)=>{
+  processing++;peak=Math.max(peak,processing);
+  assert.equal(index,names.length+1);
+  names.push(file.name);
+  await new Promise(resolve=>setTimeout(resolve,0));
+  processing--;
+ });
+ assert.equal(result.count,30);
+ assert.equal(result.totalBytes,9_000_000);
+ assert.equal(peak,1);
+ assert.equal(names[0],'01.png');
+ assert.equal(names.at(-1),'30.png');
+});
+
+test('Studio ZIP import persists one original Blob per sticker and preserves v1 library',()=>{
+ const editor=readFileSync(new URL('../src/SeamlessEditor.tsx',import.meta.url),'utf8');
+ const sync=readFileSync(new URL('../src/studio-library-sync.ts',import.meta.url),'utf8');
+ const zip=readFileSync(new URL('../src/sticker-zip-import.ts',import.meta.url),'utf8');
+ assert.match(editor,/readEditorRecord<StudioLabAsset\[\]>\('studio-imported-stickers-v1'\)/);
+ assert.match(editor,/studio-imported-stickers-v2/);
+ assert.match(editor,/writeEditorRecord\(stickerBlobKey\(id\),image\)/);
+ assert.match(editor,/writeEditorRecord\(STICKER_INDEX_V2,\[\.\.\.index,asset\]\)/);
+ assert.match(editor,/URL\.createObjectURL\(image\)/);
+ assert.match(editor,/URL\.revokeObjectURL\(url\)/);
+ assert.doesNotMatch(editor,/reader\.readAsDataURL\(image\)/);
+ assert.match(sync,/asset\.url\.startsWith\('blob:'\)/);
+ assert.match(zip,/INPUT_CHUNK_BYTES=32\*1024/);
 });
