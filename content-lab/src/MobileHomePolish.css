@@ -1,5 +1,9 @@
 /* Content Lab: targeted iPhone home polish.
    Existing logos, favicons, artwork, editors, saved projects and navigation stay untouched. */
+/* The resume affordance is a sibling of the thumbnail. Keep its containing
+   card positioned on desktop as well as iPhone; do not overlay the artwork. */
+.content[data-lab-tab="home"] .cld-project-card{position:relative}
+.content[data-lab-tab="home"] .cld-project-copy{padding-right:35px}
 @media(max-width:850px){
  .app-shell .top.lab-home-top{
    position:sticky;top:0;z-index:3;
