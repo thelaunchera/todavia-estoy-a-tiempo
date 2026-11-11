@@ -20,7 +20,7 @@ const IPHONE_DESCRIPTIONS:[RegExp,string][]=[
  [/voice message/i,'Mensaje de voz'],
  [/share contact/i,'Compartir contacto'],
  [/screenshot preview/i,'Vista previa de captura'],
- [/upload widget/i,'Subir archivos'],
+ [/upload\s+widg(?:et)?/i,'Subir archivos'],
  [/video call/i,'Videollamada'],
  [/route card/i,'Ruta en el mapa']
 ];
