@@ -1271,6 +1271,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const asset=ownedAssets.find(a=>a.id===id);
     if(!asset)return notify('Selecciona una foto de la biblioteca de esta marca.');
     if(!images[id])loadImage(id);
+    // Stickers already have a fixed, readable canvas size: don't wait for an
+    // image-decode promise before saving the layer (mobile taps can lose that race).
+    if(assetCategory(asset)==='sticker'){
+      addPanoramaAssets([{asset,point}]);
+      return;
+    }
     void photoAspectFromSource(images[id]).then(ratio=>{
       if(latestDraft.current.post.brandId===brand.id)addPanoramaAssets([{asset,point,ratio}]);
     });
