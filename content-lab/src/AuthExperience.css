@@ -9,7 +9,7 @@
 .lab-auth-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
 .lab-auth-lock{width:55px;height:55px;display:grid;place-items:center;border-radius:17px;background:#e7f2f7;color:#1f3945}
 .lab-auth-languages{display:flex;gap:4px;padding:4px;border-radius:999px;background:#f0f3f2}
-.lab-auth-languages button{font:700 11px/1.2 inherit;min-width:43px;min-height:32px;border-radius:999px;border:0;background:transparent;color:#73848a;cursor:pointer}
+.lab-auth-languages button{font:700 11px/1.2 inherit;min-width:43px;min-height:40px;border-radius:999px;border:0;background:transparent;color:#73848a;cursor:pointer}
 .lab-auth-languages button.selected{background:#fff;color:#20343e;box-shadow:0 1px 5px #1b374015}
 .lab-auth-kicker{margin:17px 0 9px!important;letter-spacing:.17em;font-size:10px!important;font-weight:800!important;color:#8ca0a9!important;line-height:1.4!important}
 .lab-auth-card h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(31px,5vw,39px);font-weight:400;line-height:1.12;letter-spacing:-.027em;margin:0;color:#1c2d34}
@@ -51,7 +51,7 @@
 .lab-auth-mail-stage h1,.lab-auth-mail-stage .lab-auth-kicker{text-align:center}
 .lab-auth-mail-stage .lab-auth-description{text-align:center}
 .lab-auth-resend{margin:20px 0 6px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;font-size:12px;color:#778991}
-.lab-auth-resend button,.lab-auth-text-button{border:0;background:transparent;color:#315f73;font-size:12px;text-decoration:underline;text-underline-offset:3px;font-weight:700;cursor:pointer;padding:7px}
+.lab-auth-resend button,.lab-auth-text-button{border:0;background:transparent;color:#315f73;font-size:12px;text-decoration:underline;text-underline-offset:3px;font-weight:700;cursor:pointer;padding:9px 7px;min-height:40px}
 .lab-auth-resend button:disabled{color:#92a2ab;text-decoration:none;cursor:default}
 .lab-auth-text-button{display:block;margin:6px auto 0;min-height:38px}
 .lab-auth-spin{animation:lab-auth-spin 1s linear infinite}
