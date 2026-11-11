@@ -747,3 +747,49 @@
 .touch-editor-outline-options input[type=range]{flex:1 1 110px;min-width:100px}
 .touch-editor-outline-options output{min-width:35px;font-weight:700;color:#191919}
 @media(max-width:390px){.touch-editor-outline-modes button{font-size:10px;padding:6px 3px}}
+
+
+/* Shared design language for the Lab & private Studio font shelf; only visible
+   sample faces load, keeping the scrolling interface responsive on iPhone. */
+.editor-font-shelf{display:grid;gap:9px;min-width:0;width:100%;max-width:100%;
+ background:#FAF8F3;color:#191919;border:1px solid #e4e1d9;border-radius:14px;padding:10px}
+.editor-font-shelf-header{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.editor-font-shelf-header>strong{font:750 13px/1.3 Prompt,Arial,sans-serif;white-space:nowrap}
+.editor-font-shelf-header input{min-width:120px;flex:1 1 130px;max-width:100%;height:44px;
+ border:1px solid #d4dddd;border-radius:10px;background:#fff;color:#191919;
+ padding:8px 12px;font:500 16px/1.2 Arial,sans-serif}
+.editor-font-shelf-categories{display:flex;gap:5px;min-width:0;width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.editor-font-shelf-categories button{flex:0 0 auto;min-height:42px;padding:7px 12px;border-radius:999px;
+ background:#fff;color:#41555b;border:1px solid #d5dcd9;font:700 11px/1.2 Prompt,Arial,sans-serif}
+.editor-font-shelf-categories button[aria-pressed=true]{color:#191919;background:#F2D85B;border-color:#d3b547}
+.editor-font-shelf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+ max-height:min(42dvh,260px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:2px}
+.editor-font-shelf-choice{display:grid;position:relative;align-content:center;gap:2px;min-width:0;min-height:79px;
+ padding:9px 8px;text-align:left;background:#fff;border:1px solid #dce0db;border-radius:11px;color:#191919}
+.editor-font-shelf-choice[aria-pressed=true]{border:2px solid #c9ad47;background:#fff9dc}
+.editor-font-shelf-sample{font-size:26px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.editor-font-shelf-name{font:650 10px/1.25 Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4a5961}
+.editor-font-shelf-check{position:absolute;right:7px;top:4px;color:#191919;font-weight:900;font-size:15px}
+.editor-font-shelf-empty{grid-column:1/-1;padding:12px;font-size:12px}
+.editor-font-shelf-note{font-size:10px;color:#62747b;line-height:1.4}
+.editor-font-shelf button:focus-visible{outline:3px solid #35819e;outline-offset:2px}
+@media(min-width:700px){.editor-font-shelf-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:310px}}
+@media(max-width:390px){.editor-font-shelf-choice{min-height:70px}.editor-font-shelf-sample{font-size:23px}}
+
+.touch-editor-context-inspector:has(.editor-font-shelf){max-height:min(63dvh,520px)!important;overflow-y:auto}
+.touch-editor-context-inspector .editor-font-shelf-list{max-height:min(37dvh,295px)}
+.touch-editor-app-effects{display:grid;gap:10px;padding:9px 1px;color:#284c57;font-size:12px}
+.touch-editor-app-effects>strong{font-size:13px;color:#191919}
+.touch-editor-app-effect-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.touch-editor-app-effect-modes button{min-height:44px;padding:7px 3px;border:1px solid #cbdadd;
+ border-radius:9px;color:#284c57;background:white;font-size:11px;font-weight:750}
+.touch-editor-app-effect-modes button[aria-pressed=true]{background:#F2D85B;border-color:#bfaa52;color:#191919}
+.touch-editor-app-effect-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:650}
+.touch-editor-app-effect-row label{display:flex;align-items:center;gap:6px;flex:1 1 110px}
+.touch-editor-app-effect-row input[type=range]{min-width:72px;flex:1;accent-color:#191919}
+.touch-editor-app-effect-row input[type=color]{height:41px;width:48px;border:1px solid #cbdadd;border-radius:8px}
+.touch-editor-app-effect-row output{min-width:30px}
+.touch-editor-context-position:has(.touch-editor-context-range){display:grid;gap:9px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.touch-editor-context-position .touch-editor-context-range{grid-column:1/-1}
+.touch-editor-context-dock{scroll-snap-type:x proximity}
+.touch-editor-context-dock>button{scroll-snap-align:start}
