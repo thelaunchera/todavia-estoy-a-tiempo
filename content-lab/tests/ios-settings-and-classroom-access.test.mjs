@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const root=(path)=>readFileSync(new URL('../../'+path,import.meta.url),'utf8');
+test('Lab Settings switches have real 84px spring motion and saved language preference',()=>{
+ const settings=read('src/AccountSettings.tsx');
+ const css=read('src/AccountSettings.css');
+ const app=read('src/App.tsx');
+ assert.ok(settings.includes('role="switch"'));
+ assert.ok(settings.includes('aria-checked={enabled}'));
+ assert.ok(settings.includes("onLanguage(on?'en':'es')"));
+ assert.ok(settings.includes("content-lab:settings-compact"));
+ assert.ok(settings.includes("content-lab:settings-motion"));
+ assert.ok(css.includes('width:84px;height:46px'));
+ assert.ok(css.includes('cubic-bezier(.22,1.35,.42,1)'));
+ assert.ok(css.includes(':active .lab-ios-settings-knob'));
+ assert.ok(css.includes('prefers-reduced-motion:reduce'));
+ assert.ok(app.includes('onLanguage={chooseLanguage}'));
+ assert.ok(app.includes('document.documentElement.dataset.labDensity='));
+});
+test('Classroom authentication keeps password and purchased-course authorization',()=>{
+ const js=root('alumnos/curso.js'),html=root('alumnos/index.html');
+ assert.ok(js.includes('db.auth.signInWithPassword({email,password})'));
+ assert.ok(js.includes('db.auth.signUp({'));
+ assert.ok(js.includes('db.auth.resend({type:'));
+ assert.ok(js.includes('db.from(\'podcast_studio_admins\')'));
+ assert.ok(js.includes('hasAulaSession(who.id)'));
+ assert.ok(html.includes('aula-access-premium-20261111.css'));
+ assert.ok(html.includes('aula-access-premium-20261111.js'));
+ assert.ok(html.includes('id="aula-email-stage"'));
+});
+test('Classroom check-email and expired-session states do not bypass login',()=>{
+ const js=root('alumnos/aula-access-premium-20261111.js');
+ const css=root('alumnos/aula-access-premium-20261111.css');
+ assert.ok(js.includes("kind==='register'"));
+ assert.ok(js.includes("tle-aula-email-resend"));
+ assert.ok(js.includes('readyAt=Date.now()+60000'));
+ assert.ok(js.includes('requestSubmit()'));
+ assert.ok(css.includes('body:not(.aula-member)'));
+ assert.ok(css.includes('aula-auth-expired'));
+ assert.ok(!js.includes('grantAccess('));
+});
