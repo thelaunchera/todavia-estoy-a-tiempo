@@ -46,7 +46,7 @@
    'If an account exists, follow the password recovery instructions sent to this email.'):
    (kind==='register'?'Si tu correo puede registrarse, sigue las instrucciones para confirmar tu cuenta.':
    'Si existe una cuenta, sigue las instrucciones para recuperar tu contraseña.');
-  resend.hidden=kind!=='reset';
+  resend.hidden=false;
   readyAt=Date.now()+60000;
   countdown();if(timer)clearInterval(timer);timer=setInterval(countdown,1000);
   stage.hidden=false;panel.dataset.emailStage='true';
@@ -65,10 +65,15 @@
   target?.click();input?.focus({preventScroll:true});
  });
  resend?.addEventListener('click',()=>{
-  if(lastKind!=='reset'||Date.now()<readyAt)return;
+  if(!lastKind||Date.now()<readyAt)return;
+  const kind=lastKind;
   readyAt=Date.now()+60000;countdown();
-  stage.hidden=true;panel.removeAttribute('data-email-stage');
-  document.getElementById('reset-email-form')?.requestSubmit();
+  if(kind==='reset'){
+   stage.hidden=true;panel.removeAttribute('data-email-stage');
+   document.getElementById('reset-email-form')?.requestSubmit();
+  }else if(kind==='register'){
+   window.dispatchEvent(new CustomEvent('tle-aula-email-resend',{detail:{mode:'signup',email:emailNode.textContent.trim()}}));
+  }
  });
  document.getElementById('aula-public-language')?.addEventListener('change',()=>{
   refillExpired();if(lastKind){const kind=lastKind;beginStage(kind);}
