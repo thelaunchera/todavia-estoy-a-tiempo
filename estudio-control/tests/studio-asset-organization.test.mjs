@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {isPersonalCharacterAssetName,isStudioBackgroundName,organizedStudioKind} from '../src/studio-asset-organization.ts';
+import {isPersonalCharacterAssetName,isSafeGenericStudioSticker,isStudioBackgroundName,organizedStudioKind} from '../src/studio-asset-organization.ts';
 
 test('all 16 imported illustrated characters remain owner-only',()=>{
  for(const name of ['01 zorra aventurera','02 pantera rosa','03 tigre guerrera','04 gata morada glam',
@@ -41,4 +41,24 @@ test('ZIP imports are private by default and require owner approval to publish',
  assert.match(studio,/Compartir en Lab/);
  assert.match(client,/if\(isPersonalCharacterAssetName\(displayName\|\|file\.name\)\)/);
  assert.match(client,/\.eq\('published',false\)/);
+});
+
+test('bulk sharing includes only generic elements and never characters, brand assets or backgrounds',()=>{
+ for(const value of ['28 marco tira film','17 marco oval cromo','30 anillo portal glitter',
+   '21 burbuja amarilla','22 subrayado rosa','05 blue checker tape','asterisco negro orgánico']){
+  if(value.includes('anillo portal'))continue; // ambiguous: deliberately stays private
+  assert.equal(isSafeGenericStudioSticker(value),true,value);
+ }
+ for(const value of ['11 heroina rayo azul','02 pantera rosa','05 osa exploradora',
+   'Nia ribbon','Ruby cinta roja','Golden Grid marco','SOVA etiqueta',
+   'The Launch Era logo','personal bow','logo TLE','04 E 16 Marfil Sombra Ramas',
+   '28 Hand Drawn Daisy Wallpaper','01 zorra aventurera','anillo portal glitter']){
+  assert.equal(isSafeGenericStudioSticker(value),false,value);
+ }
+ const studio=readFileSync(new URL('../src/SeamlessEditor.tsx',import.meta.url),'utf8');
+ const sync=readFileSync(new URL('../src/studio-library-sync.ts',import.meta.url),'utf8');
+ assert.match(studio,/isSafeGenericStudioSticker\(item\.name\)/);
+ assert.match(studio,/studio-lab-approved-shares-v1/);
+ assert.match(studio,/Compartir generales que falten en el Lab/);
+ assert.match(sync,/approvedShareIds\.includes\(item\.id\)/);
 });
