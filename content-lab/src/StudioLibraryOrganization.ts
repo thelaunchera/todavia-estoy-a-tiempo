@@ -78,3 +78,24 @@ export function matchesStickerCollection(asset:GroupableAsset,category:StickerCo
  if(category==='Mis stickers')return !asset.shared;
  return stickerCollectionFor(asset)===category;
 }
+
+/**
+ * Same image SHA means the same PNG, regardless of its display name.
+ * Dedupe cards only; NEVER remove records/files because saved designs can
+ * still reference an older asset ID.
+ * Shared and per-account private content remain independent collections.
+ */
+export function uniqueLibraryAssetCards<T extends {
+ id:string;sha256?:string|null;shared?:boolean
+}>(items:readonly T[]):T[]{
+ const ids=new Set<string>(),hashes=new Set<string>(),results:T[]=[];
+ for(const item of items){
+  if(ids.has(item.id))continue;
+  const sha=(item.sha256||'').toLowerCase();
+  const valid=/^[a-f0-9]{64}$/.test(sha);
+  const key=(item.shared?'shared:':'owner:')+sha;
+  if(valid&&hashes.has(key))continue;
+  ids.add(item.id);if(valid)hashes.add(key);results.push(item);
+ }
+ return results;
+}
