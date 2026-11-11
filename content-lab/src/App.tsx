@@ -14,6 +14,7 @@ import {validDate,type PlannedItem} from './CalendarPlannerModel';
 import ScheduleFromEditor from './ScheduleFromEditor';
 import AccountSettings from './AccountSettings';
 import InstallContentLab from './InstallContentLab';
+import AuthExperience from './AuthExperience';
 import PromptStudio from './PromptStudio';
 import OneProductEightPrompts from './OneProductEightPrompts';
 import IdeaBank, {type Idea} from './IdeaBank';
@@ -370,7 +371,10 @@ function App() {
     admin?:boolean;photo_remaining?:number;creative_remaining?:number;
     photo_today?:number;creative_today?:number;quota_day?:string;
   }|null>(null);
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginEmail, setLoginEmail] = useState(() => { try { return localStorage.getItem('content-lab:last-email') || ''; } catch { return ''; } });
+  const [expiredEmail, setExpiredEmail] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [resendReadyAt, setResendReadyAt] = useState(0);
   const [pendingEmail, setPendingEmail] = useState('');
   const [loginCode, setLoginCode] = useState('');
   const [loginStage, setLoginStage] = useState<'email'|'code'>('email');
@@ -516,7 +520,12 @@ function App() {
         'No se pudo completar.'
     );
   };
+  const loginErrorMessage = (error: unknown): string => {
+    if(error instanceof Error && error.message)return error.message;
+    return loginLanguage==='es'?'No pudimos verificar tu acceso. Inténtalo de nuevo.':'We could not verify your sign-in. Please try again.';
+  };
   const requestLoginCode = async () => {
+    setLoginError('');
     setLoginBusy(true);
     try {
       const email = loginEmail.trim();
@@ -525,24 +534,31 @@ function App() {
       setPendingEmail(email);
       setLoginStage('code');
       setLoginCode('');
-      toast(loginLanguage==='es'?'Revisa tu correo y escribe el código aquí, sin salir del Lab.':'Check your inbox and enter the code here, without leaving the Lab.');
-    } catch (e) {err(e);} finally {setLoginBusy(false);}
+      // Keep resends below the provider rate limit; no automated repeat emails.
+      setResendReadyAt(Date.now()+60_000);
+    } catch (e) {setLoginError(loginErrorMessage(e));} finally {setLoginBusy(false);}
   };
   const confirmLoginCode = async () => {
+    setLoginError('');
     setLoginBusy(true);
     try {
-      // OTP verifies in this very browser/PWA context. No cross-app magic-link navigation.
-      await auth.verifyEmailOtp(pendingEmail, loginCode.replace(/\s/g,''));
+      // OTP creates a session in this same web/PWA context.
+      await auth.verifyEmailOtp(pendingEmail, loginCode.replace(/\\s/g,''));
       const user = await auth.getUser();
       if (!user) {
         await auth.signOut();
-        throw Error(loginLanguage==='es'?'Este correo aún no tiene acceso privado. El acceso para compradores se habilitará después de la compra.':'This email does not have private access yet. Customer access opens after purchase.');
+        throw Error(loginLanguage==='es'?'Este correo aún no tiene acceso privado. El acceso para compradores se habilita después de la compra.':'This email does not have private access yet. Buyer access opens after purchase.');
       }
       await reload();
       await auth.setPreferredLanguage(loginLanguage).catch(()=>{});
+      try {
+        localStorage.setItem('content-lab:last-email',user.email||pendingEmail);
+        sessionStorage.removeItem('content-lab:expired-email');
+      }catch{}
+      setExpiredEmail('');
       setAccount(user);
       setLoginCode('');
-    } catch (e) {err(e);} finally {setLoginBusy(false);}
+    } catch (e) {setLoginError(loginErrorMessage(e));} finally {setLoginBusy(false);}
   };
   const reload = async () => {
     const { data } = await api.get('/api/data');
@@ -589,12 +605,22 @@ function App() {
       .getUser()
       .then(async u => {
         setAccount(u);
-        if (u)
+        if (u) {
+          try {
+            localStorage.setItem('content-lab:last-email',u.email||'');
+            sessionStorage.removeItem('content-lab:expired-email');
+          }catch{}
           try {
             await reload();
           } catch (e) {
             err(e);
           }
+        } else {
+          try {
+            const expired=sessionStorage.getItem('content-lab:expired-email')||'';
+            if(expired){setExpiredEmail(expired);setLoginEmail(expired);}
+          }catch{}
+        }
       })
       .catch(err)
       .finally(() => setWaiting(false));
@@ -611,6 +637,9 @@ function App() {
       void auth.checkIdle().then(valid=>{
         if(!valid){
           setLoginEmail(account.email||'');
+          setExpiredEmail(account.email||'');
+          try{sessionStorage.setItem('content-lab:expired-email',account.email||'')}catch{}
+          setLoginError('');
           setAccount(null);setAiWallet(null);setLoginStage('email');setLoginCode('');
           setPosts([]);setImages({});setAssets([]);setBrands([]);
           setCurrent('');setTab('home');
@@ -1556,81 +1585,29 @@ function App() {
     );
   if (!account)
     return (
-      <div className="login">
-        <section className="login-left">
-          <div className="logo light">
-            the content lab<span>.</span>
-          </div>
-          <div>
-            <div className="eyebrow">{t('YOUR PRIVATE CREATIVE SPACE')}</div>
-            <h1>
-              {t("Less scrolling.")}
-              <br />
-              <em>{t("More creating.")}</em>
-            </h1>
-            <p>{t('A thoughtful home for your ideas, brands and content.')}</p>
-          </div>
-          <div className="login-tags">
-            <span>{t('CREATE')}</span>
-            <span>{t('CURATE')}</span>
-            <span>{t('PUBLISH')}</span>
-          </div>
-        </section>
-        <section className="login-right">
-          <div className="login-card">
-            <div className="lockcircle">
-              <LockKeyhole size={23} />
-            </div>
-            <p className="lab-language-question">{loginLanguage==='es'?'Elige el idioma de tu cuenta':'Choose your account language'}</p>
-            <div className="lab-login-language" role="group" aria-label="Idioma / Language">
-              <button type="button" className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')} aria-pressed={loginLanguage==='es'}>Español</button>
-              <button type="button" className={loginLanguage==='en'?'active':''} onClick={()=>chooseLanguage('en')} aria-pressed={loginLanguage==='en'}>English</button>
-            </div>
-            <div className="eyebrow">{loginLanguage==='es'?'TU ESPACIO CREATIVO PRIVADO':'YOUR PRIVATE CREATIVE SPACE'}</div>
-            <h2>{loginLanguage==='es'?'Tu Content Lab.':'Your Content Lab.'}</h2>
-            <p>{loginLanguage==='es'
-                ? 'Entra con un código enviado a tu correo. Por seguridad, necesitarás uno nuevo cada 24 horas. Tus fotos y proyectos se conservan.'
-                : 'Sign in with a code sent to your email. For security, you will need a new code every 24 hours. Your photos and projects are kept.'}</p>
-            {!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL && (
-              <p role="status" style={{background:'#e9f3f5',padding:12,borderRadius:9,color:'#426a7a',fontSize:12}}>
-                {loginLanguage==='es'?'El acceso está temporalmente no disponible. Puedes usar los 8 prompts gratuitos mientras tanto.':'Access is temporarily unavailable. You can still use the 8 free prompts.'}
-              </p>
-            )}
-            {loginStage==='email'?(
-              <form onSubmit={e=>{e.preventDefault();void requestLoginCode()}}>
-                <label htmlFor="lab-email">{loginLanguage==='es'?'Correo electrónico':'Email address'}</label>
-                <input id="lab-email" type="email" required placeholder={loginLanguage==='es'?'Tu correo autorizado':'Your authorized email'} autoComplete="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}/>
-                <button className="btn dark wide" type="submit" disabled={loginBusy||!import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL}>
-                  {loginBusy?<LoaderCircle size={18}/>:<ArrowRight size={18}/>}
-                  {loginLanguage==='es'?'Enviar código de acceso':'Send sign-in code'}
-                </button>
-              </form>
-            ):(
-              <form onSubmit={e=>{e.preventDefault();void confirmLoginCode()}}>
-                <p className="lab-login-address">{loginLanguage==='es'?'Código para':'Code for'} <strong>{pendingEmail}</strong></p>
-                <label htmlFor="lab-code">{loginLanguage==='es'?'Código de tu correo':'Code from your email'}</label>
-                <input id="lab-code" type="text" inputMode="numeric" pattern="[0-9]{6,8}" minLength={6} maxLength={8} required autoComplete="one-time-code" autoCapitalize="off" autoCorrect="off" placeholder="••••••" value={loginCode} onChange={e=>setLoginCode(e.target.value.replace(/\D/g,'').slice(0,8))}/>
-                <button className="btn dark wide" type="submit" disabled={loginBusy||loginCode.length<6}>
-                  {loginBusy?<LoaderCircle size={18}/>:<ShieldCheck size={18}/>}
-                  {loginLanguage==='es'?'Entrar a mi Content Lab':'Open my Content Lab'}
-                </button>
-                <button className="lab-login-back" type="button" disabled={loginBusy} onClick={()=>{setLoginStage('email');setLoginCode('')}}>
-                  {loginLanguage==='es'?'Cambiar correo o solicitar otro código':'Change email or request another code'}
-                </button>
-                <small className="lab-login-hint">{loginLanguage==='es'
-                   ? 'Introduce el código recibido por correo. Si no lo ves, revisa también spam y promociones.'
-                   : 'Enter the code we emailed you. If you cannot find it, check spam and promotions.'}</small>
-              </form>
-            )}
-            
-            <InstallContentLab locale={loginLanguage} compact/>
-            <a href="./prompts/" className="btn ghost wide" style={{marginTop:12}}>{loginLanguage==='es'?'Usar los 8 Master Prompts gratis':'Try the 8 free Master Prompts'}</a>
-            <a href="./descubre/" className="btn ghost wide" style={{marginTop:8}}>{loginLanguage==='es'?'Ver qué incluye Content Lab':'See what Content Lab includes'}</a>
-            <a className="lab-login-purchase" href="https://buy.stripe.com/14AdR8dHp6Dnd8B1IM93y0Z" target="_blank" rel="noopener noreferrer">{loginLanguage==='es'?'Compra única · $10 USD':'One-time purchase · $10 USD'}</a>
-            <small><ShieldCheck size={16}/>{loginLanguage==='es'?'Sin suscripción · Actualizaciones mensuales incluidas · Acceso personal':'No subscription · Monthly updates included · Private access'}</small>
-          </div>
-        </section>
-      </div>
+      <AuthExperience
+        language={loginLanguage}
+        email={loginEmail}
+        pendingEmail={pendingEmail}
+        code={loginCode}
+        stage={loginStage}
+        busy={loginBusy}
+        configured={Boolean(import.meta.env.VITE_CONTENT_LAB_SUPABASE_URL)}
+        expiredEmail={expiredEmail}
+        resendReadyAt={resendReadyAt}
+        error={loginError}
+        onLanguage={chooseLanguage}
+        onEmail={value=>{setLoginEmail(value);setLoginError('')}}
+        onCode={value=>{setLoginCode(value);setLoginError('')}}
+        onRequestCode={()=>{void requestLoginCode()}}
+        onVerifyCode={()=>{void confirmLoginCode()}}
+        onBack={()=>{setLoginStage('email');setLoginCode('');setLoginError('')}}
+        onChangeAccount={()=>{
+          setExpiredEmail('');setLoginEmail('');setLoginStage('email');
+          setLoginCode('');setLoginError('');
+          try{sessionStorage.removeItem('content-lab:expired-email')}catch{}
+        }}
+      />
     );
   return (
     <div className={tab === 'factory' ? 'app-shell lab-carousel-editor-mode' : 'app-shell'} lang={loginLanguage==='es'?'es-419':'en'}>
@@ -1741,6 +1718,8 @@ function App() {
             onClick={() => {
               clearNavigationPlace('content-lab',account.email||'');
               navReadyRef.current=false;setNavReady(false);navOwnerRef.current='';
+              setExpiredEmail('');setLoginError('');
+              try{sessionStorage.removeItem('content-lab:expired-email')}catch{}
               void auth.signOut().then(() => setAccount(null));
             }}
           >
