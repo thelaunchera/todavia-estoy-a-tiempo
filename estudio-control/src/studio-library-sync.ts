@@ -65,7 +65,7 @@ export function useStudioLibrarySync(
     setSyncStatus('Organizando '+missing.length+' recursos en Stickers y Fondos del Lab…');
     for(const asset of missing){
      try{
-      if(!asset.url.startsWith('data:image/'))throw Error('Archivo local no disponible.');
+      if(!asset.url.startsWith('data:image/')&&!asset.url.startsWith('blob:'))throw Error('Archivo local no disponible.');
       const blob=await(await fetch(asset.url)).blob();
       const ext=blob.type==='image/webp'?'.webp':blob.type==='image/jpeg'?'.jpg':'.png';
       const input=new File([blob],asset.name+ext,{type:blob.type});
