@@ -116,6 +116,20 @@
  .aula-email-stage button:disabled{opacity:.5;cursor:not-allowed;text-decoration:none}
  .aula-email-stage button:focus-visible,.aula-auth-modes button:focus-visible{outline:3px solid #82b2c9;outline-offset:2px}
 }
+
+/* A session that timed out gets a centered secure overlay over a blurred
+   decorative workspace, never previously fetched private lesson data. */
+body:not(.aula-member) .aula-entry:has(#login-panel:not([hidden]) #aula-auth-expired:not([hidden])):before{
+ content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:repeating-linear-gradient(90deg,#dde7e8 0 11%,#f5f7f4 11% 21%,#dbe8ea 21% 31%);
+ opacity:.4;filter:blur(10px)
+}
+body:not(.aula-member) .aula-entry:has(#login-panel:not([hidden]) #aula-auth-expired:not([hidden])) .aula-entry-layout{
+ position:relative;z-index:1
+}
+body:not(.aula-member) .aula-entry:has(#login-panel:not([hidden]) #aula-auth-expired:not([hidden])) .aula-auth-card{
+ box-shadow:0 30px 90px #1a344542
+}
 @media(max-width:750px){
  .aula-access-floating{display:none}
  body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])){
