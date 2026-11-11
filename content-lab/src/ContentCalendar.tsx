@@ -5,6 +5,7 @@ import {localDate,monthCells,plannedItems,validDate,validTime,contentKind,conten
 import './ContentCalendar.css';
 
 type Props={
+ refreshRevision:number;
  brand:{id:string;name:string};posts:CalendarPost[];images:Record<string,string>;focusDate?:string;
  onPostSaved:(post:CalendarPost)=>void;loadImage:(id:string)=>void;
  onNewPost:()=>void;onOpenGrid:()=>void;onEditItem:(item:PlannedItem)=>void;
@@ -39,7 +40,7 @@ const dateLabel=(d:string,language:'es'|'en')=>{
  const [year,month,day]=d.split('-').map(Number);
  return new Intl.DateTimeFormat(language==='es'?'es-US':'en-US',{day:'numeric',month:'short',year:'numeric'}).format(new Date(year,month-1,day));
 };
-export default function ContentCalendar({brand,posts,images,focusDate,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,onDownloadItem,onDeleteItem,locale,notify,showError}:Props){
+export default function ContentCalendar({brand,posts,images,focusDate,refreshRevision,onPostSaved,loadImage,onNewPost,onOpenGrid,onEditItem,onDownloadItem,onDeleteItem,locale,notify,showError}:Props){
  const lang=labels[locale],today=useMemo(()=>new Date(),[]);
  const [month,setMonth]=useState(()=>validDate(focusDate||'')?new Date(Number(focusDate!.slice(0,4)),Number(focusDate!.slice(5,7))-1,1):new Date(today.getFullYear(),today.getMonth(),1));
  const [selectedDay,setSelectedDay]=useState(()=>validDate(focusDate||'')?focusDate!:localDate(today));
@@ -51,12 +52,13 @@ export default function ContentCalendar({brand,posts,images,focusDate,onPostSave
  const [actionBusy,setActionBusy]=useState('');
  useEffect(()=>{
   let mounted=true;
-  setGrids([]);setKey('');setLoading(true);setLoadError('');
+  if(refreshRevision===0){setGrids([]);setKey('')}
+  setLoading(true);setLoadError('');
   void api.get('/api/grids').then(({data})=>{if(mounted)setGrids((data.grids||[]) as CalendarGrid[])}).catch(e=>{
    if(mounted){setLoadError(locale==='es'?'No se pudieron cargar las campañas.':'Unable to load campaigns.');showError(e)}
   }).finally(()=>{if(mounted)setLoading(false)});
   return()=>{mounted=false};
- },[brand.id]);
+ },[brand.id,refreshRevision]);
  const options=useMemo(()=>[
   ...posts.filter(p=>p.brandId===brand.id&&p.id).map(p=>({
    key:'post:'+p.id!,title:(p.title||p.hook||'Post')+' · '+contentKindLabel(p.format||'',locale),date:p.date||'',time:p.time||'09:00'

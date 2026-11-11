@@ -1,10 +1,10 @@
-import {useEffect, useMemo, useRef} from 'react';
-import {ArrowRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Layers3, Lightbulb, Plus, Sparkles} from 'lucide-react';
+import {useMemo} from 'react';
+import {ArrowRight, BookOpen, ChevronRight, FolderOpen, Layers3, Lightbulb, Plus, Sparkles} from 'lucide-react';
 import {readCarouselDesign} from './CarouselArtDirection';
 import ProjectCover,{type CoverPost} from './ProjectCover';
 import type {Brand as CarouselBrand} from './CarouselFactory';
-import {assetCategory,type LibraryAsset} from './MediaAsset';
-import {UniversalLabIcon} from './UniversalLabIcon';
+import type {LibraryAsset} from './MediaAsset';
+import {DashboardIllustration} from './DashboardIllustration';
 import './CreatorDashboard.css';
 
 export type CreatorDashboardPost = CoverPost & {angle:string;status:string};
@@ -40,35 +40,17 @@ export default function CreatorDashboard({
  onNewStory,onEditPost,onNavigate,onEditBrand
 }:Props){
  const es=locale==='es';
- const [recent,libraryPhotos]=useMemo(()=>{
-  const recent=posts.map((post,index)=>({post,index}))
-   .sort((a,b)=>safeDate(b.post.updatedAt)-safeDate(a.post.updatedAt)||b.index-a.index)
-   .slice(0,4);
-  const libraryPhotos=library.filter(a=>['original','reference','generated','screenshot'].includes(assetCategory(a))&&!a.bundled).slice(0,5);
-  return [recent,libraryPhotos] as const;
- },[posts,library]);
- const attempted=useRef(new Set<string>());
- useEffect(()=>{
-  const ids=libraryPhotos.map(asset=>asset.id);
-  ids.forEach(id=>{
-   if(!id||images[id]||attempted.current.has(id))return;
-   attempted.current.add(id);
-   void loadImage(id);
-  });
- },[recent,libraryPhotos,images,loadImage]);
+ const recent=useMemo(()=>posts.map((post,index)=>({post,index}))
+  .sort((a,b)=>safeDate(b.post.updatedAt)-safeDate(a.post.updatedAt)||b.index-a.index)
+  .slice(0,4),[posts]);
  const formats=[
   {key:'normal',title:es?'Normal':'Normal',detail:es?'Slides independientes':'Separate slides',eyebrow:'CAROUSEL · 4:5',go:onNewNormal},
   {key:'seamless',title:'Seamless',detail:es?'Diseño continuo':'Continuous canvas',eyebrow:'CAROUSEL · 4:5',go:onNewSeamless},
   {key:'post',title:es?'Post individual':'Single post',detail:es?'Una idea, una imagen':'One idea, one image',eyebrow:'POST · 4:5',go:()=>onNewPost()},
   {key:'story',title:es?'Historia':'Story',detail:es?'Formato vertical':'Vertical format',eyebrow:'STORY · 9:16',go:onNewStory}
  ] as const;
- // Four fixed, non-personal product examples: identical for every brand.
- const cardPhotos={
-  normal:`${import.meta.env.BASE_URL}dashboard/soluna-matcha.webp`,
-  seamless:`${import.meta.env.BASE_URL}dashboard/sova-headphones.png`,
-  post:`${import.meta.env.BASE_URL}dashboard/casa-brownie-gift-box.png`,
-  story:`${import.meta.env.BASE_URL}dashboard/golden-grid-waffles.png`,
- } as const;
+ // Shared artwork, never photos from a customer's library.
+ const formatArtwork={normal:'carousel',seamless:'seamless',post:'post',story:'story'} as const;
  const formatLabel=(post:CreatorDashboardPost)=>{
   const kind=postKind(post);
   return kind==='seamless'?'Seamless':kind==='normal'?(es?'Carrusel normal':'Carousel'):
@@ -103,7 +85,7 @@ export default function CreatorDashboard({
    <div className="cld-format-grid">
     {formats.map((item,index)=><button type="button" key={item.key} className={'cld-format-card cld-format-'+item.key} onClick={item.go} aria-label={(es?'Crear ':'Create ')+item.title}>
      <span className={'cld-format-art cld-art-'+item.key} aria-hidden="true">
-      <img className="cld-format-photo" src={cardPhotos[item.key]} loading="lazy" decoding="async" alt=""/>
+      <DashboardIllustration className="cld-format-illustration" name={formatArtwork[item.key]} size={134}/>
      </span>
      <span className="cld-format-meta">{item.eyebrow}</span>
      <span className="cld-format-name">{item.title}<span className="cld-format-plus"><Plus size={16}/></span></span>
@@ -140,30 +122,30 @@ export default function CreatorDashboard({
    </div>
    <div className="cld-resource-grid">
     <button type="button" className="cld-resource-card cld-resource-media" onClick={()=>onNavigate('media')}>
-     <span className="cld-resource-icon"><UniversalLabIcon name="media" size={37}/></span><strong>{es?'Mis fotografías':'My photos'}</strong><small>{es?'Tus imágenes y archivos':'Your images and files'}</small>
-     <span className="cld-resource-media-strip" aria-hidden="true">
-      {libraryPhotos.length>0?libraryPhotos.slice(0,3).map(a=><span key={a.id}>{images[a.id]&&<img src={images[a.id]} alt=""/>}</span>):<><i/><i/><i/></>}
+     <span className="cld-resource-icon"><DashboardIllustration name="media" size={39}/></span><strong>{es?'Mis fotografías':'My photos'}</strong><small>{es?'Tus imágenes y archivos':'Your images and files'}</small>
+     <span className="cld-resource-feature" aria-hidden="true">
+      <DashboardIllustration name="media" size={92}/>
      </span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-elements" onClick={()=>onNavigate('stickers')}>
-     <span className="cld-resource-icon"><UniversalLabIcon name="stickers" size={37}/></span><strong>{es?'Stickers y elementos':'Stickers & elements'}</strong><small>{es?'Detalles para diseñar':'Details for your designs'}</small>
-     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="stickers" size={83}/></span>
+     <span className="cld-resource-icon"><DashboardIllustration name="stickers" size={39}/></span><strong>{es?'Stickers y elementos':'Stickers & elements'}</strong><small>{es?'Detalles para diseñar':'Details for your designs'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><DashboardIllustration name="stickers" size={92}/></span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-prompts" onClick={()=>onNavigate('prompts')}>
-     <span className="cld-resource-icon"><UniversalLabIcon name="prompts" size={37}/></span><strong>{es?'Biblioteca de prompts':'Prompt library'}</strong><small>{es?'Ideas para crear mejor':'Ideas to create better'}</small>
-     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="prompts" size={86}/></span>
+     <span className="cld-resource-icon"><DashboardIllustration name="prompts" size={39}/></span><strong>{es?'Biblioteca de prompts':'Prompt library'}</strong><small>{es?'Ideas para crear mejor':'Ideas to create better'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><DashboardIllustration name="prompts" size={92}/></span>
     </button>
     <button type="button" className="cld-resource-card cld-resource-brand" onClick={onEditBrand}>
-     <span className="cld-resource-icon"><UniversalLabIcon name="brand" size={37}/></span><strong>{es?'Mi Brand Kit':'My Brand Kit'}</strong><small>{es?'Colores y estilo de marca':'Brand colors and style'}</small>
-     <span className="cld-resource-feature" aria-hidden="true"><UniversalLabIcon name="brand" size={84}/></span>
+     <span className="cld-resource-icon"><DashboardIllustration name="brand" size={39}/></span><strong>{es?'Mi Brand Kit':'My Brand Kit'}</strong><small>{es?'Colores y estilo de marca':'Brand colors and style'}</small>
+     <span className="cld-resource-feature" aria-hidden="true"><DashboardIllustration name="brand" size={92}/></span>
     </button>
    </div>
   </section>
   <section className="cld-bottom-panel" aria-label={es?'Ideas y organización':'Ideas and planning'}>
-   <div className="cld-inspiration"><span className="cld-section-kicker">{es?'¿NECESITAS UNA IDEA?':'NEED AN IDEA?'}</span><h3>{es?'La inspiración también se diseña.':'Inspiration is part of the process.'}</h3><div className="cld-inspiration-actions">
+   <div className="cld-inspiration"><span className="cld-inspiration-icon"><DashboardIllustration name="stickers" size={31}/></span><span className="cld-section-kicker">{es?'¿NECESITAS UNA IDEA?':'NEED AN IDEA?'}</span><h3>{es?'La inspiración también se diseña.':'Inspiration is part of the process.'}</h3><div className="cld-inspiration-actions">
     {ideaActions.map(a=><button type="button" key={a.angle} onClick={()=>onNewPost(a.angle)}><a.icon size={15}/>{a.label}</button>)}
    </div><button type="button" className="cld-textlink" onClick={()=>onNavigate('idea-bank')}>{es?'Explorar banco de ideas':'Browse idea bank'}<ArrowRight size={15}/></button></div>
-   <div className="cld-planning"><CalendarDays size={24}/><h3>{es?'Tu contenido, organizado.':'Your content, organized.'}</h3><p>{es?'Planifica lo que vas a publicar sin salir de tu espacio creativo.':'Plan what you will publish without leaving your creative space.'}</p><button type="button" onClick={()=>onNavigate('calendar')}>{es?'Abrir calendario':'Open calendar'}<ArrowRight size={16}/></button></div>
+   <div className="cld-planning"><DashboardIllustration name="calendar" size={46}/><h3>{es?'Tu contenido, organizado.':'Your content, organized.'}</h3><p>{es?'Planifica lo que vas a publicar sin salir de tu espacio creativo.':'Plan what you will publish without leaving your creative space.'}</p><button type="button" onClick={()=>onNavigate('calendar')}>{es?'Abrir calendario':'Open calendar'}<ArrowRight size={16}/></button></div>
   </section>
   <details className="cld-activity"><summary>{es?'Ver actividad de esta marca':'View brand activity'}<ChevronRight size={15}/></summary>
    <div className="cld-activity-stats">

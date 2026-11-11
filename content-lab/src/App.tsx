@@ -403,6 +403,8 @@ function App() {
   },[account?.email]);
 
   const [waiting, setWaiting] = useState(true);
+  const [refreshing,setRefreshing]=useState(false);
+  const [gridRefreshRevision,setGridRefreshRevision]=useState(0);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -934,6 +936,45 @@ function App() {
       setBusy('');
       setSavePulse(n=>n+1);
     }
+  };
+
+  // Refresh account content without navigating away, resetting editors or clearing customer data.
+  const refreshLab=async()=>{
+    if(refreshing||busy||saveInFlightRef.current){
+      toast(loginLanguage==='es'?'Termina el guardado actual antes de actualizar.':'Finish saving before refreshing.');
+      return;
+    }
+    if(brandForm){
+      toast(loginLanguage==='es'?'Guarda o cancela los cambios de tu marca antes de actualizar.':'Save or cancel brand changes before refreshing.');
+      return;
+    }
+    const inEditor=['factory','vertical','create'].includes(tab);
+    if(inEditor&&recovery){
+      toast(loginLanguage==='es'?'Recupera o descarta el borrador pendiente antes de actualizar.':'Restore or dismiss the pending draft before refreshing.');
+      return;
+    }
+    setRefreshing(true);
+    try{
+      if(inEditor&&account?.email&&editorLatestRef.current.brandId){
+        const draft=editorLatestRef.current;
+        const fingerprint=draftFingerprint(draft),session=editorSessionRef.current;
+        if(fingerprint!==lastSavedFingerprintRef.current){
+          writeDraftBackup(account.email,draft);
+          const ok=await save(draft,true);
+          if(!ok){
+            toast(loginLanguage==='es'?'No se pudo guardar. El diseño sigue abierto; no lo hemos actualizado.':'Could not save. Your design remains open and was not refreshed.');
+            return;
+          }
+          if(editorSessionRef.current!==session||draftFingerprint(editorLatestRef.current)!==fingerprint){
+            toast(loginLanguage==='es'?'Hay cambios nuevos. Guárdalos antes de actualizar.':'New edits were made. Save them before refreshing.');
+            return;
+          }
+        }
+      }
+      await reload();
+      setGridRefreshRevision(n=>n+1);
+      toast(loginLanguage==='es'?'Contenido actualizado. Sigues en la misma pantalla.':'Content refreshed. You are still on the same screen.');
+    }catch(e){err(e)}finally{setRefreshing(false)}
   };
   const saveAndStartAnotherCarousel=async():Promise<boolean>=>{
     if(!brand||editorLatestRef.current.brandId!==brand.id)return false;
@@ -1631,6 +1672,12 @@ function App() {
           </div>
           <div>
             <LabNotifications email={account.email||''} locale={loginLanguage} onOpen={openLabAlert} notify={toast}/>
+            <button type="button" className="lab-refresh-control" aria-label={loginLanguage==='es'?'Actualizar Content Lab':'Refresh Content Lab'}
+              title={loginLanguage==='es'?'Actualizar contenido sin salir de esta pantalla':'Refresh content without leaving this screen'}
+              disabled={refreshing||!!busy} onClick={()=>void refreshLab()}>
+              {refreshing?<LoaderCircle size={17} className="spin"/>:<RotateCcw size={17}/>}
+              <span>{loginLanguage==='es'?'Actualizar':'Refresh'}</span>
+            </button>
             <div className="lab-site-locale" role="group" aria-label="Idioma del sitio / Site language">
               <button type="button" aria-pressed={loginLanguage==='es'}
                 className={loginLanguage==='es'?'active':''} onClick={()=>chooseLanguage('es')}>ES</button>
@@ -1764,7 +1811,7 @@ function App() {
               loadImage={imageLoad}
               notify={toast}
               showError={err}
-            /> : <LiveFeedGrid brand={brand} posts={posts} images={images}
+            /> : <LiveFeedGrid brand={brand} posts={posts} images={images} refreshRevision={gridRefreshRevision}
                 locale={loginLanguage} loadImage={id=>{void imageLoad(id)}}
                 onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
                 onOpenEditor={openCalendarItem}
@@ -1774,7 +1821,7 @@ function App() {
                 notify={toast} showError={err}/>
           )}
           {brand && tab === 'calendar' && (
-            <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
+            <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage} refreshRevision={gridRefreshRevision}
               focusDate={calendarFocusDate} onEditItem={openCalendarItem}
               onDownloadItem={downloadCalendarProject}
               onDeleteItem={async item=>{

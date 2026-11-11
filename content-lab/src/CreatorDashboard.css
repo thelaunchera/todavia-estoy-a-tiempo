@@ -245,3 +245,23 @@
   .cld-eyebrow{max-width:calc(100% - 118px);font-size:8px}
   .cld h1{font-size:30px}
 }
+
+/* Universal format + workspace art: crisp vector shapes, no product or private photos. */
+.cld-format-art{display:flex;align-items:center;justify-content:center;background:#F7F9F9}
+.cld-art-normal{background:#EDF5F8}
+.cld-art-seamless{background:#FFF7E5}
+.cld-art-post{background:#F8F1EE}
+.cld-art-story{background:#F0F3F0}
+.cld-format-illustration{display:block!important;position:relative;inset:auto!important;width:min(83%,134px);height:calc(100% - 6px);max-width:134px;max-height:134px;flex:none;object-fit:contain;transform:none!important;filter:drop-shadow(0 4px 7px #1919190a)}
+.cld-resource-icon .lab-dashboard-illustration{width:38px;height:38px;max-width:none;display:block}
+.cld-resource-feature{right:3px;bottom:-2px;width:103px;height:103px;transform:none!important;opacity:1}
+.cld-resource-feature .lab-dashboard-illustration{width:100%;height:100%;display:block}
+.cld-resource-card small,.cld-resource-card strong{max-width:76%}
+.cld-planning>.lab-dashboard-illustration{display:block;width:45px;height:45px;margin:-9px 0 -2px}
+.cld-inspiration-icon{display:inline-flex;vertical-align:middle;width:32px;height:32px;margin-right:9px}
+.cld-inspiration-icon .lab-dashboard-illustration{width:32px;height:32px}
+@media(max-width:660px){
+ .cld-format-illustration{width:min(90%,116px);max-height:118px}
+ .cld-resource-feature{right:-6px;bottom:-9px;width:91px;height:91px}
+ .cld-resource-icon .lab-dashboard-illustration{width:33px;height:33px}
+}
