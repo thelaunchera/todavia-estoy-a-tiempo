@@ -35,6 +35,13 @@ let studioSessionReady=false;
 let studioSessionLoading=false;
 const REMEMBER_KEY='podcast_class_remember_24h_v1';
 const TAB_KEY='podcast_class_tab_24h_v1';
+const EXPIRED_EMAIL_KEY='tle_aula_reconnect_email';
+let manualAulaSignout=false;
+function rememberExpiredStudent(email){
+ if(STUDIO_EMBEDDED_OWNER||!email)return;
+ try{sessionStorage.setItem(EXPIRED_EMAIL_KEY,String(email).slice(0,254))}catch{}
+}
+function clearExpiredStudent(){try{sessionStorage.removeItem(EXPIRED_EMAIL_KEY)}catch{}}
 const DAY_MS=24*60*60*1000;
 let recoveryMode=new URLSearchParams(location.hash.slice(1)).get('type')==='recovery'||new URL(location.href).searchParams.get('type')==='recovery';
 let authBusy=false;
@@ -115,6 +122,7 @@ function status(text,ok=false){message.dataset.sourceMessage=String(text??'');me
 function display(panel){
  [login,noAccess,course].forEach(el=>el.hidden=(el!==panel));
  document.body.classList.toggle('aula-member',panel===course);
+ if(panel===course)clearExpiredStudent();
  // Nunca mostrar el enlace al Studio antes de verificar el rol owner.
  const ownerNav=$('aula-owner-nav');
  if(ownerNav){
@@ -905,6 +913,7 @@ async function refreshAuth(){
   }
   // Solo alumnos con compra confirmada; nunca cerrar el Studio desde su iframe.
   if(!owner&&!hasAulaSession(who.id)){
+   rememberExpiredStudent(who.email);
    clearRememberedStudent();user=null;lessons=[];done.clear();display(login);out.hidden=true;
    await db.auth.signOut({scope:'local'});
    authNotice('Por seguridad, vuelve a entrar con tu contraseña.');
@@ -1021,17 +1030,18 @@ $('lesson-celebration-close').addEventListener('click',()=>$('lesson-celebration
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden)return;
  if(user&&!adminPreview&&currentStudentDeadline()<=Date.now()){
-  display(login);clearRememberedStudent();void db.auth.signOut({scope:'local'});return;
+  rememberExpiredStudent(user.email);display(login);clearRememberedStudent();void db.auth.signOut({scope:'local'});return;
  }
  if(!adminPreview&&user&&!course.hidden)void checkProjectShared();
 });
 window.setInterval(()=>{
  if(user&&!adminPreview&&currentStudentDeadline()<=Date.now()){
-  display(login);clearRememberedStudent();void db.auth.signOut({scope:'local'});
+  rememberExpiredStudent(user.email);display(login);clearRememberedStudent();void db.auth.signOut({scope:'local'});
  }
 },30*1000);
 out.addEventListener('click',async()=>{
  if(adminPreview){location.assign('../estudio/');return;}
+ manualAulaSignout=true;clearExpiredStudent();
  clearAulaPlace();clearRememberedStudent();await db.auth.signOut({scope:'local'});location.replace('./');
 });
 const courseHelpPanel=$('soporte-aula');
@@ -1103,6 +1113,7 @@ db.auth.onAuthStateChange((event,session)=>{
  }
  if(authBusy)return;
  if(event==='SIGNED_OUT'){
+  if(user&&!adminPreview&&!manualAulaSignout)rememberExpiredStudent(user.email);
   display(login);out.hidden=true;
   status('Tu sesión terminó. Vuelve a entrar para continuar.');
   location.replace('./');
