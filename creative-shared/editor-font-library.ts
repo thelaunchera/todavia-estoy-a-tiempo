@@ -310,10 +310,6 @@ export const EDITOR_FONTS:readonly EditorFont[]=[
 ] as const;
 const aliases:Record<string,string>={
   'dm serif display':'dm-serif-display',
-  'arial':'inter',
-  'sans':'dm-sans',
-  'serif':'playfair',
-  'brand':'playfair',
 };
 const lookup=new Map(EDITOR_FONTS.map(font=>[font.id,font]));
 export const editorFontId=(key?:string):string=>{
