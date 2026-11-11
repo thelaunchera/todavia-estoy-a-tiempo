@@ -19,6 +19,7 @@ import './studio-sticker-library.css';
 type Kind='sticker'|'background';
 type Source='local'|'private-character'|'catalog'|'bundled'|'editorial';
 type Entry={id:string;name:string;url:string;kind:Kind;source:Source;private:boolean;category?:string};
+import {dedupeStudioGallery} from './studio-gallery-dedup';
 type View='Todos'|'Mis stickers'|'Personajes privados'|'Fondos'|'Content Lab'|'Favoritos';
 const views:View[]=['Todos','Mis stickers','Personajes privados','Fondos','Content Lab','Favoritos'];
 const FAVORITES_KEY='studio-sticker-favorites-v1';
@@ -54,9 +55,11 @@ function toEntries(
  const editorial=EDITORIAL_STICKER_ASSETS.map(a=>({
   id:'editorial-'+a.id,name:a.name,kind:'sticker' as const,
   url:new URL('brand-kits/editorial-stickers/'+a.file,document.baseURI).href,
-  source:'editorial' as const,private:false
+  source:'editorial' as const,private:true
  }));
- return [...originals,...owner,...remote,...bundled,...editorial];
+ // Local ZIP assets and privately owned characters remain separate from buyer art.
+ // The same source image may have multiple references, but only one card is shown.
+ return dedupeStudioGallery([...originals,...owner,...remote,...bundled,...editorial]);
 }
 
 async function downloadSticker(item:Entry):Promise<void>{
@@ -132,12 +135,12 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
 
  const assets=useMemo(()=>toEntries(local,personal,shared,overrides),[local,personal,shared,overrides]);
  const viewAssets=useMemo(()=>{
-  if(view==='Mis stickers')return assets.filter(a=>onDevice(a)&&a.kind==='sticker'&&!isPersonal(a.name));
+  if(view==='Mis stickers')return assets.filter(a=>a.private&&a.kind==='sticker'&&!isPersonal(a.name));
   if(view==='Personajes privados')return assets.filter(a=>a.private&&isPersonal(a.name));
   if(view==='Fondos')return assets.filter(a=>a.kind==='background');
   if(view==='Content Lab')return assets.filter(a=>!a.private&&a.kind==='sticker');
-  if(view==='Favoritos')return assets.filter(a=>favorites.includes(a.id));
-  return assets.filter(a=>a.kind==='sticker');
+  if(view==='Favoritos')return dedupeStudioGallery(assets.filter(a=>favorites.includes(a.id)&&!isPersonal(a.name)));
+  return dedupeStudioGallery(assets.filter(a=>a.kind==='sticker'&&!isPersonal(a.name)));
  },[assets,view,favorites]);
  const collections=useMemo(()=>visibleStickerCollections(
   viewAssets.filter(a=>a.kind==='sticker').map(a=>({
@@ -145,16 +148,17 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   }))
  ).filter(x=>x.label!=='Mis stickers'&&x.label!=='Todos'),[viewAssets]);
  const matches=useMemo(()=>viewAssets.filter(a=>
-  (category==='Todas'||a.kind==='background'||stickerCollectionFor({name:a.name,stickerGroup:a.category})===category)&&
+  (view==='Fondos'||a.kind==='sticker')&&
+  (category==='Todas'||stickerCollectionFor({name:a.name,stickerGroup:a.category})===category)&&
   nameKey(a.name).includes(nameKey(query))
  ).sort((a,b)=>a.name.localeCompare(b.name,'es',{numeric:true})),[viewAssets,category,query]);
  const shown=matches.slice(0,visibleLimit);
- const count=(tab:View)=>tab==='Todos'?assets.length:tab==='Mis stickers'
-  ?assets.filter(a=>onDevice(a)&&a.kind==='sticker'&&!isPersonal(a.name)).length
+ const count=(tab:View)=>tab==='Todos'?dedupeStudioGallery(assets.filter(a=>a.kind==='sticker'&&!isPersonal(a.name))).length:tab==='Mis stickers'
+  ?assets.filter(a=>a.private&&a.kind==='sticker'&&!isPersonal(a.name)).length
   :tab==='Personajes privados'?assets.filter(a=>a.private&&isPersonal(a.name)).length
   :tab==='Fondos'?assets.filter(a=>a.kind==='background').length
   :tab==='Content Lab'?assets.filter(a=>!a.private&&a.kind==='sticker').length
-  :assets.filter(a=>favorites.includes(a.id)).length;
+  :assets.filter(a=>favorites.includes(a.id)&&!isPersonal(a.name)).length;
 
  const changeView=(next:View)=>{
   setView(next);setCategory('Todas');setVisibleLimit(48);
@@ -255,8 +259,8 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
       onClick={()=>void toggleFavorite(item)}><Star size={17} fill={favorites.includes(item.id)?'currentColor':'none'}/></button>
     </div>
     <div className="standalone-stickers-card-details"><strong title={item.name}>{item.name}</strong>
-     <small>{item.private?<><LockKeyhole size={12}/> Privado</>:<><Check size={12}/> Incluido</>}
-      {item.kind==='background'?' · Fondo':' · '+stickerCollectionFor({name:item.name,stickerGroup:item.category})}</small>
+     <small>{item.private?<><LockKeyhole size={12}/> {item.source==='editorial'?'Solo Studio':'Privado'}</>:<><Check size={12}/> Incluido en Lab</>}
+      {item.kind==='background'?' · Fondo':isPersonal(item.name)?' · Personaje privado':' · '+stickerCollectionFor({name:item.name,stickerGroup:item.category})}</small>
     </div>
     <div className="standalone-stickers-card-actions">
      {onDevice(item)&&<button type="button" onClick={()=>void move(item,item.kind==='background'?'sticker':'background')}>
@@ -269,7 +273,7 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
    </article>)}
   </div>:<div className="standalone-stickers-empty">
    <Archive size={28}/>
-   <strong>{view==='Mis stickers'?'Aquí aparecerán tus stickers importados.':'No hay recursos en esta categoría.'}</strong>
+   <strong>{view==='Mis stickers'?'Aquí aparecerán tus stickers importados y recursos exclusivos del Studio.':'No hay recursos en esta categoría.'}</strong>
    <p>{view==='Mis stickers'?'Importa tu ZIP una sola vez. Después los verás también en el carrusel.':'Prueba otra categoría o búsqueda.'}</p>
   </div>)}
   {matches.length>visibleLimit&&<button type="button" className="standalone-stickers-more"
