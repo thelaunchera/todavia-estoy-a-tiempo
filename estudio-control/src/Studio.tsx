@@ -1,6 +1,7 @@
 import YouTubeStudio from './YouTubeStudio';
 import { MICRO_SCENE_SECTION } from './youtube/micro-production';
 import SeamlessEditor from './SeamlessEditor';
+import StudioStickerLibrary from './StudioStickerLibrary';
 import SupportInbox from './SupportInbox';
 import WebsiteInquiries from './WebsiteInquiries';
 import OperationsCenter, {type OperationsDestination} from './OperationsCenter';
@@ -25,6 +26,7 @@ import {
   LayoutDashboard,
   Building2,
   Palette,
+  Sticker,
   Clapperboard,
   GraduationCap,
   ChevronDown,
@@ -84,6 +86,7 @@ type Page =
   | 'reels-clase'
   | 'reels-lab'
   | 'seamless'
+  | 'stickers'
   | 'youtube'
   | 'clases'
   | 'demos'
@@ -202,6 +205,7 @@ const NAV = [
   { id: 'inicio', label: 'Inicio · mi agenda', icon: LayoutDashboard, group: 'MI CENTRO' },
   { id: 'operaciones', label: 'The Launch Era · Operaciones', icon: ShoppingBag },
   { id: 'seamless', label: 'Carruseles seamless', icon: Sparkles },
+  { id: 'stickers', label: 'Mi biblioteca de stickers', icon: Sticker },
   { id: 'calendario', label: 'Calendario editorial', icon: CalendarDays },
   { id: 'tareas', label: 'Mis pendientes', icon: ListChecks },
   { id: 'episodios', label: 'Capítulos y guiones', icon: Mic2, group: '🎙️ PODCAST · PRODUCCIÓN' },
@@ -237,7 +241,7 @@ const STUDIO_AREAS: Array<{
   {id:'operations',title:'The Launch Era · Operaciones',description:'Clientes, ventas, emails y automatizaciones',icon:Building2,
    pages:['operaciones','ventas','inquiries','audiencia','soporte','flujos','seo'],home:'operaciones'},
   {id:'design',title:'Diseño y recursos',description:'Carruseles, ideas, motion y Brand Kits',icon:Palette,
-   pages:['seamless','ideas','links'],home:'seamless'},
+   pages:['seamless','stickers','ideas','links'],home:'stickers'},
   {id:'demos',title:'Demos y websites',description:'Proyectos, fotos, prompts y versiones',icon:Globe2,
    pages:['demos'],home:'demos'},
   {id:'production',title:'Producción de contenido',description:'Podcast, reels y YouTube',icon:Clapperboard,
@@ -263,6 +267,7 @@ const LABELS: Record<Page, string> = {
   'reels-clase': 'Clase · reels',
   'reels-lab': 'Content Lab · reels',
   seamless: 'Carruseles seamless',
+  stickers: 'Mi biblioteca de stickers',
   youtube: 'YouTube · Nia y Ruby',
   clases: 'Clase · grabar módulos',
   demos: 'Clase · demos',
@@ -1526,6 +1531,7 @@ function App() {
                   <div className="hero-actions">
                     <button type="button" onClick={()=>change('demos')}>Ver mis proyectos</button>
                     <button type="button" className="hero-secondary-action" onClick={()=>change('seamless')}>Abrir Carousel Studio</button>
+                    <button type="button" className="hero-secondary-action" onClick={()=>change('stickers')}>Ver mis stickers</button>
                   </div>
                 </div>
                 <aside className="studio-welcome-aside" aria-label="Acceso a la operación del negocio">
@@ -1710,6 +1716,7 @@ function App() {
           )}
           {page === 'youtube' && <YouTubeStudio entries={items.ideas} onChanged={refresh} readOnly={recording} />}
           {page === 'seamless' && <SeamlessEditor />}
+          {page === 'stickers' && <StudioStickerLibrary onOpenCarousel={()=>change('seamless')}/>}
           {page === 'reels' && (
             <ReelsProduction entries={items.ideas} onSave={async (entry,patch)=>{
               await api.put('/api/items/ideas/'+entry.id,{...entry,...patch});
