@@ -3,6 +3,15 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+// Apply saved device settings on EVERY launch, not only after opening Settings.
+try {
+  document.documentElement.dataset.labMotion=localStorage.getItem('content-lab:settings-motion')==='off'?'off':'on';
+  document.documentElement.dataset.labDensity=localStorage.getItem('content-lab:settings-compact')==='on'?'compact':'comfortable';
+} catch {
+  document.documentElement.dataset.labMotion='on';
+  document.documentElement.dataset.labDensity='comfortable';
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
