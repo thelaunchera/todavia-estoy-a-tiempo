@@ -516,6 +516,66 @@ export async function renderSavedCarouselCover(
   }
 }
 
+
+/** Export every saved slide from My Posts without changing the current editor,
+ * flattening buyer artwork, or using a thumbnail as the PNG source.
+ * The caller releases every returned canvas after preparing individual links.
+ */
+export async function renderSavedCarouselPages(
+  draft:{id?:string;assetId:string;hook?:string;slides?:string;cta?:string;designData?:string},
+  brand:Brand,images:Record<string,string>,
+):Promise<HTMLCanvasElement[]>{
+  const post={id:draft.id,assetId:draft.assetId,hook:draft.hook||'',
+    slides:draft.slides||'',cta:draft.cta||'',designData:draft.designData||''} as Post;
+  const slides=parseSlides(post,brand);
+  const style=readCarouselDesign(post.designData||'').style;
+  const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...(part.stickerIds||[])]);
+  required.push(...(style.panoramaLayers||[]).filter(layer=>
+    layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
+  if(style.seamlessEnabled)required.push(style.seamlessAssetId);
+  if(required.some(id=>id&&!images[id]))throw Error('Todavía hay fotos o stickers cargando.');
+  if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{
+    backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
+    accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
+    layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,
+    editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,
+    canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds,
+  });
+  const saved=style.panoramaLayers||[];
+  const hasBehind=saved.some(layer=>layer.role!=='background'&&layer.placement==='behind-text');
+  const pages:HTMLCanvasElement[]=[];
+  try{
+    // Sequential rendering stays within mobile Safari memory limits.
+    for(let n=0;n<slides.length;n++)pages.push(await drawSlide(
+      slides[n],n,slides.length,brand,images,style,hasBehind));
+    if(!saved.length)return pages;
+    const native:PanoramaLayer[]=hasBehind?slides.flatMap((part,n)=>{
+      const photoRect=clampRect(part.photoPosition||photoDefault(part.layout));
+      const photo:PanoramaLayer[]=part.assetId?[{
+        id:'page-photo-'+part.key,assetId:part.assetId,name:'Foto · slide '+(n+1),
+        kind:'photo',placement:'behind-text',
+        rect:{...photoRect,x:(n+photoRect.x)/slides.length,w:photoRect.w/slides.length,
+          crop:part.photoPosition?.crop||normalizeCrop({y:part.photoFocus==='top'?.12:part.photoFocus==='bottom'?.9:.5})},
+      }]:[];
+      const stickers:PanoramaLayer[]=(part.stickerIds||[]).map((id,index)=>{
+        const rect=clampRect(part.stickerPositions?.[id]||stickerDefault(index));
+        return {id:'page-sticker-'+part.key+'-'+id,assetId:id,
+          name:'Sticker · slide '+(n+1),kind:'sticker',placement:'behind-text',
+          rect:{...rect,x:(n+rect.x)/slides.length,w:rect.w/slides.length}};
+      });
+      return [...photo,...stickers];
+    }):[];
+    const layers=hasBehind?[
+      ...saved.filter(layer=>layer.placement==='behind-text'),...native,
+      ...saved.filter(layer=>layer.placement!=='behind-text'),
+    ]:saved;
+    return await overlayPanoramaPages(pages,layers,images,
+      ctx=>paintCarouselTypography(ctx,slides,brand,style),true);
+  }finally{
+    if(saved.length)pages.forEach(page=>{page.width=1;page.height=1;});
+  }
+}
+
 export default function CarouselFactory({brand,post,assets,images:libraryImages,onChange,onSave,locale,onStartNewCarousel,onNewAsset,loadImage,uploadImage,notify,showError,saving,saveState,onOpenStickers,onUploadBackground,onUploadPhoto,onUploadSticker,onRenameAsset,initialBackground,initialSticker,initialStep='canvas'}:Props) {
   // Legacy-only image resolver: preserves previously saved canvas layers.
   // The Nov 6 draft vector pack is intentionally absent from both creation libraries.
