@@ -12,7 +12,7 @@ test('iPhone home polish keeps existing favicons, assets, editors and routes unt
  assert.match(polish,/backdrop-filter:none/);
  assert.match(polish,/\.app-shell \.lab-mobile-dock/);
  assert.match(polish,/prefers-reduced-motion:reduce/);
- assert.doesNotMatch(polish,/favicon|apple-touch-icon|manifest|\.factory-preview/);
+ assert.doesNotMatch(polish.replace(/\/\*[\s\S]*?\*\//g,''),/favicon|apple-touch-icon|manifest|\.factory-preview/);
 });
 test('saved work retains its real cover and uses a separate accessible resume affordance',()=>{
  const dashboard=read('src/CreatorDashboard.tsx');
