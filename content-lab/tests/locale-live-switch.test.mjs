@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('Switching ES/EN updates the React header, new dashboard, shortcuts and mobile dock',()=>{
- const app=read('src/App.tsx'),locale=read('src/LabLocale.ts'),dashboard=read('src/CreatorDashboard.tsx');
+ const app=read('src/App.tsx'),locale=read('src/LabLocale.ts'),dashboard=read('src/CreatorDashboard.tsx'),auth=read('src/AuthExperience.tsx');
  assert.ok(app.includes("const t = (value:string):string=>uiText(value,loginLanguage)"));
  assert.ok(app.includes("{t(nav.find(n => n.id === tab)?.title||'')}"));
  assert.ok(app.includes('locale={loginLanguage}'));
@@ -16,9 +16,11 @@ test('Switching ES/EN updates the React header, new dashboard, shortcuts and mob
  assert.ok(dashboard.includes('cld-activity-stats'));
  assert.ok(dashboard.includes('cld-format-grid'));
  assert.ok(app.includes("{t(item.label)}"));
- assert.ok(app.includes("loginLanguage==='es'?'Elige el idioma de tu cuenta':'Choose your account language'"));
- assert.ok(app.includes("onClick={()=>chooseLanguage('es')}"));
- assert.ok(app.includes("onClick={()=>chooseLanguage('en')}"));
+ assert.ok(app.includes('onLanguage={chooseLanguage}'));
+ assert.ok(auth.includes("onLanguage('es')"));
+ assert.ok(auth.includes("onLanguage('en')"));
+ assert.ok(auth.includes('Idioma / Language'));
+ assert.ok(auth.includes('Entrar')&&auth.includes('Crear cuenta'));
  assert.ok(locale.includes("export function uiText(source:string,language:LabLanguage)"));
 });
 test('UI language and creative brand language remain independent',()=>{
