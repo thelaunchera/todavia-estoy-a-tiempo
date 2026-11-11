@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test:spotify-links": "node --experimental-strip-types --test tests/spotify-links.test.mjs",
-    "test:editorial-plan": "node --experimental-strip-types --test tests/editorial-plan.test.mjs tests/carousel-brand-elements.test.mjs tests/background-removal-navigation.test.mjs tests/shared-branding.test.mjs tests/buyer-preview-readonly.test.mjs tests/studio-single-copy-pages.test.mjs",
+    "test:editorial-plan": "node --experimental-strip-types --test tests/editorial-plan.test.mjs tests/carousel-brand-elements.test.mjs tests/background-removal-navigation.test.mjs tests/shared-branding.test.mjs tests/buyer-preview-readonly.test.mjs tests/studio-single-copy-pages.test.mjs tests/sticker-zip-import.test.mjs",
     "test:classes": "node --experimental-strip-types --test tests/class-course.test.mjs tests/class-recording-upload.test.mjs tests/class-screen-deck.test.mjs",
     "dev": "vite",
     "build": "vite build",
