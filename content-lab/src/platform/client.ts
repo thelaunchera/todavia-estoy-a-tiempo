@@ -248,6 +248,7 @@ export const api={
     if(path==='/api/sticker-catalog')return {data:await sharedStickers()};
     if(path==='/api/background-catalog')return {data:await sharedBackgrounds()};
     if(path==='/api/hidden-backgrounds')return {data:await hiddenBackgrounds()};
+    if(path==='/api/posts')return {data:await list('posts')};
     if(path==='/api/data'){
       const brands=await seed();
       const [posts,assets,stickers,backgrounds,hiddenBackgroundIds]=await Promise.all([

@@ -56,7 +56,8 @@ test('The bell is private, has snooze, direct project actions and voluntary iPho
 test('Finishing a post celebrates successful manual save and scheduling stores timezone',()=>{
  const app=read('src/App.tsx'),grid=read('src/BrandGrid.tsx'),calendar=read('src/ContentCalendar.tsx');
  const celebration=read('src/SaveSuccessCelebration.tsx');
- assert.match(app,/isFinished:!automatic/);
+ assert.match(app,/const finished=automatic\?isFinishedPost\(source\):true/);
+ assert.match(app,/isFinished:finished/);
  assert.match(app,/setSaveCelebration\(/);
  assert.match(app,/<SaveSuccessCelebration event=\{saveCelebration\}/);
  assert.match(celebration,/useEffect/);
