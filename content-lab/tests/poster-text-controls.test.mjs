@@ -9,7 +9,9 @@ test('Poster-black family and weight are shared by on-screen text and exported P
  const code=src('PanoramaLayers.ts');
  const editor=src('TouchLayerCanvas.tsx');
  const css=src('index.css');
- assert.match(code,/poster:'"Archivo Black",Impact/);
+ const shared=readFileSync(new URL('../../creative-shared/editor-font-library.ts',import.meta.url),'utf8');
+ assert.match(shared,/"id": "poster",[\s\S]*?"family": "Archivo Black"/);
+ assert.match(code,/editorFontFamily\(font\)/);
  assert.match(code,/ctx\.font=panoramaTextWeight\(layer\.fontWeight\)/);
  assert.match(code,/document\.fonts\?\.load\(panoramaTextWeight\(layer\.fontWeight\)/);
  assert.match(editor,/fontFamily:panoramaFont\(layer\.font\)/);
@@ -48,6 +50,13 @@ test('Pure export typography helper validates weights and poster font choices',(
   if(path==='./TouchGeometry')return {clampPanoramaRect:x=>x,layerCornerPixels:()=>0};
   if(path==='./PhotoCrop')return {coverPlacement:()=>({})};
   if(path==='./CurvedText')return {clampTextCurve:n=>Math.max(-100,Math.min(100,n||0)),drawCurvedTextLine:()=>{},curvedTextExtraHeight:()=>0};
+  if(path==='../../creative-shared/editor-font-library'){
+    const fontCode=readFileSync(new URL('../../creative-shared/editor-font-library.ts',import.meta.url),'utf8');
+    const js=ts.transpileModule(fontCode,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+    const sharedModule={exports:{}};
+    runInNewContext(js,{module:sharedModule,exports:sharedModule.exports,Map,Promise});
+    return sharedModule.exports;
+  }
   throw Error('Unexpected import '+path);
  }});
  assert.equal(module.exports.panoramaTextWeight(900),900);
