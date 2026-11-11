@@ -1,0 +1,129 @@
+/* The Launch Era · Classroom access, visual-only shell with existing Supabase authorization.
+   Keep the classroom's own logos, favicon, lessons and member layout unchanged. */
+@media (min-width:1px){
+ body:not(.aula-member) .aula-entry:has(#login-panel:not([hidden])){
+  position:relative;isolation:isolate;
+  background:radial-gradient(circle at 12% 22%,#e7f2f5 0,transparent 33%),
+    radial-gradient(circle at 84% 80%,#f5e9da 0,transparent 34%),#FAF8F3;
+  overflow:hidden;
+ }
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])){
+  width:min(100% - 36px,950px);display:flex;align-items:center;
+  flex-direction:column;justify-content:center;gap:0;
+  min-height:calc(100dvh - 116px);padding:35px 0 45px;
+ }
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])) .aula-entry-copy{
+  width:min(100%,480px);min-width:0;padding:0;position:relative;z-index:1;
+ }
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])) .aula-entry-topline,
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])) .aula-entry-heading,
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])) .aula-entry-art{
+  display:none;
+ }
+ body:not(.aula-member) .aula-entry .aula-auth-card{
+  width:100%;max-width:480px;margin:0;padding:clamp(22px,5vw,33px);
+  background:rgba(255,255,255,.96);border:1px solid #e2e8e9;
+  border-radius:25px;box-shadow:0 25px 65px #233d4915,0 2px 8px #233d4908;
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+ }
+ .aula-auth-lock-tile{
+  width:54px;height:54px;display:grid;place-items:center;
+  margin-bottom:17px;border-radius:16px;background:#e8f2f6;
+  color:#243f4a;flex-shrink:0;
+ }
+ .aula-auth-lock-tile svg{width:25px;height:25px}
+ .aula-entry .aula-auth-card .aula-auth-kicker{
+  margin-bottom:14px!important;color:#6b8490!important;font-size:10px!important;
+ }
+ .aula-entry .aula-auth-card .aula-auth-modes{
+  border-radius:12px;margin-bottom:21px;padding:4px;background:#f0f4f4;
+ }
+ .aula-entry .aula-auth-card .aula-auth-mode{
+  min-height:44px;border-radius:9px;font-size:12px;transition:background .2s,color .2s;
+ }
+ .aula-entry .aula-auth-card .aula-auth-mode.is-active{
+  color:#fff;background:#213841;box-shadow:0 3px 10px #21384123;
+ }
+ .aula-entry .aula-auth-card h2{
+  font-size:clamp(30px,4.3vw,39px);line-height:1.12;
+  letter-spacing:-.04em;color:#20343e;
+ }
+ .aula-entry .aula-auth-card .aula-auth-title>p{font-size:13px!important;color:#758891}
+ .aula-entry .aula-auth-card .aula-auth-form{
+  gap:9px;margin-top:19px;animation:aula-access-swap .25s ease-out both;
+ }
+ @keyframes aula-access-swap{
+  from{opacity:.35;transform:perspective(700px) rotateY(-7deg) translateY(3px)}
+  to{opacity:1;transform:perspective(700px) rotateY(0) translateY(0)}
+ }
+ .aula-entry .aula-auth-form input:not([type="checkbox"]){
+  border-radius:11px;height:52px;font-size:16px;background:#fcfdfc;
+  border-color:#d7e1e4;
+ }
+ .aula-entry .aula-auth-form input:focus-visible{
+  border-color:#88adc1;outline:3px solid #a3cbd34d;outline-offset:1px;
+ }
+ .aula-entry .aula-auth-form .aula-auth-submit{
+  min-height:53px;border-radius:12px;background:#213841;color:#fff;
+  box-shadow:0 5px 12px #21384114;
+ }
+ .aula-entry .aula-auth-bottom{
+  margin-top:22px;padding-top:14px;border-top:1px solid #edf0ef;
+ }
+ .aula-entry .aula-auth-bottom span{line-height:1.45}
+ .aula-access-floating{
+  position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+ }
+ .aula-access-floating span{
+  position:absolute;display:grid;place-items:center;width:94px;height:94px;
+  border:1px solid #dce8ed;border-radius:21px;background:#ffffffb9;
+  color:#587b8b;box-shadow:0 12px 35px #253e4a0d;
+  animation:aula-access-float 6.7s ease-in-out infinite;
+ }
+ .aula-access-floating svg{width:33px;height:33px;stroke-width:1.7;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+ .aula-access-floating span:nth-child(1){top:24%;left:8%;transform:rotate(-7deg)}
+ .aula-access-floating span:nth-child(2){top:32%;right:7%;animation-delay:-1.6s}
+ .aula-access-floating span:nth-child(3){bottom:16%;right:14%;animation-delay:-3s}
+ @keyframes aula-access-float{0%,100%{translate:0 0}50%{translate:0 -12px}}
+ .aula-auth-expired-hint{
+  padding:12px 14px;background:#eef6f7;color:#315666;border:1px solid #cfe2e7;
+  border-radius:12px;font-size:12px;line-height:1.55;margin-bottom:13px;
+ }
+ .aula-auth-expired-hint[hidden],.aula-email-stage[hidden]{display:none!important}
+ .aula-entry .aula-auth-card[data-email-stage="true"] .aula-auth-modes,
+ .aula-entry .aula-auth-card[data-email-stage="true"] .aula-auth-title,
+ .aula-entry .aula-auth-card[data-email-stage="true"] .aula-auth-form,
+ .aula-entry .aula-auth-card[data-email-stage="true"] .aula-auth-expired-hint{
+  display:none!important;
+ }
+ .aula-email-stage{display:grid;justify-items:center;gap:13px;text-align:center;padding:12px 0 4px}
+ .aula-email-art{height:118px;width:160px;position:relative;display:grid;place-items:center}
+ .aula-email-envelope{
+  position:relative;z-index:2;display:grid;place-items:center;
+  width:96px;height:77px;border-radius:21px;background:#e6f1f5;color:#315767;
+ }
+ .aula-email-envelope svg{width:43px;height:43px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+ .aula-email-art:before,.aula-email-art:after{
+  content:'';position:absolute;inset:7px 24px;border:1px solid #b9d6e2;border-radius:50%;
+  animation:aula-access-ring 3.8s ease-out infinite;
+ }
+ .aula-email-art:after{animation-delay:1.9s}
+ @keyframes aula-access-ring{0%{opacity:.9;transform:scale(.7)}90%,100%{opacity:0;transform:scale(1.45)}}
+ .aula-email-stage h2{margin:0!important}
+ .aula-email-stage p{font-size:13px;line-height:1.6;color:#6e8490;margin:0;overflow-wrap:anywhere}
+ .aula-email-stage strong{font-size:13px;color:#294c5a}
+ .aula-email-stage button{border:0;background:transparent;color:#305f75;text-decoration:underline;text-underline-offset:3px;font-weight:700;min-height:44px;cursor:pointer}
+ .aula-email-stage button:disabled{opacity:.5;cursor:not-allowed;text-decoration:none}
+ .aula-email-stage button:focus-visible,.aula-auth-modes button:focus-visible{outline:3px solid #82b2c9;outline-offset:2px}
+}
+@media(max-width:750px){
+ .aula-access-floating{display:none}
+ body:not(.aula-member) .aula-entry-layout:has(#login-panel:not([hidden])){
+  width:min(100% - 24px,480px);min-height:auto;padding:28px 0 46px;
+ }
+ body:not(.aula-member) .aula-entry .aula-auth-card{padding:24px 21px;border-radius:21px}
+}
+@media(prefers-reduced-motion:reduce){
+ .aula-access-floating span,.aula-email-art:before,.aula-email-art:after,
+ .aula-entry .aula-auth-card .aula-auth-form{animation:none!important}
+}
