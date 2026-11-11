@@ -1,3 +1,4 @@
+import {friendlyStickerName} from '../../creative-shared/sticker-display-name';
 /** Image library metadata lives in the existing per-owner Supabase asset payload. */
 export type MediaCategory='original'|'reference'|'logo'|'generated'|'screenshot'|'sticker'|'background';
 export const MEDIA_CATEGORIES:{id:MediaCategory;label:string;detail:string}[]=[
@@ -24,6 +25,8 @@ export function assetCategory(asset:LibraryAsset):MediaCategory{
 }
 export function displayAssetName(asset:LibraryAsset):string{
  const manuallySet=typeof asset.displayName==='string'?asset.displayName.trim():'';
+ // Readable sticker labels are presentation-only: do not mutate name, ID, or Storage.
+ if(assetCategory(asset)==='sticker')return friendlyStickerName(manuallySet||asset.name);
  if(manuallySet)return manuallySet;
  const original=String(asset.name||'').replace(/\.(png|jpe?g|webp|heic|heif)$/i,'').trim();
  if(/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(original))return 'Imagen sin nombre';
