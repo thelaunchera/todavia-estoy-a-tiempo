@@ -35,6 +35,7 @@ export type PanoramaLayer = {
   kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; lineHeight?:number; spacing?:number; curve?:number;
   color?:string; tint?:string; tintColor?:string; tintStrength?:number; outline?:boolean; shadow?:boolean;
+  outlineOnly?:boolean; outlineColor?:string; outlineWidth?:number;
   shape?:'paper'|'tape'|'circle'|'frame';
   frameStyle?:string;
   placement?: LayerPlacement;
@@ -72,6 +73,9 @@ export function normalizePanoramaLayers(value: unknown): PanoramaLayer[] {
         ...(typeof item.curve==='number'?{curve:clampTextCurve(item.curve)}:{}),
         color:/^#[0-9a-f]{6}$/i.test(String(item.color))?String(item.color):'#191919',
         outline:item.outline===true,shadow:item.shadow===true,
+        ...(item.outlineOnly===true?{outlineOnly:true}:{}),
+        ...(typeof item.outlineColor==='string'&&/^#[0-9a-f]{6}$/i.test(item.outlineColor)?{outlineColor:item.outlineColor}:{}),
+        ...(typeof item.outlineWidth==='number'&&Number.isFinite(item.outlineWidth)?{outlineWidth:Math.max(1,Math.min(20,item.outlineWidth))}:{}),
       }:{}),
       ...(item.kind === 'shape' ? {
         shape:['paper','tape','circle','frame'].includes(String(item.shape))?item.shape as PanoramaLayer['shape']:'paper',
@@ -143,7 +147,7 @@ export function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:num
  ctx.textBaseline='top';
  ctx.letterSpacing=(layer.spacing||0)+'px';
  if(layer.shadow){ctx.shadowColor='#1A1A1A66';ctx.shadowBlur=size*.13;ctx.shadowOffsetY=size*.05}
- if(layer.outline){ctx.lineWidth=Math.max(1,size*.045);ctx.strokeStyle='#FFFFFF';ctx.lineJoin='round'}
+ if(layer.outline){ctx.lineWidth=Math.max(1,Math.min(20,layer.outlineWidth??size*.045));ctx.strokeStyle=layer.outlineColor||'#FFFFFF';ctx.lineJoin='round'}
  const lines:string[]=[];
  for(const paragraph of text.split('\n')){
   const words=paragraph.split(/\s+/).filter(Boolean);
@@ -161,7 +165,7 @@ export function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:num
   displayed.forEach((line,i)=>{
    const x=-w/2+6,y=-h/2+size*leading*i;
    if(layer.outline)ctx.strokeText(line,x,y,maxWidth);
-   ctx.fillText(line,x,y,maxWidth);
+   if(!layer.outline||!layer.outlineOnly)ctx.fillText(line,x,y,maxWidth);
   });
  }else{
   const extra=curvedTextExtraHeight(size,maxWidth,curve,displayed,layer.spacing||0);
@@ -171,7 +175,7 @@ export function textPaint(ctx:CanvasRenderingContext2D,layer:PanoramaLayer,w:num
   ctx.scale(fit,fit);
   displayed.forEach((line,i)=>{
    drawCurvedTextLine(ctx,line,0,i*(size*leading+extra),
-    size,curve,maxWidth/fit,layer.spacing||0,!!layer.outline);
+    size,curve,maxWidth/fit,layer.spacing||0,!!layer.outline,!layer.outline||!layer.outlineOnly);
   });
   ctx.restore();
  }

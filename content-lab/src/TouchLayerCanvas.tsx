@@ -12,7 +12,7 @@ import type {StickerCopyResult} from './CarouselStickerCopy';
 export type TouchLayer = {
   id: string; name: string; src: string; rect: TouchRect; kind: 'photo' | 'sticker' | 'text' | 'shape';
   text?:string; font?:string; fontSize?:number; fontWeight?:number; color?:string; tint?:string; tintColor?:string; tintStrength?:number; lineHeight?:number; spacing?:number; curve?:number;
-  outline?:boolean; shadow?:boolean; shape?:PanoramaLayer['shape'];
+  outline?:boolean; shadow?:boolean; outlineOnly?:boolean; outlineColor?:string; outlineWidth?:number; shape?:PanoramaLayer['shape'];
   placement?: 'behind-text' | 'front';role?:'background';backgroundFit?:'cover';locked?:boolean;opacity?:number;page?:number;
   frameStyle?: string; paper?: string; accent?: string;
 };
@@ -768,9 +768,10 @@ export default function TouchLayerCanvas({
                 ?rect.w/Math.max(.001,layer.rect.w):1)*stageHeight/canvasHeight+'px',
               lineHeight:layer.lineHeight||1.12,
               letterSpacing:(layer.spacing||0)*stageHeight/canvasHeight+'px',
-              color:layer.color||'#191919',
+              color:layer.outline&&layer.outlineOnly?'transparent':layer.color||'#191919',
+              WebkitTextFillColor:layer.outline&&layer.outlineOnly?'transparent':layer.color||'#191919',
               textShadow:layer.shadow?'0 2px 7px #19191966':undefined,
-              WebkitTextStroke:layer.outline?'1px #FFFFFF':undefined,
+              WebkitTextStroke:layer.outline?Math.max(.4,(layer.outlineWidth??Math.max(1,(layer.fontSize||76)*.045))*stageHeight/canvasHeight)+'px '+(layer.outlineColor||'#FFFFFF'):undefined,
             }}>{layer.text||''}</div>}
             {layer.kind==='shape'&&<div className={'touch-editor-collage-shape shape-'+(layer.shape||'paper')}
               style={{opacity:visibleOpacity(layer),background:layer.shape==='frame'?'transparent':layer.color||'#F1E5D2',
@@ -955,7 +956,27 @@ export default function TouchLayerCanvas({
                onClick={()=>onUpdate(chosen.id,{color:hex})} style={{background:hex}}/>)}
          </div>
          <label><input type="checkbox" checked={!!chosen.shadow} onChange={e=>onUpdate(chosen.id,{shadow:e.target.checked})}/> Sombra</label>
-        <label><input type="checkbox" checked={!!chosen.outline} onChange={e=>onUpdate(chosen.id,{outline:e.target.checked})}/> Contorno</label>
+        <div className="touch-editor-outline-settings" role="group" aria-label="Efecto Outline del texto">
+          <strong>Outline · Contorno de texto</strong>
+          <div className="touch-editor-outline-modes">
+            <button type="button" aria-pressed={!chosen.outline} disabled={!!chosen.locked}
+              onClick={()=>onUpdate(chosen.id,{outline:false,outlineOnly:false})}>Normal</button>
+            <button type="button" aria-pressed={!!chosen.outline&&!!chosen.outlineOnly} disabled={!!chosen.locked}
+              onClick={()=>onUpdate(chosen.id,{outline:true,outlineOnly:true,outlineColor:chosen.outlineColor||chosen.color||'#191919',outlineWidth:chosen.outlineWidth??4})}>Outline</button>
+            <button type="button" aria-pressed={!!chosen.outline&&!chosen.outlineOnly} disabled={!!chosen.locked}
+              onClick={()=>onUpdate(chosen.id,{outline:true,outlineOnly:false,outlineColor:chosen.outlineColor||'#FFFFFF',outlineWidth:chosen.outlineWidth??4})}>Relleno + borde</button>
+          </div>
+          {!!chosen.outline&&<div className="touch-editor-outline-options">
+            <label>Color del contorno <input type="color" aria-label="Color del Outline"
+              disabled={!!chosen.locked} value={chosen.outlineColor||(chosen.outlineOnly?chosen.color||'#191919':'#FFFFFF')}
+              onChange={e=>onUpdate(chosen.id,{outlineColor:e.target.value})}/></label>
+            <label>Grosor del contorno <input type="range" min="1" max="20" step="1"
+              aria-label="Grosor del Outline" disabled={!!chosen.locked}
+              value={chosen.outlineWidth??4}
+              onChange={e=>onUpdate(chosen.id,{outlineWidth:Number(e.target.value)})}/>
+              <output>{chosen.outlineWidth??4}px</output></label>
+          </div>}
+        </div>
       </div>}
       {chosen.kind==='shape'&&onUpdate&&<div className="touch-editor-type-settings">
         <label>Forma<select value={chosen.shape||'paper'}

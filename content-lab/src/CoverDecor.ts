@@ -6,7 +6,7 @@ export type CoverDecor={
  stickerPositions:StickerPositions;
  layers:PanoramaLayer[];headlineRect?:PanoramaLayer['rect'];primaryPhotoRect?:PanoramaLayer['rect'];
  layerOrder?:string[];primaryPhotoOpacity?:number;primaryPhotoTintColor?:string;primaryPhotoTintStrength?:number;stickerOpacities?:Record<string,number>;stickerTints?:Record<string,string>;
- headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,lineHeight?:number,spacing?:number,opacity?:number};
+ headlineStyle?:{font?:string;fontSize?:number,fontWeight?:number,color?:string,shadow?:boolean,outline?:boolean,outlineOnly?:boolean,outlineColor?:string,outlineWidth?:number,lineHeight?:number,spacing?:number,opacity?:number};
  color:string;gradient:string;headlineLocked?:boolean;primaryPhotoLocked?:boolean;lockedStickerIds?:string[];
 };
 export const blankCoverDecor=():CoverDecor=>({backgroundId:'brand',backgroundImageId:'',
@@ -41,7 +41,10 @@ export function readCoverDecor(data?:string):CoverDecor{
     font:String(p.headlineStyle.font||'serif'),fontSize:Number(p.headlineStyle.fontSize)||82,
     fontWeight:[400,500,600,700,800,900].includes(Number(p.headlineStyle.fontWeight))?Number(p.headlineStyle.fontWeight):700,
     color:hex(p.headlineStyle.color,'#191919'),shadow:p.headlineStyle.shadow===true,
-    outline:p.headlineStyle.outline===true,
+    outline:p.headlineStyle.outline===true,outlineOnly:p.headlineStyle.outlineOnly===true,
+    outlineColor:hex(p.headlineStyle.outlineColor,'#FFFFFF'),
+    outlineWidth:typeof p.headlineStyle.outlineWidth==='number'&&Number.isFinite(p.headlineStyle.outlineWidth)
+      ?Math.max(1,Math.min(20,p.headlineStyle.outlineWidth)):undefined,
     lineHeight:Number(p.headlineStyle.lineHeight)||1.12,spacing:Number(p.headlineStyle.spacing)||0,
     opacity:typeof p.headlineStyle.opacity==='number'&&Number.isFinite(p.headlineStyle.opacity)
       ?Math.max(0,Math.min(1,p.headlineStyle.opacity)):undefined,

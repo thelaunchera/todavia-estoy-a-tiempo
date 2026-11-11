@@ -43,7 +43,9 @@ export function coverLayers(post:Post,brand:Brand,decor:CoverDecor):PanoramaLaye
    font:decor.headlineStyle?.font||brand.headingFont?.toLowerCase()||'serif',
    fontSize:decor.headlineStyle?.fontSize||84,fontWeight:decor.headlineStyle?.fontWeight||700,lineHeight:decor.headlineStyle?.lineHeight||1.12,
    spacing:decor.headlineStyle?.spacing||0,color:decor.headlineStyle?.color||'#191919',
-   shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,locked:decor.headlineLocked===true,
+   shadow:decor.headlineStyle?.shadow,outline:decor.headlineStyle?.outline,
+   outlineOnly:decor.headlineStyle?.outlineOnly,outlineColor:decor.headlineStyle?.outlineColor,
+   outlineWidth:decor.headlineStyle?.outlineWidth,locked:decor.headlineLocked===true,
    opacity:decor.headlineStyle?.opacity??1,
    rect:decor.headlineRect||{x:.08,y:.11,w:.84,h:.23}});
  // Preserve creation order: user-added images/text remain above older items.

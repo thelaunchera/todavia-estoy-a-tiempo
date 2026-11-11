@@ -73,7 +73,7 @@ export function curvedTextExtraHeight(
 
 export function drawCurvedTextLine(
  ctx:CanvasRenderingContext2D,line:string,x:number,y:number,
- fontSize:number,curve:number,maxWidth:number,letterSpacing=0,stroke=false
+ fontSize:number,curve:number,maxWidth:number,letterSpacing=0,stroke=false,fill=true
 ):void{
  const strength=clampTextCurve(curve);
  const tracking=clampLetterSpacing(letterSpacing)*fontSize/100;
@@ -82,7 +82,7 @@ export function drawCurvedTextLine(
  if(!strength&&!tracking){
   const safeWidth=Math.max(1,maxWidth);
   if(stroke)ctx.strokeText(line,x,y,safeWidth);
-  ctx.fillText(line,x,y,safeWidth);
+  if(fill)ctx.fillText(line,x,y,safeWidth);
   return;
  }
  if(!strength){
@@ -96,7 +96,7 @@ export function drawCurvedTextLine(
   let cursor=0;
   for(const char of letters){
    if(stroke)ctx.strokeText(char,cursor,0);
-   ctx.fillText(char,cursor,0);
+   if(fill)ctx.fillText(char,cursor,0);
    cursor+=ctx.measureText(char).width+tracking;
   }
   ctx.restore();
@@ -110,7 +110,7 @@ export function drawCurvedTextLine(
   ctx.rotate(glyph.angle);
   ctx.scale(layout.scaleX*layout.fit,layout.fit);
   if(stroke)ctx.strokeText(glyph.char,-glyph.width/2,-fontSize/2);
-  ctx.fillText(glyph.char,-glyph.width/2,-fontSize/2);
+  if(fill)ctx.fillText(glyph.char,-glyph.width/2,-fontSize/2);
   ctx.restore();
  }
 }
