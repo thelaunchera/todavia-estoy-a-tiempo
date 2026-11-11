@@ -5,7 +5,7 @@ import LabNotifications from './LabNotifications';
 import SaveSuccessCelebration from './SaveSuccessCelebration';
 import {CREATIVE_EDITOR_RULES} from '../../creative-shared/editor-rules';
 import {readNavigationPlace,writeNavigationPlace,clearNavigationPlace} from '../../creative-shared/NavigationMemory';
-import {sourceAwareScale,downloadLosslessPng} from './ExportQuality';
+import {sourceAwareScale,downloadLosslessPng,canvasToLosslessPng} from './ExportQuality';
 import heic2any from 'heic2any';
 import BrandGrid, { CREATIVE_FORMATS } from './BrandGrid';
 import LiveFeedGrid from './LiveFeedGrid';
@@ -23,9 +23,10 @@ import FreePostStudio,{exportFreePost} from './FreePostStudio';
 import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
-import CarouselFactory from './CarouselFactory';
+import CarouselFactory,{renderSavedCarouselPages} from './CarouselFactory';
 import CreatorDashboard from './CreatorDashboard';
-import ProjectCover from './ProjectCover';
+import ProjectCover,{projectCoverAssetIds} from './ProjectCover';
+import {isFinishedPost,collectionStatusPatch} from './PostCollection';
 import {UniversalLabIcon,APP_ICON_MAP} from './UniversalLabIcon';
 import QuickStartGuide from './QuickStartGuide';
 import FreeDecorControls from './FreeDecorControls';
@@ -407,6 +408,12 @@ function App() {
   const [gridRefreshRevision,setGridRefreshRevision]=useState(0);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [postSection,setPostSection]=useState<'finished'|'drafts'>('finished');
+  const [downloadingPostId,setDownloadingPostId]=useState('');
+  const [changingPostId,setChangingPostId]=useState('');
+  const [preparedPostDownloads,setPreparedPostDownloads]=useState<{postId:string;files:{name:string;url:string}[]}|null>(null);
+  const preparedPostUrlsRef=useRef<string[]>([]);
+  useEffect(()=>()=>{preparedPostUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));preparedPostUrlsRef.current=[]},[]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [current, setCurrent] = useState('');
   const [tab, setTab] = useState<Tab>('home');
@@ -614,6 +621,10 @@ function App() {
   const t = (value:string):string=>uiText(value,loginLanguage);
   const brand = brands.find(b => b.id === current) || brands[0];
   const mine = posts.filter(p => p.brandId === brand?.id);
+  const searchedPosts=mine.filter(p=>(p.title+p.hook+p.caption).toLowerCase().includes(query.toLowerCase()));
+  const finishedPosts=searchedPosts.filter(isFinishedPost);
+  const draftPosts=searchedPosts.filter(p=>!isFinishedPost(p));
+  const visiblePosts=postSection==='finished'?finishedPosts:draftPosts;
   const library = assets.filter(a => a.brandId === brand?.id || a.shared === true);
   const setupBrandReady = Boolean(brand && brand.name.trim() && brand.name!=='My Brand' && brand.audience?.trim());
   const setupStepsDone = Number(setupBrandReady)+Number(library.length>0)+Number(mine.length>0);
@@ -753,6 +764,14 @@ function App() {
   };
 
   const navigate = (id: Tab) => {
+    // Navigation must not cancel the 1800ms autosave and lose a new design.
+    // Save in the background; the confirmed response updates My Posts live.
+    if(['factory','vertical','create'].includes(tabRef.current)&&
+       !['factory','vertical','create'].includes(id)&&
+       editorLatestRef.current.brandId&&
+       draftFingerprint(editorLatestRef.current)!==lastSavedFingerprintRef.current&&
+       !saveInFlightRef.current){void save(editorLatestRef.current,true);}
+    if(id==='posts'&&tabRef.current!=='posts')setPostSection('finished');
     // Leaving a calendar-origin edit must not reopen an old project later.
     if(!['factory','vertical','create'].includes(id))setCalendarEditId('');
     if(id!=='grid')setGridPref(prev=>prev.fromCalendar
@@ -894,7 +913,11 @@ function App() {
     const source:Post=possible&&typeof possible.title==='string'&&
       typeof possible.format==='string'&&typeof possible.brandId==='string'
       ? possible as Post:editor;
-    const draft={...source,isFinished:!automatic,title:source.title.trim()||source.hook.trim().slice(0,80)||
+    // Autosave must NEVER demote an already finished post back to a draft.
+    const finished=automatic?isFinishedPost(source):true;
+    const draft={...source,isFinished:finished,
+      status:!automatic&&['Idea','Draft'].includes(source.status)?'Ready':source.status,
+      title:source.title.trim()||source.hook.trim().slice(0,80)||
       (source.format==='Carousel'?'Mi carrusel':source.format==='Reel'?'Portada de Reel':
        source.format==='Story'?'Mi historia':'Mi publicación')};
     const session=editorSessionRef.current;
@@ -914,7 +937,9 @@ function App() {
         if(editorSessionRef.current!==session||current.brandId!==source.brandId||
            current.format!==source.format||current.id!==source.id)return current;
         if(JSON.stringify(current)===snapshot)return data as Post;
-        return {...current,id:data.id,updatedAt:data.updatedAt};
+        return {...current,id:data.id,updatedAt:data.updatedAt,
+          isFinished:automatic?finished:true,
+          status:current.status===source.status?draft.status:current.status};
       });
       lastSavedFingerprintRef.current=draftFingerprint(draft);
       lastAttemptFingerprintRef.current='';
