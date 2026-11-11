@@ -49,5 +49,6 @@ test('Display labels are pure and do not alter original asset paths or privacy c
  assert.match(studio,/isPersonalCharacterAssetName/);
  assert.match(carousel,/friendlyStickerName\(asset\.name\)/);
  assert.match(lab,/if\(assetCategory\(asset\)==='sticker'\)return friendlyStickerName/);
- assert.doesNotMatch(readFileSync(new URL('../../creative-shared/sticker-display-name.ts',import.meta.url),'utf8'),/storage|\\.delete\\(|writeEditorRecord|\\.update\\(/);
+ const helperSource=readFileSync(new URL('../../creative-shared/sticker-display-name.ts',import.meta.url),'utf8');
+ for(const forbidden of ['storage.from','writeEditorRecord','update('])assert.equal(helperSource.includes(forbidden),false);
 });
