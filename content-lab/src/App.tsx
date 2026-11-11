@@ -371,7 +371,7 @@ function App() {
     admin?:boolean;photo_remaining?:number;creative_remaining?:number;
     photo_today?:number;creative_today?:number;quota_day?:string;
   }|null>(null);
-  const [loginEmail, setLoginEmail] = useState(() => { try { return localStorage.getItem('content-lab:last-email') || ''; } catch { return ''; } });
+  const [loginEmail, setLoginEmail] = useState('');
   const [expiredEmail, setExpiredEmail] = useState('');
   const [loginError, setLoginError] = useState('');
   const [resendReadyAt, setResendReadyAt] = useState(0);
@@ -552,7 +552,6 @@ function App() {
       await reload();
       await auth.setPreferredLanguage(loginLanguage).catch(()=>{});
       try {
-        localStorage.setItem('content-lab:last-email',user.email||pendingEmail);
         sessionStorage.removeItem('content-lab:expired-email');
       }catch{}
       setExpiredEmail('');
@@ -607,7 +606,6 @@ function App() {
         setAccount(u);
         if (u) {
           try {
-            localStorage.setItem('content-lab:last-email',u.email||'');
             sessionStorage.removeItem('content-lab:expired-email');
           }catch{}
           try {
