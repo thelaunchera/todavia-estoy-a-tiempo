@@ -2180,74 +2180,101 @@ function App() {
             <>
               <div className="pageheading">
                 <div>
-                  <div className="eyebrow">{t('YOUR CONTENT COLLECTION')}</div>
-                  <h1>
-                    {t("Everything you've")} <em>{t('made.')}</em>
-                  </h1>
-                  <p>Only publications belonging to {brand.name}.</p>
+                  <div className="eyebrow">{loginLanguage==='es'?'MIS DISEÑOS':'MY DESIGNS'}</div>
+                  <h1>{loginLanguage==='es'?'Mis publicaciones':'My posts'}</h1>
+                  <p>{loginLanguage==='es'?'Diseños de ':'Designs for '}{brand.name}</p>
                 </div>
               </div>
               <div className="search">
                 <Search size={18} />
                 <input
-                  placeholder={t('Search posts…')}
+                  aria-label={loginLanguage==='es'?'Buscar publicaciones':'Search posts'}
+                  placeholder={loginLanguage==='es'?'Buscar publicaciones…':'Search posts…'}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                 />
               </div>
-              {mine.filter(p =>
-                (p.title + p.hook + p.caption)
-                  .toLowerCase()
-                  .includes(query.toLowerCase())
-              ).length ? (
-                <div className="postgrid">
-                  {mine
-                    .filter(p =>
-                      (p.title + p.hook + p.caption)
-                        .toLowerCase()
-                        .includes(query.toLowerCase())
-                    )
-                    .slice()
-                    .reverse()
-                    .map(p => (
-                      <article className="postcard" key={p.id}>
-                        <ProjectCover post={p} brand={brand} images={images} loadImage={imageLoad} locale={loginLanguage}/>
-                        <div className="posttop">
-                          <span>
-                            {p.format} · {p.angle}
-                          </span>
-                          <b>{p.status}</b>
+              <div className="lab-post-section-tabs" role="tablist"
+                aria-label={loginLanguage==='es'?'Organizar publicaciones':'Organize posts'}>
+                <button type="button" role="tab" aria-selected={postSection==='finished'}
+                  aria-controls="lab-post-list" className={postSection==='finished'?'selected':''}
+                  onClick={()=>setPostSection('finished')}>
+                  <Check size={17}/>{loginLanguage==='es'?'Terminados':'Finished'}
+                  <span className="lab-post-tab-count">{finishedPosts.length}</span>
+                </button>
+                <button type="button" role="tab" aria-selected={postSection==='drafts'}
+                  aria-controls="lab-post-list" className={postSection==='drafts'?'selected':''}
+                  onClick={()=>setPostSection('drafts')}>
+                  <Pencil size={16}/>{loginLanguage==='es'?'Borradores':'Drafts'}
+                  <span className="lab-post-tab-count">{draftPosts.length}</span>
+                </button>
+              </div>
+              {visiblePosts.length ? (
+                <div className="postgrid" id="lab-post-list" role="tabpanel">
+                  {visiblePosts.slice().reverse().map(p => (
+                    <article className="postcard" key={p.id}>
+                      <ProjectCover post={p} brand={brand} images={images} loadImage={imageLoad} locale={loginLanguage}/>
+                      <div className="posttop">
+                        <span>{p.format} · {p.angle}</span>
+                        <b>{isFinishedPost(p)
+                          ?loginLanguage==='es'?'Terminado':'Finished'
+                          :loginLanguage==='es'?'Borrador':'Draft'}</b>
+                      </div>
+                      <h3>{p.title}</h3>
+                      <p>{p.hook||p.caption||(loginLanguage==='es'
+                        ?'Una nueva idea esperando tu creatividad.':'A new idea waiting for your voice.')}</p>
+                      <div className="postbottom">
+                        <small>{p.date||(isFinishedPost(p)
+                          ?loginLanguage==='es'?'Diseño guardado':'Saved design'
+                          :loginLanguage==='es'?'Borrador guardado':'Saved draft')}</small>
+                        <button type="button" className="lab-post-download"
+                          aria-label={(loginLanguage==='es'?'Descargar ':'Download ')+(p.title||'post')}
+                          disabled={Boolean(downloadingPostId)} onClick={()=>void downloadSavedPost(p)}>
+                          {downloadingPostId===p.id?<LoaderCircle size={17} className="spin"/>:<Download size={17}/>}
+                          <span>{downloadingPostId===p.id
+                            ?loginLanguage==='es'?'Preparando…':'Preparing…'
+                            :loginLanguage==='es'?'Descargar':'Download'}</span>
+                        </button>
+                        <button type="button" aria-label="Delete post"
+                          onClick={() => remove(p)}><Trash2 size={16} /></button>
+                        <button type="button" aria-label="Edit post"
+                          onClick={() => edit(p)}><Pencil size={16} /></button>
+                      </div>
+                      {p.format==='Carousel'&&preparedPostDownloads?.postId===p.id&&(
+                        <div className="lab-post-download-slides" role="group"
+                          aria-label={loginLanguage==='es'?'Descargar slides':'Download slides'}>
+                          <strong>{loginLanguage==='es'?'PNG individuales listos':'Individual PNGs ready'}</strong>
+                          <div>{preparedPostDownloads.files.map((file,n)=>(
+                            <a href={file.url} download={file.name} key={file.name}>
+                              <Download size={14}/>{loginLanguage==='es'?'Slide':'Slide'} {n+1}
+                            </a>
+                          ))}</div>
                         </div>
-                        <h3>{p.title}</h3>
-                        <p>
-                          {p.hook ||
-                            p.caption ||
-                            'A new idea waiting for your voice.'}
-                        </p>
-                        <div className="postbottom">
-                          <small>{p.date || 'Saved draft'}</small>
-                          <button
-                            aria-label="Delete post"
-                            onClick={() => remove(p)}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                          <button
-                            aria-label="Edit post"
-                            onClick={() => edit(p)}
-                          >
-                            <Pencil size={16} />
-                          </button>
-                        </div>
-                      </article>
-                    ))}
+                      )}
+                      <button type="button" className="lab-post-move-status"
+                        disabled={changingPostId===p.id}
+                        onClick={()=>void changeSavedPostSection(p)}>
+                        {isFinishedPost(p)
+                          ?loginLanguage==='es'?'Mover a borradores':'Move to drafts'
+                          :loginLanguage==='es'?'Marcar como terminado':'Mark as finished'}
+                      </button>
+                    </article>
+                  ))}
                 </div>
               ) : (
-                <div className="empty">
+                <div className="empty" id="lab-post-list" role="tabpanel">
                   <FolderOpen size={32} />
-                  <h3>{t('Nothing here yet.')}</h3>
-                  <p>{t('Start with one meaningful idea.')}</p>
-                  <small className="lab-empty-hint">{loginLanguage==='es'?'Usa «+ Crear» arriba para empezar tu primera publicación.':'Use “+ Create” above to start your first post.'}</small>
+                  <h3>{postSection==='finished'
+                    ?loginLanguage==='es'?'Aún no tienes posts terminados.':'No finished posts yet.'
+                    :loginLanguage==='es'?'Aún no tienes borradores.':'No drafts yet.'}</h3>
+                  <p>{loginLanguage==='es'
+                    ?'Tus diseños aparecen aquí automáticamente al guardarse.'
+                    :'Your designs appear here automatically when saved.'}</p>
+                  <button type="button" className="btn ghost" onClick={()=>setPostSection(postSection==='finished'?'drafts':'finished')}>
+                    {postSection==='finished'
+                      ?loginLanguage==='es'?'Ver borradores':'View drafts'
+                      :loginLanguage==='es'?'Ver terminados':'View finished'}
+                  </button>
                 </div>
               )}
             </>
