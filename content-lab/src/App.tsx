@@ -558,6 +558,27 @@ function App() {
         : data.brands[0]?.id || ''
     );
   };
+  // Opening My Posts synchronizes from the account automatically. No browser
+  // refresh is needed after saving, switching tabs or returning to the PWA.
+  useEffect(()=>{
+    if(tab!=='posts'||!account?.email)return;
+    let mounted=true,loading=false;
+    const sync=async()=>{
+      if(loading||saveInFlightRef.current)return;
+      loading=true;
+      try{
+        const {data}=await api.get('/api/posts');
+        if(mounted&&!saveInFlightRef.current)setPosts(data as Post[]);
+      }catch{/* Keep the locally confirmed collection if offline. */}
+      finally{loading=false;}
+    };
+    void sync();
+    const onVisible=()=>{if(document.visibilityState==='visible')void sync();};
+    window.addEventListener('focus',sync);
+    document.addEventListener('visibilitychange',onVisible);
+    return()=>{mounted=false;window.removeEventListener('focus',sync);
+      document.removeEventListener('visibilitychange',onVisible);};
+  },[tab,account?.email]);
   useEffect(()=>{
     const refresh=()=>{void api.get('/api/ai-wallet').then(r=>setAiWallet(r.data)).catch(()=>{});};
     window.addEventListener('content-lab-credit-change',refresh);
