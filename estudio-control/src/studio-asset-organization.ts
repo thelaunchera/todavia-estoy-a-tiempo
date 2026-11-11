@@ -19,3 +19,21 @@ export type StudioAssetOrganization='sticker'|'background';
 export function organizedStudioKind(asset:{id:string;name:string;category:'sticker'|'background'},overrides:Record<string,StudioAssetOrganization>={}):StudioAssetOrganization{
  return overrides[asset.id]||(isStudioBackgroundName(asset.name)?'background':asset.category);
 }
+
+/**
+ * A deliberately conservative allowlist for an owner-directed bulk sync.
+ * Anything with a person, character, demo, brand, or ambiguous title stays
+ * private even if it also contains a word like "ribbon" or "sticker".
+ * One-off manual sharing uses the existing per-file admin control instead.
+ */
+const PRIVATE_CONTENT_WORDS=/(?:^|[\s_./-])(?:nia|ruby|off[\s_-]?brief|tle|the[\s_-]?launch[\s_-]?era|self[\s_-]?love[\s_-]?gym|sova|golden[\s_-]?grid|la[\s_-]?vie[\s_-]?in[\s_-]?pink|casa[\s_-]?brownie|yumm?|crumb|havana|habana|lavanda|personal|privad[ao]s?|private|mine|my[\s_-]?own|personajes?|characters?|hero[ií]na|reina|explorador[a]?|bruj[a]?|pantera|zorra|tig(?:re|ress)|gat[ao]|perrit[ao]|lobo|conej[ao]|os[ao]|muñec[ao]|avatar|portrait|retrato|woman|girl|boy|man|modelo|fot[oó]graf[ao]|creadora|creador|logo|wordmark|monogram|marca[\s_-]?propia)(?=$|[\s_./-])/i;
+const GENERIC_STICKER_WORDS=/(?:^|[\s_./-])(?:asterisco|star|estrella|destellos?|sparkles?|lazos?|bows?|ribbons?|cintas?|washi|tape|banners?|bander[ií]n|etiquetas?|badges?|sellos?|seals?|marcos?|frames?|subrayados?|underline|flechas?|arrows?|charm|cursor|cadenas?|chain|burbuja|bubble|clips?|papel[\s_-]?rasgado|torn[\s_-]?paper|stickers?|icons?|iconos?|ornamentos?|ornament|halftone|corners?|esquinas?|tarjetas?|cards?|pincelad[ao]s?|paint[\s_-]?stroke)(?=$|[\s_./-])/i;
+
+/** Never infer that an arbitrary user image is shareable from its file type. */
+export function isSafeGenericStudioSticker(name:string):boolean{
+ const normalized=name.replace(/[_-]+/g,' ').trim();
+ return !isPersonalCharacterAssetName(normalized)
+  &&!isStudioBackgroundName(normalized)
+  &&!PRIVATE_CONTENT_WORDS.test(normalized)
+  &&GENERIC_STICKER_WORDS.test(normalized);
+}
