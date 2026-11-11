@@ -4,6 +4,7 @@ import {api} from './platform/client';
 import {contentKind,contentKindLabel,type CalendarGrid,type CalendarPost,type PlannedItem} from './CalendarPlannerModel';
 import {liveFeedState,liveFeedTiles} from './LiveFeedModel';
 import ProjectCover,{type CoverPost} from './ProjectCover';
+import GridCampaignCover,{type FeedCampaignGrid} from './GridCampaignCover';
 import type {Brand as CarouselBrand} from './CarouselFactory';
 import './LiveFeedGrid.css';
 
@@ -13,7 +14,7 @@ type Props={
  posts:CalendarPost[];
  images:Record<string,string>;
  locale:'es'|'en';
- loadImage:(id:string)=>void;
+ loadImage:(id:string)=>Promise<string|undefined>;
  onPostSaved:(post:CalendarPost)=>void;
  onOpenEditor:(item:PlannedItem)=>void;
  onOpenCalendar:(date?:string)=>void;
@@ -26,9 +27,15 @@ type Props={
  * not merely the optional raw photo asset. No writes or generated replacements. */
 type FeedPreviewProps={
  item:PlannedItem;posts:CalendarPost[];brand:CarouselBrand;images:Record<string,string>;
- loadImage:(id:string)=>void;locale:'es'|'en';compact?:boolean;
+ loadImage:(id:string)=>Promise<string|undefined>;locale:'es'|'en';compact?:boolean;
+ grids:FeedCampaignGrid[];
 };
-function FeedPostPreview({item,posts,brand,images,loadImage,locale,compact=false}:FeedPreviewProps){
+function FeedPostPreview({item,posts,brand,images,loadImage,locale,compact=false,grids}:FeedPreviewProps){
+ if(item.kind==='grid'){
+   const grid=grids.find(g=>g.id===item.gridId&&g.brandId===brand.id);
+   if(grid)return <GridCampaignCover item={item} grid={grid} brand={brand}
+     images={images} loadImage={loadImage} locale={locale} compact={compact}/>;
+ }
  const full=item.kind==='post'
    ?posts.find(p=>p.id===item.id.slice(5)&&p.brandId===brand.id) as
      (CalendarPost&Partial<CoverPost>)|undefined
@@ -60,7 +67,7 @@ const displayDate=(date:string,locale:'es'|'en')=>{
 export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refreshRevision,
  onPostSaved,onOpenEditor,onOpenCalendar,onOpenPrompts,onCreate,notify,showError}:Props){
  const es=locale==='es';
- const [grids,setGrids]=useState<CalendarGrid[]>([]);
+ const [grids,setGrids]=useState<FeedCampaignGrid[]>([]);
  const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState('');
  const [mode,setMode]=useState<'now'|'future'>('future');
  const [advance,setAdvance]=useState(3);
@@ -163,7 +170,7 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
          aria-label={(es?'Editar ':'Edit ')+item.title}
          title={item.title+' · '+contentKindLabel(item.format,locale)+' · '+item.date}
          onClick={()=>onOpenEditor(item)}>
-         <FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+         <FeedPostPreview item={item} posts={posts} brand={brand} images={images} grids={grids}
            loadImage={loadImage} locale={locale}/>
          <span className="lab-live-feed-type">{contentKindLabel(item.format,locale)}</span>
          {pending&&<span className="lab-live-feed-tile-date">{displayDate(item.date,locale)}</span>}
@@ -183,7 +190,7 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
            'No pending posts. Add a design and a date in the calendar.'}</span></div>:
        <div className="lab-live-feed-rows">{timeline.upcoming.slice(0,12).map(item=>
          <article key={item.id} className="lab-live-feed-row">
-           <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+           <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images} grids={grids}
              loadImage={loadImage} locale={locale} compact/></div>
            <div className="lab-live-feed-row-info"><strong>{item.title}</strong>
              <span>{displayDate(item.date,locale)} · {item.time} · {contentKindLabel(item.format,locale)}</span></div>
@@ -203,7 +210,7 @@ export default function LiveFeedGrid({brand,posts,images,locale,loadImage,refres
        <span>{showHistory?'−':'＋'}</span></button>
      {showHistory&&<div className="lab-live-feed-rows">
        {timeline.published.slice().reverse().slice(0,25).map(item=><article key={item.id} className="lab-live-feed-row">
-         <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images}
+         <div className="lab-live-feed-small-thumb"><FeedPostPreview item={item} posts={posts} brand={brand} images={images} grids={grids}
            loadImage={loadImage} locale={locale} compact/></div>
          <div className="lab-live-feed-row-info"><strong>{item.title}</strong>
            <span>{displayDate(item.date,locale)} · {item.time} · {contentKindLabel(item.format,locale)}</span></div>
