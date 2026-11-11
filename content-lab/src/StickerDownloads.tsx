@@ -94,7 +94,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
        else if(result){saved++;if(kind==='background')backgrounds++;}else failed++;
      }catch(e){failed++;if(failed===1)setProgress('Revisando archivos: '+(e instanceof Error?e.message:String(e)))}
    }
-   setProgress((isAdmin?'Bibliotecas organizadas: ':'Importación terminada: ')+saved+' PNG nuevos'+(backgrounds?' · '+backgrounds+' en Fondos':'')+(duplicates?' · '+duplicates+' duplicados omitidos':'')+(failed?' · '+failed+' no se pudieron guardar':'')+'. Sin créditos de IA.');
+   setProgress((isAdmin?'Bibliotecas organizadas: ':'Importación terminada: ')+saved+' PNG nuevos'+(backgrounds?' · '+backgrounds+' en Fondos':'')+(duplicates?' · '+duplicates+' duplicados omitidos':'')+(failed?' · '+failed+' no se pudieron guardar':'')+'.');
   }catch(e){setProgress('No se pudo importar: '+(e instanceof Error?e.message:String(e)))}
   finally{setRunning(false);if(fileRef.current)fileRef.current.value=''}
  };
