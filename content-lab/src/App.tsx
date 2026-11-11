@@ -404,6 +404,7 @@ function App() {
 
   const [waiting, setWaiting] = useState(true);
   const [refreshing,setRefreshing]=useState(false);
+  const [gridRefreshRevision,setGridRefreshRevision]=useState(0);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -971,6 +972,7 @@ function App() {
         }
       }
       await reload();
+      setGridRefreshRevision(n=>n+1);
       toast(loginLanguage==='es'?'Contenido actualizado. Sigues en la misma pantalla.':'Content refreshed. You are still on the same screen.');
     }catch(e){err(e)}finally{setRefreshing(false)}
   };
@@ -1809,7 +1811,7 @@ function App() {
               loadImage={imageLoad}
               notify={toast}
               showError={err}
-            /> : <LiveFeedGrid brand={brand} posts={posts} images={images}
+            /> : <LiveFeedGrid brand={brand} posts={posts} images={images} refreshRevision={gridRefreshRevision}
                 locale={loginLanguage} loadImage={id=>{void imageLoad(id)}}
                 onPostSaved={updated=>setPosts(prev=>prev.map(p=>p.id===updated.id?updated as Post:p))}
                 onOpenEditor={openCalendarItem}
@@ -1819,7 +1821,7 @@ function App() {
                 notify={toast} showError={err}/>
           )}
           {brand && tab === 'calendar' && (
-            <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage}
+            <ContentCalendar brand={brand} posts={posts} images={images} locale={loginLanguage} refreshRevision={gridRefreshRevision}
               focusDate={calendarFocusDate} onEditItem={openCalendarItem}
               onDownloadItem={downloadCalendarProject}
               onDeleteItem={async item=>{
