@@ -2244,7 +2244,7 @@ function App() {
                         <div className="lab-post-download-slides" role="group"
                           aria-label={loginLanguage==='es'?'Descargar slides':'Download slides'}>
                           <strong>{loginLanguage==='es'?'PNG individuales listos':'Individual PNGs ready'}</strong>
-                          <div>{preparedPostDownloads.files.map((file,n)=>(
+                          <div>{preparedPostDownloads?.files.map((file,n)=>(
                             <a href={file.url} download={file.name} key={file.name}>
                               <Download size={14}/>{loginLanguage==='es'?'Slide':'Slide'} {n+1}
                             </a>
