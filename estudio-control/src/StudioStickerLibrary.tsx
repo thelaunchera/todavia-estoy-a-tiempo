@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {Archive,Check,Download,FolderOpen,ImagePlus,LockKeyhole,RefreshCw,Search,Share2,Star,Upload,X} from 'lucide-react';
+import {Archive,Check,Download,FolderOpen,ImagePlus,LockKeyhole,RefreshCw,Search,Share2,Star,Upload} from 'lucide-react';
 import {
  loadStudioLabAssets,loadStudioPrivateCharacterAssets,
  type StudioLabAsset
@@ -59,13 +59,17 @@ function toEntries(
  return [...originals,...owner,...remote,...bundled,...editorial];
 }
 
-function downloadSticker(item:Entry){
- // Use the existing image URL for native downloads; never mutate the library.
- const a=document.createElement('a');
- a.href=item.url;
- a.download=(item.name.replace(/[^\p{L}\p{N}_-]+/gu,'-')||'sticker')+
-  (item.url.toLowerCase().includes('.svg')?'.svg':'.png');
- a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
+async function downloadSticker(item:Entry):Promise<void>{
+ // A Blob download works for private signed URLs and local IndexedDB images.
+ const response=await fetch(item.url);
+ if(!response.ok)throw Error('No se pudo cargar el archivo para descargar.');
+ const blob=await response.blob();
+ const suffix=blob.type.includes('svg')?'.svg':blob.type.includes('webp')?'.webp':
+  blob.type.includes('jpeg')?'.jpg':'.png';
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=(item.name.replace(/[^\p{L}\p{N}_-]+/gu,'-')||'sticker')+suffix;
+ document.body.appendChild(a);a.click();a.remove();
+ window.setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
 
 export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()=>void}){
@@ -133,7 +137,7 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   if(view==='Fondos')return assets.filter(a=>a.kind==='background');
   if(view==='Content Lab')return assets.filter(a=>!a.private&&a.kind==='sticker');
   if(view==='Favoritos')return assets.filter(a=>favorites.includes(a.id));
-  return assets;
+  return assets.filter(a=>a.kind==='sticker');
  },[assets,view,favorites]);
  const collections=useMemo(()=>visibleStickerCollections(
   viewAssets.filter(a=>a.kind==='sticker').map(a=>({
@@ -169,7 +173,7 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
   catch{setStatus('No se pudo guardar en Favoritos.');}
  };
  const shareGeneral=async(item:Entry)=>{
-  if(!onDevice(item)||item.kind!=='sticker'||!isSafeGenericStudioSticker(item.name)){
+  if(!onDevice(item)||!item.id.startsWith('studio-import-')||item.kind!=='sticker'||!isSafeGenericStudioSticker(item.name)){
    setStatus('Este recurso no es un sticker general aprobado. Sigue privado en tu Studio.');return;
   }
   if(approved.includes(item.id))return;
@@ -257,10 +261,10 @@ export default function StudioStickerLibrary({onOpenCarousel}:{onOpenCarousel:()
     <div className="standalone-stickers-card-actions">
      {onDevice(item)&&<button type="button" onClick={()=>void move(item,item.kind==='background'?'sticker':'background')}>
       {item.kind==='background'?'Mover a Stickers':'Mover a Fondos'}</button>}
-     {onDevice(item)&&item.kind==='sticker'&&!isPersonal(item.name)&&!approved.includes(item.id)&&isSafeGenericStudioSticker(item.name)&&
+     {onDevice(item)&&item.id.startsWith('studio-import-')&&item.kind==='sticker'&&!isPersonal(item.name)&&!approved.includes(item.id)&&isSafeGenericStudioSticker(item.name)&&
       <button type="button" onClick={()=>void shareGeneral(item)}><Share2 size={13}/> Compartir en Lab</button>}
      {onDevice(item)&&approved.includes(item.id)&&<small className="standalone-stickers-shared-request">Compartir solicitado</small>}
-     <button type="button" onClick={()=>downloadSticker(item)}><Download size={13}/> Descargar</button>
+     <button type="button" onClick={()=>void downloadSticker(item).catch(e=>setStatus(e instanceof Error?e.message:'No se pudo descargar el recurso.'))}><Download size={13}/> Descargar</button>
     </div>
    </article>)}
   </div>:<div className="standalone-stickers-empty">
