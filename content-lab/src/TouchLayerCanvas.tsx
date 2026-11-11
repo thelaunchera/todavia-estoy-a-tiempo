@@ -6,6 +6,8 @@ import { coverPlacement, normalizeCrop, photoFrameMetrics, initialPanoramaPhotoR
 import { Trash2, LockKeyhole, LockKeyholeOpen, Copy, Layers3 } from 'lucide-react';
 import { panoramaFont,panoramaTextWeight,type PanoramaLayer } from './PanoramaLayers';
 import CurvedTextPreview from './CurvedTextPreview';
+import FontShelf from './FontShelf';
+import {EDITOR_FONTS,ensureEditorFont,editorFont} from '../../creative-shared/editor-font-library';
 import './TouchLayerCanvas.css';
 import type {StickerCopyResult} from './CarouselStickerCopy';
 
@@ -50,7 +52,7 @@ export default function TouchLayerCanvas({
 }: Props) {
   const [draft, setDraft] = useState<Record<string, TouchRect>>({});
   const [selected, setSelected] = useState('');
-  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|'color'|null>(null);
+  const [contextInspector,setContextInspector]=useState<'opacity'|'rotation'|'position'|'curve'|'color'|'fonts'|'effects'|'size'|'more'|null>(null);
   // Preview opacity locally while dragging, avoiding full-canvas render and
   // autosave on every input event (especially costly in iPad/iPhone Safari).
   const [opacityPreview,setOpacityPreview]=useState<{id:string;value:number}|null>(null);
@@ -505,21 +507,68 @@ export default function TouchLayerCanvas({
           <button type="button" aria-pressed={contextInspector==='opacity'} onClick={()=>setContextInspector(v=>v==='opacity'?null:'opacity')}><span aria-hidden="true">◐</span><small>Transparencia</small></button>
           <button type="button" aria-pressed={contextInspector==='color'} onClick={()=>setContextInspector(v=>v==='color'?null:'color')}><span aria-hidden="true">◉</span><small>Color</small></button>
           <button type="button" aria-pressed={contextInspector==='position'} onClick={()=>setContextInspector(v=>v==='position'?null:'position')}><Layers3 size={18}/><small>Capas</small></button>
+          {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='fonts'} onClick={()=>setContextInspector(v=>v==='fonts'?null:'fonts')}><span aria-hidden="true">Aa</span><small>Fuentes</small></button>}
+          {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='effects'} onClick={()=>setContextInspector(v=>v==='effects'?null:'effects')}><span aria-hidden="true">✧</span><small>Efectos</small></button>}
+          {chosen.kind==='text'&&<button type="button" onClick={()=>setEditingText(chosen.id)}><span aria-hidden="true">✎</span><small>Editar</small></button>}
           {chosen.kind==='text'&&<button type="button" aria-pressed={contextInspector==='curve'} onClick={()=>setContextInspector(v=>v==='curve'?null:'curve')}><span aria-hidden="true">∩</span><small>Curvar</small></button>}
           <button type="button" aria-pressed={contextInspector==='rotation'} onClick={()=>setContextInspector(v=>v==='rotation'?null:'rotation')}><span aria-hidden="true">↻</span><small>Girar</small></button>
+          <button type="button" aria-pressed={contextInspector==='size'} onClick={()=>setContextInspector(v=>v==='size'?null:'size')}><span aria-hidden="true">↔</span><small>Tamaño</small></button>
           <button type="button" onClick={()=>resizeSelected(.85)}><span aria-hidden="true">−</span><small>Reducir</small></button>
           <button type="button" onClick={()=>resizeSelected(1.15)}><span aria-hidden="true">＋</span><small>Agrandar</small></button>
           {onDuplicateLayer&&<button type="button" onClick={()=>onDuplicateLayer(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
           {!onDuplicateLayer&&chosen.kind==='text'&&onDuplicateText&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}><span aria-hidden="true">⧉</span><small>Duplicar</small></button>}
+          <button type="button" aria-pressed={contextInspector==='more'} onClick={()=>setContextInspector(v=>v==='more'?null:'more')}><span aria-hidden="true">⋯</span><small>Todos</small></button>
           {onRemove&&<button type="button" onClick={()=>deleteLayer(chosen.id)}><Trash2 size={19}/><small>Borrar</small></button>}
           <button type="button" className="touch-editor-context-done" onClick={()=>{setSelected('');setContextInspector(null)}} aria-label="Terminar edición del elemento"><span aria-hidden="true">✓</span><small>Listo</small></button>
         </div>}
         {chosen&&selectedRect&&onUpdate&&contextInspector&&<div className={'touch-editor-context-inspector'+(fullscreen?' is-fullscreen':'')} role="group" aria-label="Ajustes del elemento"
       onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}
       onPointerUp={e=>e.stopPropagation()} onPointerCancel={e=>e.stopPropagation()}>
-          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='color'?'Cambiar color':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':'Posición'}</strong>
+          <div className="touch-editor-context-inspector-head"><strong>{contextInspector==='opacity'?'Transparencia':contextInspector==='color'?'Cambiar color':contextInspector==='rotation'?'Girar':contextInspector==='curve'?'Curvar texto':contextInspector==='fonts'?'50 tipografías':contextInspector==='effects'?'Efectos de texto':contextInspector==='size'?'Tamaño':'Todas las funciones'}</strong>
             <button type="button" aria-label="Cerrar ajustes" onClick={()=>setContextInspector(null)}>×</button></div>
           {contextInspector==='color'&&colorTools}
+          {contextInspector==='fonts'&&chosen.kind==='text'&&<FontShelf value={chosen.font}
+            onSelect={font=>onUpdate(chosen.id,{font})}/>}
+          {contextInspector==='effects'&&chosen.kind==='text'&&<div className="touch-editor-app-effects" role="group" aria-label="Efectos de texto">
+            <strong>Estilo de letras</strong>
+            <div className="touch-editor-app-effect-modes">
+              <button type="button" aria-pressed={!chosen.outline} onClick={()=>onUpdate(chosen.id,{outline:false,outlineOnly:false})}>Normal</button>
+              <button type="button" aria-pressed={!!chosen.outline&&!!chosen.outlineOnly}
+                onClick={()=>onUpdate(chosen.id,{outline:true,outlineOnly:true,outlineColor:chosen.outlineColor||chosen.color||'#191919'})}>Outline</button>
+              <button type="button" aria-pressed={!!chosen.outline&&!chosen.outlineOnly}
+                onClick={()=>onUpdate(chosen.id,{outline:true,outlineOnly:false})}>Relleno + borde</button>
+            </div>
+            {chosen.outline&&<div className="touch-editor-app-effect-row">
+              <label>Color <input type="color" value={chosen.outlineColor||(chosen.outlineOnly?chosen.color||'#191919':'#FFFFFF')}
+                onChange={e=>onUpdate(chosen.id,{outlineColor:e.target.value})}/></label>
+              <label>Grosor <input type="range" min="1" max="20" step="1" value={chosen.outlineWidth??4}
+                onChange={e=>onUpdate(chosen.id,{outlineWidth:Number(e.target.value)})}/>
+                <output>{chosen.outlineWidth??4}px</output></label>
+            </div>}
+            <label className="touch-editor-app-effect-row"><input type="checkbox" checked={!!chosen.shadow}
+              onChange={e=>onUpdate(chosen.id,{shadow:e.target.checked})}/> Sombra de texto</label>
+          </div>}
+          {contextInspector==='size'&&<div className="touch-editor-context-position">
+            <button type="button" onClick={()=>resizeSelected(.88)}>− Reducir</button>
+            <button type="button" onClick={()=>resizeSelected(1.12)}>＋ Agrandar</button>
+            {chosen.kind==='text'&&<label className="touch-editor-context-range">Tamaño de letra
+              <input type="range" min="20" max="240" step="2" value={chosen.fontSize||76}
+                onChange={e=>onUpdate(chosen.id,{fontSize:Number(e.target.value)})}/><output>{chosen.fontSize||76}px</output>
+            </label>}
+          </div>}
+          {contextInspector==='more'&&<div className="touch-editor-context-position" role="group" aria-label="Todas las opciones del elemento">
+            {onToggleLock&&<button type="button" onClick={()=>onToggleLock(chosen.id,!chosen.locked)}>{chosen.locked?'Desbloquear':'Bloquear'}</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'front')}>Al frente</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'back')}>Al fondo</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'forward')}>Una capa delante</button>}
+            {onReorder&&<button type="button" onClick={()=>onReorder(chosen.id,'backward')}>Una capa atrás</button>}
+            {onDuplicateLayer&&<button type="button" onClick={()=>onDuplicateLayer(chosen.id)}>Duplicar</button>}
+            {!onDuplicateLayer&&onDuplicateText&&chosen.kind==='text'&&<button type="button" onClick={()=>onDuplicateText(chosen.id)}>Duplicar texto</button>}
+            {chosen.kind==='photo'&&<button type="button" onClick={()=>setCropping(v=>!v)}>{cropping?'Terminar recorte':'Recortar foto'}</button>}
+            {chosen.kind==='text'&&<button type="button" onClick={()=>setEditingText(chosen.id)}>Editar texto</button>}
+            <button type="button" onClick={()=>onCommit(chosen.kind,chosen.id,{...selectedRect,angle:0})}>Enderezar</button>
+          </div>}
+
           {contextInspector==='opacity'&&<label className="touch-editor-context-range">
             Opacidad <input type="range" min="0" max="100" step="1" aria-label="Opacidad: 100 es completamente visible"
             value={opacityPercent} onChange={e=>changeOpacity(chosen.id,Number(e.currentTarget.value))} {...opacitySliderEvents}/>
@@ -928,9 +977,13 @@ export default function TouchLayerCanvas({
         <label>Texto<textarea rows={2} aria-label="Editar texto libre" value={chosen.text||''}
           onChange={e=>onUpdate(chosen.id,{text:e.target.value})}/></label>
         <label>Fuente<select aria-label="Fuente de texto libre" value={chosen.font||'serif'}
-          onChange={e=>onUpdate(chosen.id,{font:e.target.value})}>
-          {['serif','sans','poster','prompt','futura','dm serif display','cormorant','playfair','fraunces','bodoni','libre','outfit','manrope','syne','space','caveat']
-           .map(v=><option key={v} value={v}>{v==='poster'?'Poster Extra Bold':v[0].toUpperCase()+v.slice(1)}</option>)}
+          onChange={e=>{void ensureEditorFont(e.target.value);onUpdate(chosen.id,{font:e.target.value})}}>
+          {chosen.font&&!EDITOR_FONTS.some(font=>font.id===chosen.font)&&<option value={chosen.font}>{chosen.font}</option>}
+          {!chosen.font&&<option value="serif">Serif original</option>}
+          {(['Sans','Display','Serif','Script'] as const).map(group=>
+            <optgroup key={group} label={group}>
+              {EDITOR_FONTS.filter(font=>font.category===group).map(font=><option key={font.id} value={font.id}>{font.label}</option>)}
+            </optgroup>)}
         </select></label>
         <label>Grosor <select aria-label="Grosor del texto" value={panoramaTextWeight(chosen.fontWeight)}
            onChange={e=>onUpdate(chosen.id,{fontWeight:Number(e.target.value)})}>
