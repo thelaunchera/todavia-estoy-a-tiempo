@@ -3,7 +3,7 @@ import {Download,Search,Images,Upload,Check,LoaderCircle,Trash2} from 'lucide-re
 import {unzip} from 'fflate';
 import {classifyAdminDesignAsset,type ImportKind} from '../../creative-shared/design-asset-kind';
 import {displayAssetName,assetCategory,type LibraryAsset} from './MediaAsset';
-import {visibleStickerCollections,matchesStickerCollection,stickerCollectionFor,type StickerCollection} from './StudioLibraryOrganization';
+import {visibleStickerCollections,matchesStickerCollection,stickerCollectionFor,uniqueLibraryAssetCards,type StickerCollection} from './StudioLibraryOrganization';
 import './StickerDownloads.css';
 
 type Props={brandId:string;assets:LibraryAsset[];images:Record<string,string>;
@@ -46,7 +46,7 @@ export default function StickerDownloads({brandId,assets,images,onUpload,onPubli
  const [importKind,setImportKind]=useState<ImportKind>('auto');
  const [destination,setDestination]=useState<'carousel'|'cover'>('carousel');
  const [dragActive,setDragActive]=useState(false);
- const files=useMemo(()=>assets.filter(a=>(a.brandId===brandId||a.shared)&&assetCategory(a)==='sticker'),[assets,brandId]);
+ const files=useMemo(()=>uniqueLibraryAssetCards(assets.filter(a=>(a.brandId===brandId||a.shared)&&assetCategory(a)==='sticker')),[assets,brandId]);
  const publicCount=files.filter(a=>a.shared).length;
  const userCount=files.length-publicCount;
  const collections=useMemo(()=>visibleStickerCollections(files),[files]);

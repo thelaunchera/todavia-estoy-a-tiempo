@@ -6,6 +6,7 @@ import BackgroundThumbnail from './BackgroundThumbnail';
 import {isBackgroundVisible} from './BackgroundVisibility';
 import {ArrowRight,Download,Search,Upload,Trash2} from 'lucide-react';
 import {assetCategory,displayAssetName,type LibraryAsset} from './MediaAsset';
+import {uniqueLibraryAssetCards} from './StudioLibraryOrganization';
 import './BackgroundLibrary.css';
 
 type Props={onDesign:(id:FreeBackgroundId,imageAssetId?:string)=>void;assets:LibraryAsset[];images:Record<string,string>;loadImage:(id:string)=>void;onUpload:(file:File,category?:string)=>Promise<LibraryAsset|null>;onPublish?:(file:File,category?:string)=>Promise<LibraryAsset|null>;onDelete:(asset:LibraryAsset)=>Promise<void>;onDeletePreset:(id:FreeBackgroundId,name:string)=>Promise<void>;isAdmin?:boolean};
@@ -31,8 +32,8 @@ export default function BackgroundLibrary({onDesign,assets,images,loadImage,onUp
   [bulkProgress,setBulkProgress]=useState<{done:number;total:number;failed:number}|null>(null);
  const [filter,setFilter]=useState<GalleryFilter>('all'),[search,setSearch]=useState('');
  const [uploadCategory,setUploadCategory]=useState('Editoriales');
- const own=assets.filter(a=>assetCategory(a)==='background'&&!a.shared);
- const shared=assets.filter(a=>assetCategory(a)==='background'&&a.shared);
+ const own=uniqueLibraryAssetCards(assets.filter(a=>assetCategory(a)==='background'&&!a.shared));
+ const shared=uniqueLibraryAssetCards(assets.filter(a=>assetCategory(a)==='background'&&a.shared));
  const sharedVisible=shared.filter(a=>
    displayAssetName(a).toLowerCase().includes(search.toLowerCase().trim()));
  // Images are fetched by AssetPreview's IntersectionObserver only when visible.

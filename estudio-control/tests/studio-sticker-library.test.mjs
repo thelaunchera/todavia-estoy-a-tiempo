@@ -48,7 +48,7 @@ test('Standalone gallery provides search, filters, private characters, backgroun
  assert.match(manager,/writeEditorRecord\(STUDIO_CATEGORY_OVERRIDES,next\)/);
  assert.match(manager,/writeEditorRecord\(STUDIO_APPROVED_SHARES,next\)/);
  assert.match(manager,/Personajes privados/);
- assert.match(manager,/onDevice\(a\)&&a\.kind==='sticker'&&!isPersonal\(a\.name\)/);
+ assert.match(manager,/a\.private&&a\.kind==='sticker'&&!isPersonal\(a\.name\)/);
  assert.match(manager,/a\.kind==='sticker'/);
  assert.match(manager,/loading="lazy"/);
  assert.match(manager,/setVisibleLimit\(n=>n\+48\)/);

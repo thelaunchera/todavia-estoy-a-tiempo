@@ -25,7 +25,7 @@ export const STICKER_COLLECTIONS=[
  'Todos','Mis stickers','Lazos','Cintas','Estrellas','Marcos y etiquetas',
  'Papeles y recortes','Branding','Flores y naturaleza','Animales','Avatares',
  'Temporada','Matcha','Pilates','Ejercicios','Inspiración','Negocios',
- 'Objetos','Decorativos'
+ 'Tecnología','Picnic y lifestyle','Playa y verano','Objetos','Decorativos'
 ] as const;
 export type StickerCollection=typeof STICKER_COLLECTIONS[number];
 
@@ -38,6 +38,9 @@ export function stickerCollectionFor(asset:GroupableAsset):StickerCollection{
  // Release collections with approved editorial phrases take precedence over loose keyword matching.
  if(group==='inspiración'||group==='inspiracion')return 'Inspiración';
  if(/navidad|christmas|holiday|valent[ií]n|halloween|santa|snowman|cascabel|reyes magos|pascua/.test(name)||group==='temporadas')return 'Temporada';
+ if(/airdrop|air drop|iphone|smartphone|ipad|macbook|screen ?shot|notification|app icon|widget|cursor|mensaje|message|dm|red social|social media|desktop/.test(name))return 'Tecnología';
+ if(/picnic|merienda|manta de cuadros|picnic basket|canasta|campestre|sandwich|basket picnic|mantel|lemonade|limonada/.test(name))return 'Picnic y lifestyle';
+ if(/playa|beach|sea shell|seashell|sombrilla|surf|verano|summer|sunbed|sun hat|ocean|toalla de playa|bikini|palm tree|flotador|concha marina/.test(name))return 'Playa y verano';
  if(/lazo|bow|ribbon|moño|corbata de seda/.test(name))return 'Lazos';
  if(/cinta|tape|washi|bander[ií]n|banner|list[oó]n/.test(name))return 'Cintas';
  if(/estrella|\bstars?\b|destello|asterisco|sparkles?|rayos?|brillo estelar/.test(name))return 'Estrellas';
@@ -50,7 +53,7 @@ export function stickerCollectionFor(asset:GroupableAsset):StickerCollection{
  if(/matcha|latte|tea|t[eé] verde|caf[eé]|coffee|croissant|taza|tumbler/.test(name)||group==='matcha')return 'Matcha';
  if(/pilates|reformer|yoga|barre|stretch|magic circle/.test(name)||group==='pilates')return 'Pilates';
  if(/workout|gym|fitness|exercise|ejercicio|squat|dumbbell|kettlebell|strength|running|zapatilla|sneaker/.test(name)||group==='ejercicios')return 'Ejercicios';
- if(group==='inspiraci[oó]n'||/^(start where you are|small steps still count|keep going|progress over perfection|your pace is valid|make room for joy|trust your next step|create your own path|you can begin again|one day at a time|done is a brave start|your ideas matter|let it take time|choose yourself|more courage less doubt|you are becoming|a little progress daily|do it with heart|good things take practice|keep showing up)$/.test(name))return 'Inspiración';
+ if(group==='inspiración'||group==='inspiracion'||/^(start where you are|small steps still count|keep going|progress over perfection|your pace is valid|make room for joy|trust your next step|create your own path|you can begin again|one day at a time|done is a brave start|your ideas matter|let it take time|choose yourself|more courage less doubt|you are becoming|a little progress daily|do it with heart|good things take practice|keep showing up)$/.test(name))return 'Inspiración';
  if(group==='negocios')return 'Negocios';
  if(/phone|iphone|camera|c[aá]mara|laptop|book|libro|perfume|labial|lipstick|zapato|shoe|bolso|bag|tote|sombrero|hat|notebook|aud[ií]fonos|headphone|florero|vela|candle|p[aá]gina|globo|pez|concha|pluma|anillo/.test(name))return 'Objetos';
  return 'Decorativos';
@@ -74,4 +77,25 @@ export function matchesStickerCollection(asset:GroupableAsset,category:StickerCo
  if(category==='Todos')return true;
  if(category==='Mis stickers')return !asset.shared;
  return stickerCollectionFor(asset)===category;
+}
+
+/**
+ * Same image SHA means the same PNG, regardless of its display name.
+ * Dedupe cards only; NEVER remove records/files because saved designs can
+ * still reference an older asset ID.
+ * Shared and per-account private content remain independent collections.
+ */
+export function uniqueLibraryAssetCards<T extends {
+ id:string;sha256?:string|null;shared?:boolean
+}>(items:readonly T[]):T[]{
+ const ids=new Set<string>(),hashes=new Set<string>(),results:T[]=[];
+ for(const item of items){
+  if(ids.has(item.id))continue;
+  const sha=(item.sha256||'').toLowerCase();
+  const valid=/^[a-f0-9]{64}$/.test(sha);
+  const key=(item.shared?'shared:':'owner:')+sha;
+  if(valid&&hashes.has(key))continue;
+  ids.add(item.id);if(valid)hashes.add(key);results.push(item);
+ }
+ return results;
 }

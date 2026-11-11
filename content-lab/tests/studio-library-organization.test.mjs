@@ -68,3 +68,41 @@ test('Lab offers Studio-like collections, mobile lazy previews and a bounded gri
  assert.match(gallery,/IntersectionObserver/);
  assert.match(gallery,/matchesStickerCollection\(asset,category\)/);
 });
+
+test('iPhone/AirDrop, picnic, beach and private-independent categories are consistent',()=>{
+ const examples={
+  'AirDrop transfer screen':'Tecnología',
+  'iPhone notification sticker':'Tecnología',
+  'Picnic basket and lemonade':'Picnic y lifestyle',
+  'Manta de cuadros picnic':'Picnic y lifestyle',
+  'Toalla de playa verano':'Playa y verano',
+  'Beach umbrella':'Playa y verano',
+  'Start where you are':'Inspiración'
+ };
+ for(const [name,category] of Object.entries(examples))
+  assert.equal(lib.stickerCollectionFor({name,stickerGroup:'Aesthetic'}),category,name);
+});
+
+test('SHA-identical Lab cards are hidden without conflating user-owned and public assets',()=>{
+ const sha='a'.repeat(64);
+ const data=[
+  {id:'shared-a',name:'Sello dorado',shared:true,sha256:sha},
+  {id:'shared-b',name:'Sello dorado copy',shared:true,sha256:sha},
+  {id:'private-c',name:'Personal',shared:false,sha256:sha},
+  {id:'shared-d',name:'Lazo diferente',shared:true,sha256:'b'.repeat(64)}
+ ];
+ const result=lib.uniqueLibraryAssetCards(data);
+ assert.deepEqual(result.map(x=>x.id),['shared-a','private-c','shared-d']);
+ assert.equal(data.length,4);
+});
+
+test('Content Lab rejects private characters and checks published bundles before uploading duplicates',()=>{
+ const client=readFileSync(new URL('./platform/client.ts',root),'utf8');
+ assert.match(client,/if\(isPersonalCharacterAssetName\(name\)\)throw Error/);
+ assert.match(client,/includedCatalog\('sticker'\)\)\.find\(a=>a\.sha256===sha256\)/);
+ assert.match(client,/includedCatalog\('background'\)\)\.find\(a=>a\.sha256===sha256\)/);
+ const stickers=readFileSync(new URL('./StickerDownloads.tsx',root),'utf8');
+ const backgrounds=readFileSync(new URL('./BackgroundLibrary.tsx',root),'utf8');
+ assert.match(stickers,/uniqueLibraryAssetCards\(assets\.filter/);
+ assert.match(backgrounds,/uniqueLibraryAssetCards\(assets\.filter/);
+});
