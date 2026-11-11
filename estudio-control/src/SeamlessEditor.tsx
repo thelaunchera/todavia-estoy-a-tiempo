@@ -21,7 +21,7 @@ import {ImagePlus,Type,Sticker,Shapes,Palette,Layers3,MousePointer2,Move,Sliders
 import './seamless-app.css';
 import CarouselReader from './CarouselReader';
 import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
-type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
+type Item={id:number;kind:'text'|'image'|'sticker';text?:string;src?:string;x:number;y:number;width:number;fontSize:number;color:string;textStyle?:'hook'|'title'|'paragraph'|'caption';radius?:number;frameStyle?:'polaroid';rotation?:number;curve?:number;letterSpacing?:number;originalBackupId?:string;locked?:boolean;opacity?:number;fontFamily?:string;fontWeight?:number;textShadow?:boolean;textOutline?:boolean;outlineOnly?:boolean;outlineColor?:string;outlineWidth?:number;shape?:StudioShape;flipX?:boolean;flipY?:boolean;shadowEnabled?:boolean;shadowBlur?:number;shadowColor?:string;shadowOffsetX?:number;shadowOffsetY?:number;tintColor?:string;tintStrength?:number;role?:'background';backgroundSlide?:number};
 const W=1080,H=1350,KEY='studio-seamless-v1',PROJECTS_KEY='studio-seamless-projects-v1',PROJECT_NAME_KEY='studio-seamless-current-name-v1',ACTIVE_PROJECT_KEY='studio-seamless-active-project-v1';
 const defaults={count:5,background:String(CREATIVE_EDITOR_RULES.defaultCanvasColor),backgroundImages:{} as Record<number,string>,items:[] as Item[]};
 // The private Studio and commercial Lab share only immutable, bundled images.
@@ -358,13 +358,13 @@ export default function SeamlessEditor(){
        ctx.shadowOffsetX=it.shadowOffsetX??0;
      }
      if(it.textOutline){
-       ctx.strokeStyle='#FFFFFF';
-       ctx.lineWidth=Math.max(1,it.fontSize*.045);
+       ctx.strokeStyle=it.outlineColor||'#FFFFFF';
+       ctx.lineWidth=Math.max(1,Math.min(20,it.outlineWidth??it.fontSize*.045));
        ctx.lineJoin='round';
      }
      const lines=textLines(it),curve=clampTextCurve(it.curve||0);
      const spacing=it.fontSize*1.3+curvedTextExtraHeight(it.fontSize,it.width||900,curve,lines,it.letterSpacing||0);
-     lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0,!!it.textOutline));
+     lines.forEach((line,index)=>drawCurvedTextLine(ctx,line,x,it.y+index*spacing,it.fontSize,curve,it.width||900,it.letterSpacing||0,!!it.textOutline,!it.textOutline||!it.outlineOnly));
    }else if(it.src){
      try{
        const im=await loadImage(it.src);
@@ -1262,7 +1262,29 @@ export default function SeamlessEditor(){
       onChange={e=>update(current.id,{color:e.target.value})}/></label>
     <div className="studio-app-position-row">
       <button type="button" aria-pressed={!!current.textShadow} onClick={()=>update(current.id,{textShadow:!current.textShadow})}>Sombra</button>
-      <button type="button" aria-pressed={!!current.textOutline} onClick={()=>update(current.id,{textOutline:!current.textOutline})}>Contorno</button>
+    </div>
+    <div className="studio-outline-control" role="group" aria-label="Efecto Outline">
+      <strong>Outline · Contorno</strong>
+      <div className="studio-app-position-row studio-outline-modes">
+        <button type="button" aria-pressed={!current.textOutline}
+          onClick={()=>update(current.id,{textOutline:false,outlineOnly:false})}>Normal</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:true,
+            outlineColor:current.outlineColor||current.color||'#191919',outlineWidth:current.outlineWidth??4})}>Outline</button>
+        <button type="button" aria-pressed={!!current.textOutline&&!current.outlineOnly}
+          onClick={()=>update(current.id,{textOutline:true,outlineOnly:false,
+            outlineColor:current.outlineColor||'#FFFFFF',outlineWidth:current.outlineWidth??4})}>Relleno + borde</button>
+      </div>
+      {current.textOutline&&<div className="studio-outline-options">
+        <label>Color del contorno <input aria-label="Color del Outline" type="color"
+          value={current.outlineColor||(current.outlineOnly?current.color:'#FFFFFF')}
+          onChange={e=>update(current.id,{outlineColor:e.target.value})}/></label>
+        <label>Grosor del contorno <input aria-label="Grosor del Outline" type="range" min="1" max="20" step="1"
+          value={current.outlineWidth??4} onChange={e=>update(current.id,{outlineWidth:Number(e.target.value)})}/>
+          <output>{current.outlineWidth??4}px</output></label>
+      </div>}
+    </div>
+    <div className="studio-app-position-row">
     </div>
   </div>}
   {activeInspector==='shape'&&current.shape&&<div className="studio-app-font-inspector">
