@@ -54,7 +54,7 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  const featured=source.match(/RECENT_DEMO_KEYS = \[([^\]]+)\] as const/);
  assert.ok(featured,'Recent demos must reuse canonical keys');
  const keys=[...featured[1].matchAll(/'([^']+)'/g)].map(x=>x[1]);
- assert.deepEqual(keys,['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','school-sneekiefs','school-velmora']);
+ assert.deepEqual(keys,['school-fuego-y-maiz','school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','school-sneekiefs','school-velmora']);
  const byKey=Object.fromEntries(records.map(x=>[x.key,x]));
  for(const key of keys){
   const item=byKey[key];
@@ -64,6 +64,7 @@ test('Latest demo links are visible as shortcuts without duplicating saved Studi
  }
  assert.ok(keys.includes('school-havana-19'),'Havana 19 is included in current shortcuts');
  assert.equal(byKey['school-sneekiefs']?.url,'https://thelaunchera.com/demos/sneekiefs/');
+ assert.equal(byKey['school-fuego-y-maiz']?.url,'https://thelaunchera.com/demos/fuego-y-maiz/');
  assert.ok(!keys.includes('tle-cb-depot'),'Real customer projects must not appear as fictional demos');
  assert.ok(!keys.includes('pod-studio'),'Private Studio must not be shared');
  assert.match(source,/RECENT_DEMO_KEYS\s*\.map\(key=>links\.find/);
