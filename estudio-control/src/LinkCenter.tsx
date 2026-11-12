@@ -10,7 +10,7 @@ const GOLDEN_GRID_CANONICAL_URL = 'https://thelaunchera.com/demos/golden-grid/';
 const GOLDEN_GRID_RETIRED_URL = 'https://golden-grid-waffle-co-k4ojc8.v2.appdeploy.ai/';
 
 // The current finished-demos shortcuts reuse existing entries (no duplicates or private customer demos).
-export const RECENT_DEMO_KEYS = ['school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','school-sneekiefs','school-velmora'] as const;
+export const RECENT_DEMO_KEYS = ['school-fuego-y-maiz','school-havana-19','school-casa-static','school-casa-video','school-crumb','school-aftr','school-jaramillo','school-yummm','school-soluna','school-la-vie-in-pink','school-golden-grid','school-sneekiefs','school-velmora'] as const;
 export type Category = 'thelaunchera' | 'podcast' | 'escuela' | 'lab';
 export type Visibility = 'publico' | 'demo' | 'interno' | 'revision';
 type BaseLink = { key:string; title:string; url:string; category:Category; visibility:Visibility; description:string };
@@ -37,6 +37,7 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:'school-havana-19',title:'Havana 19 · Cuban Cuisine',url:'https://thelaunchera.com/demos/havana-19/',category:'escuela',visibility:'demo',description:'Restaurante cubano en Boston, hecho directo en GitHub con fotos individuales, historia y reserva de demostración'},
   {key:'school-golden-grid',title:'Golden Grid · Waffle Co.',url:'https://thelaunchera.com/demos/golden-grid/',category:'escuela',visibility:'demo',description:'Waffles, branding y empaques · nueve fotografías originales, galería ampliable y website bilingüe; sin pedidos ni pagos reales'},
   {key:'school-velmora',title:'VELMORA · Makeup After Dark',url:'https://thelaunchera.github.io/demo-booking-landing-/velmora/',category:'escuela',visibility:'demo',description:'Demo original de maquillaje online en rojo y negro: colección Ruby 08, ocho fotogramas editoriales, wishlist separada, carrito y checkout simulado; sin ventas ni envíos reales. Fotos y prompts en Demos terminados.'},
+  {key:'school-fuego-y-maiz',title:'Fuego y Maíz · Menú digital',url:'https://thelaunchera.com/demos/fuego-y-maiz/',category:'escuela',visibility:'demo',description:'Restaurante mexicano conceptual: menú digital ES/EN, pedido de prueba en mesa o a domicilio, carrito, nueve fotos individuales y fee de entrega ilustrativo; sin pagos ni pedidos reales. Kit completo, código y fotos en Demos terminados.'},
   {key:'school-sneekiefs',title:'Sneekiefs · Sneakers Editorial',url:'https://thelaunchera.com/demos/sneekiefs/',category:'escuela',visibility:'demo',description:'Concept sneaker website bilingüe: campaña original de 13 fotos, catálogo de tres modelos, tallas US y carrito de muestra; sin pedidos ni pagos reales. Repositorio y Drive están registrados en Demos terminados.'},
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
@@ -122,6 +123,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   'pod-diario':'revision','pod-empezar':'revision','pod-free':'publicado',
   'school-class':'produccion','school-wait':'publicado',
   'school-havana-19':'demo','school-casa-static':'demo','school-casa-video':'demo','school-crumb':'demo' ,'school-aftr':'demo','school-jaramillo':'demo','school-yummm':'demo','school-soluna':'demo','school-la-vie-in-pink':'demo',
+  'school-fuego-y-maiz':'demo',
   'school-aula':'produccion','school-club':'produccion','school-pdf':'produccion',
   'lab-editor':'publicado','lab-prompts':'publicado','lab-brand-board':'publicado'
 };

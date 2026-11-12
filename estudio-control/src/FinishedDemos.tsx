@@ -8,6 +8,7 @@ import {lavenderPhotos,lavenderRebuildPrompts,lavenderDrive,lavenderOriginalProm
 import {wokSocialPhotos, wokSocialRebuildPrompts, wokSocialDrive, wokSocialPromptDocument, wokSocialRepo, wokSocialSite} from './wok-social-kit';
 import {seasonalBrewPhotos, seasonalBrewRebuildPrompts, seasonalBrewRepo, seasonalBrewSite} from './seasonal-brew-kit';
 import {freskaPhotos, freskaRebuildPrompts, freskaDrive, freskaSite, freskaRepo} from './freska-kit';
+import {fuegoYMaizPhotos, fuegoYMaizRebuildPrompts, fuegoYMaizDrive, fuegoYMaizSite, fuegoYMaizRepo} from './fuego-y-maiz-kit';
 import {Film, Camera, BookOpen, FolderOpen, Copy} from 'lucide-react';
 import {sneekiefsPhotos,sneekiefsRebuildPrompts,sneekiefsDrive,sneekiefsSite,sneekiefsRepo} from './sneekiefs-kit';
 import {nailRoomPhotos,nailRoomRebuildPrompts,nailRoomDrive,nailRoomSite,nailRoomRepo} from './nail-room-kit';
@@ -23,7 +24,7 @@ import {WebsiteDemoVisibilityButton,WebsiteDemoVisibilitySummary,useWebsiteDemoV
 import './finished-demos.css';
 
 import {solunaRebuildPrompts} from './soluna-rebuild-prompts';
-const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts, 'nail-room': nailRoomRebuildPrompts, velmora: velmoraRebuildPrompts};
+const studioDemoPrompts = {...demoRebuildPrompts, aftr: aftrRebuildPrompts, soluna: solunaRebuildPrompts, 'ivory-bloom': ivoryBloomRebuildPrompts, ...additionalDemoPrompts, 'golden-grid': goldenGridRebuildPrompts, sova: sovaRebuildPrompts, marea: mareaRebuildPrompts, 'havana-19': havana19RebuildPrompts, 'lavender-edit': lavenderRebuildPrompts, 'wok-social': wokSocialRebuildPrompts, 'seasonal-brew': seasonalBrewRebuildPrompts, freska: freskaRebuildPrompts, sneekiefs: sneekiefsRebuildPrompts, 'nail-room': nailRoomRebuildPrompts, velmora: velmoraRebuildPrompts, 'fuego-y-maiz': fuegoYMaizRebuildPrompts};
 
 type Demo = {
  id:string; title:string; category:string; description:string; image:string;
@@ -32,6 +33,19 @@ type Demo = {
  photos:FinishedDemoPhoto[];
 };
 const finishedDemos:Demo[]=[
+  {
+    id:'fuego-y-maiz',
+    title:'Fuego y Maíz · Menú digital mexicano',
+    category:'Restaurante mexicano · pedidos en mesa y a domicilio de demostración',
+    description:'Carta digital bilingüe ES/EN con nueve fotografías individuales, categorías de tacos y antojitos, personalización, carrito, selección de mesa y dos zonas de entrega con tarifas ilustrativas $4.99 / $7.99. Incluye el logo tipográfico aprobado y cinco pasos de reconstrucción.',
+    image:fuegoYMaizPhotos[0].url,
+    url:fuegoYMaizSite,
+    source:fuegoYMaizRepo,
+    note:'Marca conceptual: no recibe pedidos, no procesa pagos ni envía órdenes a cocina. Tarifas y precios son de ejemplo. Las fotos individuales están publicadas en GitHub Pages; las instrucciones de recreación NO son los prompts originales. La carpeta privada de Drive es para organizar futuros entregables. No añadir al Aula automáticamente.',
+    kind:'other',
+    photos:fuegoYMaizPhotos,
+    promptsFor:'fuego-y-maiz',
+  },
   {
     id:'velmora',
     title:'VELMORA · Makeup After Dark',
@@ -416,7 +430,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
    <div className="finished-demos-intro">
      <span className="finished-demos-eyebrow"><FolderOpen size={16}/> BIBLIOTECA PRIVADA · RESULTADOS FINALES</span>
      <h2>Demos terminados, <em>en un solo lugar.</em></h2>
-     <p>Tu biblioteca reúne Nail Room, Sneekiefs, FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
+     <p>Tu biblioteca reúne Fuego y Maíz, Nail Room, Sneekiefs, FRESKA, WOK SOCIAL, The Lavender Edit, Havana 19, Marea Wigs · Miami, SOVA Headphones, Casa Brownie (con foto y con video), CRUMB, AFTR. Las Vegas, Jaramillo Boutique, YUMMM, La Vie in Pink, Golden Grid, SOLUNA Yoga, IVORY & BLOOM, CB Depot y Experience Cleaning. Distingue los conceptos de práctica, las vistas de boutique y los proyectos reales de cliente. Las dos vistas de Casa Brownie comparten una misma web: solo cambia el hero.</p>
      <div className="finished-demos-library-shortcut" aria-label="Enlace de la biblioteca pública de demos">
        <div className="finished-demos-library-copy">
          <span>PORTAFOLIO PÚBLICO · GITHUB PAGES</span>
@@ -449,6 +463,7 @@ export default function FinishedDemos({onOpenClass,entries=[]}:{onOpenClass:()=>
          <a href={d.source} target="_blank" rel="noopener noreferrer" className="finished-demo-secondary">Ver en repositorio</a>
        </div>
        {d.id==='freska'&&<p><a href={freskaDrive} target="_blank" rel="noopener noreferrer">Abrir fotos y kit FRESKA en Drive</a></p>}
+       {d.id==='fuego-y-maiz'&&<p><a href={fuegoYMaizDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta privada Fuego y Maíz en Drive</a> · <a href={fuegoYMaizSite} target="_blank" rel="noopener noreferrer">Abrir menú publicado</a></p>}
        {d.id==='nail-room'&&<p><a href={nailRoomDrive} target="_blank" rel="noopener noreferrer">Abrir las fotos de uñas aprobadas en Drive</a> · <a href="https://thelaunchera.com/brand-board/?brand=nail-room" target="_blank" rel="noopener noreferrer">Abrir Brand Board Nail Room</a></p>}
        {d.id==='sneekiefs'&&<p><a href={sneekiefsDrive} target="_blank" rel="noopener noreferrer">Abrir fotos originales de Sneekiefs en Drive</a> · <a href="https://thelaunchera.com/brand-board/?brand=sneekiefs" target="_blank" rel="noopener noreferrer">Abrir Brand Board Sneekiefs</a></p>}
         {d.id==='golden-grid'&&<p><a href={goldenGridDrive} target="_blank" rel="noopener noreferrer">Abrir carpeta de fotos en Drive</a></p>}

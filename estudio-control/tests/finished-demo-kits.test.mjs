@@ -13,12 +13,12 @@ assert.ok(stepsMatch,'No se encontró la biblioteca central de pasos');
 const additionalSteps=JSON.parse(stepsMatch[1]);
 
 const cards=[...demosSource.matchAll(/\{\s*id:'([^']+)'([\s\S]*?)\n\s*\},/g)].map(([,id,body])=>({id,body}));
-const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska','sneekiefs','nail-room','velmora'];
+const existingSteps=['casa-brownie','crumb','aftr','soluna','ivory-bloom','golden-grid','sova','marea','havana-19','lavender-edit','wok-social','seasonal-brew','freska','sneekiefs','nail-room','velmora','fuego-y-maiz'];
 
 test('todos los demos terminados incluyen fotos, prompts y pasos en un solo kit',()=>{
  assert.ok(cards.length>=10,'Se perdieron demos del catálogo');
  for(const {id,body} of cards){
-  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos|sneekiefsPhotos|nailRoomPhotos|velmoraPhotos)/);
+  const photos=body.match(/photos:(additionalDemoPhotos\['([^']+)'\]|solunaPhotos|ivoryBloomPhotos|goldenGridPhotos|sovaPhotos|mareaPhotos|havana19Photos|lavenderPhotos|wokSocialPhotos|seasonalBrewPhotos|freskaPhotos|sneekiefsPhotos|nailRoomPhotos|velmoraPhotos|fuegoYMaizPhotos)/);
   const prompts=body.match(/promptsFor:'([^']+)'/);
   assert.ok(photos, id+' no tiene galería de fotos asociada');
   assert.ok(prompts,id+' no tiene pasos de construcción');

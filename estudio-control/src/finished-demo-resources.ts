@@ -1,6 +1,7 @@
 /** Recursos públicos de referencia de los demos. Prompts de recreación editorial (no son los prompts originales de fotografías aprobadas). */
 import type {DemoRebuildPrompt} from './demo-rebuild-prompts';
 export {mareaPhotos, mareaRebuildPrompts} from './marea-kit';
+export {fuegoYMaizPhotos, fuegoYMaizRebuildPrompts, fuegoYMaizSite, fuegoYMaizRepo, fuegoYMaizDrive} from './fuego-y-maiz-kit';
 export type FinishedDemoPhoto = {key:string; title:string;placement:string;url:string;prompt:string};
 const photoData={
   "casa-brownie": {
