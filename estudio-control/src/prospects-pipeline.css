@@ -1,0 +1,89 @@
+/* The Launch Era / Owner-only Prospects CRM. Isolated from Content Lab and client CRM. */
+.tle-prospects{--pr-ink:#191919;--pr-ivory:#FAF8F3;--pr-yellow:#F2D85B;--pr-soft:#E7F0F5;--pr-border:#DAE2E6;color:var(--pr-ink);width:100%;min-width:0}
+.tle-prospects *{box-sizing:border-box}
+.tle-prospects button,.tle-prospects input,.tle-prospects select,.tle-prospects textarea{font:inherit}
+.tle-prospects button{cursor:pointer}
+.tle-prospects button:disabled{opacity:.5;cursor:not-allowed}
+.tle-prospects :is(button,input,select,textarea,a):focus-visible{outline:3px solid #639BB7;outline-offset:2px}
+.tle-prospects-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:26px 26px 24px;border:1px solid var(--pr-border);border-radius:25px;background:linear-gradient(118deg,#FAF8F3 35%,#E6EFF3 100%);margin:0 0 18px}
+.tle-prospects-intro>div{max-width:670px}
+.tle-prospects-kicker{display:inline-flex;gap:9px;align-items:center;font-size:10px;letter-spacing:.16em;font-weight:700;color:#4E6573}
+.tle-prospects-intro h2{font-size:clamp(25px,3.1vw,41px);letter-spacing:-.048em;line-height:1.12;margin:16px 0 11px;font-weight:700}
+.tle-prospects-intro p{color:#55636B;font-size:13px;line-height:1.7;max-width:650px;margin:0}
+.tle-prospects-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:47px;flex-shrink:0;border:1px solid #191919;border-radius:14px;padding:11px 15px;color:#FAF8F3;background:#191919;font-weight:700;font-size:12px}
+.tle-prospects-primary:hover{background:#35434B}
+.tle-prospects-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.tle-prospects-overview>div{background:#fff;border:1px solid var(--pr-border);border-radius:17px;min-width:0;padding:17px 19px;display:grid;gap:6px}
+.tle-prospects-overview span{color:#64717A;font-size:10px;font-weight:750;letter-spacing:.08em}
+.tle-prospects-overview strong{font-size:clamp(19px,2.6vw,29px);line-height:1.2;letter-spacing:-.04em;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tle-prospects-overview small{color:#74818A;font-size:10px;line-height:1.4}
+.tle-prospects-toolbar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:0 0 13px}
+.tle-prospects-search{display:flex;align-items:center;gap:10px;padding:0 13px;border-radius:13px;border:1px solid var(--pr-border);background:#fff;min-height:46px;max-width:470px;width:100%;color:#687B83}
+.tle-prospects-search input{background:transparent;outline:none;border:0;min-width:0;width:100%;color:#191919;font-size:12px}
+.tle-prospects-search input:focus-visible{outline:none}
+.tle-prospects-toolbar>button{display:flex;gap:8px;align-items:center;justify-content:center;border:1px solid var(--pr-border);background:#fff;color:#1D3039;border-radius:12px;padding:11px 14px;min-height:46px;font-weight:650;font-size:12px}
+.tle-prospects-tip{margin:0 0 12px;color:#667781;font-size:11px;line-height:1.6}
+.tle-prospects-board{display:flex;align-items:stretch;gap:13px;overflow-x:auto;overscroll-behavior-inline:contain;padding:3px 2px 20px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;min-width:0}
+.tle-prospects-column{flex:0 0 262px;min-width:0;min-height:320px;scroll-snap-align:start;background:#F8FAFA;border:1px solid #DCE5E8;border-radius:18px;padding:12px;transition:border-color .16s,background .16s}
+.tle-prospects-column.is-drop-target{background:#FDF9DE;border:2px dashed #A48A2C;padding:11px}
+.tle-prospects-column-head{padding:8px 5px 14px;display:grid;gap:5px}
+.tle-prospects-column-head>div{display:flex;align-items:center;gap:7px;min-width:0}
+.tle-prospects-column-head h3{margin:0;font-size:12px;font-weight:750;letter-spacing:-.015em;line-height:1.3;white-space:nowrap}
+.tle-prospects-column-head strong{font-size:19px;letter-spacing:-.025em;font-weight:750;font-variant-numeric:tabular-nums}
+.tle-prospects-column-head small{font-size:10px;color:#78858E}
+.tle-prospects-stage-count{margin-left:auto;color:#52616A;background:#E6ECEE;padding:3px 7px;border-radius:7px;font-size:10px;font-weight:750}
+.tle-prospects-stage-dot{height:9px;width:9px;border-radius:50%;background:#91A0A8;flex:0 0 auto}
+.tle-prospects-stage-dot.stage-qualified{background:#6A9CB6}
+.tle-prospects-stage-dot.stage-contacted{background:#AB93C9}
+.tle-prospects-stage-dot.stage-proposal{background:#D5AC42}
+.tle-prospects-stage-dot.stage-won{background:#679982}
+.tle-prospects-stage-dot.stage-lost{background:#ABB0B2}
+.tle-prospects-deals{display:grid;align-content:start;gap:10px}
+.tle-prospects-deal{background:#fff;border:1px solid #E2E7E8;border-radius:15px;box-shadow:0 5px 13px #152C3810;padding:13px;min-width:0}
+.tle-prospects-deal-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.tle-prospects-service{padding:5px 8px;background:#E8F0F3;color:#426276;border-radius:7px;font-size:10px;font-weight:700}
+.tle-prospects-drag{border:0;background:transparent;color:#86959C;display:grid;place-items:center;touch-action:none;cursor:grab!important;width:34px;height:38px;border-radius:9px}
+.tle-prospects-drag:active{cursor:grabbing!important;background:#E7EEF1}
+.tle-prospects-deal h4{margin:10px 0 4px;font-size:14px;letter-spacing:-.02em;line-height:1.4;overflow-wrap:anywhere}
+.tle-prospects-location{margin:0 0 9px;color:#71808A;font-size:11px}
+.tle-prospects-web-status{display:inline-flex;align-items:center;max-width:100%;color:#6B5F35;background:#FFF5D5;font-size:10px;line-height:1.45;border-radius:7px;padding:5px 7px}
+.tle-prospects-deal-value{display:block;margin:12px 0 5px;font-size:21px;font-variant-numeric:tabular-nums;letter-spacing:-.035em}
+.tle-prospects-next{display:flex;align-items:center;gap:7px;color:#576D7C;font-size:10px}
+.tle-prospects-card-note{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:11px;line-height:1.55;color:#63707A;overflow-wrap:anywhere;margin:8px 0 0}
+.tle-prospects-card-links{display:flex;gap:7px;align-items:center;margin:13px 0 10px;padding-top:10px;border-top:1px solid #EFF1F2}
+.tle-prospects-card-links :is(a,button){border:1px solid #E7ECEE;border-radius:9px;background:#fff;display:grid;place-items:center;width:34px;height:34px;color:#3C5666}
+.tle-prospects-card-links :is(a,button):hover{background:#E9F1F4}
+.tle-prospects-card-links .tle-prospects-remove{margin-left:auto;color:#9B6262}
+.tle-prospects-stage-select{display:grid;gap:5px;color:#61717B;font-size:10px;font-weight:600}
+.tle-prospects-stage-select select{min-height:40px;border-radius:10px;border:1px solid #DCE5E8;color:#26343C;background:#FAFCFC;padding:0 8px;font-size:11px;max-width:100%;width:100%}
+.tle-prospects-no-deals{padding:22px 12px;margin:0;text-align:center;color:#95A2A7;font-size:11px;line-height:1.5;border:1px dashed #D5DEE2;border-radius:12px}
+.tle-prospects-alert,.tle-prospects-notice{padding:12px 15px;font-size:12px;line-height:1.6;border-radius:11px;margin:8px 0 16px}
+.tle-prospects-alert{background:#FFF1EE;border:1px solid #ECC7BF;color:#983D2D}
+.tle-prospects-notice{background:#EDF4F7;border:1px solid #C5DDE8;color:#315B6E}
+.tle-prospects-empty{display:grid;place-items:center;text-align:center;gap:10px;padding:40px 20px;border:1px dashed #C4D2D9;border-radius:17px;color:#5D7584;background:#fff;margin:0 0 15px}
+.tle-prospects-empty h3{margin:0;color:#191919;font-size:18px}
+.tle-prospects-empty p{margin:0;max-width:410px;color:#62717A;font-size:12px;line-height:1.65}
+.tle-prospects-empty button{padding:11px 18px;border-radius:10px;background:#191919;color:#fff;border:0;min-height:44px;font-weight:700;font-size:12px}
+.tle-prospects-footer{display:flex;align-items:center;gap:8px;margin:13px 0 0;font-size:10px;color:#7A8790;line-height:1.6}
+.tle-prospects-modal{position:fixed;inset:0;background:#07151CC0;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10020;overflow-y:auto;overscroll-behavior:contain}
+.tle-prospects-dialog{width:min(100%,680px);max-height:min(92dvh,840px);overflow-y:auto;background:#FAF8F3;border-radius:24px;border:1px solid #E8E5DF;box-shadow:0 24px 70px #0004}
+.tle-prospects-dialog>header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:21px 23px;background:#FAF8F3;border-bottom:1px solid #E4E5E3}
+.tle-prospects-dialog header small{font-size:10px;letter-spacing:.11em;font-weight:700;color:#5B7482}
+.tle-prospects-dialog header h3{margin:5px 0 0;font-size:22px;letter-spacing:-.03em}
+.tle-prospects-dialog header button{border:1px solid #D6DFE2;background:white;border-radius:10px;min-width:40px;min-height:40px;display:grid;place-items:center}
+.tle-prospects-dialog form{padding:20px 23px 23px}
+.tle-prospects-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tle-prospects-fields label{display:grid;gap:6px;font-weight:700;color:#3E505B;font-size:11px;min-width:0}
+.tle-prospects-fields .tle-prospects-full{grid-column:1/-1}
+.tle-prospects-fields :is(input,select,textarea){width:100%;min-height:44px;border:1px solid #D6E0E4;background:#fff;border-radius:11px;padding:10px 11px;color:#191919;font-weight:400;font-size:12px}
+.tle-prospects-fields textarea{resize:vertical;min-height:100px}
+.tle-prospects-dialog-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;border-top:1px solid #E1E5E6;margin-top:19px;padding-top:17px}
+.tle-prospects-dialog-actions button{min-height:45px;padding:10px 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:11px;font-size:12px;font-weight:750}
+.tle-prospects-dialog-actions button:first-child{background:#fff;border:1px solid #CBD4D7;color:#42535D}
+.tle-prospects-dialog-actions button:last-child{background:#191919;border:1px solid #191919;color:white}
+.tle-prospects-private{display:grid;gap:8px;justify-items:start;padding:35px;background:#FAF8F3;border:1px solid #DCE4E6;border-radius:18px}
+.tle-prospects-private h2{font-size:20px;margin:0}
+.tle-prospects-private p{font-size:12px;color:#586E7A;margin:0}
+@media(max-width:810px){.tle-prospects-intro{padding:21px;align-items:stretch;flex-direction:column}.tle-prospects-primary{width:100%}.tle-prospects-overview{grid-template-columns:repeat(3,minmax(0,1fr))}.tle-prospects-overview>div{padding:13px}.tle-prospects-overview strong{font-size:18px}.tle-prospects-column{flex-basis:min(78vw,280px)}}
+@media(max-width:520px){.tle-prospects-intro{border-radius:18px;padding:19px}.tle-prospects-intro h2{font-size:28px}.tle-prospects-overview{grid-template-columns:1fr 1fr}.tle-prospects-overview>div:nth-child(2){grid-column:1/-1;grid-row:2}.tle-prospects-overview>div:nth-child(3){grid-column:2;grid-row:1}.tle-prospects-overview strong{font-size:22px}.tle-prospects-toolbar{align-items:stretch}.tle-prospects-toolbar>button{padding:9px;flex:0 0 auto;font-size:0}.tle-prospects-toolbar>button svg{width:18px;height:18px}.tle-prospects-fields{grid-template-columns:1fr}.tle-prospects-modal{padding:8px;align-items:flex-end}.tle-prospects-dialog{border-radius:19px 19px 0 0;max-height:95dvh}.tle-prospects-dialog>header{padding:16px}.tle-prospects-dialog form{padding:15px 16px 23px}.tle-prospects-footer{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.tle-prospects-column{transition:none}}

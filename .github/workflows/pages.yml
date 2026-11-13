@@ -132,6 +132,7 @@ jobs:
           npm run test:spotify-links
           npm run test:editorial-plan
           npm run test:classes
+          node --experimental-strip-types --test tests/prospects-pipeline.test.mjs
           node --test tests/link-center.test.mjs
           node --test tests/product-center.test.mjs
           node --test tests/finished-demo-kits.test.mjs
