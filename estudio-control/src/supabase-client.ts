@@ -1056,3 +1056,43 @@ export async function setWebsiteDemoVisibility(demoId:string,visible:boolean):Pr
  if(error||!data||data.demo_id!==demoId||data.visible!==visible)
   throw Error('No se pudo verificar el cambio de visibilidad. Reintenta sin salir del Studio.');
 }
+
+/* Private owner-only prospect pipeline. Never exposed by the public marketing CRM. */
+import type {StudioProspect,StudioProspectInput,ProspectStage} from './prospects-model';
+
+const PROSPECTS_TABLE='tle_studio_prospects';
+
+export async function getStudioProspects():Promise<StudioProspect[]> {
+  if(!client)throw new Error('El Studio necesita conexión segura para guardar prospectos.');
+  const session=await owner();
+  const {data,error}=await client.from(PROSPECTS_TABLE).select('*')
+    .eq('owner_id',session.id).order('created_at',{ascending:false}).limit(1000);
+  if(error)throw new Error('No pudimos cargar tus prospectos: '+error.message);
+  return (data||[]) as StudioProspect[];
+}
+export async function saveStudioProspect(input:StudioProspectInput,id?:string):Promise<StudioProspect> {
+  if(!client)throw new Error('El Studio necesita conexión segura para guardar prospectos.');
+  const session=await owner();
+  const record={...input,owner_id:session.id};
+  const query=id
+    ?client.from(PROSPECTS_TABLE).update(record).eq('id',id).eq('owner_id',session.id)
+    :client.from(PROSPECTS_TABLE).insert(record);
+  const {data,error}=await query.select('*').single();
+  if(error||!data)throw new Error('No se pudo guardar el prospecto: '+(error?.message||'Sin permiso.'));
+  return data as StudioProspect;
+}
+export async function moveStudioProspect(id:string,stage:ProspectStage):Promise<StudioProspect> {
+  if(!client)throw new Error('El Studio necesita conexión segura para guardar prospectos.');
+  const session=await owner();
+  const {data,error}=await client.from(PROSPECTS_TABLE).update({stage,updated_at:new Date().toISOString()})
+    .eq('id',id).eq('owner_id',session.id).select('*').single();
+  if(error||!data)throw new Error('No se pudo mover la oportunidad: '+(error?.message||'Sin permiso.'));
+  return data as StudioProspect;
+}
+export async function deleteStudioProspect(id:string):Promise<void> {
+  if(!client)throw new Error('El Studio necesita conexión segura para guardar prospectos.');
+  const session=await owner();
+  const {data,error}=await client.from(PROSPECTS_TABLE).delete()
+    .eq('id',id).eq('owner_id',session.id).select('id').single();
+  if(error||!data)throw new Error('No se pudo borrar el prospecto: '+(error?.message||'Sin permiso.'));
+}
