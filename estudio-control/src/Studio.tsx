@@ -4,6 +4,7 @@ import SeamlessEditor from './SeamlessEditor';
 import StudioStickerLibrary from './StudioStickerLibrary';
 import SupportInbox from './SupportInbox';
 import WebsiteInquiries from './WebsiteInquiries';
+import ProspectsPipeline from './ProspectsPipeline';
 import OperationsCenter, {type OperationsDestination} from './OperationsCenter';
 import ClassProduction from './ClassProduction';
 import FinishedDemos from './FinishedDemos';
@@ -105,6 +106,7 @@ type Page =
   | 'cancion'
   | 'soporte'
   | 'inquiries'
+  | 'prospects'
   | 'flujos'
   | 'seo'
   | 'ajustes';
@@ -228,6 +230,7 @@ const NAV = [
   { id: 'audiencia', label: 'Audiencia', icon: Users },
   { id: 'soporte', label: 'Mensajes y soporte', icon: Mail },
   { id: 'inquiries', label: 'Website · inquiries', icon: Globe2 },
+  { id: 'prospects', label: 'Prospects · oportunidades', icon: Users },
   { id: 'flujos', label: 'Automatizaciones', icon: Workflow },
   { id: 'seo', label: 'SEO y sitio web', icon: SearchCheck },
   { id: 'ajustes', label: 'Configuración', icon: Settings2 },
@@ -239,7 +242,7 @@ const STUDIO_AREAS: Array<{
   pages:Page[];home:Page;
 }> = [
   {id:'operations',title:'The Launch Era · Operaciones',description:'Clientes, ventas, emails y automatizaciones',icon:Building2,
-   pages:['operaciones','ventas','inquiries','audiencia','soporte','flujos','seo'],home:'operaciones'},
+   pages:['operaciones','prospects','ventas','inquiries','audiencia','soporte','flujos','seo'],home:'operaciones'},
   {id:'design',title:'Diseño y recursos',description:'Carruseles, ideas, motion y Brand Kits',icon:Palette,
    pages:['seamless','stickers','ideas','links'],home:'stickers'},
   {id:'demos',title:'Demos y websites',description:'Proyectos, fotos, prompts y versiones',icon:Globe2,
@@ -286,6 +289,7 @@ const LABELS: Record<Page, string> = {
   cancion: 'Escuchas de la canción',
   soporte: 'Mensajes y ayuda',
   inquiries: 'The Launch Era · inquiries de website',
+  prospects: 'Prospects CRM',
   flujos: 'Automatizaciones',
   seo: 'SEO y sitio web',
   ajustes: 'Configuración',
@@ -2009,6 +2013,7 @@ function App() {
           )}
           {page === 'soporte' && <SupportInbox />}
           {page === 'inquiries' && <WebsiteInquiries readOnly={recording} />}
+          {page === 'prospects' && <ProspectsPipeline readOnly={recording} />}
           {page === 'flujos' && (
             <>
               {head(
