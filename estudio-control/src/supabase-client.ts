@@ -1073,7 +1073,7 @@ export async function getStudioProspects():Promise<StudioProspect[]> {
 export async function saveStudioProspect(input:StudioProspectInput,id?:string):Promise<StudioProspect> {
   if(!client)throw new Error('El Studio necesita conexión segura para guardar prospectos.');
   const session=await owner();
-  const record={...input,owner_id:session.id};
+  const record={...input,owner_id:session.id,updated_at:new Date().toISOString()};
   const query=id
     ?client.from(PROSPECTS_TABLE).update(record).eq('id',id).eq('owner_id',session.id)
     :client.from(PROSPECTS_TABLE).insert(record);
