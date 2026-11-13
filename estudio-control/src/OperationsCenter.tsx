@@ -8,7 +8,7 @@ import { ReferenceBrowser, EmailCampaignBoard } from './StudioCreativeTools';
 import './operations-center.css';
 
 export type OperationsDestination =
-  | 'ventas' | 'inquiries' | 'productos' | 'links' | 'freebies'
+  | 'ventas' | 'inquiries' | 'prospects' | 'productos' | 'links' | 'freebies'
   | 'demos' | 'soporte' | 'flujos' | 'seo' | 'audiencia' | 'calendario'
   | 'alumnos';
 
@@ -30,7 +30,7 @@ const GROUPS: Category[] = [
     description: 'Compras y solicitudes en un solo recorrido.',
     details: 'Abre los módulos que ya registran ventas y solicitudes. No creamos otra lista de clientes.',
     primary: {label:'Ver ventas verificadas',page:'ventas'},
-    more: [{label:'Solicitudes de website',page:'inquiries'},{label:'Centro de productos',page:'productos'},{label:'Alumnos',page:'alumnos'}],
+    more: [{label:'Prospects CRM',page:'prospects'},{label:'Solicitudes de website',page:'inquiries'},{label:'Centro de productos',page:'productos'},{label:'Alumnos',page:'alumnos'}],
   },
   {
     id: 'cobros', title: 'Cobros y entregas', icon: CreditCard,
