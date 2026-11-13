@@ -18,6 +18,9 @@ jobs:
       - name: Test brand carousels, restore guards and editorial plan
         working-directory: estudio-control
         run: npm run test:editorial-plan
+      - name: Verify Prospects CRM counts and stage transitions
+        working-directory: estudio-control
+        run: node --experimental-strip-types --test tests/prospects-pipeline.test.mjs
       - name: Validate Studio demo URLs and Golden Grid legacy link normalization
         working-directory: estudio-control
         run: node --test tests/link-center.test.mjs
