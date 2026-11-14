@@ -895,28 +895,32 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     <div className="factory-instagram-preview" aria-label="Previsualización completa del carrusel">
       <div className="factory-swipe-caption"><span>DESLIZA CON EL DEDO</span><strong>{style.seamlessEnabled?'Seamless':'Normal'} · {slides.length} slides</strong></div>
       <div className="factory-swipe-rail" ref={carouselRailRef} onScroll={syncCarouselScroll}>
-        {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
-          {part.videoPath?
-            (activeVideo?.path===part.videoPath?
+        {slides.map((part,n)=>{
+          const shown=pageVideos(slides,n,style.seamlessEnabled)[0];
+          const videoPart=shown?.part;
+          return <div key={part.key} className="factory-swipe-page">
+          {videoPart?.videoPath?
+            (activeVideo?.path===videoPart.videoPath?
               <div style={{position:'relative',width:'100%',height:'100%',
                 aspectRatio:'4/5',overflow:'hidden',background:'#FAF8F3'}}>
                 {overview[n]&&<img src={overview[n]} alt="" draggable={false}
                   style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'fill'}}/>}
                 {(()=>{
-                  const v=normalizeVideoTransform(part.videoTransform);
+                  const v=normalizeVideoTransform(videoPart.videoTransform);
+                   const offset=videoOffsetForPage(shown.owner,n);
                   return <div style={{position:'absolute',
-                    left:(100*v.x)+'%',top:(100*v.y)+'%',
+                    left:(100*(v.x+offset))+'%',top:(100*v.y)+'%',
                     width:(100*v.w)+'%',height:(100*v.h)+'%',
                     transform:'rotate('+v.rotation+'deg)',transformOrigin:'center',
                     overflow:'hidden',background:'#191919'}}>
                     <video src={activeVideo.url} muted loop autoPlay playsInline preload="metadata"
                       aria-label={'Video del slide '+(n+1)}
                       onLoadedMetadata={event=>{
-                        if(part.videoTrimStart)event.currentTarget.currentTime=Math.max(0,part.videoTrimStart);
+                        if(videoPart.videoTrimStart)event.currentTarget.currentTime=Math.max(0,videoPart.videoTrimStart);
                       }}
                       onTimeUpdate={event=>{
                         const player=event.currentTarget;
-                        const trim=videoTrim(part.videoTrimStart,part.videoTrimEnd,player.duration);
+                        const trim=videoTrim(videoPart.videoTrimStart,videoPart.videoTrimEnd,player.duration);
                         if(trim.end>0&&player.currentTime>=trim.end-.04)player.currentTime=trim.start;
                       }}
                       style={{width:'100%',height:'100%',objectFit:'contain',
@@ -928,7 +932,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
               <div className="factory-swipe-loading"><Film size={24}/><small>{n===i?(videoIssue||'Cargando video privado…'):'Video · toca este slide para verlo'}</small></div>):
             overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
               <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
-        </div>)}
+        </div>})}
       </div>
       <div className="factory-swipe-navigation">
         <button type="button" aria-label="Diapositiva anterior" disabled={i===0} onClick={()=>setCurrent(v=>Math.max(0,v-1))}><ArrowLeft size={18}/></button>
@@ -938,7 +942,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-swipe-thumbnails">
         {slides.map((part,n)=><button type="button" key={part.key} className={i===n?'active':''}
           onClick={()=>setCurrent(n)} aria-label={'Ir a la diapositiva '+(n+1)}>
-          {part.videoPath?<span aria-label="Video">▶ {n+1}</span>:
+          {pageVideos(slides,n,style.seamlessEnabled).length?<span aria-label="Video">▶ {n+1}</span>:
             overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
         </button>)}
       </div>
@@ -2026,18 +2030,23 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
-      {(slide.videoPath||videoBusy||videoIssue)&&<section className="factory-video-editor"
+      {(selectedVideo?.videoPath||videoBusy||videoIssue)&&<section className="factory-video-editor"
         aria-label="Editor de video del slide seleccionado">
         <div className="factory-video-editor-head">
-          <Film size={20}/><strong>Editar video · slide {i+1}</strong>
-          {slide.videoName&&<span className="factory-video-name">{slide.videoName}</span>}
-          {slide.videoPath&&<button type="button" className="btn ghost"
+          <Film size={20}/><strong>Editar video · slide {selectedVideoOwner+1}</strong>
+          {selectedVideo?.videoName&&<span className="factory-video-name">{selectedVideo?.videoName}</span>}
+          {selectedVideo?.videoPath&&<button type="button" className="btn ghost"
             disabled={videoBusy||!!busy} onClick={removeSlideVideo}>Quitar video</button>}
         </div>
         {videoBusy&&<p role="status">Subiendo video privado…</p>}
         {videoIssue&&<p role="alert">{videoIssue}</p>}
         {videoExportProgress&&<p role="status" className="factory-video-progress">{videoExportProgress}</p>}
-        {slide.videoPath&&<>
+        {selectedVideo?.videoPath&&<>
+          {style.seamlessEnabled&&<p className="factory-video-seam-tip">
+            En Seamless puedes cruzar las líneas punteadas con el video, igual que con tus fotos.
+            {videoVisiblePages(selectedVideoOwner,selectedVideo.videoTransform,slides.length,true).length>1
+              ?' Descarga una parte alineada por cada slide que atraviesa.':' Arrástralo hacia el corte para extenderlo al siguiente slide.'}
+          </p>}
           <p>Activa ✋ Editar arriba del lienzo, arrastra el video para moverlo y usa el punto amarillo para cambiar su tamaño o pellizca con dos dedos. Gira y recorta aquí abajo. Los cambios se guardan con el carrusel.</p>
           <div className="factory-video-grid">
             <div className="factory-video-tools">
@@ -2079,23 +2088,23 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             </div>
             <div className="factory-video-tools">
               <h3>Recortar duración</h3>
-              {activeVideo?.path===slide.videoPath?<video key={activeVideo.path}
+              {activeVideo?.path===selectedVideo?.videoPath?<video key={activeVideo.path}
                 src={activeVideo.url} controls playsInline preload="metadata" className="factory-video-playback"
                 onLoadedMetadata={e=>setVideoDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)}
                 onPlay={e=>{
-                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,e.currentTarget.duration);
+                  const clip=videoTrim(selectedVideo?.videoTrimStart,selectedVideo?.videoTrimEnd,e.currentTarget.duration);
                   if(e.currentTarget.currentTime<clip.start||e.currentTarget.currentTime>=clip.end)
                     e.currentTarget.currentTime=clip.start;
                 }}
                 onTimeUpdate={e=>{
                   const player=e.currentTarget;
-                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,player.duration);
+                  const clip=videoTrim(selectedVideo?.videoTrimStart,selectedVideo?.videoTrimEnd,player.duration);
                   if(player.currentTime>=clip.end-.04&&!player.paused){
                     player.pause();player.currentTime=clip.start;
                   }
                 }}/>:<small>Abriendo tu video privado…</small>}
               {videoDuration>0&&(()=>{
-                const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,videoDuration);
+                const clip=videoTrim(selectedVideo?.videoTrimStart,selectedVideo?.videoTrimEnd,videoDuration);
                 return <>
                   <label htmlFor="video-trim-start">Desde <output>{videoTime(clip.start)}</output></label>
                   <input id="video-trim-start" type="range" min="0" max={Math.max(0,videoDuration-.1)} step=".1"
@@ -2103,7 +2112,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
                     onChange={e=>{
                       const next=Number(e.target.value);
                       updateCurrentVideo({videoTrimStart:next,
-                        videoTrimEnd:slide.videoTrimEnd&&slide.videoTrimEnd<=next+.1?Math.min(videoDuration,next+.2):slide.videoTrimEnd||0});
+                        videoTrimEnd:selectedVideo?.videoTrimEnd&&selectedVideo?.videoTrimEnd<=next+.1?Math.min(videoDuration,next+.2):selectedVideo?.videoTrimEnd||0});
                     }}/>
                   <label htmlFor="video-trim-end">Hasta <output>{videoTime(clip.end)}</output></label>
                   <input id="video-trim-end" type="range" min={Math.min(clip.start+.1,videoDuration)} max={videoDuration} step=".1"
