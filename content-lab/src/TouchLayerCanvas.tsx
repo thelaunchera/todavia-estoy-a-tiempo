@@ -19,7 +19,7 @@ export type TouchLayer = {
   frameStyle?: string; paper?: string; accent?: string;
 };
 type Props = {
-  preview: string; textOverlay?: string; layers: TouchLayer[];
+  preview: string; textOverlay?: string; layers: TouchLayer[]; videoPages?:{page:number;name:string;src?:string}[];
   onCommit: (kind: 'photo' | 'sticker' | 'text' | 'shape', id: string, rect: TouchRect) => void;
   onUpdate?: (id:string, patch:Partial<PanoramaLayer>)=>void;
   onSelectionChange?: (id:string|null)=>void;
@@ -46,7 +46,7 @@ type Gesture = {
   pinchDistance?: number; pinchCenter?: [number, number];
 };
 export default function TouchLayerCanvas({
-  preview, textOverlay, layers, onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
+  preview, textOverlay, layers, videoPages=[], onCommit, ratio = 1080 / 1350, pageCount = 1, continuous=true, canvasHeight = 1350, onEmpty,
   onRemove, onReorder, onUpdate, onSelectionChange, onDropAsset, onDropFiles, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,focusLayerId,inlineTextTools=false,fullscreen=false,pageIndex,onPageIndexChange,
   textPalette=['#191919','#FFFFFF','#F2D85B','#BED8E9'],
 }: Props) {
@@ -861,6 +861,21 @@ export default function TouchLayerCanvas({
    ?createPortal(mobileContextControls,document.body):mobileContextControls}
         {pageCount > 1 && textOverlay && <img className="touch-editor-text-overlay" src={textOverlay}
           alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
+        {videoPages.filter(video=>video.page>=0&&video.page<pageCount).map(video=><div
+          key={'video-slide-'+video.page} aria-label={'Video del slide '+(video.page+1)}
+          style={{position:'absolute',top:0,left:(100*video.page/pageCount)+'%',
+            width:(100/pageCount)+'%',height:'100%',zIndex:16,background:'#191919',
+            display:'grid',placeItems:'center',overflow:'hidden',pointerEvents:'none'}}>
+          {video.src?
+            <video src={video.src} controls playsInline preload="metadata"
+              aria-label={video.name}
+              onPointerDown={event=>event.stopPropagation()}
+              onClick={event=>event.stopPropagation()}
+              style={{display:'block',width:'100%',height:'100%',objectFit:'contain',pointerEvents:'auto',background:'#191919'}}/>:
+            <span style={{padding:12,textAlign:'center',fontSize:15,color:'#FFFFFF'}}>
+              ▶ {video.name} · Toca el slide para verlo
+            </span>}
+        </div>)}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
           {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
           {snapGuides.y!==undefined&&<span className="horizontal" style={{top:snapGuides.y*100+'%'}}/>}
