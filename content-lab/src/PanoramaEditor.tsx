@@ -308,6 +308,9 @@ export default function PanoramaEditor({
     <div className="panorama-primary-actions" role="toolbar" aria-label="Herramientas táctiles del carrusel">
       <button type="button" aria-pressed={libraryOpen&&libraryKind==='photo'} onClick={()=>openTool('photo')}>
         <ImagePlus size={19}/><span>Fotos</span></button>
+      {onChooseVideo&&<button type="button" onClick={onChooseVideo} disabled={videoUploading}
+        aria-label="Subir video al slide seleccionado" title="Subir video al slide seleccionado">
+        <Film size={19}/><span>{videoUploading?'Subiendo…':'Video'}</span></button>}
       <button type="button" onClick={()=>{openTool('elements');setMoreTools(false);onAddLayer('text');revealCanvas()}}>
         <Type size={19}/><span>Texto</span></button>
       <button type="button" aria-pressed={libraryOpen&&libraryKind==='sticker'} onClick={()=>openTool('sticker')}>
@@ -338,10 +341,7 @@ export default function PanoramaEditor({
         onClick={()=>{openTool('photo');input.current?.click()}}>
         <Upload size={16}/> Subir imagen
       </button>
-      {onChooseVideo&&<button type="button" className="panorama-add-photo" disabled={videoUploading}
-        onClick={onChooseVideo} aria-label="Subir video al slide seleccionado">
-        <Film size={16}/> {videoUploading?'Subiendo video…':'Subir video'}
-      </button>}
+
       {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-edit-background"
         onClick={()=>{onExtendBackground();setBackgroundOpen(false);revealCanvas()}}
         aria-label="Editar y agrandar el fondo seleccionado">
