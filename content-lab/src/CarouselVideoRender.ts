@@ -58,6 +58,20 @@ export async function renderEditedCarouselVideo(
   let finalized=false;
   try{
     await loadVideo(video);
+    // iOS can dispatch loadedmetadata before its first frame is decodable.
+    // Drawing at HAVE_METADATA would fail with InvalidStateError.
+    if(video.readyState<2)await new Promise<void>((resolve,reject)=>{
+      const finish=()=>{
+        video.removeEventListener('loadeddata',ready);
+        video.removeEventListener('canplay',ready);
+        video.removeEventListener('error',failed);
+      };
+      const ready=()=>{finish();resolve()};
+      const failed=()=>{finish();reject(Error('El video no pudo cargar su primer cuadro para el recorte.'))};
+      video.addEventListener('loadeddata',ready,{once:true});
+      video.addEventListener('canplay',ready,{once:true});
+      video.addEventListener('error',failed,{once:true});
+    });
     if(!video.videoWidth||!video.videoHeight||!Number.isFinite(video.duration))
       throw Error('No se pudo leer la duración o dimensiones del video.');
     const trim=videoTrim(start,end,video.duration);
