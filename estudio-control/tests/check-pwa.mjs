@@ -29,6 +29,14 @@ assert.ok(youtubeStudio.includes('<details className="yt-archive-section">'), 'l
 assert.ok(youtubeStudio.includes('Archivo · OFF BRIEF'), 'legacy project retains its archive name');
 assert.ok(currentYoutubePlan.includes('The Little Detours'), 'current plan is present');
 assert.ok(currentYoutubePlan.includes('The Umbrella Thief'), 'pilot remains indexed');
+assert.ok(currentYoutubePlan.includes('<TheLittleDetoursFlow />'), 'Google Flow production panel is visible in active YouTube plan');
+const flowPrompts = readFileSync(new URL('src/youtube/google-flow-umbrella.ts',root),'utf8');
+const flowUI = readFileSync(new URL('src/TheLittleDetoursFlow.tsx',root),'utf8');
+assert.equal((flowPrompts.match(/number: [1-7], title:/g)||[]).length,7,'pilot contains seven individually grounded continuous segments');
+assert.ok(flowPrompts.includes('EXTEND THE PREVIOUS GENERATED VIDEO'), 'continuation uses previous video instead of scene reset');
+assert.ok(flowPrompts.includes('NO hard cuts, jump cuts'), 'global negative continuity instructions are included');
+assert.ok(flowUI.includes('Copiar este prompt'), 'each scene has usable copy control');
+
 
 assert.ok(studio.includes("{ id: 'seamless', label: 'Carruseles seamless'"));
 assert.ok(studio.includes("cache:'no-store'"),'studio checks Pages HTML without cached stale shell');
