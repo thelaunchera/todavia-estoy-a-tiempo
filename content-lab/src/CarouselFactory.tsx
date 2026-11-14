@@ -1637,17 +1637,50 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const maxScale=independentExport()?4:Math.max(1,Math.min(4,Math.floor(Math.sqrt(36_000_000/(slides.length*1080*1350)))));
     return sourceAwareScale(ids.map(id=>images[id||'']),1080,1350,maxScale);
   };
+  const produceVideoFile=async(n:number,audioContext?:AudioContext):Promise<{blob:Blob;name:string}>=>{
+    const part=slides[n];
+    if(!part.videoPath)throw Error('No hay video en este slide.');
+    const original=await carouselVideoMedia.download(part.videoPath);
+    if(!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
+      return {blob:original,name:videoFilename(n,part.videoPath)};
+    ensureSourceImages();
+    let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=null;
+    try{
+      if(independentExport())
+        one=await drawSlide(part,n,slides.length,brand,images,style,false,1);
+      else{
+        pages=await renderAllSlides(1);
+        one=pages[n];
+      }
+      const processed=await renderEditedCarouselVideo(original,
+        part.videoTransform,part.videoTrimStart||0,part.videoTrimEnd||0,one,
+        ratio=>setVideoExportProgress('Procesando video '+(n+1)+' · '+Math.round(ratio*100)+'%'),
+        audioContext);
+      return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
+    }finally{
+      if(pages)pages.forEach(canvas=>{canvas.width=1;canvas.height=1});
+      else if(one){one.width=1;one.height=1}
+    }
+  };
+  // Warm audio on the direct tap (Safari requires user activation).
+  const startVideoAudio=()=>{
+    if(typeof AudioContext==='undefined')return undefined;
+    const ctx=new AudioContext();void ctx.resume();
+    return ctx;
+  };
   const exportOne=async(n=i)=>{
     if(busy)return;
-    setBusy('export');
+    const audio=slides[n]?.videoPath&&videoHasEdits(slides[n].videoTransform,slides[n].videoTrimStart,slides[n].videoTrimEnd)
+      ?startVideoAudio():undefined;
+    setBusy('export');setVideoExportProgress('');
     try{
       if(slides[n].videoPath){
-        const blob=await carouselVideoMedia.download(slides[n].videoPath!);
-        const url=URL.createObjectURL(blob);
+        const file=await produceVideoFile(n,audio);
+        const url=URL.createObjectURL(file.blob);
         const a=document.createElement('a');a.href=url;
-        a.download=videoFilename(n,slides[n].videoPath!);a.click();
+        a.download=file.name;a.click();
         window.setTimeout(()=>URL.revokeObjectURL(url),90_000);
-        notify('Video del slide '+(n+1)+' descargado en su formato original.');
+        notify('Video del slide '+(n+1)+' descargado'+(file.name.includes('-editado')?' con giro, encuadre y recorte aplicados.':' en su formato original.'));
         return;
       }
       ensureSourceImages();
@@ -1665,10 +1698,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         else{canvas.width=1;canvas.height=1}
       }
       notify('Slide '+(n+1)+' descargado como PNG de alta resolución.');
-    }catch(e){showError(e)}finally{setBusy('');}
+    }catch(e){showError(e)}finally{setBusy('');setVideoExportProgress('');if(audio)void audio.close().catch(()=>{});}
   };
   const exportAll=async()=>{
     if(busy)return;
+    const hasEditedVideos=slides.some(part=>!!part.videoPath&&videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd));
+    const audio=hasEditedVideos?startVideoAudio():undefined;
     const notes=await inspectImageQuality();
     setImageQualityNotes(notes);
     const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
@@ -1689,8 +1724,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
         if(slides[n].videoPath){
-          const blob=await carouselVideoMedia.download(slides[n].videoPath!);
-          result.push({name:videoFilename(n,slides[n].videoPath!),url:URL.createObjectURL(blob)});
+          const media=await produceVideoFile(n,audio);
+          result.push({name:media.name,url:URL.createObjectURL(media.blob)});
           continue;
         }
         const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
@@ -1712,7 +1747,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       showError(e);
     }finally{
       pages?.forEach(page=>{page.width=1;page.height=1});
-      setBusy('');
+      setBusy('');setVideoExportProgress('');
+      if(audio)void audio.close().catch(()=>{});
     }
   };
   const exportAnimatedCarousel=async()=>{
