@@ -21,7 +21,15 @@ assert.ok(worker.includes("request.headers.has('Authorization')"));
 assert.ok(worker.includes("url.origin !== self.location.origin"));
 const studio = readFileSync(new URL('src/Studio.tsx',root),'utf8');
 const studioCss = readFileSync(new URL('src/studio.css',root),'utf8');
-assert.ok(studio.includes("{ id: 'youtube', label: 'YouTube · Nia y Ruby'"));
+assert.ok(studio.includes("{ id: 'youtube', label: 'YouTube · The Launch Era'"));
+const youtubeStudio = readFileSync(new URL('src/YouTubeStudio.tsx',root),'utf8');
+const currentYoutubePlan = readFileSync(new URL('src/TheLaunchEraYouTubePlan.tsx',root),'utf8');
+assert.ok(youtubeStudio.includes('<TheLaunchEraYouTubePlan />'), 'current animated series is first in Studio YouTube');
+assert.ok(youtubeStudio.includes('<details className="yt-archive-section">'), 'legacy OFF BRIEF appears in a collapsed archive');
+assert.ok(youtubeStudio.includes('Archivo · OFF BRIEF'), 'legacy project retains its archive name');
+assert.ok(currentYoutubePlan.includes('The Little Detours'), 'current plan is present');
+assert.ok(currentYoutubePlan.includes('The Umbrella Thief'), 'pilot remains indexed');
+
 assert.ok(studio.includes("{ id: 'seamless', label: 'Carruseles seamless'"));
 assert.ok(studio.includes("cache:'no-store'"),'studio checks Pages HTML without cached stale shell');
 assert.ok(studio.includes("window.addEventListener('pageshow',onResume)"),'iPhone PWA checks when resumed');
