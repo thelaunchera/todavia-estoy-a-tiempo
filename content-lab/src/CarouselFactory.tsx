@@ -1689,7 +1689,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const maxScale=independentExport()?4:Math.max(1,Math.min(4,Math.floor(Math.sqrt(36_000_000/(slides.length*1080*1350)))));
     return sourceAwareScale(ids.map(id=>images[id||'']),1080,1350,maxScale);
   };
-  const produceVideoFile=async(n:number,audioContext?:AudioContext):Promise<{blob:Blob;name:string}>=>{
+  const produceVideoFile=async(n:number,audioContext?:AudioContext,preparedBackground?:HTMLCanvasElement):Promise<{blob:Blob;name:string}>=>{
     const match=exportableVideo(slides,n,style.seamlessEnabled);
     const path=match?.part.videoPath;
     if(!match||!path)throw Error('No hay video visible en este slide.');
@@ -1698,11 +1698,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(owner===n&&!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
       return {blob:original,name:videoFilename(n,path)};
     ensureSourceImages();
-    let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=null;
+    let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=preparedBackground||null;
     try{
-      if(independentExport())
-        one=await drawSlide(part,n,slides.length,brand,images,style,false,1);
-      else{
+      if(!one&&independentExport())
+        one=await drawSlide(slides[n],n,slides.length,brand,images,style,false,1);
+      else if(!one){
         pages=await renderAllSlides(1);
         one=pages[n];
       }
@@ -1713,7 +1713,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
     }finally{
       if(pages)pages.forEach(canvas=>{canvas.width=1;canvas.height=1});
-      else if(one){one.width=1;one.height=1}
+      else if(one&&!preparedBackground){one.width=1;one.height=1}
     }
   };
   // Warm audio on the direct tap (Safari requires user activation).
@@ -1787,7 +1787,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
         if(exportableVideo(slides,n,style.seamlessEnabled)){
-          const media=await produceVideoFile(n,audio);
+          const media=await produceVideoFile(n,audio,pages?.[n]);
           result.push({name:media.name,url:URL.createObjectURL(media.blob)});
           continue;
         }
