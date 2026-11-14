@@ -202,3 +202,37 @@ test('the editor renders spanning videos and prevents ambiguous overlapping expo
   assert.match(component,/left:seamless\?'0%'/);
   assert.match(component,/100\*\(video\.page\+d\.x\)\/pageCount/);
 });
+
+test('rotated video visibility clips against page height before creating exports',()=>{
+  const nearBottom={x:.65,y:1,w:.6,h:.12,rotation:45};
+  assert.deepEqual([...video.videoVisiblePages(0,nearBottom,3,true)],[0]);
+  const crossing={x:.55,y:0,w:1,h:1,rotation:0};
+  assert.deepEqual([...video.videoVisiblePages(1,crossing,5,true)],[1,2]);
+  assert.deepEqual([...video.videoVisiblePages(0,{x:1,y:0,w:.5,h:.5,rotation:0},3,true)],[1]);
+  assert.deepEqual([...video.videoVisiblePages(0,{x:-1,y:0,w:.12,h:.12,rotation:0},3,true)],[]);
+});
+
+test('rotated resize follows the handle and anchors the opposing corner',()=>{
+  const base={...video.DEFAULT_VIDEO_TRANSFORM,x:.2,y:.2,w:.5,h:.5};
+  const straight=video.resizeRotatedVideo(base,30,30,300,300);
+  assert.ok(Math.abs(straight.x-base.x)<1e-8);
+  assert.ok(Math.abs(straight.y-base.y)<1e-8);
+  assert.ok(straight.w>base.w&&straight.h>base.h);
+  const flipped=video.resizeRotatedVideo({...base,rotation:180},-30,-30,300,300);
+  assert.ok(flipped.w>base.w&&flipped.h>base.h);
+  assert.ok(flipped.x<base.x&&flipped.y<base.y);
+  const quarter=video.resizeRotatedVideo({...base,rotation:90},-30,30,300,300);
+  assert.ok(quarter.w>base.w&&quarter.h>base.h);
+});
+
+test('owner remains editable off its own page; foreground survives edited video',()=>{
+  const factory=src('CarouselFactory.tsx');
+  const renderer=src('CarouselVideoRender.ts');
+  const layer=src('CarouselVideoLayer.tsx');
+  assert.match(factory,/focusedVideo=slides\[i\]\?\.videoPath\?/);
+  assert.match(factory,/foreground=await renderVideoForeground\(n\)/);
+  assert.match(factory,/hasVideoForeground\(n\)/);
+  assert.match(renderer,/ctx\.drawImage\(foreground,0,0,canvas\.width,canvas\.height\)/);
+  assert.match(renderer,/trim\.end-trim\.start\+1e-7<\.1/);
+  assert.match(layer,/resizeRotatedVideo\(gesture\.base/);
+});
