@@ -59,7 +59,7 @@ try{
  // while the video has visible pixels inside the transformed rectangle.
  const frame=join(work,'frame.png');
  execFileSync('ffmpeg',['-nostdin','-y','-hide_banner','-loglevel','error',
-   '-ss','.6','-i',out,'-frames:v','1',frame],{timeout:15000});
+   '-ss','0.6','-i',out,'-frames:v','1',frame],{timeout:15000});
  if(readFileSync(frame).length<1500)throw Error('Composited video frame is blank');
  console.log('PASS: real video transformed/trimmed with 1080x1350 frame and audio in '+result.ext);
 }finally{
