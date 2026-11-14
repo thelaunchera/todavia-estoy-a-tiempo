@@ -1,5 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {bound,normalizeVideoTransform,type CarouselVideoTransform} from './CarouselVideoTransform';
+import {bound,normalizeVideoTransform,resizeRotatedVideo,type CarouselVideoTransform} from './CarouselVideoTransform';
 
 type VideoPage={
   page:number;name:string;src?:string;transform?:CarouselVideoTransform;
@@ -87,7 +87,9 @@ export default function CarouselVideoLayer({video,pageCount,editable,seamless,on
     const dx=(event.clientX-gesture.startX)/Math.max(1,gesture.pageWidth);
     const dy=(event.clientY-gesture.startY)/Math.max(1,gesture.pageHeight);
     const result=gesture.mode==='resize'
-      ?{...gesture.base,w:gesture.base.w+dx,h:gesture.base.h+dy}
+      ?resizeRotatedVideo(gesture.base,
+        event.clientX-gesture.startX,event.clientY-gesture.startY,
+        gesture.pageWidth,gesture.pageHeight)
       :{...gesture.base,x:gesture.base.x+dx,y:gesture.base.y+dy};
     current.current=normalizeVideoTransform(result);
     setDraft(current.current);
