@@ -92,7 +92,7 @@ console.log('QA OK: política pública de mínimos datos sin detalles internos.'
 
 
 // Centro de Productos: efectos accesibles y búsqueda sin interferir con permisos.
-// Las tarjetas se exploran aunque la clase continúe cerrada al público.
+// Solo productos activos aparecen en catálogo; la clase archivada queda fuera.
 const smoothCatalog=read('centro/index.html');
 const smoothJs=read('centro/interacciones.js');
 const smoothCss=read('centro/centro.css');
@@ -104,8 +104,8 @@ for(const group of ['programas','servicios','recursos']){
  assert.ok(smoothCatalog.includes('data-catalog-group="'+group+'"'),'Grupo filtrable '+group);
  assert.ok(smoothCatalog.includes('data-catalog-filter="'+group+'"'),'Filtro visible '+group);
 }
-assert.equal((smoothCatalog.match(/data-catalog-item>/g)||[]).length,10,'Diez tarjetas independientes');
-assert.equal((smoothCatalog.match(/class="cover-action"/g)||[]).length,10,'Las diez portadas tienen botón táctil accesible');
+assert.equal((smoothCatalog.match(/data-catalog-item>/g)||[]).length,9,'Nueve tarjetas independientes con la clase archivada');
+assert.equal((smoothCatalog.match(/class="cover-action"/g)||[]).length,9,'Las nueve portadas tienen botón táctil accesible');
 assert.ok(smoothCatalog.includes('interacciones.js?v='),'Carga de efectos funcionales');
 assert.ok(smoothJs.includes('input.addEventListener(\'input\',update)'),'La búsqueda responde al escribir');
 assert.ok(smoothJs.includes('event.key===\'Escape\''),'La búsqueda puede limpiarse con teclado');
