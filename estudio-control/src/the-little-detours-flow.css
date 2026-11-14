@@ -1,0 +1,41 @@
+.tld-flow{display:grid;gap:17px;min-width:0}
+.tld-flow-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid #e9dfad;background:#fffdf2;padding:clamp(19px,3vw,28px);border-radius:18px}
+.tld-flow-intro>div{min-width:0;flex:1}
+.tld-flow h3{font:800 clamp(1.4rem,2.7vw,2rem)/1.16 Prompt,Arial,sans-serif;letter-spacing:-.035em;color:#191919;margin:8px 0 12px}
+.tld-flow-intro p{max-width:850px;line-height:1.6;color:#464646;margin:8px 0}
+.tld-flow-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.tld-flow-tags span{padding:6px 10px;background:#fff;border:1px solid #e8e1c8;border-radius:90px;font-size:.72rem;font-weight:750}
+.tld-flow-open{display:inline-flex;align-items:center;gap:8px;color:#fff;background:#191919;text-decoration:none;padding:12px 15px;border-radius:11px;font-size:.8rem;font-weight:800;white-space:nowrap}
+.tld-flow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tld-flow-steps>div{padding:19px;border:1px solid #e9e8e3;border-radius:15px;background:#fff;min-width:0}
+.tld-flow-steps strong{font-size:.9rem;display:block;margin:10px 0 7px}
+.tld-flow-steps p{font-size:.8rem;line-height:1.55;margin:0;color:#5a5a5a}
+.tld-flow-number{font-size:.74rem;letter-spacing:.12em;font-weight:850;color:#697781}
+.tld-flow-alternative{display:flex;gap:10px;padding:15px 17px;border:1px solid #dbe4e8;border-radius:13px;background:#f2f7fa}
+.tld-flow-alternative svg{flex-shrink:0;margin-top:3px}
+.tld-flow-alternative p{font-size:.82rem;line-height:1.65;color:#354956;margin:0}
+.tld-flow-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tld-flow-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #191919;color:white;background:#191919;padding:12px 14px;border-radius:11px;font:750 .79rem/1.35 Prompt,Arial,sans-serif;cursor:pointer}
+.tld-flow-actions button+button{background:#fff;color:#191919;border-color:#d5d3cc}
+.tld-flow-scenes{display:grid;gap:10px}
+.tld-flow-scene{background:#fff;border:1px solid #e6e4df;border-radius:15px;overflow:hidden}
+.tld-flow-scene.active{border-color:#d7bf4c}
+.tld-flow-scene-header{display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:0;background:#fff;padding:14px 17px;cursor:pointer;color:#191919}
+.tld-flow-scene.active .tld-flow-scene-header{background:#fffdf2}
+.tld-flow-scene-num{height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;background:#e6f1f7;font-size:.89rem;font-weight:850}
+.tld-flow-scene-copy{display:flex;flex-direction:column;flex:1;min-width:0;gap:3px}
+.tld-flow-scene-copy strong{font-size:.9rem}
+.tld-flow-scene-copy small{font-size:.73rem;color:#777;line-height:1.45}
+.tld-flow-toggle{font-size:1.35rem;font-weight:750}
+.tld-flow-scene-body{padding:16px 20px 22px;border-top:1px solid #eeece6;display:grid;gap:14px}
+.tld-flow-handoff{display:grid;gap:8px}
+.tld-flow-handoff p{font-size:.82rem;line-height:1.65;color:#454545;margin:0}
+.tld-flow-handoff strong{display:inline-flex;align-items:center;gap:4px;color:#191919}
+.tld-flow-prompt-label{font-size:.82rem;font-weight:800;margin:4px 0 -6px}
+.tld-flow-scene-body textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:240px;padding:15px;border:1px solid #dcd9d3;border-radius:11px;background:#fafaf8;color:#333;font:400 .81rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+.tld-flow-feedback{display:flex;align-items:center;gap:8px;font-size:.81rem;font-weight:750;padding:12px 15px;border-radius:11px;background:#f1f5f6}
+.tld-flow-disclaimer{display:flex;align-items:flex-start;gap:9px;margin:0;font-size:.78rem;line-height:1.6;color:#757575}
+.tld-flow-disclaimer svg{flex-shrink:0;margin-top:2px}
+.tld-flow-actions button:focus-visible,.tld-flow-scene-header:focus-visible,.tld-flow-open:focus-visible{outline:3px solid #8bbbd9;outline-offset:3px}
+@media(max-width:850px){.tld-flow-steps{grid-template-columns:1fr}.tld-flow-intro{align-items:flex-start}.tld-flow-open{width:100%;justify-content:center}}
+@media(max-width:520px){.tld-flow-actions button{width:100%}.tld-flow-scene-body{padding:13px}.tld-flow-scene-header{padding:12px}.tld-flow-intro{padding:19px}.tld-flow-scene-num{height:38px;flex-basis:38px}}
