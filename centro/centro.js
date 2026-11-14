@@ -119,6 +119,7 @@ async function isOwner(userId){
 function setCourseActions(){
  for(const code of ['web-class','content-lab']){
   const el=$('action-'+code),state=$('status-'+code);
+  if(!el||!state)continue; // Archived courses are absent from public catalog; preserve purchased access data.
   const has=purchased.has(code),open=code==='content-lab'&&has?true:!!releases[code];
   if(code==='content-lab'&&!owner&&!has){
    state.textContent='DISPONIBLE · $10 PAGO ÚNICO';
