@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {loadLittleDetoursPreviews, type TldCharacterPreview} from './supabase-client';
 import {Camera, ExternalLink, FolderOpen, Image as ImageIcon, Info, UserRound} from 'lucide-react';
+import TheLittleDetoursExpressionBacklog, {ExpressionsSummary} from './TheLittleDetoursExpressionBacklog';
 import './the-little-detours-characters.css';
 
 // Verified 2026-11-14 via the private Google Drive master character folders.
@@ -131,6 +132,7 @@ function CharacterCard({
             : <small>Pendiente</small>}
         </div>)}
       </div>
+      <TheLittleDetoursExpressionBacklog name={character.name as 'Nora'|'Eli'|'Pip'}/>
       {active?.url&&<a className="tld-active-original" href={active.url} target="_blank" rel="noopener noreferrer">
         <ExternalLink size={15}/> Abrir fotografía original en Google Drive
       </a>}
@@ -169,13 +171,14 @@ export default function TheLittleDetoursCharacters() {
       </a>
     </div>
     {error&&<p className="tld-cast-warning" role="status">{error} Puedes abrir las fotos originales tocando sus enlaces de Drive.</p>}
+    <ExpressionsSummary/>
     <div className="tld-cast-cards">
       {cast.map(character=><CharacterCard key={character.name} character={character} sources={sources} loading={loading}/>)}
     </div>
     <p className="tld-cast-help"><Info size={16}/>
       La galería utiliza los enlaces de imagen de Higgsfield guardados solo para tu sesión privada del Studio, sin iframes de Google.
       Drive conserva las ocho fotografías originales sin cambios; abre sus enlaces si alguna miniatura no carga.
-      Los ángulos y gestos que faltan siguen pendientes.
+      Los ángulos y gestos pendientes tienen prompts individuales en cada ficha. Las expresiones nuevas no se presentan como fotos ya generadas.
     </p>
   </section>;
 }
