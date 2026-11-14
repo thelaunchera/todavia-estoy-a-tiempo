@@ -893,6 +893,14 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
                     overflow:'hidden',background:'#191919'}}>
                     <video src={activeVideo.url} muted loop autoPlay playsInline preload="metadata"
                       aria-label={'Video del slide '+(n+1)}
+                      onLoadedMetadata={event=>{
+                        if(part.videoTrimStart)event.currentTarget.currentTime=Math.max(0,part.videoTrimStart);
+                      }}
+                      onTimeUpdate={event=>{
+                        const player=event.currentTarget;
+                        const trim=videoTrim(part.videoTrimStart,part.videoTrimEnd,player.duration);
+                        if(trim.end>0&&player.currentTime>=trim.end-.04)player.currentTime=trim.start;
+                      }}
                       style={{width:'100%',height:'100%',objectFit:'contain',
                         transform:'translate('+(v.panX*100)+'%,'+(v.panY*100)+'%) scale('+v.zoom+')',
                         transformOrigin:'center',background:'#191919'}}/>
