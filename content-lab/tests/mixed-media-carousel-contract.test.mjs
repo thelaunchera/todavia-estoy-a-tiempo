@@ -41,7 +41,7 @@ test('export is mixed: edited videos are processed and photos remain PNG',()=>{
   const factory=src('CarouselFactory.tsx');
   const app=src('App.tsx');
   assert.match(factory,/carouselVideoMedia\.download\(path\)/);
-  assert.match(factory,/videoFilename\(n,part\.videoPath\)/);
+  assert.match(factory,/videoFilename\(n,path\)/);
   assert.match(factory,/const blob=await canvasToPngBlob\(canvas\)/);
   assert.match(factory,/Preparar mis archivos/);
   assert.match(app,/readCarouselDesign\(p\.designData\|\|''\)\.slides\?\.some/);
