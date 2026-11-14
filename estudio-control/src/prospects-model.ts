@@ -16,6 +16,7 @@ export function prospectProjectLinks(notes:string):ProspectProjectLink[] {
     'admin panel':'Admin Panel',
     'content planner / content hub':'Content Planner',
     'content planner':'Content Planner',
+    'propuesta canva':'Propuesta Canva',
   };
   const links:ProspectProjectLink[]=[];
   const seen=new Set<string>();
@@ -29,6 +30,7 @@ export function prospectProjectLinks(notes:string):ProspectProjectLink[] {
     try{
       const url=new URL(match[2]);
       if(!['https:','http:'].includes(url.protocol)||url.username||url.password)continue;
+      if(label==='Propuesta Canva'&&(url.protocol!=='https:'||!['canva.com','www.canva.com','canva.link'].includes(url.hostname)))continue;
       links.push({label,href:url.href});
       seen.add(label);
     }catch{/* Do not render an invalid URI as a link. */}

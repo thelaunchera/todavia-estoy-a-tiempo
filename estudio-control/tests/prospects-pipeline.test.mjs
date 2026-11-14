@@ -52,3 +52,25 @@ test('never turn arbitrary research text, unsafe or malformed URLs into shortcut
  assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nWebsite: javascript:alert(1)\nMenú digital: https://u:p@example.com/menu\nAdmin Panel: wrong\n'),[]);
  assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nWebsite: https://example.com\nWebsite: https://malicious.example/\n'),[{label:'Website',href:'https://example.com/'}]);
 });
+
+test('a Canva proposal becomes a dedicated shortcut without replacing existing project links',()=>{
+ const notes=[
+  'ENLACES DIRECTOS',
+  'Website: https://example.com/',
+  'Propuesta Canva: https://www.canva.com/d/example',
+  '',
+  'Propuesta Canva: https://canva.link/example'
+ ].join('\n');
+ assert.deepEqual(prospectProjectLinks(notes),[
+  {label:'Website',href:'https://example.com/'},
+  {label:'Propuesta Canva',href:'https://www.canva.com/d/example'}
+ ]);
+});
+test('the proposal shortcut accepts HTTPS Canva links only',()=>{
+ for(const url of ['http://www.canva.com/d/example','https://www.canva.com.example.org/d/example']){
+  assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nPropuesta Canva: '+url),[]);
+ }
+ assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nPropuesta Canva: https://canva.link/example'),[
+  {label:'Propuesta Canva',href:'https://canva.link/example'}
+ ]);
+});
