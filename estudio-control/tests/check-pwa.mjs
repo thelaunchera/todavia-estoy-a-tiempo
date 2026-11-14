@@ -30,6 +30,17 @@ assert.ok(youtubeStudio.includes('Archivo · OFF BRIEF'), 'legacy project retain
 assert.ok(currentYoutubePlan.includes('The Little Detours'), 'current plan is present');
 assert.ok(currentYoutubePlan.includes('The Umbrella Thief'), 'pilot remains indexed');
 assert.ok(currentYoutubePlan.includes('<TheLittleDetoursFlow />'), 'Google Flow production panel is visible in active YouTube plan');
+
+const characterGallery = readFileSync(new URL('src/TheLittleDetoursCharacters.tsx',root),'utf8');
+assert.equal((characterGallery.match(/fileName:'(?:Nora|Eli|Pip)_[^']+\.png'/g)||[]).length,8,
+  'eight individually named verified Drive files are linked for the three characters');
+assert.ok(characterGallery.includes('Nora_04_Surprised.png'), 'Nora surprise photo is linked');
+assert.ok(characterGallery.includes('Eli_02_Back.png'), 'Eli rear photo is linked');
+assert.ok(characterGallery.includes('Pip_02_ThreeQuarter.png'), 'Pip three-quarter photo is linked');
+assert.ok(characterGallery.includes("previewSrc=active?.url.replace"), 'private Drive images use a signed-in preview, not a /view image tag');
+assert.ok(characterGallery.includes('Para crear después'), 'future angles and expressions remain pending');
+assert.ok(characterGallery.includes('Abrir fotografía original en Drive'), 'each image retains original Drive fallback');
+
 const flowPrompts = readFileSync(new URL('src/youtube/google-flow-umbrella.ts',root),'utf8');
 const flowUI = readFileSync(new URL('src/TheLittleDetoursFlow.tsx',root),'utf8');
 assert.equal((flowPrompts.match(/number: [1-7], title:/g)||[]).length,7,'pilot contains seven individually grounded continuous segments');
