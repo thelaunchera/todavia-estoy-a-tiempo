@@ -44,7 +44,7 @@ assert.ok(characterGallery.includes('onError={()=>setImageError(true)}'), 'image
 const sbClient = readFileSync(new URL('src/supabase-client.ts',root),'utf8');
 assert.ok(sbClient.includes("from('podcast_tld_character_sources')"), 'preview URLs are not hardcoded in public GitHub source');
 assert.ok(characterGallery.includes('Para crear después'), 'future angles and expressions remain pending');
-assert.ok(characterGallery.includes('Abrir fotografía original en Drive'), 'each image retains original Drive fallback');
+assert.ok(characterGallery.includes('Abrir fotografía original en Google Drive'), 'each image retains original Drive fallback');
 
 const flowPrompts = readFileSync(new URL('src/youtube/google-flow-umbrella.ts',root),'utf8');
 const flowUI = readFileSync(new URL('src/TheLittleDetoursFlow.tsx',root),'utf8');
