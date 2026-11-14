@@ -1,7 +1,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { api } from './platform/client';
+import { api, carouselVideoMedia } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy
@@ -48,7 +48,7 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -64,6 +64,7 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
+const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
  if(!slide.assetId)return {...slide,layout};
@@ -106,6 +107,9 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
           titleFont:isCarouselFont(s.titleFont)?s.titleFont:undefined,
           assetId: String(s.assetId || ''),
+          videoPath:typeof s.videoPath==='string'?s.videoPath.slice(0,260):'',
+          videoName:typeof s.videoName==='string'?s.videoName.slice(0,160):'',
+          videoMime:typeof s.videoMime==='string'?s.videoMime.slice(0,50):'',
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
@@ -621,6 +625,10 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   },[mobilePreviewOpen]);
   useEffect(()=>{setMobilePreviewOpen(false);},[brand.id]);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const videoInputRef=useRef<HTMLInputElement>(null);
+  const [videoBusy,setVideoBusy]=useState(false);
+  const [videoIssue,setVideoIssue]=useState('');
+  const [activeVideo,setActiveVideo]=useState<{path:string;url:string}|null>(null);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
   const clearDownloads=()=>{
@@ -672,6 +680,23 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  // Load only the active clip, not every large file in the carousel.
+  useEffect(()=>{
+    const path=slide.videoPath;
+    if(!path){setActiveVideo(null);setVideoIssue('');return;}
+    let live=true,objectUrl='';
+    setActiveVideo(null);setVideoIssue('');
+    void carouselVideoMedia.download(path).then(blob=>{
+      if(!live)return;
+      objectUrl=URL.createObjectURL(blob);
+      setActiveVideo({path,url:objectUrl});
+    }).catch(error=>{if(live)setVideoIssue(error instanceof Error?error.message:'No se pudo abrir el video.')});
+    return()=>{live=false;if(objectUrl)URL.revokeObjectURL(objectUrl)};
+  },[slide.videoPath,brand.id]);
+  const videoPages=slides.flatMap((part,index)=>part.videoPath?[{
+    page:index,name:part.videoName||'Video del carrusel',
+    src:activeVideo?.path===part.videoPath?activeVideo.url:undefined
+  }]:[]);
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
   // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
   const previewPageWidth=Math.min(900,Math.floor(6800/slides.length));
