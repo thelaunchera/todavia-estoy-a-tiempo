@@ -93,3 +93,39 @@ test('download renders edited clips and keeps sound instead of exporting origina
   assert.match(renderer,/drawTransformedVideo\(ctx,video,transform/);
   assert.match(renderer,/MediaRecorder\.isTypeSupported/);
 });
+
+test('Seamless video crossing a cut is visible on both slides, with no duplicate file',()=>{
+  const v={x:.55,y:0,w:1,h:1,rotation:0,zoom:1,panX:0,panY:0};
+  assert.deepEqual([...video.videoVisiblePages(1,v,5,true)],[1,2]);
+  assert.deepEqual([...video.videoVisiblePages(1,v,5,false)],[1]);
+  assert.equal(video.videoOffsetForPage(1,1),0);
+  assert.equal(video.videoOffsetForPage(1,2),-1);
+  assert.equal(video.videoHasEdits(v,0,0),true);
+});
+test('rotation crossing a dotted line also exports to the neighboring slide',()=>{
+  const v={x:.2,y:.12,w:.6,h:1.5,rotation:55,zoom:1,panX:0,panY:0};
+  assert.deepEqual([...video.videoVisiblePages(2,v,5,true)],[1,2,3]);
+  assert.deepEqual([...video.videoVisiblePages(2,v,5,false)],[2]);
+  assert.deepEqual([...video.videoVisiblePages(-1,v,5,true)],[]);
+});
+test('shared video export applies its page offset after geometry normalization',()=>{
+  const translations=[];
+  const ctx={save(){},translate:(x,y)=>translations.push([x,y]),rotate(){},
+    beginPath(){},rect(){},clip(){},fillRect(){},drawImage(){},restore(){}};
+  const clip={x:.65,y:.1,w:.85,h:.9,rotation:0,zoom:1,panX:0,panY:0};
+  video.drawTransformedVideo(ctx,{videoWidth:160,videoHeight:200},clip,1080,1350,0);
+  video.drawTransformedVideo(ctx,{videoWidth:160,videoHeight:200},clip,1080,1350,-1);
+  assert.equal(Math.round(translations[0][0]-translations[1][0]),1080);
+  assert.equal(translations[0][1],translations[1][1]);
+});
+test('the editor renders spanning videos and prevents ambiguous overlapping exports',()=>{
+  const factory=src('CarouselFactory.tsx');
+  const component=src('CarouselVideoLayer.tsx');
+  assert.match(factory,/videoVisiblePages\(owner,\s*part\.videoTransform/);
+  assert.match(factory,/exportableVideo\(slides,n,style\.seamlessEnabled\)/);
+  assert.match(factory,/dos videos superpuestos/);
+  assert.match(factory,/videoOffsetForPage\(owner,n\)/);
+  assert.match(factory,/Entre slides \{selectedVideoOwner\+1\}/);
+  assert.match(component,/left:seamless\?'0%'/);
+  assert.match(component,/100\*\(video\.page\+d\.x\)\/pageCount/);
+});
