@@ -1919,7 +1919,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         {videoBusy&&<span role="status">Subiendo video privado…</span>}
         {videoIssue&&<small role="alert">{videoIssue}</small>}
         {slide.videoPath&&<small style={{flexBasis:'100%'}}>El clip ocupa este slide. Se descarga como video original, con sonido; las fotos de otros slides se exportan como PNG. Los elementos debajo se conservan al quitar el video.</small>}
-      </div}
+      </div>}
 
       <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
 <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
