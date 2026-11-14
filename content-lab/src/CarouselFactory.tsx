@@ -1872,7 +1872,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             <Copy size={16}/> Duplicar slide {i+1}
           </button>
           <button type="button" className="btn ghost factory-free-create" onClick={()=>{
-            if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
+            if(slides.some(part=>part.title||part.description||part.assetId||part.videoPath)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
             }
             const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:(['cover','statement','photo','steps','split','closing'] as Layout[])[n],eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
