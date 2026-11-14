@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X, Sticker, Palette } from 'lucide-react';
+import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X, Sticker, Palette, Film } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
 import type { PanoramaLayer } from './PanoramaLayers';
@@ -12,6 +12,8 @@ type Point = {x: number; y: number};
 type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   pageIndex?:number;onPageIndexChange?:(index:number)=>void;
+  onChooseVideo?:()=>void;videoUploading?:boolean;
+  videoPages?:{page:number;name:string;src?:string}[];
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
   onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
@@ -36,7 +38,7 @@ type Props = {
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
-  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,onChooseVideo,videoUploading=false,videoPages=[],
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   // On tablet and desktop, show the dedicated editing library immediately.
@@ -295,8 +297,8 @@ export default function PanoramaEditor({
   const editor=<section ref={containerRef} className={'panorama-editor' + (expanded ? ' expanded' : '')+(selectedLayerId?' layer-selected':'')}
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
-      <h2>Arrastra elementos a tu carrusel.</h2>
-      <p>Como en el ejemplo: elige una foto o un sticker de tu biblioteca, arrástralo al lienzo y cambia su tamaño. En seamless puedes cruzar los límites de los slides.</p>
+      <h2>Añade fotos, videos y elementos a tu carrusel.</h2>
+      <p>Arrastra fotos y stickers al lienzo. Usa «Subir video» para colocar un clip en el slide elegido; las fotos pueden cruzar los cortes en seamless.</p>
     </div>{!expanded&&<button type="button" className="btn ghost" onClick={()=>setExpanded(true)} aria-label="Ampliar lienzo">
       <Maximize2 size={16}/><span className="panorama-expand-long">Ampliar lienzo</span><span className="panorama-expand-short">Ampliar</span>
     </button>}</header>
@@ -336,6 +338,10 @@ export default function PanoramaEditor({
         onClick={()=>{openTool('photo');input.current?.click()}}>
         <Upload size={16}/> Subir imagen
       </button>
+      {onChooseVideo&&<button type="button" className="panorama-add-photo" disabled={videoUploading}
+        onClick={onChooseVideo} aria-label="Subir video al slide seleccionado">
+        <Film size={16}/> {videoUploading?'Subiendo video…':'Subir video'}
+      </button>}
       {canExtendBackground&&onExtendBackground&&<button type="button" className="panorama-edit-background"
         onClick={()=>{onExtendBackground();setBackgroundOpen(false);revealCanvas()}}
         aria-label="Editar y agrandar el fondo seleccionado">
@@ -387,7 +393,7 @@ export default function PanoramaEditor({
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&(mobileGallery&&typeof document!=='undefined'?createPortal(libraryPanel,document.body):libraryPanel)}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
-      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} continuous={seamless} ratio={count * 1080 / 1350}
+      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} videoPages={videoPages} continuous={seamless} ratio={count * 1080 / 1350}
         pageIndex={pageIndex} onPageIndexChange={onPageIndexChange}
         fullscreen={expanded}
         onSelectionChange={setSelectedLayerId}
@@ -405,7 +411,7 @@ export default function PanoramaEditor({
         </div>)}</div>
         {!textElements.length && <p>No hay textos añadidos en el carrusel.</p>}
       </details>
-      <small className="panorama-export-note">{count} PNG individuales · 1080 × 1350 cada uno · las líneas de corte y los controles no aparecen en la descarga.</small>
+      <small className="panorama-export-note">{count} slides · fotos en PNG, videos en formato original · los controles y cortes no aparecen en la descarga.</small>
     </div></div>
     {ghost&&<div className="panorama-drag-ghost" aria-hidden="true"
       style={{left:ghost.x,top:ghost.y}}>
