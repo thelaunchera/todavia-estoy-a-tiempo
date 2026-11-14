@@ -49,6 +49,6 @@ test('four named Knockout shortcuts become real, safe clickable destinations',()
 });
 test('never turn arbitrary research text, unsafe or malformed URLs into shortcut buttons',()=>{
  assert.deepEqual(prospectProjectLinks('Investigación: https://other-site.example/demo'),[]);
- assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\\nWebsite: javascript:alert(1)\\nMenú digital: https://u:p@example.com/menu\\nAdmin Panel: wrong\\n'),[]);
- assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\\nWebsite: https://example.com\\nWebsite: https://malicious.example/\\n'),[{label:'Website',href:'https://example.com/'}]);
+ assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nWebsite: javascript:alert(1)\nMenú digital: https://u:p@example.com/menu\nAdmin Panel: wrong\n'),[]);
+ assert.deepEqual(prospectProjectLinks('ENLACES DIRECTOS\nWebsite: https://example.com\nWebsite: https://malicious.example/\n'),[{label:'Website',href:'https://example.com/'}]);
 });
