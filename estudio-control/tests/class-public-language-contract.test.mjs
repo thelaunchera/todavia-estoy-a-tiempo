@@ -14,23 +14,24 @@ const publicCopy = source => source
   .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
   .replace(/<!--[\s\S]*?-->/g, '');
 
-test('public class pages describe benefits rather than internal tools or providers', () => {
-  const restricted = /\b(?:ChatGPT|AppDeploy|Stripe|Gmail|Supabase|GitHub|Notion|ManyChat|Vercel|Netlify|Replit|Google Drive|Make\.com|Studio|RLS)\b/i;
-  for (const [label,page] of [['es',landingEs],['en',landingEn]]) {
-    assert.doesNotMatch(publicCopy(page),restricted,'No app stack in public '+label+' landing');
-    assert.match(page,/class-faq/,'Public FAQs must remain available');
-    assert.match(page,/class-waitlist-form/,'Waitlist must remain visible');
+test('archived public class landings contain no sales, signups or course details', () => {
+  for (const [lang,page] of [['es',landingEs],['en',landingEn]]) {
+    assert.match(page,/name="robots" content="noindex,nofollow,noarchive"/,'Class landing is not indexed: '+lang);
+    assert.match(page,/href="https:\/\/thelaunchera\.com\/"/,'Class landing leads to active site: '+lang);
+    assert.doesNotMatch(page,/class-faq|class-waitlist-form|lista-espera|stripe\.com|\$9\.99|\$39\.99|data-launch-at/,'No legacy course promotion or signup: '+lang);
+    assert.doesNotMatch(publicCopy(page),/\b(?:ChatGPT|AppDeploy|Stripe|Gmail|Supabase|GitHub|Notion|ManyChat|Vercel|Netlify|Replit|Google Drive|Make\.com|Studio|RLS)\b/i,'No internal stack on archived landing: '+lang);
   }
+  assert.match(landingEs,/Esta página no está disponible por ahora/);
+  assert.match(landingEn,/This page is unavailable for now/);
 });
 
-test('English public class landing has English marketing and accessibility content', () => {
+test('archived public class pages stay bilingual and accessible without advertising a launch date', () => {
   assert.match(landingEn,/<html lang="en">/);
-  assert.match(landingEn,/name="description" content="Build and review your first website with AI/);
-  assert.match(landingEn,/og:title" content="Build Your First Website with AI/);
-  assert.match(landingEn,/aria-label="Back to top of page"/);
-  assert.doesNotMatch(publicCopy(landingEn),/[¿¡]/,'No Spanish punctuation in English landing');
-  assert.doesNotMatch(landingEn,/(?:aria-label|placeholder)="(?:Ir al|Volver al|Cómo te|Cuéntame|Escena cinematográfica)/);
-  assert.doesNotMatch(landingEn,/href="\.\.\/privacidad-en\.html" hreflang="es"/);
+  assert.match(landingEs,/<html lang="es">/);
+  assert.match(landingEn,/Visit The Launch Era/);
+  assert.match(landingEs,/Visitar The Launch Era/);
+  assert.doesNotMatch(publicCopy(landingEn),/[¿¡]/);
+  assert.doesNotMatch(landingEn,/2026-12-03|Join the waitlist|Buy now/);
 });
 
 test('only student-authenticated classroom screens explain named learning tools', () => {
