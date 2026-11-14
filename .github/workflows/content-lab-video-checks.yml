@@ -1,0 +1,32 @@
+name: Verify mixed video carousels
+on:
+  push:
+    branches:
+      - feature/content-lab-mixed-video-carousels
+  pull_request:
+    paths:
+      - 'content-lab/**'
+      - 'creative-shared/**'
+      - '.github/workflows/content-lab-video-checks.yml'
+permissions:
+  contents: read
+jobs:
+  content-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Content Lab dependencies
+        working-directory: content-lab
+        run: npm install --no-audit --no-fund
+      - name: Check TypeScript
+        working-directory: content-lab
+        run: ./node_modules/.bin/tsc --noEmit
+      - name: Run regression tests
+        working-directory: content-lab
+        run: npm test
+      - name: Compile responsive editor
+        working-directory: content-lab
+        run: npm run build
