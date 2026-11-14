@@ -1,3 +1,41 @@
+
+export type ProspectProjectLink = {label:string;href:string};
+
+/**
+ * Project shortcuts are persisted in the prospect's existing private notes.
+ * Only the explicit ENLACES DIRECTOS section can produce clickable shortcuts;
+ * untrusted links elsewhere in research notes remain plain text.
+ */
+export function prospectProjectLinks(notes:string):ProspectProjectLink[] {
+  const lines=notes.split(/\r?\n/);
+  const start=lines.findIndex(line=>/^ENLACES DIRECTOS\b/i.test(line.trim()));
+  if(start<0)return [];
+  const labels:Record<string,string>={
+    'website':'Website',
+    'menú digital':'Menú digital',
+    'admin panel':'Admin Panel',
+    'content planner / content hub':'Content Planner',
+    'content planner':'Content Planner',
+  };
+  const links:ProspectProjectLink[]=[];
+  const seen=new Set<string>();
+  for(const line of lines.slice(start+1)){
+    if(!line.trim())break;
+    const match=line.trim().match(/^([^:]+):\s*(https?:\/\/[^\s<>]+)\s*$/i);
+    if(!match)continue;
+    const name=match[1].trim().replace(/\s*\([^)]*\)\s*$/,'').toLocaleLowerCase('es');
+    const label=labels[name];
+    if(!label||seen.has(label))continue;
+    try{
+      const url=new URL(match[2]);
+      if(!['https:','http:'].includes(url.protocol)||url.username||url.password)continue;
+      links.push({label,href:url.href});
+      seen.add(label);
+    }catch{/* Do not render an invalid URI as a link. */}
+  }
+  return links;
+}
+
 export const PROSPECT_STAGES = [
   { id: 'found', label: 'Encontrados', detail: 'Por investigar' },
   { id: 'qualified', label: 'Calificados', detail: 'Oportunidad validada' },

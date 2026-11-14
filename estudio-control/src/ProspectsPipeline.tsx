@@ -1,13 +1,29 @@
 import {useCallback,useEffect,useMemo,useRef,useState,type FormEvent,type PointerEvent as ReactPointerEvent,type DragEvent} from 'react';
 import {Plus,Search,RefreshCw,GripVertical,ExternalLink,Phone,Mail,CalendarDays,Pencil,Trash2,X,Check,LayoutGrid,ShieldCheck} from 'lucide-react';
 import {getStudioProspects,saveStudioProspect,moveStudioProspect,deleteStudioProspect} from './supabase-client';
-import {PROSPECT_STAGES,SERVICES,WEBSITE_STATUS,EMPTY_PROSPECT,activePipelineTotal,stageTotals,moveProspect,parseEstimate,
+import {PROSPECT_STAGES,SERVICES,WEBSITE_STATUS,EMPTY_PROSPECT,activePipelineTotal,stageTotals,moveProspect,parseEstimate,prospectProjectLinks,
   type StudioProspect,type StudioProspectInput,type ProspectStage,type ProspectService,type ProspectWebsite} from './prospects-model';
 import './prospects-pipeline.css';
 
 const money=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
 const validWebLink=(value:string)=>{try{const url=new URL(value);return ['https:','http:'].includes(url.protocol)?url.href:'';}catch{return '';}};
 const shortDate=(date:string)=>new Intl.DateTimeFormat('es-US',{month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(date+'T12:00:00Z'));
+
+function ProjectShortcuts({notes,business,compact=false}:{notes:string;business:string;compact?:boolean}){
+  const links=prospectProjectLinks(notes);
+  if(!links.length)return null;
+  return <nav className={'tle-prospects-project-shortcuts'+(compact?' is-compact':'')}
+    aria-label={'Abrir enlaces de '+business}>
+    <strong>ABRIR PROYECTOS</strong>
+    <div className="tle-prospects-project-shortcut-grid">
+      {links.map(link=><a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer"
+        aria-label={'Abrir '+link.label+' de '+business}>
+        <span>{link.label}</span><ExternalLink size={14} aria-hidden="true"/>
+      </a>)}
+    </div>
+  </nav>;
+}
+
 const cleanForm=(form:StudioProspectInput):StudioProspectInput=>({
   ...form,business_name:form.business_name.trim().slice(0,160),
   contact_name:form.contact_name.trim().slice(0,140),phone:form.phone.trim().slice(0,50),
@@ -161,6 +177,7 @@ export default function ProspectsPipeline({readOnly=false}:{readOnly?:boolean}) 
            <strong className="tle-prospects-deal-value">{money.format(row.estimated_value)}</strong>
            {row.next_follow_up&&<small className="tle-prospects-next"><CalendarDays size={13}/> Seguimiento: {shortDate(row.next_follow_up)}</small>}
            {row.notes&&<p className="tle-prospects-card-note">{row.notes}</p>}
+           <ProjectShortcuts notes={row.notes} business={row.business_name} compact/>
            <div className="tle-prospects-card-links">
              {row.phone&&<a href={'tel:'+row.phone.replace(/[^+0-9]/g,'')} aria-label={'Llamar a '+row.business_name}><Phone size={15}/></a>}
              {row.email&&<a href={'mailto:'+row.email} aria-label={'Enviar email a '+row.business_name}><Mail size={15}/></a>}
@@ -182,6 +199,7 @@ export default function ProspectsPipeline({readOnly=false}:{readOnly?:boolean}) 
    {formOpen&&<div className="tle-prospects-modal" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget&&!saving)setFormOpen(false);}}>
      <div className="tle-prospects-dialog" role="dialog" aria-modal="true" aria-labelledby="tle-prospect-form-heading">
        <header><div><small>MI STUDIO / PROSPECTOS</small><h3 id="tle-prospect-form-heading">{editing?'Editar prospecto':'Nuevo prospecto'}</h3></div><button type="button" onClick={()=>setFormOpen(false)} disabled={saving} aria-label="Cerrar formulario"><X size={19}/></button></header>
+       <ProjectShortcuts notes={form.notes} business={form.business_name||'prospecto'}/>
        <form onSubmit={event=>void submit(event)}>
          <div className="tle-prospects-fields">
            <label className="tle-prospects-full">Negocio *<input required maxLength={160} autoFocus value={form.business_name} onChange={event=>editField('business_name',event.target.value)} placeholder="Nombre del negocio"/></label>
