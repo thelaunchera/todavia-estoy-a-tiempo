@@ -29,19 +29,14 @@ for(const [es,en] of paired){
  assert.match(read(es),/<html\s+lang="es"/i,es+' language');
  assert.match(read(en),/<html\s+lang="en"/i,en+' language');
 }
-for(const p of ['clases/primera-landing.html','clases/primera-landing-en.html']){
- const body=read(p);
- assert.match(body,/class-audio-language-note/,p+' must clearly disclose audio language');
- assert.match(body,/href="#lista-espera"/,p+' must preserve waitlist CTA');
+// The class is archived for a future relaunch. Public pages must not sell, solicit
+// waitlist submissions, or advertise a dated launch; student materials stay intact.
+for(const [path,language] of [['clases/primera-landing.html','es'],['clases/primera-landing-en.html','en']]){
+ const html=read(path);
+ assert.match(html,/name="robots" content="noindex,nofollow,noarchive"/,path+' is not searchable');
+ assert.match(html,/This page is unavailable for now|Esta página no está disponible por ahora/,path+' is neutral');
+ assert.doesNotMatch(html,/href="#lista-espera"|join the waitlist|lista de espera|class-launch-clock|checkout\.stripe\.com/i,path+' has no sales or waitlist CTA');
 }
-const courseEs=read('clases/primera-landing.html');
-const courseEn=read('clases/primera-landing-en.html');
-assert.match(courseEs,/Materiales en español e inglés/,'Spanish class landing must describe bilingual materials accurately');
-assert.match(courseEn,/Learning materials in English and Spanish/,'English class landing must describe bilingual materials accurately');
-assert.match(courseEs,/El audio y los subtítulos de cada video se indicarán cuando estén disponibles/,'Spanish FAQ must label video-language availability honestly');
-assert.match(courseEn,/Video audio and subtitles will be labeled as they become available/,'English FAQ must label video-language availability honestly');
-assert.doesNotMatch(courseEs,/el audio no está doblado|La opción «English» no cambia el idioma de la voz/,'Spanish landing must not contradict bilingual audio');
-assert.doesNotMatch(courseEn,/the lessons are not dubbed|does not change the spoken audio/,'English landing must not contradict bilingual audio');
 const room=read('alumnos/index.html');
 for(const lang of ['es','en','auto']) assert(room.includes('value="'+lang+'"'), 'Caption option '+lang);
 const player=read('alumnos/curso.js');
