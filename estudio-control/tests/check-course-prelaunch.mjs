@@ -8,6 +8,21 @@ const room=read('alumnos/index.html');
 const roomScript=read('alumnos/curso.js');
 const config=read('clases/course-config.js');
 const workflow=read('.github/workflows/pages.yml');
+
+if(classPage.includes('noindex,nofollow,noarchive')){
+ const en=read('clases/primera-landing-en.html');
+ for(const html of [classPage,en]){
+  assert.match(html,/unavailable for now|no está disponible por ahora/i,'Paused page shows neutral status');
+  assert.doesNotMatch(html,/class-waitlist-form|course-waitlist-form|id="reloj-lanzamiento"|checkout\.stripe\.com|Lista de espera abierta/i,'No class promotions remain visible');
+ }
+ assert.match(room,/id="class-content" hidden/,'Classroom remains private');
+ assert.match(room,/id="login-form"/,'Existing student sign-in remains available');
+ assert.match(roomScript,/from\('podcast_class_access'\)/,'Student access records remain supported');
+ assert.match(waitlist,/course-unsubscribe/,'Legacy consent revocation retained');
+ console.log('Paused class archive and protected student materials: OK');
+ process.exit(0);
+}
+
 assert.doesNotMatch(home,/href="clases\/primera-landing\.html"/,'La portada del podcast no repite la oferta de la clase enlazada en la bio');
 assert.doesNotMatch(home,/<section class="learning-section"/,'La portada no incluye un bloque comercial de la clase');
 assert.match(classPage,/También desde tu celular/i,'El hero ofrece una vía móvil sin computadora');
