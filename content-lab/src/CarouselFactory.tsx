@@ -1691,11 +1691,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   };
   const produceVideoFile=async(n:number,audioContext?:AudioContext):Promise<{blob:Blob;name:string}>=>{
     const match=exportableVideo(slides,n,style.seamlessEnabled);
-    if(!match?.part.videoPath)throw Error('No hay video visible en este slide.');
+    const path=match?.part.videoPath;
+    if(!match||!path)throw Error('No hay video visible en este slide.');
     const {owner,part}=match;
-    const original=await carouselVideoMedia.download(part.videoPath);
+    const original=await carouselVideoMedia.download(path);
     if(owner===n&&!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
-      return {blob:original,name:videoFilename(n,part.videoPath)};
+      return {blob:original,name:videoFilename(n,path)};
     ensureSourceImages();
     let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=null;
     try{
