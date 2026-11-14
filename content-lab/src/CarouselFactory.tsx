@@ -2,11 +2,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api, carouselVideoMedia } from './platform/client';
+import {DEFAULT_VIDEO_TRANSFORM,normalizeVideoTransform,videoHasEdits,videoTrim,bound,type CarouselVideoTransform} from './CarouselVideoTransform';
+import {renderEditedCarouselVideo} from './CarouselVideoRender';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy, Film
 } from 'lucide-react';
 import './CarouselFactory.css';
+import './CarouselVideoControls.css';
 import CarouselReader from './CarouselReader';
 import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
@@ -48,7 +51,9 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string;
+  videoTransform?:CarouselVideoTransform;videoTrimStart?:number;videoTrimEnd?:number;
+  titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -64,6 +69,7 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
+const videoTime=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
 const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
@@ -110,6 +116,9 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           videoPath:typeof s.videoPath==='string'?s.videoPath.slice(0,260):'',
           videoName:typeof s.videoName==='string'?s.videoName.slice(0,160):'',
           videoMime:typeof s.videoMime==='string'?s.videoMime.slice(0,50):'',
+          videoTransform:normalizeVideoTransform(s.videoTransform),
+          videoTrimStart:typeof s.videoTrimStart==='number'&&Number.isFinite(s.videoTrimStart)?Math.max(0,s.videoTrimStart):0,
+          videoTrimEnd:typeof s.videoTrimEnd==='number'&&Number.isFinite(s.videoTrimEnd)?Math.max(0,s.videoTrimEnd):0,
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
@@ -628,6 +637,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const videoInputRef=useRef<HTMLInputElement>(null);
   const [videoBusy,setVideoBusy]=useState(false);
   const [videoIssue,setVideoIssue]=useState('');
+  const [videoDuration,setVideoDuration]=useState(0);
+  const [videoExportProgress,setVideoExportProgress]=useState('');
   const [activeVideo,setActiveVideo]=useState<{path:string;url:string}|null>(null);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
@@ -680,6 +691,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  const currentVideoTransform=normalizeVideoTransform(slide.videoTransform);
+  useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[slide.videoPath]);
   // Load only the active clip, not every large file in the carousel.
   useEffect(()=>{
     const path=slide.videoPath;
@@ -695,6 +708,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   },[slide.videoPath,brand.id]);
   const videoPages=slides.flatMap((part,index)=>part.videoPath?[{
     page:index,name:part.videoName||'Video del carrusel',
+    transform:normalizeVideoTransform(part.videoTransform),
+    trimStart:part.videoTrimStart||0,trimEnd:part.videoTrimEnd||0,
     src:activeVideo?.path===part.videoPath?activeVideo.url:undefined
   }]:[]);
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
@@ -865,7 +880,33 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
           {part.videoPath?
             (activeVideo?.path===part.videoPath?
-              <video src={activeVideo.url} controls playsInline preload="metadata" style={{width:'100%',height:'100%',objectFit:'contain',background:'#101010'}} aria-label={'Video del slide '+(n+1)}/>:
+              <div style={{position:'relative',width:'100%',height:'100%',
+                aspectRatio:'4/5',overflow:'hidden',background:'#FAF8F3'}}>
+                {overview[n]&&<img src={overview[n]} alt="" draggable={false}
+                  style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'fill'}}/>}
+                {(()=>{
+                  const v=normalizeVideoTransform(part.videoTransform);
+                  return <div style={{position:'absolute',
+                    left:(100*v.x)+'%',top:(100*v.y)+'%',
+                    width:(100*v.w)+'%',height:(100*v.h)+'%',
+                    transform:'rotate('+v.rotation+'deg)',transformOrigin:'center',
+                    overflow:'hidden',background:'#191919'}}>
+                    <video src={activeVideo.url} muted loop autoPlay playsInline preload="metadata"
+                      aria-label={'Video del slide '+(n+1)}
+                      onLoadedMetadata={event=>{
+                        if(part.videoTrimStart)event.currentTarget.currentTime=Math.max(0,part.videoTrimStart);
+                      }}
+                      onTimeUpdate={event=>{
+                        const player=event.currentTarget;
+                        const trim=videoTrim(part.videoTrimStart,part.videoTrimEnd,player.duration);
+                        if(trim.end>0&&player.currentTime>=trim.end-.04)player.currentTime=trim.start;
+                      }}
+                      style={{width:'100%',height:'100%',objectFit:'contain',
+                        transform:'translate('+(v.panX*100)+'%,'+(v.panY*100)+'%) scale('+v.zoom+')',
+                        transformOrigin:'center',background:'#191919'}}/>
+                  </div>;
+                })()}
+              </div>:
               <div className="factory-swipe-loading"><Film size={24}/><small>{n===i?(videoIssue||'Cargando video privado…'):'Video · toca este slide para verlo'}</small></div>):
             overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
               <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
@@ -1335,7 +1376,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       const index=latest.slides.findIndex(part=>part.key===targetKey);
       if(index<0)throw Error('El slide cambió durante la subida. Vuelve a elegirlo.');
       const updated=latest.slides.map((part,n)=>n===index?{
-        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime
+        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime,
+        videoTransform:{...DEFAULT_VIDEO_TRANSFORM},videoTrimStart:0,videoTrimEnd:0
       }:part);
       recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
       onChange({...latest.post,format:'Carousel',hook:updated[0].title,
@@ -1347,8 +1389,22 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       setVideoIssue(message);notify(message);
     }finally{setVideoBusy(false);if(videoInputRef.current)videoInputRef.current.value=''}
   };
+  const updateSlideVideo=(page:number,patch:Partial<Slide>)=>{
+    const latest=latestDraft.current;
+    if(page<0||page>=latest.slides.length||!latest.slides[page]?.videoPath)return;
+    recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
+    const updated=latest.slides.map((part,n)=>n===page?{...part,...patch}:part);
+    onChange({...latest.post,format:'Carousel',hook:updated[0].title,
+      designData:encodeCarouselDesign(updated,latest.style)});
+    clearDownloads();
+  };
+  const updateVideoGeometry=(page:number,transform:CarouselVideoTransform)=>{
+    updateSlideVideo(page,{videoTransform:normalizeVideoTransform(transform)});
+  };
+  const updateCurrentVideo=(patch:Partial<Slide>)=>updateSlideVideo(i,patch);
   const removeSlideVideo=()=>{
-    replace({videoPath:'',videoName:'',videoMime:''});
+    replace({videoPath:'',videoName:'',videoMime:'',
+      videoTransform:undefined,videoTrimStart:0,videoTrimEnd:0});
     setVideoIssue('');notify('Se quitó el video de este slide. Su diseño de fotos permanece intacto.');
   };
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
@@ -1584,6 +1640,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions,
           frameStyle:previous.frameStyle,
           videoPath:previous.videoPath,videoName:previous.videoName,videoMime:previous.videoMime,
+          videoTransform:previous.videoTransform,videoTrimStart:previous.videoTrimStart,videoTrimEnd:previous.videoTrimEnd,
         }:item;
       });
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
@@ -1609,17 +1666,50 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const maxScale=independentExport()?4:Math.max(1,Math.min(4,Math.floor(Math.sqrt(36_000_000/(slides.length*1080*1350)))));
     return sourceAwareScale(ids.map(id=>images[id||'']),1080,1350,maxScale);
   };
+  const produceVideoFile=async(n:number,audioContext?:AudioContext):Promise<{blob:Blob;name:string}>=>{
+    const part=slides[n];
+    if(!part.videoPath)throw Error('No hay video en este slide.');
+    const original=await carouselVideoMedia.download(part.videoPath);
+    if(!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
+      return {blob:original,name:videoFilename(n,part.videoPath)};
+    ensureSourceImages();
+    let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=null;
+    try{
+      if(independentExport())
+        one=await drawSlide(part,n,slides.length,brand,images,style,false,1);
+      else{
+        pages=await renderAllSlides(1);
+        one=pages[n];
+      }
+      const processed=await renderEditedCarouselVideo(original,
+        part.videoTransform,part.videoTrimStart||0,part.videoTrimEnd||0,one,
+        ratio=>setVideoExportProgress('Procesando video '+(n+1)+' · '+Math.round(ratio*100)+'%'),
+        audioContext);
+      return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
+    }finally{
+      if(pages)pages.forEach(canvas=>{canvas.width=1;canvas.height=1});
+      else if(one){one.width=1;one.height=1}
+    }
+  };
+  // Warm audio on the direct tap (Safari requires user activation).
+  const startVideoAudio=()=>{
+    if(typeof AudioContext==='undefined')return undefined;
+    const ctx=new AudioContext();void ctx.resume();
+    return ctx;
+  };
   const exportOne=async(n=i)=>{
     if(busy)return;
-    setBusy('export');
+    const audio=slides[n]?.videoPath&&videoHasEdits(slides[n].videoTransform,slides[n].videoTrimStart,slides[n].videoTrimEnd)
+      ?startVideoAudio():undefined;
+    setBusy('export');setVideoExportProgress('');
     try{
       if(slides[n].videoPath){
-        const blob=await carouselVideoMedia.download(slides[n].videoPath!);
-        const url=URL.createObjectURL(blob);
+        const file=await produceVideoFile(n,audio);
+        const url=URL.createObjectURL(file.blob);
         const a=document.createElement('a');a.href=url;
-        a.download=videoFilename(n,slides[n].videoPath!);a.click();
+        a.download=file.name;a.click();
         window.setTimeout(()=>URL.revokeObjectURL(url),90_000);
-        notify('Video del slide '+(n+1)+' descargado en su formato original.');
+        notify('Video del slide '+(n+1)+' descargado'+(file.name.includes('-editado')?' con giro, encuadre y recorte aplicados.':' en su formato original.'));
         return;
       }
       ensureSourceImages();
@@ -1637,17 +1727,22 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         else{canvas.width=1;canvas.height=1}
       }
       notify('Slide '+(n+1)+' descargado como PNG de alta resolución.');
-    }catch(e){showError(e)}finally{setBusy('');}
+    }catch(e){showError(e)}finally{setBusy('');setVideoExportProgress('');if(audio)void audio.close().catch(()=>{});}
   };
   const exportAll=async()=>{
     if(busy)return;
+    const hasEditedVideos=slides.some(part=>!!part.videoPath&&videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd));
+    const audio=hasEditedVideos?startVideoAudio():undefined;
     const notes=await inspectImageQuality();
     setImageQualityNotes(notes);
     const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
     if((longText||notes.length>0)&&!window.confirm(
       (longText?'Algunos textos podrían cortarse en el PNG. ':'')+
       (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
-      '¿Exportar de todas formas?'))return;
+      '¿Exportar de todas formas?')){
+      if(audio)void audio.close().catch(()=>{});
+      return;
+    }
     setBusy('all');
     const token=exportRunRef.current+1;
     exportRunRef.current=token;
@@ -1661,8 +1756,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
         if(slides[n].videoPath){
-          const blob=await carouselVideoMedia.download(slides[n].videoPath!);
-          result.push({name:videoFilename(n,slides[n].videoPath!),url:URL.createObjectURL(blob)});
+          const media=await produceVideoFile(n,audio);
+          result.push({name:media.name,url:URL.createObjectURL(media.blob)});
           continue;
         }
         const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
@@ -1684,7 +1779,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       showError(e);
     }finally{
       pages?.forEach(page=>{page.width=1;page.height=1});
-      setBusy('');
+      setBusy('');setVideoExportProgress('');
+      if(audio)void audio.close().catch(()=>{});
     }
   };
   const exportAnimatedCarousel=async()=>{
@@ -1887,6 +1983,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         onChange={event=>{const file=event.target.files?.[0];event.target.value='';void uploadSlideVideo(file)}}/>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
         onChooseVideo={()=>videoInputRef.current?.click()} videoUploading={videoBusy} videoPages={videoPages}
+        onVideoChange={updateVideoGeometry}
         pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
@@ -1910,16 +2007,100 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
-      {(slide.videoPath||videoBusy||videoIssue)&&<div role="group" aria-label="Video del slide seleccionado"
-        style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',padding:'12px 14px',
-          margin:'10px 0',border:'1px solid #D4E0E4',borderRadius:12,background:'#FAF8F3'}}>
-        {slide.videoPath&&<><Film size={19}/><strong>Video · slide {i+1}</strong>
-          <span style={{fontSize:12}}>{slide.videoName||'Mi video'}</span>
-          <button type="button" className="btn ghost" disabled={videoBusy} onClick={removeSlideVideo}>Quitar video de este slide</button></>}
-        {videoBusy&&<span role="status">Subiendo video privado…</span>}
-        {videoIssue&&<small role="alert">{videoIssue}</small>}
-        {slide.videoPath&&<small style={{flexBasis:'100%'}}>El clip ocupa este slide. Se descarga como video original, con sonido; las fotos de otros slides se exportan como PNG. Los elementos debajo se conservan al quitar el video.</small>}
-      </div>}
+      {(slide.videoPath||videoBusy||videoIssue)&&<section className="factory-video-editor"
+        aria-label="Editor de video del slide seleccionado">
+        <div className="factory-video-editor-head">
+          <Film size={20}/><strong>Editar video · slide {i+1}</strong>
+          {slide.videoName&&<span className="factory-video-name">{slide.videoName}</span>}
+          {slide.videoPath&&<button type="button" className="btn ghost"
+            disabled={videoBusy||!!busy} onClick={removeSlideVideo}>Quitar video</button>}
+        </div>
+        {videoBusy&&<p role="status">Subiendo video privado…</p>}
+        {videoIssue&&<p role="alert">{videoIssue}</p>}
+        {videoExportProgress&&<p role="status" className="factory-video-progress">{videoExportProgress}</p>}
+        {slide.videoPath&&<>
+          <p>Activa ✋ Editar arriba del lienzo, arrastra el video para moverlo y usa el punto amarillo para cambiar su tamaño o pellizca con dos dedos. Gira y recorta aquí abajo. Los cambios se guardan con el carrusel.</p>
+          <div className="factory-video-grid">
+            <div className="factory-video-tools">
+              <h3>Mover, girar y cambiar tamaño</h3>
+              <label htmlFor="video-rotation">Girar <output>{Math.round(currentVideoTransform.rotation)}°</output></label>
+              <input id="video-rotation" type="range" min="-180" max="180" step="1"
+                value={currentVideoTransform.rotation}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:Number(e.target.value)})})}/>
+              <div className="factory-video-actions">
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:bound(currentVideoTransform.rotation-15,-180,180)})})}>↶ 15°</button>
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:0})})}>Enderezar</button>
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:bound(currentVideoTransform.rotation+15,-180,180)})})}>↷ 15°</button>
+              </div>
+              <label htmlFor="video-width">Ancho <output>{Math.round(currentVideoTransform.w*100)}%</output></label>
+              <input id="video-width" type="range" min=".15" max="2" step=".01"
+                value={currentVideoTransform.w}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,w:Number(e.target.value)})})}/>
+              <label htmlFor="video-height">Alto <output>{Math.round(currentVideoTransform.h*100)}%</output></label>
+              <input id="video-height" type="range" min=".15" max="2" step=".01"
+                value={currentVideoTransform.h}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,h:Number(e.target.value)})})}/>
+            </div>
+            <div className="factory-video-tools">
+              <h3>Recortar encuadre</h3>
+              <small>Acerca y desplaza la imagen dentro del marco del video sin cortar el archivo original.</small>
+              <label htmlFor="video-zoom">Acercar / recortar <output>{Math.round(currentVideoTransform.zoom*100)}%</output></label>
+              <input id="video-zoom" type="range" min="1" max="5" step=".05"
+                value={currentVideoTransform.zoom}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,zoom:Number(e.target.value)})})}/>
+              <label htmlFor="video-pan-x">Mover encuadre a los lados</label>
+              <input id="video-pan-x" type="range" min="-1" max="1" step=".01" value={currentVideoTransform.panX}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,panX:Number(e.target.value)})})}/>
+              <label htmlFor="video-pan-y">Mover encuadre arriba / abajo</label>
+              <input id="video-pan-y" type="range" min="-1" max="1" step=".01" value={currentVideoTransform.panY}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,panY:Number(e.target.value)})})}/>
+              <div className="factory-video-actions">
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:{...DEFAULT_VIDEO_TRANSFORM}})}>Restablecer encuadre</button>
+              </div>
+            </div>
+            <div className="factory-video-tools">
+              <h3>Recortar duración</h3>
+              {activeVideo?.path===slide.videoPath?<video key={activeVideo.path}
+                src={activeVideo.url} controls playsInline preload="metadata" className="factory-video-playback"
+                onLoadedMetadata={e=>setVideoDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)}
+                onPlay={e=>{
+                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,e.currentTarget.duration);
+                  if(e.currentTarget.currentTime<clip.start||e.currentTarget.currentTime>=clip.end)
+                    e.currentTarget.currentTime=clip.start;
+                }}
+                onTimeUpdate={e=>{
+                  const player=e.currentTarget;
+                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,player.duration);
+                  if(player.currentTime>=clip.end-.04&&!player.paused){
+                    player.pause();player.currentTime=clip.start;
+                  }
+                }}/>:<small>Abriendo tu video privado…</small>}
+              {videoDuration>0&&(()=>{
+                const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,videoDuration);
+                return <>
+                  <label htmlFor="video-trim-start">Desde <output>{videoTime(clip.start)}</output></label>
+                  <input id="video-trim-start" type="range" min="0" max={Math.max(0,videoDuration-.1)} step=".1"
+                    value={clip.start}
+                    onChange={e=>{
+                      const next=Number(e.target.value);
+                      updateCurrentVideo({videoTrimStart:next,
+                        videoTrimEnd:slide.videoTrimEnd&&slide.videoTrimEnd<=next+.1?Math.min(videoDuration,next+.2):slide.videoTrimEnd||0});
+                    }}/>
+                  <label htmlFor="video-trim-end">Hasta <output>{videoTime(clip.end)}</output></label>
+                  <input id="video-trim-end" type="range" min={Math.min(clip.start+.1,videoDuration)} max={videoDuration} step=".1"
+                    value={clip.end}
+                    onChange={e=>updateCurrentVideo({videoTrimEnd:Number(e.target.value)})}/>
+                  <small>Duración seleccionada: {videoTime(clip.end-clip.start)}. La exportación de clips editados admite hasta 90 segundos por video en el dispositivo.</small>
+                  <div className="factory-video-actions">
+                    <button type="button" onClick={()=>updateCurrentVideo({videoTrimStart:0,videoTrimEnd:0})}>Usar video completo</button>
+                  </div>
+                </>;
+              })()}
+            </div>
+          </div>
+          <p>Al descargar, un video editado se procesa como MP4 o WebM con su encuadre, rotación, recorte y audio. Si tu navegador no puede procesarlo, mostraremos un error en vez de descargar una versión sin tus cambios.</p>
+        </>}
+      </section>}
 
       <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
 <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
@@ -2159,10 +2340,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     {studioTab==='download'&&<section className="factory-download-step">
       <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
         <h2>Tu carrusel, listo para publicar.</h2>
-        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos originales. Los PNG salen en 1080 × 1350 como mínimo; cada video conserva su imagen y sonido. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos. Las fotos PNG son de al menos 1080 × 1350 y los clips editados se procesan en 1080 × 1350. Al editar un clip se exporta con recorte, giro y sonido en MP4 o WebM; los clips sin cambios conservan su archivo original. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
+      {videoExportProgress&&<p className="factory-video-progress" role="status">{videoExportProgress}</p>}
       <div className="factory-canvas-exports">
-        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y clips como MP4/MOV/WebM originales.</span></div>
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y videos editados como MP4/WebM, con el sonido y el encuadre aplicados.</span></div>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">

@@ -1,0 +1,27 @@
+/* Editable video layer controls share Content Lab's ivory/charcoal design.
+ * Mobile-first: two or three editing groups stack on iPhone/iPad.
+ */
+.factory-video-editor{margin:12px 0 18px;padding:16px;border:1px solid #D7E0E1;border-radius:16px;background:#FAF8F3;color:#191919;box-shadow:0 3px 16px #1919190b}
+.factory-video-editor-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.factory-video-editor-head strong{font-size:16px;font-weight:750}
+.factory-video-editor-head .factory-video-name{font-size:12px;color:#62666a;min-width:0;overflow-wrap:anywhere}
+.factory-video-editor-head button{margin-left:auto}
+.factory-video-editor>p{font-size:12px;line-height:1.5;color:#4c5960;margin:8px 0 14px}
+.factory-video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));gap:12px}
+.factory-video-tools{min-width:0;padding:13px;background:#fff;border:1px solid #E3E7E4;border-radius:13px}
+.factory-video-tools h3{font-size:14px;letter-spacing:-.02em;margin:0 0 12px}
+.factory-video-tools label{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin:10px 0 5px;color:#343A3B;font-weight:650}
+.factory-video-tools input[type=range]{display:block;width:100%;min-width:0;height:30px;accent-color:#191919;touch-action:pan-y}
+.factory-video-tools output{font-variant-numeric:tabular-nums;font-size:11px;font-weight:700;white-space:nowrap}
+.factory-video-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.factory-video-actions button{border:1px solid #d8e1df;border-radius:9px;background:#FAF8F3;color:#191919;font-weight:700;font-size:12px;min-height:39px;padding:7px 10px;touch-action:manipulation}
+.factory-video-actions button:hover{background:#F2D85B}
+.factory-video-playback{display:block;width:100%;max-height:190px;object-fit:contain;background:#191919;border-radius:10px}
+.factory-video-tools small{font-size:11px;line-height:1.5;display:block;color:#5d646a;margin-top:7px}
+.factory-video-progress{font-size:12px;font-weight:700;color:#345866;margin:8px 0}
+@media(max-width:550px){
+ .factory-video-editor{padding:10px 9px;border-radius:12px}
+ .factory-video-tools{padding:11px}
+ .factory-video-editor-head button{margin-left:0}
+ .factory-video-grid{grid-template-columns:1fr}
+}
