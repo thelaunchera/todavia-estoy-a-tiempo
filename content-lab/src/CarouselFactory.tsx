@@ -1864,8 +1864,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
 
       <div className="factory-step-intro">
         <span className="factory-step-eyebrow">PASO 2 DE 5 · FOTOS Y DISEÑOS</span>
-        <h2>Ahora coloca tus fotos y diseña.</h2>
-        <p>Sube fotos, arrástralas y ajusta su tamaño directamente sobre el lienzo. En seamless pueden cruzar los cortes.</p>
+        <h2>Ahora coloca tus fotos o videos y diseña.</h2>
+        <p>Sube fotos y muévelas libremente; también puedes poner un video propio en cualquier slide. Los videos mantienen su sonido y se descargan aparte.</p>
         <div className="factory-step-mini-actions">
           <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=MAX_CAROUSEL_SLIDES}>
             <Copy size={16}/> Duplicar slide {i+1}
@@ -1880,7 +1880,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           }}><Plus size={16}/> Nuevo carrusel</button>
         </div>
       </div>
+      <input ref={videoInputRef} type="file" hidden
+        accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+        aria-label="Seleccionar video para este slide"
+        onChange={event=>{const file=event.target.files?.[0];event.target.value='';void uploadSlideVideo(file)}}/>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+        onChooseVideo={()=>videoInputRef.current?.click()} videoUploading={videoBusy} videoPages={videoPages}
         pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
@@ -1904,6 +1909,16 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
+      {(slide.videoPath||videoBusy||videoIssue)&&<div role="group" aria-label="Video del slide seleccionado"
+        style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',padding:'12px 14px',
+          margin:'10px 0',border:'1px solid #D4E0E4',borderRadius:12,background:'#FAF8F3'}}>
+        {slide.videoPath&&<><Film size={19}/><strong>Video · slide {i+1}</strong>
+          <span style={{fontSize:12}}>{slide.videoName||'Mi video'}</span>
+          <button type="button" className="btn ghost" disabled={videoBusy} onClick={removeSlideVideo}>Quitar video de este slide</button></>}
+        {videoBusy&&<span role="status">Subiendo video privado…</span>}
+        {videoIssue&&<small role="alert">{videoIssue}</small>}
+        {slide.videoPath&&<small style={{flexBasis:'100%'}}>El clip ocupa este slide. Se descarga como video original, con sonido; las fotos de otros slides se exportan como PNG. Los elementos debajo se conservan al quitar el video.</small>}
+      </div>
 
       <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
 <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
