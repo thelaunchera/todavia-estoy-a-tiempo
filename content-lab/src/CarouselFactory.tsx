@@ -2054,6 +2054,17 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
             {videoVisiblePages(selectedVideoOwner,selectedVideo.videoTransform,slides.length,true).length>1
               ?' Descarga una parte alineada por cada slide que atraviesa.':' Arrástralo hacia el corte para extenderlo al siguiente slide.'}
           </p>}
+          {style.seamlessEnabled&&<div className="factory-video-actions" role="group"
+            aria-label="Colocar video entre dos slides">
+            {selectedVideoOwner>0&&<button type="button" onClick={()=>
+              updateCurrentVideo({videoTransform:normalizeVideoTransform({
+                ...currentVideoTransform,x:-currentVideoTransform.w/2
+              })})}>Entre slides {selectedVideoOwner} y {selectedVideoOwner+1}</button>}
+            {selectedVideoOwner<slides.length-1&&<button type="button" onClick={()=>
+              updateCurrentVideo({videoTransform:normalizeVideoTransform({
+                ...currentVideoTransform,x:1-currentVideoTransform.w/2
+              })})}>Entre slides {selectedVideoOwner+1} y {selectedVideoOwner+2}</button>}
+          </div>}
           <p>Activa ✋ Editar arriba del lienzo, arrastra el video para moverlo y usa el punto amarillo para cambiar su tamaño o pellizca con dos dedos. Gira y recorta aquí abajo. Los cambios se guardan con el carrusel.</p>
           <div className="factory-video-grid">
             <div className="factory-video-tools">
