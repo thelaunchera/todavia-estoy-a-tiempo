@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Camera, Check, Clapperboard, Copy, Download, Film, Layers3, Music2, Search, Users, Video, WandSparkles } from 'lucide-react';
+import { BookOpen, Camera, Check, Clapperboard, Copy, Download, Film, Layers3, Music2, Search, Users, Video, WandSparkles, FolderArchive } from 'lucide-react';
 import YouTubeVisualLibrary, { type YouTubeSavedPhoto } from './YouTubeVisualLibrary';
+import TheLaunchEraYouTubePlan from './TheLaunchEraYouTubePlan';
 import YouTubeSeasonTwo from './YouTubeSeasonTwo';
 import YouTubeSeasonOneVideo from './YouTubeSeasonOneVideo';
 import YouTubeBrandKit from './YouTubeBrandKit';
@@ -76,9 +77,16 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
   };
 
   return <div className="yt-studio">
+    <TheLaunchEraYouTubePlan />
+    <details className="yt-archive-section">
+      <summary>
+        <span className="yt-archive-icon"><FolderArchive size={21}/></span>
+        <span><strong>Archivo · OFF BRIEF</strong><small>Temporadas 1 y 2, guiones, fotos, video, covers, marca y audio originales. Todo conservado.</small></span>
+      </summary>
+      <div className="yt-archive-content">
     <section className="yt-hero">
       <div className="yt-hero-copy">
-        <span className="yt-kicker"><Clapperboard size={16}/> NUEVA SERIE · YOUTUBE</span>
+        <span className="yt-kicker"><Clapperboard size={16}/> PROYECTO ANTERIOR · ARCHIVADO</span>
         <h2>{youtubeBrief.title}</h2>
         <p className="yt-hero-tagline">{youtubeBrief.tagline}</p>
         <p>{youtubeBrief.logline}</p>
@@ -195,5 +203,7 @@ export default function YouTubeStudio({entries,onChanged,readOnly=false}:Props) 
         <ScriptText content={episode.script}/>
       </article>
     </div>}
+      </div>
+    </details>
   </div>;
 }
