@@ -9,6 +9,28 @@ const roomScript=read('alumnos/curso.js');
 const config=read('clases/course-config.js');
 const workflow=read('.github/workflows/pages.yml');
 
+const classArchived=classPage.includes('name="robots" content="noindex,nofollow,noarchive"');
+if(classArchived){
+ const classPageEn=read('clases/primera-landing-en.html');
+ const archivedCatalog=read('centro/index.html');
+ assert.match(classPage,/Esta página no está disponible por ahora/,'Class unavailable publicly in Spanish');
+ assert.match(classPageEn,/This page is unavailable for now/,'Class unavailable publicly in English');
+ assert.match(classPageEn,/noindex,nofollow,noarchive/,'English archived landing is not indexed');
+ for(const page of [classPage,classPageEn]){
+  assert.doesNotMatch(page,/class-waitlist-form|course-waitlist-form|checkout\.stripe\.com|buy\.stripe\.com|Lanzamiento oficial|Join the waitlist|\$9\.99/,'Archived class cannot be purchased or promoted');
+  assert.match(page,/href="https:\/\/thelaunchera\.com\/"/,'Archived route links to active business site');
+ }
+ assert.doesNotMatch(home,/href="clases\/primera-landing\.html"/,'Podcast home must not promote archived class');
+ assert.ok(!archivedCatalog.includes('data-product="web-class"')&&!archivedCatalog.includes('primera-landing'),'Archived class is absent from public product catalog');
+ assert.match(room,/id="class-content" hidden/,'Existing classroom remains access protected');
+ assert.match(roomScript,/from\('podcast_class_access'\)/,'Preserve customer entitlements and access verification');
+ assert.doesNotMatch(roomScript,/service_role|sk_live_|rk_live_|whsec_/,'No private credentials in classroom client');
+ assert.doesNotMatch(config,/service_role|sk_live_|rk_live_|whsec_/,'Only public config in browser');
+ assert.match(workflow,/test -s _podcast_pages\/alumnos\/index\.html/,'Publish existing private classroom without deleting assets');
+ console.log('Archived class: public sales/waitlist hidden; EN/ES closure page; private classroom/access preserved.');
+} else {
+
+
 if(classPage.includes('noindex,nofollow,noarchive')){
  const en=read('clases/primera-landing-en.html');
  for(const html of [classPage,en]){
@@ -548,3 +570,5 @@ assert.ok(catalogHtml.includes('data-detail="web-class">Conocer la clase'),'La c
 assert.ok(catalogHtml.includes('data-detail="content-lab">Descubre qué incluye'),'El Lab conserva su CTA principal');
 assert.ok(catalogCss.includes('.cover-action:focus-visible'),'Las portadas tienen foco para teclado');
 assert.match(catalogHtml,/centro\.css\?v=\d{8}-[a-z0-9-]+/,'El navegador recibe los estilos versionados');
+
+}
