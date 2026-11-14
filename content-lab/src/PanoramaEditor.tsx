@@ -300,7 +300,7 @@ export default function PanoramaEditor({
     aria-label="Lienzo panorámico editable">
     <header className="panorama-heading"><div><span className="eyebrow">TU CARRUSEL</span>
       <h2>Añade fotos, videos y elementos a tu carrusel.</h2>
-      <p>Arrastra fotos y stickers al lienzo. Usa «Subir video» para colocar un clip en el slide elegido; las fotos pueden cruzar los cortes en seamless.</p>
+      <p>Arrastra fotos, videos y stickers. En Seamless puedes extender el mismo video entre slides; sus partes se exportan alineadas.</p>
     </div>{!expanded&&<button type="button" className="btn ghost" onClick={()=>setExpanded(true)} aria-label="Ampliar lienzo">
       <Maximize2 size={16}/><span className="panorama-expand-long">Ampliar lienzo</span><span className="panorama-expand-short">Ampliar</span>
     </button>}</header>
@@ -311,7 +311,7 @@ export default function PanoramaEditor({
       <button type="button" aria-pressed={libraryOpen&&libraryKind==='photo'} onClick={()=>openTool('photo')}>
         <ImagePlus size={19}/><span>Fotos</span></button>
       {onChooseVideo&&<button type="button" onClick={onChooseVideo} disabled={videoUploading}
-        aria-label="Subir video al slide seleccionado" title="Subir video al slide seleccionado">
+        aria-label="Subir video al carrusel; en Seamless puede cruzar entre slides" title="Subir video y colocarlo entre slides">
         <Film size={19}/><span>{videoUploading?'Subiendo…':'Video'}</span></button>}
       <button type="button" onClick={()=>{openTool('elements');setMoreTools(false);onAddLayer('text');revealCanvas()}}>
         <Type size={19}/><span>Texto</span></button>

@@ -1,6 +1,7 @@
 /**
- * Editable placement of a video within ONE carousel slide.
- * Coordinates are normalized to that slide (not the whole panorama).
+ * Geometry is authored in the clip's original slide, but in Seamless mode its
+ * visible pixels may extend into neighboring slides. A single clip is stored;
+ * exports crop the SAME video into each intersected slide at the same timecode.
  */
 export type CarouselVideoTransform={
   x:number;y:number;w:number;h:number;
@@ -32,6 +33,31 @@ export function videoHasEdits(
    Math.abs(v[key as keyof CarouselVideoTransform]-original)>.001)
    ||trimStart>.001||trimEnd>.001;
 }
+/**
+ * Which slide panels contain visible pixels from the same rotated rectangle.
+ * Horizontal projection converts 4:5 slide Y units to X units, so an angled
+ * clip crossing a dotted seam is not dropped from its neighboring export.
+ * Normal mode intentionally never bleeds across slides.
+ */
+export function videoVisiblePages(
+ owner:number,raw:unknown,count:number,seamless:boolean
+):number[]{
+ if(!Number.isInteger(owner)||owner<0||owner>=count)return [];
+ if(!seamless)return [owner];
+ const v=normalizeVideoTransform(raw);
+ const theta=v.rotation*Math.PI/180;
+ const radius=(Math.abs(Math.cos(theta))*v.w+
+   Math.abs(Math.sin(theta))*v.h*(1350/1080))/2;
+ const center=owner+v.x+v.w/2;
+ const min=center-radius,max=center+radius;
+ return Array.from({length:count},(_,i)=>i)
+   .filter(page=>max>page+.0001&&min<page+1-.0001);
+}
+/** Slide-relative X for a single continuous asset on a cropped output page. */
+export function videoOffsetForPage(owner:number,page:number):number{
+ return owner-page;
+}
+
 export const videoTrim=(start:unknown,end:unknown,duration:number)=>{
  const limit=Number.isFinite(duration)&&duration>0?duration:0;
  const from=bound(finite(start,0),0,Math.max(0,limit-.1));
@@ -44,10 +70,10 @@ export const videoTrim=(start:unknown,end:unknown,duration:number)=>{
  */
 export function drawTransformedVideo(
  ctx:CanvasRenderingContext2D,video:HTMLVideoElement,raw:unknown,
- width:number,height:number,
+ width:number,height:number,pageOffset=0,
 ){
  const transform=normalizeVideoTransform(raw);
- const x=transform.x*width,y=transform.y*height;
+ const x=(transform.x+pageOffset)*width,y=transform.y*height;
  const w=transform.w*width,h=transform.h*height;
  ctx.save();
  ctx.translate(x+w/2,y+h/2);

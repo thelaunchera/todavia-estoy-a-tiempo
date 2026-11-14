@@ -867,7 +867,7 @@ export default function TouchLayerCanvas({
           alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
         {videoPages.filter(video=>video.page>=0&&video.page<pageCount).map(video=>
           <CarouselVideoLayer key={'video-slide-'+video.page} video={video}
-            pageCount={pageCount} editable={interactionMode==='edit'}
+            pageCount={pageCount} seamless={continuous} editable={interactionMode==='edit'}
             onChange={onVideoChange} onSelect={onPageIndexChange}/>
         )}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">

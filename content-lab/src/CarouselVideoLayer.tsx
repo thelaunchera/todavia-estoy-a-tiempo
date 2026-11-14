@@ -6,14 +6,15 @@ type VideoPage={
   trimStart?:number;trimEnd?:number;
 };
 type Props={
-  video:VideoPage;pageCount:number;editable:boolean;
+  video:VideoPage;pageCount:number;editable:boolean;seamless:boolean;
   onChange?:(page:number,transform:CarouselVideoTransform)=>void;
   onSelect?:(page:number)=>void;
 };
-/** A video is an editable layer, not an opaque fullscreen slide overlay.
- * Its geometry lives in the same normalized slide coordinates as the exporter.
+/** One editable video rectangle in the whole panorama.
+ * Its anchor page remains stable while the rectangle can cross dotted cuts.
+ * Normal mode retains the original one-page crop.
  */
-export default function CarouselVideoLayer({video,pageCount,editable,onChange,onSelect}:Props){
+export default function CarouselVideoLayer({video,pageCount,editable,seamless,onChange,onSelect}:Props){
   const [draft,setDraft]=useState(()=>normalizeVideoTransform(video.transform));
   const current=useRef(draft);
   const dragging=useRef<{
@@ -110,13 +111,14 @@ export default function CarouselVideoLayer({video,pageCount,editable,onChange,on
   };
   const d=draft,selected=editable&&!!video.src;
   return <div aria-label={'Video del slide '+(video.page+1)}
-    style={{position:'absolute',left:(100*video.page/pageCount)+'%',top:0,
-      width:(100/pageCount)+'%',height:'100%',overflow:'hidden',
+    style={{position:'absolute',left:seamless?'0%':(100*video.page/pageCount)+'%',
+      top:0,width:seamless?'100%':(100/pageCount)+'%',
+      height:'100%',overflow:'hidden',
       zIndex:16,pointerEvents:'none'}}>
     {video.src?<div
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-      style={{position:'absolute',left:(d.x*100)+'%',top:(d.y*100)+'%',
-        width:(d.w*100)+'%',height:(d.h*100)+'%',
+      style={{position:'absolute',left:(seamless?100*(video.page+d.x)/pageCount:100*d.x)+'%',top:(d.y*100)+'%',
+        width:(seamless?100*d.w/pageCount:100*d.w)+'%',height:(d.h*100)+'%',
         transform:'rotate('+d.rotation+'deg)',transformOrigin:'center',
         border:selected?'2px solid #F2D85B':'1px solid transparent',
         boxSizing:'border-box',background:'#191919',overflow:'hidden',
@@ -136,9 +138,13 @@ export default function CarouselVideoLayer({video,pageCount,editable,onChange,on
         color:'#191919',background:'#F2D85B',pointerEvents:'none'}}>
         Arrastra · pellizca · gira abajo
       </div>}
-    </div>:<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',
+    </div>:<div style={{position:'absolute',
+      left:(seamless?100*(video.page+d.x)/pageCount:100*d.x)+'%',
+      top:(d.y*100)+'%',width:(seamless?100*d.w/pageCount:100*d.w)+'%',
+      height:(d.h*100)+'%',transform:'rotate('+d.rotation+'deg)',
+      display:'grid',placeItems:'center',overflow:'hidden',
       background:'#191919',color:'#fff',fontSize:12,padding:6,textAlign:'center'}}>
-      ▶ {video.name} · Selecciona este slide para cargar el video
+      ▶ {video.name} · Selecciona el slide {video.page+1} para cargar el video
     </div>}
   </div>;
 }
