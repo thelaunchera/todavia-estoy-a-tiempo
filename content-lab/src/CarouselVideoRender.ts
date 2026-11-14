@@ -37,7 +37,8 @@ export async function renderEditedCarouselVideo(
  background:HTMLCanvasElement|undefined,
  progress?:(ratio:number,finalizing?:boolean)=>void,
  audioContext?:AudioContext,
- pageOffset=0
+ pageOffset=0,
+ foreground?:HTMLCanvasElement
 ):Promise<EditedCarouselVideo>{
   if(!supportsCarouselVideoEditing())throw Error(
     'Este navegador no permite exportar videos editados. Conservamos tus cambios: prueba Safari actualizado o Chrome.'
@@ -63,7 +64,7 @@ export async function renderEditedCarouselVideo(
     if(!video.videoWidth||!video.videoHeight||!Number.isFinite(video.duration))
       throw Error('No se pudo leer la duración o dimensiones del video.');
     const trim=videoTrim(start,end,video.duration);
-    if(trim.end-trim.start<.1)throw Error('Selecciona al menos 0.1 segundos para recortar.');
+    if(trim.end-trim.start+1e-7<.1)throw Error('Selecciona al menos 0.1 segundos para recortar.');
     if(trim.end-trim.start>90)throw Error(
       'Para exportar el video editado desde iPhone o iPad, recorta este clip a 90 segundos o menos.'
     );
@@ -74,6 +75,20 @@ export async function renderEditedCarouselVideo(
       ctx.fillStyle='#FAF8F3';ctx.fillRect(0,0,canvas.width,canvas.height);
       if(background)ctx.drawImage(background,0,0,canvas.width,canvas.height);
       drawTransformedVideo(ctx,video,transform,canvas.width,canvas.height,pageOffset);
+      if(foreground){
+        // The editor places editable native photos, stickers and front layers
+        // above the video. Restore their pixels ONLY where this video covers
+        // them, avoiding doubled transparency everywhere else on the slide.
+        const x=(transform.x+pageOffset)*canvas.width,y=transform.y*canvas.height;
+        const w=transform.w*canvas.width,h=transform.h*canvas.height;
+        const cx=x+w/2,cy=y+h/2,angle=transform.rotation*Math.PI/180;
+        ctx.save();
+        ctx.translate(cx,cy);ctx.rotate(angle);
+        ctx.beginPath();ctx.rect(-w/2,-h/2,w,h);ctx.clip();
+        ctx.rotate(-angle);ctx.translate(-cx,-cy);
+        ctx.drawImage(foreground,0,0,canvas.width,canvas.height);
+        ctx.restore();
+      }
     };
     draw();
     context??=new AudioContext();

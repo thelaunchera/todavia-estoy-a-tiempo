@@ -83,8 +83,8 @@ const exportableVideo=(slides:Slide[],page:number,seamless:boolean):PageVideo|nu
   );
   return matching[0]||null;
 };
-const needsVideoRender=({owner,part}:PageVideo,page:number)=>
-  owner!==page||videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd);
+const needsVideoRender=({owner,part}:PageVideo,page:number,hasForeground=false)=>
+  owner!==page||videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd)||hasForeground;
 const videoTime=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
 const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
@@ -711,8 +711,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
-  const focusedVideo=pageVideos(slides,i,style.seamlessEnabled).find(entry=>entry.owner===i)
-    ||pageVideos(slides,i,style.seamlessEnabled)[0]||null;
+  // Keep the owning clip editable even when all its pixels move to another panel
+  // (or temporarily off the panorama). Its layer can call onSelect(owner)
+  // without immediately being unloaded mid-gesture.
+  const focusedVideo=slides[i]?.videoPath?{owner:i,part:slides[i]}
+    :pageVideos(slides,i,style.seamlessEnabled)[0]||null;
   const selectedVideo=focusedVideo?.part;
   const selectedVideoOwner=focusedVideo?.owner??i;
   const currentVideoTransform=normalizeVideoTransform(selectedVideo?.videoTransform);
@@ -1213,6 +1216,43 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
     ...pageLayers,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
+  // Native slide photos, stickers and free-canvas text sit ABOVE the video
+  // in TouchLayerCanvas. Saved foreground layers also sit above it. Repaint
+  // only the covered portion of those layers after each encoded video frame.
+  // Clipping the second pass to the video itself prevents double opacity on
+  // translucent stickers outside the video rectangle.
+  const videoForegroundLayers:PanoramaLayer[]=[
+    ...pageLayers.filter(layer=>layer.kind==='photo'||layer.kind==='sticker'||layer.kind==='text')
+      .map(layer=>({...layer,placement:'front' as const})),
+    ...(style.panoramaLayers||[]).filter(layer=>
+      layer.role!=='background'&&layer.placement!=='behind-text'),
+  ];
+  const foregroundOnPage=(page:number):PanoramaLayer[]=>videoForegroundLayers.filter(layer=>{
+    if(!style.seamlessEnabled&&Number.isInteger(layer.page)&&layer.page!==page)return false;
+    const r=clampPanoramaRect(layer.rect);
+    const theta=(r.angle||0)*Math.PI/180;
+    const center=(r.x+r.w/2)*slides.length;
+    // Conservative rotated bounds are only a fast filter; final painting is
+    // clipped to the real page and the exact rotated video shape.
+    const radius=(Math.abs(Math.cos(theta))*r.w*slides.length+
+      Math.abs(Math.sin(theta))*r.h*(1350/1080))/2;
+    return center+radius>page&&center-radius<page+1;
+  });
+  const hasVideoForeground=(page:number)=>foregroundOnPage(page).length>0;
+  const renderVideoForeground=async(page:number):Promise<HTMLCanvasElement|undefined>=>{
+    const layers=foregroundOnPage(page);
+    if(!layers.length)return undefined;
+    const front=document.createElement('canvas');front.width=1080;front.height=1350;
+    try{
+      const ctx=front.getContext('2d');
+      if(!ctx)throw Error('No se pudo preparar las capas del video.');
+      ctx.save();ctx.translate(-page*1080,0);
+      try{await paintPanoramaLayers(ctx,slides.length*1080,1350,layers,images,
+        style.seamlessEnabled?0:slides.length);}
+      finally{ctx.restore()}
+      return front;
+    }catch(error){front.width=1;front.height=1;throw error}
+  };
   // An opt-in composition, using existing per-brand photo layers only.
   // Nothing is invented, flattened or shared outside the buyer workspace.
   const scatterExistingPhotos=()=>{
@@ -1710,10 +1750,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     setVideoExportProgress('Cargando video del slide '+(n+1)+'…');
     const original=await withExportTimeout(carouselVideoMedia.download(path),60_000,
       'El video tardó demasiado en cargar. Revisa tu conexión e intenta de nuevo.');
-    if(!needsVideoRender(match,n))
+    if(!needsVideoRender(match,n,hasVideoForeground(n)))
       return {blob:original,name:videoFilename(n,path)};
     ensureSourceImages();
     let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=preparedBackground||null;
+    let foreground:HTMLCanvasElement|undefined;
     try{
       if(!one&&independentExport())
         one=await drawSlide(slides[n],n,slides.length,brand,images,style,false,1);
@@ -1725,14 +1766,16 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         pages=await renderAllSlides(1);
         one=pages[n];
       }
+      foreground=await renderVideoForeground(n);
       const processed=await renderEditedCarouselVideo(original,
         part.videoTransform,part.videoTrimStart||0,part.videoTrimEnd||0,one,
         (ratio,finalizing)=>setVideoExportProgress(finalizing||ratio===1
           ?'Finalizando video del slide '+(n+1)+'…'
           :'Procesando video del slide '+(n+1)+' · '+Math.round(ratio*100)+'%'),
-        audioContext,videoOffsetForPage(owner,n));
+        audioContext,videoOffsetForPage(owner,n),foreground);
       return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
     }finally{
+      if(foreground){foreground.width=1;foreground.height=1}
       if(pages)pages.forEach(canvas=>{canvas.width=1;canvas.height=1});
       else if(one&&!preparedBackground){one.width=1;one.height=1}
     }
@@ -1750,7 +1793,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     let media:PageVideo|null=null;
     try{media=exportableVideo(slides,n,style.seamlessEnabled);}
     catch(error){showError(error);return}
-    const audio=media&&needsVideoRender(media,n)?startVideoAudio():undefined;
+    const audio=media&&needsVideoRender(media,n,hasVideoForeground(n))?startVideoAudio():undefined;
     exportLockRef.current=true;
     setBusy('export');setVideoExportProgress('');
     try{
@@ -1791,7 +1834,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const remaining=slides.map((_,n)=>n).filter(n=>!preparedFilesRef.current.has(n));
     const pngPages=remaining.filter(n=>!pageVideos(slides,n,style.seamlessEnabled).length);
     const clipPages=remaining.filter(n=>pageVideos(slides,n,style.seamlessEnabled).length);
-    const editedPages=clipPages.filter(n=>pageVideos(slides,n,style.seamlessEnabled).some(media=>needsVideoRender(media,n)));
+    const editedPages=clipPages.filter(n=>pageVideos(slides,n,style.seamlessEnabled).some(media=>
+      needsVideoRender(media,n,hasVideoForeground(n))));
     const audio=editedPages.length?startVideoAudio():undefined;
     setBusy('all');
     const addFile=(page:number,blob:Blob,name:string)=>{

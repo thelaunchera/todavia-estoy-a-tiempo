@@ -34,10 +34,56 @@ export function videoHasEdits(
    ||trimStart>.001||trimEnd>.001;
 }
 /**
- * Which slide panels contain visible pixels from the same rotated rectangle.
- * Horizontal projection converts 4:5 slide Y units to X units, so an angled
- * clip crossing a dotted seam is not dropped from its neighboring export.
- * Normal mode intentionally never bleeds across slides.
+ * Resize in the video rectangle's rotated local axes. Keep its visually
+ * opposite corner anchored (including at 90° and 180°), rather than treating
+ * a screen-space drag as if the clip were never rotated.
+ */
+export function resizeRotatedVideo(
+ raw:unknown,dxPixels:number,dyPixels:number,pageWidth:number,pageHeight:number
+):CarouselVideoTransform{
+ const base=normalizeVideoTransform(raw);
+ const theta=base.rotation*Math.PI/180,c=Math.cos(theta),s=Math.sin(theta);
+ const pw=Math.max(1,pageWidth),ph=Math.max(1,pageHeight);
+ const w=bound(base.w+(c*dxPixels+s*dyPixels)/pw,.12,2);
+ const h=bound(base.h+(-s*dxPixels+c*dyPixels)/ph,.12,2);
+ const dw=(w-base.w)*pw,dh=(h-base.h)*ph;
+ return normalizeVideoTransform({...base,w,h,
+   x:base.x+((c-1)*dw-s*dh)/(2*pw),
+   y:base.y+(s*dw+(c-1)*dh)/(2*ph)});
+}
+
+type PixelPoint={x:number;y:number};
+function cutPolygon(
+ polygon:PixelPoint[],axis:'x'|'y',at:number,keepGreater:boolean
+):PixelPoint[]{
+ const result:PixelPoint[]=[];
+ if(!polygon.length)return result;
+ let previous=polygon[polygon.length-1];
+ let prevInside=keepGreater?previous[axis]>=at:previous[axis]<=at;
+ for(const current of polygon){
+   const inside=keepGreater?current[axis]>=at:current[axis]<=at;
+   if(inside!==prevInside){
+     const t=(at-previous[axis])/(current[axis]-previous[axis]);
+     result.push({x:previous.x+(current.x-previous.x)*t,
+       y:previous.y+(current.y-previous.y)*t});
+   }
+   if(inside)result.push(current);
+   previous=current;prevInside=inside;
+ }
+ return result;
+}
+function polygonArea(polygon:PixelPoint[]):number{
+ let twice=0;
+ for(let i=0;i<polygon.length;i++){
+   const a=polygon[i],b=polygon[(i+1)%polygon.length];
+   twice+=a.x*b.y-b.x*a.y;
+ }
+ return Math.abs(twice)/2;
+}
+/**
+ * A rotated rectangle is visible on a slide only when it actually intersects
+ * the page's x bounds AND the 4:5 canvas's vertical [0,1] bounds.
+ * Projection-only checks incorrectly exported blank videos near the top/bottom.
  */
 export function videoVisiblePages(
  owner:number,raw:unknown,count:number,seamless:boolean
@@ -45,13 +91,20 @@ export function videoVisiblePages(
  if(!Number.isInteger(owner)||owner<0||owner>=count)return [];
  if(!seamless)return [owner];
  const v=normalizeVideoTransform(raw);
- const theta=v.rotation*Math.PI/180;
- const radius=(Math.abs(Math.cos(theta))*v.w+
-   Math.abs(Math.sin(theta))*v.h*(1350/1080))/2;
- const center=owner+v.x+v.w/2;
- const min=center-radius,max=center+radius;
- return Array.from({length:count},(_,i)=>i)
-   .filter(page=>max>page+.0001&&min<page+1-.0001);
+ const theta=v.rotation*Math.PI/180,c=Math.cos(theta),s=Math.sin(theta);
+ const aspect=1350/1080;
+ const cx=owner+v.x+v.w/2,cy=v.y+v.h/2;
+ const polygon:PixelPoint[]=[
+   [-v.w/2,-v.h/2],[v.w/2,-v.h/2],
+   [v.w/2,v.h/2],[-v.w/2,v.h/2]
+ ].map(([dx,dy])=>({x:cx+c*dx-s*dy*aspect,y:cy+s*dx/aspect+c*dy}));
+ return Array.from({length:count},(_,page)=>page).filter(page=>{
+   let clipped=cutPolygon(polygon,'x',page,true);
+   clipped=cutPolygon(clipped,'x',page+1,false);
+   clipped=cutPolygon(clipped,'y',0,true);
+   clipped=cutPolygon(clipped,'y',1,false);
+   return clipped.length>=3&&polygonArea(clipped)>1e-8;
+ });
 }
 /** Slide-relative X for a single continuous asset on a cropped output page. */
 export function videoOffsetForPage(owner:number,page:number):number{
