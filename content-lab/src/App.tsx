@@ -25,6 +25,7 @@ import VerticalStudio from './VerticalStudio';
 import {installLabLocale,uiText} from './LabLocale';
 import './CreativeCover.css';
 import CarouselFactory,{renderSavedCarouselPages} from './CarouselFactory';
+import {readCarouselDesign} from './CarouselArtDirection';
 import CreatorDashboard from './CreatorDashboard';
 import ProjectCover,{projectCoverAssetIds} from './ProjectCover';
 import {isFinishedPost,collectionStatusPatch} from './PostCollection';
@@ -946,7 +947,7 @@ function App() {
     if(!saved)throw Error('No se encontró la publicación guardada.');
     if(saved.format==='Carousel'){
       edit(saved,true,true);
-      toast(loginLanguage==='es'?'Abre «Preparar mis PNG» para descargar los slides sin ZIP.':'Use “Prepare my PNGs” to download slides individually.');
+      toast(loginLanguage==='es'?'Abre «Preparar mis archivos» para descargar fotos PNG y videos originales.':'Use “Prepare my files” to download photos and original videos.');
       return;
     }
     const decor=readCoverDecor(saved.designData);
@@ -983,6 +984,14 @@ function App() {
   // source photo. Multi-slide carousels offer individual iPhone-safe PNG links.
   const downloadSavedPost=async(p:Post)=>{
     if(!brand||!p.id||downloadingPostId)return;
+    // Saved mixed carousels must not be flattened to misleading static PNGs.
+    if(p.format==='Carousel'&&readCarouselDesign(p.designData||'').slides?.some((part:any)=>!!part?.videoPath)){
+      edit(p,true,true);
+      toast(loginLanguage==='es'
+        ?'Abre «Preparar mis archivos»: incluye videos con sonido y fotos PNG.'
+        :'Use “Prepare my files”: videos keep their audio and photos are PNG.');
+      return;
+    }
     setDownloadingPostId(p.id);
     const newlyPrepared:{name:string;url:string}[]=[];
     try{
