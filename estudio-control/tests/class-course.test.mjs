@@ -46,7 +46,7 @@ test('revisión móvil apta para alumnos sin computadora y sin promesas de cober
  assert.match(demo.readyPrompt,/No inventes pruebas/);
  assert.match(materials,/¿Solo tienes teléfono\? Revisa tu web sin computadora/);
  assert.match(materials,/cometweb\.io\/tools\/responsive/);
- assert.match(landing,/¿Y si solo tengo teléfono y no computadora\?/);
+ assert.match(landing,/Esta página no está disponible por ahora/,'Public class is archived while mobile learning materials remain');
 });
 
 test('plan semanal privado, con tareas existentes y sin duplicar registros',()=>{
