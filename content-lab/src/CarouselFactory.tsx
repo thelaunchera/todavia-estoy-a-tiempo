@@ -880,7 +880,25 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
           {part.videoPath?
             (activeVideo?.path===part.videoPath?
-              <video src={activeVideo.url} controls playsInline preload="metadata" style={{width:'100%',height:'100%',objectFit:'contain',background:'#101010'}} aria-label={'Video del slide '+(n+1)}/>:
+              <div style={{position:'relative',width:'100%',height:'100%',
+                aspectRatio:'4/5',overflow:'hidden',background:'#FAF8F3'}}>
+                {overview[n]&&<img src={overview[n]} alt="" draggable={false}
+                  style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'fill'}}/>}
+                {(()=>{
+                  const v=normalizeVideoTransform(part.videoTransform);
+                  return <div style={{position:'absolute',
+                    left:(100*v.x)+'%',top:(100*v.y)+'%',
+                    width:(100*v.w)+'%',height:(100*v.h)+'%',
+                    transform:'rotate('+v.rotation+'deg)',transformOrigin:'center',
+                    overflow:'hidden',background:'#191919'}}>
+                    <video src={activeVideo.url} muted loop autoPlay playsInline preload="metadata"
+                      aria-label={'Video del slide '+(n+1)}
+                      style={{width:'100%',height:'100%',objectFit:'contain',
+                        transform:'translate('+(v.panX*100)+'%,'+(v.panY*100)+'%) scale('+v.zoom+')',
+                        transformOrigin:'center',background:'#191919'}}/>
+                  </div>;
+                })()}
+              </div>:
               <div className="factory-swipe-loading"><Film size={24}/><small>{n===i?(videoIssue||'Cargando video privado…'):'Video · toca este slide para verlo'}</small></div>):
             overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
               <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
@@ -2313,6 +2331,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         <h2>Tu carrusel, listo para publicar.</h2>
         <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos originales. Los PNG salen en 1080 × 1350 como mínimo; cada video conserva su imagen y sonido. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
+      {videoExportProgress&&<p className="factory-video-progress" role="status">{videoExportProgress}</p>}
       <div className="factory-canvas-exports">
         <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y clips como MP4/MOV/WebM originales.</span></div>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
