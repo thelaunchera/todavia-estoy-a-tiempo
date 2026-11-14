@@ -36,7 +36,8 @@ export async function renderEditedCarouselVideo(
  blob:Blob,raw:unknown,start:number,end:number,
  background:HTMLCanvasElement|undefined,
  progress?:(ratio:number)=>void,
- audioContext?:AudioContext
+ audioContext?:AudioContext,
+ pageOffset=0
 ):Promise<EditedCarouselVideo>{
   if(!supportsCarouselVideoEditing())throw Error(
     'Este navegador no permite exportar videos editados. Conservamos tus cambios: prueba Safari actualizado o Chrome.'
@@ -84,7 +85,7 @@ export async function renderEditedCarouselVideo(
     const draw=()=>{
       ctx.fillStyle='#FAF8F3';ctx.fillRect(0,0,canvas.width,canvas.height);
       if(background)ctx.drawImage(background,0,0,canvas.width,canvas.height);
-      drawTransformedVideo(ctx,video,transform,canvas.width,canvas.height);
+      drawTransformedVideo(ctx,video,transform,canvas.width,canvas.height,pageOffset);
     };
     draw();
     await context.resume();
