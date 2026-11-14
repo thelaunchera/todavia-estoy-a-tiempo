@@ -121,7 +121,7 @@ export async function renderEditedCarouselVideo(
     video.pause();
     if(recorder&&!finalized&&recorder.state==='recording')recorder.stop();
     capture?.getTracks().forEach(track=>track.stop());
-    await context.close().catch(()=>{});
+    if(!audioContext)await context.close().catch(()=>{});
     video.removeAttribute('src');video.load();video.remove();
     URL.revokeObjectURL(original);
     canvas.width=1;canvas.height=1;
