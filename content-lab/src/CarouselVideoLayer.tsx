@@ -138,7 +138,11 @@ export default function CarouselVideoLayer({video,pageCount,editable,seamless,on
         color:'#191919',background:'#F2D85B',pointerEvents:'none'}}>
         Arrastra · pellizca · gira abajo
       </div>}
-    </div>:<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',
+    </div>:<div style={{position:'absolute',
+      left:(seamless?100*(video.page+d.x)/pageCount:100*d.x)+'%',
+      top:(d.y*100)+'%',width:(seamless?100*d.w/pageCount:100*d.w)+'%',
+      height:(d.h*100)+'%',transform:'rotate('+d.rotation+'deg)',
+      display:'grid',placeItems:'center',overflow:'hidden',
       background:'#191919',color:'#fff',fontSize:12,padding:6,textAlign:'center'}}>
       ▶ {video.name} · Selecciona el slide {video.page+1} para cargar el video
     </div>}
