@@ -36,6 +36,9 @@ jobs:
       - name: Check one-off reminder actions on phone, tablet and desktop
         run: node scripts/qa-unfinished-reminder.mjs
         working-directory: content-lab
+      - name: Verify edited carousel video has sound and correct crop
+        run: node scripts/qa-edited-video.mjs
+        working-directory: content-lab
   verify:
     runs-on: ubuntu-latest
     steps:
