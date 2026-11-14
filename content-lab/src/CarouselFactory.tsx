@@ -863,8 +863,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-swipe-caption"><span>DESLIZA CON EL DEDO</span><strong>{style.seamlessEnabled?'Seamless':'Normal'} · {slides.length} slides</strong></div>
       <div className="factory-swipe-rail" ref={carouselRailRef} onScroll={syncCarouselScroll}>
         {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
-          {overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
-            <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
+          {part.videoPath?
+            (activeVideo?.path===part.videoPath?
+              <video src={activeVideo.url} controls playsInline preload="metadata" style={{width:'100%',height:'100%',objectFit:'contain',background:'#101010'}} aria-label={'Video del slide '+(n+1)}/>:
+              <div className="factory-swipe-loading"><Film size={24}/><small>{n===i?(videoIssue||'Cargando video privado…'):'Video · toca este slide para verlo'}</small></div>):
+            overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
+              <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
         </div>)}
       </div>
       <div className="factory-swipe-navigation">
@@ -875,7 +879,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-swipe-thumbnails">
         {slides.map((part,n)=><button type="button" key={part.key} className={i===n?'active':''}
           onClick={()=>setCurrent(n)} aria-label={'Ir a la diapositiva '+(n+1)}>
-          {overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
+          {part.videoPath?<span aria-label="Video">▶ {n+1}</span>:
+            overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
         </button>)}
       </div>
       {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
@@ -1319,6 +1324,33 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const latestDraft=useRef({post,slides,style,ownedAssets});
   latestDraft.current={post,slides,style,ownedAssets};
   const saveLatest=()=>onSave(latestDraft.current.post);
+  const uploadSlideVideo=async(file?:File)=>{
+    if(!file||videoBusy)return;
+    const targetKey=slide.key,targetBrand=brand.id;
+    setVideoBusy(true);setVideoIssue('');
+    try{
+      const uploaded=await carouselVideoMedia.upload(file);
+      const latest=latestDraft.current;
+      if(latest.post.brandId!==targetBrand)throw Error('Cambiaste de marca durante la subida. El video privado no se añadió.');
+      const index=latest.slides.findIndex(part=>part.key===targetKey);
+      if(index<0)throw Error('El slide cambió durante la subida. Vuelve a elegirlo.');
+      const updated=latest.slides.map((part,n)=>n===index?{
+        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime
+      }:part);
+      recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
+      onChange({...latest.post,format:'Carousel',hook:updated[0].title,
+        designData:encodeCarouselDesign(updated,latest.style)});
+      clearDownloads();
+      notify('Video añadido al slide '+(index+1)+'. Guarda el carrusel para conservarlo.');
+    }catch(e){
+      const message=e instanceof Error?e.message:'No se pudo subir el video.';
+      setVideoIssue(message);notify(message);
+    }finally{setVideoBusy(false);if(videoInputRef.current)videoInputRef.current.value=''}
+  };
+  const removeSlideVideo=()=>{
+    replace({videoPath:'',videoName:'',videoMime:''});
+    setVideoIssue('');notify('Se quitó el video de este slide. Su diseño de fotos permanece intacto.');
+  };
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
     const latest=latestDraft.current;
     const nextSlides=[...latest.slides];
