@@ -37,7 +37,12 @@ assert.equal((characterGallery.match(/fileName:'(?:Nora|Eli|Pip)_[^']+\.png'/g)|
 assert.ok(characterGallery.includes('Nora_04_Surprised.png'), 'Nora surprise photo is linked');
 assert.ok(characterGallery.includes('Eli_02_Back.png'), 'Eli rear photo is linked');
 assert.ok(characterGallery.includes('Pip_02_ThreeQuarter.png'), 'Pip three-quarter photo is linked');
-assert.ok(characterGallery.includes("previewSrc=active?.url.replace"), 'private Drive images use a signed-in preview, not a /view image tag');
+assert.ok(!characterGallery.includes('<iframe'), 'iPhone gallery does not embed Google Drive iframe');
+assert.ok(characterGallery.includes('loadLittleDetoursPreviews'), 'photo sources come from owner-only Supabase table');
+assert.ok(characterGallery.includes('<img'), 'photos display inline without Google account embed');
+assert.ok(characterGallery.includes('onError={()=>setImageError(true)}'), 'images fall back safely when source unavailable');
+const sbClient = readFileSync(new URL('src/supabase-client.ts',root),'utf8');
+assert.ok(sbClient.includes("from('podcast_tld_character_sources')"), 'preview URLs are not hardcoded in public GitHub source');
 assert.ok(characterGallery.includes('Para crear después'), 'future angles and expressions remain pending');
 assert.ok(characterGallery.includes('Abrir fotografía original en Drive'), 'each image retains original Drive fallback');
 
