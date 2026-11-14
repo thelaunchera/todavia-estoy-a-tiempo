@@ -44,6 +44,17 @@ assert.ok(characterGallery.includes('onError={()=>setImageError(true)}'), 'image
 const sbClient = readFileSync(new URL('src/supabase-client.ts',root),'utf8');
 assert.ok(sbClient.includes("from('podcast_tld_character_sources')"), 'preview URLs are not hardcoded in public GitHub source');
 assert.ok(characterGallery.includes('Para crear después'), 'future angles and expressions remain pending');
+
+assert.ok(characterGallery.includes('<TheLittleDetoursExpressionBacklog'), 'all three character cards expose expression plans');
+assert.ok(characterGallery.includes('<ExpressionsSummary/>'), 'character library summarizes pending expressions');
+const expressions = readFileSync(new URL('src/youtube/character-expression-plan.ts',root),'utf8');
+const expressionsUI = readFileSync(new URL('src/TheLittleDetoursExpressionBacklog.tsx',root),'utf8');
+assert.equal((expressions.match(/origin:'drive'/g)||[]).length,14,'existing 14 Drive pending prompts are preserved');
+assert.equal((expressions.match(/origin:'new'/g)||[]).length,18,'18 distinct new expressions are added without replacing old prompts');
+assert.ok(expressions.includes('attach the approved original') || expressions.includes('Attach the approved original'), 'generation requires the original master');
+assert.ok(expressionsUI.includes('Copiar') && expressionsUI.includes('Descargar todos'),'pending expression prompts can be copied and downloaded individually');
+assert.ok(expressionsUI.includes('Sin generar'), 'unrendered expressions are never marked complete');
+
 assert.ok(characterGallery.includes('Abrir fotografía original en Google Drive'), 'each image retains original Drive fallback');
 
 const flowPrompts = readFileSync(new URL('src/youtube/google-flow-umbrella.ts',root),'utf8');
