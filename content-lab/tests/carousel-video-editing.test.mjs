@@ -118,6 +118,79 @@ test('shared video export applies its page offset after geometry normalization',
   assert.equal(Math.round(translations[0][0]-translations[1][0]),1080);
   assert.equal(translations[0][1],translations[1][1]);
 });
+
+test('video finalization times out, releases its tracks, and can be retried',async()=>{
+  const source=typescript.transpileModule(src('CarouselVideoRender.ts'),{
+    compilerOptions:{module:typescript.ModuleKind.CommonJS,target:typescript.ScriptTarget.ES2020}
+  }).outputText;
+  const quality=typescript.transpileModule(src('ExportQuality.ts'),{
+    compilerOptions:{module:typescript.ModuleKind.CommonJS,target:typescript.ScriptTarget.ES2020}
+  }).outputText;
+  let stall=true;
+  let released=0;
+  let disconnected=0;
+  let removed=0;
+  const window={setTimeout:(callback,ms)=>setTimeout(callback,ms===10_000?5:1_000),clearTimeout};
+  const track={stop:()=>{released++}};
+  const context={
+    resume:async()=>{},
+    createMediaElementSource:()=>({connect(){},disconnect(){disconnected++}}),
+    createMediaStreamDestination:()=>({stream:{getAudioTracks:()=>[track]}})
+  };
+  class Recorder {
+    static isTypeSupported(type){return type==='video/mp4'}
+    state='inactive';
+    mimeType='video/mp4';
+    start(){this.state='recording'}
+    stop(){
+      this.state='inactive';
+      if(stall)return;
+      setImmediate(()=>{
+        this.ondataavailable({data:new Blob([new Uint8Array(500)])});
+        this.onstop();
+      });
+    }
+  }
+  class FixtureVideo extends EventTarget {
+    style={};currentTime=0;duration=1;videoWidth=160;videoHeight=200;
+    set src(_){this.dispatchEvent(new Event('canplay'))}
+    async play(){this.currentTime=.96}
+    pause(){}
+    load(){}
+    removeAttribute(){}
+    remove(){removed++}
+  }
+  const canvasContext={fillRect(){},save(){},translate(){},rotate(){},
+    beginPath(){},rect(){},clip(){},drawImage(){},restore(){}};
+  const qualityModule={exports:{}};
+  vm.runInNewContext(quality,{module:qualityModule,exports:qualityModule.exports,window});
+  const renderer={exports:{}};
+  vm.runInNewContext(source,{
+    module:renderer,exports:renderer.exports,window,Blob,URL,AbortController,
+    requestAnimationFrame:setImmediate,cancelAnimationFrame:clearImmediate,
+    MediaRecorder:Recorder,MediaStream:class {getTracks(){return [track,track]}},
+    document:{body:{appendChild(){}},createElement:tag=>tag==='video'?new FixtureVideo():{
+      getContext:()=>canvasContext,captureStream:()=>({getVideoTracks:()=>[track]})
+    }},
+    require:path=>path==='./ExportQuality'?qualityModule.exports:video
+  });
+  const exportClip=progress=>renderer.exports.renderEditedCarouselVideo(
+    new Blob(['fixture']),video.DEFAULT_VIDEO_TRANSFORM,0,.98,undefined,progress,context
+  );
+  const progress=[];
+  await assert.rejects(exportClip((...args)=>progress.push(args)),/tardó demasiado en finalizar/);
+  assert.deepEqual(progress,[[.99,true]]);
+  assert.equal(released,2);
+  assert.equal(disconnected,1);
+  assert.equal(removed,1);
+  stall=false;
+  const retry=await exportClip((...args)=>progress.push(args));
+  assert.equal(retry.extension,'mp4');
+  assert.equal(retry.blob.size,500);
+  assert.deepEqual(progress.slice(1),[[.99,true],[1]]);
+  assert.equal(released,4);
+});
+
 test('the editor renders spanning videos and prevents ambiguous overlapping exports',()=>{
   const factory=src('CarouselFactory.tsx');
   const component=src('CarouselVideoLayer.tsx');

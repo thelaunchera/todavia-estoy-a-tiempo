@@ -20,8 +20,8 @@ import {isBackgroundVisible} from './BackgroundVisibility';
 import {isBowBackground} from './BowBackgrounds';
 import {isScrapbookBackground} from './ScrapbookBackgrounds';
 import {paintOriginalStickerImages} from './OriginalStickerOverlays';
-import {drawSeamlessPages,drawSeamlessCanvas,paintSeamlessTypography} from './SeamlessCarousel';
-import {sourceAwareScale} from './ExportQuality';
+import {copySeamlessPage,drawSeamlessPages,drawSeamlessCanvas,paintSeamlessTypography} from './SeamlessCarousel';
+import {sourceAwareScale,withExportTimeout} from './ExportQuality';
 import {editorialPlan,editorialRhythmForSlides} from './EditorialRhythm';
 import TouchLayerCanvas from './TouchLayerCanvas';
 import PanoramaEditor from './PanoramaEditor';
@@ -83,6 +83,8 @@ const exportableVideo=(slides:Slide[],page:number,seamless:boolean):PageVideo|nu
   );
   return matching[0]||null;
 };
+const needsVideoRender=({owner,part}:PageVideo,page:number)=>
+  owner!==page||videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd);
 const videoTime=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
 const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
@@ -466,10 +468,10 @@ async function photoAspectFromFile(file:File):Promise<number>{
  try{return await photoAspectFromSource(src);}finally{URL.revokeObjectURL(src);}
 }
 
-const canvasToPngBlob=(canvas:HTMLCanvasElement)=>new Promise<Blob>((resolve,reject)=>{
+const canvasToPngBlob=(canvas:HTMLCanvasElement)=>withExportTimeout(new Promise<Blob>((resolve,reject)=>{
   canvas.toBlob(blob=>blob&&blob.type==='image/png'
     ?resolve(blob):reject(Error('No se pudo preparar el PNG en calidad original.')),'image/png');
-});
+}),20_000,'El navegador tardó demasiado en preparar el PNG. Intenta de nuevo.');
 const filename=(post:Post,i:number,width=1080,height=1350)=>{
   const slug=(post.title||'content').normalize('NFKD').replace(/[^a-z0-9 -]/gi,'').trim().replace(/\s+/g,'-').toLowerCase()||'content';
   return slug+'-slide-'+String(i+1).padStart(2,'0')+'-'+width+'x'+height+'.png';
@@ -647,24 +649,28 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener('keydown',onEscape)};
   },[mobilePreviewOpen]);
   useEffect(()=>{setMobilePreviewOpen(false);},[brand.id]);
-  const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const [downloads,setDownloads]=useState<{page:number;name:string;url:string}[]>([]);
+  const [exportIssues,setExportIssues]=useState<{page:number;message:string}[]>([]);
   const videoInputRef=useRef<HTMLInputElement>(null);
   const [videoBusy,setVideoBusy]=useState(false);
   const [videoIssue,setVideoIssue]=useState('');
   const [videoDuration,setVideoDuration]=useState(0);
   const [videoExportProgress,setVideoExportProgress]=useState('');
   const [activeVideo,setActiveVideo]=useState<{path:string;url:string}|null>(null);
-  const downloadUrlsRef=useRef<string[]>([]);
+  const preparedFilesRef=useRef(new Map<number,{page:number;name:string;url:string}>());
+  const exportLockRef=useRef(false);
   const exportRunRef=useRef(0);
   const clearDownloads=()=>{
     exportRunRef.current++;
-    downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));
-    downloadUrlsRef.current=[];
+    preparedFilesRef.current.forEach(item=>URL.revokeObjectURL(item.url));
+    preparedFilesRef.current.clear();
     setDownloads([]);
+    setExportIssues([]);
     if(motionUrlRef.current){URL.revokeObjectURL(motionUrlRef.current);motionUrlRef.current=null;}
     setMotionDownload(null);
   };
-  useEffect(()=>()=>{downloadUrlsRef.current.forEach(url=>URL.revokeObjectURL(url));downloadUrlsRef.current=[];
+  useEffect(()=>()=>{exportRunRef.current++;
+    preparedFilesRef.current.forEach(item=>URL.revokeObjectURL(item.url));preparedFilesRef.current.clear();
     if(motionUrlRef.current)URL.revokeObjectURL(motionUrlRef.current);},[]);
   const pastHistory=useRef<string[]>([]);
   const futureHistory=useRef<string[]>([]);
@@ -710,7 +716,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const selectedVideo=focusedVideo?.part;
   const selectedVideoOwner=focusedVideo?.owner??i;
   const currentVideoTransform=normalizeVideoTransform(selectedVideo?.videoTransform);
-  useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[selectedVideo?.videoPath]);
+  useEffect(()=>{setVideoDuration(0);},[selectedVideo?.videoPath]);
   // Keep a spanning clip loaded while navigating either side of the seam.
   useEffect(()=>{
     const path=selectedVideo?.videoPath;
@@ -783,12 +789,19 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(part.description.length>210)result.push('Slide '+(n+1)+': texto de apoyo largo; podría quedar cortado en el PNG. Usa «Dividir texto».');
     return result;
   });
+  const seamlessOptions=(outputScale:number)=>({
+    backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,
+    accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,
+    layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,
+    editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,
+    usePageBackgrounds:style.perSlideBackgrounds,outputScale
+  });
   const renderAllSlides=async(pixelScale=1)=>{
     const required=slides.flatMap(part=>[part.assetId,part.backgroundImageId,...part.stickerIds||[]]);
     required.push(...(style.panoramaLayers||[]).filter(layer=>layer.kind==='photo'||layer.kind==='sticker').map(layer=>layer.assetId));
     if(style.seamlessEnabled)required.push(style.seamlessAssetId);
     if(required.some(id=>id&&!images[id]))throw Error('Una foto o sticker todavía está cargando. Espera antes de descargar.');
-    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,{backgroundId:style.seamlessBackgroundId,assetId:style.seamlessAssetId,accent:style.accentSource==='reference'?style.referenceColor||brand.color:brand.color,layers:style.panoramaLayers,font:style.font,freeCanvas:style.freeCanvas,editorialRhythm:style.editorialRhythm,canvasColor:style.canvasColor,canvasGradient:style.canvasGradient,usePageBackgrounds:style.perSlideBackgrounds,outputScale:pixelScale});
+    if(style.seamlessEnabled)return drawSeamlessPages(slides,brand,images,seamlessOptions(pixelScale));
     const hasBehind=(style.panoramaLayers||[]).some(layer=>layer.placement==='behind-text');
     // Recompose only when an element is actually sent backward. The flat
     // preview otherwise stays on the existing fast rendering path.
@@ -1694,21 +1707,29 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     const path=match?.part.videoPath;
     if(!match||!path)throw Error('No hay video visible en este slide.');
     const {owner,part}=match;
-    const original=await carouselVideoMedia.download(path);
-    if(owner===n&&!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
+    setVideoExportProgress('Cargando video del slide '+(n+1)+'…');
+    const original=await withExportTimeout(carouselVideoMedia.download(path),60_000,
+      'El video tardó demasiado en cargar. Revisa tu conexión e intenta de nuevo.');
+    if(!needsVideoRender(match,n))
       return {blob:original,name:videoFilename(n,path)};
     ensureSourceImages();
     let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=preparedBackground||null;
     try{
       if(!one&&independentExport())
         one=await drawSlide(slides[n],n,slides.length,brand,images,style,false,1);
-      else if(!one){
+      else if(!one&&style.seamlessEnabled){
+        const wide=await drawSeamlessCanvas(slides,brand,images,seamlessOptions(1));
+        try{one=copySeamlessPage(wide,n)}
+        finally{wide.width=1;wide.height=1}
+      }else if(!one){
         pages=await renderAllSlides(1);
         one=pages[n];
       }
       const processed=await renderEditedCarouselVideo(original,
         part.videoTransform,part.videoTrimStart||0,part.videoTrimEnd||0,one,
-        ratio=>setVideoExportProgress('Procesando video '+(n+1)+' · '+Math.round(ratio*100)+'%'),
+        (ratio,finalizing)=>setVideoExportProgress(finalizing||ratio===1
+          ?'Finalizando video del slide '+(n+1)+'…'
+          :'Procesando video del slide '+(n+1)+' · '+Math.round(ratio*100)+'%'),
         audioContext,videoOffsetForPage(owner,n));
       return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
     }finally{
@@ -1719,17 +1740,18 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // Warm audio on the direct tap (Safari requires user activation).
   const startVideoAudio=()=>{
     if(typeof AudioContext==='undefined')return undefined;
-    const ctx=new AudioContext();void ctx.resume();
-    return ctx;
+    try{
+      const ctx=new AudioContext();void ctx.resume().catch(()=>{});
+      return ctx;
+    }catch{return undefined}
   };
   const exportOne=async(n=i)=>{
-    if(busy)return;
+    if(busy||exportLockRef.current)return;
     let media:PageVideo|null=null;
     try{media=exportableVideo(slides,n,style.seamlessEnabled);}
     catch(error){showError(error);return}
-    const audio=media&&(media.owner!==n||videoHasEdits(
-      media.part.videoTransform,media.part.videoTrimStart,media.part.videoTrimEnd))
-      ?startVideoAudio():undefined;
+    const audio=media&&needsVideoRender(media,n)?startVideoAudio():undefined;
+    exportLockRef.current=true;
     setBusy('export');setVideoExportProgress('');
     try{
       if(media){
@@ -1756,60 +1778,104 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         else{canvas.width=1;canvas.height=1}
       }
       notify('Slide '+(n+1)+' descargado como PNG de alta resolución.');
-    }catch(e){showError(e)}finally{setBusy('');setVideoExportProgress('');if(audio)void audio.close().catch(()=>{});}
+    }catch(e){showError(e)}finally{
+      exportLockRef.current=false;
+      setBusy('');setVideoExportProgress('');if(audio)void audio.close().catch(()=>{});
+    }
   };
   const exportAll=async()=>{
-    if(busy)return;
-    const hasEditedVideos=slides.some((part,owner)=>!!part.videoPath&&(
-      videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd)
-      ||(style.seamlessEnabled&&videoVisiblePages(owner,part.videoTransform,slides.length,true).some(n=>n!==owner))));
-    const audio=hasEditedVideos?startVideoAudio():undefined;
-    const notes=await inspectImageQuality();
-    setImageQualityNotes(notes);
-    const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
-    if((longText||notes.length>0)&&!window.confirm(
-      (longText?'Algunos textos podrían cortarse en el PNG. ':'')+
-      (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
-      '¿Exportar de todas formas?')){
-      if(audio)void audio.close().catch(()=>{});
-      return;
-    }
+    if(busy||exportLockRef.current)return;
+    exportLockRef.current=true;
+    const token=++exportRunRef.current;
+    const active=()=>exportRunRef.current===token;
+    const remaining=slides.map((_,n)=>n).filter(n=>!preparedFilesRef.current.has(n));
+    const pngPages=remaining.filter(n=>!pageVideos(slides,n,style.seamlessEnabled).length);
+    const clipPages=remaining.filter(n=>pageVideos(slides,n,style.seamlessEnabled).length);
+    const editedPages=clipPages.filter(n=>pageVideos(slides,n,style.seamlessEnabled).some(media=>needsVideoRender(media,n)));
+    const audio=editedPages.length?startVideoAudio():undefined;
     setBusy('all');
-    const token=exportRunRef.current+1;
-    exportRunRef.current=token;
-    const result:{name:string,url:string}[]=[];
-    let pages:HTMLCanvasElement[]|null=null;
+    const addFile=(page:number,blob:Blob,name:string)=>{
+      if(!active())return;
+      preparedFilesRef.current.set(page,{page,name,url:URL.createObjectURL(blob)});
+      setDownloads([...preparedFilesRef.current.values()].sort((left,right)=>left.page-right.page));
+    };
+    const reportIssue=(page:number,error:unknown)=>{
+      if(active())setExportIssues(issues=>[...issues,{page,message:error instanceof Error?error.message:'Intenta preparar el archivo de nuevo.'}]);
+    };
+    const videoBackgrounds=new Map<number,HTMLCanvasElement>();
+    const copyVideoBackgrounds=(wide:HTMLCanvasElement)=>{
+      for(const n of editedPages){
+        try{videoBackgrounds.set(n,copySeamlessPage(wide,n,1))}
+        catch{/* The single-slide exporter can retry creating the background. */}
+      }
+    };
     try{
-      ensureSourceImages();
-      const quality=await qualityForExport();
-      if(!independentExport())pages=await renderAllSlides(quality);
-      // Ordinary carousels export one slide at a time. This avoids holding
-      // eight uncompressed 1080×1350 canvases in mobile Safari memory.
-      for(let n=0;n<slides.length;n++){
-        if(exportableVideo(slides,n,style.seamlessEnabled)){
-          const media=await produceVideoFile(n,audio,pages?.[n]);
-          result.push({name:media.name,url:URL.createObjectURL(media.blob)});
-          continue;
-        }
-        const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
+      if(pngPages.length){
+        const notes=await inspectImageQuality();
+        if(!active())return;
+        setImageQualityNotes(notes);
+        const longText=slides.some(item=>item.description.trim().length>210||item.title.trim().length>155);
+        if((longText||notes.length>0)&&!window.confirm(
+          (longText?'Algunos textos podrían cortarse en el PNG. ':'')+
+          (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
+          '¿Exportar de todas formas?'))return;
+      }
+      setExportIssues([]);
+      // Release each PNG canvas before recording any video on mobile.
+      if(pngPages.length){
+        setVideoExportProgress('Preparando imágenes…');
+        let wide:HTMLCanvasElement|null=null;
+        let pages:HTMLCanvasElement[]|null=null;
         try{
-          const blob=await canvasToPngBlob(canvas);
-          result.push({name:filename(post,n,canvas.width,canvas.height),url:URL.createObjectURL(blob)});
-        }finally{canvas.width=1;canvas.height=1}
+          ensureSourceImages();
+          const quality=await qualityForExport();
+          if(style.seamlessEnabled)wide=await drawSeamlessCanvas(slides,brand,images,seamlessOptions(quality));
+          else if(!independentExport())pages=await renderAllSlides(quality);
+          for(const n of pngPages){
+            if(!active())return;
+            let canvas:HTMLCanvasElement|undefined;
+            try{
+              canvas=wide?copySeamlessPage(wide,n):pages?.[n]||
+                await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
+              const blob=await canvasToPngBlob(canvas);
+              addFile(n,blob,filename(post,n,canvas.width,canvas.height));
+            }catch(error){reportIssue(n,error)}
+            finally{if(canvas){canvas.width=1;canvas.height=1}}
+          }
+          if(wide)copyVideoBackgrounds(wide);
+        }catch(error){pngPages.forEach(n=>reportIssue(n,error))}
+        finally{
+          if(wide){wide.width=1;wide.height=1}
+          pages?.forEach(canvas=>{canvas.width=1;canvas.height=1});
+        }
       }
-      if(exportRunRef.current!==token){
-        result.forEach(item=>URL.revokeObjectURL(item.url));
-        return;
+      if(!active())return;
+      if(editedPages.length&&style.seamlessEnabled&&!videoBackgrounds.size){
+        setVideoExportProgress('Preparando fondos de video…');
+        try{
+          ensureSourceImages();
+          const wide=await drawSeamlessCanvas(slides,brand,images,seamlessOptions(1));
+          try{copyVideoBackgrounds(wide)}
+          finally{wide.width=1;wide.height=1}
+        }catch{/* Individual clip errors are reported below. */}
       }
-      clearDownloads();
-      downloadUrlsRef.current=result.map(item=>item.url);
-      setDownloads(result);
-      notify('Archivos del carrusel preparados. Descarga los PNG y los videos en orden.');
-    }catch(e){
-      result.forEach(item=>URL.revokeObjectURL(item.url));
-      showError(e);
+      for(const n of clipPages){
+        if(!active())return;
+        const background=videoBackgrounds.get(n);
+        try{
+          const media=await produceVideoFile(n,audio,background);
+          addFile(n,media.blob,media.name);
+        }catch(error){reportIssue(n,error)}
+        finally{
+          if(background){background.width=1;background.height=1;videoBackgrounds.delete(n)}
+        }
+      }
+      if(active()&&preparedFilesRef.current.size===slides.length)
+        notify('Archivos del carrusel preparados. Descárgalos en orden.');
+    }catch(e){if(active())showError(e)
     }finally{
-      pages?.forEach(page=>{page.width=1;page.height=1});
+      videoBackgrounds.forEach(canvas=>{canvas.width=1;canvas.height=1});
+      exportLockRef.current=false;
       setBusy('');setVideoExportProgress('');
       if(audio)void audio.close().catch(()=>{});
     }
@@ -2392,12 +2458,18 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       {videoExportProgress&&<p className="factory-video-progress" role="status">{videoExportProgress}</p>}
       <div className="factory-canvas-exports">
         <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y videos editados como MP4/WebM, con el sonido y el encuadre aplicados.</span></div>
-        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy||downloads.length===slides.length}>
+          {busy==='all'?'Preparando archivos…':downloads.length===slides.length?'Archivos listos':exportIssues.length?'Reintentar pendientes':'Preparar mis archivos'} <Download size={17}/>
+        </button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
         <strong><Check size={15}/> {downloads.length} archivos listos</strong>
         <p>Descárgalos individualmente y súbelos en el orden de los slides.</p>
         {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> {item.name}</a>)}
+      </div>}
+      {exportIssues.length>0&&<div role="alert" className="factory-video-progress">
+        <strong>Algunos archivos quedaron pendientes</strong>
+        <ul>{exportIssues.map(issue=><li key={issue.page}>Slide {issue.page+1} · {issue.message}</li>)}</ul>
       </div>}
 
       <div className="factory-new-carousel" aria-label={locale==='es'?'Comenzar otro carrusel':'Start another carousel'}>

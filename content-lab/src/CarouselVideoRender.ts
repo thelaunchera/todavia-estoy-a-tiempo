@@ -1,25 +1,25 @@
 import {drawTransformedVideo,normalizeVideoTransform,videoTrim,type CarouselVideoTransform} from './CarouselVideoTransform';
+import {withExportTimeout} from './ExportQuality';
 
 export type EditedCarouselVideo={blob:Blob;extension:'mp4'|'webm'};
-const loadVideo=(video:HTMLVideoElement)=>new Promise<void>((resolve,reject)=>{
-  if(video.readyState>=1){resolve();return}
-  const finish=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('error',failed)};
-  const ok=()=>{finish();resolve()};
-  const failed=()=>{finish();reject(Error('No se pudo leer el archivo de video. Prueba a convertirlo a MP4.'))};
-  video.addEventListener('loadedmetadata',ok,{once:true});
-  video.addEventListener('error',failed,{once:true});
-});
-const seekVideo=async(video:HTMLVideoElement,position:number)=>{
-  if(Math.abs(video.currentTime-position)<.06)return;
-  await new Promise<void>((resolve,reject)=>{
-    const finish=()=>{video.removeEventListener('seeked',ok);video.removeEventListener('error',failed)};
-    const ok=()=>{finish();resolve()};
-    const failed=()=>{finish();reject(Error('No se pudo recortar el inicio de este video.'))};
-    video.addEventListener('seeked',ok,{once:true});
-    video.addEventListener('error',failed,{once:true});
-    video.currentTime=position;
-  });
-};
+const MEDIA_READY_TIMEOUT=12_000;
+const VIDEO_FINALIZE_TIMEOUT=10_000;
+
+async function waitForVideo(
+  video:HTMLVideoElement,event:'canplay'|'seeked',message:string,begin:()=>void
+):Promise<void>{
+  const listeners=new AbortController();
+  try{
+    await withExportTimeout(new Promise<void>((resolve,reject)=>{
+      const options={once:true,signal:listeners.signal};
+      video.addEventListener(event,()=>resolve(),options);
+      video.addEventListener('error',()=>reject(Error(message)),options);
+      begin();
+    }),MEDIA_READY_TIMEOUT,message);
+  }finally{
+    listeners.abort();
+  }
+}
 export function supportsCarouselVideoEditing():boolean{
   if(typeof window==='undefined')return false;
   const c=document.createElement('canvas');
@@ -35,7 +35,7 @@ export function supportsCarouselVideoEditing():boolean{
 export async function renderEditedCarouselVideo(
  blob:Blob,raw:unknown,start:number,end:number,
  background:HTMLCanvasElement|undefined,
- progress?:(ratio:number)=>void,
+ progress?:(ratio:number,finalizing?:boolean)=>void,
  audioContext?:AudioContext,
  pageOffset=0
 ):Promise<EditedCarouselVideo>{
@@ -51,28 +51,15 @@ export async function renderEditedCarouselVideo(
   if(!ctx)throw Error('No se pudo preparar el lienzo para exportar el video.');
   const original=URL.createObjectURL(blob);
   const video=document.createElement('video');
-  video.src=original;video.preload='auto';video.playsInline=true;video.muted=false;
+  video.preload='auto';video.playsInline=true;video.muted=false;
   video.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:.001;pointer-events:none;z-index:-1';
   document.body.appendChild(video);
-  let capture:MediaStream|null=null,recorder:MediaRecorder|null=null,frame=0;
-  const context=audioContext||new AudioContext();
-  let finalized=false;
+  let capture:MediaStream|null=null,recorder:MediaRecorder|null=null,frame=0,timer:number|undefined;
+  let context=audioContext;
+  let audioSource:MediaElementAudioSourceNode|undefined;
   try{
-    await loadVideo(video);
-    // iOS can dispatch loadedmetadata before its first frame is decodable.
-    // Drawing at HAVE_METADATA would fail with InvalidStateError.
-    if(video.readyState<2)await new Promise<void>((resolve,reject)=>{
-      const finish=()=>{
-        video.removeEventListener('loadeddata',ready);
-        video.removeEventListener('canplay',ready);
-        video.removeEventListener('error',failed);
-      };
-      const ready=()=>{finish();resolve()};
-      const failed=()=>{finish();reject(Error('El video no pudo cargar su primer cuadro para el recorte.'))};
-      video.addEventListener('loadeddata',ready,{once:true});
-      video.addEventListener('canplay',ready,{once:true});
-      video.addEventListener('error',failed,{once:true});
-    });
+    // Wait for a decodable frame before asking Safari to draw it.
+    await waitForVideo(video,'canplay','No se pudo abrir el video. Intenta de nuevo o prueba con un MP4.',()=>{video.src=original});
     if(!video.videoWidth||!video.videoHeight||!Number.isFinite(video.duration))
       throw Error('No se pudo leer la duración o dimensiones del video.');
     const trim=videoTrim(start,end,video.duration);
@@ -80,7 +67,8 @@ export async function renderEditedCarouselVideo(
     if(trim.end-trim.start>90)throw Error(
       'Para exportar el video editado desde iPhone o iPad, recorta este clip a 90 segundos o menos.'
     );
-    await seekVideo(video,trim.start);
+    if(Math.abs(video.currentTime-trim.start)>=.06)
+      await waitForVideo(video,'seeked','No se pudo abrir el recorte del video. Intenta de nuevo.',()=>{video.currentTime=trim.start});
     const transform=normalizeVideoTransform(raw);
     const draw=()=>{
       ctx.fillStyle='#FAF8F3';ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -88,55 +76,73 @@ export async function renderEditedCarouselVideo(
       drawTransformedVideo(ctx,video,transform,canvas.width,canvas.height,pageOffset);
     };
     draw();
-    await context.resume();
+    context??=new AudioContext();
+    await withExportTimeout(context.resume(),MEDIA_READY_TIMEOUT,'No se pudo activar el sonido. Toca exportar de nuevo.');
     // WebKit cannot captureStream() an HTMLVideoElement, so route its audio
     // through a MediaElementAudioSourceNode instead of relying on that API.
-    const audioSource=context.createMediaElementSource(video);
     const audioDestination=context.createMediaStreamDestination();
+    audioSource=context.createMediaElementSource(video);
     audioSource.connect(audioDestination);
     const canvasStream=canvas.captureStream(30);
     capture=new MediaStream([
       ...canvasStream.getVideoTracks(),
       ...audioDestination.stream.getAudioTracks()
     ]);
-    recorder=new MediaRecorder(capture,{mimeType:mime,videoBitsPerSecond:4_500_000});
+    const encoder=new MediaRecorder(capture,{mimeType:mime,videoBitsPerSecond:4_500_000});
+    recorder=encoder;
     const pieces:Blob[]=[];
-    const saved=new Promise<Blob>((resolve,reject)=>{
-      if(!recorder)return reject(Error('No se pudo iniciar la exportación.'));
-      recorder.ondataavailable=e=>{if(e.data?.size)pieces.push(e.data)};
-      recorder.onerror=()=>reject(Error('El navegador interrumpió la exportación del video.'));
-      recorder.onstop=()=>{
-        const out=new Blob(pieces,{type:recorder?.mimeType||mime});
-        if(out.size<400)reject(Error('El navegador no produjo un video válido. No se descargará un archivo vacío.'));
-        else resolve(out);
+    const out=await new Promise<Blob>((resolve,reject)=>{
+      let finishing=false;
+      const deadline=(ms:number,message:string)=>{
+        window.clearTimeout(timer);
+        timer=window.setTimeout(()=>reject(Error(message)),ms);
       };
-    });
-    recorder.start(250);
-    try{await video.play()}catch(e){
-      throw Error('Safari bloqueó la reproducción necesaria para exportar. Toca Exportar de nuevo desde esta página.');
-    }
-    await new Promise<void>((resolve,reject)=>{
+      encoder.ondataavailable=e=>{if(e.data.size)pieces.push(e.data)};
+      encoder.onerror=()=>reject(Error('El navegador interrumpió la exportación del video. Intenta de nuevo.'));
+      encoder.onstop=()=>{
+        const file=new Blob(pieces,{type:encoder.mimeType||mime});
+        if(!finishing||file.size<400)reject(Error('El navegador no completó el archivo de video. Intenta de nuevo.'));
+        else resolve(file);
+      };
       const tick=()=>{
-        if(video.error){reject(Error('No se pudo reproducir este video mientras se exportaba.'));return;}
-        try{draw()}catch{reject(Error('No se pudo procesar uno de los cuadros del video.'));return}
-        progress?.(Math.min(1,(video.currentTime-trim.start)/Math.max(.1,trim.end-trim.start)));
-        if(video.ended||video.currentTime>=trim.end-.035){resolve();return}
-        frame=requestAnimationFrame(tick);
+        try{
+          if(video.error)throw Error('No se pudo reproducir el video mientras se exportaba.');
+          draw();
+          if(video.ended||video.currentTime>=trim.end-.035){
+            finishing=true;
+            progress?.(.99,true);
+            deadline(VIDEO_FINALIZE_TIMEOUT,'El navegador tardó demasiado en finalizar el video. Intenta de nuevo.');
+            encoder.stop();
+            return;
+          }
+          progress?.(Math.min(.99,Math.max(0,(video.currentTime-trim.start)/(trim.end-trim.start))));
+          frame=requestAnimationFrame(tick);
+        }catch(error){reject(error)}
       };
-      frame=requestAnimationFrame(tick);
+      // Export one complete recording and leave its sources live through onstop.
+      encoder.start();
+      deadline(MEDIA_READY_TIMEOUT,'El video no empezó a reproducirse. Toca exportar de nuevo.');
+      void video.play().then(()=>{
+        if(encoder.state!=='recording')return;
+        deadline((trim.end-trim.start)*1000+MEDIA_READY_TIMEOUT,'Se interrumpió la reproducción. Mantén el editor abierto e intenta de nuevo.');
+        frame=requestAnimationFrame(tick);
+      },()=>reject(Error('El navegador bloqueó la reproducción. Toca exportar de nuevo.')));
     });
-    video.pause();
-    if(recorder.state==='recording')recorder.stop();
-    const out=await saved;
-    finalized=true;
     progress?.(1);
-    return {blob:out,extension:(recorder.mimeType||mime).startsWith('video/mp4')?'mp4':'webm'};
+    return {blob:out,extension:(encoder.mimeType||mime).startsWith('video/mp4')?'mp4':'webm'};
   }finally{
+    window.clearTimeout(timer);
     cancelAnimationFrame(frame);
+    if(recorder){
+      recorder.ondataavailable=null;
+      recorder.onerror=null;
+      recorder.onstop=null;
+      if(recorder.state!=='inactive')recorder.stop();
+    }
     video.pause();
-    if(recorder&&!finalized&&recorder.state==='recording')recorder.stop();
+    audioSource?.disconnect();
     capture?.getTracks().forEach(track=>track.stop());
-    if(!audioContext)await context.close().catch(()=>{});
+    if(!audioContext&&context)void context.close().catch(()=>{});
     video.removeAttribute('src');video.load();video.remove();
     URL.revokeObjectURL(original);
     canvas.width=1;canvas.height=1;

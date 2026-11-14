@@ -26,16 +26,18 @@ const words=(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,width:nu
  ctx.fillStyle=color;ctx.font='700 '+Math.round(size)+'px '+fontName;ctx.textBaseline='top';
  lines.slice(0,maxLines).forEach((line,i)=>ctx.fillText(line,x,y+i*size*1.13));
 };
+export function copySeamlessPage(wide:HTMLCanvasElement,index:number,scale=wide.height/H):HTMLCanvasElement{
+ const originalScale=wide.height/H;
+ const page=document.createElement('canvas');page.width=W*scale;page.height=H*scale;
+ const ctx=page.getContext('2d');if(!ctx)throw Error('No se pudo cortar el carrusel.');
+ ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ ctx.drawImage(wide,index*W*originalScale,0,W*originalScale,wide.height,0,0,page.width,page.height);
+ return page;
+}
+
 const splitIntoPages=(wide:HTMLCanvasElement,count:number)=>{
- const scale=wide.height/H,output:HTMLCanvasElement[]=[];
- for(let i=0;i<count;i++){
-  const c=document.createElement('canvas');c.width=W*scale;c.height=H*scale;
-  const ctx=c.getContext('2d');if(!ctx)throw Error('No se pudo cortar el carrusel.');
-  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(wide,i*W*scale,0,W*scale,H*scale,0,0,c.width,c.height);output.push(c);
- }
- wide.width=1;wide.height=1;
- return output;
+ try{return Array.from({length:count},(_,index)=>copySeamlessPage(wide,index))}
+ finally{wide.width=1;wide.height=1}
 };
 
 /** Paints transparent typography over back-layer photos (matches the original layout). */

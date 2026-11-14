@@ -3,6 +3,18 @@
  * Pixel dimensions are matched to the largest available original, within
  * a per-canvas safety limit for mobile Safari.
  */
+export async function withExportTimeout<T>(work:Promise<T>,milliseconds:number,message:string):Promise<T>{
+  let timer:number|undefined;
+  try{
+    return await Promise.race([
+      work,
+      new Promise<never>((_,reject)=>{timer=window.setTimeout(()=>reject(Error(message)),milliseconds)})
+    ]);
+  }finally{
+    window.clearTimeout(timer);
+  }
+}
+
 export async function sourceAwareScale(
   sources:(string|undefined)[], baseWidth:number, baseHeight:number, maxScale=4,
 ):Promise<number>{
