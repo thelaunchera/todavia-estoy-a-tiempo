@@ -1583,6 +1583,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           assetId:previous.assetId,photoPosition:previous.photoPosition,
           stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions,
           frameStyle:previous.frameStyle,
+          videoPath:previous.videoPath,videoName:previous.videoName,videoMime:previous.videoMime,
         }:item;
       });
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
