@@ -6,7 +6,7 @@
 import {readFileSync,writeFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
-import {execFileSync} from 'node:child_process';
+import {execFileSync,spawnSync} from 'node:child_process';
 import {build} from 'esbuild';
 import {chromium} from 'playwright';
 
@@ -55,6 +55,13 @@ try{
  if(!video||video.width!==1080||video.height!==1350)
    throw Error('Edited file lost its 1080x1350 video frame');
  if(!audio)throw Error('Edited output lost the source video audio track');
+ const measured=spawnSync('ffmpeg',['-nostdin','-hide_banner','-i',out,
+   '-vn','-af','volumedetect','-f','null','-'],{encoding:'utf8',timeout:15000});
+ if(measured.status!==0)throw Error('Unable to decode exported audio for QA');
+ const loudness=measured.stderr.match(/mean_volume:\s*(-?[\d.]+|-inf)\s*dB/);
+ if(!loudness||!Number.isFinite(Number(loudness[1]))||Number(loudness[1]) < -70)
+   throw Error('Edited video has an audio track but the original 440Hz soundtrack became silent');
+
  // Compare frame pixels: the ivory artboard must survive the composite,
  // while the video has visible pixels inside the transformed rectangle.
  const frame=join(work,'frame.png');
