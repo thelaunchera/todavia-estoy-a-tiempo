@@ -2,6 +2,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api, carouselVideoMedia } from './platform/client';
+import {DEFAULT_VIDEO_TRANSFORM,normalizeVideoTransform,videoHasEdits,videoTrim,bound,type CarouselVideoTransform} from './CarouselVideoTransform';
+import {renderEditedCarouselVideo} from './CarouselVideoRender';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy, Film
@@ -48,7 +50,9 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string;
+  videoTransform?:CarouselVideoTransform;videoTrimStart?:number;videoTrimEnd?:number;
+  titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -110,6 +114,9 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           videoPath:typeof s.videoPath==='string'?s.videoPath.slice(0,260):'',
           videoName:typeof s.videoName==='string'?s.videoName.slice(0,160):'',
           videoMime:typeof s.videoMime==='string'?s.videoMime.slice(0,50):'',
+          videoTransform:normalizeVideoTransform(s.videoTransform),
+          videoTrimStart:typeof s.videoTrimStart==='number'&&Number.isFinite(s.videoTrimStart)?Math.max(0,s.videoTrimStart):0,
+          videoTrimEnd:typeof s.videoTrimEnd==='number'&&Number.isFinite(s.videoTrimEnd)?Math.max(0,s.videoTrimEnd):0,
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
@@ -628,6 +635,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const videoInputRef=useRef<HTMLInputElement>(null);
   const [videoBusy,setVideoBusy]=useState(false);
   const [videoIssue,setVideoIssue]=useState('');
+  const [videoDuration,setVideoDuration]=useState(0);
+  const [videoExportProgress,setVideoExportProgress]=useState('');
   const [activeVideo,setActiveVideo]=useState<{path:string;url:string}|null>(null);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
@@ -680,6 +689,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[slide.videoPath]);
   // Load only the active clip, not every large file in the carousel.
   useEffect(()=>{
     const path=slide.videoPath;
@@ -695,6 +705,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   },[slide.videoPath,brand.id]);
   const videoPages=slides.flatMap((part,index)=>part.videoPath?[{
     page:index,name:part.videoName||'Video del carrusel',
+    transform:normalizeVideoTransform(part.videoTransform),
+    trimStart:part.videoTrimStart||0,trimEnd:part.videoTrimEnd||0,
     src:activeVideo?.path===part.videoPath?activeVideo.url:undefined
   }]:[]);
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
@@ -1335,7 +1347,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       const index=latest.slides.findIndex(part=>part.key===targetKey);
       if(index<0)throw Error('El slide cambió durante la subida. Vuelve a elegirlo.');
       const updated=latest.slides.map((part,n)=>n===index?{
-        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime
+        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime,
+        videoTransform:{...DEFAULT_VIDEO_TRANSFORM},videoTrimStart:0,videoTrimEnd:0
       }:part);
       recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
       onChange({...latest.post,format:'Carousel',hook:updated[0].title,
@@ -1347,8 +1360,22 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       setVideoIssue(message);notify(message);
     }finally{setVideoBusy(false);if(videoInputRef.current)videoInputRef.current.value=''}
   };
+  const updateSlideVideo=(page:number,patch:Partial<Slide>)=>{
+    const latest=latestDraft.current;
+    if(page<0||page>=latest.slides.length||!latest.slides[page]?.videoPath)return;
+    recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
+    const updated=latest.slides.map((part,n)=>n===page?{...part,...patch}:part);
+    onChange({...latest.post,format:'Carousel',hook:updated[0].title,
+      designData:encodeCarouselDesign(updated,latest.style)});
+    clearDownloads();
+  };
+  const updateVideoGeometry=(page:number,transform:CarouselVideoTransform)=>{
+    updateSlideVideo(page,{videoTransform:normalizeVideoTransform(transform)});
+  };
+  const updateCurrentVideo=(patch:Partial<Slide>)=>updateSlideVideo(i,patch);
   const removeSlideVideo=()=>{
-    replace({videoPath:'',videoName:'',videoMime:''});
+    replace({videoPath:'',videoName:'',videoMime:'',
+      videoTransform:undefined,videoTrimStart:0,videoTrimEnd:0});
     setVideoIssue('');notify('Se quitó el video de este slide. Su diseño de fotos permanece intacto.');
   };
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
@@ -1584,6 +1611,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions,
           frameStyle:previous.frameStyle,
           videoPath:previous.videoPath,videoName:previous.videoName,videoMime:previous.videoMime,
+          videoTransform:previous.videoTransform,videoTrimStart:previous.videoTrimStart,videoTrimEnd:previous.videoTrimEnd,
         }:item;
       });
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
@@ -1887,6 +1915,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         onChange={event=>{const file=event.target.files?.[0];event.target.value='';void uploadSlideVideo(file)}}/>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
         onChooseVideo={()=>videoInputRef.current?.click()} videoUploading={videoBusy} videoPages={videoPages}
+        onVideoChange={updateVideoGeometry}
         pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
