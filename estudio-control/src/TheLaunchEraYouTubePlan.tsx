@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Camera, Check, Clapperboard, Copy, Film, FolderOpen, Image, Music2, PlayCircle, Sparkles, Video } from 'lucide-react';
 import TheLittleDetoursCharacters from './TheLittleDetoursCharacters';
+import TheLittleDetoursFlow from './TheLittleDetoursFlow';
 import './the-launch-era-youtube-plan.css';
 
 // Current YouTube editorial plan, 14 November 2026.
@@ -37,13 +38,13 @@ const pilotBrief = [
   'THE LAUNCH ERA · THE LITTLE DETOURS',
   'Pilot: The Umbrella Thief',
   'Cast: Nora, Eli, Pip',
-  'Target: approximately 40 seconds',
+  'Target: approximately 42 seconds (7 connected segments of about six seconds).',
   'Format: visual storytelling, expressive gestures, no dialogue and no lip-sync.',
   'Story: stolen umbrella → rain chase → scattered oranges → unexpected encounter → tender beat → mysterious key.',
-  'Production: Higgsfield only for character stills, scene stills and animation.',
-  'Continuity: use each approved character master reference, keep facial identity, proportions and wardrobe consistent, use distinct shots rather than morphing between different frames.',
+  'Production: Google Flow · Omni Flash 1.2. Animate the first clip from approved references, then Extend the same clip through all seven beats when available. No jump cuts.',
+  'Continuity: one uninterrupted tracking shot, steady environment, stable face and wardrobe, exactly four oranges, yellow umbrella, red bandana, key revealed only at the end. Never reset the camera.',
   'Audio: original music and sound effects; no spoken lines.',
-  'Status: character masters initiated; more views and scene assets still pending. Do not mark video as rendered until verified.'
+  'Status: all seven Google Flow prompts prepared; character reference images and actual rendered footage must be verified separately.'
 ].join('\n');
 
 export default function TheLaunchEraYouTubePlan() {
@@ -77,14 +78,15 @@ export default function TheLaunchEraYouTubePlan() {
         <h3>The Little Detours</h3>
         <p>Personajes principales: <strong>Nora · Eli · Pip</strong>. Las imágenes maestras deben mantenerse consistentes en todas las escenas.</p>
       </div>
-      <span className="tle-yt-status">Producción iniciada en Higgsfield</span>
+      <span className="tle-yt-status">Google Flow · prompts preparados</span>
     </section>
 
     <TheLittleDetoursCharacters />
+    <TheLittleDetoursFlow />
 
     <section className="tle-yt-grid">
       <article className="tle-yt-card tle-yt-pilot">
-        <div className="tle-yt-card-head"><span><PlayCircle size={17}/> EPISODIO 01 · PILOTO</span><small>≈ 40 segundos</small></div>
+        <div className="tle-yt-card-head"><span><PlayCircle size={17}/> EPISODIO 01 · PILOTO</span><small>≈ 42 segundos</small></div>
         <h4>The Umbrella Thief</h4>
         <p>Un paraguas desaparece y empieza una persecución bajo la lluvia. Unas naranjas, un encuentro inesperado y una llave misteriosa conectan esta historia con la siguiente.</p>
         <div className="tle-yt-actions">
@@ -92,9 +94,9 @@ export default function TheLaunchEraYouTubePlan() {
         </div>
       </article>
       <article className="tle-yt-card">
-        <div className="tle-yt-card-head"><span><Camera size={17}/> REFERENCIAS DE HIGGSFIELD</span></div>
+        <div className="tle-yt-card-head"><span><Camera size={17}/> REFERENCIAS DE PERSONAJES</span></div>
         <h4>Nora, Eli y Pip</h4>
-        <p>Según el último registro de producción: tres imágenes maestras individuales iniciadas y referencias guardadas; vistas adicionales pendientes. Dos generaciones encontraron un límite temporal.</p>
+        <p>Las imágenes maestras iniciadas en Higgsfield se conservan como referencias. La animación nueva se realizará en Google Flow; las fotos deben verificarse en Drive antes de enlazarlas aquí.</p>
         <p className="tle-yt-muted"><Image size={16}/> Enlazar las imágenes aprobadas cuando estén disponibles. No se duplican ni se presentan como entregadas aquí.</p>
       </article>
     </section>
@@ -114,16 +116,16 @@ export default function TheLaunchEraYouTubePlan() {
     </section>
 
     <section className="tle-yt-card">
-      <div className="tle-yt-card-head"><span><Sparkles size={17}/> PRODUCCIÓN ACTUAL · HIGGSFIELD</span></div>
-      <h4>Orden del trabajo</h4>
+      <div className="tle-yt-card-head"><span><Sparkles size={17}/> CONTINUIDAD · REVISIÓN FINAL</span></div>
+      <h4>Antes de aprobar cada segmento</h4>
       <ol className="tle-yt-workflow">
-        <li><strong>Personajes:</strong> terminar vistas de referencia individuales de Nora, Eli y Pip, sin alterar sus identidades.</li>
-        <li><strong>Escenas:</strong> generar las imágenes individuales requeridas por el piloto, conservando vestuario y escenarios.</li>
-        <li><strong>Movimiento:</strong> animar toma por toma con gestos, acciones claras y expresiones; sin diálogos ni lip-sync.</li>
-        <li><strong>Continuidad:</strong> revisar caras, proporciones, objetos, dirección de movimiento y cortes. No usar morph para ocultar tomas distintas.</li>
+        <li><strong>Personajes:</strong> usar las imágenes máster aprobadas de Nora, Eli y Pip, sin alterar sus identidades.</li>
+        <li><strong>Escenas:</strong> reutilizar el mismo lugar, encuadre y los fotogramas de referencia aprobados.</li>
+        <li><strong>Movimiento:</strong> continuar el clip anterior con Extend; no crear un montaje de tomas sin conexión.</li>
+        <li><strong>Continuidad:</strong> revisar caras, proporciones, objetos, dirección de movimiento y punto exacto de unión entre segmentos. No hacer cortes ni morph.</li>
         <li><strong>Montaje:</strong> música y efectos de sonido, revisión de la historia y exportación solo después de verificar el video.</li>
       </ol>
-      <p className="tle-yt-muted">El contenido de Higgsfield no se sincroniza automáticamente con el Studio. Fotos, prompts y clips se enlazarán aquí cuando existan enlaces comprobados.</p>
+      <p className="tle-yt-muted">El contenido de Google Flow no se sincroniza automáticamente con el Studio. Los prompts sí están aquí; las fotos y los clips se enlazarán únicamente cuando existan archivos verificados.</p>
     </section>
 
     <section className="tle-yt-card tle-yt-channel-card">
