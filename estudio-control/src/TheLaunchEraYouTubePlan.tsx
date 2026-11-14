@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BookOpen, Camera, Check, Clapperboard, Copy, Film, FolderOpen, Image, Music2, PlayCircle, Sparkles, Video } from 'lucide-react';
+import TheLittleDetoursCharacters from './TheLittleDetoursCharacters';
 import './the-launch-era-youtube-plan.css';
 
 // Current YouTube editorial plan, 14 November 2026.
@@ -78,6 +79,8 @@ export default function TheLaunchEraYouTubePlan() {
       </div>
       <span className="tle-yt-status">Producción iniciada en Higgsfield</span>
     </section>
+
+    <TheLittleDetoursCharacters />
 
     <section className="tle-yt-grid">
       <article className="tle-yt-card tle-yt-pilot">
