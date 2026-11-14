@@ -9,6 +9,7 @@ import {
   Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy, Film
 } from 'lucide-react';
 import './CarouselFactory.css';
+import './CarouselVideoControls.css';
 import CarouselReader from './CarouselReader';
 import {renderCarouselVideo,carouselVideoAvailable} from '../../creative-shared/CarouselMotionExport';
 import {readCarouselDesign,encodeCarouselDesign,normalizeCarouselStyle,getCarouselPalette,readableColor,sampleReferencePalette,CAROUSEL_FONTS,carouselFontFamily,isCarouselFont,type CarouselFont,type CarouselStyle} from './CarouselArtDirection';
@@ -68,6 +69,7 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
+const videoTime=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
 const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
@@ -689,6 +691,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  const currentVideoTransform=normalizeVideoTransform(slide.videoTransform);
   useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[slide.videoPath]);
   // Load only the active clip, not every large file in the carousel.
   useEffect(()=>{
@@ -1975,16 +1978,100 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
-      {(slide.videoPath||videoBusy||videoIssue)&&<div role="group" aria-label="Video del slide seleccionado"
-        style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',padding:'12px 14px',
-          margin:'10px 0',border:'1px solid #D4E0E4',borderRadius:12,background:'#FAF8F3'}}>
-        {slide.videoPath&&<><Film size={19}/><strong>Video · slide {i+1}</strong>
-          <span style={{fontSize:12}}>{slide.videoName||'Mi video'}</span>
-          <button type="button" className="btn ghost" disabled={videoBusy} onClick={removeSlideVideo}>Quitar video de este slide</button></>}
-        {videoBusy&&<span role="status">Subiendo video privado…</span>}
-        {videoIssue&&<small role="alert">{videoIssue}</small>}
-        {slide.videoPath&&<small style={{flexBasis:'100%'}}>El clip ocupa este slide. Se descarga como video original, con sonido; las fotos de otros slides se exportan como PNG. Los elementos debajo se conservan al quitar el video.</small>}
-      </div>}
+      {(slide.videoPath||videoBusy||videoIssue)&&<section className="factory-video-editor"
+        aria-label="Editor de video del slide seleccionado">
+        <div className="factory-video-editor-head">
+          <Film size={20}/><strong>Editar video · slide {i+1}</strong>
+          {slide.videoName&&<span className="factory-video-name">{slide.videoName}</span>}
+          {slide.videoPath&&<button type="button" className="btn ghost"
+            disabled={videoBusy||!!busy} onClick={removeSlideVideo}>Quitar video</button>}
+        </div>
+        {videoBusy&&<p role="status">Subiendo video privado…</p>}
+        {videoIssue&&<p role="alert">{videoIssue}</p>}
+        {videoExportProgress&&<p role="status" className="factory-video-progress">{videoExportProgress}</p>}
+        {slide.videoPath&&<>
+          <p>Activa ✋ Editar arriba del lienzo, arrastra el video para moverlo y usa el punto amarillo para cambiar su tamaño o pellizca con dos dedos. Gira y recorta aquí abajo. Los cambios se guardan con el carrusel.</p>
+          <div className="factory-video-grid">
+            <div className="factory-video-tools">
+              <h3>Mover, girar y cambiar tamaño</h3>
+              <label htmlFor="video-rotation">Girar <output>{Math.round(currentVideoTransform.rotation)}°</output></label>
+              <input id="video-rotation" type="range" min="-180" max="180" step="1"
+                value={currentVideoTransform.rotation}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:Number(e.target.value)})})}/>
+              <div className="factory-video-actions">
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:bound(currentVideoTransform.rotation-15,-180,180)})})}>↶ 15°</button>
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:0})})}>Enderezar</button>
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,rotation:bound(currentVideoTransform.rotation+15,-180,180)})})}>↷ 15°</button>
+              </div>
+              <label htmlFor="video-width">Ancho <output>{Math.round(currentVideoTransform.w*100)}%</output></label>
+              <input id="video-width" type="range" min=".15" max="2" step=".01"
+                value={currentVideoTransform.w}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,w:Number(e.target.value)})})}/>
+              <label htmlFor="video-height">Alto <output>{Math.round(currentVideoTransform.h*100)}%</output></label>
+              <input id="video-height" type="range" min=".15" max="2" step=".01"
+                value={currentVideoTransform.h}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,h:Number(e.target.value)})})}/>
+            </div>
+            <div className="factory-video-tools">
+              <h3>Recortar encuadre</h3>
+              <small>Acerca y desplaza la imagen dentro del marco del video sin cortar el archivo original.</small>
+              <label htmlFor="video-zoom">Acercar / recortar <output>{Math.round(currentVideoTransform.zoom*100)}%</output></label>
+              <input id="video-zoom" type="range" min="1" max="5" step=".05"
+                value={currentVideoTransform.zoom}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,zoom:Number(e.target.value)})})}/>
+              <label htmlFor="video-pan-x">Mover encuadre a los lados</label>
+              <input id="video-pan-x" type="range" min="-1" max="1" step=".01" value={currentVideoTransform.panX}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,panX:Number(e.target.value)})})}/>
+              <label htmlFor="video-pan-y">Mover encuadre arriba / abajo</label>
+              <input id="video-pan-y" type="range" min="-1" max="1" step=".01" value={currentVideoTransform.panY}
+                onChange={e=>updateCurrentVideo({videoTransform:normalizeVideoTransform({...currentVideoTransform,panY:Number(e.target.value)})})}/>
+              <div className="factory-video-actions">
+                <button type="button" onClick={()=>updateCurrentVideo({videoTransform:{...DEFAULT_VIDEO_TRANSFORM}})}>Restablecer encuadre</button>
+              </div>
+            </div>
+            <div className="factory-video-tools">
+              <h3>Recortar duración</h3>
+              {activeVideo?.path===slide.videoPath?<video key={activeVideo.path}
+                src={activeVideo.url} controls playsInline preload="metadata" className="factory-video-playback"
+                onLoadedMetadata={e=>setVideoDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)}
+                onPlay={e=>{
+                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,e.currentTarget.duration);
+                  if(e.currentTarget.currentTime<clip.start||e.currentTarget.currentTime>=clip.end)
+                    e.currentTarget.currentTime=clip.start;
+                }}
+                onTimeUpdate={e=>{
+                  const player=e.currentTarget;
+                  const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,player.duration);
+                  if(player.currentTime>=clip.end-.04&&!player.paused){
+                    player.pause();player.currentTime=clip.start;
+                  }
+                }}/>:<small>Abriendo tu video privado…</small>}
+              {videoDuration>0&&(()=>{
+                const clip=videoTrim(slide.videoTrimStart,slide.videoTrimEnd,videoDuration);
+                return <>
+                  <label htmlFor="video-trim-start">Desde <output>{videoTime(clip.start)}</output></label>
+                  <input id="video-trim-start" type="range" min="0" max={Math.max(0,videoDuration-.1)} step=".1"
+                    value={clip.start}
+                    onChange={e=>{
+                      const next=Number(e.target.value);
+                      updateCurrentVideo({videoTrimStart:next,
+                        videoTrimEnd:slide.videoTrimEnd&&slide.videoTrimEnd<=next+.1?Math.min(videoDuration,next+.2):slide.videoTrimEnd||0});
+                    }}/>
+                  <label htmlFor="video-trim-end">Hasta <output>{videoTime(clip.end)}</output></label>
+                  <input id="video-trim-end" type="range" min={Math.min(clip.start+.1,videoDuration)} max={videoDuration} step=".1"
+                    value={clip.end}
+                    onChange={e=>updateCurrentVideo({videoTrimEnd:Number(e.target.value)})}/>
+                  <small>Duración seleccionada: {videoTime(clip.end-clip.start)}. La exportación de clips editados admite hasta 90 segundos por video en el dispositivo.</small>
+                  <div className="factory-video-actions">
+                    <button type="button" onClick={()=>updateCurrentVideo({videoTrimStart:0,videoTrimEnd:0})}>Usar video completo</button>
+                  </div>
+                </>;
+              })()}
+            </div>
+          </div>
+          <p>Al descargar, un video editado se procesa como MP4 o WebM con su encuadre, rotación, recorte y audio. Si tu navegador no puede procesarlo, mostraremos un error en vez de descargar una versión sin tus cambios.</p>
+        </>}
+      </section>}
 
       <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
 <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
