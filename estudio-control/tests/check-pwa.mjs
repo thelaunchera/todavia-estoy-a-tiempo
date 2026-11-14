@@ -49,8 +49,8 @@ assert.ok(characterGallery.includes('<TheLittleDetoursExpressionBacklog'), 'all 
 assert.ok(characterGallery.includes('<ExpressionsSummary/>'), 'character library summarizes pending expressions');
 const expressions = readFileSync(new URL('src/youtube/character-expression-plan.ts',root),'utf8');
 const expressionsUI = readFileSync(new URL('src/TheLittleDetoursExpressionBacklog.tsx',root),'utf8');
-assert.equal((expressions.match(/origin:'drive'/g)||[]).length,14,'existing 14 Drive pending prompts are preserved');
-assert.equal((expressions.match(/origin:'new'/g)||[]).length,18,'18 distinct new expressions are added without replacing old prompts');
+assert.equal((expressions.match(/,origin:'drive'/g)||[]).length,14,'existing 14 Drive pending prompts are preserved');
+assert.equal((expressions.match(/,origin:'new'/g)||[]).length,18,'18 distinct new expressions are added without replacing old prompts');
 assert.ok(expressions.includes('attach the approved original') || expressions.includes('Attach the approved original'), 'generation requires the original master');
 assert.ok(expressionsUI.includes('Copiar') && expressionsUI.includes('Descargar todos'),'pending expression prompts can be copied and downloaded individually');
 assert.ok(expressionsUI.includes('Sin generar'), 'unrendered expressions are never marked complete');
