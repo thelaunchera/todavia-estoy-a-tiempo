@@ -23,10 +23,16 @@ try{
    bundle:true,platform:'browser',format:'iife',globalName:'TestCarouselVideo',
    target:'es2020',write:false
  });
+ const seamMath=await build({
+   entryPoints:[resolve('src/CarouselVideoTransform.ts')],
+   bundle:true,platform:'browser',format:'iife',globalName:'TestSeamTransform',
+   target:'es2020',write:false
+ });
  browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required']});
  const page=await browser.newPage({viewport:{width:1024,height:768}});
  await page.goto('about:blank');
  await page.addScriptTag({content:source.outputFiles[0].text});
+ await page.addScriptTag({content:seamMath.outputFiles[0].text});
  const bytes=Array.from(new Uint8Array(readFileSync(input)));
  const result=await page.evaluate(async raw=>{
    const src=new Blob([new Uint8Array(raw)],{type:'video/mp4'});
@@ -68,6 +74,43 @@ try{
  execFileSync('ffmpeg',['-nostdin','-y','-hide_banner','-loglevel','error',
    '-ss','0.6','-i',out,'-frames:v','1',frame],{timeout:15000});
  if(readFileSync(frame).length<1500)throw Error('Composited video frame is blank');
+
+ // One original video frame cut at the dotted seam must match exactly on
+ // adjacent output slides. This catches accidental cropping to its anchor.
+ const seam=await page.evaluate(async raw=>{
+   const blob=new Blob([new Uint8Array(raw)],{type:'video/mp4'});
+   const url=URL.createObjectURL(blob);
+   const video=document.createElement('video');
+   video.src=url;video.playsInline=true;video.preload='auto';
+   try{
+     await new Promise((resolve,reject)=>{
+       video.onloadeddata=resolve;
+       video.onerror=()=>reject(Error('Seam test video did not load'));
+     });
+     await new Promise((resolve,reject)=>{
+       video.onseeked=resolve;
+       video.onerror=()=>reject(Error('Seam test video could not seek'));
+       video.currentTime=.75;
+     });
+     const make=()=>{
+       const c=document.createElement('canvas');c.width=1080;c.height=1350;
+       const x=c.getContext('2d');x.fillStyle='#FAF8F3';x.fillRect(0,0,1080,1350);
+       return {c,x};
+     };
+     const left=make(),right=make();
+     const t={x:.5,y:0,w:1,h:1,rotation:0,zoom:1,panX:0,panY:0};
+     window.TestSeamTransform.drawTransformedVideo(left.x,video,t,1080,1350,0);
+     window.TestSeamTransform.drawTransformedVideo(right.x,video,t,1080,1350,-1);
+     const pixel=(ctx,x,y)=>[...ctx.getImageData(x,y,1,1).data].slice(0,3);
+     const a=pixel(left.x,1079,675),b=pixel(right.x,0,675);
+     return {left:a,right:b,difference:a.reduce((acc,x,i)=>acc+Math.abs(x-b[i]),0)};
+   }finally{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)}
+ },bytes);
+ if(seam.difference>75)throw Error('A video extending between slides has mismatched edge pixels: '+JSON.stringify(seam));
+ if(seam.left.every(v=>v<10)||seam.left.every(v=>v>235))
+   throw Error('Seam continuity test shows only a blank border, not a real video frame');
+ console.log('PASS: a single clip crosses two slide exports with matching edge pixels');
+
  console.log('PASS: real video transformed/trimmed with 1080x1350 frame and audio in '+result.ext);
 }finally{
  if(browser)await browser.close();
