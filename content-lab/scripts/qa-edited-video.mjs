@@ -98,17 +98,39 @@ try{
        return {c,x};
      };
      const left=make(),right=make();
+     const master=document.createElement('canvas');
+     master.width=2160;master.height=1350;
+     const all=master.getContext('2d');
+     all.fillStyle='#FAF8F3';all.fillRect(0,0,2160,1350);
      const t={x:.5,y:0,w:1,h:1,rotation:0,zoom:1,panX:0,panY:0};
+     window.TestSeamTransform.drawTransformedVideo(all,video,t,1080,1350,0);
      window.TestSeamTransform.drawTransformedVideo(left.x,video,t,1080,1350,0);
      window.TestSeamTransform.drawTransformedVideo(right.x,video,t,1080,1350,-1);
      const pixel=(ctx,x,y)=>[...ctx.getImageData(x,y,1,1).data].slice(0,3);
-     const a=pixel(left.x,1079,675),b=pixel(right.x,0,675);
-     return {left:a,right:b,difference:a.reduce((acc,x,i)=>acc+Math.abs(x-b[i]),0)};
+     let maxDifference=0,nonblank=0;
+     // Compare each exported half with the SAME decoded, continuous master.
+     // Comparing consecutive adjacent pixels is invalid at sharp edges in
+     // a legitimate video image (e.g. the center of a test color-bar).
+     for(const y of [400,675,900]){
+       for(const x of [680,820,970]){
+         const actual=pixel(left.x,x,y),expected=pixel(all,x,y);
+         maxDifference=Math.max(maxDifference,
+           actual.reduce((sum,v,i)=>sum+Math.abs(v-expected[i]),0));
+         if(actual.some((v,i)=>Math.abs(v-[250,248,243][i])>50))nonblank++;
+       }
+       for(const x of [60,180,350]){
+         const actual=pixel(right.x,x,y),expected=pixel(all,1080+x,y);
+         maxDifference=Math.max(maxDifference,
+           actual.reduce((sum,v,i)=>sum+Math.abs(v-expected[i]),0));
+         if(actual.some((v,i)=>Math.abs(v-[250,248,243][i])>50))nonblank++;
+       }
+     }
+     return {maxDifference,nonblank};
    }finally{video.removeAttribute('src');video.load();URL.revokeObjectURL(url)}
  },bytes);
- if(seam.difference>75)throw Error('A video extending between slides has mismatched edge pixels: '+JSON.stringify(seam));
- if(seam.left.every(v=>v<10)||seam.left.every(v=>v>235))
-   throw Error('Seam continuity test shows only a blank border, not a real video frame');
+ if(seam.maxDifference>40)throw Error('A video extending between slides does not match its continuous master: '+JSON.stringify(seam));
+ if(seam.nonblank<6)
+   throw Error('Seam continuity test only shows blank slide backgrounds, not the real video');
  console.log('PASS: a single clip crosses two slide exports with matching edge pixels');
 
  console.log('PASS: real video transformed/trimmed with 1080x1350 frame and audio in '+result.ext);
