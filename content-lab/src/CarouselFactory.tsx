@@ -1612,6 +1612,15 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(busy)return;
     setBusy('export');
     try{
+      if(slides[n].videoPath){
+        const blob=await carouselVideoMedia.download(slides[n].videoPath!);
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;
+        a.download=videoFilename(n,slides[n].videoPath!);a.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),90_000);
+        notify('Video del slide '+(n+1)+' descargado en su formato original.');
+        return;
+      }
       ensureSourceImages();
       const quality=await qualityForExport();
       const pages=independentExport()?null:await renderAllSlides(quality);
@@ -1650,6 +1659,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // Ordinary carousels export one slide at a time. This avoids holding
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
+        if(slides[n].videoPath){
+          const blob=await carouselVideoMedia.download(slides[n].videoPath!);
+          result.push({name:videoFilename(n,slides[n].videoPath!),url:URL.createObjectURL(blob)});
+          continue;
+        }
         const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
         try{
           const blob=await canvasToPngBlob(canvas);
@@ -1663,7 +1677,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       clearDownloads();
       downloadUrlsRef.current=result.map(item=>item.url);
       setDownloads(result);
-      notify('PNG nítidos preparados. Descárgalos individualmente.');
+      notify('Archivos del carrusel preparados. Descarga los PNG y los videos en orden.');
     }catch(e){
       result.forEach(item=>URL.revokeObjectURL(item.url));
       showError(e);
@@ -1709,7 +1723,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           }}>Vista revista · Page Curl / Polaroid</button>
           <button type="button" onClick={scatterExistingPhotos}>Ordenar 2–3 fotos Polaroid</button>
           <button type="button" onClick={()=>void exportAnimatedCarousel()}
-            disabled={!carouselVideoAvailable()||!!busy||motionBusy||overview.length!==slides.length||overview.some(src=>!src)}>
+            disabled={!carouselVideoAvailable()||!!busy||motionBusy||slides.some(part=>!!part.videoPath)||overview.length!==slides.length||overview.some(src=>!src)}
+            title={slides.some(part=>!!part.videoPath)?'Descarga videos originales y PNG por separado.':'Crear video animado a partir de fotos.'}>
             {motionBusy?'Creando video '+motionProgress:'Crear video animado'}</button>
           {motionDownload&&<a className="factory-motion-download" href={motionDownload.url}
             download={motionDownload.name}>Descargar video · {motionDownload.name.split('.').pop()?.toUpperCase()}</a>}
@@ -1738,7 +1753,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         <button type="button" className="btn ghost" onClick={saveLatest} disabled={saving}
           aria-label={saveState==='offline'?'Guardar carrusel · sin conexión':saveState==='saved'?'Carrusel guardado':'Guardar carrusel'}>
           {saving?<LoaderCircle size={16}/>:saveState==='offline'?<X size={16}/>:saveState==='saved'?<Check size={16}/>:<Save size={16}/>} <span className="factory-action-label">{saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</span></button>
-        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy} aria-label={busy?'Preparando PNG':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':'Exportar PNG'}</span></button>
+        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy||videoBusy} aria-label={busy?'Preparando archivo':slide.videoPath?'Exportar video actual':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':slide.videoPath?'Exportar video':'Exportar PNG'}</span></button>
       </div>
     </div>
 
@@ -2128,16 +2143,16 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     {studioTab==='download'&&<section className="factory-download-step">
       <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
         <h2>Tu carrusel, listo para publicar.</h2>
-        <p>{slides.length} imágenes PNG individuales, 1080 × 1350 como mínimo en modo independiente. {style.seamlessEnabled?'El seamless se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos originales. Los PNG salen en 1080 × 1350 como mínimo; cada video conserva su imagen y sonido. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
       <div className="factory-canvas-exports">
-        <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales en alta resolución, sin líneas de edición.</span></div>
-        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar mis PNG <Download size={17}/></button>
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y clips como MP4/MOV/WebM originales.</span></div>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
-        <strong><Check size={15}/> {downloads.length} PNG listos</strong>
-        <p>Descárgalos individualmente, sin ZIP.</p>
-        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
+        <strong><Check size={15}/> {downloads.length} archivos listos</strong>
+        <p>Descárgalos individualmente y súbelos en el orden de los slides.</p>
+        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> {item.name}</a>)}
       </div>}
 
       <div className="factory-new-carousel" aria-label={locale==='es'?'Comenzar otro carrusel':'Start another carousel'}>
