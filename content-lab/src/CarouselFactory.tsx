@@ -1,10 +1,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { api } from './platform/client';
+import { api, carouselVideoMedia } from './platform/client';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
-  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy
+  Upload, ImagePlus, Save, Check, LoaderCircle, Layers3, Eye, X, Copy, Film
 } from 'lucide-react';
 import './CarouselFactory.css';
 import CarouselReader from './CarouselReader';
@@ -48,7 +48,7 @@ const photoFrames:{id:PhotoFrame;name:string}[]=[{id:'none',name:'Clean'},{id:'r
 const sampleHomes=["https://images.unsplash.com/photo-1647579350413-a6ada4e480ed?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1639060631449-4a3ba54a203a?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1771366260867-7e07094579d7?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1743884134387-24734042d379?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1770756051811-1612ac8bedfa?auto=format&fit=crop&w=480&q=80","https://images.unsplash.com/photo-1778166166419-792a411e197c?auto=format&fit=crop&w=480&q=80"];
 type Slide = {
   key: string; eyebrow: string; title: string; description: string;
-  layout: Layout; assetId: string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
+  layout: Layout; assetId: string; videoPath?:string; videoName?:string; videoMime?:string; titleFont?:CarouselFont; photoFocus?:'top'|'center'|'bottom';accentIndex?:number;backgroundId?:FreeBackgroundId;backgroundColor?:string;backgroundGradient?:string;stickerIds?:string[];frameStyle?:PhotoFrame;backgroundImageId?:string;photoPosition?:TouchRect;stickerPositions?:StickerPositions;
 };
 type Props = {
   brand: Brand; post: Post; assets: Asset[]; images: Record<string, string>;
@@ -64,6 +64,7 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
+const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
 const reflowDefaultPhoto=(slide:Slide,layout:Layout):Slide=>{
  if(!slide.assetId)return {...slide,layout};
@@ -106,6 +107,9 @@ function parseSlides(post: Post, brand: Brand): Slide[] {
           layout: layouts.includes(s.layout) ? s.layout as Layout : 'statement',
           titleFont:isCarouselFont(s.titleFont)?s.titleFont:undefined,
           assetId: String(s.assetId || ''),
+          videoPath:typeof s.videoPath==='string'?s.videoPath.slice(0,260):'',
+          videoName:typeof s.videoName==='string'?s.videoName.slice(0,160):'',
+          videoMime:typeof s.videoMime==='string'?s.videoMime.slice(0,50):'',
           photoFocus:['top','center','bottom'].includes(s.photoFocus)?s.photoFocus:'center',
            frameStyle:photoFrames.some(f=>f.id===s.frameStyle)?s.frameStyle:'none',
           accentIndex:Number.isInteger(s.accentIndex)&&s.accentIndex>=0&&s.accentIndex<=8?s.accentIndex:0,
@@ -621,6 +625,10 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   },[mobilePreviewOpen]);
   useEffect(()=>{setMobilePreviewOpen(false);},[brand.id]);
   const [downloads,setDownloads]=useState<{name:string,url:string}[]>([]);
+  const videoInputRef=useRef<HTMLInputElement>(null);
+  const [videoBusy,setVideoBusy]=useState(false);
+  const [videoIssue,setVideoIssue]=useState('');
+  const [activeVideo,setActiveVideo]=useState<{path:string;url:string}|null>(null);
   const downloadUrlsRef=useRef<string[]>([]);
   const exportRunRef=useRef(0);
   const clearDownloads=()=>{
@@ -672,6 +680,23 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
+  // Load only the active clip, not every large file in the carousel.
+  useEffect(()=>{
+    const path=slide.videoPath;
+    if(!path){setActiveVideo(null);setVideoIssue('');return;}
+    let live=true,objectUrl='';
+    setActiveVideo(null);setVideoIssue('');
+    void carouselVideoMedia.download(path).then(blob=>{
+      if(!live)return;
+      objectUrl=URL.createObjectURL(blob);
+      setActiveVideo({path,url:objectUrl});
+    }).catch(error=>{if(live)setVideoIssue(error instanceof Error?error.message:'No se pudo abrir el video.')});
+    return()=>{live=false;if(objectUrl)URL.revokeObjectURL(objectUrl)};
+  },[slide.videoPath,brand.id]);
+  const videoPages=slides.flatMap((part,index)=>part.videoPath?[{
+    page:index,name:part.videoName||'Video del carrusel',
+    src:activeVideo?.path===part.videoPath?activeVideo.url:undefined
+  }]:[]);
   // A wide, sharp preview, capped to stay below mobile canvas texture limits.
   // Legacy rendering used 432px/slide and blurred fine type on Retina displays.
   const previewPageWidth=Math.min(900,Math.floor(6800/slides.length));
@@ -838,8 +863,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-swipe-caption"><span>DESLIZA CON EL DEDO</span><strong>{style.seamlessEnabled?'Seamless':'Normal'} · {slides.length} slides</strong></div>
       <div className="factory-swipe-rail" ref={carouselRailRef} onScroll={syncCarouselScroll}>
         {slides.map((part,n)=><div key={part.key} className="factory-swipe-page">
-          {overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
-            <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
+          {part.videoPath?
+            (activeVideo?.path===part.videoPath?
+              <video src={activeVideo.url} controls playsInline preload="metadata" style={{width:'100%',height:'100%',objectFit:'contain',background:'#101010'}} aria-label={'Video del slide '+(n+1)}/>:
+              <div className="factory-swipe-loading"><Film size={24}/><small>{n===i?(videoIssue||'Cargando video privado…'):'Video · toca este slide para verlo'}</small></div>):
+            overview[n]?<img src={overview[n]} alt={'Vista previa final de la diapositiva '+(n+1)} draggable={false}/>:
+              <div className="factory-swipe-loading"><LoaderCircle className="spin" size={23}/><small>Preparando vista nítida…</small></div>}
         </div>)}
       </div>
       <div className="factory-swipe-navigation">
@@ -850,7 +879,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       <div className="factory-swipe-thumbnails">
         {slides.map((part,n)=><button type="button" key={part.key} className={i===n?'active':''}
           onClick={()=>setCurrent(n)} aria-label={'Ir a la diapositiva '+(n+1)}>
-          {overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
+          {part.videoPath?<span aria-label="Video">▶ {n+1}</span>:
+            overview[n]?<img src={overview[n]} alt=""/>:<span>{n+1}</span>}
         </button>)}
       </div>
       {overviewError&&<p className="factory-swipe-error">{overviewError} <button type="button" onClick={previewAll}>Reintentar</button></p>}
@@ -1294,6 +1324,33 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const latestDraft=useRef({post,slides,style,ownedAssets});
   latestDraft.current={post,slides,style,ownedAssets};
   const saveLatest=()=>onSave(latestDraft.current.post);
+  const uploadSlideVideo=async(file?:File)=>{
+    if(!file||videoBusy)return;
+    const targetKey=slide.key,targetBrand=brand.id;
+    setVideoBusy(true);setVideoIssue('');
+    try{
+      const uploaded=await carouselVideoMedia.upload(file);
+      const latest=latestDraft.current;
+      if(latest.post.brandId!==targetBrand)throw Error('Cambiaste de marca durante la subida. El video privado no se añadió.');
+      const index=latest.slides.findIndex(part=>part.key===targetKey);
+      if(index<0)throw Error('El slide cambió durante la subida. Vuelve a elegirlo.');
+      const updated=latest.slides.map((part,n)=>n===index?{
+        ...part,videoPath:uploaded.path,videoName:uploaded.name,videoMime:uploaded.mime
+      }:part);
+      recordHistory(latest.post.designData||encodeCarouselDesign(latest.slides,latest.style));
+      onChange({...latest.post,format:'Carousel',hook:updated[0].title,
+        designData:encodeCarouselDesign(updated,latest.style)});
+      clearDownloads();
+      notify('Video añadido al slide '+(index+1)+'. Guarda el carrusel para conservarlo.');
+    }catch(e){
+      const message=e instanceof Error?e.message:'No se pudo subir el video.';
+      setVideoIssue(message);notify(message);
+    }finally{setVideoBusy(false);if(videoInputRef.current)videoInputRef.current.value=''}
+  };
+  const removeSlideVideo=()=>{
+    replace({videoPath:'',videoName:'',videoMime:''});
+    setVideoIssue('');notify('Se quitó el video de este slide. Su diseño de fotos permanece intacto.');
+  };
   const addPanoramaAssets=(items:{asset:Asset;point:{x:number;y:number};ratio?:number}[])=>{
     const latest=latestDraft.current;
     const nextSlides=[...latest.slides];
@@ -1526,6 +1583,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           assetId:previous.assetId,photoPosition:previous.photoPosition,
           stickerIds:previous.stickerIds,stickerPositions:previous.stickerPositions,
           frameStyle:previous.frameStyle,
+          videoPath:previous.videoPath,videoName:previous.videoName,videoMime:previous.videoMime,
         }:item;
       });
       onChange({...updated,designData:encodeCarouselDesign(generated,normalizeCarouselStyle({...style,editorialRhythm:true}))});
@@ -1555,6 +1613,15 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if(busy)return;
     setBusy('export');
     try{
+      if(slides[n].videoPath){
+        const blob=await carouselVideoMedia.download(slides[n].videoPath!);
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;
+        a.download=videoFilename(n,slides[n].videoPath!);a.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),90_000);
+        notify('Video del slide '+(n+1)+' descargado en su formato original.');
+        return;
+      }
       ensureSourceImages();
       const quality=await qualityForExport();
       const pages=independentExport()?null:await renderAllSlides(quality);
@@ -1593,6 +1660,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // Ordinary carousels export one slide at a time. This avoids holding
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
+        if(slides[n].videoPath){
+          const blob=await carouselVideoMedia.download(slides[n].videoPath!);
+          result.push({name:videoFilename(n,slides[n].videoPath!),url:URL.createObjectURL(blob)});
+          continue;
+        }
         const canvas=pages?pages[n]:await drawSlide(slides[n],n,slides.length,brand,images,style,false,quality);
         try{
           const blob=await canvasToPngBlob(canvas);
@@ -1606,7 +1678,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       clearDownloads();
       downloadUrlsRef.current=result.map(item=>item.url);
       setDownloads(result);
-      notify('PNG nítidos preparados. Descárgalos individualmente.');
+      notify('Archivos del carrusel preparados. Descarga los PNG y los videos en orden.');
     }catch(e){
       result.forEach(item=>URL.revokeObjectURL(item.url));
       showError(e);
@@ -1652,7 +1724,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           }}>Vista revista · Page Curl / Polaroid</button>
           <button type="button" onClick={scatterExistingPhotos}>Ordenar 2–3 fotos Polaroid</button>
           <button type="button" onClick={()=>void exportAnimatedCarousel()}
-            disabled={!carouselVideoAvailable()||!!busy||motionBusy||overview.length!==slides.length||overview.some(src=>!src)}>
+            disabled={!carouselVideoAvailable()||!!busy||motionBusy||slides.some(part=>!!part.videoPath)||overview.length!==slides.length||overview.some(src=>!src)}
+            title={slides.some(part=>!!part.videoPath)?'Descarga videos originales y PNG por separado.':'Crear video animado a partir de fotos.'}>
             {motionBusy?'Creando video '+motionProgress:'Crear video animado'}</button>
           {motionDownload&&<a className="factory-motion-download" href={motionDownload.url}
             download={motionDownload.name}>Descargar video · {motionDownload.name.split('.').pop()?.toUpperCase()}</a>}
@@ -1681,7 +1754,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         <button type="button" className="btn ghost" onClick={saveLatest} disabled={saving}
           aria-label={saveState==='offline'?'Guardar carrusel · sin conexión':saveState==='saved'?'Carrusel guardado':'Guardar carrusel'}>
           {saving?<LoaderCircle size={16}/>:saveState==='offline'?<X size={16}/>:saveState==='saved'?<Check size={16}/>:<Save size={16}/>} <span className="factory-action-label">{saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</span></button>
-        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy} aria-label={busy?'Preparando PNG':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':'Exportar PNG'}</span></button>
+        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy||videoBusy} aria-label={busy?'Preparando archivo':slide.videoPath?'Exportar video actual':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':slide.videoPath?'Exportar video':'Exportar PNG'}</span></button>
       </div>
     </div>
 
@@ -1792,14 +1865,14 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
 
       <div className="factory-step-intro">
         <span className="factory-step-eyebrow">PASO 2 DE 5 · FOTOS Y DISEÑOS</span>
-        <h2>Ahora coloca tus fotos y diseña.</h2>
-        <p>Sube fotos, arrástralas y ajusta su tamaño directamente sobre el lienzo. En seamless pueden cruzar los cortes.</p>
+        <h2>Ahora coloca tus fotos o videos y diseña.</h2>
+        <p>Sube fotos y muévelas libremente; también puedes poner un video propio en cualquier slide. Los videos mantienen su sonido y se descargan aparte.</p>
         <div className="factory-step-mini-actions">
           <button type="button" className="btn ghost" onClick={duplicateSlide} disabled={slides.length>=MAX_CAROUSEL_SLIDES}>
             <Copy size={16}/> Duplicar slide {i+1}
           </button>
           <button type="button" className="btn ghost factory-free-create" onClick={()=>{
-            if(slides.some(part=>part.title||part.description||part.assetId)||(style.panoramaLayers||[]).length){
+            if(slides.some(part=>part.title||part.description||part.assetId||part.videoPath)||(style.panoramaLayers||[]).length){
               if(!window.confirm('¿Crear un carrusel vacío nuevo? Se reemplazará el diseño actual.'))return;
             }
             const next=Array.from({length:6},(_,n)=>({...makeSlide(n,''),layout:(['cover','statement','photo','steps','split','closing'] as Layout[])[n],eyebrow:'',description:'',assetId:'',stickerIds:[],stickerPositions:{},
@@ -1808,7 +1881,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
           }}><Plus size={16}/> Nuevo carrusel</button>
         </div>
       </div>
+      <input ref={videoInputRef} type="file" hidden
+        accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+        aria-label="Seleccionar video para este slide"
+        onChange={event=>{const file=event.target.files?.[0];event.target.value='';void uploadSlideVideo(file)}}/>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
+        onChooseVideo={()=>videoInputRef.current?.click()} videoUploading={videoBusy} videoPages={videoPages}
         pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
@@ -1832,6 +1910,16 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       onReorder={reorderPanoramaLayer}
        textElements={panoramaTextElements} onRemoveText={removePanoramaText}
       onUpload={uploadPanoramaPhotos} error={panoramaError} onRetry={()=>setPreviewRevision(v=>v+1)}/>
+      {(slide.videoPath||videoBusy||videoIssue)&&<div role="group" aria-label="Video del slide seleccionado"
+        style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',padding:'12px 14px',
+          margin:'10px 0',border:'1px solid #D4E0E4',borderRadius:12,background:'#FAF8F3'}}>
+        {slide.videoPath&&<><Film size={19}/><strong>Video · slide {i+1}</strong>
+          <span style={{fontSize:12}}>{slide.videoName||'Mi video'}</span>
+          <button type="button" className="btn ghost" disabled={videoBusy} onClick={removeSlideVideo}>Quitar video de este slide</button></>}
+        {videoBusy&&<span role="status">Subiendo video privado…</span>}
+        {videoIssue&&<small role="alert">{videoIssue}</small>}
+        {slide.videoPath&&<small style={{flexBasis:'100%'}}>El clip ocupa este slide. Se descarga como video original, con sonido; las fotos de otros slides se exportan como PNG. Los elementos debajo se conservan al quitar el video.</small>}
+      </div>}
 
       <details className="factory-photo-extra"><summary>Fotos, composición y marcos de este slide</summary>
 <details className="factory-typography-more"><summary>Foto y detalles de este slide</summary>
@@ -2071,16 +2159,16 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     {studioTab==='download'&&<section className="factory-download-step">
       <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
         <h2>Tu carrusel, listo para publicar.</h2>
-        <p>{slides.length} imágenes PNG individuales, 1080 × 1350 como mínimo en modo independiente. {style.seamlessEnabled?'El seamless se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos originales. Los PNG salen en 1080 × 1350 como mínimo; cada video conserva su imagen y sonido. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
       <div className="factory-canvas-exports">
-        <div><strong>Tu carrusel · {slides.length} slides</strong><span>PNG individuales en alta resolución, sin líneas de edición.</span></div>
-        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy}>Preparar mis PNG <Download size={17}/></button>
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y clips como MP4/MOV/WebM originales.</span></div>
+        <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
-        <strong><Check size={15}/> {downloads.length} PNG listos</strong>
-        <p>Descárgalos individualmente, sin ZIP.</p>
-        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> Slide {n+1}.png</a>)}
+        <strong><Check size={15}/> {downloads.length} archivos listos</strong>
+        <p>Descárgalos individualmente y súbelos en el orden de los slides.</p>
+        {downloads.map((item,n)=><a key={item.name} href={item.url} download={item.name}><Download size={15}/> {item.name}</a>)}
       </div>}
 
       <div className="factory-new-carousel" aria-label={locale==='es'?'Comenzar otro carrusel':'Start another carousel'}>

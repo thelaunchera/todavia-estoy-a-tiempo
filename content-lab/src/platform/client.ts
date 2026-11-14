@@ -14,6 +14,7 @@ const sb=createClient(url||'https://not-configured.supabase.co',key||'missing-pu
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 const bucket='content-lab-private';
+const videoBucket='content-lab-videos';
 // Private image reads are shared across concurrent requests and limited per tab.
 // A library with dozens of originals plus shared stickers must never open all
 // Storage downloads at once. In-flight deduplication is memory-only: no private
@@ -586,6 +587,43 @@ export const api={
     return {data:{deleted:true}};
   }
 };
+
+/**
+ * Videos for mixed-media carousels remain in the existing private bucket.
+ * Post designData stores ONLY the owner-scoped Storage path, never video bytes,
+ * public links or a base64 copy. RLS protects the user-owned files.
+ */
+export const carouselVideoMedia={
+  upload:async(file:File):Promise<{path:string;mime:string;name:string}>=>{
+    requireConfig();
+    const me=await current();
+    const extension=file.name.split('.').pop()?.toLowerCase();
+    if(!extension||!['mp4','mov','webm'].includes(extension))
+      throw Error('Selecciona un video MP4, MOV o WebM.');
+    if(!file.size||file.size>40_000_000)
+      throw Error('El video debe pesar menos de 40 MB. Recorta o comprime el clip y vuelve a subirlo.');
+    const mime=extension==='mov'?'video/quicktime':extension==='webm'?'video/webm':'video/mp4';
+    if(file.type&&!['video/mp4','video/quicktime','video/webm','application/octet-stream'].includes(file.type))
+      throw Error('Este archivo no es un video compatible.');
+    const path=me.id+'/carousel-videos/'+crypto.randomUUID()+'.'+extension;
+    const {error}=await sb.storage.from(videoBucket).upload(path,file,{
+      contentType:mime,upsert:false,cacheControl:'3600'
+    });
+    if(error)throw Error('No se pudo guardar el video de forma privada: '+error.message);
+    return {path,mime,name:file.name.slice(0,160)};
+  },
+  download:async(path:string):Promise<Blob>=>{
+    requireConfig();
+    const me=await current();
+    if(!path.startsWith(me.id+'/carousel-videos/')||
+       !/^[a-f0-9-]{36}\/carousel-videos\/[a-f0-9-]{36}\.(mp4|mov|webm)$/i.test(path))
+      throw Error('Este video no pertenece a tu biblioteca privada.');
+    const {data,error}=await sb.storage.from(videoBucket).download(path);
+    if(error||!data)throw Error('No se pudo recuperar el video privado: '+(error?.message||'archivo no disponible'));
+    return data;
+  }
+};
+
 export const image={
   resizeIfNeeded:async(input:File|Blob,opts:{maxDimension:number;maxPixels:number;quality:number;mimeType:string;preserveIfPossible?:boolean;maxBytes?:number})=>{
     const url=URL.createObjectURL(input);
