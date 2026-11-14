@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api, carouselVideoMedia } from './platform/client';
-import {DEFAULT_VIDEO_TRANSFORM,normalizeVideoTransform,videoHasEdits,videoTrim,bound,type CarouselVideoTransform} from './CarouselVideoTransform';
+import {DEFAULT_VIDEO_TRANSFORM,normalizeVideoTransform,videoHasEdits,videoVisiblePages,videoOffsetForPage,videoTrim,bound,type CarouselVideoTransform} from './CarouselVideoTransform';
 import {renderEditedCarouselVideo} from './CarouselVideoRender';
 import {
   Sparkles, WandSparkles, Plus, Trash2, ArrowLeft, ArrowRight, Download,
@@ -69,6 +69,20 @@ type Props = {
 };
 const layouts: Layout[] = ['cover','statement','photo','steps','split','closing'];
 const MAX_CAROUSEL_SLIDES=10;
+/** A clip stays owned by one slide but may be visible in adjacent Seamless panels. */
+type PageVideo={owner:number;part:Slide};
+const pageVideos=(slides:Slide[],page:number,seamless:boolean):PageVideo[]=>
+  slides.flatMap((part,owner)=>part.videoPath&&videoVisiblePages(owner,
+    part.videoTransform,slides.length,seamless).includes(page)
+    ?[{owner,part}]:[]);
+/** Never silently flatten or hide overlapping clips when a slide is exported. */
+const exportableVideo=(slides:Slide[],page:number,seamless:boolean):PageVideo|null=>{
+  const matching=pageVideos(slides,page,seamless);
+  if(matching.length>1)throw Error(
+    'El slide '+(page+1)+' contiene dos videos superpuestos. Mueve o recorta uno de ellos antes de exportar.'
+  );
+  return matching[0]||null;
+};
 const videoTime=(seconds:number)=>Math.floor(Math.max(0,seconds)/60)+':'+String(Math.floor(Math.max(0,seconds)%60)).padStart(2,'0');
 const videoFilename=(page:number,path:string)=>'carrusel-slide-'+String(page+1).padStart(2,'0')+'.'+(path.match(/\.(mp4|mov|webm)$/i)?.[1]?.toLowerCase()||'mp4');
 /** Reflow only default-position photos; never overwrite a placement moved by a person. */
@@ -691,11 +705,15 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   // resetting on post.id would erase freshly prepared PNG download links and previews.
   useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
-  const currentVideoTransform=normalizeVideoTransform(slide.videoTransform);
-  useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[slide.videoPath]);
-  // Load only the active clip, not every large file in the carousel.
+  const focusedVideo=pageVideos(slides,i,style.seamlessEnabled).find(entry=>entry.owner===i)
+    ||pageVideos(slides,i,style.seamlessEnabled)[0]||null;
+  const selectedVideo=focusedVideo?.part;
+  const selectedVideoOwner=focusedVideo?.owner??i;
+  const currentVideoTransform=normalizeVideoTransform(selectedVideo?.videoTransform);
+  useEffect(()=>{setVideoDuration(0);setVideoExportProgress('');},[selectedVideo?.videoPath]);
+  // Keep a spanning clip loaded while navigating either side of the seam.
   useEffect(()=>{
-    const path=slide.videoPath;
+    const path=selectedVideo?.videoPath;
     if(!path){setActiveVideo(null);setVideoIssue('');return;}
     let live=true,objectUrl='';
     setActiveVideo(null);setVideoIssue('');
@@ -705,7 +723,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       setActiveVideo({path,url:objectUrl});
     }).catch(error=>{if(live)setVideoIssue(error instanceof Error?error.message:'No se pudo abrir el video.')});
     return()=>{live=false;if(objectUrl)URL.revokeObjectURL(objectUrl)};
-  },[slide.videoPath,brand.id]);
+  },[selectedVideo?.videoPath,brand.id]);
   const videoPages=slides.flatMap((part,index)=>part.videoPath?[{
     page:index,name:part.videoName||'Video del carrusel',
     transform:normalizeVideoTransform(part.videoTransform),
@@ -1401,9 +1419,10 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const updateVideoGeometry=(page:number,transform:CarouselVideoTransform)=>{
     updateSlideVideo(page,{videoTransform:normalizeVideoTransform(transform)});
   };
-  const updateCurrentVideo=(patch:Partial<Slide>)=>updateSlideVideo(i,patch);
+  const updateCurrentVideo=(patch:Partial<Slide>)=>updateSlideVideo(selectedVideoOwner,patch);
   const removeSlideVideo=()=>{
-    replace({videoPath:'',videoName:'',videoMime:'',
+    if(!selectedVideo)return;
+    updateSlideVideo(selectedVideoOwner,{videoPath:'',videoName:'',videoMime:'',
       videoTransform:undefined,videoTrimStart:0,videoTrimEnd:0});
     setVideoIssue('');notify('Se quitó el video de este slide. Su diseño de fotos permanece intacto.');
   };
