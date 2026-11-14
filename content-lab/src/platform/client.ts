@@ -14,6 +14,7 @@ const sb=createClient(url||'https://not-configured.supabase.co',key||'missing-pu
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
 const bucket='content-lab-private';
+const videoBucket='content-lab-videos';
 // Private image reads are shared across concurrent requests and limited per tab.
 // A library with dozens of originals plus shared stickers must never open all
 // Storage downloads at once. In-flight deduplication is memory-only: no private
@@ -605,7 +606,7 @@ export const carouselVideoMedia={
     if(file.type&&!['video/mp4','video/quicktime','video/webm','application/octet-stream'].includes(file.type))
       throw Error('Este archivo no es un video compatible.');
     const path=me.id+'/carousel-videos/'+crypto.randomUUID()+'.'+extension;
-    const {error}=await sb.storage.from(bucket).upload(path,file,{
+    const {error}=await sb.storage.from(videoBucket).upload(path,file,{
       contentType:mime,upsert:false,cacheControl:'3600'
     });
     if(error)throw Error('No se pudo guardar el video de forma privada: '+error.message);
@@ -617,7 +618,7 @@ export const carouselVideoMedia={
     if(!path.startsWith(me.id+'/carousel-videos/')||
        !/^[a-f0-9-]{36}\/carousel-videos\/[a-f0-9-]{36}\.(mp4|mov|webm)$/i.test(path))
       throw Error('Este video no pertenece a tu biblioteca privada.');
-    const {data,error}=await sb.storage.from(bucket).download(path);
+    const {data,error}=await sb.storage.from(videoBucket).download(path);
     if(error||!data)throw Error('No se pudo recuperar el video privado: '+(error?.message||'archivo no disponible'));
     return data;
   }
