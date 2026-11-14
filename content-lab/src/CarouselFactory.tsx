@@ -1690,10 +1690,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     return sourceAwareScale(ids.map(id=>images[id||'']),1080,1350,maxScale);
   };
   const produceVideoFile=async(n:number,audioContext?:AudioContext):Promise<{blob:Blob;name:string}>=>{
-    const part=slides[n];
-    if(!part.videoPath)throw Error('No hay video en este slide.');
+    const match=exportableVideo(slides,n,style.seamlessEnabled);
+    if(!match?.part.videoPath)throw Error('No hay video visible en este slide.');
+    const {owner,part}=match;
     const original=await carouselVideoMedia.download(part.videoPath);
-    if(!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
+    if(owner===n&&!videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd))
       return {blob:original,name:videoFilename(n,part.videoPath)};
     ensureSourceImages();
     let pages:HTMLCanvasElement[]|null=null,one:HTMLCanvasElement|null=null;
@@ -1707,7 +1708,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       const processed=await renderEditedCarouselVideo(original,
         part.videoTransform,part.videoTrimStart||0,part.videoTrimEnd||0,one,
         ratio=>setVideoExportProgress('Procesando video '+(n+1)+' · '+Math.round(ratio*100)+'%'),
-        audioContext);
+        audioContext,videoOffsetForPage(owner,n));
       return {blob:processed.blob,name:'carrusel-slide-'+String(n+1).padStart(2,'0')+'-editado.'+processed.extension};
     }finally{
       if(pages)pages.forEach(canvas=>{canvas.width=1;canvas.height=1});
@@ -1722,11 +1723,15 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   };
   const exportOne=async(n=i)=>{
     if(busy)return;
-    const audio=slides[n]?.videoPath&&videoHasEdits(slides[n].videoTransform,slides[n].videoTrimStart,slides[n].videoTrimEnd)
+    let media:PageVideo|null=null;
+    try{media=exportableVideo(slides,n,style.seamlessEnabled);}
+    catch(error){showError(error);return}
+    const audio=media&&(media.owner!==n||videoHasEdits(
+      media.part.videoTransform,media.part.videoTrimStart,media.part.videoTrimEnd))
       ?startVideoAudio():undefined;
     setBusy('export');setVideoExportProgress('');
     try{
-      if(slides[n].videoPath){
+      if(media){
         const file=await produceVideoFile(n,audio);
         const url=URL.createObjectURL(file.blob);
         const a=document.createElement('a');a.href=url;
@@ -1754,7 +1759,9 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   };
   const exportAll=async()=>{
     if(busy)return;
-    const hasEditedVideos=slides.some(part=>!!part.videoPath&&videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd));
+    const hasEditedVideos=slides.some((part,owner)=>!!part.videoPath&&(
+      videoHasEdits(part.videoTransform,part.videoTrimStart,part.videoTrimEnd)
+      ||(style.seamlessEnabled&&videoVisiblePages(owner,part.videoTransform,slides.length,true).some(n=>n!==owner))));
     const audio=hasEditedVideos?startVideoAudio():undefined;
     const notes=await inspectImageQuality();
     setImageQualityNotes(notes);
@@ -1778,7 +1785,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       // Ordinary carousels export one slide at a time. This avoids holding
       // eight uncompressed 1080×1350 canvases in mobile Safari memory.
       for(let n=0;n<slides.length;n++){
-        if(slides[n].videoPath){
+        if(exportableVideo(slides,n,style.seamlessEnabled)){
           const media=await produceVideoFile(n,audio);
           result.push({name:media.name,url:URL.createObjectURL(media.blob)});
           continue;
@@ -1873,7 +1880,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         <button type="button" className="btn ghost" onClick={saveLatest} disabled={saving}
           aria-label={saveState==='offline'?'Guardar carrusel · sin conexión':saveState==='saved'?'Carrusel guardado':'Guardar carrusel'}>
           {saving?<LoaderCircle size={16}/>:saveState==='offline'?<X size={16}/>:saveState==='saved'?<Check size={16}/>:<Save size={16}/>} <span className="factory-action-label">{saving?'Guardando…':saveState==='offline'?'Sin conexión':saveState==='saved'?'✓ Guardado':'Guardar'}</span></button>
-        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy||videoBusy} aria-label={busy?'Preparando archivo':slide.videoPath?'Exportar video actual':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':slide.videoPath?'Exportar video':'Exportar PNG'}</span></button>
+        <button type="button" className="btn dark" onClick={()=>void exportOne(i)} disabled={!!busy||videoBusy} aria-label={busy?'Preparando archivo':pageVideos(slides,i,style.seamlessEnabled).length?'Exportar video actual':'Exportar slide actual como PNG'}><Download size={16}/> <span className="factory-action-label">{busy?'Preparando…':pageVideos(slides,i,style.seamlessEnabled).length?'Exportar video':'Exportar PNG'}</span></button>
       </div>
     </div>
 
@@ -2368,7 +2375,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     {studioTab==='download'&&<section className="factory-download-step">
       <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
         <h2>Tu carrusel, listo para publicar.</h2>
-        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos. Las fotos PNG son de al menos 1080 × 1350 y los clips editados se procesan en 1080 × 1350. Al editar un clip se exporta con recorte, giro y sonido en MP4 o WebM; los clips sin cambios conservan su archivo original. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+        <p>{slides.filter((_,n)=>!pageVideos(slides,n,style.seamlessEnabled).length).length} imágenes PNG y {slides.filter((_,n)=>!!pageVideos(slides,n,style.seamlessEnabled).length).length} videos. Las fotos PNG son de al menos 1080 × 1350 y los clips editados se procesan en 1080 × 1350. Al editar un clip se exporta con recorte, giro y sonido en MP4 o WebM; los clips sin cambios conservan su archivo original. {style.seamlessEnabled?'Si un video cruza un corte, sus partes se exportan en archivos separados con la misma posición temporal y el encuadre alineado.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
       {videoExportProgress&&<p className="factory-video-progress" role="status">{videoExportProgress}</p>}
       <div className="factory-canvas-exports">
