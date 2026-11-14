@@ -225,11 +225,13 @@ test('Centro de Productos: las seis portadas originales se cargan sin modificar 
  assert.doesNotMatch(center,/src="\.\/portadas\/(?:0[1-6].*\.png)"/,'No prometer PNG que no existen');
 });
 
-test('Cuatro portadas originales: clase, Lab y dos productos digitales del podcast',()=>{
+test('Clase archivada; Lab y productos digitales siguen públicos',()=>{
  const center=readFileSync('centro/index.html','utf8');
  const script=readFileSync('centro/centro.js','utf8');
+ const archivedCover=readFileSync('centro/portadas/07-tu-primera-web-con-ia.svg','utf8');
+ assert.match(archivedCover,/^<svg xmlns=/,'Archived class cover asset retained for relaunch');
+ assert.doesNotMatch(center,/data-product="web-class"/,'Paused class is hidden from public catalog');
  const expected=[
-  ['07-tu-primera-web-con-ia.svg','web-class'],
   ['08-content-lab.svg','content-lab'],
   ['09-no-voy-tarde.svg','no-voy-tarde'],
   ['10-empezar-de-nuevo.svg','empezar-de-nuevo']
@@ -242,7 +244,7 @@ test('Cuatro portadas originales: clase, Lab y dos productos digitales del podca
   assert.match(center,new RegExp('data-product="'+code+'"'),'Producto existente '+code);
   assert.match(center,new RegExp('data-detail="'+code+'"'),'Ficha de producto intacta '+code);
  }
- assert.equal((center.match(/class="program-cover program-cover-image"/g)||[]).length,2,'Dos portadas de programas');
+ assert.equal((center.match(/class="program-cover program-cover-image"/g)||[]).length,1,'Solo Content Lab permanece visible');
  assert.equal((center.match(/class="tile-cover tile-cover-image tile-cover-resource"/g)||[]).length,2,'Dos portadas de recursos');
  assert.match(script,/releases=\{'web-class':false,'content-lab':false\}/,'Acceso cerrado por defecto');
  assert.match(script,/from\('podcast_hub_entitlements'\)/,'Acceso por compra verificada');
