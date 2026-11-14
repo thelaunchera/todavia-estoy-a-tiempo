@@ -30,17 +30,18 @@ test('video can be chosen on the same touch canvas as photos',()=>{
   const factory=src('CarouselFactory.tsx');
   assert.match(editor,/Subir video/);
   assert.match(editor,/videoPages=\{videoPages\}/);
-  assert.match(canvas,/<video src=\{video\.src\} controls playsInline/);
+  assert.match(canvas,/CarouselVideoLayer/);
+  assert.match(src('CarouselVideoLayer.tsx'),/<video ref=\{preview\} src=\{video\.src\}/);
   assert.match(factory,/accept="video\/mp4,video\/quicktime,video\/webm/);
   assert.match(factory,/videoPages=\{videoPages\}/);
-  assert.match(factory,/<video src=\{activeVideo\.url\} controls playsInline/);
+  assert.match(factory,/src=\{activeVideo\.url\} controls playsInline/);
 });
 
-test('export is mixed: videos are originals and images remain PNG',()=>{
+test('export is mixed: edited videos are processed and photos remain PNG',()=>{
   const factory=src('CarouselFactory.tsx');
   const app=src('App.tsx');
-  assert.match(factory,/carouselVideoMedia\.download\(slides\[n\]\.videoPath!\)/);
-  assert.match(factory,/videoFilename\(n,slides\[n\]\.videoPath!\)/);
+  assert.match(factory,/carouselVideoMedia\.download\(part\.videoPath\)/);
+  assert.match(factory,/videoFilename\(n,part\.videoPath\)/);
   assert.match(factory,/const blob=await canvasToPngBlob\(canvas\)/);
   assert.match(factory,/Preparar mis archivos/);
   assert.match(app,/readCarouselDesign\(p\.designData\|\|''\)\.slides\?\.some/);
