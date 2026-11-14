@@ -2,6 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {loadLittleDetoursPreviews, type TldCharacterPreview} from './supabase-client';
 import {Camera, ExternalLink, FolderOpen, Image as ImageIcon, Info, UserRound} from 'lucide-react';
 import TheLittleDetoursExpressionBacklog, {ExpressionsSummary} from './TheLittleDetoursExpressionBacklog';
+import {expressionCounts} from './youtube/character-expression-plan';
 import './the-little-detours-characters.css';
 
 // Verified 2026-11-14 via the private Google Drive master character folders.
@@ -158,13 +159,13 @@ export default function TheLittleDetoursCharacters() {
     return ()=>{active=false};
   },[]);
   const linked=cast.reduce((n,character)=>n+character.shots.filter(s=>Boolean(s.url)).length,0);
-  const pending=cast.reduce((n,character)=>n+character.shots.filter(s=>!s.url).length,0);
+  const pending=expressionCounts.existing+expressionCounts.new;
   return <section className="tld-cast-section" aria-labelledby="tld-cast-title">
     <div className="tld-cast-heading">
       <div>
         <span className="tle-yt-eyebrow"><UserRound size={16}/> PERSONAJES OFICIALES · BIBLIOTECA MÁSTER</span>
         <h3 id="tld-cast-title">Nora, Eli &amp; Pip</h3>
-        <p>{linked} fotografías originales en Drive · {pending} vistas y expresiones para completar después.</p>
+        <p>{linked} fotografías originales en Drive · {pending} ángulos, poses y expresiones con prompts pendientes de generar.</p>
       </div>
       <a href="https://drive.google.com/drive/folders/1ltmct1l5vxn5aYtypelJ5RKP9ihDLax8" target="_blank" rel="noopener noreferrer" className="tld-open-master">
         <FolderOpen size={17}/> Abrir carpeta máster
