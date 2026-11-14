@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import { ImagePlus, Maximize2, Minimize2, Upload, Trash2, Undo2, Redo2, Type, Shapes, Layers3, Pencil, Check, X, Sticker, Palette, Film } from 'lucide-react';
 import TouchLayerCanvas, { type TouchLayer } from './TouchLayerCanvas';
 import type { TouchRect } from './TouchGeometry';
+import type {CarouselVideoTransform} from './CarouselVideoTransform';
 import type { PanoramaLayer } from './PanoramaLayers';
 import { assetCategory, displayAssetName, cleanAssetName, type LibraryAsset } from './MediaAsset';
 import './PanoramaEditor.css';
@@ -13,7 +14,8 @@ type Props = {
   preview: string; textOverlay?: string; count: number; seamless: boolean; layers: TouchLayer[];
   pageIndex?:number;onPageIndexChange?:(index:number)=>void;
   onChooseVideo?:()=>void;videoUploading?:boolean;
-  videoPages?:{page:number;name:string;src?:string}[];
+  videoPages?:{page:number;name:string;src?:string;transform?:CarouselVideoTransform;trimStart?:number;trimEnd?:number}[];
+  onVideoChange?:(page:number,value:CarouselVideoTransform)=>void;
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
   onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
@@ -38,7 +40,7 @@ type Props = {
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
-  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,onChooseVideo,videoUploading=false,videoPages=[],
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,onChooseVideo,videoUploading=false,videoPages=[],onVideoChange,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   // On tablet and desktop, show the dedicated editing library immediately.
@@ -393,7 +395,7 @@ export default function PanoramaEditor({
     <div className={'panorama-body'+(!libraryOpen?' panorama-library-collapsed':'')}>
       {libraryOpen&&(mobileGallery&&typeof document!=='undefined'?createPortal(libraryPanel,document.body):libraryPanel)}<div className="panorama-workspace">
       {error && <div className="panorama-error" role="alert">{error} <button type="button" onClick={onRetry}>Reintentar vista previa</button></div>}
-      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} videoPages={videoPages} continuous={seamless} ratio={count * 1080 / 1350}
+      <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} videoPages={videoPages} onVideoChange={onVideoChange} continuous={seamless} ratio={count * 1080 / 1350}
         pageIndex={pageIndex} onPageIndexChange={onPageIndexChange}
         fullscreen={expanded}
         onSelectionChange={setSelectedLayerId}
