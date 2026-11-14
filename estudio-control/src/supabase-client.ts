@@ -766,6 +766,28 @@ export async function getPodcastReelAudioUrl(path:string):Promise<string>{
  return data.signedUrl;
 }
 
+/** Galería privada de referencias de The Little Detours (no es OFF BRIEF).
+ * Las URLs de origen permanecen en una tabla RLS, nunca en el código público.
+ * Drive queda como archivo maestro; las vistas se cargan sin iframes ni cookies de Google.
+ */
+export type TldCharacterPreview = {
+  shot_id: string;
+  character_name: 'Nora' | 'Eli' | 'Pip';
+  file_name: string;
+  drive_file_id: string;
+  source_url: string;
+};
+export async function loadLittleDetoursPreviews(): Promise<TldCharacterPreview[]> {
+  if (!client) throw new Error('Abre tu Studio para consultar las fotos privadas.');
+  await owner();
+  const { data, error } = await client
+    .from('podcast_tld_character_sources')
+    .select('shot_id,character_name,file_name,drive_file_id,source_url')
+    .order('shot_id', { ascending: true });
+  if (error) throw new Error('No se pudieron cargar las referencias: ' + error.message);
+  return (data || []) as TldCharacterPreview[];
+}
+
 /** Galería privada de fotos de la serie Fuera de Brief (YouTube). */
 const YOUTUBE_PHOTO_BUCKET='podcast-youtube-storyboard';
 const YOUTUBE_PHOTO_MAX_BYTES=15_000_000;
