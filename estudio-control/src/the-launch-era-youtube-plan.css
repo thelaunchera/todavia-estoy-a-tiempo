@@ -1,0 +1,61 @@
+/* Current The Launch Era YouTube project; legacy OFF BRIEF lives below in an archive disclosure. */
+.tle-yt-current{display:grid;gap:18px;min-width:0;color:#191919}
+.tle-yt-current *{box-sizing:border-box}
+.tle-yt-hero{background:#faf8f3;border:1px solid #e9e5da;border-radius:22px;padding:clamp(24px,4vw,46px);display:flex;align-items:center;justify-content:space-between;gap:26px;overflow:hidden}
+.tle-yt-hero-text{max-width:710px;min-width:0}
+.tle-yt-eyebrow,.tle-yt-card-head{display:flex;gap:8px;align-items:center;font-size:.73rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#555}
+.tle-yt-hero h2{font:800 clamp(2.3rem,5.5vw,4.7rem)/1.06 Prompt,Arial,sans-serif;letter-spacing:-.055em;margin:15px 0 12px;color:#191919}
+.tle-yt-hero p{line-height:1.62;max-width:660px}
+.tle-yt-hero .tle-yt-subtitle{font-size:clamp(1.06rem,2.2vw,1.38rem);font-weight:800;margin:0}
+.tle-yt-motto{font-style:italic;font-size:.99rem}
+.tle-yt-pills{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.tle-yt-pills span{display:inline-flex;align-items:center;gap:6px;border:1px solid #dedad0;background:#fff;border-radius:99px;font-size:.78rem;padding:8px 11px}
+.tle-yt-hero-art{background:#f2d85b;color:#191919;min-width:225px;min-height:220px;padding:30px 24px 24px;border-radius:115px 115px 18px 18px;display:flex;flex-direction:column;justify-content:center;transform:rotate(4deg);box-shadow:0 14px 20px #19191914}
+.tle-yt-hero-art span{font:750 14px/1 Prompt,Arial,sans-serif;letter-spacing:.16em}
+.tle-yt-hero-art strong{font:900 clamp(1.75rem,3vw,2.6rem)/.98 Prompt,Arial,sans-serif;letter-spacing:-.075em;margin:10px 0}
+.tle-yt-hero-art small{letter-spacing:.23em;font-weight:850}
+.tle-yt-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:4px}
+.tle-yt-heading h3{font:800 clamp(1.55rem,3vw,2.2rem)/1.15 Prompt,Arial,sans-serif;letter-spacing:-.035em;margin:7px 0}
+.tle-yt-heading p{margin:6px 0;color:#555;line-height:1.5}
+.tle-yt-status{border:1px solid #d0d9de;background:#e9f2f7;color:#314e63;border-radius:99px;padding:9px 14px;font-weight:750;font-size:.78rem;white-space:nowrap}
+.tle-yt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.tle-yt-card{background:#fff;border:1px solid #e6e5e0;padding:clamp(18px,2.4vw,29px);border-radius:18px;min-width:0}
+.tle-yt-card h4{font:800 clamp(1.22rem,2vw,1.65rem)/1.25 Prompt,Arial,sans-serif;letter-spacing:-.025em;margin:16px 0 8px;color:#191919}
+.tle-yt-card p{line-height:1.65;margin:9px 0;color:#424242}
+.tle-yt-card-head{justify-content:space-between;flex-wrap:wrap;gap:10px}
+.tle-yt-card-head span{display:inline-flex;align-items:center;gap:8px}
+.tle-yt-card-head small{font-weight:700;letter-spacing:0;text-transform:none;color:#656565}
+.tle-yt-pilot{background:#fffdf4;border-color:#eee1a1}
+.tle-yt-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.tle-yt-actions button{display:inline-flex;align-items:center;gap:9px;border:1px solid #191919;background:#191919;color:#fff;border-radius:11px;padding:12px 15px;cursor:pointer;font:750 .81rem/1.35 Prompt,Arial,sans-serif}
+.tle-yt-actions button:hover{background:#323232}
+.tle-yt-actions button:focus-visible,.tle-yt-episode button:focus-visible,.yt-archive-section summary:focus-visible{outline:3px solid #8bbbd9;outline-offset:3px}
+.tle-yt-muted{color:#777!important;font-size:.81rem;display:flex;gap:8px;align-items:flex-start}
+.tle-yt-muted svg{flex-shrink:0;margin-top:3px}
+.tle-yt-episode-list{display:grid;gap:8px;margin-top:15px}
+.tle-yt-episode{border:1px solid #e8e8e5;border-radius:12px;overflow:hidden;background:#fdfcf9}
+.tle-yt-episode.selected{border-color:#e9cf69;background:#fffdf2}
+.tle-yt-episode button{display:flex;align-items:center;gap:12px;width:100%;background:transparent;border:0;padding:12px 14px;text-align:left;cursor:pointer;color:#191919}
+.tle-yt-num{display:grid;place-items:center;background:#e6f0f7;border-radius:9px;flex:0 0 42px;height:42px;font-weight:800}
+.tle-yt-episode-copy{min-width:0;flex:1;display:grid;gap:3px}
+.tle-yt-episode-copy strong{font-size:.89rem}
+.tle-yt-episode-copy small{font-size:.74rem;color:#6b6b6b}
+.tle-yt-chevron{font-size:1.45rem;line-height:1}
+.tle-yt-episode p{padding:0 17px 16px 68px;margin:0;font-size:.84rem}
+.tle-yt-workflow{margin:16px 0 8px;padding-left:22px;display:grid;gap:12px}
+.tle-yt-workflow li{line-height:1.6;padding-left:5px}
+.tle-yt-channel-card pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#faf8f3;border:1px solid #ebe7dd;border-radius:12px;padding:18px;font:400 .9rem/1.75 Prompt,Arial,sans-serif;color:#333;max-height:360px;overflow-y:auto}
+.tle-yt-notice{padding:13px 17px;background:#f3f5f7;border-radius:11px;font-weight:700;display:flex;align-items:center;gap:8px}
+.yt-archive-section{border:1px solid #dddcd7;background:#f7f6f2;border-radius:18px;min-width:0;overflow:hidden}
+.yt-archive-section>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:13px;padding:23px 25px;color:#191919;min-height:86px}
+.yt-archive-section>summary::-webkit-details-marker{display:none}
+.yt-archive-section>summary:after{content:'+';font:800 26px/1 Prompt,Arial,sans-serif;margin-left:auto}
+.yt-archive-section[open]>summary:after{content:'−'}
+.yt-archive-section>summary .yt-archive-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:12px;background:#ecebe6}
+.yt-archive-section>summary strong{display:block;font:800 1.08rem/1.4 Prompt,Arial,sans-serif}
+.yt-archive-section>summary small{display:block;font-size:.76rem;line-height:1.5;color:#666}
+.yt-archive-content{display:grid;gap:18px;padding:18px;border-top:1px solid #e5e3dc;background:#fff}
+.yt-archive-content .yt-hero{background:#f4f3f0}
+.yt-archive-content .yt-kicker{color:#666}
+@media(max-width:800px){.tle-yt-hero-art{display:none}.tle-yt-grid{grid-template-columns:minmax(0,1fr)}.tle-yt-heading{align-items:flex-start;flex-direction:column}.tle-yt-status{white-space:normal}}
+@media(max-width:500px){.tle-yt-hero{padding:25px 21px}.tle-yt-hero h2{font-size:2.55rem}.tle-yt-episode p{padding-left:15px}.yt-archive-section>summary{padding:18px 16px}.yt-archive-content{padding:12px}.tle-yt-actions button{width:100%;justify-content:center}}
