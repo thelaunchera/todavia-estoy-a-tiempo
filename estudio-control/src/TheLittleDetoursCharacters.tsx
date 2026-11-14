@@ -1,11 +1,12 @@
-import {useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
+import {loadLittleDetoursPreviews, type TldCharacterPreview} from './supabase-client';
 import {Camera, ExternalLink, FolderOpen, Image as ImageIcon, Info, UserRound} from 'lucide-react';
 import './the-little-detours-characters.css';
 
 // Verified 2026-11-14 via the private Google Drive master character folders.
 // Keep all media in the original private Drive files; do not upload duplicates,
 // publish source assets, or alter the archived OFF BRIEF series.
-// Drive file-preview embeds require the owner to be signed in to Google.
+// Original Drive files remain private; inline previews load from an owner-only RLS record.
 type MasterShot = {label: string; fileName: string; url: string};
 type Character = {
   name: string;
@@ -63,20 +64,53 @@ const cast: Character[] = [
   }
 ];
 
-function CharacterCard({character}: {character:Character}) {
+
+function CharacterCard({
+  character, sources, loading
+}: {
+  character:Character;
+  sources:Map<string,TldCharacterPreview>;
+  loading:boolean;
+}) {
   const shots=character.shots.filter(s=>Boolean(s.url));
-  const [activeUrl,setActiveUrl]=useState(shots[0]?.url ?? '');
-  const active=shots.find(s=>s.url===activeUrl) ?? shots[0];
-  // Google Drive /view URLs are NOT image sources. Embed a signed-in Drive
-  // preview instead, with the original file link as an explicit fallback.
-  const previewSrc=active?.url.replace(/\/view(?:\?.*)?$/, '/preview') ?? '';
+  const [activeUrl,setActiveUrl]=useState(shots[0]?.url??'');
+  const active=shots.find(s=>s.url===activeUrl)??shots[0];
+  const shotId=active?.fileName.replace(/\.png$/i,'')??'';
+  const sourceUrl=sources.get(shotId)?.source_url??'';
+  const [imageError,setImageError]=useState(false);
+  const [imageLoaded,setImageLoaded]=useState(false);
+
+  useEffect(()=>{
+    setImageError(false);
+    setImageLoaded(false);
+  },[sourceUrl,shotId]);
 
   return <article className="tld-cast-card">
     <div className="tld-cast-image">
-      {previewSrc
-        ? <iframe key={previewSrc} src={previewSrc} title={'Vista previa privada de '+character.name+' — '+active.label}
-            loading="lazy" allow="fullscreen" referrerPolicy="no-referrer"/>
-        : <div className="tld-cast-empty"><Camera size={28}/><strong>{character.name}</strong><small>Foto máster pendiente</small></div>}
+      {sourceUrl&&!imageError
+        ? <>
+            {!imageLoaded&&<div className="tld-image-loading"><Camera size={24}/><span>Cargando foto de {character.name}…</span></div>}
+            <img
+              key={shotId}
+              src={sourceUrl}
+              alt={'Referencia original de '+character.name+' · '+active.label}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onLoad={()=>setImageLoaded(true)}
+              onError={()=>setImageError(true)}
+              style={{display:imageLoaded?'block':'none'}}
+            />
+          </>
+        : <div className="tld-cast-empty">
+            <Camera size={27}/>
+            <strong>{character.name}</strong>
+            <small>{loading?'Buscando fotografía original…':
+              imageError?'La miniatura no se pudo cargar aquí.':
+              'Vista previa no disponible en esta sesión.'}</small>
+            {active?.url&&<a href={active.url} target="_blank" rel="noopener noreferrer" className="tld-cast-preview-open">
+              <ExternalLink size={15}/> Abrir foto original en Drive
+            </a>}
+          </div>}
     </div>
     <div className="tld-cast-info">
       <span className="tld-cast-role">{character.role}</span>
@@ -88,17 +122,17 @@ function CharacterCard({character}: {character:Character}) {
         <span><ImageIcon size={15}/> Fotografías individuales</span>
         <small>{shots.length} verificadas · {character.shots.length-shots.length} pendientes</small>
       </div>
-      <div className="tld-cast-shots">{character.shots.map(shot=><div className="tld-cast-shot" key={shot.label}>
-        <span><strong>{shot.label}</strong><small>{shot.url?shot.fileName:'Para crear después'}</small></span>
-        {shot.url
-          ? <button type="button" className={active?.url===shot.url?'selected':''}
-              onClick={()=>setActiveUrl(shot.url)} aria-pressed={active?.url===shot.url}>
-              Ver aquí
-            </button>
-          : <small>Pendiente</small>}
-      </div>)}</div>
+      <div className="tld-cast-shots">
+        {character.shots.map(shot=><div className="tld-cast-shot" key={shot.label}>
+          <span><strong>{shot.label}</strong><small>{shot.url?shot.fileName:'Para crear después'}</small></span>
+          {shot.url
+            ? <button type="button" className={active?.url===shot.url?'selected':''}
+              onClick={()=>setActiveUrl(shot.url)} aria-pressed={active?.url===shot.url}>Ver foto</button>
+            : <small>Pendiente</small>}
+        </div>)}
+      </div>
       {active?.url&&<a className="tld-active-original" href={active.url} target="_blank" rel="noopener noreferrer">
-        <ExternalLink size={15}/> Abrir fotografía original en Drive
+        <ExternalLink size={15}/> Abrir fotografía original en Google Drive
       </a>}
       <a className="tld-cast-drive" href={character.folder} target="_blank" rel="noopener noreferrer">
         <FolderOpen size={16}/> Abrir carpeta de {character.name}
@@ -108,6 +142,19 @@ function CharacterCard({character}: {character:Character}) {
 }
 
 export default function TheLittleDetoursCharacters() {
+  const [previews,setPreviews]=useState<TldCharacterPreview[]>([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState('');
+  const sources=useMemo(()=>new Map(previews.map(p=>[p.shot_id,p])),[previews]);
+  useEffect(()=>{
+    let active=true;
+    void loadLittleDetoursPreviews().then(found=>{
+      if(active)setPreviews(found);
+    }).catch(err=>{
+      if(active)setError(err instanceof Error?err.message:'No se pudieron leer las fotos.');
+    }).finally(()=>{if(active)setLoading(false)});
+    return ()=>{active=false};
+  },[]);
   const linked=cast.reduce((n,character)=>n+character.shots.filter(s=>Boolean(s.url)).length,0);
   const pending=cast.reduce((n,character)=>n+character.shots.filter(s=>!s.url).length,0);
   return <section className="tld-cast-section" aria-labelledby="tld-cast-title">
@@ -115,17 +162,20 @@ export default function TheLittleDetoursCharacters() {
       <div>
         <span className="tle-yt-eyebrow"><UserRound size={16}/> PERSONAJES OFICIALES · BIBLIOTECA MÁSTER</span>
         <h3 id="tld-cast-title">Nora, Eli &amp; Pip</h3>
-        <p>{linked} fotografías originales vinculadas desde Drive · {pending} vistas y expresiones para completar después.</p>
+        <p>{linked} fotografías originales en Drive · {pending} vistas y expresiones para completar después.</p>
       </div>
       <a href="https://drive.google.com/drive/folders/1ltmct1l5vxn5aYtypelJ5RKP9ihDLax8" target="_blank" rel="noopener noreferrer" className="tld-open-master">
         <FolderOpen size={17}/> Abrir carpeta máster
       </a>
     </div>
-    <div className="tld-cast-cards">{cast.map(character=><CharacterCard key={character.name} character={character}/>)}</div>
+    {error&&<p className="tld-cast-warning" role="status">{error} Puedes abrir las fotos originales tocando sus enlaces de Drive.</p>}
+    <div className="tld-cast-cards">
+      {cast.map(character=><CharacterCard key={character.name} character={character} sources={sources} loading={loading}/>)}
+    </div>
     <p className="tld-cast-help"><Info size={16}/>
-      Las ocho fotografías son archivos individuales originales de Drive; no se copiaron ni se hicieron públicas.
-      La vista previa usa Google Drive y puede pedir iniciar sesión; el enlace «Abrir fotografía original» siempre apunta al archivo correspondiente.
-      Las vistas y expresiones faltantes quedan pendientes sin bloquear la producción en Google Flow.
+      La galería utiliza los enlaces de imagen de Higgsfield guardados solo para tu sesión privada del Studio, sin iframes de Google.
+      Drive conserva las ocho fotografías originales sin cambios; abre sus enlaces si alguna miniatura no carga.
+      Los ángulos y gestos que faltan siguen pendientes.
     </p>
   </section>;
 }
