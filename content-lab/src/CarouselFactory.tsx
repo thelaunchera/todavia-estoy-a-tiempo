@@ -1739,7 +1739,10 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     if((longText||notes.length>0)&&!window.confirm(
       (longText?'Algunos textos podrían cortarse en el PNG. ':'')+
       (notes.length?notes.length+' imagen(es) podrían verse borrosas al ampliarlas. ':'')+
-      '¿Exportar de todas formas?'))return;
+      '¿Exportar de todas formas?')){
+      if(audio)void audio.close().catch(()=>{});
+      return;
+    }
     setBusy('all');
     const token=exportRunRef.current+1;
     exportRunRef.current=token;
@@ -2337,11 +2340,11 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     {studioTab==='download'&&<section className="factory-download-step">
       <div className="factory-step-intro"><span className="factory-step-eyebrow">PASO 5 DE 5 · DESCARGAR</span>
         <h2>Tu carrusel, listo para publicar.</h2>
-        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos originales. Los PNG salen en 1080 × 1350 como mínimo; cada video conserva su imagen y sonido. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
+        <p>{slides.filter(part=>!part.videoPath).length} imágenes PNG y {slides.filter(part=>!!part.videoPath).length} videos. Al editar un clip se exporta con recorte, giro y sonido en MP4 o WebM; los clips sin cambios conservan su archivo original. {style.seamlessEnabled?'El seamless fotográfico se cortará en los límites de cada slide.':'Cada slide conservará su propio fondo y composición.'}</p>
       </div>
       {videoExportProgress&&<p className="factory-video-progress" role="status">{videoExportProgress}</p>}
       <div className="factory-canvas-exports">
-        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y clips como MP4/MOV/WebM originales.</span></div>
+        <div><strong>Tu carrusel · {slides.length} slides</strong><span>Fotos como PNG individuales y videos editados como MP4/WebM, con el sonido y el encuadre aplicados.</span></div>
         <button type="button" className="btn dark" onClick={exportAll} disabled={!!busy||videoBusy}>Preparar mis archivos <Download size={17}/></button>
       </div>
       {downloads.length>0&&<div className="factory-exports factory-canvas-download-list">
