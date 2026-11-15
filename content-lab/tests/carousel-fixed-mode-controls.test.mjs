@@ -67,7 +67,8 @@ test('Mobile canvas remains present and layer-specific controls replace the crea
  assert.ok(studio.includes('studio-app-inspector'));
  assert.ok(studioCss.includes('.studio-app-canvas{position:sticky'));
  assert.ok(studioCss.includes('.studio-app-context-dock{position:fixed'));
- assert.ok(panorama.includes('onSelectionChange={setSelectedLayerId}'));
+ assert.ok(panorama.includes('onSelectionChange={handleLayerSelection}'));
+ assert.ok(panorama.includes('onLayerSelectionChange?.(id)'),'Selected image is propagated to the media panel');
  assert.ok(panorama.includes('panorama-discovery-categories'));
  assert.ok(panoramaCss.includes('.panorama-editor>.panorama-body{position:sticky'));
  assert.ok(panoramaCss.includes('.panorama-editor.layer-selected>.panorama-primary-actions{display:none!important}'));
@@ -75,4 +76,18 @@ test('Mobile canvas remains present and layer-specific controls replace the crea
  assert.ok(touch.includes('touch-editor-context-inspector'));
  assert.ok(touch.includes('touch-editor-mini-actions'));
  assert.ok(touchCss.includes('.touch-editor-context-dock{position:fixed'));
+});
+
+test('Photo and video use independent selection, gesture and rotation controls',()=>{
+ const touch=read('src/TouchLayerCanvas.tsx');
+ const panorama=read('src/PanoramaEditor.tsx');
+ const factory=read('src/CarouselFactory.tsx');
+ assert.ok(touch.includes("editable={interactionMode==='edit'&&!chosen}"),'Video gestures are disabled while a photo is selected');
+ assert.ok(touch.includes("setSelected('');setEditingText('');setContextInspector(null)"),'Tapping video clears an old image selection');
+ assert.ok(panorama.includes('onLayerSelectionChange={')===false,'Selection propagation is handled by the canvas callback');
+ assert.ok(panorama.includes('onLayerSelectionChange?.(id)'));
+ assert.ok(factory.includes('onLayerSelectionChange={setSelectedCanvasLayerId}'));
+ assert.ok(factory.includes('selectedCanvasLayer?<div className="factory-video-tools"'),'Photo controls replace video controls');
+ assert.ok(factory.includes('movePanoramaLayer(selectedCanvasLayer.kind,selectedCanvasLayer.id'),'Photo rotation targets the selected image');
+ assert.ok(factory.includes('selectedCanvasLayer.rect,angle:Number(e.target.value)'));
 });

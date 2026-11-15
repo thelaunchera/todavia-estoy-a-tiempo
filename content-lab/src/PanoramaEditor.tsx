@@ -16,6 +16,7 @@ type Props = {
   onChooseVideo?:()=>void;videoUploading?:boolean;
   videoPages?:{page:number;name:string;src?:string;transform?:CarouselVideoTransform;trimStart?:number;trimEnd?:number}[];
   onVideoChange?:(page:number,value:CarouselVideoTransform)=>void;
+  onLayerSelectionChange?:(id:string|null)=>void;
   canExtendBackground?:boolean;onExtendBackground?:()=>void;focusLayerId?:string;
   assets: LibraryAsset[]; images: Record<string, string>; loadImage: (id: string) => void; brandId:string;
   onUploadToLibrary:(files:File[],kind:'photo'|'sticker')=>Promise<void>;
@@ -40,7 +41,7 @@ type Props = {
 export default function PanoramaEditor({
   preview, textOverlay, count, seamless, layers, assets, images, loadImage, brandId,onUploadToLibrary,onRenameAsset, onCommit, onUpdate, onAddLayer, onUndo, onRedo, canUndo, canRedo, onAdd,
   onRemove, onReorder, textElements, onRemoveText, onUpload, error, onRetry, onCopySticker,onToggleLock,onDuplicateText,onDuplicateLayer,
-  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,onChooseVideo,videoUploading=false,videoPages=[],onVideoChange,
+  canExtendBackground,onExtendBackground,focusLayerId,backgroundColor,onBackgroundColor,onClearBackground,pageIndex,onPageIndexChange,onChooseVideo,videoUploading=false,videoPages=[],onVideoChange,onLayerSelectionChange,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   // On tablet and desktop, show the dedicated editing library immediately.
@@ -49,6 +50,10 @@ export default function PanoramaEditor({
   const [libraryKind,setLibraryKind]=useState<'photo'|'sticker'|'all'>('sticker');
   const [librarySection,setLibrarySection]=useState<'all'|'shapes'|'photos'|'stickers'>('stickers');
   const [selectedLayerId,setSelectedLayerId]=useState<string|null>(null);
+  const handleLayerSelection=React.useCallback((id:string|null)=>{
+    setSelectedLayerId(id);
+    onLayerSelectionChange?.(id);
+  },[onLayerSelectionChange]);
   const [layersOpen,setLayersOpen]=useState(false);
   const [focusedLayerId,setFocusedLayerId]=useState('');
   const containerRef=useRef<HTMLElement>(null);
@@ -398,7 +403,7 @@ export default function PanoramaEditor({
       <TouchLayerCanvas preview={preview} textOverlay={textOverlay} layers={layers} videoPages={videoPages} onVideoChange={onVideoChange} continuous={seamless} ratio={count * 1080 / 1350}
         pageIndex={pageIndex} onPageIndexChange={onPageIndexChange}
         fullscreen={expanded}
-        onSelectionChange={setSelectedLayerId}
+        onSelectionChange={handleLayerSelection}
         focusLayerId={focusedLayerId||focusLayerId}
         pageCount={count} onCommit={onCommit} onUpdate={onUpdate} onRemove={onRemove} onReorder={onReorder}
          onCopySticker={onCopySticker} onToggleLock={onToggleLock} onDuplicateText={onDuplicateText} onDuplicateLayer={onDuplicateLayer}
