@@ -1218,6 +1218,8 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     ...pageLayers,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
   const selectedCanvasLayer=panoramaLayers.find(layer=>layer.id===selectedCanvasLayerId);
+  const selectedCanvasAngle=selectedCanvasLayer&&'angle' in selectedCanvasLayer.rect
+    ?(selectedCanvasLayer.rect.angle??0):0;
   // Native slide photos, stickers and free-canvas text sit ABOVE the video
   // in TouchLayerCanvas. Saved foreground layers also sit above it. Repaint
   // only the covered portion of those layers after each encoded video frame.
@@ -2164,12 +2166,12 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         {selectedCanvasLayer?<div className="factory-video-tools" role="group" aria-label="Rotación del elemento seleccionado">
           <p>Ahora estás editando {selectedCanvasLayer.kind==='photo'?'esta foto':'este elemento'}. El video no se modificará.</p>
           <label htmlFor="carousel-selected-layer-rotation">
-            Girar {selectedCanvasLayer.kind==='photo'?'foto':'elemento'} <output>{Math.round(selectedCanvasLayer.rect.angle||0)}°</output>
+            Girar {selectedCanvasLayer.kind==='photo'?'foto':'elemento'} <output>{Math.round(selectedCanvasAngle)}°</output>
           </label>
           <input id="carousel-selected-layer-rotation" type="range" min="-180" max="180" step="1"
             aria-label={selectedCanvasLayer.kind==='photo'?'Girar foto seleccionada':'Girar elemento seleccionado'}
             disabled={!!selectedCanvasLayer.locked||(style.lockedLayerIds||[]).includes(selectedCanvasLayer.id)}
-            value={Math.max(-180,Math.min(180,selectedCanvasLayer.rect.angle||0))}
+            value={Math.max(-180,Math.min(180,selectedCanvasAngle))}
             onChange={e=>movePanoramaLayer(selectedCanvasLayer.kind,selectedCanvasLayer.id,
               {...selectedCanvasLayer.rect,angle:Number(e.target.value)})}/>
           <small>También puedes usar Girar en las herramientas que aparecen al tocar la foto en el lienzo.</small>
