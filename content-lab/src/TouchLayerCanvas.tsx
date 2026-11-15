@@ -867,8 +867,11 @@ export default function TouchLayerCanvas({
           alt="" draggable={false} aria-hidden="true" style={{zIndex:10}}/>}
         {videoPages.filter(video=>video.page>=0&&video.page<pageCount).map(video=>
           <CarouselVideoLayer key={'video-slide-'+video.page} video={video}
-            pageCount={pageCount} seamless={continuous} editable={interactionMode==='edit'}
-            onChange={onVideoChange} onSelect={onPageIndexChange}/>
+            pageCount={pageCount} seamless={continuous} editable={interactionMode==='edit'&&!chosen}
+            onChange={onVideoChange} onSelect={page=>{
+              setSelected('');setEditingText('');setContextInspector(null);
+              onPageIndexChange?.(page);
+            }}/>
         )}
         {snapGuides&&<div className="touch-editor-smart-guides" aria-hidden="true">
           {snapGuides.x!==undefined&&<span className="vertical" style={{left:snapGuides.x*100+'%'}}/>}
