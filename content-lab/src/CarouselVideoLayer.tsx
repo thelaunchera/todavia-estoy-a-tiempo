@@ -6,7 +6,7 @@ type VideoPage={
   trimStart?:number;trimEnd?:number;
 };
 type Props={
-  video:VideoPage;pageCount:number;editable:boolean;seamless:boolean;
+  video:VideoPage;pageCount:number;editable:boolean;seamless:boolean;selected?:boolean;
   onChange?:(page:number,transform:CarouselVideoTransform)=>void;
   onSelect?:(page:number)=>void;
 };
@@ -14,7 +14,7 @@ type Props={
  * Its anchor page remains stable while the rectangle can cross dotted cuts.
  * Normal mode retains the original one-page crop.
  */
-export default function CarouselVideoLayer({video,pageCount,editable,seamless,onChange,onSelect}:Props){
+export default function CarouselVideoLayer({video,pageCount,editable,seamless,selected:active=false,onChange,onSelect}:Props){
   const [draft,setDraft]=useState(()=>normalizeVideoTransform(video.transform));
   const current=useRef(draft);
   const dragging=useRef<{
@@ -111,7 +111,7 @@ export default function CarouselVideoLayer({video,pageCount,editable,seamless,on
       commit(current.current);
     }
   };
-  const d=draft,selected=editable&&!!video.src;
+  const d=draft,selected=editable&&active&&!!video.src;
   return <div aria-label={'Video del slide '+(video.page+1)}
     style={{position:'absolute',left:seamless?'0%':(100*video.page/pageCount)+'%',
       top:0,width:seamless?'100%':(100/pageCount)+'%',
@@ -124,7 +124,7 @@ export default function CarouselVideoLayer({video,pageCount,editable,seamless,on
         transform:'rotate('+d.rotation+'deg)',transformOrigin:'center',
         border:selected?'2px solid #F2D85B':'1px solid transparent',
         boxSizing:'border-box',background:'#191919',overflow:'hidden',
-        touchAction:selected?'none':'auto',pointerEvents:selected?'auto':'none',
+        touchAction:editable?'none':'auto',pointerEvents:editable?'auto':'none',
         cursor:selected?'move':'default',boxShadow:selected?'0 0 0 1px #191919':'none'}}>
       <video ref={preview} src={video.src} muted loop autoPlay playsInline preload="metadata"
         aria-label={video.name} draggable={false}
