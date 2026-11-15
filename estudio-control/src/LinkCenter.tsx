@@ -42,6 +42,8 @@ export const STUDIO_LINKS:BaseLink[] = [
   {key:'lab-landing',title:'Content Lab · Página del producto',url:'https://podcast.thelaunchera.com/content-lab/prompts/#content-lab',category:'lab',visibility:'publico',description:'Presentación del Content Lab, qué incluye y botón de compra'},
   {key:'product-hub',title:'Centro de productos · Catálogo',url:'https://podcast.thelaunchera.com/centro/',category:'escuela',visibility:'publico',description:'Catálogo público y acceso a las compras'},
   {key:'tle-site',title:'The Launch Era · Website',url:'https://thelaunchera.com/',category:'thelaunchera',visibility:'publico',description:'Web principal'},
+  {key:'tle-pinpilot-pages',title:'PinPilot · Web desde GitHub',url:'https://thelaunchera.github.io/tle-pinterest-scheduler/',category:'thelaunchera',visibility:'revision',description:'Sitio compilado en la rama gh-pages de GitHub. Pendiente de activar GitHub Pages y comprobar que abre; no compartir como web publicada todavía.'},
+  {key:'tle-pinpilot-repo',title:'PinPilot · Repositorio GitHub',url:'https://github.com/thelaunchera/tle-pinterest-scheduler',category:'thelaunchera',visibility:'interno',description:'Código fuente completo, rama main; web compilada en gh-pages. Enlace técnico privado del Studio, sin AppDeploy ni configuración DNS.'},
   {key:'tle-website-basic-2026',title:'Website + Command Center · $15 · pago único',url:'https://thelaunchera.com/website-for-your-business/#website-basic',category:'thelaunchera',visibility:'revision',description:'Website nuevo o renovación puntual de uno existente, con Command Center y correo. Pago único; verificar que el checkout LIVE y la entrega funcionen antes de compartir.'},
   {key:'tle-website-ai-crm-2026',title:'Website + Command Center avanzado · $25 · pago único',url:'https://thelaunchera.com/website-for-your-business/#website-plus',category:'thelaunchera',visibility:'revision',description:'Website nuevo o mejora de uno existente, con funciones acordadas de Command Center avanzado. El agente IA es una opción independiente de $10 USD/mes, sin cobro ni activación automática. Los compradores antiguos de IA + CRM conservan su contrato.'},
 
@@ -113,6 +115,7 @@ export const LINK_PUBLICATION:Partial<Record<string,PublicationState>> = {
   "studio-registro-20261105":"interno",
   "school-freebies-repo":"interno",
   'lab-landing':'publicado','product-hub':'publicado',
+  'tle-pinpilot-pages':'revision','tle-pinpilot-repo':'interno',
   'tle-site':'publicado','tle-website-basic-2026':'revision','tle-website-ai-crm-2026':'revision',
   'tle-intake-website-2026':'revision','tle-intake-ai-crm-2026':'revision','tle-studio-inquiries-2026':'interno',
   'tle-app-info':'revision','tle-booking':'revision','tle-checkout':'revision','tle-free':'revision',
