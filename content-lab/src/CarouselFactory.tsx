@@ -619,6 +619,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const [current,setCurrent]=useState(0);
   const [backgroundScope,setBackgroundScope]=useState<'slide'|'all'>('slide');
   const [focusWallpaperId,setFocusWallpaperId]=useState('');
+  const [selectedCanvasLayerId,setSelectedCanvasLayerId]=useState<string|null>(null);
   const carouselRailRef=useRef<HTMLDivElement>(null);
   const [preview,setPreview]=useState('');
   const [panoramaPreview,setPanoramaPreview]=useState('');
@@ -709,7 +710,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
   const [creatingNewCarousel,setCreatingNewCarousel]=useState(false);
   // The parent keys this editor by session. Assigning a first saved post.id is NOT a new project:
   // resetting on post.id would erase freshly prepared PNG download links and previews.
-  useEffect(()=>{setCurrent(0);setTouchEdit(false);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
+  useEffect(()=>{setCurrent(0);setTouchEdit(false);setSelectedCanvasLayerId(null);clearDownloads();setOverview([]);setReferenceReport('');setSourceId('');setPreview('');setPanoramaPreview('');setPanoramaTextPreview('');setPanoramaError('');pastHistory.current=[];futureHistory.current=[];setHistoryVersion(n=>n+1);},[brand.id]);
   const i=Math.min(current,slides.length-1),slide=slides[i];
   // Keep the owning clip editable even when all its pixels move to another panel
   // (or temporarily off the panorama). Its layer can call onSelect(owner)
@@ -1216,6 +1217,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement==='behind-text'),
     ...pageLayers,
     ...savedPanoramaLayers.filter(layer=>layer.role!=='background'&&layer.placement!=='behind-text')];
+  const selectedCanvasLayer=panoramaLayers.find(layer=>layer.id===selectedCanvasLayerId);
   // Native slide photos, stickers and free-canvas text sit ABOVE the video
   // in TouchLayerCanvas. Saved foreground layers also sit above it. Repaint
   // only the covered portion of those layers after each encoded video frame.
@@ -2124,7 +2126,7 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
         onChange={event=>{const file=event.target.files?.[0];event.target.value='';void uploadSlideVideo(file)}}/>
       <PanoramaEditor preview={panoramaPreview} textOverlay={panoramaTextPreview} count={slides.length} seamless={style.seamlessEnabled}
         onChooseVideo={()=>videoInputRef.current?.click()} videoUploading={videoBusy} videoPages={videoPages}
-        onVideoChange={updateVideoGeometry}
+        onVideoChange={updateVideoGeometry} onLayerSelectionChange={setSelectedCanvasLayerId}
         pageIndex={i} onPageIndexChange={setCurrent}
         backgroundColor={slide.backgroundColor||style.canvasColor}
         onBackgroundColor={color=>{
@@ -2151,15 +2153,27 @@ export default function CarouselFactory({brand,post,assets,images:libraryImages,
       {(selectedVideo?.videoPath||videoBusy||videoIssue)&&<section className="factory-video-editor"
         aria-label="Editor de video del slide seleccionado">
         <div className="factory-video-editor-head">
-          <Film size={20}/><strong>Editar video · slide {selectedVideoOwner+1}</strong>
-          {selectedVideo?.videoName&&<span className="factory-video-name">{selectedVideo?.videoName}</span>}
-          {selectedVideo?.videoPath&&<button type="button" className="btn ghost"
+          <Film size={20}/><strong>{selectedCanvasLayer?'Editar '+(selectedCanvasLayer.kind==='photo'?'foto':selectedCanvasLayer.kind==='sticker'?'sticker':'elemento')+' · '+selectedCanvasLayer.name:'Editar video · slide '+(selectedVideoOwner+1)}</strong>
+          {!selectedCanvasLayer&&selectedVideo?.videoName&&<span className="factory-video-name">{selectedVideo?.videoName}</span>}
+          {!selectedCanvasLayer&&selectedVideo?.videoPath&&<button type="button" className="btn ghost"
             disabled={videoBusy||!!busy} onClick={removeSlideVideo}>Quitar video</button>}
         </div>
         {videoBusy&&<p role="status">Subiendo video privado…</p>}
         {videoIssue&&<p role="alert">{videoIssue}</p>}
         {videoExportProgress&&<p role="status" className="factory-video-progress">{videoExportProgress}</p>}
-        {selectedVideo?.videoPath&&<>
+        {selectedCanvasLayer?<div className="factory-video-tools" role="group" aria-label="Rotación del elemento seleccionado">
+          <p>Ahora estás editando {selectedCanvasLayer.kind==='photo'?'esta foto':'este elemento'}. El video no se modificará.</p>
+          <label htmlFor="carousel-selected-layer-rotation">
+            Girar {selectedCanvasLayer.kind==='photo'?'foto':'elemento'} <output>{Math.round(selectedCanvasLayer.rect.angle||0)}°</output>
+          </label>
+          <input id="carousel-selected-layer-rotation" type="range" min="-180" max="180" step="1"
+            aria-label={selectedCanvasLayer.kind==='photo'?'Girar foto seleccionada':'Girar elemento seleccionado'}
+            disabled={!!selectedCanvasLayer.locked||(style.lockedLayerIds||[]).includes(selectedCanvasLayer.id)}
+            value={Math.max(-180,Math.min(180,selectedCanvasLayer.rect.angle||0))}
+            onChange={e=>movePanoramaLayer(selectedCanvasLayer.kind,selectedCanvasLayer.id,
+              {...selectedCanvasLayer.rect,angle:Number(e.target.value)})}/>
+          <small>También puedes usar Girar en las herramientas que aparecen al tocar la foto en el lienzo.</small>
+        </div>:selectedVideo?.videoPath&&<>
           {style.seamlessEnabled&&<p className="factory-video-seam-tip">
             En Seamless puedes cruzar las líneas punteadas con el video, igual que con tus fotos.
             {videoVisiblePages(selectedVideoOwner,selectedVideo.videoTransform,slides.length,true).length>1
