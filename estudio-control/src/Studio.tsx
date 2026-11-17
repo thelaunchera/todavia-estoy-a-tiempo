@@ -1,4 +1,5 @@
 import YouTubeStudio from './YouTubeStudio';
+import InstagramStoryBank from './InstagramStoryBank';
 import { MICRO_SCENE_SECTION } from './youtube/micro-production';
 import SeamlessEditor from './SeamlessEditor';
 import StudioStickerLibrary from './StudioStickerLibrary';
@@ -89,6 +90,7 @@ type Page =
   | 'seamless'
   | 'stickers'
   | 'youtube'
+  | 'historias'
   | 'clases'
   | 'demos'
   | 'alumnos'
@@ -222,6 +224,7 @@ const NAV = [
   { id: 'club', label: 'Comunidad · Club', icon: Users },
   { id: 'demos', label: 'Demos de la clase', icon: Globe2 },
   { id: 'youtube', label: 'YouTube · The Launch Era', icon: Film, group: 'YOUTUBE · SERIE ANIMADA' },
+  { id: 'historias', label: 'Historias para Instagram', icon: BookOpen, group: 'STORYTELLING · IG' },
   { id: 'reels-lab', label: 'Reels de Content Lab', icon: Film, group: '🎨 CREACIÓN DE CONTENIDO' },
   { id: 'ideas', label: 'Banco de ideas', icon: Lightbulb },
   { id: 'ventas', label: 'Ventas e ingresos', icon: CreditCard, group: '💼 NEGOCIO Y OPERACIONES' },
@@ -248,7 +251,7 @@ const STUDIO_AREAS: Array<{
   {id:'demos',title:'Demos y websites',description:'Proyectos, fotos, prompts y versiones',icon:Globe2,
    pages:['demos'],home:'demos'},
   {id:'production',title:'Producción de contenido',description:'Podcast, reels y YouTube',icon:Clapperboard,
-   pages:['episodios','reels','cancion','youtube','reels-clase','reels-lab'],home:'youtube'},
+   pages:['episodios','reels','cancion','youtube','historias','reels-clase','reels-lab'],home:'youtube'},
   {id:'education',title:'Clases y productos',description:'Aula, freebies, bonos y estudiantes',icon:GraduationCap,
    pages:['clases','alumnos','espera','bonos','freebies','club','productos'],home:'clases'},
   {id:'planning',title:'Planificación',description:'Agenda, calendario y pendientes',icon:CalendarDays,
@@ -272,6 +275,7 @@ const LABELS: Record<Page, string> = {
   seamless: 'Carruseles seamless',
   stickers: 'Mi biblioteca de stickers',
   youtube: 'YouTube · The Launch Era',
+  historias: 'Historias para Instagram',
   clases: 'Clase · grabar módulos',
   demos: 'Clase · demos',
   alumnos: 'Clase · aula y estudiantes',
@@ -2014,6 +2018,7 @@ function App() {
           {page === 'soporte' && <SupportInbox />}
           {page === 'inquiries' && <WebsiteInquiries readOnly={recording} />}
           {page === 'prospects' && <ProspectsPipeline readOnly={recording} />}
+          {page === 'historias' && <InstagramStoryBank readOnly={recording} />}
           {page === 'flujos' && (
             <>
               {head(
